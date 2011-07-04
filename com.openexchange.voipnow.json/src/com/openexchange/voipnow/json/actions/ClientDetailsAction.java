@@ -50,7 +50,6 @@
 package com.openexchange.voipnow.json.actions;
 
 import javax.xml.ws.Holder;
-
 import com._4psa.client._2_5_1.ClientInterface;
 import com._4psa.client._2_5_1.ClientPort;
 import com._4psa.clientmessages_xsd._2_5.GetClientDetailsRequest;

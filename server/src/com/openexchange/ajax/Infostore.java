@@ -76,7 +76,6 @@ import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -108,7 +107,6 @@ import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tx.TransactionException;
 
 public class Infostore extends PermissionServlet {
 

@@ -49,7 +49,9 @@
 
 package com.openexchange.publish.site;
 
-import static com.openexchange.publish.site.FormStrings.*;
+import static com.openexchange.publish.site.FormStrings.FORM_LABEL_DISPLAY_NAME;
+import static com.openexchange.publish.site.FormStrings.FORM_LABEL_LINK;
+import static com.openexchange.publish.site.FormStrings.TARGET_NAME_INFOSTORE;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

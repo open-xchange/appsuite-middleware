@@ -50,7 +50,6 @@
 package com.openexchange.groupware.generic;
 
 import java.util.Collection;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 

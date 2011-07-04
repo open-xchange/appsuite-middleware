@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.reminder.internal;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;

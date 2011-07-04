@@ -49,9 +49,7 @@
 
 package com.openexchange.eav;
 
-import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
 
 
 /**

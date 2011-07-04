@@ -51,13 +51,11 @@ package com.openexchange.mailfilter.ajax.actions;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailfilter.ajax.Action;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
 import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**

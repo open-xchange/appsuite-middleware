@@ -51,7 +51,6 @@ package com.openexchange.subscribe.json.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.Servlet;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;

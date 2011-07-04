@@ -48,12 +48,12 @@
  */
 package com.openexchange.exceptions.console.osgi;
 
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import com.openexchange.exceptions.osgi.OSGiComponentRegistry;
 import com.openexchange.exceptions.console.Commands;
+import com.openexchange.exceptions.osgi.OSGiComponentRegistry;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

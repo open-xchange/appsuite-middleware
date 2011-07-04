@@ -60,7 +60,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.modules.json.ModelParser;
 import com.openexchange.modules.json.ModelWriter;
 import com.openexchange.modules.model.Model;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

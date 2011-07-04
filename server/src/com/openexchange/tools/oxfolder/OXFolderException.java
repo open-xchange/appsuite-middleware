@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.exception.Category;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 

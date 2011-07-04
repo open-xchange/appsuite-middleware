@@ -51,8 +51,8 @@ package com.openexchange.subscribe.microformats.parser;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.datatypes.genericonf.FormElement;
 import junit.framework.TestCase;
+import com.openexchange.datatypes.genericonf.FormElement;
 
 
 /**

@@ -1,6 +1,4 @@
-import jcifs.netbios.NbtAddress;
 import jcifs.smb.SmbFile;
-import java.util.Date;
 
 public class ListTypes {
 

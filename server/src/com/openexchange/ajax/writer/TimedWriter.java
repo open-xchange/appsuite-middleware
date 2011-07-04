@@ -53,10 +53,8 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 public abstract class TimedWriter<T> {
 	

@@ -52,7 +52,8 @@ package com.openexchange.modules.storage.sql.engines;
 import java.sql.SQLException;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.modules.model.*;
+import com.openexchange.modules.model.Attribute;
+import com.openexchange.modules.model.Model;
 
 
 /**

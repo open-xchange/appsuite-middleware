@@ -54,7 +54,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.Replacements;

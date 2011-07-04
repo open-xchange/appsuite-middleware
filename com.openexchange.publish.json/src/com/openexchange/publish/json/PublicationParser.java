@@ -49,11 +49,11 @@
 
 package com.openexchange.publish.json;
 
+import static com.openexchange.publish.json.FieldNames.ENABLED;
 import static com.openexchange.publish.json.FieldNames.ENTITY;
 import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
 import static com.openexchange.publish.json.FieldNames.ID;
 import static com.openexchange.publish.json.FieldNames.TARGET;
-import static com.openexchange.publish.json.FieldNames.ENABLED;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;

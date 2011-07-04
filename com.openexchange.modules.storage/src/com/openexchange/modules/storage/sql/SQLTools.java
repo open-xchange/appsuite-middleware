@@ -52,7 +52,9 @@ package com.openexchange.modules.storage.sql;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import com.openexchange.modules.model.*;
+import com.openexchange.modules.model.Attribute;
+import com.openexchange.modules.model.AttributeHandler;
+import com.openexchange.modules.model.Model;
 
 
 /**

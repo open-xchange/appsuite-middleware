@@ -53,13 +53,11 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONWriter;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 
 public class AttachmentWriter extends TimedWriter<AttachmentMetadata> {

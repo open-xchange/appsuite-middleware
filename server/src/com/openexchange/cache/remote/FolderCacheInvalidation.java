@@ -50,7 +50,6 @@
 package com.openexchange.cache.remote;
 
 import java.rmi.RemoteException;
-import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.contexts.impl.ContextException;

@@ -1,4 +1,4 @@
-import jcifs.netbios.*;
+import jcifs.netbios.NbtAddress;
 
 public class ThreadedNbtQuery {
 

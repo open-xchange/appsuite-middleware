@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.exception.Category;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;

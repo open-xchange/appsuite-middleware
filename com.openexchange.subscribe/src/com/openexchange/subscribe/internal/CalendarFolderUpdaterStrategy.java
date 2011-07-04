@@ -63,7 +63,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.iterator.SearchIterator;
 

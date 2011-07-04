@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;

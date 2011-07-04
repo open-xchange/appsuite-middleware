@@ -51,8 +51,8 @@ package com.openexchange.subscribe;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.crypto.SimCryptoService;
 import junit.framework.TestCase;
+import com.openexchange.crypto.SimCryptoService;
 
 
 /**

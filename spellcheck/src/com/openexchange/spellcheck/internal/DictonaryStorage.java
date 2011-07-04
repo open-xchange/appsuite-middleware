@@ -68,14 +68,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
-
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.spellcheck.SpellCheckException;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.services.SpellCheckServiceRegistry;

@@ -53,8 +53,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
-import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.OXException.Code;
 
 public class FileStorage {

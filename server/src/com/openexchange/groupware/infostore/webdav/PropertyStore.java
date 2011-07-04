@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore.webdav;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.webdav.protocol.WebdavProperty;

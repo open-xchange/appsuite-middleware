@@ -16,8 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-import jcifs.smb.*;
-import java.io.*;
+import java.io.IOException;
+import jcifs.smb.SmbFile;
+import jcifs.smb.SmbRandomAccessFile;
 
 public class SmbTableFile extends SmbRandomAccessFile {
 

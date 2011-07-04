@@ -56,9 +56,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>

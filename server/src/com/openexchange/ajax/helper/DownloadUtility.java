@@ -60,7 +60,6 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**

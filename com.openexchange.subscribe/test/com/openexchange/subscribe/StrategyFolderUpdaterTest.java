@@ -50,9 +50,9 @@
 package com.openexchange.subscribe;
 
 import java.util.Arrays;
+import junit.framework.TestCase;
 import com.openexchange.subscribe.internal.SimFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
-import junit.framework.TestCase;
 
 
 /**

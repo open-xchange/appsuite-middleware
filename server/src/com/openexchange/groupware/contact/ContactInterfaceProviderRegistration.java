@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.contact;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 

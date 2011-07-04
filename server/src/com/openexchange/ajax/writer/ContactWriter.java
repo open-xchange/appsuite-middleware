@@ -50,8 +50,6 @@
 package com.openexchange.ajax.writer;
 
 import gnu.trove.TIntObjectHashMap;
-
-import java.util.Iterator;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,8 +58,6 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;

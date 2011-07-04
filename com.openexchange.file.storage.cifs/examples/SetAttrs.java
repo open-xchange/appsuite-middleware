@@ -1,4 +1,5 @@
-import jcifs.smb.*;
+import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileInputStream;
 
 public class SetAttrs {
 

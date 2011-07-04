@@ -50,7 +50,6 @@
 package com.openexchange.webdav.protocol.osgi;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;

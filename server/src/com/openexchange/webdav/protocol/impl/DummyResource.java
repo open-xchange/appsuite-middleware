@@ -60,13 +60,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 public class DummyResource extends AbstractResource implements WebdavResource  {

@@ -61,11 +61,11 @@ import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavLock.Scope;
+import com.openexchange.webdav.protocol.WebdavLock.Type;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.WebdavLock.Scope;
-import com.openexchange.webdav.protocol.WebdavLock.Type;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 
 public class WebdavLockAction extends AbstractAction {

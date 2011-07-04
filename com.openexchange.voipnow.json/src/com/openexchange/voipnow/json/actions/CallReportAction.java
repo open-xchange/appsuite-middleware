@@ -54,25 +54,21 @@ import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.ws.Holder;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com._4psa.headerdata_xsd._2_5.ServerInfo;
-import com._4psa.headerdata_xsd._2_5.UserCredentials;
 import com._4psa.report._2_5_1.ReportInterface;
 import com._4psa.report._2_5_1.ReportPort;
 import com._4psa.reportdata_xsd._2_5.CallReport.Call;
 import com._4psa.reportdata_xsd._2_5.CallReport.IncomingCalls;
 import com._4psa.reportdata_xsd._2_5.CallReport.OutgoingCalls;
 import com._4psa.reportmessages_xsd._2_5.CallReportRequest;
-import com._4psa.reportmessages_xsd._2_5.ObjectFactory;
 import com._4psa.reportmessages_xsd._2_5.CallReportRequest.Interval;
+import com._4psa.reportmessages_xsd._2_5.ObjectFactory;
 import com._4psa.reportmessagesinfo_xsd._2_5.CallReportResponseType;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;

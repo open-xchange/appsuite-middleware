@@ -48,7 +48,6 @@
  */
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.groupware.container.FolderObject;
@@ -59,7 +58,6 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tx.TransactionException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

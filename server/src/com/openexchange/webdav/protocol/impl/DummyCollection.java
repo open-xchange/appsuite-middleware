@@ -56,12 +56,12 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavMultistatusException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
 
 public class DummyCollection extends DummyResource implements WebdavCollection {
 	

@@ -92,7 +92,6 @@ import com.openexchange.ajax.writer.MessagingFolderWriter;
 import com.openexchange.ajax.writer.MessagingFolderWriter.MessagingFolderFieldWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.FolderSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;

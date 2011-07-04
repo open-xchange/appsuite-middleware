@@ -49,8 +49,9 @@
 
 package com.openexchange.sim;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.lang.reflect.Method;
-import static org.junit.Assert.*;
 
 
 /**

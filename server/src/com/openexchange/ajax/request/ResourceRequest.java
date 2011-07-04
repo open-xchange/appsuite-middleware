@@ -69,9 +69,7 @@ import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceWriter;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

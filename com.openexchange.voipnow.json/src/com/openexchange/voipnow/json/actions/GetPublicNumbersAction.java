@@ -51,19 +51,14 @@ package com.openexchange.voipnow.json.actions;
 
 import java.math.BigInteger;
 import java.util.List;
-
 import javax.xml.ws.Holder;
-
 import org.json.JSONArray;
-import org.json.JSONException;
-
 import com._4psa.channel._2_5_1.ChannelInterface;
 import com._4psa.channel._2_5_1.ChannelPort;
 import com._4psa.channeldata_xsd._2_5.PublicNoSelection.Assigned;
 import com._4psa.channelmessages_xsd._2_5.GetPublicNoPollRequest;
 import com._4psa.channelmessagesinfo_xsd._2_5.GetNoSelectionResponseType;
 import com._4psa.headerdata_xsd._2_5.ServerInfo;
-import com._4psa.headerdata_xsd._2_5.UserCredentials;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;

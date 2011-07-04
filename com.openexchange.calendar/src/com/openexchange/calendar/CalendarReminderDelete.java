@@ -53,9 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.tools.sql.DBUtils;
@@ -140,6 +140,6 @@ public final class CalendarReminderDelete implements TargetService {
 //	}
 
 	private static OXCalendarException handleSQLException(final SQLException e) {
-		return new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
+		return OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
 	}
 }

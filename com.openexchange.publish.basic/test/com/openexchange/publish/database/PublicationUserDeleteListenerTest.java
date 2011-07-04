@@ -49,9 +49,9 @@
 
 package com.openexchange.publish.database;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.schema.Tables.publications;
-import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;

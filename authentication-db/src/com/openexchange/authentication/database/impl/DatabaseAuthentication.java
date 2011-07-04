@@ -49,12 +49,11 @@
 
 package com.openexchange.authentication.database.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.*;
-
-import com.openexchange.authentication.AuthenticationService;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.LoginInfo;
+import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.authentication.LoginInfo;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;

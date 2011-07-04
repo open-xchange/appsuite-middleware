@@ -52,7 +52,6 @@ package com.openexchange.subscribe;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 
 /**

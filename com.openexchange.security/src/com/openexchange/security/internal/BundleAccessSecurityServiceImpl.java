@@ -50,7 +50,6 @@
 package com.openexchange.security.internal;
 
 import java.util.Collection;
-
 import com.openexchange.security.BundleAccessException;
 import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.security.permission.BundleAccessPermission;

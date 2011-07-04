@@ -51,9 +51,7 @@ package com.openexchange.groupware.ldap;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;

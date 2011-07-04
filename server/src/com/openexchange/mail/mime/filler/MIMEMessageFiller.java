@@ -81,7 +81,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
-import com.openexchange.api2.OXException;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataProperties;

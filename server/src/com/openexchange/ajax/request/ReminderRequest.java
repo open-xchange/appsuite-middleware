@@ -67,7 +67,6 @@ import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -76,6 +75,7 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -372,7 +372,7 @@ public final class ReminderRequest {
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         }
 
         final Calendar calendar = Calendar.getInstance(tz);
@@ -408,7 +408,7 @@ public final class ReminderRequest {
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         }
         
         final RecurringResultsInterface recurringResults;

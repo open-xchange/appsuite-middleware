@@ -1,5 +1,4 @@
 import jcifs.UniAddress;
-import java.util.Enumeration;
 
 public class TortureTest5 extends Thread {
 

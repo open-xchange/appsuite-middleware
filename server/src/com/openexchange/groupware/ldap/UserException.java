@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.ldap;
 
-import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 

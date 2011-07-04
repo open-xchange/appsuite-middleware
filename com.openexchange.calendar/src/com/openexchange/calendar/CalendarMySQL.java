@@ -76,7 +76,6 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
@@ -84,6 +83,7 @@ import com.openexchange.calendar.storage.SQL;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
@@ -94,6 +94,7 @@ import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.MBoolean;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -114,9 +115,9 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -265,7 +266,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 if (cdao.containsModifiedBy()) {
                     stmt.setInt(pos, cdao.getModifiedBy());
                 } else {
-                    throw new OXCalendarException(OXCalendarException.Code.MODIFIED_BY_MISSING);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.MODIFIED_BY_MISSING);
                 }
             }
         });
@@ -293,7 +294,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
                     stmt.setInt(pos, cdao.getGlobalFolderID());
                 } else {
-                    throw new OXCalendarException(OXCalendarException.Code.NOT_YET_SUPPORTED);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.NOT_YET_SUPPORTED);
                 }
             }
         });
@@ -1417,7 +1418,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
                 pst.setInt(i++, cdao.getGlobalFolderID());
             } else {
-                throw new OXCalendarException(OXCalendarException.Code.NOT_YET_SUPPORTED);
+                throw new OXCalendarException(OXCalendarExceptionCodes.NOT_YET_SUPPORTED);
             }
             pst.setInt(i++, I(cdao.getPrivateFlag()));
             pst.setInt(i++, cdao.getContextID());
@@ -1529,7 +1530,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 return true;
             }
         } catch (final LdapException e) {
-            throw new OXCalendarException(OXCalendarException.Code.EVENT_ERROR);
+            throw new OXCalendarException(OXCalendarExceptionCodes.EVENT_ERROR);
         }
 
         return false;
@@ -1542,7 +1543,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (cdao.containsUid()) {
             final int resolvedUid = resolveUid(so, cdao.getUid());
             if (resolvedUid > 0) {
-                throw new OXCalendarException(OXCalendarException.Code.UID_ALREDY_EXISTS, cdao.getTitle(), cdao.getUid());
+                throw OXCalendarExceptionCodes.UID_ALREDY_EXISTS.create(cdao.getTitle(), cdao.getUid());
             }
         } else {
             cdao.setUid(UUID.randomUUID().toString());
@@ -1612,7 +1613,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                             + participant.getClass().getSimpleName(), new Throwable());
                                 }
                                 throw new OXCalendarException(
-                                        OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
+                                        OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
                             }
                         } else {
                             pi.setString(6, participant.getEmailAddress());
@@ -1686,7 +1687,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             stmt.setNull(3, java.sql.Types.INTEGER);
                         } else if (FolderObject.SHARED == folderType) {
                             if (cdao.getSharedFolderOwner() == 0) {
-                                throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                                throw new OXCalendarException(OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER);
                             }
                             if (user.getIdentifier() == cdao.getSharedFolderOwner()) {
                                 if (cdao.getGlobalFolderID() == 0) {
@@ -1712,7 +1713,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 user.setPersonalFolderId(pfid);
                             }
                         } else {
-                            throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
+                            throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_TYPE_UNRESOLVEABLE);
                         }
                         stmt.setInt(4, user.getConfirm());
                         
@@ -1761,7 +1762,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                             }
                                         }
                                         if (reminder == null) {
-                                            OXCalendarException e = new OXCalendarException(OXCalendarException.Code.NEXT_REMINDER_FAILED, Autoboxing.I(cdao.getContext().getContextId()), Autoboxing.I(cdao.getObjectID()));
+                                            OXCalendarException e = OXCalendarExceptionCodes.NEXT_REMINDER_FAILED.create(Autoboxing.I(cdao.getContext().getContextId()), Autoboxing.I(cdao.getObjectID()));
                                             LOG.warn(e.getMessage(), e);
                                         }
                                     }
@@ -2028,7 +2029,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             up.setPersonalFolderId(pfid);
                         } else if (cdao.getFolderType() == FolderObject.SHARED) {
                             if (cdao.getSharedFolderOwner() == 0) {
-                                throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                                throw new OXCalendarException(OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER);
                             }
                             if (cdao.getSharedFolderOwner() == tuid) {
                                 cdao.setGlobalFolderID(pfid);
@@ -2118,7 +2119,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                     } else if (cdao.getFolderType() == FolderObject.SHARED) {
                         if (cdao.getSharedFolderOwner() == 0) {
-                            throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                            throw new OXCalendarException(OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER);
                         }
                         if (cdao.getSharedFolderOwner() == tuid) {
                             // we read an appointment in a shared folder and the
@@ -2179,7 +2180,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             rs = getResultSet(prep);
             edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.UPDATE, action_folder);
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final OXPermissionException oxpe) {
             throw oxpe;
         } catch (final OXObjectNotFoundException oxonfe) {
@@ -2207,19 +2208,19 @@ public class CalendarMySQL implements CalendarSqlImp {
         final CalendarOperation co = new CalendarOperation();
 
         if (cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC && edao.getPrivateFlag()) {
-            throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.PRIVATE_MOVE_TO_PUBLIC));
+            throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.PRIVATE_MOVE_TO_PUBLIC));
         }
 
         if (cdao.getFolderMove() && edao.getRecurrenceType() != Appointment.NO_RECURRENCE) {
-            throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.RECURRING_FOLDER_MOVE));
+            throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE));
         }
 
         collection.detectFolderMoveAction(cdao, edao);
 
         if (clientLastModified == null) {
-            throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.LAST_MODIFIED_IS_NULL);
         } else if (edao.getLastModified() == null) {
-            throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.LAST_MODIFIED_IS_NULL);
         }
 
         if (clientLastModifiedCheck && edao.getLastModified().getTime() > clientLastModified.getTime()) {
@@ -2232,14 +2233,14 @@ public class CalendarMySQL implements CalendarSqlImp {
              * edao denotes a change exception
              */
             if (cdao.getFolderMove()) {
-                throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_MOVE_EXCEPTION);
+                throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_EXCEPTION_MOVE_EXCEPTION);
             }
             if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateFlag() != cdao.getPrivateFlag()) {
-                throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
+                throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_EXCEPTION_PRIVATE_FLAG);
             }
             if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
                 if (edao.getRecurrencePosition() != cdao.getRecurrencePosition()) {
-                    throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.INVALID_RECURRENCE_POSITION_CHANGE);
                 }
             } else {
                 cdao.setRecurrencePosition(edao.getRecurrencePosition());
@@ -2258,7 +2259,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         if (rec_action == collection.CHANGE_RECURRING_TYPE || changeMasterTime) {
             if (edao.getRecurrenceID() > 0 && edao.getObjectID() != edao.getRecurrenceID()) {
-                throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE, new Object[0]);
+                throw OXCalendarExceptionCodes.INVALID_RECURRENCE_TYPE_CHANGE.create(new Object[0]);
             }
             final List<Integer> exceptions = getExceptionList(null, ctx, edao.getRecurrenceID());
             if (exceptions != null && !exceptions.isEmpty()) {
@@ -2330,7 +2331,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             // merged object
             // from cdao and edao and then we force an insert!
             if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateFlag() != cdao.getPrivateFlag()) {
-                throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
+                throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_EXCEPTION_PRIVATE_FLAG);
             }
             /*
              * Create a clone for the "new" change exception
@@ -2424,7 +2425,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 cdao.setRecurrence(edao.getRecurrence());
                 cdao.setLastModified(clone.getLastModified());
             } catch (final SQLException sqle) {
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
             } catch (final LdapException ldape) {
                 throw new OXException(ldape);
             } catch (final OXCalendarException oxce) {
@@ -2432,7 +2433,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             } catch (final OXException oxe) {
                 throw oxe;
             } catch (final Exception ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, Integer.valueOf(2));
+                throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, Integer.valueOf(2));
             }
         }
 
@@ -2450,7 +2451,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
             if (!collection.checkIfDatesOccurInRecurrence(collection.mergeExceptionDates(
                     cdao.getDeleteException(), cdao.getChangeException()), tdao)) {
-                throw new OXCalendarException(OXCalendarException.Code.FOREIGN_EXCEPTION_DATE);
+                throw new OXCalendarException(OXCalendarExceptionCodes.FOREIGN_EXCEPTION_DATE);
             }
         }
 
@@ -2715,7 +2716,7 @@ public class CalendarMySQL implements CalendarSqlImp {
              * Updated appointment has private flag set but contains more than
              * one participant
              */
-            throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS, new Object[0]);
+            throw OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS.create(new Object[0]);
         }
 
         int check_up = old_users.length;
@@ -2776,7 +2777,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         modified_userparticipants = collection.checkAndModifyAlarm(cdao, modified_userparticipants, uid, edao.getUsers());
 
         if (check_up < 1) {
-            throw new OXCalendarException(OXCalendarException.Code.UPDATE_WITHOUT_PARTICIPANTS);
+            throw new OXCalendarException(OXCalendarExceptionCodes.UPDATE_WITHOUT_PARTICIPANTS);
         }
 
         if (new_participants != null && new_participants.length > 0) {
@@ -2823,7 +2824,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         if (new_participants[a].getEmailAddress() == null) {
                             if (Participant.GROUP == new_participants[a].getType() ? new_participants[a].getIdentifier() < 0 : new_participants[a].getIdentifier() <= 0) {
-                                throw new OXCalendarException(OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
+                                throw new OXCalendarException(OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
                             }
                             dr.setNull(6, java.sql.Types.VARCHAR);
                         } else {
@@ -2920,7 +2921,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         pi.setInt(5, pfid);
                                         new_userparticipants[a].setPersonalFolderId(pfid);
                                     } catch (final Exception fe) {
-                                        throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(3));
+                                        throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(fe, Integer.valueOf(3));
                                     }
                                 } else {
                                     pi.setInt(5, cdao.getGlobalFolderID());
@@ -2957,7 +2958,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     }
                                     new_userparticipants[a].setPersonalFolderId(pfid);
                                 } catch (final Exception fe) {
-                                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(4));
+                                    throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(fe, Integer.valueOf(4));
                                 }
                             }
                         } else if (FolderObject.PUBLIC == folderType) {
@@ -2987,7 +2988,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             new_userparticipants[a].setPersonalFolderId(pfid);
                         } else if (FolderObject.SHARED == folderType) {
                             if (edao.getSharedFolderOwner() == 0) {
-                                throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                                throw new OXCalendarException(OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER);
                             }
                             if (edao.getSharedFolderOwner() == new_userparticipants[a].getIdentifier()) {
                                 if (cdao.getGlobalFolderID() == 0) {
@@ -2999,7 +3000,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         pi.setInt(5, pfid);
                                         new_userparticipants[a].setPersonalFolderId(pfid);
                                     } catch (final Exception fe) {
-                                        throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(5));
+                                        throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(fe, Integer.valueOf(5));
                                     }
                                 } else {
                                     pi.setInt(5, cdao.getGlobalFolderID());
@@ -3036,11 +3037,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     }
                                     new_userparticipants[a].setPersonalFolderId(pfid);
                                 } catch (final Exception fe) {
-                                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(3));
+                                    throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(fe, Integer.valueOf(3));
                                 }
                             }
                         } else {
-                            throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
+                            throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_TYPE_UNRESOLVEABLE);
                         }
 
                         if (new_userparticipants[a].getAlarmMinutes() >= 0 && new_userparticipants[a].containsAlarm()) {
@@ -3114,7 +3115,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     }
                                     pu.setInt(3, pfid);
                                 } catch (final Exception fe) {
-                                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(6));
+                                    throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(fe, Integer.valueOf(6));
                                 }
                             } else {
                                 pu.setInt(3, cdao.getGlobalFolderID());
@@ -3138,7 +3139,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         }
                                         pu.setInt(3, pfid);
                                     } catch (final Exception fe) {
-                                        throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(6));
+                                        throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(fe, Integer.valueOf(6));
                                     }
                                 } else {
                                     pu.setInt(3, cdao.getGlobalFolderID());
@@ -3158,11 +3159,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     }
                                     pu.setInt(3, pfid);
                                 } catch (final Exception fe) {
-                                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(6));
+                                    throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(fe, Integer.valueOf(6));
                                 }
                             }
                         } else {
-                            throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
+                            throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_TYPE_UNRESOLVEABLE);
                         }
                     } else {
                         if (FolderObject.PRIVATE == folderType) {
@@ -3178,7 +3179,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             pu.setNull(3, java.sql.Types.INTEGER);
                         } else if (FolderObject.SHARED == folderType) {
                             if (edao.getSharedFolderOwner() == 0) {
-                                throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                                throw new OXCalendarException(OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER);
                             }
                             if (edao.getSharedFolderOwner() == modified_userparticipants[a].getIdentifier()) {
                                 if (cdao.getGlobalFolderID() == 0) {
@@ -3191,7 +3192,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                             pu.setInt(3, pfid);
                                             modified_userparticipants[a].setPersonalFolderId(pfid);
                                         } catch (final Exception fe) {
-                                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(7));
+                                            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(fe, Integer.valueOf(7));
                                         }
                                     } else {
                                         pu.setInt(3, cdao.getActionFolder());
@@ -3205,7 +3206,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 pu.setInt(3, modified_userparticipants[a].getPersonalFolderId());
                             }
                         } else {
-                            throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
+                            throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_TYPE_UNRESOLVEABLE);
                         }
                     }
 
@@ -3540,7 +3541,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     LOG.error("setUserConfirmation (writecon) error while rollback ", rb);
                 }
             }
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             collection.closePreparedStatement(pu);
             collection.closePreparedStatement(mo);
@@ -3568,7 +3569,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             cdao = new CalendarSql(so).getObjectById(oid, fid);
         } catch (final SQLException e) {
             LOG.warn("Confirmation event could not be triggered", new OXCalendarException(
-                    OXCalendarException.Code.CALENDAR_SQL_ERROR, e));
+                    OXCalendarExceptionCodes.CALENDAR_SQL_ERROR, e));
             return changeTimestamp;
         }
         cdao.setParentFolderID(fid);
@@ -3620,14 +3621,14 @@ public class CalendarMySQL implements CalendarSqlImp {
                 writeCon.commit();
             } else {
                 writeCon.rollback();
-                final OXCalendarException e = new OXCalendarException(OXCalendarException.Code.COULD_NOT_FIND_PARTICIPANT);
+                final OXCalendarException e = new OXCalendarException(OXCalendarExceptionCodes.COULD_NOT_FIND_PARTICIPANT);
                 LOG.error(e.getMessage(), e);
                 throw e;
             }
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             collection.closePreparedStatement(stmt);
             collection.closePreparedStatement(stmtUpdateAppointment);
@@ -3636,7 +3637,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     writeCon.setAutoCommit(true);
                 } catch (final SQLException sqle) {
                     LOG.error("setUserConfirmation (writecon) error while setAutoCommit(true) ", sqle);
-                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
                 } finally {
                     DBPool.closeWriterSilent(ctx, writeCon);
                 }
@@ -3654,10 +3655,10 @@ public class CalendarMySQL implements CalendarSqlImp {
             final OXFolderAccess ofa = new OXFolderAccess(ctx);
             final EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
             if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {
-                throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
+                throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_1));
             }
             if (!oclp.canWriteAllObjects()) {
-                throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
+                throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_1));
             }
         }
     }
@@ -3701,7 +3702,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             collection.closeResultSet(rs);
             collection.closePreparedStatement(prep);
@@ -3743,7 +3744,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     LOG.error("attachmentAction (writecon) error while rollback ", rb);
                 }
             }
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             collection.closePreparedStatement(pst);
             if (writecon != null) {
@@ -3763,9 +3764,9 @@ public class CalendarMySQL implements CalendarSqlImp {
         try {
             eventclient.modify(edao);
         } catch (ContextException e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e);
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);
         } catch (EventException e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e);
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);
         }
         return last_modified;
     }
@@ -4227,7 +4228,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             rs = getResultSet(prep);
             edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.DELETE, inFolder);
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final OXPermissionException oxpe) {
             throw oxpe;
         } catch (final OXException oxe) {
@@ -4238,9 +4239,9 @@ public class CalendarMySQL implements CalendarSqlImp {
             DBPool.push(ctx, readcon);
         }
         if (clientLastModified == null) {
-            throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.LAST_MODIFIED_IS_NULL);
         } else if (edao.getLastModified() == null) {
-            throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.LAST_MODIFIED_IS_NULL);
         }
 
         if (edao.getLastModified().getTime() > clientLastModified.getTime()) {
@@ -4380,7 +4381,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } catch (final LdapException le) {
                             throw new OXException(le);
                         } catch (final Exception e) {
-                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(8));
+                            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(8));
                         }
                         final CalendarDataObject update = new CalendarDataObject();
                         update.setContext(ctx);
@@ -4397,7 +4398,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } catch (final OXException e) {
                             throw e;
                         } catch (final Exception e) {
-                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(9));
+                            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(9));
                         }
                     }
                     return;
@@ -4425,7 +4426,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } catch (final LdapException le) {
                             throw new OXException(le);
                         } catch (final Exception e) {
-                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(11));
+                            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(11));
                         }
                     } else {
                         if (close_read && readcon != null) {
@@ -4456,7 +4457,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } catch (final LdapException le) {
                             throw new OXException(le);
                         } catch (final Exception e) {
-                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(10));
+                            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(10));
                         }
                     }
                     if (edao.getRecurrenceID() > 0 && !cdao.containsRecurrenceID()) {
@@ -4465,7 +4466,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     return;
                 }
             } catch (final SQLException sqle) {
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
             } catch (final OXException oxe) {
                 throw oxe;
             } catch (final DBPoolingException dbpe) {
@@ -4480,7 +4481,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (recurring_action == collection.RECURRING_VIRTUAL_ACTION) {
             // this is an update with a new delete_exception
             if (edao == null) {
-                throw new OXCalendarException(OXCalendarException.Code.RECURRING_UNEXPECTED_DELETE_STATE, Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(-1));
+                throw OXCalendarExceptionCodes.RECURRING_UNEXPECTED_DELETE_STATE.create(Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(-1));
             }
             createSingleVirtualDeleteException(cdao, edao, writecon, oid, uid, fid, so, ctx, clientLastModified);
             return;
@@ -4526,7 +4527,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } catch (final LdapException le) {
                             throw new OXException(le);
                         } catch (final Exception e) {
-                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(11));
+                            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(11));
                         }
                     } else {
                         if (close_read && readcon != null) {
@@ -4557,7 +4558,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } catch (final LdapException le) {
                             throw new OXException(le);
                         } catch (final Exception e) {
-                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(10));
+                            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(10));
                         }
                     }
                     if (edao.getRecurrenceID() > 0 && !cdao.containsRecurrenceID()) {
@@ -4565,7 +4566,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                     return;
                 } catch (final SQLException sqle) {
-                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
                 } catch (final OXException oxe) {
                     throw oxe;
                 } catch (final DBPoolingException dbpe) {
@@ -4648,7 +4649,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         //udao.setDeleteExceptions(new java.util.Date[] {de});
         if (de == null) {
-            throw new OXCalendarException(OXCalendarException.Code.RECURRING_UNEXPECTED_DELETE_STATE, Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(cdao.getRecurrencePosition()));
+            throw OXCalendarExceptionCodes.RECURRING_UNEXPECTED_DELETE_STATE.create(Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(cdao.getRecurrencePosition()));
         }
         try {
             final CalendarDataObject ldao = loadObjectForUpdate(udao, so, ctx, fid, writecon);
@@ -4933,7 +4934,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 al.add(Integer.valueOf(rs.getInt(1)));
             }
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } finally {
@@ -4985,7 +4986,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
             dates.addAll(longs);
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } finally {
@@ -5058,9 +5059,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                 return rs.getInt(1);
             }
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } catch (final DBPoolingException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
             DBUtils.closeResources(rs, stmt, null, true, ctx);
             DBPool.push(ctx, connection);
@@ -5099,9 +5100,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                 return rs.getInt(1);
             }
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } catch (final DBPoolingException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
             DBUtils.closeResources(rs, stmt, null, true, ctx);
             DBPool.push(ctx, connection);

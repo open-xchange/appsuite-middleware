@@ -51,8 +51,8 @@ package com.openexchange.file.storage.webdav.exception;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.file.storage.webdav.WebDAVOXException;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageExceptionCodes;
+import com.openexchange.file.storage.webdav.WebDAVOXException;
 
 /**
  * {@link WebDAVOXExceptionFactory} - Factory for creating {@link WebDAVOXException}.

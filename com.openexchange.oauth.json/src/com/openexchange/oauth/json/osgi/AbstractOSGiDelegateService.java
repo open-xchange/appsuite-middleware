@@ -54,8 +54,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link AbstractOSGiDelegateService}

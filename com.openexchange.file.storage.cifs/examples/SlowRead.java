@@ -1,6 +1,4 @@
-import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
-import java.io.FileOutputStream;
 
 public class SlowRead {
 

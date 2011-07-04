@@ -60,6 +60,7 @@ import java.util.Map;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 
@@ -111,7 +112,7 @@ public class DefaultConfirmStatusUpdateTask implements UpdateTask {
             con.commit();
         } catch (SQLException e) {
             rollback(con);
-            throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, e.getMessage());
+            throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(e.getMessage());
         } finally {
             autocommit(con);
             Database.backNoTimeout(contextId, true, con);

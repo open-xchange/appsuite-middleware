@@ -50,7 +50,6 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;

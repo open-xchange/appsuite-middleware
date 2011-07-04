@@ -1,8 +1,6 @@
-import jcifs.smb.SmbFile;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.net.MalformedURLException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import jcifs.smb.SmbFile;
 import jcifs.util.Hexdump;
 
 public class CountPerms {

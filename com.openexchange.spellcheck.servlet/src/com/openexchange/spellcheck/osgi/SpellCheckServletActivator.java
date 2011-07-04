@@ -50,14 +50,11 @@
 package com.openexchange.spellcheck.osgi;
 
 import static com.openexchange.spellcheck.services.SpellCheckServletServiceRegistry.getServiceRegistry;
-import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.servlet.SpellCheckServlet;
-import com.openexchange.spellcheck.servlet.SpellCheckServletException;
 import com.openexchange.tools.service.SessionServletRegistration;
 
 /**

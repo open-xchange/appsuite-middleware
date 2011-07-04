@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.filestore;
 
-import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.*;
+import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.FILESTORE_MIXUP_MSG;
+import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.NO_SUCH_FILESTORE_MSG;
+import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.URI_CREATION_FAILED_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.filestore.internal.FilestoreExceptionFactory;

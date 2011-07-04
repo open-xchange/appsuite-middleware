@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.attach;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 

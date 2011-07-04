@@ -61,8 +61,8 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
 import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.update.internal.UpdateExceptionFactory;
 import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
+import com.openexchange.groupware.update.internal.UpdateExceptionFactory;
 
 /**
  * This {@link Activator} currently is only used to initialize some structures within the database update component. Lateron this may used

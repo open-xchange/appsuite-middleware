@@ -1,5 +1,5 @@
 import java.net.UnknownHostException;
-import jcifs.*;
+import jcifs.UniAddress;
 
 public class ThreadedUniQuery {
 

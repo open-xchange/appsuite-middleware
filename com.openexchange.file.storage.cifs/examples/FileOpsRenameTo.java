@@ -32,9 +32,10 @@
  *     true  - the target was renamed
  */
 
-import jcifs.smb.*;
 import java.io.IOException;
-import java.util.Date;
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileOutputStream;
 
 public class FileOpsRenameTo {
 

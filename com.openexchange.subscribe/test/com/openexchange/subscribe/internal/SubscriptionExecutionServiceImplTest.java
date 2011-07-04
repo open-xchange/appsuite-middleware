@@ -51,9 +51,7 @@ package com.openexchange.subscribe.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import junit.framework.TestCase;
 import com.openexchange.context.SimContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -63,9 +61,8 @@ import com.openexchange.subscribe.SimFolderUpdaterService;
 import com.openexchange.subscribe.SimSubscribeService;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.SubscriptionSource;
-import junit.framework.TestCase;
+import com.openexchange.subscribe.TargetFolderSession;
 
 /**
  * {@link SubscriptionExecutionServiceImplTest}

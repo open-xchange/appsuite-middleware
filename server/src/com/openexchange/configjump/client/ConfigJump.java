@@ -51,9 +51,9 @@ package com.openexchange.configjump.client;
 
 import java.net.URL;
 import com.openexchange.configjump.ConfigJumpException;
+import com.openexchange.configjump.ConfigJumpException.Code;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.Replacements;
-import com.openexchange.configjump.ConfigJumpException.Code;
 
 /**
  * Provides a static method for the servlet to generate the ConfigJump URL based

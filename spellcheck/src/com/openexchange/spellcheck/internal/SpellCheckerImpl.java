@@ -53,9 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-
 import javax.swing.text.Document;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.spellcheck.SpellCheckError;
 import com.openexchange.spellcheck.SpellCheckException;

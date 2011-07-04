@@ -1,7 +1,7 @@
-import java.io.*;
-import jcifs.smb.*;
+import java.io.FileInputStream;
+import java.util.Properties;
+import jcifs.smb.SmbFile;
 import jcifs.util.Hexdump;
-import java.util.*;
 
 public class Torture2 extends Thread {
 

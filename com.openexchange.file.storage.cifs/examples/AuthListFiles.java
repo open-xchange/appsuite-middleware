@@ -1,7 +1,6 @@
-import jcifs.netbios.NbtAddress;
-import jcifs.util.*;
-import jcifs.smb.*;
-import java.util.Date;
+import jcifs.smb.NtlmAuthenticator;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
 
 public class AuthListFiles extends NtlmAuthenticator {
 

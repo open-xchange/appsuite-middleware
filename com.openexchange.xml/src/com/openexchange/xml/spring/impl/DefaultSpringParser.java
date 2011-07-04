@@ -49,12 +49,10 @@
 package com.openexchange.xml.spring.impl;
 
 import java.io.File;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
-
 import com.openexchange.xml.spring.SpringParser;
 
 /**

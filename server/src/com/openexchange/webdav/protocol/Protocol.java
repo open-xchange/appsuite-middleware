@@ -52,10 +52,8 @@ package com.openexchange.webdav.protocol;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.jdom.Document;
 import org.jdom.Namespace;
 import com.openexchange.webdav.action.WebdavAction;
-import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
 public class Protocol {

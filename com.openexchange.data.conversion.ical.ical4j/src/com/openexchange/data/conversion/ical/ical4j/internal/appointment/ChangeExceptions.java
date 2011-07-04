@@ -59,7 +59,6 @@ import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.RecurrenceId;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -67,6 +66,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
@@ -122,10 +122,10 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
             try {
                 start = Long.parseLong(matcher.group(1));
             } catch (final NumberFormatException e) {
-                throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_START_DATE, e);
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_START_DATE.create(e);
             }
         } else {
-            throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_START_DATE);
+            throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_MISSING_START_DATE);
         }
         return new java.util.Date(start);
     }

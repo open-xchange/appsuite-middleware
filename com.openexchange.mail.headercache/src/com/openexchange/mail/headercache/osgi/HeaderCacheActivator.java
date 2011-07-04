@@ -50,16 +50,13 @@
 package com.openexchange.mail.headercache.osgi;
 
 import static com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry.getServiceRegistry;
-
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;

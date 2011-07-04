@@ -21,7 +21,6 @@
 package org.apache.jsieve.parser;
 
 import org.apache.jsieve.ScriptCoordinate;
-
 import org.apache.jsieve.parser.generated.Token;
 
 

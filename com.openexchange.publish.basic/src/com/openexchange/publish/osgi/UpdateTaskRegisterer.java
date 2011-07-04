@@ -58,12 +58,12 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.publish.database.PublicationUsersCreatedAndLastModifiedColumn;
-import com.openexchange.publish.database.PublicationsCreatedAndLastModifiedColumn;
 import com.openexchange.publish.database.EnabledColumn;
 import com.openexchange.publish.database.FixPublicationTablePrimaryKey;
+import com.openexchange.publish.database.PublicationUsersCreatedAndLastModifiedColumn;
 import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTask;
 import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTaskRetry;
+import com.openexchange.publish.database.PublicationsCreatedAndLastModifiedColumn;
 
 /**
  * {@link UpdateTaskRegisterer}

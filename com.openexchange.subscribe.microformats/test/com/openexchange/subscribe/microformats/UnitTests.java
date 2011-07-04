@@ -49,10 +49,10 @@
 
 package com.openexchange.subscribe.microformats;
 
-import com.openexchange.subscribe.microformats.objectparser.OXHCardParserTest;
-import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.subscribe.microformats.objectparser.OXHCardParserTest;
+import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserTest;
 
 /**
  * {@link UnitTests}

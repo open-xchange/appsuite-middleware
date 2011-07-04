@@ -49,8 +49,8 @@
 
 package com.openexchange.config.cascade;
 
-import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.config.cascade.exception.ConfigCascadeExceptionFactory;
+import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**

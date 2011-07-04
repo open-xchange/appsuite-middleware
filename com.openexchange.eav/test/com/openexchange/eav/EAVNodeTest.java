@@ -5,9 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.eav.EAVNode;
-import com.openexchange.eav.EAVNodeVisitor;
-import com.openexchange.eav.EAVPath;
 import junit.framework.TestCase;
 
 

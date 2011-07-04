@@ -57,8 +57,8 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.ldap.UserException.Code;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 

@@ -1,4 +1,6 @@
-import jcifs.smb.*;
+import jcifs.smb.ACE;
+import jcifs.smb.SID;
+import jcifs.smb.SmbFile;
 
 public class ListACL {
 

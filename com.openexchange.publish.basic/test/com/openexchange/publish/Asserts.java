@@ -49,10 +49,13 @@
 
 package com.openexchange.publish;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import static org.junit.Assert.*;
 
 /**
  * {@link Asserts}

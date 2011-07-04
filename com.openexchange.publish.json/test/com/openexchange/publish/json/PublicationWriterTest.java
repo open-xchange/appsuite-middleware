@@ -49,9 +49,11 @@
 
 package com.openexchange.publish.json;
 
+import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,9 +62,6 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
-import junit.framework.TestCase;
-
-import static com.openexchange.json.JSONAssertion.assertValidates;
 
 /**
  * {@link PublicationWriterTest}

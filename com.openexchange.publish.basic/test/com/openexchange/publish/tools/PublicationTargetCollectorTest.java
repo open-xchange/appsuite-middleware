@@ -49,17 +49,17 @@
 
 package com.openexchange.publish.tools;
 
+import static com.openexchange.publish.Asserts.assertDoesNotKnow;
+import static com.openexchange.publish.Asserts.assertGettable;
+import static com.openexchange.publish.Asserts.assertKnows;
+import static com.openexchange.publish.Asserts.assertTargets;
 import java.util.Collection;
-import com.openexchange.groupware.contexts.SimContext;
+import junit.framework.TestCase;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationService;
-import com.openexchange.publish.tools.PublicationTargetCollector;
-
-import junit.framework.TestCase;
-
-import static com.openexchange.publish.Asserts.*;
 
 /**
  * {@link PublicationTargetCollectorTest}

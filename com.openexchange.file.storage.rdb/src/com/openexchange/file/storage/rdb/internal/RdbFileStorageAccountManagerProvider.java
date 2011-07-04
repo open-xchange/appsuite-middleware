@@ -51,7 +51,6 @@ package com.openexchange.file.storage.rdb.internal;
 
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.RdbFileStorageAccountManager;
 

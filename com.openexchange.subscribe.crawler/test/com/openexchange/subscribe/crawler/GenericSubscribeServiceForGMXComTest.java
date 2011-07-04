@@ -51,9 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import org.apache.commons.httpclient.NameValuePair;
-import org.ho.yaml.Yaml;
 import com.openexchange.subscribe.crawler.internal.Step;
 
 

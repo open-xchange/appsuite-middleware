@@ -1,6 +1,7 @@
 import java.io.InterruptedIOException;
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFileInputStream;
 import jcifs.util.transport.TransportException;
-import jcifs.smb.*;
 
 public class InterruptTest extends Thread {
 

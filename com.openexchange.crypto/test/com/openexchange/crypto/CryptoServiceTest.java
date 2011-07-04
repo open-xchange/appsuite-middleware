@@ -50,9 +50,9 @@
 package com.openexchange.crypto;
 
 import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
+import junit.framework.TestCase;
 import com.openexchange.crypto.internal.CryptoServiceImpl;
 import com.openexchange.exceptions.StringComponent;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

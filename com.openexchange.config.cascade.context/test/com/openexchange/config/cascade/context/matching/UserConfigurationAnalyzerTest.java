@@ -51,8 +51,8 @@ package com.openexchange.config.cascade.context.matching;
 
 import java.util.Arrays;
 import java.util.Set;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import junit.framework.TestCase;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 
 /**

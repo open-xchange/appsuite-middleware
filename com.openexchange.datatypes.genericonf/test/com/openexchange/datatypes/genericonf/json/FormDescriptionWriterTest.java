@@ -49,6 +49,8 @@
 
 package com.openexchange.datatypes.genericonf.json;
 
+import static com.openexchange.json.JSONAssertion.assertValidates;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,9 +58,6 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.i18n.Translator;
 import com.openexchange.json.JSONAssertion;
-import junit.framework.TestCase;
-
-import static com.openexchange.json.JSONAssertion.assertValidates;
 
 
 /**

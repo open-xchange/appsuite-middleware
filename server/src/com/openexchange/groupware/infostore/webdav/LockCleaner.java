@@ -50,7 +50,6 @@ package com.openexchange.groupware.infostore.webdav;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.groupware.container.FolderObject;

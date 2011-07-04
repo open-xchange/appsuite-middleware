@@ -51,7 +51,6 @@ package com.openexchange.file.storage.rdb.internal;
 
 import java.util.List;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.session.Session;
 
 /**

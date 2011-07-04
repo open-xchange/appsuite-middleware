@@ -51,8 +51,6 @@ package com.openexchange.ajax.parser;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.groupware.contact.sqlinjectors.StringSQLInjector;
@@ -60,10 +58,8 @@ import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.Operand;
 import com.openexchange.search.Operation;
 import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm.OperationPosition;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.SingleSearchTerm;
 
 /**
  * Base class for converting a SearchTerm to a WHERE clause usable by SQL.

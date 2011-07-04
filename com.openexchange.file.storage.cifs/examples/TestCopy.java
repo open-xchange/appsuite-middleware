@@ -1,4 +1,4 @@
-import jcifs.smb.*;
+import jcifs.smb.SmbFile;
 
 public class TestCopy {
 

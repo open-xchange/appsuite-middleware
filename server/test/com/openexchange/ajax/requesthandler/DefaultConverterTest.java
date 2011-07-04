@@ -49,11 +49,10 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.List;
+import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.DefaultConverter.Step;
 import com.openexchange.ajax.requesthandler.ResultConverter.Quality;
 import com.openexchange.tools.session.ServerSession;
-import junit.framework.TestCase;
 
 /**
  * {@link DefaultConverterTest}

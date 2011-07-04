@@ -49,7 +49,13 @@
 
 package com.openexchange.publish;
 
-import static com.openexchange.publish.PublicationExceptionMessages.*;
+import static com.openexchange.publish.PublicationExceptionMessages.ACCESS_DENIED_MSG;
+import static com.openexchange.publish.PublicationExceptionMessages.ID_GIVEN_MSG;
+import static com.openexchange.publish.PublicationExceptionMessages.NO_LOADER_FOUND_MSG;
+import static com.openexchange.publish.PublicationExceptionMessages.PARSE_EXCEPTION_MSG;
+import static com.openexchange.publish.PublicationExceptionMessages.PUBLICATION_NOT_FOUND_MSG;
+import static com.openexchange.publish.PublicationExceptionMessages.SQL_EXCEPTION_MSG;
+import static com.openexchange.publish.PublicationExceptionMessages.UNIQUENESS_CONSTRAINT_VIOLATION;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 

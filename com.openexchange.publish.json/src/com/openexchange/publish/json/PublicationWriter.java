@@ -50,9 +50,9 @@
 package com.openexchange.publish.json;
 
 import static com.openexchange.publish.json.FieldNames.DISPLAYNAME;
+import static com.openexchange.publish.json.FieldNames.ENABLED;
 import static com.openexchange.publish.json.FieldNames.ENTITY;
 import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
-import static com.openexchange.publish.json.FieldNames.ENABLED;
 import static com.openexchange.publish.json.FieldNames.ID;
 import static com.openexchange.publish.json.FieldNames.TARGET;
 import java.util.List;

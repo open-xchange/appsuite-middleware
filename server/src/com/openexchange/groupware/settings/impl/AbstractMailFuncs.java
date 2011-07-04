@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.impl;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;

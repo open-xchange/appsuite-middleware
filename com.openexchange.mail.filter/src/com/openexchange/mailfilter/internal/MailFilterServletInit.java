@@ -50,12 +50,9 @@
 package com.openexchange.mailfilter.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.servlet.ServletException;
-
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
 import com.openexchange.mailfilter.ajax.MailfilterServlet;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;

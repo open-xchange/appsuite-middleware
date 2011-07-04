@@ -49,9 +49,9 @@
 
 package com.openexchange.http.deferrer;
 
-import com.openexchange.http.deferrer.impl.DefaultDeferringURLServiceTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.http.deferrer.impl.DefaultDeferringURLServiceTest;
 
 
 /**

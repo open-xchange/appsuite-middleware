@@ -49,14 +49,11 @@
 
 package com.openexchange.groupware.dataRetrieval.mail;
 
-import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.tools.session.ServerSession;
 
 

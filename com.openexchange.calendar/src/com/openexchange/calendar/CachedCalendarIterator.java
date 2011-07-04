@@ -60,12 +60,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.SimpleDBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -75,6 +75,7 @@ import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -248,7 +249,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			        try {
 			            new CalendarMySQL().getUserParticipantsSQLIn(visibleFolders, list, readcon, c.getContextId(), uid, sqlin);
 			        } catch (final SQLException ex) {
-			            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, I(202));
+			            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, I(202));
 			        }
 			    }
 			
@@ -256,7 +257,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			        try {
 			            new CalendarMySQL().getParticipantsSQLIn(list, readcon, cdao.getContextID(), sqlin);
 			        } catch (final SQLException ex) {
-			            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, I(203));
+			            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, I(203));
 			        }
 			    }
 			    if (cdao.fillConfirmations()) {
@@ -282,7 +283,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             		}
             	}
             	if (!found) {
-            		throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5, I(cdao.getObjectID())));
+            		throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5, I(cdao.getObjectID())));
             	}
             }
 

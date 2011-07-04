@@ -56,13 +56,13 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
 import com.openexchange.search.Operation;
 import com.openexchange.search.SearchAttributeFetcher;
 import com.openexchange.search.SearchService;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**

@@ -50,23 +50,19 @@
 package com.openexchange.passwordchange.script.impl;
 
 import static com.openexchange.passwordchange.script.services.SPWServiceRegistry.getServiceRegistry;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.Arrays;
-
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.services.SPWServiceRegistry;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.user.UserService;
 
 /**

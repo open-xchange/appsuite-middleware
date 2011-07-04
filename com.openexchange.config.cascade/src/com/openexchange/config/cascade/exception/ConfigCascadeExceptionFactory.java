@@ -49,10 +49,10 @@
 
 package com.openexchange.config.cascade.exception;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.exceptions.Exceptions;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
 /**
  * {@link ConfigCascadeExceptionFactory} - Factory for creating {@link ConfigCascadeException}.

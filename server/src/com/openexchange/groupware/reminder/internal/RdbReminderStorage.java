@@ -62,9 +62,9 @@ import java.util.List;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
-import com.openexchange.groupware.reminder.ReminderException.Code;
 
 /**
  * {@link RdbReminderStorage}

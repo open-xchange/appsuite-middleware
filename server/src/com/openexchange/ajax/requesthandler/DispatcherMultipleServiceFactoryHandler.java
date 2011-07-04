@@ -49,12 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.Collection;
-import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 

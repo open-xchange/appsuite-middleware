@@ -49,14 +49,14 @@
 
 package com.openexchange.publish;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import com.openexchange.publish.database.PublicationUserDeleteListenerTest;
 import com.openexchange.publish.impl.ContactFolderLoaderTest;
 import com.openexchange.publish.impl.InfostoreDocumentLoaderTest;
 import com.openexchange.publish.sql.PublicationSQLTest;
 import com.openexchange.publish.tools.CompositePublicationTargetDiscovererTest;
 import com.openexchange.publish.tools.PublicationTargetCollectorTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 /**

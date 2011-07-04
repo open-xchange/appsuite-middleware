@@ -53,7 +53,6 @@ import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.session.Session;
 
 /**

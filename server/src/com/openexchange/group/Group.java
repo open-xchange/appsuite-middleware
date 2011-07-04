@@ -50,7 +50,6 @@
 package com.openexchange.group;
 
 import java.util.Date;
-
 import com.openexchange.ajax.AJAXServlet;
 
 /**

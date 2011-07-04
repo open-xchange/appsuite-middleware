@@ -60,12 +60,12 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.AbstractOXException.Parsing;
 import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 import com.openexchange.groupware.AbstractOXException.Truncated;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  *

@@ -52,8 +52,8 @@ package com.openexchange.oauth.osgi;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link AbstractOSGiDelegateService}

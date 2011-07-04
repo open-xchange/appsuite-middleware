@@ -55,9 +55,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.Initialization;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

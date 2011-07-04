@@ -51,11 +51,11 @@ package com.openexchange.publish.microformats;
 
 import java.util.Date;
 import java.util.Set;
+import junit.framework.TestCase;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.microformats.tools.InfostoreTemplateUtils;
-import junit.framework.TestCase;
 
 
 /**

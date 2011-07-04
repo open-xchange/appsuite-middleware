@@ -50,10 +50,10 @@
 package com.openexchange.subscribe.internal;
 
 import java.util.Date;
+import junit.framework.TestCase;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import junit.framework.TestCase;
 
 
 /**

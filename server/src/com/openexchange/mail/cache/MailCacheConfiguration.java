@@ -50,7 +50,6 @@
 package com.openexchange.mail.cache;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;

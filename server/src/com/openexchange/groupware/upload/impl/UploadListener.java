@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.upload.impl;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.tools.servlet.UploadServletException;
 
 /**

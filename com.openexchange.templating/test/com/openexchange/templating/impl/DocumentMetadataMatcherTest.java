@@ -49,9 +49,9 @@
 
 package com.openexchange.templating.impl;
 
+import junit.framework.TestCase;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import junit.framework.TestCase;
 
 
 /**

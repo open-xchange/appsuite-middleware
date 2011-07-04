@@ -56,8 +56,8 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * Provides a static method for the login servlet to do the authentication.

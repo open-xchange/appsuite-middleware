@@ -1,5 +1,4 @@
-import jcifs.dcerpc.*;
-import jcifs.util.*;
+import jcifs.dcerpc.UUID;
 
 public class U2 {
 

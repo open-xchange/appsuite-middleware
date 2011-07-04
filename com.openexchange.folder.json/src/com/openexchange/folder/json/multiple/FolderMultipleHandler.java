@@ -61,7 +61,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

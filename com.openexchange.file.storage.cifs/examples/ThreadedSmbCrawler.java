@@ -16,11 +16,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-import jcifs.smb.SmbFile;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.net.MalformedURLException;
 import java.io.IOException;
+import java.util.LinkedList;
+import jcifs.smb.SmbFile;
 
 public class ThreadedSmbCrawler {
 

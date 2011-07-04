@@ -1,5 +1,6 @@
-import jcifs.*;
-import jcifs.smb.*;
+import jcifs.UniAddress;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbSession;
 
 public class Logon {
 

@@ -6,7 +6,6 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.json.TemplateMultipleHandler;
 import com.openexchange.templating.json.TemplatingServlet;
-import com.openexchange.tools.service.ServletRegistration;
 import com.openexchange.tools.service.SessionServletRegistration;
 
 public class TemplatingJSONActivator extends DeferredActivator {

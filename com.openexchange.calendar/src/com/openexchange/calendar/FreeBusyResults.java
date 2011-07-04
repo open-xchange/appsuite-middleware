@@ -60,13 +60,14 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Participant;
@@ -255,7 +256,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 }
             }
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final Exception e) {
             LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString() , e);
             throw new SearchIteratorException(SearchIteratorException.Code.CALCULATION_ERROR, com.openexchange.groupware.EnumComponent.APPOINTMENT, oid, e);
@@ -417,7 +418,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         } catch (final SearchIteratorException ex) {
             throw new OXException(ex);
         } catch (final SQLException ex) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(ex);
         }
     }
     
@@ -454,7 +455,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
                 }
             } catch(final SQLException sqle) {
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
             }
         } else {
             try {
@@ -483,7 +484,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                     }
                 }
             } catch(final SQLException sqle) {
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
             }
         }
         return p;

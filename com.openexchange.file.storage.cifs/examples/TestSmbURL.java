@@ -1,6 +1,5 @@
 import java.util.Date;
-import jcifs.smb.*;
-import java.io.*;
+import jcifs.smb.SmbFile;
 
 public class TestSmbURL {
 

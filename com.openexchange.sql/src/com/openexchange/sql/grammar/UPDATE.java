@@ -51,7 +51,6 @@ package com.openexchange.sql.grammar;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class UPDATE extends ModifyCommand {

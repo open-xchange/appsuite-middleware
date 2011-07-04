@@ -136,7 +136,7 @@ public class CalendarCallbacks implements CalendarListener {
             }
         }
         if(!exceptionIDs.isEmpty()) {
-            throw new OXCalendarException(OXCalendarException.Code.CALLBACK_EXCEPTIONS, exceptionIDs.toString());
+            throw OXCalendarExceptionCodes.CALLBACK_EXCEPTIONS.create(exceptionIDs.toString());
         }
     }
 }

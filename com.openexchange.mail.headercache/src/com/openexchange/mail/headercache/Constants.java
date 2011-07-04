@@ -51,7 +51,6 @@ package com.openexchange.mail.headercache;
 
 import java.util.EnumSet;
 import java.util.Set;
-
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 

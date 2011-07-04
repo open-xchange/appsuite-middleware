@@ -49,7 +49,9 @@
 
 package com.openexchange.consistency;
 
-import static com.openexchange.consistency.ConsistencyExceptionMessages.*;
+import static com.openexchange.consistency.ConsistencyExceptionMessages.COMMUNICATION_PROBLEM_MSG;
+import static com.openexchange.consistency.ConsistencyExceptionMessages.REGISTRATION_FAILED_MSG;
+import static com.openexchange.consistency.ConsistencyExceptionMessages.UNREGISTRATION_FAILED_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 

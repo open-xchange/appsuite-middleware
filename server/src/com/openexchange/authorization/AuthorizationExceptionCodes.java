@@ -49,9 +49,9 @@
 
 package com.openexchange.authorization;
 
-import static com.openexchange.authorization.AuthorizationExceptionMessages.USER_DISABLED_MSG;
 import static com.openexchange.authorization.AuthorizationExceptionMessages.PASSWORD_EXPIRED_MSG;
 import static com.openexchange.authorization.AuthorizationExceptionMessages.UNKNOWN_MSG;
+import static com.openexchange.authorization.AuthorizationExceptionMessages.USER_DISABLED_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 

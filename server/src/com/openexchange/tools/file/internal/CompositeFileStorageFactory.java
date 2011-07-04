@@ -3,8 +3,8 @@ package com.openexchange.tools.file.internal;
 import java.io.File;
 import java.net.URI;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.external.OXException;
 
 /**
  * {@link CompositeFileStorageFactory}

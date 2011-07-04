@@ -56,8 +56,8 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.LoginResult;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 

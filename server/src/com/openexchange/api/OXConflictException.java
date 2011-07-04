@@ -49,7 +49,6 @@
 
 package com.openexchange.api;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**

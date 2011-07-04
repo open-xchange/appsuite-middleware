@@ -52,7 +52,6 @@ package com.openexchange.tools.id;
 
 import java.util.Arrays;
 import java.util.List;
-import com.openexchange.tools.id.IDMangler;
 import junit.framework.TestCase;
 
 /**

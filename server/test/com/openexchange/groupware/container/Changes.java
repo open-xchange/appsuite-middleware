@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.container;
 
-import com.openexchange.groupware.container.CommonObject;
 
 /**
  * A change for an update request.

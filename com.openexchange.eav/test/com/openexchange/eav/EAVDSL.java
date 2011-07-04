@@ -64,8 +64,6 @@ import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
 
-import static org.junit.Assert.*;
-
 /**
  * {@link EAVDSL}
  *

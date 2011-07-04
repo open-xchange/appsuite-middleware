@@ -50,11 +50,9 @@ package com.openexchange.xml.jdom.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-
 import com.openexchange.xml.jdom.JDOMParser;
 
 /**

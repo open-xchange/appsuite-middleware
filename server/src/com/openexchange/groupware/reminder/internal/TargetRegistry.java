@@ -54,8 +54,8 @@ import gnu.trove.TIntObjectHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.reminder.ReminderException;
-import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.groupware.reminder.TargetService;
 
 /**
  * Registry for the {@link TargetService} instances.

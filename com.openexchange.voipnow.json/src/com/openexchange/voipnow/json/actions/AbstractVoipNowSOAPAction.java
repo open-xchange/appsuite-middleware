@@ -52,13 +52,11 @@ package com.openexchange.voipnow.json.actions;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.cxf.headers.Header;
-import org.apache.cxf.jaxb.JAXBDataBinding;
-
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
-
+import org.apache.cxf.headers.Header;
+import org.apache.cxf.jaxb.JAXBDataBinding;
 import com._4psa.headerdata_xsd._2_5.UserCredentials;
 
 /**

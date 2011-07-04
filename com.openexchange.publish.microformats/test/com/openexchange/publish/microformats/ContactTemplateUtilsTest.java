@@ -49,11 +49,11 @@
 
 package com.openexchange.publish.microformats;
 
+import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
-import junit.framework.TestCase;
 
 
 /**

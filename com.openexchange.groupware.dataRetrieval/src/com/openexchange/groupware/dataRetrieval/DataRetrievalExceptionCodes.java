@@ -50,8 +50,8 @@
 package com.openexchange.groupware.dataRetrieval;
 
 import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.dataRetrieval.exception.DataRetrievalExceptionFactory;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.dataRetrieval.exception.DataRetrievalExceptionFactory;
 
 /**
  * {@link DataRetrievalExceptionCodes} - Enumeration of all {@link DataRetrievalException}s.

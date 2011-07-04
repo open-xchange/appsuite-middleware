@@ -50,7 +50,6 @@
 package com.openexchange.server.impl;
 
 import java.util.Arrays;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderAccess;

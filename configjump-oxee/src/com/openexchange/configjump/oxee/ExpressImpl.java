@@ -52,13 +52,11 @@ package com.openexchange.configjump.oxee;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
-
 import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.ICookie;

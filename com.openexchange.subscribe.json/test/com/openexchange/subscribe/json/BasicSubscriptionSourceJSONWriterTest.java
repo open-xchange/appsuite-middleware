@@ -51,6 +51,7 @@ package com.openexchange.subscribe.json;
 
 import java.util.ArrayList;
 import java.util.List;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,7 +61,6 @@ import com.openexchange.datatypes.genericonf.FormElement.Widget;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.Translator;
 import com.openexchange.subscribe.SubscriptionSource;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

@@ -51,7 +51,6 @@ package com.openexchange.mail.headercache;
 
 import java.sql.Connection;
 import java.util.Map;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.headercache.properties.RdbHeaderCacheProperties;
 import com.openexchange.mailaccount.MailAccountDeleteListener;

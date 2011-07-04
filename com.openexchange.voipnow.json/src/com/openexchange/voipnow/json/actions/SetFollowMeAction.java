@@ -54,22 +54,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com._4psa.common_xsd._2_5.DelObject;
 import com._4psa.common_xsd._2_5.UpdateObject;
 import com._4psa.extension._2_5_1.ExtensionInterface;
 import com._4psa.extension._2_5_1.ExtensionPort;
 import com._4psa.extensiondata_xsd._2_5.CallRuleTransferInfo;
 import com._4psa.extensionmessages_xsd._2_5.AddCallRulesInRequest;
+import com._4psa.extensionmessages_xsd._2_5.AddCallRulesInRequest.Rule;
 import com._4psa.extensionmessages_xsd._2_5.DelCallRulesInRequest;
 import com._4psa.extensionmessages_xsd._2_5.GetCallRulesInRequest;
-import com._4psa.extensionmessages_xsd._2_5.AddCallRulesInRequest.Rule;
 import com._4psa.extensionmessagesinfo_xsd._2_5.GetCallRulesInResponseType;
 import com._4psa.extensionmessagesinfo_xsd._2_5.GetCallRulesInResponseType.Rules;
 import com._4psa.extensionmessagesinfo_xsd._2_5.GetCallRulesInResponseType.Rules.Transfer;
@@ -78,7 +75,6 @@ import com._4psa.headerdata_xsd._2_5.UserCredentials;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.VoipNowException;

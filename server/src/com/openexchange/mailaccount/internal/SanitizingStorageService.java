@@ -61,7 +61,6 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.internal.Sanitizer;
 import com.openexchange.tools.net.URIDefaults;
 
 /**

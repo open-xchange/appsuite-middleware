@@ -49,7 +49,7 @@
 
 package com.openexchange.context;
 
-import static com.openexchange.context.ContextExceptionMessages.*;
+import static com.openexchange.context.ContextExceptionMessages.CONTEXT_DISABLED_MSG;
 import com.openexchange.context.internal.ContextExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;

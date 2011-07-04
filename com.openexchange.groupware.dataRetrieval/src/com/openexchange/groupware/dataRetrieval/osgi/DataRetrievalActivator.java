@@ -54,7 +54,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.dataRetrieval.actions.RetrievalActions;
-import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.FileDeliveryServlet;
 import com.openexchange.groupware.dataRetrieval.servlets.Paths;

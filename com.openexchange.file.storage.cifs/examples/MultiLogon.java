@@ -1,4 +1,5 @@
-import jcifs.smb.*;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
 
 public class MultiLogon {
 

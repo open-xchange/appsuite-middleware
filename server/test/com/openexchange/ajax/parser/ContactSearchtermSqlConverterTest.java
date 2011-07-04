@@ -1,14 +1,12 @@
 package com.openexchange.ajax.parser;
 
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
 

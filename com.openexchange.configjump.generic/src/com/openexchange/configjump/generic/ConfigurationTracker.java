@@ -50,11 +50,9 @@
 package com.openexchange.configjump.generic;
 
 import java.util.Properties;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.config.ConfigurationService;
 
 /**

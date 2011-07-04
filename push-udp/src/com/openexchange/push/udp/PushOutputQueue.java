@@ -49,9 +49,8 @@
 
 package com.openexchange.push.udp;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import static com.openexchange.push.udp.PushChannels.ChannelType.EXTERNAL;
+import static com.openexchange.push.udp.PushChannels.ChannelType.INTERNAL;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -69,7 +68,6 @@ import com.openexchange.event.RemoteEvent;
 import com.openexchange.groupware.Types;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.tools.StringCollection;
-import static com.openexchange.push.udp.PushChannels.ChannelType.*;
 
 /**
  * {@link PushOutputQueue} - Holds main queue containing objects to deliver.

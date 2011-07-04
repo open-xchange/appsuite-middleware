@@ -56,6 +56,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -86,18 +87,18 @@ public class AlterChangeExceptionFieldLength implements UpdateTask {
             try {
                 stmt = writecon.createStatement();
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
+                throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex.getMessage());
             }
             if (stmt != null) {
                 try {
                     stmt.executeUpdate(UPDATE_PRG_DATES);
                 } catch (final SQLException ex) {
-                    throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
+                    throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex.getMessage());
                 }
                 try {
                     stmt.executeUpdate(UPDATE_DEL_DATES);
                 } catch (final SQLException ex) {
-                   throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
+                   throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex.getMessage());
                 }
             }
         } finally {

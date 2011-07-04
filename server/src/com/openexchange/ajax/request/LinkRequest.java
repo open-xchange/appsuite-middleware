@@ -63,7 +63,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.LinkSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbLinkSQLInterface;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;

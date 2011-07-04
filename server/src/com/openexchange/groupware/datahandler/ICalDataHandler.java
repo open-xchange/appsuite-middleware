@@ -68,7 +68,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.DataException;
@@ -80,6 +79,7 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -155,7 +155,7 @@ public abstract class ICalDataHandler implements DataHandler {
                 return;
             }
         } catch (SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         }
         
         appointmentSql.updateAppointmentObject(appointment, calendarFolder, new Date());

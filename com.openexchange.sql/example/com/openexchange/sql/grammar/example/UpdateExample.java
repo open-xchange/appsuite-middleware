@@ -50,7 +50,9 @@
 package com.openexchange.sql.grammar.example;
 
 import com.openexchange.sql.builder.StatementBuilder;
-import com.openexchange.sql.grammar.*;
+import com.openexchange.sql.grammar.Constant;
+import com.openexchange.sql.grammar.GREATEROREQUAL;
+import com.openexchange.sql.grammar.UPDATE;
 
 public class UpdateExample {
 

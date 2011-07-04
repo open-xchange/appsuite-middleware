@@ -54,11 +54,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;

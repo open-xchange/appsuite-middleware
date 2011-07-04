@@ -49,7 +49,6 @@
 package com.openexchange.jsieve.visitors;
 
 import java.util.ArrayList;
-
 import org.apache.jsieve.NumberArgument;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -66,7 +65,6 @@ import org.apache.jsieve.parser.generated.ASTtest_list;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.SieveParserVisitor;
 import org.apache.jsieve.parser.generated.SimpleNode;
-
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Command;
 import com.openexchange.jsieve.commands.IfCommand;

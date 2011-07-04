@@ -49,9 +49,9 @@
 
 package com.openexchange.subscribe.xing;
 
+import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
-import junit.framework.TestCase;
 
 /**
  * {@link ContactSanitationTest}

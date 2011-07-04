@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;

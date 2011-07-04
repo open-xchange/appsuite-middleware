@@ -50,8 +50,8 @@
 package com.openexchange.mailfilter.ajax.actions;
 
 import com.openexchange.mailfilter.ajax.Action;
-import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.Credentials;
+import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;

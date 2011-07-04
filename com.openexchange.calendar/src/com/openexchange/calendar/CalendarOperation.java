@@ -67,10 +67,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
@@ -81,6 +81,7 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -180,7 +181,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     if (DEBUG && action_folder != inFolder) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":",I(oid),":",I(action_folder),":",inFolder }));
                     }
-                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5, I(oid)));
+                    throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5, I(oid)));
                 }
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));
@@ -208,12 +209,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         if (DEBUG) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":",I(oid),":",I(inFolder),":",I(action) }));
                         }
-                        throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_2));
+                        throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2));
                     } else if (action_folder != inFolder && check_special_action == action) {
                         if (DEBUG) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":",I(oid),":",I(inFolder),":",I(action) }));
                         }
-                        throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_3));
+                        throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_3));
                     }
                 }
                 if (check_permissions && action == UPDATE && inFolder != action_folder) {
@@ -221,7 +222,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         if (DEBUG && inFolder != action_folder) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":",I(oid),":",I(action_folder),":",I(inFolder) }));
                         }
-                        throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_4));
+                        throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_4));
                     }
                 }
                 if (cdao.containsRecurrenceID()) {
@@ -375,11 +376,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      */
     public boolean prepareUpdateAction(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int inFolder, final String timezone) throws OXException {
         if (cdao.getContext() == null) {
-            throw new OXCalendarException(OXCalendarException.Code.CONTEXT_NOT_SET);
+            throw new OXCalendarException(OXCalendarExceptionCodes.CONTEXT_NOT_SET);
         }
         final OXFolderAccess ofa = new OXFolderAccess(cdao.getContext());
         if (ofa.getFolderModule(inFolder) != FolderObject.CALENDAR) {
-            throw new OXCalendarException(OXCalendarException.Code.NON_CALENDAR_FOLDER);
+            throw new OXCalendarException(OXCalendarExceptionCodes.NON_CALENDAR_FOLDER);
         }
 
         final boolean isInsert = !cdao.containsObjectID();
@@ -434,32 +435,32 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     /*
                      * Deny change of recurring position in a change exception
                      */
-                    throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.INVALID_RECURRENCE_POSITION_CHANGE);
                 } else if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0 && cdao.getRecurrencePosition() != edao.getRecurrencePosition()) {
                     /*
                      * Deny change of recurring position in a change exception
                      */
-                    throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.INVALID_RECURRENCE_POSITION_CHANGE);
                 } else if (cdao.containsInterval() && cdao.getInterval() > 0 && cdao.getInterval() != edao.getInterval()) {
                     /*
                      * Deny change of recurring type/pattern in a change exception
                      */
-                    throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.INVALID_RECURRENCE_TYPE_CHANGE);
                 } else if (cdao.containsDays() && cdao.getDays() > 0 && cdao.getDays() != edao.getDays()) {
                     /*
                      * Deny change of recurring type/pattern in a change exception
                      */
-                    throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.INVALID_RECURRENCE_TYPE_CHANGE);
                 } else if (cdao.containsDayInMonth() && cdao.getDayInMonth() > 0 && cdao.getDayInMonth() != edao.getDayInMonth()) {
                     /*
                      * Deny change of recurring type/pattern in a change exception
                      */
-                    throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.INVALID_RECURRENCE_TYPE_CHANGE);
                 } else if (cdao.containsMonth() && cdao.getMonth() > 0 && cdao.getMonth() != edao.getMonth()) {
                     /*
                      * Deny change of recurring type/pattern in a change exception
                      */
-                    throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.INVALID_RECURRENCE_TYPE_CHANGE);
                 }
                 // Not overwriting the recurrence position. This must give the exception INVALID_RECURRENCE_POSITION_CHANGE.
                 // Keep the recurrence pattern
@@ -767,7 +768,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             int g = 1;
             boolean bbs = false;
             if (co_rs == null || cols == null) {
-                throw new OXCalendarException(OXCalendarException.Code.SEARCH_ITERATOR_NULL);
+                throw new OXCalendarException(OXCalendarExceptionCodes.SEARCH_ITERATOR_NULL);
             }
             try {
                 for (int a = 0; a < cols.length; a++) {
@@ -860,7 +861,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     }
                 }
             } catch(final SQLException sqle) {
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
             }
 
             extractRecurringInformation(cdao);
@@ -905,7 +906,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         }
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception (fid!inFolder) for user:oid:fid:cols ", I(so.getUserId()), ":", I(cdao.getObjectID()),":",I(oids[index][1]),":",colss.toString() }));
                     }
-                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5, I(cdao.getObjectID())));
+                    throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5, I(cdao.getObjectID())));
                 }
             }
             rsNext(false);
@@ -1250,14 +1251,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private final void simpleDataCheck(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid) throws OXException {
         // Both, start and end date are set
         if (cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
-            throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
+            throw new OXCalendarException(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE);
         }
         // Only start date is set
         if (cdao.containsStartDate() && !cdao.containsEndDate() && edao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
-            throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
+            throw new OXCalendarException(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE);
         }// Only end date is set
         if (!cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < edao.getStartDate().getTime()) {
-            throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
+            throw new OXCalendarException(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE);
         }
         if (cdao.containsUntil() && cdao.getUntil() != null) {
             final Date until = cdao.getUntil();
@@ -1269,40 +1270,40 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 start = cdao.getStartDate();
             }
             if (isUntilBeforeStart(until, start)) {
-                throw new OXCalendarException(OXCalendarException.Code.UNTIL_BEFORE_START_DATE);
+                throw new OXCalendarException(OXCalendarExceptionCodes.UNTIL_BEFORE_START_DATE);
             }
         }
         if (cdao.containsLabel() && (cdao.getLabel() < 0 || cdao.getLabel() > 256)) {
-            throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_LABEL, cdao.getLabel());
+            throw OXCalendarExceptionCodes.UNSUPPORTED_LABEL.create(cdao.getLabel());
         }
         if (cdao.containsPrivateFlag()) {
             if (cdao.getPrivateFlag()) {
                 if (cdao.getFolderType() != recColl.PRIVATE) {
-                    throw new OXCalendarException(OXCalendarException.Code.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER);
                 }
                 if (edao == null || (edao.containsPrivateFlag() && edao.getPrivateFlag())) {
                     if (cdao.containsObjectID() && cdao.getSharedFolderOwner() != 0 && cdao.getSharedFolderOwner() != uid) {
-                        throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
+                        throw new OXCalendarException(OXCalendarExceptionCodes.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
                     }
                     if (cdao.getFolderType() != FolderObject.PRIVATE) {
-                        throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_IN_PRIVATE_FOLDER);
+                        throw new OXCalendarException(OXCalendarExceptionCodes.PRIVATE_FLAG_IN_PRIVATE_FOLDER);
                     }
                     if ( (cdao.getUsers() != null && cdao.getUsers().length > 1) || (cdao.getParticipants() != null && cdao.getParticipants().length > 1) ) {
-                        throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS);
+                        throw new OXCalendarException(OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS);
                     }
                 }
             } else if (cdao.getPrivateFlag()) {
-                throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_PRIVATE_FLAG, cdao.getPrivateFlag());
+                throw OXCalendarExceptionCodes.UNSUPPORTED_PRIVATE_FLAG.create(cdao.getPrivateFlag());
             }
         } else if (edao != null && edao.containsPrivateFlag() && edao.getPrivateFlag()) {
             if (cdao.getSharedFolderOwner() != uid) {
                 if (cdao.getFolderType() != recColl.PRIVATE) {
-                    throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
                 }
             }
         }
         if (cdao.containsShownAs() && (cdao.getShownAs() < 0 || cdao.getShownAs() > 4)) {
-            throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_SHOWN_AS, cdao.getShownAs());
+            throw OXCalendarExceptionCodes.UNSUPPORTED_SHOWN_AS.create(cdao.getShownAs());
         } else if (cdao.containsShownAs() && cdao.getShownAs() == 0) {
             // auto correction
             cdao.setShownAs(CalendarDataObject.RESERVED);
@@ -1325,7 +1326,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
              * An update of a change exception
              */
             if (RecurrenceChecker.containsRecurrenceInformation(cdao)) {
-                throw new OXCalendarException(OXCalendarException.Code.CHANGE_EXCEPTION_TO_RECURRENCE);
+                throw new OXCalendarException(OXCalendarExceptionCodes.CHANGE_EXCEPTION_TO_RECURRENCE);
             }
             return recColl.RECURRING_NO_ACTION;
         }
@@ -1352,7 +1353,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
             } else {
                 if (cdao.getFolderMove()) {
-                    throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_MOVE_EXCEPTION);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_EXCEPTION_MOVE_EXCEPTION);
                 }
                 if (recColl.RECURRING_EXCEPTION_DELETE_EXISTING == ret
                         && (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() == edao
@@ -1394,7 +1395,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         } else if (!edao.containsRecurrenceType() && cdao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE) {
             // TODO: Change from normal apointment to sequence
             if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrence() != null) {
-                throw new OXCalendarException(OXCalendarException.Code.RECURRING_ALREADY_EXCEPTION);
+                throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_ALREADY_EXCEPTION);
             }
             cdao.setRecurrenceID(edao.getObjectID());
             if (!cdao.containsStartDate()) {
@@ -1603,10 +1604,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private static final void checkInsertMandatoryFields(final CalendarDataObject cdao) throws OXException {
         if (!cdao.containsStartDate()) {
-            throw new OXCalendarException(OXCalendarException.Code.MANDATORY_FIELD_START_DATE);
+            throw new OXCalendarException(OXCalendarExceptionCodes.MANDATORY_FIELD_START_DATE);
         }
         if (!cdao.containsEndDate()) {
-            throw new OXCalendarException(OXCalendarException.Code.MANDATORY_FIELD_END_DATE);
+            throw new OXCalendarException(OXCalendarExceptionCodes.MANDATORY_FIELD_END_DATE);
         }
         if (!cdao.containsTitle()) {
             // Adapt to MS Outlook behavior and set empty title

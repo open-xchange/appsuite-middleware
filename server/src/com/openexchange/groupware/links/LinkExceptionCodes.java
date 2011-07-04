@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.links;
 
-import static com.openexchange.groupware.links.LinkExceptionMessages.*;
+import static com.openexchange.groupware.links.LinkExceptionMessages.ALREADY_LINKED_MSG;
+import static com.openexchange.groupware.links.LinkExceptionMessages.NO_LINK_ACCESS_PERMISSION_MSG;
+import static com.openexchange.groupware.links.LinkExceptionMessages.SQL_PROBLEM_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.links.internal.LinkExceptionFactory;

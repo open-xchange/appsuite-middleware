@@ -64,16 +64,17 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -140,7 +141,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public boolean[] hasAppointmentsBetween(final Date d1, final Date d2) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
@@ -153,7 +154,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             // Don't mask OX exceptions in a SQL exception.
             throw e;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
             if (readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -168,7 +169,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int fid, int[] cols, final Date start, final Date end, final int from, final int to, final int orderBy, final Order orderDir) throws OXException, SQLException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection readcon = null;
         PreparedStatement prep = null;
@@ -203,7 +204,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             return new AppointmentIteratorAdapter(new AnonymizingIterator(co, ctx, session.getUserId()));
             
         } catch (final IndexOutOfBoundsException ioobe) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, Integer.valueOf(19));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ioobe, Integer.valueOf(19));
         } catch (final OXPermissionException oxpe) {
             throw oxpe;
         } catch(final OXCalendarException oxc) {
@@ -211,9 +212,9 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(20));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(20));
         } finally  {
             if (close_connection) {
                 recColl.closeResultSet(rs);
@@ -234,7 +235,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public SearchIterator<Appointment> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection readcon = null;
         PreparedStatement prep = null;
@@ -267,7 +268,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 return new AppointmentIteratorAdapter(new AnonymizingIterator(co, ctx, session.getUserId()));
             return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
         } catch (final IndexOutOfBoundsException ioobe) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, I(21));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ioobe, I(21));
         } catch (final OXPermissionException oxpe) {
             throw oxpe;
         } catch(final OXCalendarException oxc) {
@@ -275,9 +276,9 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(22));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(22));
         } finally {
             if (close_connection) {
                 recColl.closeResultSet(rs);
@@ -291,7 +292,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private void mayRead(final EffectivePermission oclp) throws OXCalendarException {
         if (!oclp.canReadAllObjects() && !oclp.canReadOwnObjects()) {
-            throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION, I(oclp.getFuid()));   
+            throw OXCalendarExceptionCodes.NO_PERMISSION.create(I(oclp.getFuid()));   
         }
     }
 
@@ -301,7 +302,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public SearchIterator<Appointment> getDeletedAppointmentsInFolder(final int fid, int cols[], final Date since) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection readcon = null;
         PreparedStatement prep = null;
@@ -342,7 +343,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
             }
         } catch (final IndexOutOfBoundsException ioobe) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, Integer.valueOf(23));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ioobe, Integer.valueOf(23));
         } catch (final OXPermissionException oxpe) {
             throw oxpe;
         } catch(final OXCalendarException oxc) {
@@ -350,9 +351,9 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(24));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(24));
         } finally {
             if (close_connection) {
                 recColl.closeResultSet(rs);
@@ -381,7 +382,7 @@ public class CalendarSql implements AppointmentSQLInterface {
      */
     public CalendarDataObject getObjectById(final int oid, final int inFolder, final Connection readcon) throws OXException, OXObjectNotFoundException, OXPermissionException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection rcon = readcon;
         boolean closeRead = false;
@@ -408,7 +409,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } finally {
@@ -423,7 +424,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     public CalendarDataObject[] insertAppointmentObject(final CalendarDataObject cdao) throws OXException, OXPermissionException {
         RecurrenceChecker.check(cdao);
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection writecon = null;
         final Context ctx = Tools.getContext(session);
@@ -449,11 +450,11 @@ public class CalendarSql implements AppointmentSQLInterface {
                         }
                         return conflicts;
                     }
-                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_6));
+                    throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_6));
                 } catch(final DataTruncation dt) {
                     final String fields[] = DBUtils.parseTruncatedFields(dt);
                     final int fid[] = new int[fields.length];
-                    final OXCalendarException oxe = new OXCalendarException(OXCalendarException.Code.TRUNCATED_SQL_ERROR);
+                    final OXCalendarException oxe = new OXCalendarException(OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR);
                     int id = -1;
                     for (int a = 0; a < fid.length; a++) {
                         id = recColl.getFieldId(fields[a]);
@@ -475,18 +476,18 @@ public class CalendarSql implements AppointmentSQLInterface {
                     } catch(final SQLException rb) {
                         LOG.error("Rollback failed: " + rb.getMessage(), rb);
                     }
-                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
                 } finally {
                     if (writecon != null) {
                         writecon.setAutoCommit(true);
                     }
                 }
             }
-            throw new OXCalendarException(OXCalendarException.Code.INSERT_WITH_OBJECT_ID);
+            throw new OXCalendarException(OXCalendarExceptionCodes.INSERT_WITH_OBJECT_ID);
         } catch(final DataTruncation dt) {
             final String fields[] = DBUtils.parseTruncatedFields(dt);
             final int fid[] = new int[fields.length];
-            final OXException oxe = new OXCalendarException(OXCalendarException.Code.TRUNCATED_SQL_ERROR, dt, new Object[0]);
+            final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create(dt, new Object[0]);
             int id = -1;
             for (int a = 0; a < fid.length; a++) {
                 id = recColl.getFieldId(fields[a]);
@@ -507,7 +508,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
             throw oxe;
         } catch (final SQLException sqle) {
-            final OXCalendarException exception = new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            final OXCalendarException exception = OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
             LOG.error("Additioal info for: "+exception.getExceptionID()+": "+sqle.getMessage(), sqle);
             throw exception;
         } catch(final DBPoolingException dbpe) {
@@ -519,7 +520,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(25));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(25));
         } finally {
             if (writecon != null) {
                 DBPool.pushWrite(ctx, writecon);
@@ -530,7 +531,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {
         RecurrenceChecker.check(cdao);
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection writecon = null;
         final Context ctx = Tools.getContext(session);
@@ -542,7 +543,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon);
             if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
                 // Insert-through-update detected
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_WITHOUT_OBJECT_ID);
+                throw new OXCalendarException(OXCalendarExceptionCodes.UPDATE_WITHOUT_OBJECT_ID);
             }
             recColl.checkForInvalidCharacters(cdao);
             final CalendarDataObject[] conflicts;
@@ -587,7 +588,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 } catch(final DataTruncation dt) {
                     final String fields[] = DBUtils.parseTruncatedFields(dt);
                     final int fid[] = new int[fields.length];
-                    final OXException oxe = new OXCalendarException(OXCalendarException.Code.TRUNCATED_SQL_ERROR, dt, new Object[0]);
+                    final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create(dt, new Object[0]);
                     int id = -1;
                     for (int a = 0; a < fid.length; a++) {
                         id = recColl.getFieldId(fields[a]);
@@ -609,7 +610,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     } catch(final SQLException rb) {
                         LOG.error("Rollback failed: " + rb.getMessage(), rb);
                     }
-                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
                 } finally {
                     if (writecon != null) {
                         writecon.setAutoCommit(true);
@@ -620,7 +621,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final DataTruncation dt) {
             final String fields[] = DBUtils.parseTruncatedFields(dt);
             final int fid[] = new int[fields.length];
-            final OXException oxe = new OXCalendarException(OXCalendarException.Code.TRUNCATED_SQL_ERROR, dt, new Object[0]);
+            final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create(dt, new Object[0]);
             int id = -1;
             for (int a = 0; a < fid.length; a++) {
                 id = recColl.getFieldId(fields[a]);
@@ -642,7 +643,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
             throw oxe;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch(final OXException oxe) {
@@ -650,7 +651,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch (final AbstractOXException e) {
             throw new OXException(e);
         } catch (final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(26));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(26));
         } finally {
             if (writecon != null) {
                 DBPool.pushWrite(ctx, writecon);
@@ -660,7 +661,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException, SQLException, OXPermissionException, OXConcurrentModificationException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         final Context ctx = Tools.getContext(session);
         final Connection writecon;
@@ -714,7 +715,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } catch(final SQLException rb) {
                 LOG.error("Rollback failed: " + rb.getMessage(), rb);
             }
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, Integer.valueOf(28));
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, Integer.valueOf(28));
         } finally {
             try {
                 writecon.setAutoCommit(true);
@@ -727,7 +728,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     public void deleteAppointmentsInFolder(final int fid) throws OXException, SQLException, OXPermissionException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         final Context ctx = Tools.getContext(session);
         Connection writecon = null;
@@ -746,7 +747,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public void deleteAppointmentsInFolder(final int fid, final Connection writeCon) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -763,10 +764,10 @@ public class CalendarSql implements AppointmentSQLInterface {
                     rs = cimp.getResultSet(prep);
                     cimp.deleteAppointmentsInFolder(session, ctx, rs, writeCon, writeCon, FolderObject.PUBLIC, fid);
                 } else {
-                    throw new OXCalendarException(OXCalendarException.Code.FOLDER_DELETE_INVALID_REQUEST);
+                    throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_DELETE_INVALID_REQUEST);
                 }
             } catch(final SQLException sqle) {
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
             }
         } catch(final OXCalendarException oxc) {
             throw oxc;
@@ -775,7 +776,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(29));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(29));
         } finally {
             recColl.closeResultSet(rs);
             recColl.closePreparedStatement(prep);
@@ -784,7 +785,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public boolean checkIfFolderContainsForeignObjects(final int uid, final int fid) throws OXException, SQLException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection readcon = null;
         final Context ctx = Tools.getContext(session);
@@ -796,18 +797,18 @@ public class CalendarSql implements AppointmentSQLInterface {
             } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
                 return cimp.checkIfFolderContainsForeignObjects(uid, fid, ctx, readcon, FolderObject.PUBLIC);
             } else {
-                throw new OXCalendarException(OXCalendarException.Code.FOLDER_FOREIGN_INVALID_REQUEST);
+                throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_FOREIGN_INVALID_REQUEST);
             }
         } catch(final OXCalendarException oxc) {
             throw oxc;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(30));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(30));
         } finally {
             if (readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -818,7 +819,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     public boolean checkIfFolderContainsForeignObjects(final int uid, final int fid, final Connection readCon) throws OXException,
             SQLException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         final Context ctx = Tools.getContext(session);
         try {
@@ -828,22 +829,22 @@ public class CalendarSql implements AppointmentSQLInterface {
             } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
                 return cimp.checkIfFolderContainsForeignObjects(uid, fid, ctx, readCon, FolderObject.PUBLIC);
             } else {
-                throw new OXCalendarException(OXCalendarException.Code.FOLDER_FOREIGN_INVALID_REQUEST);
+                throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_FOREIGN_INVALID_REQUEST);
             }
         } catch (final OXCalendarException oxc) {
             throw oxc;
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final OXException oxe) {
             throw oxe;
         } catch (final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(30));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(30));
         }
     }
 
     public boolean isFolderEmpty(final int uid, final int fid) throws OXException, SQLException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection readcon = null;
         final Context ctx = Tools.getContext(session);
@@ -855,18 +856,18 @@ public class CalendarSql implements AppointmentSQLInterface {
             } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) { 
                 return cimp.checkIfFolderIsEmpty(uid, fid, ctx, readcon, FolderObject.PUBLIC);
             } else {
-                throw new OXCalendarException(OXCalendarException.Code.FOLDER_IS_EMPTY_INVALID_REQUEST);
+                throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_IS_EMPTY_INVALID_REQUEST);
             }
         } catch(final OXCalendarException oxc) {
             throw oxc;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(31));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(31));
         } finally {
             if (readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -876,7 +877,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public boolean isFolderEmpty(final int uid, final int fid, final Connection readCon) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         final Context ctx = Tools.getContext(session);
         try {
@@ -886,16 +887,16 @@ public class CalendarSql implements AppointmentSQLInterface {
             } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
                 return cimp.checkIfFolderIsEmpty(uid, fid, ctx, readCon, FolderObject.PUBLIC);
             } else {
-                throw new OXCalendarException(OXCalendarException.Code.FOLDER_IS_EMPTY_INVALID_REQUEST);
+                throw new OXCalendarException(OXCalendarExceptionCodes.FOLDER_IS_EMPTY_INVALID_REQUEST);
             }
         } catch (final OXCalendarException oxc) {
             throw oxc;
         } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final OXException oxe) {
             throw oxe;
         } catch (final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(31));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(31));
         }
     }
 
@@ -904,14 +905,14 @@ public class CalendarSql implements AppointmentSQLInterface {
      */
     public Date setUserConfirmation(final int oid, int folderId, final int uid, final int confirm, final String confirm_message) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         final Context ctx = Tools.getContext(session);
         if (confirm_message != null) {
             String error = null;
             error = Check.containsInvalidChars(confirm_message);
             if (error != null) {
-                throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Confirm Message", error);
+                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
             }
         }
         return cimp.setUserConfirmation(oid, folderId, uid, confirm, confirm_message, session, ctx);
@@ -919,14 +920,14 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         final Context ctx = Tools.getContext(session);
         if (message != null) {
             String error = null;
             error = Check.containsInvalidChars(message);
             if (error != null) {
-                throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Confirm Message", error);
+                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
             }
         }
         return cimp.setExternalConfirmation(oid, folderId, mail, confirm, message, session, ctx);
@@ -934,7 +935,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public SearchIterator<Appointment> getObjectsById(final int[][] oids, int[] cols) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         if (oids.length > 0) {
             Connection readcon = null;
@@ -953,7 +954,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 close_connection = false;
                 return new AppointmentIteratorAdapter(new AnonymizingIterator(co, ctx, session.getUserId(), oids));
             } catch(final SQLException sqle) {
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
             } catch(final DBPoolingException dbpe) {
                 throw new OXException(dbpe);
             } catch(final OXObjectNotFoundException oxonfe) {
@@ -963,7 +964,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } catch(final OXException oxe) {
                 throw oxe;
             } catch(final Exception e) {
-                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(32));
+                throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(32));
             } finally {
                 if (readcon != null && close_connection) {
                     recColl.closeResultSet(rs);
@@ -981,7 +982,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     public SearchIterator<Appointment> searchAppointments(final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir, int[] cols) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         
         final Context ctx = Tools.getContext(session);
@@ -1011,7 +1012,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 if (folderPermission.isFolderVisible() && (folderPermission.canReadAllObjects() || folderPermission.canReadOwnObjects())) {
                     co.setRequestedFolder(folderId);
                 } else {
-                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_READ));
+                    throw new OXPermissionException(new OXCalendarException(OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ));
                 }
             } else {
                 // Missing folder attribute indicates a search over all calendar folders the user can see,
@@ -1023,7 +1024,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 } catch (DBPoolingException e) {
                     throw new OXException(e);
                 } catch (SQLException e) {
-                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
                 }
                 
 //                final int ara[] = new int[1];
@@ -1056,9 +1057,9 @@ public class CalendarSql implements AppointmentSQLInterface {
             
             return new AppointmentIteratorAdapter(new CachedCalendarIterator(cfo, co, ctx, session.getUserId()));
         } catch (SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } catch (AbstractOXException e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(1));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(1));
         } finally {
             if (stmt != null) {
                 recColl.closeResultSet(rs);
@@ -1073,7 +1074,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final Order orderDir, int cols[], final int from, final int to) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Search.checkPatternLength(searchobject);
         Connection readcon = null;
@@ -1099,7 +1100,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } catch (final DBPoolingException dbpe) {
                 throw new OXException(dbpe);
             } catch (final SearchIteratorException sie) {
-                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(1));
+                throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(sie, Integer.valueOf(1));
             }
             readcon = DBPool.pickup(ctx);
             final int userId;
@@ -1122,7 +1123,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             close_connection = false;
             return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch(final OXObjectNotFoundException oxonfe) {
@@ -1133,7 +1134,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             throw oxe;
         } catch(final Exception e) {
             LOG.error(e.getMessage(), e); // Unfortunately the nested exception looses its stack trace.
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, I(33));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, I(33));
         } finally {
             if (close_connection) {
                 recColl.closeResultSet(rs);
@@ -1152,7 +1153,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public SearchIterator<Appointment> getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
@@ -1183,7 +1184,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     prep = cimp.getResourceFreeBusy(uid, ctx, start, end, readcon);
                     break;
                 default:
-                    throw new OXCalendarException(OXCalendarException.Code.FREE_BUSY_UNSUPPOTED_TYPE, Integer.valueOf(type));
+                    throw OXCalendarExceptionCodes.FREE_BUSY_UNSUPPOTED_TYPE.create(Integer.valueOf(type));
             }
             rs = cimp.getResultSet(prep);
             //final SearchIterator si = new FreeBusyResults(rs, prep, ctx, readcon, start.getTime(), end.getTime());
@@ -1191,7 +1192,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             close_connection = false;
             return si;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch(final OXObjectNotFoundException oxonfe) {
@@ -1201,7 +1202,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(34));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(34));
         } finally {
             if (close_connection) {
                 recColl.closeResultSet(rs);
@@ -1215,7 +1216,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public SearchIterator<Appointment> getActiveAppointments(final int user_uid, final Date start, final Date end, int cols[]) throws OXException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection readcon = null;
         PreparedStatement prep = null;
@@ -1231,7 +1232,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             close_connection = false;
             return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch(final OXObjectNotFoundException oxonfe) {
@@ -1241,7 +1242,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(35));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(35));
         } finally {
             if (readcon != null && close_connection) {
                 DBPool.push(ctx, readcon);
@@ -1251,7 +1252,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public SearchIterator<Appointment> getModifiedAppointmentsBetween(final int userId, final Date start, final Date end, int[] cols, final Date since, final int orderBy, final Order orderDir) throws OXException, SQLException {
         if (session == null) {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+            throw new OXCalendarException(OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL);
         }
         Connection readcon = null;
         PreparedStatement prep = null;
@@ -1272,7 +1273,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXPermissionException oxpe) {
             throw oxpe;
         } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch(final OXCalendarException oxc) {
@@ -1280,7 +1281,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxe) {
             throw oxe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(36));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(36));
         } finally {
             if (close_connection) {
                 recColl.closeResultSet(rs);

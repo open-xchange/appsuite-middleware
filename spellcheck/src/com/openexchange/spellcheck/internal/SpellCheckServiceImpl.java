@@ -50,7 +50,6 @@
 package com.openexchange.spellcheck.internal;
 
 import java.util.Locale;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.spellcheck.SpellCheckException;
 import com.openexchange.spellcheck.SpellCheckService;

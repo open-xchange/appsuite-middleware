@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.search.internal.terms.AndTerm;
 import com.openexchange.search.internal.terms.NotTerm;
 import com.openexchange.search.internal.terms.OrTerm;

@@ -51,7 +51,6 @@ package com.openexchange.passwordchange.script.osgi;
 
 import static com.openexchange.passwordchange.script.services.SPWServiceRegistry.getServiceRegistry;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.impl.ScriptPasswordChange;

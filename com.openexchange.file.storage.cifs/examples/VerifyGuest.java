@@ -1,6 +1,5 @@
-import jcifs.netbios.NbtAddress;
-import jcifs.smb.*;
-import java.util.Date;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
 
 public class VerifyGuest {
 

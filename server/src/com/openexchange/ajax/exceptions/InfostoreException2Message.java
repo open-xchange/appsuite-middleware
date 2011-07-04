@@ -50,7 +50,6 @@
 package com.openexchange.ajax.exceptions;
 
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
 
 /**
  * TODO Error codes

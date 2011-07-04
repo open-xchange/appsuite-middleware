@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.paths.impl;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;

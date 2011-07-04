@@ -49,11 +49,11 @@
 
 package com.openexchange.subscribe;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategyTest;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategyTest;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImplTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * {@link UnitTests}

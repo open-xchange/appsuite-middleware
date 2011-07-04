@@ -53,7 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.OXCalendarException.Code;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.tools.sql.SearchStrings;
 
@@ -89,7 +89,7 @@ public class Search {
 
     private static void checkPatternLength(int minimumSearchCharacters, String pattern) throws OXCalendarException {
         if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
-            throw new OXCalendarException(Code.PATTERN_TOO_SHORT, I(minimumSearchCharacters));
+            throw OXCalendarExceptionCodes.PATTERN_TOO_SHORT.create(I(minimumSearchCharacters));
         }
     }
 }

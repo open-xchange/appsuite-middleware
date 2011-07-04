@@ -49,7 +49,7 @@
 
 package com.openexchange.contacts.ldap.exceptions;
 
-import com.openexchange.api2.OXException;
+import org.junit.experimental.categories.Category;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 

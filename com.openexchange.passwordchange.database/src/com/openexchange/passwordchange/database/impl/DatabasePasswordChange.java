@@ -64,7 +64,6 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceException;
 import com.openexchange.user.UserService;
 
 /**

@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 import java.util.SortedSet;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
@@ -61,6 +60,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tx.TransactionAware;
+import com.openexchange.tx.TransactionException;
 
 public interface AttachmentBase extends TransactionAware {
 

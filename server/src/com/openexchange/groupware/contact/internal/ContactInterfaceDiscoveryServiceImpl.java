@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact.internal;
 
 import java.util.List;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.groupware.contact.ContactInterface;

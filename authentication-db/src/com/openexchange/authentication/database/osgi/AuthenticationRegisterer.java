@@ -51,14 +51,12 @@ package com.openexchange.authentication.database.osgi;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.database.impl.DatabaseAuthentication;
 import com.openexchange.context.ContextService;

@@ -67,7 +67,6 @@ import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tx.TransactionException;
 
 public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface,
         ContactEventInterface {

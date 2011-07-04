@@ -1,4 +1,5 @@
-import jcifs.smb.*;
+import jcifs.smb.ACE;
+import jcifs.smb.SmbFile;
 
 public class GetSecurity {
 

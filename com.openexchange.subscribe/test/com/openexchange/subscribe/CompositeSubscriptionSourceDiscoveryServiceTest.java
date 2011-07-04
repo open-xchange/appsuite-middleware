@@ -51,9 +51,8 @@ package com.openexchange.subscribe;
 
 import static com.openexchange.subscribe.Asserts.assertDoesNotKnow;
 import static com.openexchange.subscribe.Asserts.assertKnows;
-import static com.openexchange.subscribe.Asserts.assertSources;
 import static com.openexchange.subscribe.Asserts.assertPriority;
-
+import static com.openexchange.subscribe.Asserts.assertSources;
 import java.util.List;
 import junit.framework.TestCase;
 

@@ -49,8 +49,8 @@
 
 package com.openexchange.file.storage.webdav;
 
+import org.apache.log4j.Category;
 import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 

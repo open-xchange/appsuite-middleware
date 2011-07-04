@@ -52,7 +52,6 @@ package com.openexchange.group.internal;
 import static com.openexchange.group.internal.SQLStrings.INSERT_GROUP;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,7 +59,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
@@ -68,8 +66,8 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.groupware.ldap.LdapException.Code;
+import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.server.impl.DBPool;
 
 /**

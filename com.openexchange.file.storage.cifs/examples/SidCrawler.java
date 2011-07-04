@@ -1,9 +1,7 @@
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.net.MalformedURLException;
 import java.io.IOException;
-
-import jcifs.smb.*;
+import java.net.MalformedURLException;
+import jcifs.smb.ACE;
+import jcifs.smb.SmbFile;
 
 public class SidCrawler {
 

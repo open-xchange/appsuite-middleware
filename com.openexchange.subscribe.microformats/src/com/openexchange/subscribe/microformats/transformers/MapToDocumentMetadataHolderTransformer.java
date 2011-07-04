@@ -49,6 +49,21 @@
 
 package com.openexchange.subscribe.microformats.transformers;
 
+import static com.openexchange.groupware.infostore.utils.Metadata.CATEGORIES_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.CREATION_DATE;
+import static com.openexchange.groupware.infostore.utils.Metadata.CREATION_DATE_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.DESCRIPTION_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.FILENAME_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.FILE_MIMETYPE_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.FILE_SIZE;
+import static com.openexchange.groupware.infostore.utils.Metadata.FILE_SIZE_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.LAST_MODIFIED;
+import static com.openexchange.groupware.infostore.utils.Metadata.LAST_MODIFIED_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.TITLE_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.URL_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.VERSION;
+import static com.openexchange.groupware.infostore.utils.Metadata.VERSION_COMMENT_LITERAL;
+import static com.openexchange.groupware.infostore.utils.Metadata.VERSION_LITERAL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,8 +76,6 @@ import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
-
-import static com.openexchange.groupware.infostore.utils.Metadata.*;
 
 
 /**

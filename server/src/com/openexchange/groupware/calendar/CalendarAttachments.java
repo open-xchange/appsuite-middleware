@@ -53,7 +53,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
@@ -91,7 +90,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, collection.getUniqueCalendarSessionName());
             if (!collection.getWritePermission(objectId, folderId, so, ctx)) {
-                throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_ATTACH_DETACH);
+                throw new OXCalendarException(OXCalendarExceptionCodes.NO_PERMISSIONS_TO_ATTACH_DETACH);
             }
         } catch (final OXObjectNotFoundException oxonfe) {
             if (LOG.isErrorEnabled()) {
@@ -101,7 +100,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
         } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 14);
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, 14);
         }
     }
     
@@ -114,7 +113,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, collection.getUniqueCalendarSessionName());
             if (!collection.getReadPermission(objectId, folderId, so, ctx)) {
-                throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_READ);
+                throw new OXCalendarException(OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ);
             }
         } catch (final OXObjectNotFoundException oxonfe) {
             if (LOG.isErrorEnabled()) {
@@ -122,7 +121,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             }
             throw oxonfe;
         } catch(final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 15);
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, 15);
         }
     }
     

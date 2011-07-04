@@ -53,9 +53,9 @@ import java.io.InputStream;
 import java.io.Serializable;
 import org.apache.jcs.JCS;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.exception.OXException;
 
 /**

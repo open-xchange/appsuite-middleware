@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.json;
 
 import java.util.Map;
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -57,7 +58,6 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-import junit.framework.TestCase;
 
 
 /**

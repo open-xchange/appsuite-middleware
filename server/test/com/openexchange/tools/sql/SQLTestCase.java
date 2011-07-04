@@ -64,14 +64,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.groupware.tx.ConfigurableDBProvider;
-import com.openexchange.tx.TransactionException;
 import junit.framework.TestCase;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.groupware.tx.ConfigurableDBProvider;
 
 /**
  * {@link SQLTestCase}

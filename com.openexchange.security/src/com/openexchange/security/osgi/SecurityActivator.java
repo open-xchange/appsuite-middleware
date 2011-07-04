@@ -52,7 +52,6 @@ package com.openexchange.security.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.security.internal.BundleAccessSecurityServiceImpl;
 

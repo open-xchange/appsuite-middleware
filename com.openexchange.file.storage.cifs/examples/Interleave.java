@@ -1,4 +1,4 @@
-import jcifs.smb.*;
+import jcifs.smb.SmbFileOutputStream;
 
 public class Interleave {
 

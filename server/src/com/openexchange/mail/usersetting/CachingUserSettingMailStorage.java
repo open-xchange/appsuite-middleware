@@ -62,7 +62,6 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;

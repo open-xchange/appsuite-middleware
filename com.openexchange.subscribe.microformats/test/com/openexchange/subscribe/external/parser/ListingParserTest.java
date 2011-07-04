@@ -50,11 +50,11 @@
 package com.openexchange.subscribe.external.parser;
 
 import java.util.List;
+import junit.framework.TestCase;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFactory;
-import junit.framework.TestCase;
 
 
 /**

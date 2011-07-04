@@ -50,7 +50,6 @@
 package com.openexchange.groupware.calendar;
 
 import java.util.Date;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;

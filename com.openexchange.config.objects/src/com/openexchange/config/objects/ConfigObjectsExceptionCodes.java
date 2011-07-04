@@ -49,8 +49,8 @@
 
 package com.openexchange.config.objects;
 
-import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.config.objects.exception.ConfigObjectsExceptionFactory;
+import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**

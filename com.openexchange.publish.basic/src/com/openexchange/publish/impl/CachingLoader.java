@@ -52,7 +52,6 @@ package com.openexchange.publish.impl;
 import java.io.Serializable;
 import java.util.Collection;
 import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.publish.Publication;

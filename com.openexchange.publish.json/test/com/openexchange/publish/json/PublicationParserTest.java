@@ -50,6 +50,7 @@
 package com.openexchange.publish.json;
 
 import java.util.Map;
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -58,7 +59,6 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import junit.framework.TestCase;
 
 
 /**

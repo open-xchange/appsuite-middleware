@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.dataRetrieval.config;
 
-import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 
 

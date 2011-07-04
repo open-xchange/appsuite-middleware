@@ -1,5 +1,5 @@
-import java.net.*;
-import java.io.*;
+import java.io.InputStream;
+import java.net.URL;
 
 public class UrlReader extends Thread {
 

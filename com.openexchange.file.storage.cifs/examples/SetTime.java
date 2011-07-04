@@ -1,5 +1,4 @@
 import jcifs.smb.SmbFile;
-import jcifs.smb.SmbException;
 
 public class SetTime {
 

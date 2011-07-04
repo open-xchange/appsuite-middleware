@@ -52,7 +52,6 @@ package com.openexchange.sql.grammar;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class INSERT extends ModifyCommand {

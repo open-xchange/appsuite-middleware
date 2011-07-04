@@ -49,7 +49,15 @@
 
 package com.openexchange.groupware.update.internal;
 
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.*;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.ALREADY_LOCKED_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.DATABASE_DOWN_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.LOCK_FAILED_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.MISSING_VERSION_ENTRY_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.MULTIPLE_VERSION_ENTRY_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.UNLOCK_FAILED_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.UPDATE_CONFLICT_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.WRONG_ROW_COUNT_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.SchemaException;

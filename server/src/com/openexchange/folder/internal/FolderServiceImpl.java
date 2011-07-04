@@ -49,7 +49,6 @@
 
 package com.openexchange.folder.internal;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.folder.FolderException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.FolderObject;

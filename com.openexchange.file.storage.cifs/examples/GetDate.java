@@ -1,7 +1,7 @@
-import java.util.Date;
-import jcifs.smb.SmbFile;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import jcifs.smb.SmbFile;
 
 public class GetDate {
 

@@ -60,6 +60,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -110,13 +111,13 @@ public class UpdateFolderIdInReminder implements UpdateTask {
             try {
                 stmt = writecon.createStatement();
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }
             if (stmt != null) {
                 try {
                     stmt.executeUpdate(DELETE_ZERO_REMINDERS);
                 } catch (final SQLException ex) {
-                    throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                    throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
                 }
             }
             final ArrayList update = new ArrayList(16);
@@ -153,7 +154,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     }
                 }
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }
             
             try {
@@ -171,7 +172,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     }
                 }
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }            
             
             try {
@@ -189,7 +190,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     pst3.executeBatch();
                 }
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }
             try {
                 if (delete.size() > 0)  {
@@ -205,7 +206,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     pst4.executeBatch();
                 }
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }
             
             try {
@@ -274,7 +275,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     }
                 }
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }
         } finally {
             collection.closeResultSet(rs);

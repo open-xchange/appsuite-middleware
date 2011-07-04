@@ -60,9 +60,9 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionContext;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 
 /**
  * {@link HttpSessionWrapper} - A wrapper class for {@link HttpSession}.

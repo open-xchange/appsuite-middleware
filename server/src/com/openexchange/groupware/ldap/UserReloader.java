@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
-import com.openexchange.caching.CacheException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**

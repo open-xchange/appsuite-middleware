@@ -58,7 +58,6 @@ import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
-import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 
 /**

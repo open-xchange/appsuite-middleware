@@ -2,10 +2,7 @@ package com.openexchange.ajax.request;
 
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
-
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;

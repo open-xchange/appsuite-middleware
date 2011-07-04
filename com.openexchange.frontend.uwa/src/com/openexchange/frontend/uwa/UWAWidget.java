@@ -49,6 +49,7 @@
 
 package com.openexchange.frontend.uwa;
 
+import static com.openexchange.java.Autoboxing.a2b;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -57,7 +58,6 @@ import java.util.List;
 import com.openexchange.modules.model.AbstractModel;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Metadata;
-import static com.openexchange.java.Autoboxing.*;
 /**
  * {@link UWAWidget}
  * 

@@ -1,6 +1,5 @@
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
-import java.io.FileInputStream;
 
 public class GrowWrite {
 

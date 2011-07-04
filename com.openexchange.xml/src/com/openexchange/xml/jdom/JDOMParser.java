@@ -50,7 +50,6 @@ package com.openexchange.xml.jdom;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.jdom.Document;
 import org.jdom.JDOMException;
 

@@ -52,7 +52,6 @@ package com.openexchange.groupware.tx;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
 

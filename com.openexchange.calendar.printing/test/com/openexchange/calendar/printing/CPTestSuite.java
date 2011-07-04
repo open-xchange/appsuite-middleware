@@ -49,11 +49,11 @@
 
 package com.openexchange.calendar.printing;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import com.openexchange.calendar.printing.blocks.MonthPartitioningTest;
 import com.openexchange.calendar.printing.blocks.WeekPartitioningTest;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**

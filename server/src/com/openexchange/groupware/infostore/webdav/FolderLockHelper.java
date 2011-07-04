@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLock;
 import com.openexchange.groupware.impl.FolderLockManager;

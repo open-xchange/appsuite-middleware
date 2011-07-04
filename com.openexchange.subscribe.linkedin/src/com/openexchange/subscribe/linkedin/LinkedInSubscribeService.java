@@ -57,12 +57,12 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.linkedin.osgi.Activator;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.subscribe.linkedin.osgi.Activator;
 
 
 /**

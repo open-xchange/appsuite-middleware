@@ -48,12 +48,11 @@
  */
 package com.openexchange.groupware.settings.extensions.osgi;
 
-import com.openexchange.groupware.settings.extensions.ServicePublisher;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.BundleContext;
-
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.groupware.settings.extensions.ServicePublisher;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

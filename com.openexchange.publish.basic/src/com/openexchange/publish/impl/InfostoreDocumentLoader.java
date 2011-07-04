@@ -52,7 +52,6 @@ package com.openexchange.publish.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;

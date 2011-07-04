@@ -52,11 +52,11 @@ package com.openexchange.tools.file.internal;
 import java.net.URI;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.external.OXException;
 import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaOXException;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
+import com.openexchange.tools.file.external.QuotaOXException;
 
 public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
 

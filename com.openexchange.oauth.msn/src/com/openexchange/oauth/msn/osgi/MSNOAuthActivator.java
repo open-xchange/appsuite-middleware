@@ -55,9 +55,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.msn.OAuthServiceMetaDataMSNImpl;
 import com.openexchange.oauth.msn.MSNService;
 import com.openexchange.oauth.msn.MSNServiceImpl;
+import com.openexchange.oauth.msn.OAuthServiceMetaDataMSNImpl;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**

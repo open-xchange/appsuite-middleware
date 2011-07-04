@@ -49,9 +49,10 @@
 
 package com.openexchange.subscribe.json;
 
+import static com.openexchange.groupware.AbstractOXException.Category.CODE_ERROR;
+import static com.openexchange.groupware.AbstractOXException.Category.USER_INPUT;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
-import static com.openexchange.groupware.AbstractOXException.Category.*;
 
 
 /**

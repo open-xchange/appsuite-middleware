@@ -68,9 +68,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.ResourceFields;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.UserService;
 

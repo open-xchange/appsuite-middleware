@@ -50,11 +50,11 @@
 package com.openexchange.config.cascade.impl;
 
 import java.util.Map;
+import junit.framework.TestCase;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.tools.strings.BasicTypesStringParser;
-import junit.framework.TestCase;
 
 
 /**

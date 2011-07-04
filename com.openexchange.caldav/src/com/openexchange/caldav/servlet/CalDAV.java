@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.caldav.servlet.CaldavPerformer.Action;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
@@ -63,7 +64,6 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
-import com.openexchange.caldav.servlet.CaldavPerformer.Action;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer

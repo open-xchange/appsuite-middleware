@@ -65,7 +65,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
-import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;

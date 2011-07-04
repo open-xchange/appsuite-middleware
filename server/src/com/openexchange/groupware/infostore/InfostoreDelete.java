@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
-import com.openexchange.api2.OXException;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;

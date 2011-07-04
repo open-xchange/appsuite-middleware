@@ -50,9 +50,7 @@
 package com.openexchange.voipnow.json.actions;
 
 import java.math.BigInteger;
-
 import javax.xml.ws.Holder;
-
 import com._4psa.extension._2_5_1.ExtensionInterface;
 import com._4psa.extension._2_5_1.ExtensionPort;
 import com._4psa.extensionmessages_xsd._2_5.GetExtensionDetailsRequest;

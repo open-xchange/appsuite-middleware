@@ -53,7 +53,6 @@ import java.text.Collator;
 import java.text.RuleBasedCollator;
 import java.util.Comparator;
 import java.util.Locale;
-
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 

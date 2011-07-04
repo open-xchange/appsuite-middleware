@@ -69,7 +69,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -84,6 +83,7 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.CalendarObject;
@@ -93,7 +93,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
@@ -244,7 +243,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                                 LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));
                             }
                             throw new OXCalendarException(
-                                OXCalendarException.Code.UNKNOWN_RECURRENCE_POSITION,
+                                OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION,
                                 Integer.valueOf(recurrencePosition));
                         }
                         final RecurringResultInterface result = recuResults.getRecurringResult(0);

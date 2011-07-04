@@ -1,4 +1,4 @@
-import jcifs.smb.*;
+import jcifs.smb.SID;
 
 public class SidLookup {
 

@@ -52,7 +52,6 @@ package com.openexchange.ajax.parser;
 import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
 

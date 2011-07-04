@@ -51,7 +51,6 @@ package com.openexchange.webdav.protocol.helpers;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;

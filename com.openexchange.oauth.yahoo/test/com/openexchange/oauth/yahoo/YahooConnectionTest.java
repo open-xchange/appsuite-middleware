@@ -49,15 +49,12 @@
 
 package com.openexchange.oauth.yahoo;
 
-import java.util.HashMap;
 import java.util.List;
+import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthException;
 import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
-import junit.framework.TestCase;
 
 
 /**

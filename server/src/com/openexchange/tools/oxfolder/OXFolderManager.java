@@ -51,7 +51,6 @@ package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;

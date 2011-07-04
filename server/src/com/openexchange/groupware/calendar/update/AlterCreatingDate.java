@@ -56,6 +56,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -87,13 +88,13 @@ public class AlterCreatingDate implements UpdateTask {
             try {
                 stmt = writecon.createStatement();
             } catch (final SQLException ex) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }
             if (stmt != null) {
                 try {
                     stmt.executeUpdate(UPDATE_PRG_DATES);
                 } catch (final SQLException ex) {
-                    throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
+                    throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
                 }
             }
         } finally {

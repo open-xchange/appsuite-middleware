@@ -50,7 +50,6 @@
 package com.openexchange.voipnow.json.actions;
 
 import javax.xml.ws.Holder;
-
 import com._4psa.headerdata_xsd._2_5.ServerInfo;
 import com._4psa.pbx._2_5_1.PBXInterface;
 import com._4psa.pbx._2_5_1.PBXPort;

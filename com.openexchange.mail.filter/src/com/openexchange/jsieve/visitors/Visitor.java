@@ -50,7 +50,6 @@ package com.openexchange.jsieve.visitors;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.ASTargument;
 import org.apache.jsieve.parser.generated.ASTarguments;

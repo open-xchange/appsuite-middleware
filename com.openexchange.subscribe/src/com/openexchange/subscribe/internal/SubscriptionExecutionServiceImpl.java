@@ -49,12 +49,12 @@
 
 package com.openexchange.subscribe.internal;
 
+import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURCE;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,11 +65,10 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURCE;
 
 /**
  * {@link SubscriptionExecutionServiceImpl}

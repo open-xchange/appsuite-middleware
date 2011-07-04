@@ -54,13 +54,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import junit.framework.TestCase;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.microformats.datasources.SimMicroformatSource;
 import com.openexchange.subscribe.microformats.parser.SimOXMFParser;
 import com.openexchange.subscribe.microformats.parser.SimOXMFParserFactory;
 import com.openexchange.subscribe.microformats.transformers.SimMapTransformer;
-import junit.framework.TestCase;
 
 
 /**

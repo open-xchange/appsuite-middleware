@@ -49,15 +49,15 @@
 
 package com.openexchange.eav;
 
-import java.util.Map;
-import java.util.TreeMap;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 /**
  * {@link EAVType}

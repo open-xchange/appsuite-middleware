@@ -50,12 +50,9 @@
 package com.openexchange.group.servlet.osgi;
 
 import static com.openexchange.group.servlet.services.GroupRequestServiceRegistry.getServiceRegistry;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.servlet.preferences.Module;

@@ -52,7 +52,6 @@ package com.openexchange.secret.recovery.json.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;

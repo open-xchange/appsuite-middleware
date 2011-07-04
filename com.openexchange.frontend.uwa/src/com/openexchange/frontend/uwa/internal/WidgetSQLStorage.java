@@ -54,11 +54,11 @@ import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.frontend.uwa.UWAWidget;
+import com.openexchange.frontend.uwa.UWAWidget.Field;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.AttributeHandler;
 import com.openexchange.modules.model.Metadata;
 import com.openexchange.modules.storage.sql.engines.UserScopedStorage;
-import static com.openexchange.frontend.uwa.UWAWidget.Field;
 
 /**
  * {@link WidgetSQLStorage}

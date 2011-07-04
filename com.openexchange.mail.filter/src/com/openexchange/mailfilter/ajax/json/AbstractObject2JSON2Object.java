@@ -53,7 +53,6 @@ import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**

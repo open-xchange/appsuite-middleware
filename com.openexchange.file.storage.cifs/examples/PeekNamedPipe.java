@@ -1,7 +1,6 @@
-import jcifs.smb.SmbNamedPipe;
-import java.io.OutputStream;
 import java.io.InputStream;
-import java.io.IOException;
+import java.io.OutputStream;
+import jcifs.smb.SmbNamedPipe;
 
 public class PeekNamedPipe {
 

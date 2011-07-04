@@ -1,6 +1,7 @@
-import java.io.*;
-import jcifs.smb.*;
-import jcifs.util.*;
+import java.io.FileInputStream;
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileOutputStream;
 
 public class TestUnicode {
     static SmbFile dir;

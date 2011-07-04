@@ -49,7 +49,8 @@
 
 package com.openexchange.templating;
 
-import static com.openexchange.templating.TemplateErrorMessage.*;
+import static com.openexchange.templating.TemplateErrorMessage.IOException;
+import static com.openexchange.templating.TemplateErrorMessage.TemplateNotFound;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -66,14 +67,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;

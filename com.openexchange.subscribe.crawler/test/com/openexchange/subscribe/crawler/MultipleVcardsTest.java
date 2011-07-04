@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.TimeZone;
+import junit.framework.TestCase;
 import org.ho.yaml.Yaml;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
@@ -63,7 +64,6 @@ import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import junit.framework.TestCase;
 
 /**
  * {@link MultipleVcardsTest}

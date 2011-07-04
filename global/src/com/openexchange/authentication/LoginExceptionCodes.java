@@ -49,7 +49,20 @@
 
 package com.openexchange.authentication;
 
-import static com.openexchange.authentication.LoginExceptionMessages.*;
+import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.CLASS_NOT_FOUND_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENIED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.DATABASE_DOWN_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.INSTANTIATION_FAILED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.MISSING_PROPERTY_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_HTTP_AUTHORIZATION_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_ACTIVE_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_FOUND_MSG;
 import com.openexchange.authentication.exception.LoginExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;

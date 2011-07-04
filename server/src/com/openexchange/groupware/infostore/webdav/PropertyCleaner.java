@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore.webdav;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.groupware.EnumComponent;
@@ -62,7 +61,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tx.TransactionException;
 
 public class PropertyCleaner implements FolderEventInterface, InfostoreEventInterface {
 	

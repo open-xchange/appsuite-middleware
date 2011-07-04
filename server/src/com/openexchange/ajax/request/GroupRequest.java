@@ -53,7 +53,6 @@ import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,9 +65,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.group.Group;
+import com.openexchange.group.Group.Field;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.group.Group.Field;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;

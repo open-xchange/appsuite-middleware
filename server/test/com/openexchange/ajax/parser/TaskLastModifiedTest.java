@@ -51,10 +51,10 @@ package com.openexchange.ajax.parser;
 
 import java.util.Date;
 import java.util.TimeZone;
+import junit.framework.TestCase;
 import org.json.JSONObject;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.groupware.tasks.Task;
-import junit.framework.TestCase;
 
 /**
  * {@link TaskLastModifiedTest}

@@ -1,4 +1,4 @@
-import java.net.*;
+import java.net.URL;
 
 public class HttpURL {
 

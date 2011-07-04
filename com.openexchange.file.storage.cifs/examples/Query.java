@@ -1,6 +1,4 @@
-import jcifs.netbios.NbtAddress;
 import jcifs.UniAddress;
-import java.net.InetAddress;
 
 public class Query {
 

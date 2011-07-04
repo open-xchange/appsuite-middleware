@@ -52,7 +52,6 @@ package com.openexchange.contacts.ldap.contacts;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import com.openexchange.api2.OXException;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;

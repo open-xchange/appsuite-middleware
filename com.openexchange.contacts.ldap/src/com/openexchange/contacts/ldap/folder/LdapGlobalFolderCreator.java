@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.api2.OXException;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.container.FolderObject;

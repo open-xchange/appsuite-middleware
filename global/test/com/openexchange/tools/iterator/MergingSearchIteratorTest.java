@@ -50,8 +50,8 @@
 package com.openexchange.tools.iterator;
 
 import java.util.Comparator;
-import com.openexchange.groupware.AbstractOXException;
 import junit.framework.TestCase;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link MergingSearchIteratorTest}

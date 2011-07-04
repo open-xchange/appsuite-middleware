@@ -52,7 +52,6 @@ package com.openexchange.audit.logging;
 import java.util.logging.Filter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-
 import com.openexchange.audit.impl.AuditEventHandler;
 
 /**

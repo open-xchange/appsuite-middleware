@@ -49,7 +49,24 @@
 
 package com.openexchange.groupware.attach;
 
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.*;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.ATTACHMENT_NOT_FOUND_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.ATTACHMENT_WITH_FILEID_NOT_FOUND_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.ATTACH_FAILED_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.DELETE_FAILED_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.DETACH_FAILED_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.FILESTORE_DOWN_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.FILESTORE_WRITE_FAILED_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.FILE_DELETE_FAILED_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.FILE_MISSING_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.GENERATING_ID_FAILED_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.INVALID_CHARACTERS_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.INVALID_REQUEST_PARAMETER_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.READ_FAILED_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.SAVE_FAILED_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.SEARCH_PROBLEM_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.SERVICE_CONFLICT_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.UNDONE_FAILED_MSG;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.impl.AttachmentExceptionFactory;

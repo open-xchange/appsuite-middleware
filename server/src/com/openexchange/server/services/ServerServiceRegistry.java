@@ -52,8 +52,8 @@ package com.openexchange.server.services;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link ServerServiceRegistry} - A registry for services needed by server

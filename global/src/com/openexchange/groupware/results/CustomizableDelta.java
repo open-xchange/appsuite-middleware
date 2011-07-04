@@ -50,8 +50,8 @@
 package com.openexchange.groupware.results;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.iterator.Customizer;
 import com.openexchange.tools.iterator.CustomizableSearchIterator;
+import com.openexchange.tools.iterator.Customizer;
 import com.openexchange.tools.iterator.SearchIterator;
 
 

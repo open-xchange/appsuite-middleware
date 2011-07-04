@@ -66,11 +66,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.management.ManagementService;
 
 /**
  * {@link Activator}

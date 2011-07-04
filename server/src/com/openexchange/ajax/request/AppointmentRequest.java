@@ -53,7 +53,6 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,14 +61,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.DateOrderObject;
 import com.openexchange.ajax.fields.AppointmentFields;
@@ -87,13 +84,13 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -479,7 +476,7 @@ public class AppointmentRequest extends CalendarRequest {
 
             return jsonResponseArray;
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
             if (it != null) {
                 it.close();
@@ -512,7 +509,7 @@ public class AppointmentRequest extends CalendarRequest {
                 timestamp = appointmentObj.getLastModified();
             }
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         }
 
         return new JSONArray();
@@ -885,7 +882,7 @@ public class AppointmentRequest extends CalendarRequest {
 
             return jsonResponseArray;
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
             if (it != null) {
                 it.close();
@@ -929,7 +926,7 @@ public class AppointmentRequest extends CalendarRequest {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));
                     }
-                    throw new OXCalendarException(OXCalendarException.Code.UNKNOWN_RECURRENCE_POSITION, Integer.valueOf(recurrencePosition));
+                    throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
                 }
                 final RecurringResultInterface result = recuResults.getRecurringResult(0);
                 appointmentobject.setStartDate(new Date(result.getStart()));
@@ -945,7 +942,7 @@ public class AppointmentRequest extends CalendarRequest {
 
             return jsonResponseObj;
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         }
     }
 
@@ -1173,7 +1170,7 @@ public class AppointmentRequest extends CalendarRequest {
 
             return jsonResponseArray;
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
             if (searchIterator != null) {
                 searchIterator.close();
@@ -1243,7 +1240,7 @@ public class AppointmentRequest extends CalendarRequest {
         try {
             appointmentObj = appointmentSql.getObjectById(id, inFolder);
         } catch (final SQLException exc) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, exc, new Object[0]);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(exc, new Object[0]);
         }
 
         appointmentObj.removeObjectID();

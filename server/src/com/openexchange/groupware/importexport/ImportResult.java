@@ -52,7 +52,6 @@ package com.openexchange.groupware.importexport;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.api2.OXException;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.AbstractOXException;
 

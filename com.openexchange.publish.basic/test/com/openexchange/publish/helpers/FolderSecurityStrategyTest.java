@@ -49,9 +49,9 @@
 
 package com.openexchange.publish.helpers;
 
+import junit.framework.TestCase;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.impl.OCLPermission;
-import junit.framework.TestCase;
 
 
 /**

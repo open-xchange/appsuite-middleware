@@ -49,16 +49,15 @@
 
 package com.openexchange.datatypes.genericonf.json;
 
+import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.json.JSONAssertion;
-import junit.framework.TestCase;
-
-import static com.openexchange.json.JSONAssertion.assertValidates;
 
 /**
  * {@link FormContentWriterTest}

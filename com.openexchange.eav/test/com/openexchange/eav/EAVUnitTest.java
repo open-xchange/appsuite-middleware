@@ -49,8 +49,6 @@
 
 package com.openexchange.eav;
 
-import static com.openexchange.eav.EAVDSL.*;
-import junit.framework.TestCase;
 
 /**
  * {@link EAVUnitTest}

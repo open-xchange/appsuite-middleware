@@ -1,11 +1,9 @@
-import jcifs.smb.SmbFile;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Random;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbAuthException;
-
-
-import java.util.Random;
-import java.net.MalformedURLException;
-import java.io.IOException;
+import jcifs.smb.SmbFile;
 
 public class SmbThreadTest extends Thread {
 

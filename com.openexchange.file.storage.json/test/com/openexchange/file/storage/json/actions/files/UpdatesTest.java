@@ -49,15 +49,15 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.time.TimeTools.D;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Results;
-import static com.openexchange.time.TimeTools.D;
 
 /**
  * {@link UpdatesTest}

@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;

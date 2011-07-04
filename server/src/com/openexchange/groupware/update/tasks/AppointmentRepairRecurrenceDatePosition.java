@@ -60,14 +60,13 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.OXCalendarException.Code;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.contexts.Context;
@@ -197,7 +196,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
                     Integer.valueOf(id));
             }
         } catch (final SQLException e) {
-            throw new OXCalendarException(Code.CALENDAR_SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
         }
@@ -240,11 +239,11 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         recColl.fillDAO(appointment);
         final RecurringResultsInterface rrs = recColl.calculateRecurring(appointment, 0, 0, recurrencePosition, recColl.MAX_OCCURRENCESE, true);
         if (null == rrs) {
-            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
+            throw new OXCalendarException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
         }
         final RecurringResultInterface rs = rrs.getRecurringResult(0);
         if (null == rs) {
-            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
+            throw new OXCalendarException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
         }
         appointment.setRecurrenceDatePosition(new Date(rs.getNormalized()));
     }

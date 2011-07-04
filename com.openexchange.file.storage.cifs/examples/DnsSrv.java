@@ -1,6 +1,8 @@
-import java.util.*;
-import javax.naming.*;
-import javax.naming.directory.*;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 
 public class DnsSrv {
 

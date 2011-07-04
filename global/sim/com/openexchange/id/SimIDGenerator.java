@@ -50,8 +50,6 @@
 package com.openexchange.id;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.id.IDException;
-import com.openexchange.id.IDGeneratorService;
 
 
 /**

@@ -64,7 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.OXCalendarException.Code;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.contexts.Context;
 
@@ -113,7 +113,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
 //        } catch (final DataTruncation e) {
 //            throw parseTruncatedE(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -146,7 +146,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(participant);
             }
         } catch (SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -172,15 +172,15 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             int[] rowss = stmt.executeBatch();
             if (rowss.length != participants.length) {
-                throw new OXCalendarException(Code.WRONG_ROW_COUNT, I(participants.length), I(rowss.length));
+                throw OXCalendarExceptionCodes.WRONG_ROW_COUNT.create(I(participants.length), I(rowss.length));
             }
             for (int rows : rowss) {
                 if (1 != rows) {
-                    throw new OXCalendarException(Code.WRONG_ROW_COUNT, I(1), I(rows));
+                    throw OXCalendarExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(rows));
                 }
             }
         } catch (SQLException e) {
-            throw new OXCalendarException(Code.SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(stmt);
         }

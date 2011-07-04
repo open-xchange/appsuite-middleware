@@ -51,8 +51,8 @@ package com.openexchange.publish.microformats;
 
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_LINK;
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_PROTECTED;
-import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_TEMPLATE;
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_SITE;
+import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_TEMPLATE;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

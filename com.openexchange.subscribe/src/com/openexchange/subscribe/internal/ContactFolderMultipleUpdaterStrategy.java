@@ -61,17 +61,16 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.FinalContactInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.TargetFolderSession;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.OverridingContactInterface;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.subscribe.TargetFolderSession;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**

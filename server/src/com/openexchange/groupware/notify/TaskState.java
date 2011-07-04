@@ -62,7 +62,6 @@ import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**

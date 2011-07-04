@@ -1,6 +1,7 @@
-import java.io.*;
-import jcifs.smb.*;
-import java.util.*;
+import java.io.FileInputStream;
+import java.util.Properties;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
 
 class Worker extends Thread {
 

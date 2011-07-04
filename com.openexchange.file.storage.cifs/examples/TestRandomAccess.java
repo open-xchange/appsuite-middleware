@@ -1,4 +1,5 @@
-import jcifs.smb.*;
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
 
 public class TestRandomAccess {
 

@@ -49,10 +49,10 @@
 
 package com.openexchange.config.objects.exception;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.exceptions.Exceptions;
 import com.openexchange.config.objects.ConfigObjectsException;
 import com.openexchange.config.objects.ConfigObjectsExceptionCodes;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
 /**
  * {@link ConfigObjectsExceptionFactory} - Factory for creating {@link ConfigObjectsException}.

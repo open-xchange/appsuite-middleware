@@ -49,6 +49,7 @@
 
 package com.openexchange.api2;
 
+import com.openexchange.exception.Category;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
