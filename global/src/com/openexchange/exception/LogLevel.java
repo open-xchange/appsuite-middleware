@@ -83,6 +83,15 @@ public enum LogLevel {
     FATAL;
 
     /**
+     * Checks if this log level equals {@link #DEBUG}.
+     * 
+     * @return <code>true</code> if this log level equals {@link #DEBUG}; otherwise <code>false</code>
+     */
+    public boolean isDebug() {
+        return DEBUG.equals(this);
+    }
+
+    /**
      * The default comparator for {@link LogLevel}.
      */
     public static final Comparator<LogLevel> COMPARATOR = new Comparator<LogLevel>() {
