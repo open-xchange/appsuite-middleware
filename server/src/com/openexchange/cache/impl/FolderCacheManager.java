@@ -400,7 +400,7 @@ public final class FolderCacheManager {
                             final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                             final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
                             globalCache.remove(cacheKey);
-                        } catch (final CacheException e) {
+                        } catch (final OXException e) {
                             LOG.warn(e.getMessage(), e);
                         }
                     }
@@ -417,8 +417,6 @@ public final class FolderCacheManager {
                 // Return null to indicate successful insertion
                 retval = null;
             }
-        } catch (final CacheException e) {
-            throw new OXException(e);
         } finally {
             cacheLock.unlock();
         }
@@ -489,7 +487,7 @@ public final class FolderCacheManager {
                             final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                             final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
                             globalCache.remove(cacheKey);
-                        } catch (final CacheException e) {
+                        } catch (final OXException e) {
                             LOG.warn(e.getMessage(), e);
                         }
                     }
@@ -513,8 +511,6 @@ public final class FolderCacheManager {
             if (null != cond) {
                 cond.signalAll();
             }
-        } catch (final CacheException e) {
-            throw new OXException(e);
         } finally {
             cacheLock.unlock();
         }
@@ -540,8 +536,6 @@ public final class FolderCacheManager {
                 if (!(tmp instanceof Condition)) {
                     folderCache.remove(cacheKey);
                 }
-            } catch (final CacheException e) {
-                throw new OXException(e);
             } finally {
                 cacheLock.unlock();
             }
@@ -553,7 +547,7 @@ public final class FolderCacheManager {
                 final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                 final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
                 globalCache.remove(cacheKey);
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.warn(e.getMessage(), e);
             }
         }
@@ -589,8 +583,6 @@ public final class FolderCacheManager {
                     folderCache.remove(cacheKey);
                 }
             }
-        } catch (final CacheException e) {
-            throw new OXException(e);
         } finally {
             cacheLock.unlock();
         }
@@ -603,7 +595,7 @@ public final class FolderCacheManager {
                     final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
                     globalCache.remove(cacheKey);
                 }
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.warn(e.getMessage(), e);
             }
         }
@@ -618,18 +610,14 @@ public final class FolderCacheManager {
         if (null == folderCache) {
             return;
         }
-        try {
-            folderCache.clear();
-        } catch (final CacheException e) {
-            throw new OXException(e);
-        }
+        folderCache.clear();
         // Dirty hack
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                 globalCache.clear();
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.warn(e.getMessage(), e);
             }
         }
@@ -639,9 +627,9 @@ public final class FolderCacheManager {
      * Returns default element attributes for this cache
      * 
      * @return default element attributes for this cache or <code>null</code>
-     * @throws CacheException If a caching error occurs
+     * @throws OXException If a caching error occurs
      */
-    public ElementAttributes getDefaultFolderObjectAttributes() throws CacheException {
+    public ElementAttributes getDefaultFolderObjectAttributes() throws OXException {
         if (null == folderCache) {
             return null;
         }
