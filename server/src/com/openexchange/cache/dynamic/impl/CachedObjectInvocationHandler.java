@@ -57,11 +57,10 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.dynamic.OXNoRefresh;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachedObjectInvocationHandler<T> implements InvocationHandler {
@@ -69,17 +68,17 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(
-        CachedObjectInvocationHandler.class);
- 
+    private static final Log LOG = LogFactory.getLog(CachedObjectInvocationHandler.class);
+
     private static final Method EQUALS;
 
     private T cached;
+
     private final OXObjectFactory<T> factory;
+
     private final String regionName;
 
-    public CachedObjectInvocationHandler(final OXObjectFactory<T> factory,
-        final String regionName) throws AbstractOXException {
+    public CachedObjectInvocationHandler(final OXObjectFactory<T> factory, final String regionName) throws OXException {
         this.factory = factory;
         this.regionName = regionName;
         refresh();
@@ -88,8 +87,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
     /**
      * {@inheritDoc}
      */
-    public final Object invoke(final Object object, final Method method,
-        final Object[] arguments) throws Throwable {
+    public final Object invoke(final Object object, final Method method, final Object[] arguments) throws Throwable {
         if (!method.isAnnotationPresent(OXNoRefresh.class) || null == cached) {
             refresh();
         }
@@ -101,27 +99,27 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
         return method.invoke(cached, arguments);
     }
 
-    private Cache getCache() throws CacheException {
-    	final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
-    	if (null == service) {
-    		return null;
-    	}
-    	return service.getCache(regionName);
+    private Cache getCache() throws OXException {
+        final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+        return service.getCache(regionName);
     }
 
     /**
-     * Checks if the object was removed from the cache and must be reloaded from
-     * the database.
-     * @throws AbstractOXException if loading or putting into cache fails.
+     * Checks if the object was removed from the cache and must be reloaded from the database.
+     * 
+     * @throws OXException if loading or putting into cache fails.
      */
-    private void refresh() throws AbstractOXException {
-    	final Cache cache = getCache();
-    	if (null == cache) {
-    		if (null == cached) {
-    			cached = factory.load();
-    		}
-    		return;
-    	}
+    private void refresh() throws OXException {
+        final Cache cache = getCache();
+        if (null == cache) {
+            if (null == cached) {
+                cached = factory.load();
+            }
+            return;
+        }
         final Lock lock = factory.getCacheLock();
         Condition cond = null;
         boolean load;
@@ -133,11 +131,8 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
                 // into cache.
                 load = true;
                 cond = lock.newCondition();
-                try {
+                {
                     cache.putSafe(factory.getKey(), (Serializable) cond);
-                } catch (final CacheException e) {
-                    throw new OXCachingException(OXCachingException.Code
-                        .FAILED_PUT, e);
                 }
             } else if (tmp instanceof Condition) {
                 // I have to wait for another thread to load the object.
@@ -148,8 +143,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
                     cached = (T) cache.get(factory.getKey());
                 } else {
                     // We have to load it, too.
-                    LOG.warn("Found 2 threads loading cached objects after 1 "
-                        + "second.");
+                    LOG.warn("Found 2 threads loading cached objects after 1 " + "second.");
                     load = true;
                 }
             } else {
@@ -170,9 +164,6 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
             try {
                 cond.signalAll();
                 cache.put(factory.getKey(), (Serializable) cached);
-            } catch (final CacheException e) {
-                throw new OXCachingException(OXCachingException.Code.FAILED_PUT,
-                    e);
             } finally {
                 lock.unlock();
             }
@@ -181,8 +172,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 
     static {
         try {
-            EQUALS = Object.class.getMethod("equals",
-                new Class[] { Object.class });
+            EQUALS = Object.class.getMethod("equals", new Class[] { Object.class });
         } catch (final SecurityException e) {
             throw new RuntimeException(e);
         } catch (final NoSuchMethodException e) {

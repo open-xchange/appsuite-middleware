@@ -58,7 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -898,7 +898,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @param userConfig The user configuration
      * @param ctx The context
      * @return A list of user-visible subfolders
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      * @throws OXException If an error occurs
      * @throws SQLException If a SQL error occurs
      * @throws SearchIteratorException If an iterator error occurs
@@ -961,11 +961,11 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * Returns a list of subfolder IDs. If <code>enforce</code> is set and list has not been already loaded, their IDs are going to be
      * loaded from storage. Otherwise a exception is thrown that no subfolder IDs are present in this folder object.
      */
-    public final List<Integer> getSubfolderIds(final boolean enforce, final Context ctx) throws DBPoolingException, SQLException, OXException {
+    public final List<Integer> getSubfolderIds(final boolean enforce, final Context ctx) throws OXException, SQLException, OXException {
         return getSubfolderIds(enforce, null, ctx);
     }
 
-    public final List<Integer> getSubfolderIds(final boolean enforce, final Connection readCon, final Context ctx) throws DBPoolingException, SQLException, OXException {
+    public final List<Integer> getSubfolderIds(final boolean enforce, final Connection readCon, final Context ctx) throws OXException, SQLException, OXException {
         if (!b_subfolderIds) {
             /*
              * Subfolder list not set, yet
@@ -1117,7 +1117,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         if (containsObjectID()) {
             try {
                 return OXFolderSQL.exists(getObjectID(), null, ctx);
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1130,7 +1130,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 }
                 setObjectID(fuid);
                 return true;
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1152,7 +1152,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     /**
      * @return <code>true</code> if given user has READ access to this folder, <code>false</code> otherwise
      */
-    public final boolean isVisible(final int userId, final UserConfiguration userConfig) throws DBPoolingException, SQLException {
+    public final boolean isVisible(final int userId, final UserConfiguration userConfig) throws OXException, SQLException {
         return (getEffectiveUserPermission(userId, userConfig).isFolderVisible());
     }
 
@@ -1160,7 +1160,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * This methods yields the effective OCL permission for the currently logged in user by determining the max. OCL permission which the
      * user has on folder and applying the user configuration profile.
      */
-    public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig) throws SQLException, DBPoolingException {
+    public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig) throws SQLException, OXException {
         return getEffectiveUserPermission(userId, userConfig, null);
     }
 
@@ -1168,7 +1168,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * This methods yields the effective OCL permission for the currently logged in user by determining the max. OCL permission which the
      * user has on folder and applying the user configuration profile.
      */
-    public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final Connection readConArg) throws SQLException, DBPoolingException {
+    public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final Connection readConArg) throws SQLException, OXException {
         final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), userConfig);
         final int[] idArr;
         {
@@ -1526,9 +1526,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The folder's permissions
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return OXFolderLoader.getFolderPermissions(folderId, ctx, readConArg);
     }
 
@@ -1541,9 +1541,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @param table Either folder permissions working or backup table name
      * @return The folder's permissions
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         return OXFolderLoader.getFolderPermissions(folderId, ctx, readConArg, table);
     }
 
@@ -1555,9 +1555,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return OXFolderLoader.getSubfolderIds(folderId, ctx, readConArg);
     }
 
@@ -1570,9 +1570,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @param table The folder's working or backup table name
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         return OXFolderLoader.getSubfolderIds(folderId, ctx, readConArg, table);
     }
 

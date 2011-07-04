@@ -60,7 +60,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -170,17 +170,9 @@ public final class OXFolderLoader {
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(
-                OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED,
-                e,
-                String.valueOf(folderId),
-                String.valueOf(ctx.getContextId()));
-        } catch (final DBPoolingException e) {
-            throw new OXFolderException(
-                OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED,
-                e,
-                String.valueOf(folderId),
-                String.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
+        } catch (final OXException e) {
+            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
         }
     }
 
@@ -192,9 +184,9 @@ public final class OXFolderLoader {
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The folder's permissions
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getFolderPermissions(folderId, ctx, readConArg, TABLE_OP);
     }
 
@@ -210,9 +202,9 @@ public final class OXFolderLoader {
      * @param table Either folder permissions working or backup table name
      * @return The folder's permissions
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -256,9 +248,9 @@ public final class OXFolderLoader {
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getSubfolderIdAndNames(folderId, ctx, readConArg, TABLE_OT);
     }
 
@@ -273,9 +265,9 @@ public final class OXFolderLoader {
      * @param table The folder's working or backup table name
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -307,9 +299,9 @@ public final class OXFolderLoader {
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getSubfolderIds(folderId, ctx, readConArg, TABLE_OT);
     }
 
@@ -324,9 +316,9 @@ public final class OXFolderLoader {
      * @param table The folder's working or backup table name
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -358,9 +350,9 @@ public final class OXFolderLoader {
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static TIntArrayList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static TIntArrayList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getSubfolderInts(folderId, ctx, readConArg, TABLE_OT);
     }
 
@@ -373,9 +365,9 @@ public final class OXFolderLoader {
      * @param table The folder's working or backup table name
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static TIntArrayList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static TIntArrayList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;

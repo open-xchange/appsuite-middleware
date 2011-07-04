@@ -68,7 +68,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -268,8 +267,6 @@ public final class FolderCacheManager {
             return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, objectId)).clone();
         } catch (final OXException e) {
             throw e;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         }
     }
 
