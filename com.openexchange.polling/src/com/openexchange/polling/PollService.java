@@ -67,5 +67,5 @@ public interface PollService {
     
     public void deletePoll(int id, int cid);
     
-    
+    // Blupp
 }

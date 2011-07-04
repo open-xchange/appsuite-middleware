@@ -68,6 +68,10 @@ public class Answer {
         this.answers = answers;
     }
     
+    public void newMethod() {
+    	
+    }
+    
 
     
 }
