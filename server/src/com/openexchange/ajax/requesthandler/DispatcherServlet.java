@@ -82,6 +82,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -170,7 +171,7 @@ public class DispatcherServlet extends SessionServlet {
         AJAXRequestData request = null; 
         try {
             if (action == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
             }
             final ServerSession session = getSessionObject(req);
 

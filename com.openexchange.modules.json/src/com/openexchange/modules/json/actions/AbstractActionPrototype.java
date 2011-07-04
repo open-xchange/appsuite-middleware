@@ -61,6 +61,7 @@ import com.openexchange.modules.json.ModelParser;
 import com.openexchange.modules.json.ModelWriter;
 import com.openexchange.modules.model.Model;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -86,7 +87,7 @@ public abstract class AbstractActionPrototype<T extends Model<T>> implements AJA
         try {
             return perform(req);
         } catch (JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e.getMessage(), e);
+            throw AjaxExceptionCodes.JSONError.create( e.getMessage(), e);
         }
     }
 

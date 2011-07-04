@@ -62,6 +62,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -120,7 +121,7 @@ public final class ClearAction extends AbstractFolderAction {
              */
             return new AJAXRequestResult(responseArray).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

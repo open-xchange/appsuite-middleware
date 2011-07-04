@@ -62,6 +62,7 @@ import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -120,7 +121,7 @@ public final class DeleteAction extends AbstractMailAccountAction {
              */
             return new AJAXRequestResult(responseArray);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
     

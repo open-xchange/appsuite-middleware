@@ -61,6 +61,7 @@ import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -109,7 +110,7 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
             final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
             return new AJAXRequestResult(actionValidateTree0(mailAccess, session));
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

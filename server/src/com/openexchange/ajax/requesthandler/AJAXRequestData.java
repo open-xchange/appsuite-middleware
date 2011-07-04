@@ -68,6 +68,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.strings.StringParser;
 
 /**
@@ -328,7 +329,7 @@ public class AJAXRequestData {
     public void require(final String...mandatoryParameters) throws AbstractOXException {
         List<String> missingParameters = getMissingParameters(mandatoryParameters);
         if(!missingParameters.isEmpty()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, missingParameters.toString());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( missingParameters.toString());
         }
     }
     

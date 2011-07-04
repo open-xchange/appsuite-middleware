@@ -81,6 +81,7 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -163,7 +164,7 @@ public class Multiple extends SessionServlet {
         if (jsonObj.has(MODULE)) {
             module = DataParser.checkString(jsonObj, MODULE);
         } else {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MODULE);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MODULE);
         }
 
         action = jsonObj.optString(PARAMETER_ACTION);
@@ -319,7 +320,7 @@ public class Multiple extends SessionServlet {
                     final AttachmentRequest request = new AttachmentRequest(session, jsonWriter);
                     request.action(action, new JSONSimpleRequest(jsonObj));
             } else {
-                final AjaxException ajaxException = new AjaxException(AjaxException.Code.UNKNOWN_MODULE, module);
+                final AjaxException ajaxException = AjaxExceptionCodes.UNKNOWN_MODULE.create( module);
                 LOG.error(ajaxException.getMessage(), ajaxException);
                 jsonWriter.object();
                 ResponseWriter.writeException(ajaxException, jsonWriter);

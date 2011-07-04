@@ -74,6 +74,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -119,7 +120,7 @@ public class GroupRequest {
                 /*
                  * No appropriate handler
                  */
-                throw new AjaxException(AjaxException.Code.UnknownAction, action);
+                throw AjaxExceptionCodes.UnknownAction.create( action);
             }
             /*
              * ... and delegate to manage request

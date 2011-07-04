@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.services.ServiceRegistry;
@@ -102,7 +103,7 @@ public final class GetAttributeAction extends AbstractUserAction {
             json.put("value", value);
             return new AJAXRequestResult(json);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

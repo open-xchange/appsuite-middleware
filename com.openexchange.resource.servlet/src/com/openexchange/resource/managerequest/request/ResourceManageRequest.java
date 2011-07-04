@@ -71,6 +71,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.UserService;
 
 /**
@@ -107,7 +108,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
             return actionDelete(jsonObject, user, ctx);
         } else {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 

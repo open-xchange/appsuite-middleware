@@ -89,6 +89,7 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -153,7 +154,7 @@ public final class ReminderRequest {
         } else if (action.equalsIgnoreCase("remindAgain")) {
             return actionRemindAgain(jsonObject);
         } else {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 

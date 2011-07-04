@@ -72,6 +72,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -123,7 +124,7 @@ public class ResourceRequest {
                 /*
                  * No appropriate handler
                  */
-                throw new AjaxException(AjaxException.Code.UnknownAction, action);
+                throw AjaxExceptionCodes.UnknownAction.create( action);
             }
             /*
              * ... and delegate to manage request

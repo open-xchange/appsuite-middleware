@@ -80,6 +80,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 /**
@@ -154,7 +155,7 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 
 			return new AJAXRequestResult(calls);
 		} catch (JSONException e) {
-			throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+			throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
 		} catch (DatatypeConfigurationException e) {
 			throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
 		}
@@ -233,7 +234,7 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 		// Set disposion
 		List<String> allowedDispositions = Arrays.asList("answered","busy","failed","no answer","unknown","not allowed");
 		if(! allowedDispositions.contains(disposion.toLowerCase()))
-			throw new AjaxException(AjaxException.Code.InvalidParameterValue, "disposion", disposion);
+			throw AjaxExceptionCodes.InvalidParameterValue.create( "disposion", disposion);
 		callReportRequest.setDisposion(disposion.toUpperCase());
 
 		return callReportRequest;

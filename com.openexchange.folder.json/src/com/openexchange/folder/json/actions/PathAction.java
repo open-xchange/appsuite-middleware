@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -96,7 +97,7 @@ public final class PathAction extends AbstractFolderAction {
         }
         final String folderId = request.getParameter("id");
         if (null == folderId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);

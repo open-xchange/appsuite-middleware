@@ -61,6 +61,7 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -104,7 +105,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         } else if (action.equals(MIGRATE)) {
             return migrate(jsonObject, session);
         } else {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 

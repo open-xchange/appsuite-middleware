@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.Utility;
 import com.openexchange.voipnow.json.VoipNowException;
@@ -165,13 +166,13 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                 getMethod.releaseConnection();
             }
         } catch (final UnsupportedEncodingException e) {
-            throw new AjaxException(AjaxException.Code.UnexpectedError, e, e.getMessage());
+            throw AjaxExceptionCodes.UnexpectedError.create( e, e.getMessage());
         } catch (final HttpException e) {
             throw VoipNowExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             throw VoipNowExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

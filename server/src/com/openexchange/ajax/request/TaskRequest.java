@@ -90,6 +90,7 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -168,7 +169,7 @@ public class TaskRequest extends CalendarRequest {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
             return actionCopy(json);
         } else {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 
@@ -418,7 +419,7 @@ public class TaskRequest extends CalendarRequest {
         final int taskId;
         if (DataParser.NO_INT == taskIdFromParameter) {
             if (!task.containsObjectID()) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_ID);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_ID);
             }
             taskId = task.getObjectID();
         } else {

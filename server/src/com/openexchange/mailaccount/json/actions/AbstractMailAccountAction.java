@@ -86,6 +86,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -135,7 +136,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected static int parseIntParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         return getUnsignedInteger(tmp);
     }
@@ -153,7 +154,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         final String[] sa = PAT.split(tmp, 0);
         final int[] columns = new int[sa.length];
@@ -194,13 +195,13 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected static void checkNeededFields(final MailAccountDescription accountDescription) throws AjaxException {
         // Check needed fields
         if (null == accountDescription.getMailServer()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.MAIL_URL);
         }
         if (null == accountDescription.getLogin()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.LOGIN);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.LOGIN);
         }
         if (null == accountDescription.getPassword()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MailAccountFields.PASSWORD);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.PASSWORD);
         }
     }
 

@@ -61,6 +61,7 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthmeta.MetaDataWriter;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -97,7 +98,7 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(jsonArray);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

@@ -61,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.AjaxException.Code;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -107,11 +107,11 @@ public class DefaultDispatcher implements Dispatcher {
         AJAXActionServiceFactory factory = lookupFactory(request.getModule());
         
         if (factory == null) {
-            throw new AjaxException(AjaxException.Code.UNKNOWN_MODULE, request.getModule());
+            throw AjaxExceptionCodes.UNKNOWN_MODULE.create( request.getModule());
         }
         AJAXActionService action = factory.createActionService(request.getAction());
         if (action == null) {
-            throw new AjaxException(Code.UnknownAction, request.getAction());
+            throw AjaxExceptionCodes.UnknownAction.create( request.getAction());
         }
         Action actionMetadata = getActionMetadata(action);
         

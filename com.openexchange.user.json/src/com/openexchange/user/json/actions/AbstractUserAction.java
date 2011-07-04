@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.json.filter.ContactCensorship;
 import com.openexchange.user.json.filter.DoNothingCensorship;
@@ -126,7 +127,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
                 }
             } else {
                 if (value.length() > 1) {
-                    throw new AjaxException(AjaxException.Code.InvalidParameterValue, key, value);
+                    throw AjaxExceptionCodes.InvalidParameterValue.create( key, value);
                 }
                 list.add(ALL);
             }
@@ -151,7 +152,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         try {
             return Long.valueOf(tmp);
         } catch (final NumberFormatException e) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
     }
 
@@ -166,13 +167,13 @@ public abstract class AbstractUserAction implements AJAXActionService {
     protected static long checkLongParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         tmp = tmp.trim();
         try {
             return Long.parseLong(tmp);
         } catch (final NumberFormatException e) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
     }
 
@@ -193,7 +194,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException e) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
     }
 
@@ -208,13 +209,13 @@ public abstract class AbstractUserAction implements AJAXActionService {
     protected static int checkIntParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         tmp = tmp.trim();
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException e) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
     }
 
@@ -229,7 +230,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
     protected static String checkStringParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         return tmp.trim();
     }
@@ -253,7 +254,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
     protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         final String[] sa = PAT.split(tmp, 0);
         final int[] columns = new int[sa.length];

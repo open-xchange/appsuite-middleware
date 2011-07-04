@@ -54,6 +54,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link UpdateAction}
@@ -70,7 +71,7 @@ public class UpdateAction extends AbstractWriteAction {
 
         File file = request.getFile();
         if(file.getId() == null) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, "Request Body", "Missing field 'id'");
+            throw AjaxExceptionCodes.InvalidParameterValue.create( "Request Body", "Missing field 'id'");
         }
 
         if( request.hasUploads() ) {

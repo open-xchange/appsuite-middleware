@@ -62,6 +62,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -83,7 +84,7 @@ public final class MetaDataMultipleHandler implements MultipleHandler {
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         final AJAXActionService actionService = MetaDataActionFactory.getInstance().createActionService(action);
         if (null == actionService) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);

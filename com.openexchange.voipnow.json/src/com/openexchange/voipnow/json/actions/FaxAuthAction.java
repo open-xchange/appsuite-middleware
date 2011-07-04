@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.Utility;
 
@@ -130,7 +131,7 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
              */
             return new AJAXRequestResult(retval);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

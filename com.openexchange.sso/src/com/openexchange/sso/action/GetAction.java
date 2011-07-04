@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.sso.SSOConstants;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -86,7 +87,7 @@ public final class GetAction implements AJAXActionService {
              * Ensure a secure connection to not transfer sensitive data in plain text
              */
             if (!request.isSecure()) {
-                throw new AjaxException(AjaxException.Code.NonSecureDenied, ACTION, SSOConstants.SERVLET_PATH);
+                throw AjaxExceptionCodes.NonSecureDenied.create( ACTION, SSOConstants.SERVLET_PATH);
             }
             /*
              * Create & fill JSON object
@@ -104,7 +105,7 @@ public final class GetAction implements AJAXActionService {
              */
             return new AJAXRequestResult(obj);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

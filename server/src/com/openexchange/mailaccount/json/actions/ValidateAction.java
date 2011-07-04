@@ -80,6 +80,7 @@ import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -149,7 +150,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             }
             return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, warnings)).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         } catch (final GeneralSecurityException e) {
             throw new OXException(MailAccountExceptionFactory.getInstance().create(
                 MailAccountExceptionMessages.UNEXPECTED_ERROR,

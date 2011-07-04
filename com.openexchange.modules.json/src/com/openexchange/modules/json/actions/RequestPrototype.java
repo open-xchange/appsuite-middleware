@@ -58,6 +58,7 @@ import com.openexchange.modules.json.ModelParser;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Model;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,7 +92,7 @@ public class RequestPrototype<T extends Model<T>> {
             return true;
         }
 
-        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, missingParameters.toString());
+        throw AjaxExceptionCodes.MISSING_PARAMETER.create( missingParameters.toString());
     }
 
     public T getBody() throws JSONException {

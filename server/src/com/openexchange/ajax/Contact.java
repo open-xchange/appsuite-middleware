@@ -79,6 +79,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Logging;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -245,12 +246,12 @@ public class Contact extends DataServlet {
                     final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
 
                     if (uploadFile == null) {
-                        throw new AjaxException(AjaxException.Code.NoUploadImage);
+                        throw new AjaxException(AjaxExceptionCodes.NoUploadImage);
                     }
 
                     final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
                     if (obj == null) {
-                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_JSON);
                     }
 
                     final com.openexchange.groupware.container.Contact contactobject = new com.openexchange.groupware.container.Contact();
@@ -304,7 +305,7 @@ public class Contact extends DataServlet {
 
                     final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
                     if (obj == null) {
-                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_JSON);
                     }
 
                     final com.openexchange.groupware.container.Contact contactobject = new com.openexchange.groupware.container.Contact();
@@ -344,7 +345,7 @@ public class Contact extends DataServlet {
                     }
                 }
             } else {
-                throw new AjaxException(AjaxException.Code.UnknownAction, action);
+                throw AjaxExceptionCodes.UnknownAction.create( action);
             }
         } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);

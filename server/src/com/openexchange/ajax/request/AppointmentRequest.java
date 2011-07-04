@@ -115,6 +115,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.OXJSONException.Code;
 import com.openexchange.tools.session.ServerSession;
@@ -209,7 +210,7 @@ public class AppointmentRequest extends CalendarRequest {
         } else if (AJAXServlet.ACTION_RESOLVE_UID.equalsIgnoreCase(action)) {
             return actionResolveUid(jsonObject);
         } else {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
     
@@ -240,7 +241,7 @@ public class AppointmentRequest extends CalendarRequest {
         appointmentParser.parse(appointmentObj, jData);
 
         if (!appointmentObj.containsParentFolderID()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_FOLDERID);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_FOLDERID);
         }
         
         convertExternalToInternalUsersIfPossible(appointmentObj, ctx, LOG);
@@ -970,7 +971,7 @@ public class AppointmentRequest extends CalendarRequest {
         } else if (participant.getType() == Participant.EXTERNAL_USER) {
             timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, participant.getEmailAddress(), confirmStatus, confirmMessage);
         } else {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
+            throw AjaxExceptionCodes.InvalidParameterValue.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
         }
 
         return new JSONObject();

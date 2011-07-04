@@ -64,6 +64,7 @@ import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountParser;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -90,7 +91,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
             final int id;
             if (null == accountId) {
                 if (!data.has(AccountField.ID.getName())) {
-                    throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
                 }
                 id = data.getInt(AccountField.ID.getName());
             } else {
@@ -123,7 +124,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(Boolean.TRUE);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

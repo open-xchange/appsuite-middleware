@@ -62,6 +62,7 @@ import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link FileMetadataParser}
@@ -96,7 +97,7 @@ public class FileMetadataParser implements FileMetadataParserService{
             File.Field.inject(jsonHandler, file, object);
         } catch (RuntimeException x) {
             if(x.getCause() != null && JSONException.class.isInstance(x.getCause())) {
-                throw new AjaxException(AjaxException.Code.JSONError, x.getCause().getMessage());
+                throw AjaxExceptionCodes.JSONError.create( x.getCause().getMessage());
             }
             throw x;
         }

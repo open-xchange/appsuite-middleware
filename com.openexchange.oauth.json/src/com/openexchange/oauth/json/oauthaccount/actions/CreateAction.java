@@ -63,6 +63,7 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -87,7 +88,7 @@ AbstractOAuthTokenAction {
              */
             final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
             }
             /*
              * Get service meta data
@@ -113,7 +114,7 @@ AbstractOAuthTokenAction {
              */
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.groupware.generic;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -87,7 +88,7 @@ public class TargetFolderDefinition {
         try {
             retval = Integer.parseInt(folderId);
         } catch (NumberFormatException e) {
-            throw new AjaxException(AjaxException.Code.InvalidParameterValue, folderId);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( folderId);
         }
         return retval;
     }

@@ -66,6 +66,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -106,7 +107,7 @@ public class TemplateMultipleHandler implements MultipleHandler {
         if(action.equalsIgnoreCase(Action.names.name())) {
             return names(jsonObject, session);
         } else {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 

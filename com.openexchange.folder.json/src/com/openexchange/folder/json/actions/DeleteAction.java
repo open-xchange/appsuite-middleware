@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -101,7 +102,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
                 } catch (final NumberFormatException e) {
-                    throw new AjaxException(AjaxException.Code.InvalidParameterValue, "timestamp", timestampStr);
+                    throw AjaxExceptionCodes.InvalidParameterValue.create( "timestamp", timestampStr);
                 }
             }
         }
@@ -134,7 +135,7 @@ public final class DeleteAction extends AbstractFolderAction {
              */
             return new AJAXRequestResult(responseArray).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 
