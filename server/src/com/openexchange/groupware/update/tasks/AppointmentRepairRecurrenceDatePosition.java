@@ -239,11 +239,11 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         recColl.fillDAO(appointment);
         final RecurringResultsInterface rrs = recColl.calculateRecurring(appointment, 0, 0, recurrencePosition, recColl.MAX_OCCURRENCESE, true);
         if (null == rrs) {
-            throw new OXCalendarException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT.create();
         }
         final RecurringResultInterface rs = rrs.getRecurringResult(0);
         if (null == rs) {
-            throw new OXCalendarException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT.create();
         }
         appointment.setRecurrenceDatePosition(new Date(rs.getNormalized()));
     }

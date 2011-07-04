@@ -66,7 +66,7 @@ public class RecurrenceChecker {
             return;
 
         if (!cdao.containsRecurrenceType())
-            throw new OXCalendarException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_TYPE);
+            throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_TYPE.create();
 
         if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             checkNo(cdao);
@@ -74,10 +74,10 @@ public class RecurrenceChecker {
         }
 
         if (!cdao.containsInterval())
-            throw new OXCalendarException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL);
+            throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL.create();
 
         if (cdao.containsUntil() && cdao.containsOccurrence() && !(cdao.getUntil() == null && cdao.getOccurrence() == 0))
-            throw new OXCalendarException(OXCalendarExceptionCodes.REDUNDANT_UNTIL_OCCURRENCES);
+            throw OXCalendarExceptionCodes.REDUNDANT_UNTIL_OCCURRENCES.create();
 
         if (cdao.getRecurrenceType() == CalendarObject.DAILY)
             checkDaily(cdao);
@@ -94,7 +94,7 @@ public class RecurrenceChecker {
 
     private static void checkNo(CalendarObject cdao) throws OXCalendarException {
         if (containsRecurrenceInformation(cdao, CalendarObject.RECURRENCE_TYPE))
-            throw new OXCalendarException(OXCalendarExceptionCodes.UNNECESSARY_RECURRENCE_INFORMATION_NO);
+            throw OXCalendarExceptionCodes.UNNECESSARY_RECURRENCE_INFORMATION_NO.create();
     }
 
     private static void checkDaily(CalendarObject cdao) throws OXCalendarException {
@@ -116,7 +116,7 @@ public class RecurrenceChecker {
             throw unnecessary("month", "weekly");
 
         if (!cdao.containsDays())
-            throw new OXCalendarException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_WEEKDAY);
+            throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_WEEKDAY.create();
         
         if (cdao.getDays() < 1 || cdao.getDays() > 127)
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());
@@ -127,7 +127,7 @@ public class RecurrenceChecker {
             throw unnecessary("month", "monthly");
 
         if (!cdao.containsDayInMonth())
-            throw new OXCalendarException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY);
+            throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create();
 
         if (!cdao.containsDays())
             checkMonthly1(cdao);
@@ -145,18 +145,18 @@ public class RecurrenceChecker {
 
     private static void checkMonthly2(CalendarObject cdao) throws OXCalendarException {
         if (!cdao.containsDays())
-            throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create();
         
         if (cdao.getDays() < 1 || cdao.getDays() > 127)
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());
 
         if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5)
-            throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2, cdao.getDayInMonth());
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_.create(2, cdao.getDayInMonth());
     }
 
     private static void checkYearly(CalendarObject cdao) throws OXCalendarException {
         if (!cdao.containsDayInMonth())
-            throw new OXCalendarException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY);
+            throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create();
 
         if (!cdao.containsMonth())
             throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create(I(-1));
@@ -177,7 +177,7 @@ public class RecurrenceChecker {
 
     private static void checkYearly2(CalendarObject cdao) throws OXCalendarException {
         if (!cdao.containsDays())
-            throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create();
         
         if (cdao.getDays() < 1 || cdao.getDays() > 127)
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());

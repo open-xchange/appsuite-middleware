@@ -125,7 +125,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_START_DATE.create(e);
             }
         } else {
-            throw new OXCalendarException(OXCalendarExceptionCodes.RECURRING_MISSING_START_DATE);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_START_DATE.create();
         }
         return new java.util.Date(start);
     }

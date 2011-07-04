@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
@@ -195,7 +196,7 @@ public interface CalendarCollectionService {
 
     public void triggerEvent(final Session session, final int action, final Appointment appointmentobject) throws OXException;
 
-    public void triggerModificationEvent(final Session session, final CalendarDataObject oldAppointment, final CalendarDataObject newAppointment) throws OXCalendarException;
+    public void triggerModificationEvent(final Session session, final CalendarDataObject oldAppointment, final CalendarDataObject newAppointment) throws OXException;
 
     public String getSQLInStringForParticipants(final List<UserParticipant> userParticipant);
 
@@ -269,7 +270,7 @@ public interface CalendarCollectionService {
     
     public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection con) throws SQLException, DBPoolingException, SearchIteratorException, OXException;
     
-    public void getVisibleFolderSQLInString(final StringBuilder sb, final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, OXException, OXCalendarException;
+    public void getVisibleFolderSQLInString(final StringBuilder sb, final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, OXException, OXException;
 
     /**
      * Returns a {@link Date} array with all occurrences of <code>d</code> deleted from given date array
@@ -843,7 +844,7 @@ public interface CalendarCollectionService {
      *            otherwise <code>false</code>
      * @throws OXCalendarException If check fails
      */
-    public void checkRecurringCompleteness(final CalendarObject cdao, final boolean ignoreUntilAndOccurrence) throws OXCalendarException;
+    public void checkRecurringCompleteness(final CalendarObject cdao, final boolean ignoreUntilAndOccurrence) throws OXException;
 
     public void checkRecurring(final CalendarObject cdao) throws OXException;
 
@@ -918,7 +919,7 @@ public interface CalendarCollectionService {
      * @return The appointment's title or <code>null</code>
      * @throws OXCalendarException If determining appointment's title fails
      */
-    public String getAppointmentTitle(final int objectId, final Context ctx) throws OXCalendarException;
+    public String getAppointmentTitle(final int objectId, final Context ctx) throws OXException;
     
     /**
      * Gets the appointment's folder associated with given object ID in given context.

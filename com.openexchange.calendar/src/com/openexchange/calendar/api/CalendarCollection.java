@@ -513,7 +513,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 return;
             }
             
-            throw new OXException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION);
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create();
         } else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
             /*
              * Determine recurrence position from recurrence date position
@@ -531,9 +531,9 @@ public final class CalendarCollection implements CalendarCollectionService {
                 return;
             }
             
-            throw new OXException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION);
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create();
         } else {
-            throw new OXException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT.create();
         }
     }
 
@@ -704,7 +704,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     }
                 } else {
                     if (monthday > 5) {
-                        throw new OXException(OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2, Integer.valueOf(monthday));
+                        throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_.create(2, Integer.valueOf(monthday));
                     }
                     dsf(recStrBuilder, 5);
                     dsf(recStrBuilder, 'i', interval);
@@ -762,7 +762,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
             return recStrBuilder == null ? null : recStrBuilder.toString();
         }
-        throw new OXException(OXCalendarExceptionCodes.RECURRING_MISSING_START_DATE);
+        throw OXCalendarExceptionCodes.RECURRING_MISSING_START_DATE.create();
     }
 
     private Date calculateUntilOfSequence(final CalendarDataObject cdao) throws OXException {
@@ -971,7 +971,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (calDataObject.containsTimezone()) {
                     calc_timezone = calDataObject.getTimezone();
                 } else {
-                    final OXException e = new OXException(OXCalendarExceptionCodes.TIMEZONE_MISSING);
+                    final OXException e = OXCalendarExceptionCodes.TIMEZONE_MISSING.create();
                     LOG.warn(e.getMessage(), e);
                 }
             }
@@ -1017,11 +1017,11 @@ public final class CalendarCollection implements CalendarCollectionService {
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL_2) {
-                throw new OXException(OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL_2, re, Integer.valueOf(re.getValue()));
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL_.create(2, re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY_2) {
-                throw new OXException(OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2, re, Integer.valueOf(re.getValue()));
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_.create(2, re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_INTERVAL) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_DAY) {
@@ -1194,13 +1194,13 @@ public final class CalendarCollection implements CalendarCollectionService {
             /*
              * Every recurrence type needs interval information
              */
-            throw new OXException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL);
+            throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL.create();
         }
         if (!ignoreUntilAndOccurrence && !cdao.containsOccurrence() && !cdao.containsUntil()) {
             /*
              * Every recurrence type needs at least an until or occurrence information
              */
-            throw new OXException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR);
+            throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR.create();
         }
         if (CalendarObject.DAILY == recType) {
             /*
@@ -1213,39 +1213,39 @@ public final class CalendarCollection implements CalendarCollectionService {
                 /*
                  * Weekday needed for weekly recurrence
                  */
-                throw new OXException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_WEEKDAY);
+                throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_WEEKDAY.create();
             }
         } else if (CalendarObject.MONTHLY == recType) {
             if (!cdao.containsDayInMonth()) {
                 /*
                  * Monthday needed for monthly recurrence
                  */
-                throw new OXException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY);
+                throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create();
             }
             if (cdao.getDays() > 0 && !cdao.containsDays()) {
                 /*
                  * Weekday needed for monthly2 recurrence
                  */
-                throw new OXException(OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY);
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY.create();
             }
         } else if (CalendarObject.YEARLY == recType) {
             if (!cdao.containsDayInMonth()) {
                 /*
                  * Monthday needed for yearly recurrence
                  */
-                throw new OXException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY);
+                throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create();
             }
             if (!cdao.containsMonth()) {
                 /*
                  * Month needed for yearly recurrence
                  */
-                throw new OXException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTH);
+                throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTH.create();
             }
             if (cdao.getDays() > 0 && !cdao.containsDays()) {
                 /*
                  * Weekday needed for yearly recurrence with weekdays greater than zero
                  */
-                throw new OXException(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_WEEKDAY);
+                throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_WEEKDAY.create();
             }
         }
     }
@@ -1276,7 +1276,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL.create(Integer.valueOf(cdao.getInterval()));
                 }
                 if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5) {
-                    throw new OXException(OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2, Integer.valueOf(cdao.getDayInMonth()));
+                    throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_.create(2, Integer.valueOf(cdao.getDayInMonth()));
                 }
             } else {
                 if (cdao.getInterval() < 1) {
@@ -1330,7 +1330,7 @@ public final class CalendarCollection implements CalendarCollectionService {
          * appointment's range
          */
         if (!checkIfDateOccursInRecurrence(clone.getRecurrenceDatePosition(), edao)) {
-            throw new OXException(OXCalendarExceptionCodes.FOREIGN_EXCEPTION_DATE);
+            throw OXCalendarExceptionCodes.FOREIGN_EXCEPTION_DATE.create();
         }
         {
             final Date[] newChangeExcs = addException(edao.getChangeException(), clone
@@ -1377,7 +1377,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             fillDAO(edao);
             final RecurringResultsInterface rss = calculateRecurring(edao, 0, 0, clone.getRecurrencePosition());
             if (rss == null) {
-                throw new OXException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION);
+                throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create();
             }
             final RecurringResultInterface rs = rss.getRecurringResult(0);
             clone.setStartDate(new Date(rs.getStart()));
@@ -1498,7 +1498,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public void replaceDatesWithFirstOccurence(final Appointment appointment) throws OXException {
         final RecurringResultsInterface results = calculateFirstRecurring(appointment);
         if (0 == results.size()) {
-            throw new OXException(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_FIRST_RECURRING);
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_FIRST_RECURRING.create();
         }
         final RecurringResultInterface result = results.getRecurringResult(0);
         appointment.setStartDate(new Date(result.getStart()));
@@ -2006,7 +2006,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                         check[a].setIdentifier(0); // auto correction ! should not happen !
                     }
                     if (check[a].getEmailAddress() == null) {
-                        throw new OXException(OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
+                        throw OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD.create();
                     }
                 }
             }
@@ -2077,7 +2077,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
             cdao.setUsers(ret);
         } else {
-            throw new OXException(OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_2);
+            throw OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_.create(2);
         }
     }
     
@@ -2097,7 +2097,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 cdao.setParticipants(ret);
             }
         } else {
-            throw new OXException(OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_2);
+            throw OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_.create(2);
         }
     }        
     
@@ -2545,7 +2545,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(sie, Integer.valueOf(1));
         }
         if (cfo == null) {
-            throw new OXException(OXCalendarExceptionCodes.CFO_NOT_INITIALIZIED);
+            throw OXCalendarExceptionCodes.CFO_NOT_INITIALIZIED.create();
         }
         final  Set<Integer> private_read_all = cfo.getPrivateReadableAll();
         final Set<Integer> private_read_own = cfo.getPrivateReadableOwn();
@@ -2975,11 +2975,11 @@ public final class CalendarCollection implements CalendarCollectionService {
      */
     public void checkUserParticipantObject(final UserParticipant up, final int folder_type) throws OXException {
         if (up.getIdentifier() < 1) {
-            throw new OXException(OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_1, Integer.valueOf(up.getIdentifier()), Integer.valueOf(folder_type));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_.create(1, Integer.valueOf(up.getIdentifier()), Integer.valueOf(folder_type));
         } else if ((folder_type == FolderObject.PRIVATE || folder_type == FolderObject.SHARED) && up.getPersonalFolderId() < 1) {
-            throw new OXException(OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_2, Integer.valueOf(up.getIdentifier()));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_.create(2, Integer.valueOf(up.getIdentifier()));
         } else if (folder_type == FolderObject.PUBLIC && up.getPersonalFolderId() > 0) {
-            throw new OXException(OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_3, Integer.valueOf(up.getIdentifier()));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_.create(3, Integer.valueOf(up.getIdentifier()));
         }
     }
     
