@@ -105,7 +105,7 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(jsonArray);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

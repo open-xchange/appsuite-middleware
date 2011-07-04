@@ -107,7 +107,7 @@ public class TemplateMultipleHandler implements MultipleHandler {
         if(action.equalsIgnoreCase(Action.names.name())) {
             return names(jsonObject, session);
         } else {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 

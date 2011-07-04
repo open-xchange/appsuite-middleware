@@ -146,15 +146,15 @@ public abstract class AbstractRequest {
     public Action getAction() throws AjaxException {
         final Parameter action = Parameter.ACTION;
         if (null == parameters) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, action.getName());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( action.getName());
         }
         final String value = parameters.getParameter(Parameter.ACTION);
         if (null == value) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, action.getName());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( action.getName());
         }
         final Action retval = Action.byName(value);
         if (null == retval) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, value);
+            throw AjaxExceptionCodes.UnknownAction.create( value);
         }
         return retval;
     }
@@ -163,7 +163,7 @@ public abstract class AbstractRequest {
         final Parameter pUsername = Parameter.USERNAME;        
         final String username = parameters.getParameter(pUsername);
         if (username == null) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, pUsername);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( pUsername);
         }
         
         return username;

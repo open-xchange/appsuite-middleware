@@ -79,14 +79,14 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
          */
         final String accountId = request.getParameter("id");
         if (null == accountId) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
         }
         final int id = Tools.getUnsignedInteger(accountId);
 
         
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
         }
         final OAuthService oAuthService = getOAuthService();
         

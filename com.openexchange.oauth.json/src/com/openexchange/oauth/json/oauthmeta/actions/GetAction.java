@@ -85,7 +85,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             final String serviceId = request.getParameter(MetaDataField.ID.getName());
             if (null == serviceId) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MetaDataField.ID.getName());
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( MetaDataField.ID.getName());
             }
             /*
              * Request account
@@ -102,7 +102,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(jsonObject);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

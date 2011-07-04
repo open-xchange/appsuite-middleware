@@ -71,7 +71,7 @@ public class UpdateAction extends AbstractWriteAction {
 
         File file = request.getFile();
         if(file.getId() == null) {
-            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, "Request Body", "Missing field 'id'");
+            throw AjaxExceptionCodes.InvalidParameterValue.create( "Request Body", "Missing field 'id'");
         }
 
         if( request.hasUploads() ) {

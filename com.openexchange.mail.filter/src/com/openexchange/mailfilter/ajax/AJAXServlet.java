@@ -141,7 +141,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 public String getParameter(final Parameter param) throws AjaxException {
                     final String value = req.getParameter(param.getName());
                     if (param.isRequired() && null == value) {
-                        throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, param.getName());
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( param.getName());
                     }
                     return value;
                 }
@@ -198,7 +198,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 public String getParameter(final Parameter param) throws AjaxException {
                     final String value = req.getParameter(param.getName());
                     if (null == value) {
-                        throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, param.getName());
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( param.getName());
                     }
                     return value;
                 }

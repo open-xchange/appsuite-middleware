@@ -97,11 +97,11 @@ public final class VoipNowActionFactory implements AJAXActionServiceFactory {
 
     public AJAXActionService createActionService(final String action) throws AjaxException {
         if (null == action) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         final AJAXActionService retval = actions.get(action);
         if (null == retval) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         return retval;
     }

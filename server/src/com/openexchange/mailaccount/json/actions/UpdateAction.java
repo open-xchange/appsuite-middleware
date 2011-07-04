@@ -135,7 +135,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
 
             final int id = accountDescription.getId();
             if (-1 == id) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.ID);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.ID);
             }
 
             final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
@@ -185,7 +185,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
 
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
     

@@ -92,7 +92,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(String action) throws AjaxException {
         AJAXActionService handler = ACTIONS.get(action);
         if(handler == null) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         return handler;
     }

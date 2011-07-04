@@ -84,7 +84,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             final String accountId = request.getParameter("id");
             if (null == accountId) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
             }
             /*
              * Request account
@@ -104,7 +104,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(jsonObject);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

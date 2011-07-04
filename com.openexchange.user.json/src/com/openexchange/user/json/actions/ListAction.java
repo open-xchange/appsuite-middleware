@@ -109,7 +109,7 @@ public final class ListAction extends AbstractUserAction {
             {
                 final JSONArray jsonArray = (JSONArray) request.getData();
                 if (null == jsonArray) {
-                    throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "data");
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
                 }
                 final int len = jsonArray.length();
                 userIdArray = new int[len];
@@ -161,7 +161,7 @@ public final class ListAction extends AbstractUserAction {
              */
             return new AJAXRequestResult(jsonArray, lastModified);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

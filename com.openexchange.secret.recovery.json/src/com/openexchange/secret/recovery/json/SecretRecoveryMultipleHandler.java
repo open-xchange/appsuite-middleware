@@ -105,7 +105,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         } else if (action.equals(MIGRATE)) {
             return migrate(jsonObject, session);
         } else {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 

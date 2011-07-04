@@ -379,7 +379,7 @@ public class Login extends AJAXServlet {
                 Session session = null;
                 try {
                     if (!sessiondAutoLogin) {
-                        throw new AjaxException(AjaxExceptionCodes.DisabledAction, "autologin");
+                        throw AjaxExceptionCodes.DisabledAction.create( "autologin");
                     }
 
                     final Cookie[] cookies = req.getCookies();
@@ -565,7 +565,7 @@ public class Login extends AJAXServlet {
         } else if (null != action) {
             doJSONAuth(req, resp, action);
         } else {
-            logAndSendException(resp, new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ACTION));
+            logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION));
             return;
         }
     }
@@ -573,7 +573,7 @@ public class Login extends AJAXServlet {
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
         final JSONRequestHandler handler = handlerMap.get(action);
         if (null == handler) {
-            logAndSendException(resp, new AjaxException(AjaxExceptionCodes.UnknownAction, action));
+            logAndSendException(resp, AjaxExceptionCodes.UnknownAction.create( action));
             return;
         }
         handler.handleRequest(req, resp);
@@ -634,7 +634,7 @@ public class Login extends AJAXServlet {
      */
     private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws AbstractOXException, JSONException, IOException {
         if (!sessiondAutoLogin && CookieType.SESSION == type) {
-            throw new AjaxException(AjaxExceptionCodes.DisabledAction, "store");
+            throw AjaxExceptionCodes.DisabledAction.create( "store");
         }
         final SessiondService sessiond = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null == sessiond) {
@@ -643,7 +643,7 @@ public class Login extends AJAXServlet {
 
         final String sessionId = req.getParameter(PARAMETER_SESSION);
         if (null == sessionId) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_SESSION);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_SESSION);
         }
 
         final Session session = SessionServlet.getSession(hashSource, req, sessionId, sessiond);
@@ -773,16 +773,16 @@ public class Login extends AJAXServlet {
     private LoginRequest parseLogin(final HttpServletRequest req, final String loginParamName, final boolean strict) throws AjaxException {
         final String login = req.getParameter(loginParamName);
         if (null == login) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, loginParamName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( loginParamName);
         }
         final String password = req.getParameter(LoginFields.PASSWORD_PARAM);
         if (null == password) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, LoginFields.PASSWORD_PARAM);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( LoginFields.PASSWORD_PARAM);
         }
         final String authId;
         if (null == req.getParameter(LoginFields.AUTHID_PARAM)) {
             if (strict) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, LoginFields.AUTHID_PARAM);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( LoginFields.AUTHID_PARAM);
             }
             authId = UUIDs.getUnformattedString(UUID.randomUUID());
         } else {
@@ -791,7 +791,7 @@ public class Login extends AJAXServlet {
         final String client;
         if (null == req.getParameter(LoginFields.CLIENT_PARAM)) {
             if (strict) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, LoginFields.CLIENT_PARAM);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( LoginFields.CLIENT_PARAM);
             }
             client = "default";
         } else {
@@ -800,7 +800,7 @@ public class Login extends AJAXServlet {
         final String version;
         if (null == req.getParameter(LoginFields.VERSION_PARAM)) {
             if (strict) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, LoginFields.VERSION_PARAM);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( LoginFields.VERSION_PARAM);
             }
             version = null;
         } else {

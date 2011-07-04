@@ -123,35 +123,35 @@ public abstract class AbstractAction<T, U extends AbstractRequest> {
     protected abstract AbstractObject2JSON2Object<T> getConverter();
 
     protected JSONObject actionConfig(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.CONFIG.getAjaxName());
+        throw AjaxExceptionCodes.UnknownAction.create( Action.CONFIG.getAjaxName());
     }
 
     protected int actionNew(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.NEW.getAjaxName());
+        throw AjaxExceptionCodes.UnknownAction.create( Action.NEW.getAjaxName());
     }
 
     protected void actionReorder(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.NEW.getAjaxName());
+        throw AjaxExceptionCodes.UnknownAction.create( Action.NEW.getAjaxName());
     }
 
     protected void actionUpdate(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.UPDATE.getAjaxName());
+        throw AjaxExceptionCodes.UnknownAction.create( Action.UPDATE.getAjaxName());
     }
 
     protected void actionDelete(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.DELETE.getAjaxName());
+        throw AjaxExceptionCodes.UnknownAction.create( Action.DELETE.getAjaxName());
     }
 
     protected JSONArray actionList(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.LIST.getAjaxName());
+        throw AjaxExceptionCodes.UnknownAction.create( Action.LIST.getAjaxName());
     }
 
     protected void actionDeleteScript(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.NEW.getAjaxName());
+        throw AjaxExceptionCodes.UnknownAction.create( Action.NEW.getAjaxName());
     }
 
     protected String actionGetScript(final U request) throws AbstractOXException {
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, Action.NEW.getAjaxName());
+        throw AjaxExceptionCodes.UnknownAction.create( Action.NEW.getAjaxName());
     }
 
 

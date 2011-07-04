@@ -114,7 +114,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final MultipleHandler handler = createMultipleHandler();
 
             if (action == null) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ACTION);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
             }
             final Object response = handler.performRequest(action, request, getSessionObject(req), Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();

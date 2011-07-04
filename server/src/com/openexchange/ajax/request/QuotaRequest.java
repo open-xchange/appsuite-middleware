@@ -111,7 +111,7 @@ public class QuotaRequest {
         } else if ("mail".equals(action)) {
             return mail();
         }
-        throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+        throw AjaxExceptionCodes.UnknownAction.create( action);
     }
 
     private JSONObject filestore() throws AbstractOXException, JSONException {

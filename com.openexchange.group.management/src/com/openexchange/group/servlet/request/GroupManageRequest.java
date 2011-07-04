@@ -124,7 +124,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
             } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
                 retval = actionUpdate(ctx, user, json);
             } else {
-                throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+                throw AjaxExceptionCodes.UnknownAction.create( action);
             }
             return retval;
         } catch (final AbstractOXException e) {

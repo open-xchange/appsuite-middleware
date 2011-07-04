@@ -97,7 +97,7 @@ public final class PathAction extends AbstractFolderAction {
         }
         final String folderId = request.getParameter("id");
         if (null == folderId) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);

@@ -77,7 +77,7 @@ public class Quota extends SessionServlet {
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             if (null == action) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ACTION);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
             }
             final ServerSession session = getSessionObject(req);
 

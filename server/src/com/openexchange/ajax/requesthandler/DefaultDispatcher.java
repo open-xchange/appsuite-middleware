@@ -107,11 +107,11 @@ public class DefaultDispatcher implements Dispatcher {
         AJAXActionServiceFactory factory = lookupFactory(request.getModule());
         
         if (factory == null) {
-            throw new AjaxException(AjaxExceptionCodes.UNKNOWN_MODULE, request.getModule());
+            throw AjaxExceptionCodes.UNKNOWN_MODULE.create( request.getModule());
         }
         AJAXActionService action = factory.createActionService(request.getAction());
         if (action == null) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, request.getAction());
+            throw AjaxExceptionCodes.UnknownAction.create( request.getAction());
         }
         Action actionMetadata = getActionMetadata(action);
         

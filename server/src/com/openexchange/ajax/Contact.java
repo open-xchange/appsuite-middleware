@@ -251,7 +251,7 @@ public class Contact extends DataServlet {
 
                     final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
                     if (obj == null) {
-                        throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_JSON);
                     }
 
                     final com.openexchange.groupware.container.Contact contactobject = new com.openexchange.groupware.container.Contact();
@@ -305,7 +305,7 @@ public class Contact extends DataServlet {
 
                     final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
                     if (obj == null) {
-                        throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, AJAXServlet.PARAMETER_JSON);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_JSON);
                     }
 
                     final com.openexchange.groupware.container.Contact contactobject = new com.openexchange.groupware.container.Contact();
@@ -345,7 +345,7 @@ public class Contact extends DataServlet {
                     }
                 }
             } else {
-                throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+                throw AjaxExceptionCodes.UnknownAction.create( action);
             }
         } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);

@@ -200,7 +200,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         try {
             return Long.valueOf(tmp);
         } catch (final NumberFormatException e) {
-            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
     }
 
@@ -215,13 +215,13 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
     protected static long checkLongParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         tmp = tmp.trim();
         try {
             return Long.parseLong(tmp);
         } catch (final NumberFormatException e) {
-            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
     }
 
@@ -256,7 +256,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         try {
             return ActionUtility.getUnsignedInteger(tmp);
         } catch (final NumberFormatException e) {
-            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
     }
 
@@ -271,13 +271,13 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
     protected static int checkIntParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         tmp = tmp.trim();
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException e) {
-            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
     }
 
@@ -292,7 +292,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
     protected static String checkStringParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp || 0 == tmp.length()) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         return tmp;
     }
@@ -315,14 +315,14 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
             if (null != parameter) {
                 if (null != foundName) {
                     // There was already one of specified choices
-                    throw new AjaxException(AjaxExceptionCodes.EitherParameterConflict, name, foundName);
+                    throw AjaxExceptionCodes.EitherParameterConflict.create( name, foundName);
                 }
                 foundName = name;
             }
             retval[i] = parameter;
         }
         if (null == foundName) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, parameterNames[0]);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterNames[0]);
         }
         return retval;
     }
@@ -354,7 +354,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
     protected static int[] parseIntArrayParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         final String[] sa = PAT.split(tmp, 0);
         final int[] columns = new int[sa.length];

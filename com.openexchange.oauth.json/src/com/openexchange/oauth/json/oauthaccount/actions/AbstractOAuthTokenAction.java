@@ -87,7 +87,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         }
         final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
         if (uuid == null) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, OAuthConstants.SESSION_PARAM_UUID);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( OAuthConstants.SESSION_PARAM_UUID);
         }
         /*
          * Get request token secret from session parameters

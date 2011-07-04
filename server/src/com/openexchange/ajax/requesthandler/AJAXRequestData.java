@@ -329,7 +329,7 @@ public class AJAXRequestData {
     public void require(final String...mandatoryParameters) throws AbstractOXException {
         List<String> missingParameters = getMissingParameters(mandatoryParameters);
         if(!missingParameters.isEmpty()) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, missingParameters.toString());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( missingParameters.toString());
         }
     }
     

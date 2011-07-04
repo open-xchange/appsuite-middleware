@@ -79,7 +79,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
          */
         final String accountId = request.getParameter("id");
         if (null == accountId) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
         }
         /*
          * Delete account

@@ -161,7 +161,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         final Response response = new Response();
         try {
             if (action == null) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ACTION);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
             }
             if (handleIndividually(action, req, resp)) {
                 return;

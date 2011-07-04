@@ -171,7 +171,7 @@ public class DispatcherServlet extends SessionServlet {
         AJAXRequestData request = null; 
         try {
             if (action == null) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ACTION);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
             }
             final ServerSession session = getSessionObject(req);
 

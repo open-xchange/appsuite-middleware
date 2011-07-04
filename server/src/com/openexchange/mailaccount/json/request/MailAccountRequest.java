@@ -163,7 +163,7 @@ public final class MailAccountRequest {
         } else if ("get_tree".equalsIgnoreCase(action)) {
             return actionGetTree(jsonObject);
         } else {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 
@@ -588,7 +588,7 @@ public final class MailAccountRequest {
 
             final int id = accountDescription.getId();
             if (-1 == id) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.ID);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.ID);
             }
 
             final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
@@ -731,13 +731,13 @@ public final class MailAccountRequest {
     private static void checkNeededFields(final MailAccountDescription accountDescription) throws AjaxException {
         // Check needed fields
         if (null == accountDescription.getMailServer()) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.MAIL_URL);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.MAIL_URL);
         }
         if (null == accountDescription.getLogin()) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.LOGIN);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.LOGIN);
         }
         if (null == accountDescription.getPassword()) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MailAccountFields.PASSWORD);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.PASSWORD);
         }
     }
 }

@@ -87,7 +87,7 @@ public final class GetAction implements AJAXActionService {
              * Ensure a secure connection to not transfer sensitive data in plain text
              */
             if (!request.isSecure()) {
-                throw new AjaxException(AjaxExceptionCodes.NonSecureDenied, ACTION, SSOConstants.SERVLET_PATH);
+                throw AjaxExceptionCodes.NonSecureDenied.create( ACTION, SSOConstants.SERVLET_PATH);
             }
             /*
              * Create & fill JSON object
@@ -105,7 +105,7 @@ public final class GetAction implements AJAXActionService {
              */
             return new AJAXRequestResult(obj);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

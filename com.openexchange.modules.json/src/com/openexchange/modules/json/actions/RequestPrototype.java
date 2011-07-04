@@ -92,7 +92,7 @@ public class RequestPrototype<T extends Model<T>> {
             return true;
         }
 
-        throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, missingParameters.toString());
+        throw AjaxExceptionCodes.MISSING_PARAMETER.create( missingParameters.toString());
     }
 
     public T getBody() throws JSONException {

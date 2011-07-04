@@ -127,7 +127,7 @@ public final class DownloadUtility {
                 try {
                     nRead = in.read(sequence, 0, sequence.length);
                 } catch (final IOException e) {
-                    throw new AjaxException(AjaxExceptionCodes.IOError, e, e.getMessage());
+                    throw AjaxExceptionCodes.IOError.create( e, e.getMessage());
                 }
                 if (nRead < sequence.length) {
                     final byte[] tmp = sequence;

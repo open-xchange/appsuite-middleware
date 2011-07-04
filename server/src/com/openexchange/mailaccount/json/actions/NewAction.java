@@ -128,7 +128,7 @@ public final class NewAction extends AbstractMailAccountAction {
 
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

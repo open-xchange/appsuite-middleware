@@ -82,7 +82,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
     
     public AJAXActionService createActionService(String action) throws AjaxException {
         if(!GET.equals(action)) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         return new AJAXActionService() {
 
@@ -90,7 +90,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
                 
                 String path = request.getParameter(PATH);
                 if(path == null) {
-                    throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PATH);
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create( PATH);
                 }
                 
                 ConfigObjectRegistry view = registryFactory.getView(session.getUserId(), session.getContextId());
@@ -104,7 +104,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
                     Object json = JSONCoercion.coerceToJSON(object);
                     return new AJAXRequestResult(json);
                 } catch (JSONException e) {
-                    throw new AjaxException(AjaxExceptionCodes.JSONError, e);
+                    throw AjaxExceptionCodes.JSONError.create( e);
                 }
             }
             

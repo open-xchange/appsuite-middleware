@@ -169,7 +169,7 @@ public class TaskRequest extends CalendarRequest {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
             return actionCopy(json);
         } else {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 
@@ -419,7 +419,7 @@ public class TaskRequest extends CalendarRequest {
         final int taskId;
         if (DataParser.NO_INT == taskIdFromParameter) {
             if (!task.containsObjectID()) {
-                throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, AJAXServlet.PARAMETER_ID);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_ID);
             }
             taskId = task.getObjectID();
         } else {

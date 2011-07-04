@@ -101,7 +101,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
              */
             return reauthorizeCallbackAction(accountId, request, session);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
     
@@ -114,7 +114,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, AccountField.SERVICE_ID.getName());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
         }
         /*
          * Generate UUID

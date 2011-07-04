@@ -181,7 +181,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
             }
             return new AJAXRequestResult(addResponse.getID().get(0));
         } catch (JSONException e) {
-        	throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+        	throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

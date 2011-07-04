@@ -92,7 +92,7 @@ public final class CreateAction extends AbstractFolderAction {
         }
         final String parentId = request.getParameter("folder_id");
         if (null == parentId) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "folder_id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "folder_id");
         }
         /*
          * Parse folder object

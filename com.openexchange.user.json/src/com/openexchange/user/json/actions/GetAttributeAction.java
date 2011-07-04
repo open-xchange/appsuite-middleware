@@ -103,7 +103,7 @@ public final class GetAttributeAction extends AbstractUserAction {
             json.put("value", value);
             return new AJAXRequestResult(json);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

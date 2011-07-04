@@ -124,7 +124,7 @@ public class ResourceRequest {
                 /*
                  * No appropriate handler
                  */
-                throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+                throw AjaxExceptionCodes.UnknownAction.create( action);
             }
             /*
              * ... and delegate to manage request

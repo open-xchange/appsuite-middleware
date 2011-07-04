@@ -105,7 +105,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         }
         final ContentType contentType = parseContentTypeParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, request);
         if (null == contentType) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, AJAXServlet.PARAMETER_CONTENT_TYPE);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_CONTENT_TYPE);
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;
@@ -215,7 +215,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
              */
             return new AJAXRequestResult(ret, 0 == lastModified ? null : new Date(lastModified)).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

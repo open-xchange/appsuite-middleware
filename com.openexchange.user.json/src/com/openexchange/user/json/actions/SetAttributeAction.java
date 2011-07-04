@@ -116,7 +116,7 @@ public final class SetAttributeAction extends AbstractUserAction {
              */
             return new AJAXRequestResult(Boolean.TRUE);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

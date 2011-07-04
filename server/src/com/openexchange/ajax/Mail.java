@@ -1027,7 +1027,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (null == tmp2) {
                         tmp2 = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
                         if (null == tmp2) {
-                            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ID);
+                            throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ID);
                         }
                         uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                     } else {
@@ -1174,7 +1174,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (null == tmp2) {
                         tmp2 = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
                         if (null == tmp2) {
-                            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, PARAMETER_ID);
+                            throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ID);
                         }
                         uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                     } else {

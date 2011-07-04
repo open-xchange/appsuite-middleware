@@ -164,7 +164,7 @@ public class Multiple extends SessionServlet {
         if (jsonObj.has(MODULE)) {
             module = DataParser.checkString(jsonObj, MODULE);
         } else {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, MODULE);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MODULE);
         }
 
         action = jsonObj.optString(PARAMETER_ACTION);
@@ -320,7 +320,7 @@ public class Multiple extends SessionServlet {
                     final AttachmentRequest request = new AttachmentRequest(session, jsonWriter);
                     request.action(action, new JSONSimpleRequest(jsonObj));
             } else {
-                final AjaxException ajaxException = new AjaxException(AjaxExceptionCodes.UNKNOWN_MODULE, module);
+                final AjaxException ajaxException = AjaxExceptionCodes.UNKNOWN_MODULE.create( module);
                 LOG.error(ajaxException.getMessage(), ajaxException);
                 jsonWriter.object();
                 ResponseWriter.writeException(ajaxException, jsonWriter);

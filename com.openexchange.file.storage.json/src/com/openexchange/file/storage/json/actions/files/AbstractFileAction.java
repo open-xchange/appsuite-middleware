@@ -162,7 +162,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
                 array.put(object);
             }
         } catch (JSONException x) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, x.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( x.getMessage());
         }
 
         return new AJAXRequestResult(array);
@@ -195,7 +195,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
         } catch (Throwable t) {
             failure(req,t);
             LOG.error(t.getMessage(), t);
-            throw new AjaxException(AjaxExceptionCodes.UnexpectedError, t.getMessage());
+            throw AjaxExceptionCodes.UnexpectedError.create( t.getMessage());
         } finally {
             after(req);
             

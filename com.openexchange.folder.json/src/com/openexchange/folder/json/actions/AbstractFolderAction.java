@@ -58,12 +58,11 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -106,12 +105,12 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>
-     * @throws AjaxException If parameter is not present in given request
+     * @throws OXException If parameter is not present in given request
      */
-    protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
         }
         final String[] sa = PAT.split(tmp, 0);
         final int[] columns = new int[sa.length];
@@ -147,9 +146,9 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of {@link ContentType} as a list.
-     * @throws AbstractOXException If an invalid content type is denoted
+     * @throws OXException If an invalid content type is denoted
      */
-    protected static List<ContentType> parseOptionalContentTypeArrayParameter(final String parameterName, final AJAXRequestData request) throws AbstractOXException {
+    protected static List<ContentType> parseOptionalContentTypeArrayParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             return getDefaultAllowedModules();
@@ -177,7 +176,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 final ContentType ct = tmpMap.get(str);
                 if (null == ct) {
                     org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for string: " + str);
-                    throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, parameterName, tmp);
+                    throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
                 }
                 ret.add(ct);
             } else {
@@ -185,7 +184,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 final ContentType ct = availableContentTypes.get(key);
                 if (null == ct) {
                     org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + key);
-                    throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, parameterName, tmp);
+                    throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
                 }
                 ret.add(ct);
             }
@@ -193,7 +192,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         return ret;
     }
 
-    protected static ContentType parseContentTypeParameter(final String parameterName, final AJAXRequestData request) throws AbstractOXException {
+    protected static ContentType parseContentTypeParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             return null;
@@ -218,7 +217,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
              * Not found
              */
             org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + tmp);
-            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
         /*
          * A number
@@ -227,7 +226,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         final ContentType ct = availableContentTypes.get(key);
         if (null == ct) {
             org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + key);
-            throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, parameterName, tmp);
+            throw AjaxExceptionCodes.InvalidParameterValue.create( parameterName, tmp);
         }
         return ct;
     }

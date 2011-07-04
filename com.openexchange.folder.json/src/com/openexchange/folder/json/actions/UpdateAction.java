@@ -94,7 +94,7 @@ public final class UpdateAction extends AbstractFolderAction {
         }
         final String id = request.getParameter("id");
         if (null == id) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
         }
         final Date timestamp;
         {
@@ -105,7 +105,7 @@ public final class UpdateAction extends AbstractFolderAction {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
                 } catch (final NumberFormatException e) {
-                    throw new AjaxException(AjaxExceptionCodes.InvalidParameterValue, "timestamp", timestampStr);
+                    throw AjaxExceptionCodes.InvalidParameterValue.create( "timestamp", timestampStr);
                 }
             }
         }

@@ -210,7 +210,7 @@ public class ContactRequest {
         } else if (action.equalsIgnoreCase(FinalContactConstants.ACTION_GET_BY_UUID.getName())) {
             return actionGetByUuid(jsonObject);
         } else {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
 
@@ -1019,7 +1019,7 @@ public class ContactRequest {
             FolderObject.SYSTEM_LDAP_FOLDER_ID,
             session);
         if(! (contactInterfaceTemp instanceof FinalContactInterface)) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, FinalContactConstants.ACTION_GET_BY_UUID.getName());
+            throw AjaxExceptionCodes.UnknownAction.create( FinalContactConstants.ACTION_GET_BY_UUID.getName());
         }
         return (FinalContactInterface) contactInterfaceTemp;
     }

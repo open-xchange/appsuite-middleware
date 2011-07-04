@@ -95,7 +95,7 @@ public final class GetAction extends AbstractFolderAction {
         }
         final String folderId = request.getParameter("id");
         if (null == folderId) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);

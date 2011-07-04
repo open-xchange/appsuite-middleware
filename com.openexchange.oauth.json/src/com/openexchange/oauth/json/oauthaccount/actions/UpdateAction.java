@@ -91,7 +91,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
             final int id;
             if (null == accountId) {
                 if (!data.has(AccountField.ID.getName())) {
-                    throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "id");
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
                 }
                 id = data.getInt(AccountField.ID.getName());
             } else {
@@ -124,7 +124,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(Boolean.TRUE);
         } catch (final JSONException e) {
-            throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
 

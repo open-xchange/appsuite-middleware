@@ -91,7 +91,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
     public AJAXActionService createActionService(final String action) throws AjaxException {
         if (!action.equals(REGISTER)) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         return REGISTER_ACTION;
     }
@@ -150,7 +150,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
                 json.put("url", uri);
                 return json;
             } catch (JSONException e) {
-                throw new AjaxException(AjaxExceptionCodes.JSONError, e, e.getMessage());
+                throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
             }
         }
 

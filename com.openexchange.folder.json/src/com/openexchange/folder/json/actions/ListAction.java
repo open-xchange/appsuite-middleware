@@ -97,7 +97,7 @@ public final class ListAction extends AbstractFolderAction {
         }
         final String parentId = request.getParameter("parent");
         if (null == parentId) {
-            throw new AjaxException(AjaxExceptionCodes.MISSING_PARAMETER, "parent");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "parent");
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;

@@ -126,7 +126,7 @@ public class LinkRequest {
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
 			actionDelete(jsonObject);
 		} else {
-			throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+			throw AjaxExceptionCodes.UnknownAction.create( action);
 		}
 	}
 	

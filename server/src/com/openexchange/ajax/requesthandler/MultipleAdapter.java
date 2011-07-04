@@ -89,7 +89,7 @@ public class MultipleAdapter implements MultipleHandler {
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         final AJAXActionService actionService = factory.createActionService(action);
         if (null == actionService) {
-            throw new AjaxException(AjaxExceptionCodes.UnknownAction, action);
+            throw AjaxExceptionCodes.UnknownAction.create( action);
         }
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
