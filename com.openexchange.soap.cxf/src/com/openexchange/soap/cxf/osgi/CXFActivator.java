@@ -108,7 +108,9 @@ public class CXFActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         HttpService httpService = getService(HttpService.class);
-        httpService.unregister(PATH);
+        if (httpService != null) {
+            httpService.unregister(PATH);
+        }
         if (null != collector) {
             collector.close();
             collector = null;
