@@ -49,6 +49,7 @@
 
 package com.openexchange.polling;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -60,15 +61,18 @@ import java.util.List;
 public class Answer {
 	private List<Integer> answers;
  
-    // Bla
     public List<Integer> getAnswers() {
         return answers;
     }
 
-    // Gnitz    
     public void setAnswers(List<Integer> answers) {
-        this.answers = answers;
+        this.answers = Collections.unmodifiableList(answers);
     }
+    
+    public void newMethod() {
+    	
+    }
+    
 
     
 }

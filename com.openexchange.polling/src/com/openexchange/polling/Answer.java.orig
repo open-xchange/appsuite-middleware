@@ -49,24 +49,35 @@
 
 package com.openexchange.polling;
 
+import java.util.Collections;
 import java.util.List;
 
 
 /**
- * {@link PollService}
+ * {@link Answer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface PollService {
-    public void createPoll(Poll poll, int cid);
-    public void updatePoll(Poll poll, int cid);
-    public void saveAnswers(int id, int cid, Answer answer);
+public class Answer {
+	private List<Integer> answers;
+ 
+    public List<Integer> getAnswers() {
+        return answers;
+    }
+
+<<<<<<< HEAD
+    public void setAnswers(List<Integer> answers) {
+        this.answers = Collections.unmodifiableList(answers);
+=======
+    public void setAnswers(final List<Integer> answers) {
+        this.answers = new ArrayList<Integer>(answers);
+>>>>>>> 2974ca11b134fed8f02cb73c45bef0789b86b5d7
+    }
     
-    public Poll getPoll(int id, int cid);
-    public List<Poll> getPolls(int cid);
+    public void newMethod() {
+    	
+    }
     
-    public void deletePoll(int id, int cid);
+
     
-    // Blupp
-    // Fix Bug 15634
 }

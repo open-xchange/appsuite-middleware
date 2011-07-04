@@ -149,5 +149,9 @@ public class PollJSONConverter implements ResultConverter {
             throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
         }
     }
+    
+    private void test() {
+    	
+    }
 
 }
