@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 16
+%define		ox_release 17
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -809,6 +809,19 @@ fi
 %doc doc/examples
 
 %changelog
+* Mon Jul 04 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19585: Allowing empty cookie values; e.g. ``mycookie=лл
+ - Bugfix #19691: Dropping AJP connection (in AJP way) if a corrupt AJP cycle is detected
+* Sat Jul 02 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19561: Proper re-initialization of LIST/LSUB cache
+ - Bugfix #19683: Fixed NPE in Unified Mail
+ - Bugfix #19684: Dealing with possible missing headers when writing OLOX2's structured JSON mail object
+ - Bugfix #19628: Safe reading of a message's address headers
+ - Bugfix #19657: Dealing with possible failure when reading from an account's folder
+* Fri Jul 01 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #19600: Deleting the first and only user of a context made the filestore inaccessible to other users in that context. Fixed. 
+* Fri Jul 01 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19536: Proper detection of possible quota exceeded error
 * Thu Jun 30 2011 - thorben.betten@open-xchange.com
  - Bugfix #19658: [L3] Moving mails with the OX WebGUI makes them disappear (dovecot)
  - Bugfix #19669: Proper expunge flag on folder closure

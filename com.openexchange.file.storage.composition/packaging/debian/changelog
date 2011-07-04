@@ -1,3 +1,9 @@
+open-xchange-file-storage-composition (6.20.0.0-15) unstable; urgency=low
+
+  * build for PTF 2011070410000182
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Jul 2011 13:33:24 +0000
+
 open-xchange-file-storage-composition (6.20.0.0-14) unstable; urgency=low
 
   * build for PTF 2011062710000382
