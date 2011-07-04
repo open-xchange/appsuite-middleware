@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -88,7 +89,7 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
         this.cache = cache;
     }
     
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final MessagingRequestData req = new MessagingRequestData(request, session, registry, parser, cache);
         try {
             final AJAXRequestResult result = doIt(req, session);

@@ -58,7 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
@@ -97,7 +97,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
     private final AJAXActionService REGISTER_ACTION = new AJAXActionService() {
 
-        public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+        public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
             final String id = request.getParameter("datasource");
             DataProvider provider = null;
             Object state = null;

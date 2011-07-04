@@ -55,7 +55,6 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
-import com.openexchange.file.storage.json.actions.files.InfostoreRequest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;

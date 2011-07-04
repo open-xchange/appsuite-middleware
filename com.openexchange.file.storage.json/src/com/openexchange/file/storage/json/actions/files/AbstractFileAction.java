@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.groupware.AbstractOXException;
@@ -180,7 +181,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
         return new AJAXRequestResult(true, new Date(sequenceNumber));
     }
     
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         AJAXInfostoreRequest req = new AJAXInfostoreRequest(request, session);
         try {
             before(req);

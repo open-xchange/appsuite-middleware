@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.AjaxException.Code;
 import com.openexchange.tools.session.ServerSession;
@@ -75,7 +75,7 @@ public class DefaultDispatcher implements Dispatcher {
 
     private Queue<AJAXActionCustomizerFactory> customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
         

@@ -102,7 +102,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws com.openexchange.exception.OXException {
         final JSONObject jData = (JSONObject) request.getData();
 
         try {

@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -66,8 +66,8 @@ public interface AJAXActionService {
      * @param request The request to perform
      * @param session The session providing needed user data
      * @return The result yielded from given request
-     * @throws AbstractOXException If an error occurs
+     * @throws OXException If an error occurs
      */
-    AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException;
+    AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException;
 
 }
