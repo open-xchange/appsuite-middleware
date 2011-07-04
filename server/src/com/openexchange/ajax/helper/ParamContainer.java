@@ -62,7 +62,7 @@ import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * ParamContainer
@@ -89,27 +89,27 @@ public abstract class ParamContainer {
     private static final ErrorInfo FOLDER_ERR_INFO = new ErrorInfo() {
 
         public Category getBadParamCategory() {
-            return FolderCode.BAD_PARAM_VALUE.getCategory();
+            return OXFolderExceptionCode.BAD_PARAM_VALUE.getCategory();
         }
 
         public String getBadParamMsg() {
-            return FolderCode.BAD_PARAM_VALUE.getMessage();
+            return OXFolderExceptionCode.BAD_PARAM_VALUE.getMessage();
         }
 
         public int getBadParamNum() {
-            return FolderCode.BAD_PARAM_VALUE.getNumber();
+            return OXFolderExceptionCode.BAD_PARAM_VALUE.getNumber();
         }
 
         public Category getMissingParamCategory() {
-            return FolderCode.MISSING_PARAMETER.getCategory();
+            return OXFolderExceptionCode.MISSING_PARAMETER.getCategory();
         }
 
         public String getMissingParamMsg() {
-            return FolderCode.MISSING_PARAMETER.getMessage();
+            return OXFolderExceptionCode.MISSING_PARAMETER.getMessage();
         }
 
         public int getMissingParamNum() {
-            return FolderCode.MISSING_PARAMETER.getNumber();
+            return OXFolderExceptionCode.MISSING_PARAMETER.getNumber();
         }
     };
 

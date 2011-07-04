@@ -146,7 +146,7 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -533,7 +533,7 @@ public class Folder extends SessionServlet {
                 } else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                     if (!session.getUserConfiguration().hasInfostore()) {
                         throw new OXFolderException(
-                            FolderCode.NO_MODULE_ACCESS,
+                            OXFolderExceptionCode.NO_MODULE_ACCESS,
                             getUserName(session),
                             folderModule2String(FolderObject.INFOSTORE),
                             Integer.valueOf(ctx.getContextId()));
@@ -835,7 +835,7 @@ public class Folder extends SessionServlet {
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
-                            if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
+                            if (e.getDetailNumber() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public calendar folders due to user configuration
                                  */
@@ -866,7 +866,7 @@ public class Folder extends SessionServlet {
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
-                            if (FolderCode.NO_MODULE_ACCESS.getNumber() == e.getDetailNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
+                            if (OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() == e.getDetailNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public contact folders due to user configuration
                                  */
@@ -897,7 +897,7 @@ public class Folder extends SessionServlet {
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
-                            if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
+                            if (e.getDetailNumber() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public task folders due to user configuration
                                  */
@@ -1876,7 +1876,7 @@ public class Folder extends SessionServlet {
                 lastModifiedDate = fo.getLastModified();
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.NO_ADMIN_ACCESS,
+                    OXFolderExceptionCode.NO_ADMIN_ACCESS,
                     getUserName(session),
                     folderIdentifier,
                     Integer.valueOf(ctx.getContextId()));
@@ -2014,7 +2014,7 @@ public class Folder extends SessionServlet {
                 lastModifiedDate = fo.getLastModified();
             } else if (parentFolder.startsWith(FolderObject.SHARED_PREFIX)) {
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.NO_CREATE_SUBFOLDER_PERMISSION,
+                    OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION,
                     getUserName(session),
                     parentFolder,
                     Integer.valueOf(ctx.getContextId()));
@@ -2151,7 +2151,7 @@ public class Folder extends SessionServlet {
                         lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
                     } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                         throw new OXFolderException(
-                            OXFolderException.FolderCode.NO_ADMIN_ACCESS,
+                            OXFolderExceptionCode.NO_ADMIN_ACCESS,
                             getUserName(session),
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
@@ -2280,7 +2280,7 @@ public class Folder extends SessionServlet {
                         lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
                     } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                         throw new OXFolderException(
-                            OXFolderException.FolderCode.NO_ADMIN_ACCESS,
+                            OXFolderExceptionCode.NO_ADMIN_ACCESS,
                             getUserName(session.getUserId(), ctx),
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
@@ -2371,7 +2371,7 @@ public class Folder extends SessionServlet {
     private static final String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {
         final String paramVal = req.getParameter(paramName);
         if (paramVal == null) {
-            throw new OXFolderException(FolderCode.MISSING_PARAMETER, paramName);
+            throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, paramName);
         }
         return paramVal;
     }
@@ -2381,7 +2381,7 @@ public class Folder extends SessionServlet {
     private static final int[] checkIntArrayParam(final HttpServletRequest req, final String paramName) throws OXException {
         String tmp = req.getParameter(paramName);
         if (tmp == null) {
-            throw new OXFolderException(FolderCode.MISSING_PARAMETER, paramName);
+            throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, paramName);
         }
         final String[] sa = PATERN_SPLIT.split(tmp, 0);
         tmp = null;
@@ -2390,7 +2390,7 @@ public class Folder extends SessionServlet {
             try {
                 intArray[a] = Integer.parseInt(sa[a]);
             } catch (final NumberFormatException e) {
-                throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, e, sa[a], paramName);
+                throw new OXFolderException(OXFolderExceptionCode.BAD_PARAM_VALUE, e, sa[a], paramName);
             }
         }
         return intArray;

@@ -78,7 +78,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.downgrade.sql.OXFolderDowngradeSQL;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -249,7 +249,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             removeFromFolderCache(fuids, event.getContext());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         }
         /*
          * Strip all user permission from other (public) infostore folders
@@ -320,7 +320,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 ids.add(Integer.valueOf(fuid));
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         }
         /*
          * Update cache
@@ -359,7 +359,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 break;
             default:
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.UNKNOWN_MODULE,
+                    OXFolderExceptionCode.UNKNOWN_MODULE,
                     Integer.valueOf(imodule),
                     Integer.valueOf(event.getContext().getContextId()));
             }
@@ -375,7 +375,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 cSql.deleteAppointmentsInFolder(folderID, event.getWriteCon());
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -413,7 +413,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 }
             }
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(event.getContext().getContextId()));
+            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(event.getContext().getContextId()));
         }
     }
 
@@ -467,7 +467,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 event.getWriteCon());
             set.addAll(tmp);
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         }
         /*
          * Update cache

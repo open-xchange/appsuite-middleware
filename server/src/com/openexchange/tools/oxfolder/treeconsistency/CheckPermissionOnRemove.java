@@ -70,6 +70,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
@@ -123,9 +124,9 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 removeSystemPermissions(lastModified, toRemove);
             }
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -149,9 +150,9 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 removeSystemPermissions(lastModified, toRemove);
             }
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         }
     }
 

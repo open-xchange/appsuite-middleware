@@ -52,7 +52,6 @@ package com.openexchange.tools.oxfolder;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.Category;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * OXFolderPermissionException
@@ -65,15 +64,15 @@ public class OXFolderPermissionException extends OXPermissionException {
 
     private static final transient Object EMPTY_ARGS = new Object[0];
 
-    public OXFolderPermissionException(final FolderCode code) {
+    public OXFolderPermissionException(final OXFolderExceptionCode code) {
         this(code, EMPTY_ARGS);
     }
 
-    public OXFolderPermissionException(final FolderCode code, final Object... messageArgs) {
+    public OXFolderPermissionException(final OXFolderExceptionCode code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
-    public OXFolderPermissionException(final FolderCode code, final Exception cause, final Object... messageArgs) {
+    public OXFolderPermissionException(final OXFolderExceptionCode code, final Exception cause, final Object... messageArgs) {
         super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), cause, messageArgs);
     }
 

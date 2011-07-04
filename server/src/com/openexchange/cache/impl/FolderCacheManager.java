@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
@@ -195,7 +195,7 @@ public final class FolderCacheManager {
         try {
             folderCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(FOLDER_CACHE_REGION_NAME);
         } catch (final CacheException e) {
-            throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e.getMessage());
         }
     }
 
@@ -211,7 +211,7 @@ public final class FolderCacheManager {
         try {
             folderCache.clear();
         } catch (final CacheException e) {
-            throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e.getMessage());
         }
         folderCache = null;
     }
@@ -392,7 +392,7 @@ public final class FolderCacheManager {
             throw new FolderCacheNotEnabledException();
         }
         if (!folderObj.containsObjectID()) {
-            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
+            throw new OXFolderException(OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
         }
         return putIfAbsentInternal(new InstanceFolderProvider(folderObj.clone()), ctx, elemAttribs);
     }
@@ -480,7 +480,7 @@ public final class FolderCacheManager {
             return;
         }
         if (!folderObj.containsObjectID()) {
-            throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
+            throw new OXFolderException(OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, I(-1), I(ctx.getContextId()));
         }
         if (null != elemAttribs) {
             /*

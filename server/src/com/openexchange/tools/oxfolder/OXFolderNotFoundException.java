@@ -67,7 +67,7 @@ public class OXFolderNotFoundException extends OXFolderException {
      * @param cid The context ID
      */
     public OXFolderNotFoundException(final int fuid, final Context ctx) {
-        super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()));
+        super(OXFolderExceptionCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()));
     }
 
     /**
@@ -77,7 +77,7 @@ public class OXFolderNotFoundException extends OXFolderException {
      * @param cid The context ID
      */
     public OXFolderNotFoundException(final String fuid, final Context ctx) {
-        super(FolderCode.NOT_EXISTS, fuid, Integer.valueOf(ctx.getContextId()));
+        super(OXFolderExceptionCode.NOT_EXISTS, fuid, Integer.valueOf(ctx.getContextId()));
     }
 
 }

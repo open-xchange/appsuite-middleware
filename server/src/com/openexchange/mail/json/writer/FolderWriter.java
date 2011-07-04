@@ -72,7 +72,7 @@ import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -653,7 +653,7 @@ public final class FolderWriter {
                     try {
                         retval += mapping[permission[i]] << shiftVal;
                     } catch (final Exception e) {
-                        throw new OXFolderException(FolderCode.MAP_PERMISSION_FAILED, e, Integer.valueOf(permission[i]));
+                        throw new OXFolderException(OXFolderExceptionCode.MAP_PERMISSION_FAILED, e, Integer.valueOf(permission[i]));
                     }
                 }
             }

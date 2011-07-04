@@ -72,7 +72,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -852,7 +852,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         } catch (final AbstractOXException e) {
             throw new OXFolderException(e);
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         } finally {
             if (iter != null) {
                 try {
@@ -952,7 +952,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     public final List<Integer> getSubfolderIds() throws OXFolderException {
         if (!b_subfolderIds) {
-            throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "subfolderIds", String.valueOf(getObjectID()), "");
+            throw new OXFolderException(OXFolderExceptionCode.ATTRIBUTE_NOT_SET, "subfolderIds", String.valueOf(getObjectID()), "");
         }
         return subfolderIds;
     }
@@ -977,7 +977,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 return new ArrayList<Integer>(0);
             }
             if (!enforce) {
-                throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "subfolderIds", String.valueOf(getObjectID()), "");
+                throw new OXFolderException(OXFolderExceptionCode.ATTRIBUTE_NOT_SET, "subfolderIds", String.valueOf(getObjectID()), "");
             }
             subfolderIds = getSubfolderIds(objectId, ctx, readCon);
             b_subfolderIds = true;
@@ -1118,9 +1118,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             try {
                 return OXFolderSQL.exists(getObjectID(), null, ctx);
             } catch (final DBPoolingException e) {
-                throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
             } catch (final SQLException e) {
-                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
             }
         } else if (containsParentFolderID() && containsFolderName() && containsModule()) {
             try {
@@ -1131,12 +1131,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 setObjectID(fuid);
                 return true;
             } catch (final DBPoolingException e) {
-                throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
             } catch (final SQLException e) {
-                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
             }
         }
-        throw new OXFolderException(FolderCode.UNSUFFICIENT_FOLDER_INFORMATION);
+        throw new OXFolderException(OXFolderExceptionCode.UNSUFFICIENT_FOLDER_INFORMATION);
     }
 
     /**

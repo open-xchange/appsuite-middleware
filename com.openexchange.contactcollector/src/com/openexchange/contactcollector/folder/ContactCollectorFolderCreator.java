@@ -72,7 +72,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 
@@ -107,7 +107,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         } catch (final SettingException e) {
             throw new LoginException(e);
         } catch (final SQLException e) {
-            throw new LoginException(new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage()));
+            throw new LoginException(new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage()));
         } catch (final AbstractOXException e) {
             throw new LoginException(e);
         } finally {
@@ -153,7 +153,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
                     true,
                     System.currentTimeMillis()).getObjectID();
         } catch (final OXFolderException folderException) {
-            if (folderException.getDetailNumber() == OXFolderException.FolderCode.NO_DUPLICATE_FOLDER.getNumber()) {
+            if (folderException.getDetailNumber() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
                 LOG.info(new StringBuilder("Found Folder with name of contact collect folder. Guess this is the dedicated folder."));
                 collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);
             }

@@ -62,7 +62,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * {@link FolderQueryCacheManager}
@@ -125,7 +125,7 @@ public final class FolderQueryCacheManager {
         try {
             folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
         } catch (final CacheException e) {
-            throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e.getMessage());
         }
     }
 
@@ -141,7 +141,7 @@ public final class FolderQueryCacheManager {
         try {
             folderQueryCache.clear();
         } catch (final CacheException e) {
-            throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e.getMessage());
         }
         folderQueryCache = null;
     }

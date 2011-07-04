@@ -55,7 +55,7 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -97,7 +97,7 @@ public class FolderRequest {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CLEAR)) {
             FOLDER_SERVLET.actionPutClearFolder(session, pw, jsonObject);
         } else {
-            throw new OXFolderException(FolderCode.UNKNOWN_ACTION, action);
+            throw new OXFolderException(OXFolderExceptionCode.UNKNOWN_ACTION, action);
         }
     }
 

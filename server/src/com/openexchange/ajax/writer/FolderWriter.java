@@ -76,7 +76,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -400,9 +400,9 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.endObject();
             }
         } catch (final JSONException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.JSON_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.JSON_ERROR, e, e.getMessage());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         } catch (final AbstractOXException e) {
             throw new OXFolderException(e);
         }
@@ -443,9 +443,9 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.endArray();
             }
         } catch (final JSONException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.JSON_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.JSON_ERROR, e, e.getMessage());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         } catch (final AbstractOXException e) {
             throw new OXFolderException(e);
         }
@@ -583,14 +583,14 @@ public final class FolderWriter extends DataWriter {
                                     }
                                 } catch (final SQLException e) {
                                     throw new OXFolderException(
-                                        FolderCode.MISSING_FOLDER_ATTRIBUTE,
+                                        OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE,
                                         e,
                                         FolderFields.OWN_RIGHTS,
                                         Integer.valueOf(fo.getObjectID()),
                                         Integer.valueOf(ctx.getContextId()));
                                 } catch (final DBPoolingException e) {
                                     throw new OXFolderException(
-                                        FolderCode.MISSING_FOLDER_ATTRIBUTE,
+                                        OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE,
                                         e,
                                         FolderFields.OWN_RIGHTS,
                                         Integer.valueOf(fo.getObjectID()),
@@ -622,9 +622,9 @@ public final class FolderWriter extends DataWriter {
                                         FolderCacheManager.getInstance().putFolderObject(fo, ctx);
                                     }
                                 } catch (final SQLException e) {
-                                    throw new OXFolderException(FolderCode.MISSING_PARAMETER, e, FolderFields.PERMISSIONS);
+                                    throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, e, FolderFields.PERMISSIONS);
                                 } catch (final DBPoolingException e) {
-                                    throw new OXFolderException(FolderCode.MISSING_PARAMETER, e, FolderFields.PERMISSIONS);
+                                    throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, e, FolderFields.PERMISSIONS);
                                 }
                             }
                             /*
@@ -659,7 +659,7 @@ public final class FolderWriter extends DataWriter {
                                 } catch (final DBPoolingException e) {
                                     throw new OXException(e);
                                 } catch (final SQLException e) {
-                                    throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+                                    throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
                                 }
                             }
                             /*
@@ -734,7 +734,7 @@ public final class FolderWriter extends DataWriter {
                     try {
                         retval += mapping[permission[i]] << shiftVal;
                     } catch (final Exception e) {
-                        throw new OXFolderException(FolderCode.MAP_PERMISSION_FAILED, e, Integer.valueOf(permission[i]));
+                        throw new OXFolderException(OXFolderExceptionCode.MAP_PERMISSION_FAILED, e, Integer.valueOf(permission[i]));
                     }
                 }
             }

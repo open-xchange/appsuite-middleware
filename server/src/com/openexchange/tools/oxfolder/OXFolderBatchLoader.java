@@ -69,7 +69,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * {@link OXFolderBatchLoader}
@@ -239,19 +238,19 @@ public final class OXFolderBatchLoader {
             if (loadSubfolderList) {
                 final SubfolderProcedure procedure = new SubfolderProcedure(getSubfolderIds(folderIds, ctx, readCon, table));
                 if (!folders.forEachValue(procedure)) {
-                    throw new OXFolderException(FolderCode.RUNTIME_ERROR, I(ctx.getContextId()));
+                    throw new OXFolderException(OXFolderExceptionCode.RUNTIME_ERROR, I(ctx.getContextId()));
                 }
             }
             if (loadPermissions) {
                 final TIntObjectHashMap<List<OCLPermission>> permissions = getFolderPermissions(folderIds, ctx, readCon, permTable);
                 final FolderPermissionProcedure procedure = new FolderPermissionProcedure(permissions);
                 if (!folders.forEachValue(procedure)) {
-                    throw new OXFolderException(FolderCode.RUNTIME_ERROR, I(ctx.getContextId()));
+                    throw new OXFolderException(OXFolderExceptionCode.RUNTIME_ERROR, I(ctx.getContextId()));
                 }
             }
             return folders;
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             throw new OXFolderException(e);
         }

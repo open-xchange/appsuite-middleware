@@ -68,7 +68,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
@@ -118,7 +118,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
         try {
             if (folder.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
                 throw new OXFolderException(
-                    FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
+                    OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
                     getUserName(session, user),
                     getFolderName(folder),
                     Integer.valueOf(ctx.getContextId()));
@@ -135,19 +135,19 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
             final EffectivePermission effectivePerm = folder.getEffectiveUserPermission(userId, userConfiguration);
             if (!effectivePerm.hasModuleAccess(folder.getModule())) {
                 throw new OXFolderException(
-                    FolderCode.NO_MODULE_ACCESS,
+                    OXFolderExceptionCode.NO_MODULE_ACCESS,
                     getUserName(session, user),
                     folderModule2String(folder.getModule()),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderVisible()) {
                 if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, Integer.valueOf(folder.getObjectID()), getUserName(
+                    throw new OXFolderPermissionException(OXFolderExceptionCode.NOT_VISIBLE, Integer.valueOf(folder.getObjectID()), getUserName(
                         session,
                         user), Integer.valueOf(ctx.getContextId()));
                 }
                 throw new OXFolderException(
-                    FolderCode.NOT_VISIBLE,
+                    OXFolderExceptionCode.NOT_VISIBLE,
                     Category.USER_CONFIGURATION,
                     Integer.valueOf(folder.getObjectID()),
                     getUserName(session, user),
@@ -157,9 +157,9 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folder, false, lastModified);
             return folder.getObjectID();
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         }
     }
 

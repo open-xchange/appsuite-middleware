@@ -74,6 +74,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -338,7 +339,7 @@ public class FolderWriter extends FolderChildWriter {
                     deletedQueue.add(fo);
                 }
             } catch (final SQLException e) {
-                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
             }
         }
 
@@ -366,7 +367,7 @@ public class FolderWriter extends FolderChildWriter {
                     deletedQueue.add(fo);
                 }
             } catch (final SQLException e) {
-                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
             }
         }
 
@@ -385,7 +386,7 @@ public class FolderWriter extends FolderChildWriter {
                     updatedQueue.add(fo);
                 }
             } catch (final SQLException e) {
-                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
             }
         }
 
@@ -407,7 +408,7 @@ public class FolderWriter extends FolderChildWriter {
                     updatedQueue.add(fo);
                 }
             } catch (final SQLException e) {
-                throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+                throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
             }
         }
 

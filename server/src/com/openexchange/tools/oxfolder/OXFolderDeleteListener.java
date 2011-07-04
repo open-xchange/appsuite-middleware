@@ -59,7 +59,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.deletelistener.OXFolderDeleteListenerHelper;
 
 /**
@@ -122,7 +121,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    if (mailadmin == -1) {
 		        mailadmin = OXFolderSQL.getContextMailAdmin(readCon, ctx);
 		        if (mailadmin == -1) {
-		            throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx.getContextId()));
+		            throw new OXFolderException(OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx.getContextId()));
 		        }
 		    }
 		    /*
@@ -200,7 +199,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    if (mailadmin == -1) {
 		        mailadmin = OXFolderSQL.getContextMailAdmin(readCon, ctx);
 		        if (mailadmin == -1) {
-		            throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx.getContextId()));
+		            throw new OXFolderException(OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx.getContextId()));
 		        }
 		    }
 		    /*

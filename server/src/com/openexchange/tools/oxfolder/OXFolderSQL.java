@@ -82,7 +82,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -146,7 +145,7 @@ public final class OXFolderSQL {
             }
             return set.toArray();
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
+            throw new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -1483,7 +1482,7 @@ public final class OXFolderSQL {
                     callWriteCon.rollback(); // ROLLBACK
                     callWriteCon.setAutoCommit(true);
                 }
-                throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(OXFolderExceptionCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
             }
         } finally {
             NEXTSERIAL_LOCK.unlock();

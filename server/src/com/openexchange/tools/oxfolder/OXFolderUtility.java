@@ -111,7 +111,7 @@ public final class OXFolderUtility {
                  * A duplicate folder exists
                  */
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.NO_DUPLICATE_FOLDER,
+                    OXFolderExceptionCode.NO_DUPLICATE_FOLDER,
                     parentFolderName,
                     Integer.valueOf(ctx.getContextId()));
             }
@@ -124,7 +124,7 @@ public final class OXFolderUtility {
                  * A duplicate folder exists
                  */
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.NO_DUPLICATE_FOLDER,
+                    OXFolderExceptionCode.NO_DUPLICATE_FOLDER,
                     parentFolderName,
                     Integer.valueOf(ctx.getContextId()));
             }
@@ -150,12 +150,12 @@ public final class OXFolderUtility {
             final Integer key = Integer.valueOf(permission.getEntity());
             if (set.contains(key)) {
                 if (permission.isGroupPermission()) {
-                    throw new OXFolderException(OXFolderException.FolderCode.DUPLICATE_GROUP_PERMISSION, getGroupName(
+                    throw new OXFolderException(OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION, getGroupName(
                         permission.getEntity(),
                         ctx));
                 }
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.DUPLICATE_USER_PERMISSION,
+                    OXFolderExceptionCode.DUPLICATE_USER_PERMISSION,
                     getUserName(permission.getEntity(), ctx));
             }
             set.add(key);
@@ -209,7 +209,7 @@ public final class OXFolderUtility {
             }
         }
         if (!affectedUsers.isEmpty()) {
-            throw new OXFolderException(OXFolderException.FolderCode.SIMILAR_NAMED_SHARED_FOLDER, folderName);
+            throw new OXFolderException(OXFolderExceptionCode.SIMILAR_NAMED_SHARED_FOLDER, folderName);
         }
     }
 
@@ -222,7 +222,7 @@ public final class OXFolderUtility {
     public static void checkFolderStringData(final FolderObject checkMe) throws OXFolderException {
         final String result;
         if (checkMe.containsFolderName() && (result = Check.containsInvalidChars(checkMe.getFolderName())) != null) {
-            throw new OXFolderException(OXFolderException.FolderCode.INVALID_DATA, result);
+            throw new OXFolderException(OXFolderExceptionCode.INVALID_DATA, result);
         }
     }
 
@@ -247,7 +247,7 @@ public final class OXFolderUtility {
             final OCLPermission oclPerm = iter.next();
             if (oclPerm.getEntity() < 0) {
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.INVALID_ENTITY,
+                    OXFolderExceptionCode.INVALID_ENTITY,
                     Integer.valueOf(oclPerm.getEntity()),
                     getFolderName(folderObj),
                     Integer.valueOf(ctx.getContextId()));
@@ -263,9 +263,9 @@ public final class OXFolderUtility {
             }
         }
         if (adminPermissionCount == 0) {
-            throw new OXFolderLogicException(OXFolderException.FolderCode.NO_FOLDER_ADMIN);
+            throw new OXFolderLogicException(OXFolderExceptionCode.NO_FOLDER_ADMIN);
         } else if (isDefaultFolder && !creatorIsAdmin) {
-            throw new OXFolderException(OXFolderException.FolderCode.CREATOR_IS_NOT_ADMIN, getUserName(creator, ctx), getFolderName(
+            throw new OXFolderException(OXFolderExceptionCode.CREATOR_IS_NOT_ADMIN, getUserName(creator, ctx), getFolderName(
                 folderObj.getObjectID(),
                 ctx));
         }
@@ -273,13 +273,13 @@ public final class OXFolderUtility {
 
     private static void checkPrivateAdminPerm(final int adminPermissionCount, final int creator, final OCLPermission oclPerm) throws OXFolderLogicException {
         if (adminPermissionCount > 1) {
-            throw new OXFolderLogicException(OXFolderException.FolderCode.ONLY_ONE_PRIVATE_FOLDER_ADMIN);
+            throw new OXFolderLogicException(OXFolderExceptionCode.ONLY_ONE_PRIVATE_FOLDER_ADMIN);
         }
         if (oclPerm.isGroupPermission()) {
-            throw new OXFolderLogicException(OXFolderException.FolderCode.NO_PRIVATE_FOLDER_ADMIN_GROUP);
+            throw new OXFolderLogicException(OXFolderExceptionCode.NO_PRIVATE_FOLDER_ADMIN_GROUP);
         }
         if (creator != oclPerm.getEntity()) {
-            throw new OXFolderLogicException(OXFolderException.FolderCode.ONLY_PRIVATE_FOLDER_OWNER_ADMIN);
+            throw new OXFolderLogicException(OXFolderExceptionCode.ONLY_PRIVATE_FOLDER_OWNER_ADMIN);
         }
     }
 
@@ -304,7 +304,7 @@ public final class OXFolderUtility {
                  * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
                  */
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.SHARE_FORBIDDEN,
+                    OXFolderExceptionCode.SHARE_FORBIDDEN,
                     getUserName(sessionUserConfig.getUserId(), ctx),
                     getFolderName(folderObj),
                     Integer.valueOf(ctx.getContextId()));
@@ -336,7 +336,7 @@ public final class OXFolderUtility {
                 final OCLPermission newPerm = newPerms[i];
                 if (newPerm.isGroupPermission()) {
                     final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                    throw new OXFolderException(OXFolderException.FolderCode.NO_GROUP_PERMISSION, null == i18nName ? getFolderName(
+                    throw new OXFolderException(OXFolderExceptionCode.NO_GROUP_PERMISSION, null == i18nName ? getFolderName(
                         folderId,
                         ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
                 }
@@ -350,7 +350,7 @@ public final class OXFolderUtility {
                 final OCLPermission newPerm = newPerms[i];
                 if (!newPerm.isGroupPermission() && newPerm.getEntity() != admin) {
                     final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                    throw new OXFolderException(OXFolderException.FolderCode.NO_INDIVIDUAL_PERMISSION, null == i18nName ? getFolderName(
+                    throw new OXFolderException(OXFolderExceptionCode.NO_INDIVIDUAL_PERMISSION, null == i18nName ? getFolderName(
                         folderId,
                         ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
                 }
@@ -370,7 +370,7 @@ public final class OXFolderUtility {
             toCheck,
             allowedObjectPermissions) || toCheck.getFolderPermission() > maxAllowedFolderPermission) {
             final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-            throw new OXFolderException(OXFolderException.FolderCode.FOLDER_VISIBILITY_PERMISSION_ONLY, null == i18nName ? getFolderName(
+            throw new OXFolderException(OXFolderExceptionCode.FOLDER_VISIBILITY_PERMISSION_ONLY, null == i18nName ? getFolderName(
                 folderId,
                 ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
         }
@@ -470,7 +470,7 @@ public final class OXFolderUtility {
                     getMaxApplicablePermission(folderObj, userConfigStorage.getUserConfiguration(assignedPerm.getEntity(), ctx));
                 if (!isApplicable(maxApplicablePerm, assignedPerm)) {
                     throw new OXFolderException(
-                        OXFolderException.FolderCode.UNAPPLICABLE_FOLDER_PERM,
+                        OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM,
                         getUserName(assignedPerm.getEntity(), ctx),
                         getFolderName(folderObj),
                         Integer.valueOf(ctx.getContextId()));
@@ -534,7 +534,7 @@ public final class OXFolderUtility {
                 pownerFound = true;
             } else if (cur.isFolderAdmin()) {
                 throw new OXFolderException(
-                    OXFolderException.FolderCode.INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION,
+                    OXFolderExceptionCode.INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION,
                     getUserName(userId, ctx),
                     getFolderName(folderObj),
                     Integer.valueOf(ctx.getContextId()),
@@ -587,7 +587,7 @@ public final class OXFolderUtility {
         } else if (parentModule == FolderObject.INFOSTORE) {
             return (newFolderModule == FolderObject.INFOSTORE);
         } else {
-            throw new OXFolderException(OXFolderException.FolderCode.UNKNOWN_MODULE, Integer.valueOf(parentModule), Integer.valueOf(cid));
+            throw new OXFolderException(OXFolderExceptionCode.UNKNOWN_MODULE, Integer.valueOf(parentModule), Integer.valueOf(cid));
         }
         return true;
     }

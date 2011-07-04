@@ -51,7 +51,6 @@ package com.openexchange.tools.oxfolder;
 
 import com.openexchange.exception.Category;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * Thrown during invocations of methods from class <code>OXFolderAction</code> to indicate logical errors during add, update, delete or move
@@ -63,24 +62,24 @@ public class OXFolderLogicException extends OXException {
 
     private static final long serialVersionUID = 8726469144997944494L;
 
-    public OXFolderLogicException(final FolderCode code) {
+    public OXFolderLogicException(final OXFolderExceptionCode code) {
         this(code, new Object[0]);
     }
 
-    public OXFolderLogicException(final FolderCode code, final Object... messageArgs) {
+    public OXFolderLogicException(final OXFolderExceptionCode code, final Object... messageArgs) {
         super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), null, messageArgs);
     }
 
-    public OXFolderLogicException(final FolderCode code, final String messagePrefix) {
+    public OXFolderLogicException(final OXFolderExceptionCode code, final String messagePrefix) {
         this(code, messagePrefix, new Object[0]);
     }
 
-    public OXFolderLogicException(final FolderCode code, final String messagePrefix, final Object... messageArgs) {
+    public OXFolderLogicException(final OXFolderExceptionCode code, final String messagePrefix, final Object... messageArgs) {
         super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), new StringBuilder().append(messagePrefix).append(
             code.getMessage()).toString(), null, messageArgs);
     }
 
-    public OXFolderLogicException(final FolderCode code, final Exception cause, final boolean insertCauseMsg, final Object... messageArgs) {
+    public OXFolderLogicException(final OXFolderExceptionCode code, final Exception cause, final boolean insertCauseMsg, final Object... messageArgs) {
         super(
             EnumComponent.FOLDER,
             Category.PERMISSION,

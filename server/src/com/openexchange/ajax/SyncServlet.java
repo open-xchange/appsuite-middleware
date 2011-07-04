@@ -77,7 +77,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -226,7 +226,7 @@ public class SyncServlet extends PermissionServlet {
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
 					} else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
 					    throw new OXFolderException(
-                            OXFolderException.FolderCode.NO_ADMIN_ACCESS,
+                            OXFolderExceptionCode.NO_ADMIN_ACCESS,
                             getUserName(sessionObj.getUserId(), ctx),
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
@@ -304,7 +304,7 @@ public class SyncServlet extends PermissionServlet {
 			throws OXException {
 		final String paramVal = req.getParameter(paramName);
 		if (paramVal == null) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, paramName);
+			throw new OXFolderException(OXFolderExceptionCode.MISSING_PARAMETER, paramName);
 		}
 		return paramVal;
 	}

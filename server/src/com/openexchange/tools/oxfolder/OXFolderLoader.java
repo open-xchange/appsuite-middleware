@@ -65,7 +65,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * {@link OXFolderLoader}
@@ -172,13 +171,13 @@ public final class OXFolderLoader {
             }
         } catch (final SQLException e) {
             throw new OXFolderException(
-                FolderCode.FOLDER_COULD_NOT_BE_LOADED,
+                OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED,
                 e,
                 String.valueOf(folderId),
                 String.valueOf(ctx.getContextId()));
         } catch (final DBPoolingException e) {
             throw new OXFolderException(
-                FolderCode.FOLDER_COULD_NOT_BE_LOADED,
+                OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED,
                 e,
                 String.valueOf(folderId),
                 String.valueOf(ctx.getContextId()));

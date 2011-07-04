@@ -73,6 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
@@ -122,7 +123,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
             } catch (final DBPoolingException e) {
                 throw new LoginException(e);
             } catch (final SQLException e) {
-                throw new LoginException(new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage()));
+                throw new LoginException(new OXFolderException(OXFolderExceptionCode.SQL_ERROR, e, e.getMessage()));
             } catch (final OXFolderException e) {
                 throw new LoginException(e);
             } catch (final OXException e) {

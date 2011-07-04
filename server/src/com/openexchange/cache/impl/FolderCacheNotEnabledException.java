@@ -53,6 +53,7 @@ package com.openexchange.cache.impl;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * FolderCacheNotEnabledException
@@ -67,12 +68,12 @@ public class FolderCacheNotEnabledException extends OXFolderException {
 	private static final String FOLDER_CACHE_PROPFILE = SystemConfig.getProperty("FOLDERCACHEPROPERTIES");
 
 	public FolderCacheNotEnabledException() {
-		super(FolderCode.CACHE_NOT_ENABLED);
+		super(OXFolderExceptionCode.CACHE_NOT_ENABLED);
 		setMessageArgs(FOLDER_CACHE_PROPFILE);
 	}
 
 	public FolderCacheNotEnabledException(final Exception cause) {
-		super(FolderCode.CACHE_NOT_ENABLED, cause, FOLDER_CACHE_PROPFILE);
+		super(OXFolderExceptionCode.CACHE_NOT_ENABLED, cause, FOLDER_CACHE_PROPFILE);
 	}
 
 }
