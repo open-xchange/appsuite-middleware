@@ -80,6 +80,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.groupware.downgrade.DowngradeFailedExceptionCode;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -151,7 +152,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             removeAppointmentsWithOnlyTheUserAsParticipant(downgradeEvent.getSession(),downgradeEvent.getContext(),downgradeEvent.getNewUserConfiguration().getUserId(), downgradeEvent.getWriteCon());
         } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getMessage());
+            throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
             throw new DowngradeFailedException(e);
         }
@@ -201,7 +202,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
         } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getMessage());
+            throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
             throw new DowngradeFailedException(e);
         } finally {
@@ -276,7 +277,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             throw new DowngradeFailedException(e);
         } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getMessage());
+            throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             CalendarCollection collection = new CalendarCollection();
             for(final Statement stmt : statements) {

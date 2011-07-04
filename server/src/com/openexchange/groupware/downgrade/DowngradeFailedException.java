@@ -49,108 +49,18 @@
 
 package com.openexchange.groupware.downgrade;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link DowngradeFailedException} - Thrown if a downgrade event cannot be
- * performed
+ * {@link DowngradeFailedException} - Thrown if a downgrade event cannot be performed
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
-public class DowngradeFailedException extends AbstractOXException {
+public class DowngradeFailedException extends OXException {
 
-	/**
-	 * Serial version UID
-	 */
-	private static final long serialVersionUID = 4758389272199816473L;
-
-	public static enum Code {
-
-		/**
-		 * A SQL error occurred: %1$s
-		 */
-		SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 1),
-		/**
-		 * An error occurred: %1$s
-		 */
-		ERROR("An error occurred: %1$s", Category.CODE_ERROR, 2);
-
-		private final String message;
-
-		private final Category category;
-
-		private final int detailNumber;
-
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.category = category;
-			this.detailNumber = detailNumber;
-		}
-
-		public final Category getCategory() {
-			return category;
-		}
-
-		public final int getDetailNumber() {
-			return detailNumber;
-		}
-
-		public final String getMessage() {
-			return message;
-		}
-	}
-
-	/**
-	 * Initializes a new {@link DowngradeFailedException} from specified cause
-	 * exception
-	 * 
-	 * @param cause
-	 *            The cause exception
-	 */
-	public DowngradeFailedException(final AbstractOXException cause) {
-		super(cause);
-	}
-
-	private static final transient Object[] EMPTY_ARGS = new Object[0];
-
-	/**
-	 * Initializes a new {@link DowngradeFailedException}
-	 * 
-	 * @param code
-	 *            The error code
-	 */
-	public DowngradeFailedException(final DowngradeFailedException.Code code) {
-		this(code, null, EMPTY_ARGS);
-	}
-
-	/**
-	 * Initializes a new {@link DowngradeFailedException}
-	 * 
-	 * @param code
-	 *            The error code
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public DowngradeFailedException(final DowngradeFailedException.Code code, final Object... messageArgs) {
-		this(code, null, messageArgs);
-	}
-
-	/**
-	 * Initializes a new {@link DowngradeFailedException}
-	 * 
-	 * @param code
-	 *            The error code
-	 * @param cause
-	 *            The cause exception
-	 * @param messageArgs
-	 *            The message arguments
-	 */
-	public DowngradeFailedException(final DowngradeFailedException.Code code, final Throwable cause,
-			final Object... messageArgs) {
-		super(EnumComponent.DOWNGRADE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
-		setMessageArgs(messageArgs);
-	}
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = 4758389272199816473L;
 
 }
