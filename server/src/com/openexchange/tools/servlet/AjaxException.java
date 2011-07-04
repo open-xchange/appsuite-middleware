@@ -101,7 +101,7 @@ public class AjaxException extends AbstractOXException {
      * 
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    public enum Code {
+    public static enum Code {
         /**
          * Unknown AJAX action: %s.
          */
