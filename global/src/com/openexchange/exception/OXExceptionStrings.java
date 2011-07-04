@@ -60,7 +60,10 @@ import com.openexchange.i18n.LocalizableStrings;
 public final class OXExceptionStrings implements LocalizableStrings {
 
     // The default message displayed to user.
-    public static final String MESSAGE = "An error occurred. Please try again later.";
+    public static final String MESSAGE = "An error occurred. There is nothing you can do about at the moment.";
+
+    // The default message displayed to user.
+    public static final String MESSAGE_RETRY = "An error occurred. Please try again later.";
 
     /**
      * Initializes a new {@link OXExceptionStrings}.
