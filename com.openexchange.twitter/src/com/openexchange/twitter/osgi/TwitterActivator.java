@@ -56,10 +56,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterService;
-import com.openexchange.twitter.exception.TwitterExceptionFactory;
 import com.openexchange.twitter.internal.TwitterServiceImpl;
 
 /**
@@ -68,8 +65,6 @@ import com.openexchange.twitter.internal.TwitterServiceImpl;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterActivator implements BundleActivator {
-
-    private ComponentRegistration componentRegistration;
 
     private List<ServiceTracker> trackers;
 
@@ -88,15 +83,6 @@ public final class TwitterActivator implements BundleActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.twitter");
             }
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    TwitterException.COMPONENT,
-                    "com.openexchange.twitter",
-                    TwitterExceptionFactory.getInstance());
             /*
              * Service trackers
              */
@@ -140,13 +126,6 @@ public final class TwitterActivator implements BundleActivator {
                     tracker.close();
                 }
                 trackers = null;
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
         } catch (final Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.twitter: " + e.getMessage(), e);

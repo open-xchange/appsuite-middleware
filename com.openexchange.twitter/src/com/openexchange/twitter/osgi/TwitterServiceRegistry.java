@@ -49,7 +49,7 @@
 
 package com.openexchange.twitter.osgi;
 
-import com.openexchange.server.ServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -84,9 +84,9 @@ public final class TwitterServiceRegistry {
      * @param clazz The service's class
      * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
      * @return The service if found; otherwise <code>null</code> if <code>errorOnAbsence</code> is <code>false</code>
-     * @throws ServiceException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
+     * @throws OXException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
      */
-    public static <S> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws ServiceException {
+    public static <S> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws OXException {
         return SERVICE_REGISTRY.getService(clazz, errorOnAbsence);
     }
 

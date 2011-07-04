@@ -52,11 +52,11 @@ package com.openexchange.twitter.internal;
 import java.util.ArrayList;
 import java.util.List;
 import twitter4j.OXTwitter;
+import com.openexchange.exception.OXException;
 import com.openexchange.twitter.DirectMessage;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.TwitterAccess;
-import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterExceptionCodes;
 import com.openexchange.twitter.User;
 
@@ -86,7 +86,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         this.twitter4jTwitter = twitter4jTwitter;
     }
 
-    public List<DirectMessage> getDirectMessages() throws TwitterException {
+    public List<DirectMessage> getDirectMessages() throws OXException {
         try {
             final List<twitter4j.DirectMessage> l = twitter4jTwitter.getDirectMessages();
 
@@ -100,7 +100,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public List<DirectMessage> getDirectMessages(final Paging paging) throws TwitterException {
+    public List<DirectMessage> getDirectMessages(final Paging paging) throws OXException {
         try {
             final List<twitter4j.DirectMessage> l = twitter4jTwitter.getDirectMessages(pagingFrom(paging));
 
@@ -114,7 +114,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public List<Status> getFriendsTimeline() throws TwitterException {
+    public List<Status> getFriendsTimeline() throws OXException {
         try {
             final List<twitter4j.Status> l = twitter4jTwitter.getFriendsTimeline();
 
@@ -128,7 +128,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public List<Status> getFriendsTimeline(final Paging paging) throws TwitterException {
+    public List<Status> getFriendsTimeline(final Paging paging) throws OXException {
         try {
             final List<twitter4j.Status> l = twitter4jTwitter.getFriendsTimeline(pagingFrom(paging));
 
@@ -142,7 +142,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public List<Status> getHomeTimeline() throws TwitterException {
+    public List<Status> getHomeTimeline() throws OXException {
         try {
             final List<twitter4j.Status> l = twitter4jTwitter.getHomeTimeline();
 
@@ -156,7 +156,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public List<Status> getHomeTimeline(final Paging paging) throws TwitterException {
+    public List<Status> getHomeTimeline(final Paging paging) throws OXException {
         try {
             final List<twitter4j.Status> l = twitter4jTwitter.getHomeTimeline(pagingFrom(paging));
 
@@ -170,7 +170,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public DirectMessage sendDirectMessage(final String id, final String text) throws TwitterException {
+    public DirectMessage sendDirectMessage(final String id, final String text) throws OXException {
         try {
             return new DirectMessageImpl(twitter4jTwitter.sendDirectMessage(id, text));
         } catch (final twitter4j.TwitterException e) {
@@ -178,7 +178,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public Status updateStatus(final String status) throws TwitterException {
+    public Status updateStatus(final String status) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.updateStatus(status));
         } catch (final twitter4j.TwitterException e) {
@@ -186,7 +186,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public Status updateStatus(final String status, final long inReplyToStatusId) throws TwitterException {
+    public Status updateStatus(final String status, final long inReplyToStatusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.updateStatus(status, inReplyToStatusId));
         } catch (final twitter4j.TwitterException e) {
@@ -194,7 +194,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public Status retweetStatus(final long statusId) throws TwitterException {
+    public Status retweetStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.retweetStatus(statusId));
         } catch (final twitter4j.TwitterException e) {
@@ -202,7 +202,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public Status destroyStatus(final long statusId) throws TwitterException {
+    public Status destroyStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.destroyStatus(statusId));
         } catch (final twitter4j.TwitterException e) {
@@ -210,7 +210,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
-    public Status showStatus(final long statusId) throws TwitterException {
+    public Status showStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.showStatusAuthenticated(statusId));
         } catch (final twitter4j.TwitterException e) {
@@ -226,7 +226,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         return twitter4jTwitter.getUserId();
     }
 
-    public User getUser() throws TwitterException {
+    public User getUser() throws OXException {
         User tmp = user;
         if (null == tmp) {
             // No need for synchronization
@@ -239,7 +239,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
         return tmp;
     }
 
-    public User showUser(final String id) throws TwitterException {
+    public User showUser(final String id) throws OXException {
         try {
             return new UserImpl(twitter4jTwitter.showUser(id));
         } catch (final twitter4j.TwitterException e) {

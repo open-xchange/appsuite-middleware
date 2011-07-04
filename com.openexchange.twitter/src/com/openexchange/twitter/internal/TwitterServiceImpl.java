@@ -66,10 +66,10 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.openexchange.exception.OXException;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.TwitterAccess;
 import com.openexchange.twitter.TwitterAccessToken;
-import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterExceptionCodes;
 import com.openexchange.twitter.TwitterService;
 
@@ -104,7 +104,7 @@ public final class TwitterServiceImpl implements TwitterService {
         return new PagingImpl(new twitter4j.Paging());
     }
 
-    public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) throws TwitterException {
+    public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) throws OXException {
         final OXTwitter twitter = new twitter4j.OXTwitter();
         /*
          * Insert the appropriate consumer key and consumer secret here
@@ -119,7 +119,7 @@ public final class TwitterServiceImpl implements TwitterService {
         return new TwitterAccessImpl(twitter);
     }
 
-    public TwitterAccessToken getTwitterAccessToken(final String twitterId, final String password) throws TwitterException {
+    public TwitterAccessToken getTwitterAccessToken(final String twitterId, final String password) throws OXException {
         try {
             final Twitter twitter = new Twitter();
             /*
@@ -175,9 +175,9 @@ public final class TwitterServiceImpl implements TwitterService {
      * @param password The twitter account password
      * @param requestToken The request token providing authorization URL
      * @return The PIN from authorization URL if any found; otherwise an empty string
-     * @throws TwitterException If crawling the PIN fails
+     * @throws OXException If crawling the PIN fails
      */
-    private static String crawlPINFromAuthURL(final String twitterId, final String password, final RequestToken requestToken) throws TwitterException {
+    private static String crawlPINFromAuthURL(final String twitterId, final String password, final RequestToken requestToken) throws OXException {
         try {
             String pin = "";
             final BrowserVersion browser = BrowserVersion.FIREFOX_3;

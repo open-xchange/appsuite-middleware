@@ -24,6 +24,7 @@ Bundle-ClassPath: .,
  lib/twitter4j-2.0.10-sources.jar,
  lib/xalan-2.7.1.jar
 Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.exceptions,
  com.openexchange.exceptions.osgi,
  com.openexchange.groupware,

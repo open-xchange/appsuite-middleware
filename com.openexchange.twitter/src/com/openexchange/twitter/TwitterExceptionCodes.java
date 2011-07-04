@@ -49,41 +49,44 @@
 
 package com.openexchange.twitter;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.twitter.exception.TwitterExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link TwitterExceptionCodes} - Enumeration about all {@link TwitterException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum TwitterExceptionCodes implements OXErrorMessage {
+public enum TwitterExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(TwitterExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(TwitterExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY(TwitterExceptionMessages.MISSING_PROPERTY_MSG, Category.CODE_ERROR, 2),
+    MISSING_PROPERTY(TwitterExceptionMessages.MISSING_PROPERTY_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY(TwitterExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 3),
+    INVALID_PROPERTY(TwitterExceptionMessages.INVALID_PROPERTY_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * The consumer key/consumer secret pair is missing in configuration.
      */
-    MISSING_CONSUMER_KEY_SECRET(TwitterExceptionMessages.MISSING_CONSUMER_KEY_SECRET_MSG, Category.CODE_ERROR, 4),
+    MISSING_CONSUMER_KEY_SECRET(TwitterExceptionMessages.MISSING_CONSUMER_KEY_SECRET_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * The access token for twitter user %1$s could not be obtained.
      */
-    ACCESS_TOKEN_FAILED(TwitterExceptionMessages.ACCESS_TOKEN_FAILED_MSG, Category.CODE_ERROR, 5),
+    ACCESS_TOKEN_FAILED(TwitterExceptionMessages.ACCESS_TOKEN_FAILED_MSG, Category.CATEGORY_ERROR, 5),
     /**
-     * The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.
+     * The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through
+     * configuration.
      */
-    INVALID_CONSUMER_KEY_SECRET(TwitterExceptionMessages.INVALID_CONSUMER_KEY_SECRET_MSG, Category.CODE_ERROR, 6);
+    INVALID_CONSUMER_KEY_SECRET(TwitterExceptionMessages.INVALID_CONSUMER_KEY_SECRET_MSG, Category.CATEGORY_ERROR, 6);
 
     private final Category category;
 
@@ -91,10 +94,17 @@ public enum TwitterExceptionCodes implements OXErrorMessage {
 
     private final String message;
 
+    private final boolean display;
+
     private TwitterExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
+    }
+
+    public String getPrefix() {
+        return "TWITTER";
     }
 
     public Category getCategory() {
@@ -105,32 +115,47 @@ public enum TwitterExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return create(new Object[0]);
     }
 
     /**
-     * Creates a new twitter exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public TwitterException create(final Object... messageArgs) {
-        return TwitterExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create(final Object... args) {
+        return create((Throwable) null, args);
     }
 
     /**
-     * Creates a new twitter exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public TwitterException create(final Throwable cause, final Object... messageArgs) {
-        return TwitterExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Throwable cause, final Object... args) {
+        final OXException ret;
+        if (display) {
+            ret = new OXException(detailNumber, message, cause, args);
+        } else {
+            ret =
+                new OXException(
+                    detailNumber,
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
+        }
+        return ret.addCategory(category).setPrefix(getPrefix());
     }
 }
