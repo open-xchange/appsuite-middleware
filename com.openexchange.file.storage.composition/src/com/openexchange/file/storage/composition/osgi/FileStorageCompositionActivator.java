@@ -50,11 +50,8 @@
 package com.openexchange.file.storage.composition.osgi;
 
 import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.file.storage.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;

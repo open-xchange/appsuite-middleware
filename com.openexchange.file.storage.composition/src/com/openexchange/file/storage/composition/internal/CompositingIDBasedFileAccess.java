@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static com.openexchange.file.storage.composition.internal.IDManglingFileCustomizer.fixIDs;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,16 +60,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.AbstractTimedResult;
@@ -80,7 +81,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tx.AbstractService;
 import com.openexchange.tx.TransactionException;
-import static com.openexchange.file.storage.composition.internal.IDManglingFileCustomizer.*;
 
 /**
  * {@link CompositingIDBasedFileAccess}
@@ -91,24 +91,24 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     protected Session session;
     
-    private ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
-    private ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
+    private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
+    private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
     
-    public CompositingIDBasedFileAccess(Session session) {
+    public CompositingIDBasedFileAccess(final Session session) {
         super();
         this.session = session;
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
         accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
     }
 
-    public boolean exists(String id, int version) throws OXException {
-        FileID fileID = new FileID(id);
+    public boolean exists(final String id, final int version) throws OXException {
+        final FileID fileID = new FileID(id);
         return getFileAccess(fileID.getService(), fileID.getAccountId()).exists(fileID.getFolderId(), fileID.getFileId(), version);
     }
 
-    public Delta<File> getDelta(String folderId, long updateSince, List<Field> columns, boolean ignoreDeleted) throws OXException {
-        FolderID folderID = new FolderID(folderId);
-        Delta<File> delta = getFileAccess(folderID.getService(), folderID.getAccountId()).getDelta(
+    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> columns, final boolean ignoreDeleted) throws OXException {
+        final FolderID folderID = new FolderID(folderId);
+        final Delta<File> delta = getFileAccess(folderID.getService(), folderID.getAccountId()).getDelta(
             folderID.getFolderId(),
             updateSince,
             addIDColumns(columns),
@@ -116,9 +116,9 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(delta, folderID.getService(), folderID.getAccountId());
     }
 
-    public Delta<File> getDelta(String folderId, long updateSince, List<Field> columns, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        FolderID folderID = new FolderID(folderId);
-        Delta<File> delta = getFileAccess(folderID.getService(), folderID.getAccountId()).getDelta(
+    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> columns, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
+        final FolderID folderID = new FolderID(folderId);
+        final Delta<File> delta = getFileAccess(folderID.getService(), folderID.getAccountId()).getDelta(
             folderID.getFolderId(),
             updateSince,
             addIDColumns(columns),
@@ -128,26 +128,26 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(delta, folderID.getService(), folderID.getAccountId());
     }
 
-    public InputStream getDocument(String id, int version) throws OXException {
-        FileID fileID = new FileID(id);
+    public InputStream getDocument(final String id, final int version) throws OXException {
+        final FileID fileID = new FileID(id);
 
         return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
     }
 
-    public TimedResult<File> getDocuments(String folderId) throws OXException {
-        FolderID folderID = new FolderID(folderId);
-        TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId());
+    public TimedResult<File> getDocuments(final String folderId) throws OXException {
+        final FolderID folderID = new FolderID(folderId);
+        final TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId());
         return fixIDs(result, folderID.getService(), folderID.getAccountId());
     }
 
-    public TimedResult<File> getDocuments(String folderId, List<Field> columns) throws OXException {
-        FolderID folderID = new FolderID(folderId);
+    public TimedResult<File> getDocuments(final String folderId, final List<Field> columns) throws OXException {
+        final FolderID folderID = new FolderID(folderId);
         return getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId(), addIDColumns(columns));
     }
 
-    public TimedResult<File> getDocuments(String folderId, List<Field> columns, Field sort, SortDirection order) throws OXException {
-        FolderID folderID = new FolderID(folderId);
-        TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(
+    public TimedResult<File> getDocuments(final String folderId, final List<Field> columns, final Field sort, final SortDirection order) throws OXException {
+        final FolderID folderID = new FolderID(folderId);
+        final TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(
             folderID.getFolderId(),
             addIDColumns(columns),
             sort,
@@ -155,53 +155,54 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(result, folderID.getService(), folderID.getAccountId());
     }
 
-    public TimedResult<File> getDocuments(List<String> ids, List<Field> columns) throws OXException {
+    public TimedResult<File> getDocuments(final List<String> ids, final List<Field> columns) throws OXException {
         final List<File> files = new ArrayList<File>(100);
-        for (String id : ids) {
+        for (final String id : ids) {
             if(exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
-                File fileMetadata = getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                final File fileMetadata = getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
                 files.add(fileMetadata);
             }
         }
 
         return new AbstractTimedResult<File>(new SearchIteratorAdapter<File>(files.iterator())) {
 
-            protected long extractTimestamp(File object) {
+            @Override
+            protected long extractTimestamp(final File object) {
                 return object.getSequenceNumber();
             }
 
         };
     }
 
-    public File getFileMetadata(String id, int version) throws OXException {
-        FileID fileID = new FileID(id);
-        File fileMetadata = getFileAccess(fileID.getService(), fileID.getAccountId()).getFileMetadata(
+    public File getFileMetadata(final String id, final int version) throws OXException {
+        final FileID fileID = new FileID(id);
+        final File fileMetadata = getFileAccess(fileID.getService(), fileID.getAccountId()).getFileMetadata(
             fileID.getFolderId(),
             fileID.getFileId(),
             version);
         return fixIDs(fileMetadata, fileID.getService(), fileID.getAccountId());
     }
 
-    public TimedResult<File> getVersions(String id) throws OXException {
-        FileID fileID = new FileID(id);
-        TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
+    public TimedResult<File> getVersions(final String id) throws OXException {
+        final FileID fileID = new FileID(id);
+        final TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
             fileID.getFolderId(),
             fileID.getFileId());
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
-    public TimedResult<File> getVersions(String id, List<Field> columns) throws OXException {
-        FileID fileID = new FileID(id);
-        TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
+    public TimedResult<File> getVersions(final String id, final List<Field> columns) throws OXException {
+        final FileID fileID = new FileID(id);
+        final TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
             fileID.getFolderId(),
             fileID.getFileId(),
             addIDColumns(columns));
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
-    public TimedResult<File> getVersions(String id, List<Field> columns, Field sort, SortDirection order) throws OXException {
-        FileID fileID = new FileID(id);
-        TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
+    public TimedResult<File> getVersions(final String id, final List<Field> columns, final Field sort, final SortDirection order) throws OXException {
+        final FileID fileID = new FileID(id);
+        final TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
             fileID.getFolderId(),
             fileID.getFileId(),
             addIDColumns(columns),
@@ -210,22 +211,22 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
-    public void lock(String id, long diff) throws OXException {
-        FileID fileID = new FileID(id);
+    public void lock(final String id, final long diff) throws OXException {
+        final FileID fileID = new FileID(id);
         getFileAccess(fileID.getService(), fileID.getAccountId()).lock(fileID.getFolderId(), fileID.getFileId(), diff);
     }
 
-    public void removeDocument(String folderId, long sequenceNumber) throws OXException {
-        FolderID id = new FolderID(folderId);
+    public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
+        final FolderID id = new FolderID(folderId);
 
         getFileAccess(id.getService(), id.getAccountId()).removeDocument(id.getFolderId(), sequenceNumber);
     }
 
-    public List<String> removeDocument(List<String> ids, long sequenceNumber) throws OXException {
-        Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = new HashMap<FileStorageFileAccess, List<IDTuple>>();
-        for (String id : ids) {
-            FileID fileID = new FileID(id);
-            FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+    public List<String> removeDocument(final List<String> ids, final long sequenceNumber) throws OXException {
+        final Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = new HashMap<FileStorageFileAccess, List<IDTuple>>();
+        for (final String id : ids) {
+            final FileID fileID = new FileID(id);
+            final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
 
             List<IDTuple> deletes = deleteOperations.get(fileAccess);
             if (deletes == null) {
@@ -236,13 +237,13 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
             deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));
         }
 
-        List<String> notDeleted = new ArrayList<String>(ids.size());
+        final List<String> notDeleted = new ArrayList<String>(ids.size());
 
-        for (Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
-            FileStorageFileAccess access = deleteOp.getKey();
-            List<IDTuple> conflicted = access.removeDocument(deleteOp.getValue(), sequenceNumber);
-            for (IDTuple tuple : conflicted) {
-                FileStorageAccountAccess accountAccess = access.getAccountAccess();
+        for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
+            final FileStorageFileAccess access = deleteOp.getKey();
+            final List<IDTuple> conflicted = access.removeDocument(deleteOp.getValue(), sequenceNumber);
+            for (final IDTuple tuple : conflicted) {
+                final FileStorageAccountAccess accountAccess = access.getAccountAccess();
                 notDeleted.add(new FileID(
                     accountAccess.getService().getId(),
                     accountAccess.getAccountId(),
@@ -253,8 +254,8 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return notDeleted;
     }
 
-    public int[] removeVersion(String id, int[] versions) throws OXException {
-        FileID fileID = new FileID(id);
+    public int[] removeVersion(final String id, final int[] versions) throws OXException {
+        final FileID fileID = new FileID(id);
 
         return getFileAccess(fileID.getService(), fileID.getAccountId()).removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
     }
@@ -264,14 +265,14 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         public void call(FileStorageFileAccess access) throws OXException;
     }
 
-    protected void save(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, FileAccessDelegation delegation) throws OXException {
-        String id = document.getId();
+    protected void save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation delegation) throws OXException {
+        final String id = document.getId();
         FolderID folderID = null;
         if(document.getFolderId() != null) {
             folderID = new FolderID(document.getFolderId());
         } 
         if (id != FileStorageFileAccess.NEW) {
-            FileID fileID = new FileID(id);
+            final FileID fileID = new FileID(id);
             if(folderID == null) {
                 folderID = new FolderID(fileID.getService(), fileID.getAccountId(), fileID.getFolderId());
             }
@@ -292,15 +293,15 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     }
 
-    protected void move(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns) throws OXException {
-        FileID id = new FileID(document.getId()); // signifies the source
-        FolderID folderId = new FolderID(document.getFolderId()); // signifies the destination
+    protected void move(final File document, InputStream data, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
+        final FileID id = new FileID(document.getId()); // signifies the source
+        final FolderID folderId = new FolderID(document.getFolderId()); // signifies the destination
 
-        boolean partialUpdate = modifiedColumns != null && !modifiedColumns.isEmpty();
-        boolean hasUpload = data != null;
+        final boolean partialUpdate = modifiedColumns != null && !modifiedColumns.isEmpty();
+        final boolean hasUpload = data != null;
 
-        FileStorageFileAccess destAccess = getFileAccess(folderId.getService(), folderId.getAccountId());
-        FileStorageFileAccess sourceAccess = getFileAccess(id.getService(), id.getAccountId());
+        final FileStorageFileAccess destAccess = getFileAccess(folderId.getService(), folderId.getAccountId());
+        final FileStorageFileAccess sourceAccess = getFileAccess(id.getService(), id.getAccountId());
 
         document.setId(FileStorageFileAccess.NEW);
         document.setFolderId(folderId.getFolderId());
@@ -310,14 +311,14 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         }
 
         if (partialUpdate) {
-            File original = sourceAccess.getFileMetadata(id.getFolderId(), id.getFileId(), FileStorageFileAccess.CURRENT_VERSION);
-            Set<Field> fieldsToSkip = new HashSet<Field>(modifiedColumns);
+            final File original = sourceAccess.getFileMetadata(id.getFolderId(), id.getFileId(), FileStorageFileAccess.CURRENT_VERSION);
+            final Set<Field> fieldsToSkip = new HashSet<Field>(modifiedColumns);
             fieldsToSkip.add(Field.FOLDER_ID);
             fieldsToSkip.add(Field.ID);
             fieldsToSkip.add(Field.LAST_MODIFIED);
             fieldsToSkip.add(Field.CREATED);
 
-            Set<Field> toCopy = EnumSet.complementOf(EnumSet.copyOf(fieldsToSkip));
+            final Set<Field> toCopy = EnumSet.complementOf(EnumSet.copyOf(fieldsToSkip));
 
             document.copyFrom(original, toCopy.toArray(new File.Field[toCopy.size()]));
 
@@ -334,7 +335,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     public void saveDocument(final File document, final InputStream data, final long sequenceNumber) throws OXException {
         save(document, data, sequenceNumber, null, new FileAccessDelegation() {
 
-            public void call(FileStorageFileAccess access) throws OXException {
+            public void call(final FileStorageFileAccess access) throws OXException {
                 access.saveDocument(document, data, sequenceNumber);
             }
 
@@ -344,7 +345,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     public void saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
         save(document, data, sequenceNumber, modifiedColumns, new FileAccessDelegation() {
 
-            public void call(FileStorageFileAccess access) throws OXException {
+            public void call(final FileStorageFileAccess access) throws OXException {
                 access.saveDocument(document, data, sequenceNumber, modifiedColumns);
             }
 
@@ -354,7 +355,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     public void saveFileMetadata(final File document, final long sequenceNumber) throws OXException {
         save(document, null, sequenceNumber, null, new FileAccessDelegation() {
 
-            public void call(FileStorageFileAccess access) throws OXException {
+            public void call(final FileStorageFileAccess access) throws OXException {
                 access.saveFileMetadata(document, sequenceNumber);
             }
 
@@ -364,15 +365,15 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     public void saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
         save(document, null, sequenceNumber, modifiedColumns, new FileAccessDelegation() {
 
-            public void call(FileStorageFileAccess access) throws OXException {
+            public void call(final FileStorageFileAccess access) throws OXException {
                 access.saveFileMetadata(document, sequenceNumber, modifiedColumns);
             }
 
         });
     }
     
-    public String copy(String sourceId, String destFolderId, File update, InputStream newData, List<File.Field> fields) throws OXException {
-        FileID source = new FileID(sourceId);
+    public String copy(final String sourceId, final String destFolderId, final File update, InputStream newData, final List<File.Field> fields) throws OXException {
+        final FileID source = new FileID(sourceId);
         FolderID dest = null;
         
         File fileMetadata = null;
@@ -384,8 +385,8 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         }
         
         if(source.getService().equals(dest.getService()) && source.getAccountId().equals(dest.getAccountId())) {
-            FileStorageFileAccess fileAccess = getFileAccess(source.getService(), source.getAccountId());
-            IDTuple destAddress = fileAccess.copy(new IDTuple(source.getFolderId(), source.getFileId()), dest.getFolderId(), update, newData, fields);
+            final FileStorageFileAccess fileAccess = getFileAccess(source.getService(), source.getAccountId());
+            final IDTuple destAddress = fileAccess.copy(new IDTuple(source.getFolderId(), source.getFileId()), dest.getFolderId(), update, newData, fields);
             return new FileID(source.getService(), source.getAccountId(), destAddress.getFolder(), destAddress.getId()).toUniqueID();
         }
         
@@ -413,44 +414,42 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return fileMetadata.getId();
     }
 
-    public SearchIterator<File> search(String query, List<Field> cols, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
+    public SearchIterator<File> search(final String query, List<Field> cols, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         cols = addIDColumns(cols);
         if (folderId == FileStorageFileAccess.ALL_FOLDERS) {
-            List<FileStorageFileAccess> all = getAllFileStorageAccesses();
-            List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(all.size());
-            for (FileStorageFileAccess files : all) {
-                SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+            final List<FileStorageFileAccess> all = getAllFileStorageAccesses();
+            final List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(all.size());
+            for (final FileStorageFileAccess files : all) {
+                final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
                 if(result != null) {
-                    FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                    final FileStorageAccountAccess accountAccess = files.getAccountAccess();
                     results.add(fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
                 }
             }
             try {
                 return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
-            } catch (OXException e) {
-                throw e;
-            } catch (AbstractOXException e) {
+            } catch (final AbstractOXException e) {
                 throw new OXException(e);
             }
         }
-        FolderID id = new FolderID(folderId);
+        final FolderID id = new FolderID(folderId);
         return getFileAccess(id.getService(), id.getAccountId()).search(query, cols, id.getFolderId(), sort, order, start, end);
     }
 
-    public void touch(String id) throws OXException {
-        FileID fileID = new FileID(id);
+    public void touch(final String id) throws OXException {
+        final FileID fileID = new FileID(id);
         getFileAccess(fileID.getService(), fileID.getAccountId()).touch(fileID.getFolderId(), fileID.getFileId());
     }
 
-    public void unlock(String id) throws OXException {
-        FileID fileID = new FileID(id);
+    public void unlock(final String id) throws OXException {
+        final FileID fileID = new FileID(id);
         getFileAccess(fileID.getService(), fileID.getAccountId()).unlock(fileID.getFolderId(), fileID.getFileId());
     }
 
     protected List<File.Field> addIDColumns(List<File.Field> columns) {
-        boolean hasID = columns.contains(File.Field.ID);
-        boolean hasFolder = columns.contains(File.Field.FOLDER_ID);
-        boolean hasLastModified = columns.contains(File.Field.LAST_MODIFIED);
+        final boolean hasID = columns.contains(File.Field.ID);
+        final boolean hasFolder = columns.contains(File.Field.FOLDER_ID);
+        final boolean hasLastModified = columns.contains(File.Field.LAST_MODIFIED);
 
         if (hasID && hasFolder && hasLastModified) {
             return columns;
@@ -474,20 +473,20 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     }
 
-    protected FileStorageFileAccess getFileAccess(String serviceId, String accountId) throws OXException {
-        FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId+"/"+accountId);
+    protected FileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
+        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId+"/"+accountId);
         if(cached != null) {
             return cached.getFileAccess();
         }
-        FileStorageService fileStorage = getFileStorageService(serviceId);
+        final FileStorageService fileStorage = getFileStorageService(serviceId);
 
-        FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
+        final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
         connect( accountAccess );
         return accountAccess.getFileAccess();
     }
 
-    private void connect(FileStorageAccountAccess accountAccess) throws OXException {
-        String id = accountAccess.getService().getId()+"/"+accountAccess.getAccountId();
+    private void connect(final FileStorageAccountAccess accountAccess) throws OXException {
+        final String id = accountAccess.getService().getId()+"/"+accountAccess.getAccountId();
         
         
         if(!connectedAccounts.get().containsKey(id)) {
@@ -498,13 +497,13 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
-        List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>();
-        List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
-        for (FileStorageService fileStorageService : allFileStorageServices) {
-            FileStorageAccountManager accountManager = fileStorageService.getAccountManager();
-            List<FileStorageAccount> accounts = accountManager.getAccounts(session);
-            for (FileStorageAccount fileStorageAccount : accounts) {
-                FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(fileStorageAccount.getId(), session);
+        final List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>();
+        final List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
+        for (final FileStorageService fileStorageService : allFileStorageServices) {
+            final FileStorageAccountManager accountManager = fileStorageService.getAccountManager();
+            final List<FileStorageAccount> accounts = accountManager.getAccounts(session);
+            for (final FileStorageAccount fileStorageAccount : accounts) {
+                final FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(fileStorageAccount.getId(), session);
                 connect( accountAccess );
                 retval.add(accountAccess.getFileAccess());
             }
@@ -521,7 +520,8 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.AbstractService#commit(java.lang.Object)
      */
-    protected void commit(Transaction transaction) throws TransactionException {
+    @Override
+    protected void commit(final Transaction transaction) throws TransactionException {
         // TODO Auto-generated method stub
 
     }
@@ -530,6 +530,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.AbstractService#createTransaction()
      */
+    @Override
     protected Transaction createTransaction() throws TransactionException {
         // TODO Auto-generated method stub
         return null;
@@ -539,7 +540,8 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.AbstractService#rollback(java.lang.Object)
      */
-    protected void rollback(Transaction transaction) throws TransactionException {
+    @Override
+    protected void rollback(final Transaction transaction) throws TransactionException {
         // TODO Auto-generated method stub
 
     }
@@ -548,7 +550,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.TransactionAware#setCommitsTransaction(boolean)
      */
-    public void setCommitsTransaction(boolean commits) {
+    public void setCommitsTransaction(final boolean commits) {
         // TODO Auto-generated method stub
 
     }
@@ -557,7 +559,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.TransactionAware#setRequestTransactional(boolean)
      */
-    public void setRequestTransactional(boolean transactional) {
+    public void setRequestTransactional(final boolean transactional) {
         // TODO Auto-generated method stub
 
     }
@@ -566,7 +568,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * (non-Javadoc)
      * @see com.openexchange.tx.TransactionAware#setTransactional(boolean)
      */
-    public void setTransactional(boolean transactional) {
+    public void setTransactional(final boolean transactional) {
         // TODO Auto-generated method stub
 
     }
@@ -581,7 +583,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     @Override
     public void finish() throws TransactionException {
         connectedAccounts.get().clear();
-        for(FileStorageAccountAccess acc : accessesToClose.get()) {
+        for(final FileStorageAccountAccess acc : accessesToClose.get()) {
             acc.close();
         }
         accessesToClose.get().clear();

@@ -57,9 +57,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 

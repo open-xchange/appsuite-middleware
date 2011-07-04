@@ -51,8 +51,8 @@ package com.openexchange.file.storage.composition;
 
 import java.io.InputStream;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;

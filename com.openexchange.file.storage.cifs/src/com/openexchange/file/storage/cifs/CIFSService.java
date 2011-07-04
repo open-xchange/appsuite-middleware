@@ -56,13 +56,12 @@ import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.cifs.services.CIFSServiceRegistry;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 
 /**
@@ -103,13 +102,9 @@ public final class CIFSService implements FileStorageService {
     }
 
     private void applyAccountManager() throws OXException {
-        try {
-            accountManager =
-                CIFSServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
-                    this);
-        } catch (final ServiceException e) {
-            throw new OXException(e);
-        }
+        accountManager =
+            CIFSServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
+                this);
     }
 
     public String getId() {
