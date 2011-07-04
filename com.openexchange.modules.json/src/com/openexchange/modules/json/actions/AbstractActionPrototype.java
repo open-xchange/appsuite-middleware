@@ -55,6 +55,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.modules.json.ModelParser;
 import com.openexchange.modules.json.ModelWriter;
@@ -80,7 +81,7 @@ public abstract class AbstractActionPrototype<T extends Model<T>> implements AJA
     }
 
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         RequestPrototype<T> req = createRequest(request, parser, session);
         try {
             return perform(req);

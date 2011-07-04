@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
@@ -91,7 +91,7 @@ public class DispatcherMultipleServiceFactoryHandler implements AJAXActionServic
             this.dispatcher = dispatcher;
         }
 
-        public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
             request.setModule(module);
             request.setFormat("json");
             request.setAction(action);

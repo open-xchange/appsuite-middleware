@@ -53,6 +53,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.json.MessagingAccountParser;
@@ -81,7 +82,7 @@ public abstract class AbstractMessagingAccountAction implements AJAXActionServic
         parser = new MessagingAccountParser(registry);
     }
     
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             return doIt(request, session);
         } catch (final JSONException x) {

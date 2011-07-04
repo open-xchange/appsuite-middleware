@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
@@ -400,7 +401,7 @@ public class DefaultDispatcherTest extends TestCase {
             this.result = result;
         }
 
-        public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
             this.request = request;
             this.session = session;
             return result;

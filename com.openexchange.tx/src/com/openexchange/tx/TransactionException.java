@@ -51,9 +51,15 @@ package com.openexchange.tx;
 
 import com.openexchange.exception.OXException;
 
+/**
+ * {@link TransactionException} - The transaction exception.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class TransactionException extends OXException {
 
     private static final long serialVersionUID = -8149589818960075908L;
+
     private final StackTraceElement[] elements;
 
     public TransactionException(final String logMessage, final StackTraceElement[] elements) {

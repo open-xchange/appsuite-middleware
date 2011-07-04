@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.config.objects.ConfigObjectRegistry;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -85,7 +85,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
         }
         return new AJAXActionService() {
 
-            public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+            public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
                 
                 String path = request.getParameter(PATH);
                 if(path == null) {
