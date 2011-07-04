@@ -57,6 +57,7 @@ import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.file.external.QuotaOXException;
+import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
 
 public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
 
@@ -71,7 +72,7 @@ public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
 
     public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws QuotaOXException {
         if (fss == null || dbs == null) {
-            throw new QuotaOXException(QuotaOXException.Code.INSTANTIATIONERROR);
+            throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
         try {
             return new DBQuotaFileStorage(ctx, fss.getFileStorage(uri), dbs);

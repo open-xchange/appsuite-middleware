@@ -49,12 +49,14 @@
 
 package com.openexchange.tools.file.external;
 
+import com.openexchange.exception.OXException;
+
 public interface QuotaFileStorage extends FileStorage {
 
     long getQuota();
 
-    long getUsage() throws QuotaOXException;
+    long getUsage() throws OXException;
 
-    void recalculateUsage() throws QuotaOXException;
+    void recalculateUsage() throws OXException;
 
 }

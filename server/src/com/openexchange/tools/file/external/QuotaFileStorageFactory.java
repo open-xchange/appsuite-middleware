@@ -50,6 +50,7 @@
 package com.openexchange.tools.file.external;
 
 import java.net.URI;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -59,6 +60,6 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface QuotaFileStorageFactory {
 
-    public QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws QuotaOXException;
+    public QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws OXException;
 
 }
