@@ -88,7 +88,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
             folderProperties.startTransaction();
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
 			folderProperties.commit();
-		} catch (final TransactionException e) {
+		} catch (final OXException e) {
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} catch (final OXException e) {
 			if(e.getDetailNumber() == 3 && e.getComponent().equals(EnumComponent.USER_SETTING)) {
@@ -100,7 +100,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
         } finally {
 			try {
 				folderProperties.finish();
-			} catch (final TransactionException e) {
+			} catch (final OXException e) {
 				LL.log(e);
 			}
 		}
@@ -122,7 +122,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
             infoProperties.startTransaction();
 			infoProperties.removeAll(metadata.getId(), sessionObject.getContext());
 			infoProperties.commit();
-		} catch (final TransactionException e) {
+		} catch (final OXException e) {
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} catch (final OXException e) {
 			if(e.getDetailNumber() == 3 && e.getComponent().equals(EnumComponent.USER_SETTING)) {
@@ -134,7 +134,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
         } finally {
 			try {
 				infoProperties.finish();
-			} catch (final TransactionException e) {
+			} catch (final OXException e) {
 				LL.log(e);
 			}
 		}

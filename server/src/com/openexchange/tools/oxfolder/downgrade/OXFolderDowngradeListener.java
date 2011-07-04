@@ -435,16 +435,16 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
         } catch (final OXException x) {
             try {
                 db.rollback();
-            } catch (TransactionException e) {
+            } catch (final OXException e) {
                 throw new InfostoreException(e);
             }
             throw x;
-        } catch (TransactionException e) {
+        } catch (final OXException e) {
             throw new InfostoreException(e);
         } finally {
             try {
                 db.finish();
-            } catch (TransactionException e) {
+            } catch (final OXException e) {
                 throw new InfostoreException(e);
             }
         }

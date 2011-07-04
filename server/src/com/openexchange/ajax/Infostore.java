@@ -413,14 +413,14 @@ public class Infostore extends PermissionServlet {
         } catch (final FileNotFoundException e) {
             rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
             return;
-        } catch (TransactionException e) {
+        } catch (final OXException e) {
             rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
             return;
         } finally {
             try {
                 infostore.finish();
                 searchEngine.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
             if (in != null) {
@@ -491,14 +491,14 @@ public class Infostore extends PermissionServlet {
         } catch (final FileNotFoundException e) {
             rollback(infostore, null, res, e, ACTION_UPDATE, true);
             return;
-        } catch (TransactionException e) {
+        } catch (final OXException e) {
             rollback(infostore, null, res, e, ACTION_UPDATE, true);
             return;
         } finally {
             try {
                 infostore.finish();
                 searchEngine.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
 
@@ -563,14 +563,14 @@ public class Infostore extends PermissionServlet {
         } catch (final FileNotFoundException e) {
             rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
             return;
-        } catch (TransactionException e) {
+        } catch (final OXException e) {
             rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
             return;
         } finally {
             try {
                 infostore.finish();
                 searchEngine.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
 
@@ -745,14 +745,14 @@ public class Infostore extends PermissionServlet {
         if (infostore != null) {
             try {
                 infostore.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
         }
         if (searchEngine != null) {
             try {
                 searchEngine.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
         }

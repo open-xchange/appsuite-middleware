@@ -448,7 +448,7 @@ public class Attachment extends PermissionServlet {
             }
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
         }
@@ -457,7 +457,7 @@ public class Attachment extends PermissionServlet {
     private void rollback(final Throwable t, final HttpServletResponse res, final String action) {
         try {
             ATTACHMENT_BASE.rollback();
-        } catch (final TransactionException e) {
+        } catch (final OXException e) {
             LOG.debug("", e);
         }
         if (t instanceof AbstractOXException) {
@@ -503,7 +503,7 @@ public class Attachment extends PermissionServlet {
         } catch (final OXException t) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error(e);
             }
             handle(res, t, ResponseFields.ERROR);
@@ -511,7 +511,7 @@ public class Attachment extends PermissionServlet {
         } catch (final JSONException e) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException x) {
+            } catch (final OXException x) {
                 LOG.error(e);
             }
             handle(res, new OXException(e), ResponseFields.ERROR);
@@ -519,15 +519,15 @@ public class Attachment extends PermissionServlet {
         } catch (final IOException e) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException x) {
+            } catch (final OXException x) {
                 LOG.error(e);
             }
             handle(res, new OXException(e), ResponseFields.ERROR);
             return;
-        } catch (TransactionException e) {
+        } catch (final OXException e) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException x) {
+            } catch (final OXException x) {
                 LOG.error(x);
             }
             handle(res, e, ResponseFields.ERROR);
@@ -535,7 +535,7 @@ public class Attachment extends PermissionServlet {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
         }

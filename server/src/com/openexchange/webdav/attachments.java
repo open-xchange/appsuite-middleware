@@ -234,7 +234,7 @@ public final class attachments extends OXServlet {
             resp.setContentType(XmlServlet._contentType);
 
             xo.output(output_doc, resp.getOutputStream());
-        } catch (final TransactionException exc) {
+        } catch (final OXException exc) {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
             LOG.error(exc.getMessage(), exc);
             exc.printStarterTrace();
@@ -395,7 +395,7 @@ public final class attachments extends OXServlet {
     private void finishTransaction() {
         try {
             ATTACHMENT_BASE.finish();
-        } catch (final TransactionException exc) {
+        } catch (final OXException exc) {
             LOG.error("finishTransaction", exc);
         }
     }
@@ -403,7 +403,7 @@ public final class attachments extends OXServlet {
     private void rollbackTransaction() {
         try {
             ATTACHMENT_BASE.rollback();
-        } catch (final TransactionException exc) {
+        } catch (final OXException exc) {
             LOG.error("finishTransaction", exc);
         }
     }

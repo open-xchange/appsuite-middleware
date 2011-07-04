@@ -141,7 +141,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
             ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, ids.toNativeArray(), sessionObj, sessionObj.getContext(), null, null);
             ATTACHMENT_BASE.commit();
         
-        } catch (final TransactionException e) {
+        } catch (final OXException e) {
             rollback(e);
         } catch (final ContextException e) {
             LL.log(e);
@@ -157,7 +157,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
             }
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LL.log(e);
             }
         }
@@ -166,7 +166,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
     private void rollback(final AbstractOXException x) {
         try {
             ATTACHMENT_BASE.rollback();
-        } catch (final TransactionException e) {
+        } catch (final OXException e) {
             LL.log(e);
         }
         LL.log(x);

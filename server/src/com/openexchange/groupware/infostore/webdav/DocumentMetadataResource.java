@@ -648,7 +648,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             } catch (final Exception x) {
                 try {
                     database.rollback();
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG.error("Couldn't rollback transaction. Run the recovery tool.");
                 }
                 if (x instanceof InfostoreException) {
@@ -664,7 +664,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             } finally {
                 try {
                     database.finish();
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG.error("Couldn't finish transaction: ", e);
                 }
             }
@@ -711,7 +711,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             } catch (final OXException x) {
                 try {
                     database.rollback();
-                } catch (final TransactionException x2) {
+                } catch (final OXException x2) {
                     LOG.error("Couldn't roll back: ", x2);
                 }
                 throw x;
@@ -730,7 +730,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             } catch (final OXException x) {
                 try {
                     database.rollback();
-                } catch (final TransactionException x2) {
+                } catch (final OXException x2) {
                     LOG.error("Can't roll back", x2);
                 }
                 throw x;
