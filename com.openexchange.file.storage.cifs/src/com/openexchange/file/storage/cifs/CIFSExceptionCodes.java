@@ -49,9 +49,11 @@
 
 package com.openexchange.file.storage.cifs;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.file.storage.cifs.exception.CIFSExceptionFactory;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link CIFSExceptionCodes} - Enumeration of all {@link CIFSException}s.
@@ -59,53 +61,50 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public enum CIFSExceptionCodes implements OXErrorMessage {
+public enum CIFSExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(CIFSExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(CIFSExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * A CIFS/SMB error occurred: %1$s
      */
-    SMB_ERROR(CIFSExceptionMessages.SMB_ERROR_MSG, Category.CODE_ERROR, 2),
+    SMB_ERROR(CIFSExceptionMessages.SMB_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Invalid CIFS/SMB URL: %1$s
      */
-    INVALID_SMB_URL(CIFSExceptionMessages.INVALID_SMB_URL_MSG, Category.CODE_ERROR, 3),
+    INVALID_SMB_URL(CIFSExceptionMessages.INVALID_SMB_URL_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * CIFS/SMB URL does not denote a directory: %1$s
      */
-    NOT_A_FOLDER(CIFSExceptionMessages.NOT_A_FOLDER_MSG, Category.CODE_ERROR, 4),
+    NOT_A_FOLDER(CIFSExceptionMessages.NOT_A_FOLDER_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * The CIFS/SMB resource does not exist: %1$s
      */
-    NOT_FOUND(CIFSExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 5),
+    NOT_FOUND(CIFSExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * Update denied for CIFS/SMB resource: %1$s
      */
-    UPDATE_DENIED(CIFSExceptionMessages.UPDATE_DENIED_MSG, Category.CODE_ERROR, 6),
+    UPDATE_DENIED(CIFSExceptionMessages.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Delete denied for CIFS/SMB resource: %1$s
      */
-    DELETE_DENIED(CIFSExceptionMessages.DELETE_DENIED_MSG, Category.CODE_ERROR, 7),
+    DELETE_DENIED(CIFSExceptionMessages.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * CIFS/SMB URL does not denote a file: %1$s
      */
-    NOT_A_FILE(CIFSExceptionMessages.NOT_A_FILE_MSG, Category.CODE_ERROR, 8),
+    NOT_A_FILE(CIFSExceptionMessages.NOT_A_FILE_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(CIFSExceptionMessages.MISSING_FILE_NAME_MSG, Category.CODE_ERROR, 12),
+    MISSING_FILE_NAME(CIFSExceptionMessages.MISSING_FILE_NAME_MSG, Category.CATEGORY_ERROR, 12),
     /**
      * Versioning not supported by CIFS/SMB file storage.
      */
-    VERSIONING_NOT_SUPPORTED(CIFSExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 13),
-    
-    
-    
+    VERSIONING_NOT_SUPPORTED(CIFSExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 13),
+
     ;
-    
 
     private final Category category;
 
@@ -113,10 +112,13 @@ public enum CIFSExceptionCodes implements OXErrorMessage {
 
     private final String message;
 
+    private final boolean display;
+
     private CIFSExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     public Category getCategory() {
@@ -127,32 +129,51 @@ public enum CIFSExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
+    public String getPrefix() {
+        return "CIFS";
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance
      */
-    public CIFSException create(final Object... messageArgs) {
-        return CIFSExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return create(new Object[0]);
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public CIFSException create(final Throwable cause, final Object... messageArgs) {
-        return CIFSExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return create((Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        final OXException ret;
+        if (display) {
+            ret = new OXException(detailNumber, message, cause, args);
+        } else {
+            ret =
+                new OXException(
+                    detailNumber,
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
+        }
+        return ret.addCategory(category).setPrefix(getPrefix());
     }
 }

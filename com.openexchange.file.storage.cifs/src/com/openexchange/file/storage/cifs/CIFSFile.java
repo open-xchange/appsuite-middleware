@@ -55,8 +55,8 @@ import java.util.List;
 import java.util.Set;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 

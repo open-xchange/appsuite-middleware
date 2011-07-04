@@ -58,11 +58,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.cifs.CIFSException;
-import com.openexchange.file.storage.cifs.exception.CIFSExceptionFactory;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -77,8 +74,6 @@ public final class CIFSActivator extends DeferredActivator {
     private List<ServiceTracker> trackers;
 
     private List<ServiceRegistration> registrations;
-
-    private ComponentRegistration componentRegistration;
 
     private Registerer registerer;
 
@@ -132,17 +127,6 @@ public final class CIFSActivator extends DeferredActivator {
             /*
              * Some init stuff
              */
-            // FacebookConstants.init();
-            // FacebookConfiguration.getInstance().configure(getService(ConfigurationService.class));
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    CIFSException.CIFS_COMPONENT,
-                    "com.openexchange.file.storage.cifs",
-                    CIFSExceptionFactory.getInstance());
 
             trackers = new ArrayList<ServiceTracker>(1);
             // trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
@@ -178,13 +162,6 @@ public final class CIFSActivator extends DeferredActivator {
             if (null != registerer) {
                 registerer.close();
                 registerer = null;
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
