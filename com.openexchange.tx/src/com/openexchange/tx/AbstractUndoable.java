@@ -49,7 +49,7 @@
 
 package com.openexchange.tx;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 public abstract class AbstractUndoable implements Undoable {
 	
@@ -59,10 +59,10 @@ public abstract class AbstractUndoable implements Undoable {
 		return error;
 	}
 
-	public void undo() throws AbstractOXException {
+	public void undo() throws OXException {
 		try {
 			undoAction();
-		} catch (final AbstractOXException x) {
+		} catch (final OXException x) {
 			final StringBuilder error = new StringBuilder();
 			error.append(x.getMessage());
 			this.error = error.toString();
@@ -70,6 +70,6 @@ public abstract class AbstractUndoable implements Undoable {
 		}
 	}
 
-	protected abstract void undoAction() throws AbstractOXException;
+	protected abstract void undoAction() throws OXException;
 
 }

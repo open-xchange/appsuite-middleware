@@ -49,9 +49,9 @@
 
 package com.openexchange.tx;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 public interface Undoable {
-	void undo() throws AbstractOXException;
+	void undo() throws OXException;
 	String error();
 }

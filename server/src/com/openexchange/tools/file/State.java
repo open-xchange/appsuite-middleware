@@ -64,6 +64,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -140,11 +141,11 @@ class State {
                 line = reader.readLine();
             }
         } catch (final UnsupportedEncodingException e) {
-            throw FileExceptionCode.ENCODING.create(e);
+            throw FileStorageCodes.ENCODING.create(e);
         } catch (final NumberFormatException e) {
-            throw FileExceptionCode.NO_NUMBER.create(e);
+            throw FileStorageCodes.NO_NUMBER.create(e);
         } catch (final IOException e) {
-            throw FileExceptionCode.IOERROR.create(e, e.getMessage());
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             if (null != reader) {
                 try {
@@ -189,9 +190,9 @@ class State {
             osw.close();
             return new ByteArrayInputStream(baos.toByteArray());
         } catch (final UnsupportedEncodingException e) {
-            throw FileExceptionCode.ENCODING.create(e);
+            throw FileStorageCodes.ENCODING.create(e);
         } catch (final IOException e) {
-            throw FileExceptionCode.IOERROR.create(e, e.getMessage());
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }
 

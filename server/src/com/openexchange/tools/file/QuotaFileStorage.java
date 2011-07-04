@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 public final class QuotaFileStorage extends FileStorage {
@@ -70,12 +71,12 @@ public final class QuotaFileStorage extends FileStorage {
 
     public static final QuotaFileStorage getInstance(final URI uri, final Context ctx) throws OXException {
         if (qfss == null) {
-            throw FileExceptionCode.INSTANTIATIONERROR.create("No quota file storage starter registered.");
+            throw FileStorageCodes.INSTANTIATIONERROR.create("No quota file storage starter registered.");
         }
         return new com.openexchange.tools.file.QuotaFileStorage(uri, ctx, qfss);
     }
 
-    public static void setQuotaFileStorageStarter(QuotaFileStorageFactory qfss) {
+    public static void setQuotaFileStorageStarter(final QuotaFileStorageFactory qfss) {
         QuotaFileStorage.qfss = qfss;
     }
 
@@ -136,7 +137,7 @@ public final class QuotaFileStorage extends FileStorage {
         return qfs.saveNewFile(file);
     }
 
-    public String saveNewFile(InputStream file, long sizeHint) throws OXException {
+    public String saveNewFile(final InputStream file, final long sizeHint) throws OXException {
         // TODO use sizeHint to faster break on over quota
         return qfs.saveNewFile(file);
     }
