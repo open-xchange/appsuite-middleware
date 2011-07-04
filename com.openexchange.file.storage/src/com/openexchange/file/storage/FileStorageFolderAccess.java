@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link FileStorageFolderAccess} - Provides access to folder storage.
  * 
@@ -63,18 +65,18 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * 
      * @param folderId The identifier
      * @return <code>true</code> if folder exists in account; otherwise <code>false</code>
-     * @throws FileStorageException If existence cannot be checked
+     * @throws OXException If existence cannot be checked
      */
-    public boolean exists(final String folderId) throws FileStorageException;
+    public boolean exists(final String folderId) throws OXException;
 
     /**
      * Gets the folder identified through given identifier
      * 
      * @param folderId The identifier
      * @return The corresponding instance of {@link FileStorageFolder}
-     * @throws FileStorageException If either folder does not exist or could not be fetched
+     * @throws OXException If either folder does not exist or could not be fetched
      */
-    public FileStorageFolder getFolder(final String folderId) throws FileStorageException;
+    public FileStorageFolder getFolder(final String folderId) throws OXException;
 
     /**
      * Gets the first level subfolders located below the folder whose identifier matches given parameter <code>parentIdentifier</code>.
@@ -85,9 +87,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * @param all Whether all or only subscribed subfolders shall be returned. If underlying file storage system does not support folder
      *            subscription, this argument should always be treated as <code>true</code>.
      * @return An array of {@link FileStorageFolder} representing the subfolders
-     * @throws FileStorageException If either parent folder does not exist or its subfolders cannot be delivered
+     * @throws OXException If either parent folder does not exist or its subfolders cannot be delivered
      */
-    public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws FileStorageException;
+    public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException;
 
     /**
      * Gets the account's root folder.
@@ -95,9 +97,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * A convenience method for {@link #getFolder(String)} invoked with {@link FileStorageFolder#ROOT_FULLNAME}.
      * 
      * @return The account's root folder
-     * @throws FileStorageException If account's default folder cannot be delivered
+     * @throws OXException If account's default folder cannot be delivered
      */
-    public FileStorageFolder getRootFolder() throws FileStorageException;
+    public FileStorageFolder getRootFolder() throws OXException;
 
     /**
      * Checks user's default folder as defined in user's file storage settings and creates them if any is missing.
@@ -106,18 +108,18 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedHam() createConfirmedHam()}, and
      * {@link com.openexchange.spamhandler.SpamHandler#isUnsubscribeSpamFolders() unsubscribeSpamFolders()}.
      * 
-     * @throws FileStorageException If user's default folder could not be checked
+     * @throws OXException If user's default folder could not be checked
      */
-    // public void checkDefaultFolders() throws FileStorageException;
+    // public void checkDefaultFolders() throws OXException;
 
     /**
      * Creates a new file storage folder with attributes taken from given file storage folder description
      * 
      * @param toCreate The file storage folder to create
      * @return The identifier of the created file storage folder
-     * @throws FileStorageException If creation fails
+     * @throws OXException If creation fails
      */
-    public String createFolder(FileStorageFolder toCreate) throws FileStorageException;
+    public String createFolder(FileStorageFolder toCreate) throws OXException;
 
     /**
      * Updates an existing file storage folder identified through given identifier. All attributes set in given file storage folder instance are
@@ -135,9 +137,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * @param identifier The identifier of the file storage folder to update
      * @param toUpdate The file storage folder to update containing only the modified fields
      * @return The identifier of the updated file storage folder
-     * @throws FileStorageException If either folder does not exist or cannot be updated
+     * @throws OXException If either folder does not exist or cannot be updated
      */
-    public String updateFolder(String identifier, FileStorageFolder toUpdate) throws FileStorageException;
+    public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException;
 
     /**
      * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>.
@@ -151,9 +153,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * @param folderId The folder identifier
      * @param newParentId The identifier of the new parent to move to
      * @return The new identifier where the folder has been moved
-     * @throws FileStorageException If either folder does not exist or cannot be moved
+     * @throws OXException If either folder does not exist or cannot be moved
      */
-    public String moveFolder(String folderId, String newParentId) throws FileStorageException;
+    public String moveFolder(String folderId, String newParentId) throws OXException;
 
     /**
      * Renames the folder identified through given identifier to the specified new name.
@@ -167,9 +169,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * @param folderId The folder identifier
      * @param newName The new name
      * @return The new identifier
-     * @throws FileStorageException If either folder does not exist or cannot be renamed
+     * @throws OXException If either folder does not exist or cannot be renamed
      */
-    public String renameFolder(final String folderId, final String newName) throws FileStorageException;
+    public String renameFolder(final String folderId, final String newName) throws OXException;
 
     /**
      * Deletes an existing file storage folder identified through given identifier.
@@ -179,9 +181,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * 
      * @param folderId The identifier of the file storage folder to delete
      * @return The identifier of the deleted file storage folder
-     * @throws FileStorageException If either folder does not exist or cannot be deleted
+     * @throws OXException If either folder does not exist or cannot be deleted
      */
-    public String deleteFolder(final String folderId) throws FileStorageException;
+    public String deleteFolder(final String folderId) throws OXException;
 
     /**
      * Deletes an existing file storage folder identified through given identifier.
@@ -199,26 +201,26 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * @param folderId The identifier of the file storage folder to delete
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @return The identifier of the deleted file storage folder
-     * @throws FileStorageException If either folder does not exist or cannot be deleted
+     * @throws OXException If either folder does not exist or cannot be deleted
      */
-    public String deleteFolder(String folderId, boolean hardDelete) throws FileStorageException;
+    public String deleteFolder(String folderId, boolean hardDelete) throws OXException;
 
     /**
      * Deletes the content of the folder identified through given identifier.
      * 
      * @param folderId The identifier of the file storage folder whose content should be cleared
-     * @throws FileStorageException If either folder does not exist or its content cannot be cleared
+     * @throws OXException If either folder does not exist or its content cannot be cleared
      */
-    public void clearFolder(String folderId) throws FileStorageException;
+    public void clearFolder(String folderId) throws OXException;
 
     /**
      * Deletes the content of the folder identified through given identifier.
      * 
      * @param folderId The identifier of the file storage folder whose content should be cleared
      * @param hardDelete Whether to delete permanently or to backup into trash folder
-     * @throws FileStorageException If either folder does not exist or its content cannot be cleared
+     * @throws OXException If either folder does not exist or its content cannot be cleared
      */
-    public void clearFolder(String folderId, boolean hardDelete) throws FileStorageException;
+    public void clearFolder(String folderId, boolean hardDelete) throws OXException;
 
     /**
      * Gets the reverse path from the folder identified through given identifier to parental default folder. All occurring folders on that
@@ -226,9 +228,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * 
      * @param folderId The folder identifier
      * @return All occurring folders in reverse order as an array of {@link FileStorageFolder} instances.
-     * @throws FileStorageException If either folder does not exist or path cannot be determined
+     * @throws OXException If either folder does not exist or path cannot be determined
      */
-    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws FileStorageException;
+    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException;
 
     /**
      * Detects both quota limit and quota usage of STORAGE resource on given file storage folder's quota-root. If the folder denoted by passed
@@ -239,9 +241,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * 
      * @param folderId The folder identifier (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of STORAGE resource
-     * @throws FileStorageException If either folder does not exist or quota limit and/or quote usage cannot be determined
+     * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota getStorageQuota(final String folderId) throws FileStorageException;
+    public Quota getStorageQuota(final String folderId) throws OXException;
 
     /**
      * Detects both quota limit and quota usage of FILE resource on given file storage folder's quota-root. If the folder denoted by passed
@@ -250,9 +252,9 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * 
      * @param folderId The folder identifier (if <code>null</code> <i>""</i> is used)
      * @return The quota of FILE resource
-     * @throws FileStorageException If either folder does not exist or quota limit and/or quote usage cannot be determined
+     * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota getFileQuota(final String folderId) throws FileStorageException;
+    public Quota getFileQuota(final String folderId) throws OXException;
 
     /**
      * Detects both quotas' limit and usage on given file storage folder's quota-root for specified resource types. If the folder denoted by
@@ -267,8 +269,8 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * @param folder The folder identifier (if <code>null</code> <i>""</i> is used)
      * @param types The desired quota resource types
      * @return The quotas for specified resource types
-     * @throws FileStorageException If either folder does not exist or quota limit and/or quote usage cannot be determined
+     * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota[] getQuotas(String folder, Quota.Type[] types) throws FileStorageException;
+    public Quota[] getQuotas(String folder, Quota.Type[] types) throws OXException;
 
 }

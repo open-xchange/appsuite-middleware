@@ -59,12 +59,12 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 
 /**
  * {@link OSGIFileStorageAccountManagerLookupService}
@@ -117,7 +117,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         }
     }
 
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws FileStorageException {
+    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : providers) {
             if (provider.supports(service) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {

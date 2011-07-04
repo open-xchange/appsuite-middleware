@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.meta.FileComparator;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -255,9 +256,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param id The ID to check for
      * @param version The version to check for
      * @return true when the file exists and is readable, false otherwise.
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public boolean exists(String folderId, String id, int version) throws FileStorageException;
+    public boolean exists(String folderId, String id, int version) throws OXException;
 
     /**
      * Load the metadata about a file
@@ -266,9 +267,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param id The id of the file
      * @param version The version number of the file. May pass in CURRENT_VERSION to load the current version
      * @return The File Metadata
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public File getFileMetadata(String folderId, String id, int version) throws FileStorageException;
+    public File getFileMetadata(String folderId, String id, int version) throws OXException;
 
     /**
      * Save the file metadata.
@@ -276,9 +277,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param file The metadata to save
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *            DISTANT_FUTURE to circumvent the check
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public void saveFileMetadata(File file, long sequenceNumber) throws FileStorageException; // No modifiedColumns means all columns
+    public void saveFileMetadata(File file, long sequenceNumber) throws OXException; // No modifiedColumns means all columns
 
     /**
      * Save the file metadata.
@@ -287,9 +288,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *            DISTANT_FUTURE to circumvent the check
      * @param modifiedFields The fields to save. All other fields will be ignored
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public void saveFileMetadata(File file, long sequenceNumber, List<File.Field> modifiedFields) throws FileStorageException;
+    public void saveFileMetadata(File file, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
     
     /**
      * Copy a file from a given source to a given destination. Changes to the metadata can be applied and a new file attachment
@@ -301,9 +302,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param newFile A new file to be attached to the copy. May be null, if no new file data should be attached to the file.
      * @param The fields to use from the update. May be null if the update is null.
      * @return The new folderId and id
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<File.Field> modifiedFields) throws FileStorageException;
+    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<File.Field> modifiedFields) throws OXException;
     
     /**
      * Load the file content
@@ -312,9 +313,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param id The id of the file
      * @param version The version of the file. Pass in CURRENT_VERSION for the current version of the file.
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public InputStream getDocument(String folderId, String id, int version) throws FileStorageException;
+    public InputStream getDocument(String folderId, String id, int version) throws OXException;
 
     /**
      * Save the file metadata and binary content
@@ -323,9 +324,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *            DISTANT_FUTURE to circumvent the check
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws FileStorageException;
+    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException;
 
     /**
      * Save the file metadata.
@@ -334,18 +335,18 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @param modifiedFields The fields to save. All other fields will be ignored
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws FileStorageException;
+    public void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
 
     /**
      * Remove all files in the given folder.
      * 
      * @param folderId The folder to clear
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public void removeDocument(String folderId, long sequenceNumber) throws FileStorageException;
+    public void removeDocument(String folderId, long sequenceNumber) throws OXException;
 
     /**
      * Removes the files with the given identifiers from the folder. Documents identifiers that could not be removed due to an
@@ -354,9 +355,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws FileStorageException;
+    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException;
 
     /**
      * Remove a certain version of a file
@@ -365,18 +366,18 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param id The file id whose version is to be removed
      * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public int[] removeVersion(String folderId, String id, int[] versions) throws FileStorageException;
+    public int[] removeVersion(String folderId, String id, int[] versions) throws OXException;
 
     /**
      * Unlocks a given file.
      * 
      * @param folderId The folder identifier
      * @param id The file to unlock
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public void unlock(String folderId, String id) throws FileStorageException;
+    public void unlock(String folderId, String id) throws OXException;
 
     /**
      * Locks a given file for the given duration (in milliseconds)
@@ -384,27 +385,27 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param folderId The folder identifier
      * @param id The file to lock
      * @param diff The duration in milliseconds
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public void lock(String folderId, String id, long diff) throws FileStorageException;
+    public void lock(String folderId, String id, long diff) throws OXException;
 
     /**
      * Updates a files sequence number
      * 
      * @param folderId The folder identifier
      * @param id The file whose sequence number should be updated
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public void touch(String folderId, String id) throws FileStorageException;
+    public void touch(String folderId, String id) throws OXException;
 
     /**
      * List a folders content
      * 
      * @param folderId The folder whose contents to list
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public TimedResult<File> getDocuments(String folderId) throws FileStorageException;
+    public TimedResult<File> getDocuments(String folderId) throws OXException;
 
     /**
      * List a folders content loading only the fields given
@@ -412,9 +413,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param folderId The folder whose contents to list
      * @param fields The fields to load
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public TimedResult<File> getDocuments(String folderId, List<File.Field> fields) throws FileStorageException;
+    public TimedResult<File> getDocuments(String folderId, List<File.Field> fields) throws OXException;
 
     /**
      * List a folders content loading only the fields given and sorting by a certain field either ascending or descending.
@@ -424,9 +425,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param sort The field to sort by
      * @param order The sorting direction
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public TimedResult<File> getDocuments(String folderId, List<File.Field> fields, File.Field sort, SortDirection order) throws FileStorageException;
+    public TimedResult<File> getDocuments(String folderId, List<File.Field> fields, File.Field sort, SortDirection order) throws OXException;
 
     /**
      * List all versions of a file
@@ -434,9 +435,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param folderId The folder identifier
      * @param id The file's identifier
      * @return All versions of a file
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public TimedResult<File> getVersions(String folderId, String id) throws FileStorageException;
+    public TimedResult<File> getVersions(String folderId, String id) throws OXException;
 
     /**
      * List all versions of a file loading the given fields
@@ -445,9 +446,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param id The file's identifier
      * @param fields The fields to load
      * @return All versions of a file with given fields loaded
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields) throws FileStorageException;
+    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields) throws OXException;
 
     /**
      * List all versions of a file loading the given fields sorted according to the given field in a given order
@@ -456,9 +457,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param id The file's identifier
      * @param fields The fields to load
      * @return All sorted versions of a file with given fields loaded
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields, File.Field sort, SortDirection order) throws FileStorageException;
+    public TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields, File.Field sort, SortDirection order) throws OXException;
 
     /**
      * Load the file metadata with the given identifiers.
@@ -466,9 +467,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param ids The identifiers
      * @param fields The fields to load
      * @return The file metadatas
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public TimedResult<File> getDocuments(List<IDTuple> ids, List<File.Field> fields) throws FileStorageException;
+    public TimedResult<File> getDocuments(List<IDTuple> ids, List<File.Field> fields) throws OXException;
 
     /**
      * Get changes in a given folder since a certain sequence number
@@ -478,9 +479,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param fields The fields to load
      * @param ignoreDeleted Whether to check for file deletion as well.
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> fields, boolean ignoreDeleted) throws FileStorageException;
+    public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> fields, boolean ignoreDeleted) throws OXException;
 
     /**
      * Get changes in a given folder since a certain sequence number
@@ -492,9 +493,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param order The sorting direction
      * @param ignoreDeleted
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> fields, File.Field sort, SortDirection order, boolean ignoreDeleted) throws FileStorageException;
+    public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> fields, File.Field sort, SortDirection order, boolean ignoreDeleted) throws OXException;
 
     /**
      * Search for a given file.
@@ -507,9 +508,9 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
      * @return
-     * @throws FileStorageException
+     * @throws OXException
      */
-    public SearchIterator<File> search(String pattern, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws FileStorageException;
+    public SearchIterator<File> search(String pattern, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
     /**
      * Retrieve the parent account access.

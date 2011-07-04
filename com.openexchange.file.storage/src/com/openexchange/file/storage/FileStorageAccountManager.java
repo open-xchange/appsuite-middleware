@@ -50,6 +50,7 @@
 package com.openexchange.file.storage;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -67,36 +68,36 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @param account The account to add
      * @param session The session providing needed user data
      * @return The identifier of the newly created account
-     * @throws FileStorageException If insertion fails
+     * @throws OXException If insertion fails
      */
-    public String addAccount(FileStorageAccount account, Session session) throws FileStorageException;
+    public String addAccount(FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Updates an existing account.
      * 
      * @param account The account providing the identifier and the data to update
      * @param session The session providing needed user data
-     * @throws FileStorageException If update fails
+     * @throws OXException If update fails
      */
-    public void updateAccount(FileStorageAccount account, Session session) throws FileStorageException;;
+    public void updateAccount(FileStorageAccount account, Session session) throws OXException;;
 
     /**
      * Deletes an existing account.
      * 
      * @param account The account to delete
      * @param session The session providing needed user data
-     * @throws FileStorageException If deletion fails
+     * @throws OXException If deletion fails
      */
-    public void deleteAccount(FileStorageAccount account, Session session) throws FileStorageException;
+    public void deleteAccount(FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Gets all accounts associated with session user.
      * 
      * @param session The session providing needed user data
      * @return All accounts associated with session user.
-     * @throws FileStorageException If listing fails
+     * @throws OXException If listing fails
      */
-    public List<FileStorageAccount> getAccounts(Session session) throws FileStorageException;;
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException;;
 
     /**
      * Gets an existing file storage account.
@@ -104,9 +105,9 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @param id The identifier
      * @param session The session providing needed user data
      * @return The file storage account.
-     * @throws FileStorageException If retrieval fails
+     * @throws OXException If retrieval fails
      */
-    public FileStorageAccount getAccount(String id, Session session) throws FileStorageException;
+    public FileStorageAccount getAccount(String id, Session session) throws OXException;
 
     /**
      * Checks whether the given secret can be used to decrypt secret strings in this account.
@@ -114,17 +115,17 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @param session The session providing needed user data
      * @param secret The secret to use for decrypting
      * @return true when all accounts could be decrypted, false otherwise
-     * @throws FileStorageException 
+     * @throws OXException 
      */
-    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws FileStorageException;
+    public boolean checkSecretCanDecryptStrings(Session session, String secret) throws OXException;
 
     /**
      * Migrates all encrypted strings from an old secret to a new one.
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
      * @param session The session providing needed user data
-     * @throws FileStorageException 
+     * @throws OXException 
      */
-    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws FileStorageException;
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
 
 }

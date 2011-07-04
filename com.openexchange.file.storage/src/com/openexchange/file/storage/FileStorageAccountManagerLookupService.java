@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link FileStorageAccountManagerLookupService} - Performs a look-up for the appropriate {@link FileStorageAccountManager} for a certain
  * {@link FileStorageService}.
@@ -62,8 +64,8 @@ public interface FileStorageAccountManagerLookupService {
      * 
      * @param service The file storage service
      * @return The appropriate account manager for specified file storage service.
-     * @throws FileStorageException If look-up fails
+     * @throws OXException If look-up fails
      */
-    FileStorageAccountManager getAccountManagerFor(FileStorageService service) throws FileStorageException;
+    FileStorageAccountManager getAccountManagerFor(FileStorageService service) throws OXException;
 
 }

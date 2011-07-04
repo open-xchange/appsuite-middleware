@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link FileStorageAccountManagerProvider} - Provides the {@link FileStorageAccountManager account manager} appropriate for a certain
  * {@link FileStorageService file storage service}.
@@ -85,9 +87,9 @@ public interface FileStorageAccountManagerProvider {
      * 
      * @param service The file storage service
      * @return The appropriate account manager for specified file storage service.
-     * @throws FileStorageException If an appropriate account manager cannot be returned
+     * @throws OXException If an appropriate account manager cannot be returned
      */
-    FileStorageAccountManager getAccountManagerFor(FileStorageService service) throws FileStorageException;
+    FileStorageAccountManager getAccountManagerFor(FileStorageService service) throws OXException;
 
     /**
      * Gets the ranking of this provider.

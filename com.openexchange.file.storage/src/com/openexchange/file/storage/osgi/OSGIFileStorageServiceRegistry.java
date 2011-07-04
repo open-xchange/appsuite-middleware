@@ -57,9 +57,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.file.storage.FileStorageException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 
 /**
@@ -111,11 +111,11 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
         }
     }
 
-    public List<FileStorageService> getAllServices() throws FileStorageException {
+    public List<FileStorageService> getAllServices() throws OXException {
         return new ArrayList<FileStorageService>(map.values());
     }
 
-    public FileStorageService getFileStorageService(final String id) throws FileStorageException {
+    public FileStorageService getFileStorageService(final String id) throws OXException {
         final FileStorageService filestorageService = map.get(id);
         if (null == filestorageService) {
             throw FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.create(id);

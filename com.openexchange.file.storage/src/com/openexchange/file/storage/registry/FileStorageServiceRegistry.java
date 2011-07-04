@@ -50,7 +50,7 @@
 package com.openexchange.file.storage.registry;
 
 import java.util.List;
-import com.openexchange.file.storage.FileStorageException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageService;
 
 /**
@@ -67,9 +67,9 @@ public interface FileStorageServiceRegistry {
      * 
      * @param id The file storage service identifier
      * @return The file storage service associated with specified identifier
-     * @throws FileStorageException If no file storage service is associated with specified identifier
+     * @throws OXException If file storage service cannot be returned
      */
-    public FileStorageService getFileStorageService(String id) throws FileStorageException;
+    public FileStorageService getFileStorageService(String id) throws OXException;
 
     /**
      * Checks if there is a file storage service associated with specified identifier.
@@ -83,7 +83,7 @@ public interface FileStorageServiceRegistry {
      * Gets all file storage services kept in this registry.
      * 
      * @return All file storage services kept in this registry
-     * @throws FileStorageException If file storage services cannot be returned
+     * @throws OXException If file storage services cannot be returned
      */
-    public List<FileStorageService> getAllServices() throws FileStorageException;
+    public List<FileStorageService> getAllServices() throws OXException;
 }

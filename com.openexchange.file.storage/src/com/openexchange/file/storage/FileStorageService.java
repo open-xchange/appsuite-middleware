@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -94,9 +95,9 @@ public interface FileStorageService extends FileStorageConstants {
      * Gets the account manager for this file storage service.
      * 
      * @return The account manager
-     * @throws FileStorageException 
+     * @throws OXException 
      */
-    public FileStorageAccountManager getAccountManager() throws FileStorageException;
+    public FileStorageAccountManager getAccountManager() throws OXException;
 
     /**
      * Gets the account access for specified account identifier.
@@ -104,8 +105,8 @@ public interface FileStorageService extends FileStorageConstants {
      * @param accountId The account identifier
      * @param session The session providing needed user data
      * @return The account access for specified account identifier
-     * @throws FileStorageException If account access cannot be returned for given account identifier
+     * @throws OXException If account access cannot be returned for given account identifier
      */
-    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws FileStorageException;
+    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException;
 
 }

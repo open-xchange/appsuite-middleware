@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link FileStorageAccountAccess} - Provides access to a file storage account.
  * 
@@ -69,17 +71,17 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      * Gets the file access for associated account.
      * 
      * @return The file access
-     * @throws FileStorageException If file access cannot be returned
+     * @throws OXException If file access cannot be returned
      */
-    public FileStorageFileAccess getFileAccess() throws FileStorageException;
+    public FileStorageFileAccess getFileAccess() throws OXException;
 
     /**
      * Gets the folder access for associated account.
      * 
      * @return The folder access
-     * @throws FileStorageException If folder access cannot be returned
+     * @throws OXException If folder access cannot be returned
      */
-    public FileStorageFolderAccess getFolderAccess() throws FileStorageException;
+    public FileStorageFolderAccess getFolderAccess() throws OXException;
 
     /**
      * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
@@ -88,9 +90,9 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      * The same result is yielded through calling <code>getFolderAccess().getRootFolder()</code> on a connected
      * {@link FileStorageFolderAccess}.
      * 
-     * @throws FileStorageException If returning the root folder fails
+     * @throws OXException If returning the root folder fails
      */
-    public FileStorageFolder getRootFolder() throws FileStorageException;
+    public FileStorageFolder getRootFolder() throws OXException;
     
     /**
      * Retrieve the parent file storage service

@@ -54,10 +54,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileFieldHandler;
-import com.openexchange.file.storage.FileFieldSwitcher;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileFieldHandler;
+import com.openexchange.file.storage.FileFieldSwitcher;
 
 /**
  * {@link FileFieldHandling}

@@ -49,10 +49,11 @@
 
 package com.openexchange.file.storage;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link FileStorageExceptionMessages} - Exception messages for {@link FileStorageException} that needs to be translated.
+ * {@link OXExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
@@ -138,7 +139,7 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Error: %2$s.";
 
     /**
-     * Initializes a new {@link FileStorageExceptionMessages}.
+     * Initializes a new {@link OXExceptionMessages}.
      */
     private FileStorageExceptionMessages() {
         super();
