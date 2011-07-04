@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * Interface class for accessing the database system.
@@ -80,7 +80,7 @@ public final class Database {
 
     private static DatabaseService getDatabaseService() throws OXException {
         if (null == databaseService) {
-            throw ServiceErrorCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         return databaseService;
     }

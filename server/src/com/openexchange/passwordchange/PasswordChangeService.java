@@ -66,7 +66,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -141,7 +141,7 @@ public abstract class PasswordChangeService {
          */
         final AuthenticationService authenticationService = Authentication.getService();
         if (authenticationService == null) {
-            throw new UserException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, AuthenticationService.class.getName()));
+            throw new UserException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName()));
         }
         try {
             /*
@@ -203,7 +203,7 @@ public abstract class PasswordChangeService {
          */
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
-            throw new UserException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+            throw new UserException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName()));
         }
         try {
             sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());

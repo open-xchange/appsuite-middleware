@@ -55,7 +55,7 @@ import org.apache.jcs.JCS;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.CacheExceptionCodes;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.exception.OXException;
 
 /**
@@ -108,13 +108,13 @@ public final class JCSCacheService implements CacheService {
              */
             return new JCSCache(JCS.getInstance(name));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheExceptionCodes.CACHE_ERROR.create(e, e.getMessage());
+            throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
         } catch (final NullPointerException npe) {
             /*
              * Can't use JCS without a configuration file or to be more precise a configuration file which lacks a region of the specified
              * name. It should fail more gracefully, but that's a minor concern in the eyes of JCS developer.
              */
-            throw CacheExceptionCodes.MISSING_CACHE_REGION.create(npe, name);
+            throw CacheExceptionCode.MISSING_CACHE_REGION.create(npe, name);
         }
     }
 

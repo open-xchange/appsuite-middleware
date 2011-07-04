@@ -54,7 +54,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.user.UserService;
 
@@ -78,7 +78,7 @@ public class OXUserResolver implements UserResolver {
             return users;
         }
         if (null == userService) {
-            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, UserService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
         }
         for(final String mail : mails) {
             try {
@@ -94,7 +94,7 @@ public class OXUserResolver implements UserResolver {
 
     public User loadUser(final int userId, final Context ctx) throws UserException, ServiceException {
         if (null == userService) {
-            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, UserService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
         }
         return userService.getUser(userId, ctx);
     }

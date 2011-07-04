@@ -88,6 +88,6 @@ public final class HeaderCacheExceptionFactory extends Exceptions<HeaderCacheExc
      */
     @Override
     protected void knownExceptions() {
-        declareAll(HeaderCacheExceptionCodes.values());
+        declareAll(HeaderCacheExceptionCode.values());
     }
 }

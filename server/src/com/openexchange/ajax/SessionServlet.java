@@ -84,7 +84,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -193,7 +193,7 @@ public abstract class SessionServlet extends AJAXServlet {
          */
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
-            throw new SessiondException(new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+            throw new SessiondException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName()));
         }
         final String sessionId = getSessionId(req);
         final ServerSession session = getSession(req, sessionId, sessiondService);

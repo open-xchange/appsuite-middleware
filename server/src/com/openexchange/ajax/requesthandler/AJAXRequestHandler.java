@@ -52,7 +52,7 @@ package com.openexchange.ajax.requesthandler;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -72,10 +72,10 @@ public interface AJAXRequestHandler {
      * @param session The session providing needed user data
      * @param ctx The context
      * @return An appropriate result corresponding to request
-     * @throws AbstractOXException If action cannot be performed
+     * @throws OXException If action cannot be performed
      * @throws JSONException If a JSON error occurs
      */
-    public AJAXRequestResult performAction(String action, JSONObject jsonObject, Session session, Context ctx) throws AbstractOXException, JSONException;
+    public AJAXRequestResult performAction(String action, JSONObject jsonObject, Session session, Context ctx) throws OXException, JSONException;
 
     /**
      * Gets this request handler's module.

@@ -67,7 +67,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.ResourceFields;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -97,7 +97,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
     public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session, final Context ctx) throws AbstractOXException, JSONException {
         final UserService userService = getServiceRegistry().getService(UserService.class);
         if (null == userService) {
-            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, UserService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
         }
         final User user = userService.getUser(session.getUserId(), ctx);
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -133,7 +133,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
          */
         final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
         if (null == resourceService) {
-            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, ResourceService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
         }
         resourceService.create(user, ctx, resource);
         /*
@@ -155,7 +155,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
     private AJAXRequestResult actionUpdate(final JSONObject jsonObj, final User user, final Context ctx) throws AbstractOXException, JSONException {
         final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
         if (null == resourceService) {
-            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, ResourceService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
         }
         /*
          * Check for "data"
@@ -191,7 +191,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
     private AJAXRequestResult actionDelete(final JSONObject jsonObj, final User user, final Context ctx) throws AbstractOXException, JSONException {
         final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
         if (null == resourceService) {
-            throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, ResourceService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
         }
         /*
          * Check for "data"

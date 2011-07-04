@@ -52,7 +52,7 @@ package com.openexchange.server.services;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -145,7 +145,7 @@ public final class ServerServiceRegistry {
              * Service is not present
              */
             if (failOnError) {
-                throw new ServiceException(ServiceErrorCode.SERVICE_UNAVAILABLE, clazz.getName());
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( clazz.getName());
             }
             return null;
         }
