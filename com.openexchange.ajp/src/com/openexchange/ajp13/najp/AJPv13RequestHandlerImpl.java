@@ -176,7 +176,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                     /*
                      * Caught in another cycle! Abort immediately
                      */
-                    // ajpCon.dropOutstandingData();
+                    ajpCon.dropOutstandingData();
                     final AJPv13Exception e = new AJPv13Exception(AJPCode.IO_ERROR, false, "Broken AJP cyle. Detected outgoing data available with first AJP package.");
                     LOG.error(e.getMessage(), e);
                 }
@@ -324,7 +324,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 final BlockableBufferedOutputStream out = ajpCon.getOutputStream();
                 out.acquire();
                 try {
-                    out.write(AJPv13Response.getEndResponseBytes());
+                    out.write(AJPv13Response.getEndResponseBytes(true));
                     out.flush();
                 } finally {
                     out.release();
