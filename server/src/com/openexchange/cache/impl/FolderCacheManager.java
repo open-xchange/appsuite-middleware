@@ -143,11 +143,9 @@ public final class FolderCacheManager {
      * Gets the singleton instance of folder cache {@link FolderCacheManager manager}.
      * 
      * @return The singleton instance of folder cache {@link FolderCacheManager manager}.
-     * @throws FolderCacheNotEnabledException If folder cache is explicitly disabled through
-     *             {@link OXFolderProperties#isEnableFolderCache() property}
      * @throws OXException If initialization fails
      */
-    public static FolderCacheManager getInstance() throws FolderCacheNotEnabledException, OXException {
+    public static FolderCacheManager getInstance() throws OXException {
         if (!OXFolderProperties.isEnableFolderCache()) {
             throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
         }

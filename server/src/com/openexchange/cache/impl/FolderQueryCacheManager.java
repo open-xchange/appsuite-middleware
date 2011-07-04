@@ -59,10 +59,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * {@link FolderQueryCacheManager}
@@ -77,7 +76,7 @@ public final class FolderQueryCacheManager {
 
     private Cache folderQueryCache;
 
-    private Lock cacheLock;
+    private final Lock cacheLock;
 
     private FolderQueryCacheManager() throws OXException {
         super();
@@ -116,33 +115,25 @@ public final class FolderQueryCacheManager {
     /**
      * Initializes cache reference.
      * 
-     * @throws OXFolderException If initializing the cache reference fails
+     * @throws OXException If initializing the cache reference fails
      */
-    public void initCache() throws OXFolderException {
+    public void initCache() throws OXException {
         if (folderQueryCache != null) {
             return;
         }
-        try {
-            folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
-        } catch (final CacheException e) {
-            throw OXFolderExceptionCode.FOLDER_CACHE_INITIALIZATION_FAILED.create(e, REGION_NAME, e.getMessage());
-        }
+        folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
     }
 
     /**
      * Releases cache reference.
      * 
-     * @throws OXFolderException If clearing cache fails
+     * @throws OXException If clearing cache fails
      */
-    public void releaseCache() throws OXFolderException {
+    public void releaseCache() throws OXException {
         if (folderQueryCache == null) {
             return;
         }
-        try {
-            folderQueryCache.clear();
-        } catch (final CacheException e) {
-            throw OXFolderExceptionCode.FOLDER_CACHE_INITIALIZATION_FAILED.create(e, REGION_NAME, e.getMessage());
-        }
+        folderQueryCache.clear();
         folderQueryCache = null;
     }
 
@@ -158,11 +149,7 @@ public final class FolderQueryCacheManager {
                     instance = null;
                     final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
                     if (null != cacheService) {
-                        try {
-                            cacheService.freeCache(REGION_NAME);
-                        } catch (final CacheException e) {
-                            throw new OXException(e);
-                        }
+                        cacheService.freeCache(REGION_NAME);
                     }
                 }
             }
@@ -189,7 +176,7 @@ public final class FolderQueryCacheManager {
         }
         cacheLock.lock();
         try {
-            Object tmp = folderQueryCache.getFromGroup(createUserKey(userId), createContextKey(cid));
+            final Object tmp = folderQueryCache.getFromGroup(createUserKey(userId), createContextKey(cid));
             if (null == tmp) {
                 return null;
             }
@@ -200,6 +187,7 @@ public final class FolderQueryCacheManager {
                 return null;
             }
             @SuppressWarnings("unchecked")
+            final
             LinkedList<Integer> retval = (LinkedList<Integer>) q.clone();
             return retval;
         } finally {
@@ -260,18 +248,18 @@ public final class FolderQueryCacheManager {
             final LinkedList<Integer> tmp = map.get(queryKey);
             if (tmp == null || !append) {
                 @SuppressWarnings("unchecked")
+                final
                 LinkedList<Integer> clone = (LinkedList<Integer>) q.clone();
                 map.put(queryKey, clone);
             } else {
                 @SuppressWarnings("unchecked")
+                final
                 LinkedList<Integer> clone = (LinkedList<Integer>) q.clone();
                 tmp.addAll(clone);
             }
             if (insertMap) {
                 folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), (Serializable) map);
             }
-        } catch (final CacheException e) {
-            throw new OXException(e);
         } finally {
             cacheLock.unlock();
         }
