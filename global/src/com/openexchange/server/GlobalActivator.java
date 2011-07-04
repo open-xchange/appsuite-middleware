@@ -70,7 +70,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDException;
 import com.openexchange.id.exception.IDExceptionFactory;
-import com.openexchange.sessiond.exception.SessionExceptionFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -89,8 +88,6 @@ public final class GlobalActivator implements BundleActivator {
     private ServiceRegistration componentRegistryRegistration;
 
     private ComponentRegistration loginComponent;
-
-    private ComponentRegistration sessionComponent;
 
     private Initialization initialization;
 
@@ -123,7 +120,6 @@ public final class GlobalActivator implements BundleActivator {
                 EnumComponent.LOGIN,
                 "com.openexchange.authentication",
                 LoginExceptionFactory.getInstance());
-            sessionComponent = new ComponentRegistration(context, EnumComponent.SESSION, "com.openexchange.sessiond", SessionExceptionFactory.getInstance());
             idRegistration = new ComponentRegistration(context, IDException.COMPONENT, "com.openexchange.id", IDExceptionFactory.getInstance());
             initStringParsers(context);
 
@@ -196,8 +192,6 @@ public final class GlobalActivator implements BundleActivator {
             }
             idRegistration.unregister();
             idRegistration = null;
-            sessionComponent.unregister();
-            sessionComponent = null;
             loginComponent.unregister();
             loginComponent = null;
             componentRegistryRegistration.unregister();
