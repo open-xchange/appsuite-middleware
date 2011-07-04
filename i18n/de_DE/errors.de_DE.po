@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-06-09 10:48+0200\n"
+"PO-Revision-Date: 2011-07-04 14:46+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -154,6 +154,9 @@ msgstr ""
 
 msgid "Alarm date for the reminder is missing."
 msgstr "Es wurde kein Datum für die Erinnerungsfunktion angegeben."
+
+msgid "Alias entries are missing for user %1$d in context %2$d."
+msgstr "Alias-Einträge für Benutzer %1$d im Kontext %2$d sind nicht vorhanden."
 
 msgid "An I/O error occurred"
 msgstr "Es trat ein E/A-Fehler auf."
@@ -2768,6 +2771,11 @@ msgstr "Aktualisierung der Quota-Verwendung für Kontext %1$d fehlgeschlagen."
 
 msgid "Updated too many reminders."
 msgstr "Zu viele Erinnerungen aktualisiert."
+
+msgid "Updating attributes failed in context %1$d for user %2$d."
+msgstr ""
+"Das Aktualisieren der Attribute im Kontext %1$d für Benutzer %2$d ist "
+"fehlgeschlagen."
 
 msgid "Updating database ... Try again later."
 msgstr "Datenbank wird aktualisiert... Bitte später erneut versuchen."
