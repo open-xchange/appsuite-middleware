@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Black-/Whitelist Interface bundle
+Bundle-SymbolicName: com.openexchange.blackwhitelist
+Bundle-Version: 6.20.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.api,
+ com.openexchange.groupware,
+ com.openexchange.server.osgiservice,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.http
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: com.openexchange.blackwhitelist.osgi.Activator
+Export-Package: com.openexchange.blackwhitelist
