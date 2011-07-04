@@ -53,7 +53,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link AbstractServiceRegistry} can be used to create a singleton inside a bundle for holding concrete service implementations.
@@ -132,7 +132,7 @@ public class AbstractServiceRegistry {
              * Service is not present
              */
             if (errorOnAbsence) {
-                throw ServiceErrorCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
             }
             return null;
         }

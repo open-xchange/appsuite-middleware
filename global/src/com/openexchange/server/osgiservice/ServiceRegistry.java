@@ -53,7 +53,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceErrorCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -144,7 +144,7 @@ public class ServiceRegistry implements ServiceLookup {
              * Service is not present
              */
             if (errorOnAbsence) {
-                throw ServiceErrorCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
             }
             return null;
         }

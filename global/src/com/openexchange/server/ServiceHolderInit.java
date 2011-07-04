@@ -100,12 +100,12 @@ public final class ServiceHolderInit implements Initialization {
             final String propDir = System.getProperties().getProperty("openexchange.propdir");
             if (null == propDir) {
                 LOG.error("Missing property \"openexchange.propdir\"");
-                throw ServiceErrorCode.SERVICE_INITIALIZATION_FAILED.create();
+                throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
             }
             final File sysPropFile = new File(propDir, "system.properties");
             if (!sysPropFile.exists() || !sysPropFile.isFile()) {
                 LOG.error(new StringBuilder("Missing property file \"system.properties\" in properties path \"").append(propDir).append('"').toString());
-                throw ServiceErrorCode.SERVICE_INITIALIZATION_FAILED.create();
+                throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
             }
             try {
                 in = new FileInputStream(sysPropFile);
@@ -114,7 +114,7 @@ public final class ServiceHolderInit implements Initialization {
                  * Cannot occur due to the above check
                  */
                 LOG.error(e.getMessage(), e);
-                throw ServiceErrorCode.SERVICE_INITIALIZATION_FAILED.create();
+                throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
             }
         }
         try {
@@ -141,7 +141,7 @@ public final class ServiceHolderInit implements Initialization {
                     }
                 }
             } catch (final IOException e) {
-                throw ServiceErrorCode.IO_ERROR.create();
+                throw ServiceExceptionCode.IO_ERROR.create();
             }
         } finally {
             try {
