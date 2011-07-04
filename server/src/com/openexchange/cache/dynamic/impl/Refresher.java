@@ -55,11 +55,10 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.cache.OXCachingException;
-import com.openexchange.cache.OXCachingException.Code;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -97,23 +96,23 @@ public abstract class Refresher<T extends Serializable> {
         this.regionName = regionName;
     }
 
-    private Cache getCache() throws CacheException {
+    private Cache getCache() throws OXException {
         return getCache(regionName);
     }
 
-    protected void cache(final T obj) throws CacheException {
+    protected void cache(final T obj) throws OXException {
         cache(obj, getCache(), factory);
     }
 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
-     * @throws AbstractOXException if loading or putting into cache fails.
+     * @throws OXException TODO
      */
-    protected T refresh() throws AbstractOXException {
+    protected T refresh() throws OXException {
         return refresh(regionName, factory);
     }
 
-    public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws CacheException {
+    public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
         T retval = null;
         final Lock lock = factory.getCacheLock();
         final Serializable key = factory.getKey(); 
@@ -138,11 +137,11 @@ public abstract class Refresher<T extends Serializable> {
         return retval;
     }
 
-    public static <T extends Serializable> T refresh(final String regionName, final OXObjectFactory<T> factory) throws AbstractOXException {
+    public static <T extends Serializable> T refresh(final String regionName, final OXObjectFactory<T> factory) throws OXException {
         return refresh(regionName, getCache(regionName), factory);
     }
 
-    public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory) throws AbstractOXException {
+    public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
         if (null == cache) {
             return factory.load();
         }
@@ -157,10 +156,8 @@ public abstract class Refresher<T extends Serializable> {
                 // I am the thread to load the object. Put temporary condition
                 // into cache.
                 cond = lock.newCondition();
-                try {
+                {
                     cache.putSafe(key, (Serializable) cond);
-                } catch (final CacheException e) {
-                    throw new OXCachingException(Code.FAILED_PUT, e);
                 }
             } else if (tmp instanceof Condition) {
                 // I have to wait for another thread to load the object.
@@ -194,7 +191,7 @@ public abstract class Refresher<T extends Serializable> {
         if (null != cond) {
             try {
                 retval = factory.load();
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 cache.remove(key);
                 throw e;
             }
@@ -202,8 +199,6 @@ public abstract class Refresher<T extends Serializable> {
             try {
                 cache.put(key, retval);
                 cond.signalAll();
-            } catch (final CacheException e) {
-                throw new OXCachingException(Code.FAILED_PUT, e);
             } finally {
                 lock.unlock();
             }
@@ -211,9 +206,9 @@ public abstract class Refresher<T extends Serializable> {
         return retval;
     }
 
-    public static Cache getCache(final String regionName) throws CacheException {
+    public static Cache getCache(final String regionName) throws OXException {
         if (null == regionName) {
-            throw new CacheException(Code.INVALID_CACHE_REGION_NAME, regionName);
+            throw CacheExceptionCode.INVALID_CACHE_REGION_NAME.create(regionName);
         }
         final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
         return null == service ? null : service.getCache(regionName);

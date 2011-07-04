@@ -327,27 +327,18 @@ public final class FolderCacheManager {
                         final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                         final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
                         globalCache.remove(cacheKey);
-                    } catch (final CacheException e) {
+                    } catch (final OXException e) {
                         LOG.warn(e.getMessage(), e);
                     }
                 }
             }
-        } catch (final CacheException e) {
-            throw new OXException(e);
         } finally {
             cacheLock.unlock();
         }
         if (null != readCon) {
             putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
         }
-        try {
-            return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, folderId)).clone();
-        } catch (final AbstractOXException e) {
-            if (e instanceof OXException) {
-                throw (OXException) e;
-            }
-            throw new OXException(e);
-        }
+        return Refresher.refresh(FOLDER_CACHE_REGION_NAME, folderCache, new FolderFactory(ctx, folderId)).clone();
     }
 
     /**
