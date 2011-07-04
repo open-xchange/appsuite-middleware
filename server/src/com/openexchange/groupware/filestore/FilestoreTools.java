@@ -52,6 +52,7 @@ package com.openexchange.groupware.filestore;
 import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -72,7 +73,7 @@ public final class FilestoreTools {
      * @param context Context that wants to use the file store.
      * @return read to use URI to the file store.
      */
-    public static URI createLocation(final Filestore store, final Context context) throws FilestoreException {
+    public static URI createLocation(final Filestore store, final Context context) throws OXException {
         if (store.getId() != context.getFilestoreId()) {
             throw FilestoreExceptionCodes.FILESTORE_MIXUP.create(I(store.getId()), I(context.getContextId()), I(context.getFilestoreId()));
         }
@@ -84,7 +85,7 @@ public final class FilestoreTools {
                 uri.getPath() + '/' + context.getFilestoreName(),
                 uri.getQuery(),
                 uri.getFragment());
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, uri.toString() + '/' + context.getFilestoreName());
         }
     }

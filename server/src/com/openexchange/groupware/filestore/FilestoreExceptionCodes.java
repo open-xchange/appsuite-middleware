@@ -53,37 +53,45 @@ import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.FI
 import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.NO_SUCH_FILESTORE_MSG;
 import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.SQL_PROBLEM_MSG;
 import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.URI_CREATION_FAILED_MSG;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.filestore.internal.FilestoreExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link FilestoreExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum FilestoreExceptionCodes implements OXErrorMessage {
+public enum FilestoreExceptionCodes implements OXExceptionCode {
     /** "Wrong filestore %1$d for context %2$d needing filestore %3$d. */
-    FILESTORE_MIXUP(FILESTORE_MIXUP_MSG, Category.CODE_ERROR, 201),
+    FILESTORE_MIXUP(FILESTORE_MIXUP_MSG, Category.CATEGORY_ERROR, 201),
     /** Cannot find filestore with id %1$d. */
-    NO_SUCH_FILESTORE(NO_SUCH_FILESTORE_MSG, Category.SETUP_ERROR, 303),
+    NO_SUCH_FILESTORE(NO_SUCH_FILESTORE_MSG, Category.CATEGORY_CONFIGURATION, 303),
     /** Cannot create URI from "%1$s". */
-    URI_CREATION_FAILED(URI_CREATION_FAILED_MSG, Category.CODE_ERROR, 304),
+    URI_CREATION_FAILED(URI_CREATION_FAILED_MSG, Category.CATEGORY_ERROR, 304),
     /** SQL Problem: "%s". */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 306),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 306),
     ;
 
     private final String message;
     private final Category category;
-    private int number;
+    private final int number;
+    private final boolean display;
 
-    private FilestoreExceptionCodes(String message, Category category, int number) {
+    private FilestoreExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
+    }
+    
+    public String getPrefix() {
+        return "FLS";
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return number;
     }
 
@@ -91,20 +99,47 @@ public enum FilestoreExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public String getHelp() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public Category getCategory() {
         return category;
     }
 
-    public final FilestoreException create(Object... args) {
-        return FilestoreExceptionFactory.getInstance().create(this, args);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return create(new Object[0]);
     }
 
-    public final FilestoreException create(Throwable cause, Object... args) {
-        return FilestoreExceptionFactory.getInstance().create(this, cause, args);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return create((Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        final OXException ret;
+        if (display) {
+            ret = new OXException(number, message, cause, args);
+        } else {
+            ret =
+                new OXException(
+                    number,
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
+        }
+        return ret.addCategory(category).setPrefix(getPrefix());
     }
 }

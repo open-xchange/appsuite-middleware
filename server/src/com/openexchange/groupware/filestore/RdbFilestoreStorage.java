@@ -56,7 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -66,12 +65,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
 
     @Override
     public Filestore getFilestore(final int id) throws FilestoreException {
-        final Connection con;
-        try {
-            con = DBPool.pickup();
-        } catch (final DBPoolingException e) {
-            throw new FilestoreException(e);
-        }
+        final Connection con = DBPool.pickup();
         try {
             return getFilestore(con, id);
         } finally {
@@ -80,7 +74,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
     }
 
     @Override
-    public Filestore getFilestore(Connection con, int id) throws FilestoreException {
+    public Filestore getFilestore(final Connection con, final int id) throws FilestoreException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -102,7 +96,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
             filestore.setSize(result.getLong("size"));
             filestore.setMaxContext(result.getLong("max_context"));
             return filestore;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(result, stmt);

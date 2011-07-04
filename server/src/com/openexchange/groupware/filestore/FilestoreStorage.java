@@ -51,6 +51,7 @@ package com.openexchange.groupware.filestore;
 
 import java.net.URI;
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;
@@ -63,36 +64,36 @@ public abstract class FilestoreStorage {
         return INSTANCE;
     }
 
-    public abstract Filestore getFilestore(int id) throws FilestoreException;
+    public abstract Filestore getFilestore(int id) throws OXException;
 
-    public abstract Filestore getFilestore(Connection con, int id) throws FilestoreException;
+    public abstract Filestore getFilestore(Connection con, int id) throws OXException;
 
     /**
      * Convenience method for generating the context specific file store
      * location.
      * @param ctx the location will be generated for this context.
      * @return a ready to use context specific file store location.
-     * @throws FilestoreException if an error occurs generating the URI.
+     * @throws OXException if an error occurs generating the URI.
      */
-    public static URI createURI(final Context ctx) throws FilestoreException {
+    public static URI createURI(final Context ctx) throws OXException {
         final Filestore store = getInstance().getFilestore(ctx.getFilestoreId());
         return FilestoreTools.createLocation(store, ctx);
     }
 
-    public static URI createURI(Connection con, Context ctx) throws FilestoreException {
+    public static URI createURI(final Connection con, final Context ctx) throws OXException {
         final FilestoreStorage storage = getInstance();
         final Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
         return FilestoreTools.createLocation(store, ctx);
     }
 
-    public static URI createURI(Connection con, int contextId) throws FilestoreException {
+    public static URI createURI(final Connection con, final int contextId) throws OXException {
         try {
-            RdbContextStorage ctxStorage = new RdbContextStorage();
-            Context ctx = ctxStorage.loadContextData(con, contextId);
-            FilestoreStorage storage = getInstance();
-            Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
+            final RdbContextStorage ctxStorage = new RdbContextStorage();
+            final Context ctx = ctxStorage.loadContextData(con, contextId);
+            final FilestoreStorage storage = getInstance();
+            final Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
             return FilestoreTools.createLocation(store, ctx);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new FilestoreException(e);
         }
     }
