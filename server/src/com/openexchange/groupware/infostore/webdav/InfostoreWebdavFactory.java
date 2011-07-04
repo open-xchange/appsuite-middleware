@@ -536,7 +536,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         for(final TransactionAware service : services()) {
             try {
                 service.startTransaction();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("",e);
             }
         }
@@ -547,7 +547,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         for (final TransactionAware service : services()) {
             try {
                 service.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("",e);
             }
         }

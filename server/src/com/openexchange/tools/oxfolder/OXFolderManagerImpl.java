@@ -1850,7 +1850,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             } finally {
                 infostoreFacade.finish();
             }
-        } catch (final TransactionException e) {
+        } catch (final OXException e) {
             throw new InfostoreException(e);
         }
     }

@@ -936,7 +936,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             } catch (OXException e) {
                 try {
                     rollback();
-                } catch (final TransactionException txe) {
+                } catch (final OXException txe) {
                     LL.log(e);
                 }
                 throw new TransactionException(AttachmentExceptionCodes.FILE_DELETE_FAILED.create(e, I(contextHolder.get().getContextId())));

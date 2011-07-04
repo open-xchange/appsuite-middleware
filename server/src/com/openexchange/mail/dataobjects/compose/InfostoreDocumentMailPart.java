@@ -125,7 +125,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             if(fileAccess != null) {
                 try {
                     fileAccess.finish();
-                } catch (TransactionException e) {
+                } catch (final OXException e) {
                     // IGNORE
                 }
             }

@@ -285,7 +285,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             }
         } catch (final PublicationException e) {
             throw new MailException(e);
-        } catch (final TransactionException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         /*
@@ -608,7 +608,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     }
                     file.setFileName(newName);
                     file.setTitle(newName);
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     fileAccess.rollback();
                     throw e;
                 } catch (final Exception e) {
@@ -675,7 +675,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 } finally {
                     fileAccess.finish();
                 }
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error(
                     new StringBuilder("Transaction error while deleting infostore document with ID \"").append(publication.infostoreId).append(
                         "\" failed.").toString(),

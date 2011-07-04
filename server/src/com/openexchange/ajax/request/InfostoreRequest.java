@@ -571,7 +571,7 @@ public class InfostoreRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 infostore.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
             handle(t);
@@ -586,7 +586,7 @@ public class InfostoreRequest extends CommonRequest {
             }
             try {
                 infostore.finish();
-            } catch (final TransactionException e1) {
+            } catch (final OXException e1) {
                 LOG.error("", e1);
             }
         }
@@ -813,14 +813,14 @@ public class InfostoreRequest extends CommonRequest {
                     searchEngine.rollback();
                     handle(t);
                     return;
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                 }
             } finally {
                 try {
                     infostore.finish();
                     searchEngine.finish();
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                 }
 
@@ -873,7 +873,7 @@ public class InfostoreRequest extends CommonRequest {
                 try {
                     infostore.rollback();
                     searchEngine.rollback();
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                 }
                 handle(t);
@@ -882,7 +882,7 @@ public class InfostoreRequest extends CommonRequest {
                 try {
                     infostore.finish();
                     searchEngine.finish();
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                 }
 
@@ -924,7 +924,7 @@ public class InfostoreRequest extends CommonRequest {
                 infostore.rollback();
                 searchEngine.rollback();
 
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
             handle(t);
@@ -933,7 +933,7 @@ public class InfostoreRequest extends CommonRequest {
             try {
                 infostore.finish();
                 searchEngine.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
         }
@@ -1000,7 +1000,7 @@ public class InfostoreRequest extends CommonRequest {
                 infostore.rollback();
                 searchEngine.rollback();
                 attachmentBase.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
             handle(t);
@@ -1010,7 +1010,7 @@ public class InfostoreRequest extends CommonRequest {
                 infostore.finish();
                 searchEngine.finish();
                 attachmentBase.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
             if (in != null) {
@@ -1055,7 +1055,7 @@ public class InfostoreRequest extends CommonRequest {
             try {
                 infostore.rollback();
                 searchEngine.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
             handle(t);
@@ -1064,7 +1064,7 @@ public class InfostoreRequest extends CommonRequest {
             try {
                 infostore.finish();
                 searchEngine.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
 
@@ -1119,7 +1119,7 @@ public class InfostoreRequest extends CommonRequest {
             try {
                 infostore.rollback();
                 searchEngine.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
             handle(t);
@@ -1128,7 +1128,7 @@ public class InfostoreRequest extends CommonRequest {
             try {
                 infostore.finish();
                 searchEngine.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
 
@@ -1168,14 +1168,14 @@ public class InfostoreRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 infostore.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
             handle(t);
         } finally {
             try {
                 infostore.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
         }
@@ -1205,14 +1205,14 @@ public class InfostoreRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 infostore.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
             handle(t);
         } finally {
             try {
                 infostore.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
         }
@@ -1238,14 +1238,14 @@ public class InfostoreRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 searchEngine.rollback();
-            } catch (final TransactionException x) {
+            } catch (final OXException x) {
                 LOG.debug("", x);
             }
             handle(t);
         } finally {
             try {
                 searchEngine.finish();
-            } catch (final TransactionException x) {
+            } catch (final OXException x) {
                 LOG.error("", x);
             }
         }

@@ -463,13 +463,13 @@ public abstract class Consistency implements ConsistencyMBean {
                     try {
                         database.rollback();
                         return;
-                    } catch (final TransactionException e1) {
+                    } catch (final OXException e1) {
                         LOG1.debug("", e1);
                     }
                 } finally {
                     try {
                         database.finish();
-                    } catch (final TransactionException e) {
+                    } catch (final OXException e) {
                         LOG1.debug("", e);
                     }
                 }
@@ -515,12 +515,12 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG1.error("", e);
                     try {
                         attachments.rollback();
                         return;
-                    } catch (final TransactionException e1) {
+                    } catch (final OXException e1) {
                         LOG1.error("", e1);
                     }
                 } catch (final OXException e) {
@@ -528,13 +528,13 @@ public abstract class Consistency implements ConsistencyMBean {
                     try {
                         attachments.rollback();
                         return;
-                    } catch (final TransactionException e1) {
+                    } catch (final OXException e1) {
                         LOG1.debug("", e1);
                     }
                 } finally {
                     try {
                         attachments.finish();
-                    } catch (final TransactionException e) {
+                    } catch (final OXException e) {
                         LOG1.debug("", e);
                     }
                 }
@@ -610,13 +610,13 @@ public abstract class Consistency implements ConsistencyMBean {
                     try {
                         database.rollback();
                         return;
-                    } catch (final TransactionException e1) {
+                    } catch (final OXException e1) {
                         LOG1.debug("", e1);
                     }
                 } finally {
                     try {
                         database.finish();
-                    } catch (final TransactionException e) {
+                    } catch (final OXException e) {
                         LOG1.debug("", e);
                     }
                 }
@@ -653,12 +653,12 @@ public abstract class Consistency implements ConsistencyMBean {
                     if (numbers[1] == 1 && LOG1.isInfoEnabled()) {
                         LOG1.info("Removed attachment database entry for: " + identifier);
                     }
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG1.debug("", e);
                     try {
                         attachments.rollback();
                         return;
-                    } catch (final TransactionException e1) {
+                    } catch (final OXException e1) {
                         LOG1.debug("", e1);
                     }
                     return;
@@ -667,14 +667,14 @@ public abstract class Consistency implements ConsistencyMBean {
                     try {
                         attachments.rollback();
                         return;
-                    } catch (final TransactionException e1) {
+                    } catch (final OXException e1) {
                         LOG1.debug("", e1);
                     }
                     return;
                 } finally {
                     try {
                         attachments.finish();
-                    } catch (final TransactionException e) {
+                    } catch (final OXException e) {
                         LOG1.debug("", e);
                     }
                 }
@@ -733,7 +733,7 @@ public abstract class Consistency implements ConsistencyMBean {
                         try {
                             database.rollback();
                             return;
-                        } catch (final TransactionException e1) {
+                        } catch (final OXException e1) {
                             LOG1.debug("", e1);
                         }
                     } catch (final OXException e) {
@@ -741,13 +741,13 @@ public abstract class Consistency implements ConsistencyMBean {
                         try {
                             database.rollback();
                             return;
-                        } catch (final TransactionException e1) {
+                        } catch (final OXException e1) {
                             LOG1.debug("", e1);
                         }
                     } finally {
                         try {
                             database.finish();
-                        } catch (final TransactionException e) {
+                        } catch (final OXException e) {
                             LOG1.debug("", e);
                         }
                     }

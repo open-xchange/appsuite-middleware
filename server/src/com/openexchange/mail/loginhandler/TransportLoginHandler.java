@@ -159,7 +159,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
                     } catch (final OXException e) {
                         fileAccess.rollback();
                         throw new LoginException(e);
-                    } catch (final TransactionException e) {
+                    } catch (final OXException e) {
                         fileAccess.rollback();
                         throw e;
                     } catch (final Exception e) {
@@ -168,7 +168,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
                     } finally {
                         fileAccess.finish();
                     }
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     throw new LoginException(e);
                 }
             }

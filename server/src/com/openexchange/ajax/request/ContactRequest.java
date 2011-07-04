@@ -966,14 +966,14 @@ public class ContactRequest {
             } catch (final SearchIteratorException e) {
                 try {
                     attachmentBase.rollback();
-                } catch (final TransactionException e1) {
+                } catch (final OXException e1) {
                     LOG.error("Attachment transaction rollback failed", e);
                 }
                 throw new OXException(e);
             } catch (final OXException e) {
                 try {
                     attachmentBase.rollback();
-                } catch (final TransactionException e1) {
+                } catch (final OXException e1) {
                     LOG.error("Attachment transaction rollback failed", e);
                 }
                 throw e;
@@ -985,7 +985,7 @@ public class ContactRequest {
                 }
                 try {
                     attachmentBase.finish();
-                } catch (final TransactionException e) {
+                } catch (final OXException e) {
                     LOG.error("Attachment transaction finish failed", e);
                 }
             }

@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -75,6 +74,7 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentException;
@@ -88,18 +88,14 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.mail.MailException;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tx.TransactionException;
 
 public class AttachmentRequest extends CommonRequest {
 
@@ -143,7 +139,7 @@ public class AttachmentRequest extends CommonRequest {
         }
         try {
             if (AJAXServlet.ACTION_ATTACH.equals(action)) {
-                JSONObject object = (JSONObject) req.getBody();
+                final JSONObject object = (JSONObject) req.getBody();
                 
                 for (final AttachmentField required : Attachment.REQUIRED) {
                     if (!object.has(required.getName())) {
@@ -160,33 +156,33 @@ public class AttachmentRequest extends CommonRequest {
                 final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
                 
                 if (conversionService == null) {
-                    throw new ServiceException(
-                        ServiceExceptionCode.SERVICE_UNAVAILABLE,
+                    throw 
+                        ServiceExceptionCode.SERVICE_UNAVAILABLE.create(
                         ConversionService.class.getName());
                 }
                 
-                JSONObject datasourceDef = object.getJSONObject(DATASOURCE);
-                String datasourceIdentifier = datasourceDef.getString(IDENTIFIER);
+                final JSONObject datasourceDef = object.getJSONObject(DATASOURCE);
+                final String datasourceIdentifier = datasourceDef.getString(IDENTIFIER);
                 
-                DataSource source = conversionService.getDataSource(datasourceIdentifier);
+                final DataSource source = conversionService.getDataSource(datasourceIdentifier);
                 if(source == null) {
                     invalidParameter("datasource", datasourceIdentifier);
                     return true;
                 }
                 
-                List<Class<?>> types = Arrays.asList(source.getTypes());
+                final List<Class<?>> types = Arrays.asList(source.getTypes());
                 
-                Map<String, String> arguments = new HashMap<String, String>();
+                final Map<String, String> arguments = new HashMap<String, String>();
                 
-                for(String key : datasourceDef.keySet()) {
+                for(final String key : datasourceDef.keySet()) {
                     arguments.put(key, datasourceDef.getString(key));
                 }
                 
                 InputStream is;
                 if(types.contains(InputStream.class)) {
-                    Data<InputStream> data = source.getData(InputStream.class, new DataArguments(arguments), session);
-                    String sizeS = data.getDataProperties().get(DataProperties.PROPERTY_SIZE);
-                    String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
+                    final Data<InputStream> data = source.getData(InputStream.class, new DataArguments(arguments), session);
+                    final String sizeS = data.getDataProperties().get(DataProperties.PROPERTY_SIZE);
+                    final String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
                     
                     if(sizeS != null) {
                         attachment.setFilesize(Long.parseLong(sizeS));
@@ -196,7 +192,7 @@ public class AttachmentRequest extends CommonRequest {
                         attachment.setFileMIMEType(contentTypeS);
                     }
                     
-                    String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
+                    final String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
                     if(name != null && null == attachment.getFilename()) {
                         attachment.setFilename(name);
                     }
@@ -204,17 +200,17 @@ public class AttachmentRequest extends CommonRequest {
                     is = data.getData();
                     
                 } else if (types.contains(byte[].class)) {
-                    Data<byte[]> data = source.getData(byte[].class, new DataArguments(arguments), session);
-                    byte[] bytes = data.getData();
+                    final Data<byte[]> data = source.getData(byte[].class, new DataArguments(arguments), session);
+                    final byte[] bytes = data.getData();
                     is = new ByteArrayInputStream(bytes);
                     attachment.setFilesize(bytes.length);
 
-                    String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
+                    final String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
                     if(contentTypeS != null) {
                         attachment.setFileMIMEType(contentTypeS);
                     }
                     
-                    String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
+                    final String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
                     if(name != null && null == attachment.getFilename()) {
                         attachment.setFilename(name);
                     }
@@ -235,7 +231,7 @@ public class AttachmentRequest extends CommonRequest {
                 try {
                     ts = ATTACHMENT_BASE.attachToObject(attachment, is, session, ctx, user, userConfig);
                     ATTACHMENT_BASE.commit();
-                } catch (AttachmentException x) {
+                } catch (final AttachmentException x) {
                     ATTACHMENT_BASE.rollback();
                     throw x;
                 } finally {
@@ -365,9 +361,11 @@ public class AttachmentRequest extends CommonRequest {
             handle(e);
         } catch (final OXAborted x) {
             return true;
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             handle(e);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
+            handle(e);
+        } catch (final OXException e) {
             handle(e);
         }
 
@@ -405,14 +403,14 @@ public class AttachmentRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
             handle(t);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -459,14 +457,14 @@ public class AttachmentRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
             handle(t);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             if (iter != null) {
@@ -508,14 +506,14 @@ public class AttachmentRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
             handle(t);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             if (iter != null) {
@@ -539,7 +537,7 @@ public class AttachmentRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.debug("", e);
             }
             handle(t);
@@ -547,7 +545,7 @@ public class AttachmentRequest extends CommonRequest {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -583,14 +581,14 @@ public class AttachmentRequest extends CommonRequest {
         } catch (final Throwable t) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             handle(t);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final TransactionException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
 
