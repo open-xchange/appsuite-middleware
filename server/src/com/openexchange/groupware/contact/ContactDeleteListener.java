@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -94,7 +93,7 @@ public final class ContactDeleteListener implements DeleteListener {
         }
     }
 
-    private static void dropDListEntries(final String dlistTable, final String contactTable, final int userId, final int contextId, final Connection writeCon) throws ContactException {
+    private static void dropDListEntries(final String dlistTable, final String contactTable, final int userId, final int contextId, final Connection writeCon) throws OXException {
         String sql = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;

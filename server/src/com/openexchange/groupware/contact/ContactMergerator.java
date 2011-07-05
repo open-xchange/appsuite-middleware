@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -72,20 +71,20 @@ public class ContactMergerator implements SearchIterator<Contact>{
     private Contact next = null;
     private List<RememberingIterator> iterators = null;
     private List<SearchIterator<Contact>> delegates = null;
-    private AbstractOXException e;
+    private OXException e;
     private OXException oxe;
-    private Comparator<Contact> comparator;
+    private final Comparator<Contact> comparator;
     
     
-    public ContactMergerator(Comparator<Contact> comparator, SearchIterator<Contact>...iterators) throws AbstractOXException{
+    public ContactMergerator(final Comparator<Contact> comparator, final SearchIterator<Contact>...iterators) throws OXException{
         this(comparator, Arrays.asList(iterators));
     }
 
-    public ContactMergerator(Comparator<Contact> comparator, List<SearchIterator<Contact>> iterators) throws AbstractOXException{
+    public ContactMergerator(final Comparator<Contact> comparator, final List<SearchIterator<Contact>> iterators) throws OXException{
         super();
         this.iterators = new ArrayList<RememberingIterator>(iterators.size());
         this.delegates = iterators;
-        for (SearchIterator<Contact> searchIterator : iterators) {
+        for (final SearchIterator<Contact> searchIterator : iterators) {
             if(searchIterator.hasNext()) {
                 this.iterators.add(new RememberingIterator(searchIterator));
             }
@@ -94,7 +93,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
         grabNext();
     }
 
-    private void grabNext() throws AbstractOXException{
+    private void grabNext() throws OXException{
         if(this.iterators.isEmpty()) {
             next = null;
             return;
@@ -104,11 +103,11 @@ public class ContactMergerator implements SearchIterator<Contact>{
                 Collections.sort(iterators, new TopMostComparator(comparator));
             }
             next = this.iterators.get(0).currentOrNext();
-        } catch (ExceptionTransporter transporter) {
+        } catch (final ExceptionTransporter transporter) {
             this.e = transporter.e;
-        } catch (SearchIteratorException e) {
+        } catch (final SearchIteratorException e) {
             this.e = e;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             this.oxe = e;
         } finally {
             if(this.iterators.get(0).hasNext()) {
@@ -119,11 +118,11 @@ public class ContactMergerator implements SearchIterator<Contact>{
         }
     }
 
-    public void addWarning(OXException warning) {
+    public void addWarning(final OXException warning) {
     }
 
     public void close() throws OXException {
-        for (SearchIterator<Contact> iter : delegates) {
+        for (final SearchIterator<Contact> iter : delegates) {
             iter.close();
         }
     }
@@ -142,12 +141,12 @@ public class ContactMergerator implements SearchIterator<Contact>{
 
     public Contact next() throws OXException {
         throwExceptions();
-        Contact nextContact = next;
+        final Contact nextContact = next;
         grabNext();
         return nextContact;
     }
 
-    private void throwExceptions() throws AbstractOXException {
+    private void throwExceptions() throws OXException {
         if(e != null) {
             throw e;
         }
@@ -161,10 +160,10 @@ public class ContactMergerator implements SearchIterator<Contact>{
     }
     
     private static final class RememberingIterator {
-        private SearchIterator<Contact> iterator;
+        private final SearchIterator<Contact> iterator;
         private Contact element;
         
-        public RememberingIterator(SearchIterator<Contact> iterator) {
+        public RememberingIterator(final SearchIterator<Contact> iterator) {
             this.iterator = iterator;
         }
         
@@ -172,7 +171,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
             element = null;
         }
 
-        public Contact currentOrNext() throws AbstractOXException {
+        public Contact currentOrNext() throws OXException {
             return (element == null) ? next() : getCurrent();
         }
         
@@ -180,11 +179,11 @@ public class ContactMergerator implements SearchIterator<Contact>{
             return element;
         }
         
-        public boolean hasNext() throws AbstractOXException {
+        public boolean hasNext() throws OXException {
             return iterator.hasNext();
         }
         
-        public Contact next() throws AbstractOXException {
+        public Contact next() throws OXException {
             return element = iterator.next();
         }
     }
@@ -194,16 +193,16 @@ public class ContactMergerator implements SearchIterator<Contact>{
         private Comparator<Contact> contactComparator = null;
         
 
-        public TopMostComparator(Comparator<Contact> comparator) {
+        public TopMostComparator(final Comparator<Contact> comparator) {
             this.contactComparator = comparator;
         }
         
-        public int compare(RememberingIterator o1, RememberingIterator o2) {
+        public int compare(final RememberingIterator o1, final RememberingIterator o2) {
             try {
-                Contact v1 = o1.currentOrNext();
-                Contact v2 = o2.currentOrNext();
+                final Contact v1 = o1.currentOrNext();
+                final Contact v2 = o2.currentOrNext();
                 return contactComparator.compare(v1, v2);
-            } catch (AbstractOXException e) {
+            } catch (final OXException e) {
                 throw new ExceptionTransporter(e);
             }
         }
@@ -211,10 +210,10 @@ public class ContactMergerator implements SearchIterator<Contact>{
     }
     
     private static final class ExceptionTransporter extends RuntimeException {
-        public AbstractOXException e;
+        public OXException e;
 
         
-        public ExceptionTransporter(AbstractOXException x) {
+        public ExceptionTransporter(final OXException x) {
             this.e = x;
         }
     }

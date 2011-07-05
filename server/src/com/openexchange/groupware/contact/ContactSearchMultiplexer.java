@@ -56,7 +56,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.CollationContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
@@ -82,7 +82,7 @@ public class ContactSearchMultiplexer {
         this.discoveryService = discoveryService;
     }
 
-    public SearchIterator<Contact> extendedSearch(final ServerSession session, final ContactSearchObject searchObj, final int orderBy, final Order order, final String collation, final int[] cols) throws AbstractOXException {
+    public SearchIterator<Contact> extendedSearch(final ServerSession session, final ContactSearchObject searchObj, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
         final int[] folders = searchObj.getFolders();
         final int contextId = session.getContextId();
         final List<SearchIterator<Contact>> searchIterators = new LinkedList<SearchIterator<Contact>>();
@@ -125,7 +125,7 @@ public class ContactSearchMultiplexer {
         return new ContactMergerator(new DefaultContactComparator(orderBy, order), searchIterators);
     }
     
-    public SearchIterator<Contact> extendedSearch(final ServerSession session, final SearchTerm<?> searchTerm, final int orderBy, final Order order, final String collation, final int[] cols) throws AbstractOXException {
+    public SearchIterator<Contact> extendedSearch(final ServerSession session, final SearchTerm<?> searchTerm, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
     	final ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
     	conv.parse(searchTerm);
     	final List<String> folders = conv.getFolders();

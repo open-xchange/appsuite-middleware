@@ -55,6 +55,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentException;
@@ -74,7 +75,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         super();
     }
 
-    public long attached(final AttachmentEvent e) throws ContactException, OXObjectNotFoundException, AttachmentException, OXConflictException, OXConcurrentModificationException, OXPermissionException {
+    public long attached(final AttachmentEvent e) throws OXException, OXObjectNotFoundException, AttachmentException, OXConflictException, OXConcurrentModificationException, OXPermissionException {
         final int userId = e.getUser().getId();
         final int[] groups = e.getUser().getGroups();
         final Contact co = Contacts.getContactById(e.getAttachedId(), userId, groups, e.getContext(), e.getUserConfig(), e.getWriteConnection());
@@ -83,7 +84,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         return co.getLastModified().getTime();
     }
 
-    public long detached(final AttachmentEvent event) throws ContactException, OXObjectNotFoundException, AttachmentException, OXConflictException, OXConcurrentModificationException, OXPermissionException {
+    public long detached(final AttachmentEvent event) throws OXException, OXObjectNotFoundException, AttachmentException, OXConflictException, OXConcurrentModificationException, OXPermissionException {
         final Contact co = Contacts.getContactById(event.getAttachedId(),event.getUser().getId(),event.getUser().getGroups(),event.getContext(),event.getUserConfig(),event.getWriteConnection());
         if (co.getNumberOfAttachments() < 1) {
             throw ContactExceptionCodes.TOO_FEW_ATTACHMENTS.create();
@@ -95,18 +96,18 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         return co.getLastModified().getTime();
     }
 
-    public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws ContactException {
+    public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         final boolean back = Contacts.performContactWriteCheckByID(folderId, objectId,user.getId(),ctx,userConfig);
         if (!back) {
             throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectId), I(ctx.getContextId()));
         }
     }
 
-    public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws ContactException {
+    public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         checkMayAttach(folderId, objectId,user,userConfig,ctx);
     }
 
-    public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws ContactException {
+    public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         final boolean back = Contacts.performContactReadCheckByID(folderId, objectId,user.getId(),ctx,userConfig);
         if (!back) {
             throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(user.getId()));

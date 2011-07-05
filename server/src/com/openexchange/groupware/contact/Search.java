@@ -51,8 +51,8 @@ package com.openexchange.groupware.contact;
 
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.sql.SearchStrings;
 
@@ -68,27 +68,23 @@ public class Search {
         super();
     }
 
-    public static void checkPatternLength(ContactSearchObject searchData) throws ContactException {
+    public static void checkPatternLength(final ContactSearchObject searchData) throws OXException {
         final int minimumSearchCharacters = getMinimumSearchCharacters();
         if (0 == minimumSearchCharacters) {
             return;
         }
-        for (String pattern : new String[] {
+        for (final String pattern : new String[] {
             searchData.getPattern(), searchData.getDisplayName(), searchData.getEmail1(), searchData.getEmail2(), searchData.getEmail3(),
             searchData.getGivenName(), searchData.getSurname() }) {
             checkPatternLength(minimumSearchCharacters, pattern);
         }
     }
 
-    private static int getMinimumSearchCharacters() throws ContactException {
-        try {
-            return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (ConfigurationException e) {
-            throw new ContactException(e);
-        }
+    private static int getMinimumSearchCharacters() throws OXException {
+        return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
     }
 
-    public static void checkPatternLength(String pattern) throws ContactException {
+    public static void checkPatternLength(final String pattern) throws OXException {
         final int minimumSearchCharacters = getMinimumSearchCharacters();
         if (0 == minimumSearchCharacters) {
             return;
@@ -96,7 +92,7 @@ public class Search {
         checkPatternLength(minimumSearchCharacters, pattern);
     }
 
-    private static void checkPatternLength(int minimumSearchCharacters, String pattern) throws ContactException {
+    private static void checkPatternLength(final int minimumSearchCharacters, final String pattern) throws OXException {
         if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
             throw ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.create(I(minimumSearchCharacters));
         }
