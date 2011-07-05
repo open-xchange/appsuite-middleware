@@ -64,6 +64,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateException;
@@ -165,7 +166,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
     }
 
     private ContextException missingAdminError(final int contextId) {
-        return new ContextException(ContextException.Code.NO_MAILADMIN, I(contextId));
+        return ContextExceptionCodes.NO_MAILADMIN.create(I(contextId));
     }
 
     private int getMailAdmin(final Connection con, final int contextId) throws UpdateException {

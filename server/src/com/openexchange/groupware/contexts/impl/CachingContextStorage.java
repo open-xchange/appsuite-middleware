@@ -207,7 +207,7 @@ public class CachingContextStorage extends ContextStorage {
             try {
                 cache.remove(Integer.valueOf(contextId));
             } catch (final CacheException e) {
-                throw new ContextException(ContextException.Code.CACHE_REMOVE, e, String.valueOf(contextId));
+                throw ContextExceptionCodes.CACHE_REMOVE.create(e, String.valueOf(contextId));
             } finally {
                 cacheLock.unlock();
             }
@@ -229,7 +229,7 @@ public class CachingContextStorage extends ContextStorage {
             try {
                 cache.remove(loginContextInfo);
             } catch (final CacheException e) {
-                throw new ContextException(ContextException.Code.CACHE_REMOVE, e, loginContextInfo);
+                throw ContextExceptionCodes.CACHE_REMOVE.create(e, loginContextInfo);
             } finally {
                 cacheLock.unlock();
             }

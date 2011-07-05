@@ -65,6 +65,7 @@ import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -203,11 +204,11 @@ public final class LoginPerformer {
         final ContextStorage contextStor = ContextStorage.getInstance();
         final int contextId = contextStor.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
-            throw new ContextException(ContextException.Code.NO_MAPPING, contextInfo);
+            throw ContextExceptionCodes.NO_MAPPING.create(contextInfo);
         }
         final Context context = contextStor.getContext(contextId);
         if (null == context) {
-            throw new ContextException(ContextException.Code.NOT_FOUND, I(contextId));
+            throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
         }
         return context;
     }
@@ -260,7 +261,7 @@ public final class LoginPerformer {
             throw new LoginException(e);
         }
         if (null == context) {
-            throw new LoginException(new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(session.getContextId())));
+            throw new LoginException(ContextExceptionCodes.NOT_FOUND.create(Integer.valueOf(session.getContextId())));
         }
         // Get user
         final User u;

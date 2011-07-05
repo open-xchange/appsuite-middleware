@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.update.Tools;
 
@@ -108,7 +107,7 @@ public class RdbContextStorage extends ContextStorage {
         try {
             con = DBPool.pickup();
         } catch (final DBPoolingException e) {
-            throw new ContextException(Code.NO_CONNECTION, e);
+            throw ContextExceptionCodes.NO_CONNECTION.create(e);
         }
         int contextId = NOT_FOUND;
         PreparedStatement stmt = null;
@@ -121,7 +120,7 @@ public class RdbContextStorage extends ContextStorage {
                 contextId = result.getInt(1);
             }
         } catch (final SQLException e) {
-            throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(con);
@@ -134,7 +133,7 @@ public class RdbContextStorage extends ContextStorage {
         try {
             con = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
-            throw new ContextException(Code.NO_CONNECTION, e);
+            throw ContextExceptionCodes.NO_CONNECTION.create(e);
         }
         int identifier = -1;
         PreparedStatement stmt = null;
@@ -147,10 +146,10 @@ public class RdbContextStorage extends ContextStorage {
             if (result.next()) {
                 identifier = result.getInt(1);
             } else {
-                throw new ContextException(Code.NO_MAILADMIN, Integer.valueOf(contextId));
+                throw ContextExceptionCodes.NO_MAILADMIN.create(Integer.valueOf(contextId));
             }
         } catch (final SQLException e) {
-            throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
@@ -163,7 +162,7 @@ public class RdbContextStorage extends ContextStorage {
         try {
             con = DBPool.pickup();
         } catch (final DBPoolingException e) {
-            throw new ContextException(Code.NO_CONNECTION, e);
+            throw ContextExceptionCodes.NO_CONNECTION.create(e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -176,7 +175,7 @@ public class RdbContextStorage extends ContextStorage {
                 loginInfo.add(result.getString(1));
             }
         } catch (final SQLException e) {
-            throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(con);
@@ -218,9 +217,9 @@ public class RdbContextStorage extends ContextStorage {
             } catch (SQLException e1) {
                 // IGNORE
             }
-            throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (DBPoolingException e) {
-            throw new ContextException(Code.NO_CONNECTION, e);
+            throw ContextExceptionCodes.NO_CONNECTION.create(e);
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
@@ -232,7 +231,7 @@ public class RdbContextStorage extends ContextStorage {
         try {
             con = DBPool.pickup();
         } catch (DBPoolingException e) {
-            throw new ContextException(Code.NO_CONNECTION, e);
+            throw ContextExceptionCodes.NO_CONNECTION.create(e);
         }
         try {
             return loadContextData(con, contextId);
@@ -262,10 +261,10 @@ public class RdbContextStorage extends ContextStorage {
                 context.setFilestoreAuth(auth);
                 context.setFileStorageQuota(result.getLong(pos++));
             } else {
-                throw new ContextException(Code.NOT_FOUND, I(contextId));
+                throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
             }
         } catch (SQLException e) {
-            throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -282,7 +281,7 @@ public class RdbContextStorage extends ContextStorage {
         try {
             con = DBPool.pickup();
         } catch (final DBPoolingException e) {
-            throw new ContextException(Code.NO_CONNECTION, e);
+            throw ContextExceptionCodes.NO_CONNECTION.create(e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -293,7 +292,7 @@ public class RdbContextStorage extends ContextStorage {
                 retval.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(con);

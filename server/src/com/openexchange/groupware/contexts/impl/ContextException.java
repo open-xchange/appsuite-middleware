@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -58,7 +59,7 @@ import com.openexchange.groupware.EnumComponent;
  * contexts.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ContextException extends AbstractOXException {
+public class ContextException extends OXException {
 
     /**
      * Serialization.
@@ -78,7 +79,7 @@ public class ContextException extends AbstractOXException {
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public ContextException(final Code code, final Object... messageArgs) {
+    public ContextException(final ContextExceptionCodes code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
@@ -88,101 +89,13 @@ public class ContextException extends AbstractOXException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public ContextException(final Code code, final Throwable cause, final Object... messageArgs) {
+    public ContextException(final ContextExceptionCodes code, final Throwable cause, final Object... messageArgs) {
         super(EnumComponent.CONTEXT, code.getCategory(), code.getNumber(), code.getMessage(), cause);
         setMessageArgs(messageArgs);
     }
 
-    public ContextException(ErrorMessage message, Throwable cause, Object... args) {
+    public ContextException(final ErrorMessage message, final Throwable cause, final Object... args) {
         super(message, cause);
         setMessageArgs(args);
-    }
-
-    /**
-     * Error codes for context exceptions.
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-     */
-    public enum Code {
-        /**
-         * Mailadmin for a context is missing.
-         */
-        NO_MAILADMIN("Cannot resolve mailadmin for context %d.", Category.SETUP_ERROR, 1),
-        /**
-         * Cannot find context %d.
-         */
-        NOT_FOUND("Cannot find context %d.", Category.SETUP_ERROR, 2),
-        /**
-         * No connection to database.
-         */
-        NO_CONNECTION("Cannot get connection to database.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
-        /**
-         * SQL problem: %1$s.
-         */
-        SQL_ERROR("SQL problem: %1$s.", Category.CODE_ERROR, 6),
-        /**
-         * Updating database ... Try again later.
-         */
-        UPDATE("Updating database ... Try again later.", Category.TRY_AGAIN, 7),
-        /**
-         * Problem initializing the cache.
-         */
-        CACHE_INIT("Problem initializing the cache.", Category.SETUP_ERROR, 8),
-        /**
-         * Cannot remove object %s from cache.
-         */
-        CACHE_REMOVE("Cannot remove object %s from cache.", Category.INTERNAL_ERROR, 9),
-        /**
-         * Cannot find context "%s".
-         */
-        NO_MAPPING("Cannot find context \"%s\".", Category.CODE_ERROR, 10);
-
-        /**
-         * Message of the exception.
-         */
-        private final String message;
-
-        /**
-         * Category of the exception.
-         */
-        private final Category category;
-
-        /**
-         * Detail number of the exception.
-         */
-        private final int number;
-
-        /**
-         * Default constructor.
-         * @param message message.
-         * @param category category.
-         * @param number detail number.
-         */
-        private Code(final String message, final Category category,
-            final int number) {
-            this.message = message;
-            this.category = category;
-            this.number = number;
-        }
-
-        /**
-         * @return the message
-         */
-        public String getMessage() {
-            return message;
-        }
-
-        /**
-         * @return the category
-         */
-        public Category getCategory() {
-            return category;
-        }
-
-        /**
-         * @return the number
-         */
-        public int getNumber() {
-            return number;
-        }
     }
 }

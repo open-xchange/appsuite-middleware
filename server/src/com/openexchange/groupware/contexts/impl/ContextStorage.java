@@ -53,7 +53,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException.Code;
 import com.openexchange.session.Session;
 
 /**
@@ -113,7 +112,7 @@ public abstract class ContextStorage {
     public Context getContext(final int contextId) throws ContextException {
         final Context retval = loadContext(contextId);
         if (retval.isUpdating()) {
-            throw new ContextException(Code.UPDATE);
+            throw ContextExceptionCodes.UPDATE.create();
         }
         return retval;
     }

@@ -75,6 +75,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -187,7 +188,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
         {
             final int mailAdmin = getMailAdmin(contextId);
             if (-1 == mailAdmin) {
-                throw new UpdateException(new ContextException(ContextException.Code.NO_MAILADMIN));
+                throw new UpdateException(ContextExceptionCodes.NO_MAILADMIN.create());
             }
             final ContextImpl ctxi = new ContextImpl(contextId);
             ctxi.setMailadmin(mailAdmin);
