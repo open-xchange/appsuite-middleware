@@ -62,7 +62,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -74,7 +73,6 @@ import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
 import com.openexchange.folderstorage.messaging.osgi.MessagingFolderStorageActivator;
 import com.openexchange.folderstorage.outlook.osgi.OutlookFolderStorageActivator;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -171,8 +169,6 @@ public final class FolderStorageActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class));
 
-    private ComponentRegistration componentRegistration;
-
     private List<ServiceRegistration> serviceRegistrations;
 
     private List<ServiceTracker> serviceTrackers;
@@ -188,13 +184,6 @@ public final class FolderStorageActivator implements BundleActivator {
 
     public void start(final BundleContext context) throws Exception {
         try {
-            // Register error component
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    EnumComponent.FOLDER,
-                    "com.openexchange.folderstorage",
-                    FolderExceptionFactory.getInstance());
             // Register services
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
             // Register folder service
@@ -289,11 +278,6 @@ public final class FolderStorageActivator implements BundleActivator {
                 }
                 serviceRegistrations.clear();
                 serviceRegistrations = null;
-            }
-            // Unregister previously registered component
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
 
             if (LOG.isInfoEnabled()) {
