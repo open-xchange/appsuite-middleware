@@ -47,97 +47,75 @@
  *
  */
 
-package com.openexchange.server;
-
-import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
-import com.openexchange.exception.OXExceptionStrings;
-
+package com.openexchange.exception;
 
 /**
- * The error code enumeration for service errors.
+ * {@link OXExceptionFactory} - A factory for {@link OXException} instances.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ServiceExceptionCode implements OXExceptionCode {
+public class OXExceptionFactory {
+
+    private static final OXExceptionFactory INSTANCE = new OXExceptionFactory();
 
     /**
-     * The required service %1$s is temporary not available. Please try again later.
-     */
-    SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.CATEGORY_TRY_AGAIN, 1),
-    /**
-     * An I/O error occurred
-     */
-    IO_ERROR("An I/O error occurred", Category.CATEGORY_ERROR, 2),
-    /**
-     * Service initialization failed
-     */
-    SERVICE_INITIALIZATION_FAILED("Service initialization failed", Category.CATEGORY_ERROR, 3);
-
-    private final String message;
-
-    private final int detailNumber;
-
-    private final Category category;
-
-    private final boolean display;
-
-    private ServiceExceptionCode(final String message, final Category category, final int detailNumber) {
-        this.message = message;
-        this.detailNumber = detailNumber;
-        this.category = category;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public int getNumber() {
-        return detailNumber;
-    }
-
-    public String getPrefix() {
-        return "SRV";
-    }
-
-    /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * Gets the factory instance.
      * 
+     * @return The factory instance.
+     */
+    public static OXExceptionFactory getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Initializes a new {@link OXExceptionFactory}.
+     */
+    private OXExceptionFactory() {
+        super();
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
+     * 
+     * @param code The exception code
      * @return The newly created {@link OXException} instance
      */
-    public OXException create() {
-        return create(new Object[0]);
+    public OXException create(final OXExceptionCode code) {
+        return create(code, new Object[0]);
     }
 
     /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
      * 
+     * @param code The exception code
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
-        return create((Throwable) null, args);
+    public OXException create(final OXExceptionCode code, final Object... args) {
+        return create(code, (Throwable) null, args);
     }
 
     /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
      * 
+     * @param code The exception code
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(final OXExceptionCode code, final Throwable cause, final Object... args) {
+        final Category category = code.getCategory();
         final OXException ret;
-        if (display) {
-            ret = new OXException(detailNumber, message, cause, args);
+        if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+            ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
         } else {
-            ret = new OXException(detailNumber, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, new Object[0]);
+            ret =
+                new OXException(
+                    code.getNumber(),
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
         }
-        return ret.addCategory(category).setPrefix(getPrefix());
+        return ret.addCategory(category).setPrefix(code.getPrefix());
     }
+
 }

@@ -77,4 +77,11 @@ public interface OXExceptionCode {
      * @return The prefix
      */
     String getPrefix();
+
+    /**
+     * Gets the message either for display or for logging purpose.
+     * 
+     * @return The message
+     */
+    String getMessage();
 }
