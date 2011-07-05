@@ -74,7 +74,6 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
@@ -83,7 +82,6 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.i18n.LocaleTools;
@@ -144,7 +142,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             public boolean execute(final int currentContextId, final List<Integer> list) {
                 try {
                     iterateUsersPerContext(list, names, currentContextId, status, log);
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     final StringBuilder sb = new StringBuilder(128);
                     sb.append("DuplicateContactCollectFolderRemoverTask experienced an error while removing duplicate contact collect folders for users in context ");
                     sb.append(currentContextId);
@@ -158,12 +156,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
     }
 
     private static int getAllUsers(final int contextId, final TIntObjectHashMap<List<Integer>> m) throws OXException {
-        final Connection con;
-        try {
-            con = Database.getNoTimeout(contextId, true);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.getNoTimeout(contextId, true);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -349,12 +342,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
     }
 
     private static int getContextMailAdmin(final int cid) throws OXException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.getNoTimeout(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.getNoTimeout(cid, true);
         try {
             PreparedStatement stmt = null;
             ResultSet rs = null;
@@ -467,7 +455,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         }
     }
 
-    private static void deleteFolder(final int id, final int parent, final long now, final int userId, final Context ctx, final Connection con, final Log log) throws SQLException {
+    private static void deleteFolder(final int id, final int parent, final long now, final int userId, final Context ctx, final Connection con, final Log log) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             /*
@@ -495,12 +483,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
          * Update parent's last-modified time stamp
          */
         final int admin = ctx.getMailadmin();
-        try {
-            OXFolderSQL.updateLastModified(parent, now, admin > 0 ? admin : userId, con, ctx);
-        } catch (final DBPoolingException e) {
-            // Cannot occur since a connection is passed to call
-            log.error(e.getMessage(), e);
-        }
+        OXFolderSQL.updateLastModified(parent, now, admin > 0 ? admin : userId, con, ctx);
         /*
          * Update caches
          */
@@ -514,7 +497,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             if (CalendarCache.isInitialized()) {
                 CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             log.error(e.getMessage(), e);
         }
     }

@@ -55,13 +55,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -131,12 +130,7 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection writeCon;
-        try {
-            writeCon = ds.getWritable(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = ds.getWritable(contextId);
         PreparedStatement stmt = null;
         try {
             if (tableExists(writeCon, tablename)) {

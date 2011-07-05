@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Mapping;
@@ -103,14 +102,9 @@ public final class EnlargeTaskTitle implements UpdateTask {
      * {@inheritDoc}
      * @throws TaskException 
      */
-    public void perform(final Schema schema, final int contextId) throws TaskException, OXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         LOG.info("Performing update task EnlargeTaskTitle.");
-        Connection con = null;
-        try {
-            con = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(TaskException.Code.NO_CONNECTION, e);
-        }
+        final Connection con = Database.get(contextId, true);
         try {
             for (final StorageType type : StorageType.TYPES_AD) {
                 alterTitle(con, SQL.TASK_TABLES.get(type));

@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.internal.PerformParametersImpl;
 import com.openexchange.groupware.update.internal.ProgressStatusImpl;
 
@@ -65,13 +64,13 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
         super();
     }
 
-    public final void perform(Schema schema, int contextId) throws OXException {
+    public final void perform(final Schema schema, final int contextId) throws OXException {
         perform(this, schema, contextId);
     }
 
-    public static final void perform(UpdateTaskV2 task, Schema schema, int contextId) throws AbstractOXException {
-        ProgressState logger = new ProgressStatusImpl(task.getClass().getName(), schema.getSchema());
-        PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
+    public static final void perform(final UpdateTaskV2 task, final Schema schema, final int contextId) throws OXException {
+        final ProgressState logger = new ProgressStatusImpl(task.getClass().getName(), schema.getSchema());
+        final PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
         task.perform(params);
     }
 
@@ -81,6 +80,7 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
 
     public int getPriority() {
         @SuppressWarnings("deprecation")
+        final
         int priority = UpdateTask.UpdateTaskPriority.NORMAL.priority;
         return priority;
     }
