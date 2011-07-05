@@ -167,22 +167,18 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     }
 
     private static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws OXException {
-        try {
-            // Validate mail server
-            boolean validated = checkMailServerURL(accountDescription, session, warnings);
-            // Failed?
-            if (!validated) {
-                return Boolean.FALSE;
-            }
-            // Now check transport server URL, if a transport server is present
-            final String transportServer = accountDescription.getTransportServer();
-            if (null != transportServer && transportServer.length() > 0) {
-                validated = checkTransportServerURL(accountDescription, session, warnings);
-            }
-            return Boolean.valueOf(validated);
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
+        // Validate mail server
+        boolean validated = checkMailServerURL(accountDescription, session, warnings);
+        // Failed?
+        if (!validated) {
+            return Boolean.FALSE;
         }
+        // Now check transport server URL, if a transport server is present
+        final String transportServer = accountDescription.getTransportServer();
+        if (null != transportServer && transportServer.length() > 0) {
+            validated = checkTransportServerURL(accountDescription, session, warnings);
+        }
+        return Boolean.valueOf(validated);
     }
 
     private static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws OXException {
