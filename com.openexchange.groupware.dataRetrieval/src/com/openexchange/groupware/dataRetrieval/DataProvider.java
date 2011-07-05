@@ -51,7 +51,7 @@ package com.openexchange.groupware.dataRetrieval;
 
 import java.io.InputStream;
 import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -79,10 +79,9 @@ public interface DataProvider<T> {
      * @param specification A parameter map specifying the file to be retrieved.
      * @param session The users session.
      * @return
-     * @throws AbstractOXException if the specification is incomplete or incorrect or if the user may not access this item or file retrieval
-     *             fails
+     * @throws OXException If the specification is incomplete or incorrect or if the user may not access this item or file retrieval fails
      */
-    public InputStream retrieve(T state, Map<String, Object> specification, ServerSession session) throws AbstractOXException;
+    public InputStream retrieve(T state, Map<String, Object> specification, ServerSession session) throws OXException;
 
     /**
      * Retrieves the known metadata for a file item.
@@ -90,10 +89,9 @@ public interface DataProvider<T> {
      * @param specification A parameter map specifying the file to be retrieved.
      * @param session The users session.
      * @return The known metadata for this file item
-     * @throws AbstractOXException if the specification is incomplete or incorrect or if the user may not access this item or file retrieval
-     *             fails
+     * @throws OXException If the specification is incomplete or incorrect or if the user may not access this item or file retrieval fails
      */
-    public FileMetadata retrieveMetadata(T state, Map<String, Object> specification, ServerSession session) throws AbstractOXException;
+    public FileMetadata retrieveMetadata(T state, Map<String, Object> specification, ServerSession session) throws OXException;
 
     
     

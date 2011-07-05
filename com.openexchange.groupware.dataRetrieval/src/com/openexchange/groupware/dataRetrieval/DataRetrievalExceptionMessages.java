@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.dataRetrieval;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DataRetrievalExceptionMessages} - Exception messages for {@link DataRetrievalException} that needs to be translated.
+ * {@link DataRetrievalExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  * 
  * @author francisco.laguna@open-xchange.com
  */

@@ -50,7 +50,7 @@
 package com.openexchange.groupware.dataRetrieval.registry;
 
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.DataRetrievalExceptionCodes;
 
@@ -62,9 +62,9 @@ import com.openexchange.groupware.dataRetrieval.DataRetrievalExceptionCodes;
  */
 public abstract class DataProviderRegistry {
     
-    public DataProvider getProvider(String id) throws AbstractOXException {
-        List<DataProvider> providers = getProviders();
-        for (DataProvider dataProvider : providers) {
+    public DataProvider getProvider(final String id) throws OXException {
+        final List<DataProvider> providers = getProviders();
+        for (final DataProvider dataProvider : providers) {
             if(dataProvider.getId().equals(id)) {
                 return dataProvider;
             }

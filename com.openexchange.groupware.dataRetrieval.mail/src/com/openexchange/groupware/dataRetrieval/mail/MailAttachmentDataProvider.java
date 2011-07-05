@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
-import com.openexchange.groupware.dataRetrieval.DataRetrievalException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.DataRetrievalExceptionCodes;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
 import com.openexchange.mail.FullnameArgument;
@@ -118,7 +118,7 @@ public class MailAttachmentDataProvider implements DataProvider<MailAttachmentSt
         return part.getInputStream();
     }
 
-    private void check(Map<String, Object> specification, String... parameters) throws DataRetrievalException {
+    private void check(Map<String, Object> specification, String... parameters) throws OXException {
         List<String> missing = new ArrayList<String>(parameters.length);
         for (String paramName : parameters) {
             if (!specification.containsKey(paramName)) {
