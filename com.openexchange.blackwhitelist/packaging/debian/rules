@@ -4,6 +4,7 @@
 #export DH_VERBOSE=1
 
 oxroot=$(CURDIR)/debian/open-xchange-blackwhitelist
+guiroot=$(CURDIR)/debian/open-xchange-blackwhitelist-gui
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
@@ -32,6 +33,7 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 	ant -Ddestdir=$(oxroot) -Dprefix=$(instprefix) -Dguiprefix=/var/www/ox6 install 
+	ant -Ddestdir=$(guiroot) -Dhtdoc=/var/www/ox6 installGui
 	
 # Build architecture-independent files here.
 binary-indep: build install

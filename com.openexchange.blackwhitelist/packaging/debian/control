@@ -9,3 +9,8 @@ Standards-Version: 3.6.1
 Package: open-xchange-blackwhitelist
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, j2re1.5|sun-java5-jre|sun-java6-jre|java6-runtime, open-xchange-htp-interface (>= @OXVERSION@), open-xchange-common (>= @OXVERSION@), open-xchange-server (>=@OXVERSION@), open-xchange-genconf (>= @OXVERSION@)
+
+Package: open-xchange-blackwhitelist-gui
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-gui (>= @OXVERSION@)
+Description: The Open-Xchange Parallels GUI Plugin

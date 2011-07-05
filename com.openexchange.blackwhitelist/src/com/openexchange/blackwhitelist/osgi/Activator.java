@@ -66,7 +66,7 @@ public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final String ALIAS = "/ajax/parallels/openapi";
+    private static final String ALIAS = "/ajax/blackwhitelist";
 
     private BlackWhiteListServlet servlet;
 
