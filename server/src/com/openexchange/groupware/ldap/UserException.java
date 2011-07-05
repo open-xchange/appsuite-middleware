@@ -115,7 +115,7 @@ public class UserException extends AbstractOXException {
      * Detail information for the LdapException.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    public enum Detail {
+    public static enum Detail {
         /**
          * The requested data can not be found.
          */
@@ -127,15 +127,11 @@ public class UserException extends AbstractOXException {
     }
 
     /**
-     * Error codes for the database pooling exception.
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-     */
-    /**
      * {@link Code}
      *
      * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
      */
-    public enum Code {
+    public static enum Code {
         /**
          * A property from the ldap.properties file is missing.
          */
