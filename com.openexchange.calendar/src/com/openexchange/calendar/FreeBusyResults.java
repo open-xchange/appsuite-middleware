@@ -62,7 +62,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -86,7 +85,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     
     public final static int MAX_SHOW_USER_PARTICIPANTS = 5;
 
-    private final List<AbstractOXException> warnings;
+    private final List<OXException> warnings;
     private final ResultSet rs;
     private final Connection con;
     private final Context c;
@@ -147,7 +146,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }
 
     public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp, final long range_start, final long range_end) throws OXException {
-    	this.warnings =  new ArrayList<AbstractOXException>(2);
+    	this.warnings =  new ArrayList<OXException>(2);
     	this.rs = rs;
         this.prep = prep;
         this.con = con;
@@ -257,7 +256,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final Exception e) {
             LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString() , e);
-            throw new SearchIteratorException(SearchIteratorException.Code.CALCULATION_ERROR, com.openexchange.groupware.EnumComponent.APPOINTMENT, oid, e);
+            throw SearchIteratorException.Code.CALCULATION_ERROR.create("APP", oid, e);
         }
         if (ft != 0 && cdao != null) {
             cdao.setFullTime(true);
@@ -280,7 +279,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 	}
 
 	public OXException[] getWarnings() {
-		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+		return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
 	}
 
 	public boolean hasWarnings() {
@@ -409,12 +408,6 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private final void preFillPermissionArray(final int groups[], final UserConfiguration uc) throws OXException {
         try {
             cfo = recColl.getAllVisibleAndReadableFolderObject(uid, groups, c, uc, con);
-        } catch (final OXException ex) {
-            throw new OXException(ex);
-        } catch (final DBPoolingException ex) {
-            throw new OXException(ex);
-        } catch (final SearchIteratorException ex) {
-            throw new OXException(ex);
         } catch (final SQLException ex) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(ex);
         }
