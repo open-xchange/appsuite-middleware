@@ -71,26 +71,26 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     private static final String DYNAMIC_ATTR_PREFIX = "config/";
 
-    public ContextConfigProvider(ContextService contexts) {
+    public ContextConfigProvider(final ContextService contexts) {
         super(contexts);
     }
 
     @Override
-    public BasicProperty get(final String property, final Context ctx, int user) throws OXException {
+    public BasicProperty get(final String property, final Context ctx, final int user) throws OXException {
 
         return new BasicProperty() {
 
             public String get() {
-                Map<String, Set<String>> attributes = ctx.getAttributes();
+                final Map<String, Set<String>> attributes = ctx.getAttributes();
 
-                Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
+                final Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
                 if (set == null || set.isEmpty()) {
                     return null;
                 }
                 return set.iterator().next();
             }
 
-            public String get(String metadataName) throws ConfigCascadeException {
+            public String get(final String metadataName) throws ConfigCascadeException {
                 return null;
             }
 
@@ -98,11 +98,11 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
                 return get() != null;
             }
 
-            public void set(String value) throws ConfigCascadeException {
+            public void set(final String value) throws OXException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, "user");
             }
 
-            public void set(String metadataName, String value) throws ConfigCascadeException {
+            public void set(final String metadataName, final String value) throws OXException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
             }
 
@@ -114,11 +114,12 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     }
 
-    public Collection<String> getAllPropertyNames(Context ctx) {
-        Map<String, Set<String>> attributes = ctx.getAttributes();
-        Set<String> allNames = new HashSet<String>();
-        int snip = DYNAMIC_ATTR_PREFIX.length();
-        for (String name : attributes.keySet()) {
+    @Override
+    public Collection<String> getAllPropertyNames(final Context ctx) {
+        final Map<String, Set<String>> attributes = ctx.getAttributes();
+        final Set<String> allNames = new HashSet<String>();
+        final int snip = DYNAMIC_ATTR_PREFIX.length();
+        for (final String name : attributes.keySet()) {
             if (name.startsWith(DYNAMIC_ATTR_PREFIX)) {
                 allNames.add(name.substring(snip));
             }

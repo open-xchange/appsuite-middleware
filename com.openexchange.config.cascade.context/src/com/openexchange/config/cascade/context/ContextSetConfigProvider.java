@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -67,9 +66,9 @@ import com.openexchange.config.cascade.context.matching.ContextSetTerm;
 import com.openexchange.config.cascade.context.matching.ContextSetTermParser;
 import com.openexchange.config.cascade.context.matching.UserConfigurationAnalyzer;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.userconf.UserConfigurationService;
 
 
@@ -89,15 +88,15 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     private List<ContextSetConfig> contextSetConfigs;
     private List<AdditionalPredicates> additionalPredicates;
 
-    private UserConfigurationService userConfigs;
-    private UserConfigurationAnalyzer userConfigAnalyzer = new UserConfigurationAnalyzer();
+    private final UserConfigurationService userConfigs;
+    private final UserConfigurationAnalyzer userConfigAnalyzer = new UserConfigurationAnalyzer();
 
-    private ConfigViewFactory configViews;
+    private final ConfigViewFactory configViews;
 
-    public ContextSetConfigProvider(ContextService contexts, ConfigurationService config, UserConfigurationService userConfigs, ConfigViewFactory configViews) {
+    public ContextSetConfigProvider(final ContextService contexts, final ConfigurationService config, final UserConfigurationService userConfigs, final ConfigViewFactory configViews) {
         super(contexts);
         
-        Map<String, Object> yamlInFolder = config.getYamlInFolder("contextSets");
+        final Map<String, Object> yamlInFolder = config.getYamlInFolder("contextSets");
         if(yamlInFolder != null) {
             prepare(yamlInFolder);
         } else {
@@ -109,28 +108,28 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         this.configViews = configViews;
     }
     
-    protected Set<String> getSpecification(Context context, UserConfiguration userConfig) throws ConfigCascadeException {
+    protected Set<String> getSpecification(final Context context, final UserConfiguration userConfig) throws OXException {
         Set<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
         if(typeValues == null) {
             typeValues = Collections.emptySet();
         }
         
-        Set<String> tags = new HashSet<String>();
-        for (String string : typeValues) {
+        final Set<String> tags = new HashSet<String>();
+        for (final String string : typeValues) {
             tags.addAll(Arrays.asList(string.split("\\s*,\\s*")));
         }
         
         tags.addAll(userConfigAnalyzer.getTags(userConfig));
         
-        int user = userConfig.getUserId();
+        final int user = userConfig.getUserId();
         
         // Now let's try modifications by cascade, first those below the contextSet level
-        ConfigView view = configViews.getView(user, context.getContextId());
+        final ConfigView view = configViews.getView(user, context.getContextId());
         
-        String[] searchPath = configViews.getSearchPath();
-        for (String scope : searchPath) {
+        final String[] searchPath = configViews.getSearchPath();
+        for (final String scope : searchPath) {
             if(!scope.equals(SCOPE)) {
-                String types = view.property(TYPE_PROPERTY, String.class).precedence(scope).get();
+                final String types = view.property(TYPE_PROPERTY, String.class).precedence(scope).get();
                 if(types != null) {
                     tags.addAll(Arrays.asList(types.split("\\s*,\\s*")));
                 }
@@ -141,7 +140,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         boolean goOn = true;
         while(goOn) {
             goOn = false;
-            for(AdditionalPredicates additional : additionalPredicates) {
+            for(final AdditionalPredicates additional : additionalPredicates) {
                 goOn = goOn || additional.apply(tags);
             }
         }
@@ -150,7 +149,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     @Override
-    protected BasicProperty get(final String property, Context context, int user) throws OXException {
+    protected BasicProperty get(final String property, final Context context, final int user) throws OXException {
         final List<Map<String, Object>> config = getConfigData(getSpecification(context, getUserConfiguration(context, user)));
 
         final String value = findFirst(config, property);
@@ -161,7 +160,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
                 return value;
             }
 
-            public String get(String metadataName) {
+            public String get(final String metadataName) {
                 return null;
             }
 
@@ -169,11 +168,11 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
                 return value != null;
             }
 
-            public void set(String value) throws ConfigCascadeException {
+            public void set(final String value) throws OXException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, SCOPE);
             }
 
-            public void set(String metadataName, String value) throws ConfigCascadeException {
+            public void set(final String metadataName, final String value) throws OXException {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, SCOPE);
             }
 
@@ -185,22 +184,18 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
 
-    private UserConfiguration getUserConfiguration(Context ctx, int user) throws ConfigCascadeException {
-        try {
-            return userConfigs.getUserConfiguration(user, ctx);
-        } catch (OXException e) {
-            throw new ConfigCascadeException(e);
-        }
+    private UserConfiguration getUserConfiguration(final Context ctx, final int user) throws OXException {
+        return userConfigs.getUserConfiguration(user, ctx);
     }
 
     @Override
-    protected Collection<String> getAllPropertyNames(Context context) {
+    protected Collection<String> getAllPropertyNames(final Context context) {
         return Collections.emptyList();
     }
 
-    protected String findFirst(List<Map<String, Object>> configData, String property) {
-        for (Map<String, Object> map : configData) {
-            Object object = map.get(property);
+    protected String findFirst(final List<Map<String, Object>> configData, final String property) {
+        for (final Map<String, Object> map : configData) {
+            final Object object = map.get(property);
             if(object != null) {
                 return object.toString();
             }
@@ -210,9 +205,9 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     
 
     
-    protected List<Map<String, Object>> getConfigData(Set<String> tags) {
-        List<Map<String, Object>> retval = new LinkedList<Map<String, Object>>();
-        for (ContextSetConfig c : contextSetConfigs) {
+    protected List<Map<String, Object>> getConfigData(final Set<String> tags) {
+        final List<Map<String, Object>> retval = new LinkedList<Map<String, Object>>();
+        for (final ContextSetConfig c : contextSetConfigs) {
             if (c.matches(tags)) {
                 retval.add(c.getConfiguration());
             }
@@ -220,31 +215,31 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         return retval;
     }
     
-    protected void prepare(Map<String, Object> yamlFiles) {
-        ContextSetTermParser parser = new ContextSetTermParser();
+    protected void prepare(final Map<String, Object> yamlFiles) {
+        final ContextSetTermParser parser = new ContextSetTermParser();
         contextSetConfigs = new LinkedList<ContextSetConfig>();
         additionalPredicates = new LinkedList<AdditionalPredicates>();
-        for(Map.Entry<String, Object> file : yamlFiles.entrySet()) {
-            String filename = file.getKey();
-            Map<String, Map<String, Object>> content = (Map<String, Map<String, Object>>) file.getValue();
-            for(Map.Entry<String, Map<String, Object>> configData : content.entrySet()) {
-                String configName = configData.getKey();
-                Map<String, Object> configuration = configData.getValue();
+        for(final Map.Entry<String, Object> file : yamlFiles.entrySet()) {
+            final String filename = file.getKey();
+            final Map<String, Map<String, Object>> content = (Map<String, Map<String, Object>>) file.getValue();
+            for(final Map.Entry<String, Map<String, Object>> configData : content.entrySet()) {
+                final String configName = configData.getKey();
+                final Map<String, Object> configuration = configData.getValue();
                 
-                String withTags = (String) configuration.get("withTags");
+                final String withTags = (String) configuration.get("withTags");
                 if(withTags == null) {
                     throw new IllegalArgumentException("Missing withTags specification in configuration "+configName+" in file "+filename);
                 }
                 try {
-                    ContextSetTerm term = parser.parse(withTags);
+                    final ContextSetTerm term = parser.parse(withTags);
                     contextSetConfigs.add(new ContextSetConfig(term, configuration));
-                    Object addTags = configuration.get("addTags");
+                    final Object addTags = configuration.get("addTags");
                     if(addTags != null) {
-                        String additional = addTags.toString();
-                        List<String> additionalList = Arrays.asList(additional.split("\\s*,\\s*"));
+                        final String additional = addTags.toString();
+                        final List<String> additionalList = Arrays.asList(additional.split("\\s*,\\s*"));
                         additionalPredicates.add(new AdditionalPredicates(term, additionalList));
                     }
-                } catch (IllegalArgumentException x) {
+                } catch (final IllegalArgumentException x) {
                     throw new IllegalArgumentException("Could not parse withTags expression '"+withTags+"' in configuration "+configName+" in file "+filename+": "+x.getMessage());
                 }
             }
@@ -253,16 +248,16 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
     
     private class ContextSetConfig {
-        private ContextSetTerm term;
-        private Map<String, Object> configuration;
+        private final ContextSetTerm term;
+        private final Map<String, Object> configuration;
         
-        public ContextSetConfig(ContextSetTerm term, Map<String, Object> configuration) {
+        public ContextSetConfig(final ContextSetTerm term, final Map<String, Object> configuration) {
             super();
             this.term = term;
             this.configuration = configuration;
         }
        
-        public boolean matches(Set<String> tags) {
+        public boolean matches(final Set<String> tags) {
             return term.matches(tags);
         }
         
@@ -273,16 +268,16 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
     
     private class AdditionalPredicates {
-        private ContextSetTerm term;
-        private List<String> additionalTags;
+        private final ContextSetTerm term;
+        private final List<String> additionalTags;
         
-        public AdditionalPredicates(ContextSetTerm term, List<String> additionalTags) {
+        public AdditionalPredicates(final ContextSetTerm term, final List<String> additionalTags) {
             super();
             this.term = term;
             this.additionalTags = additionalTags;
         }
         
-        public boolean apply(Set<String> terms) {
+        public boolean apply(final Set<String> terms) {
             if(term.matches(terms)) {
                 return terms.addAll(additionalTags);
             }
