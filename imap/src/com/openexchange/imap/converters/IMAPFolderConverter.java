@@ -57,7 +57,7 @@ import java.util.Set;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.AccessedIMAPStore;
 import com.openexchange.imap.IMAPAccess;
@@ -660,7 +660,7 @@ public final class IMAPFolderConverter {
 
     private static boolean isUnknownEntityError(final OXException e) {
         final int code = e.getCode();
-        return (e.isPrefix("ACL") && (Entity2ACLExceptionCode.RESOLVE_USER_FAILED.getNumber() == code)) || (e.isPrefix("USR") && (LdapException.Code.USER_NOT_FOUND.getNumber() == code));
+        return (e.isPrefix("ACL") && (Entity2ACLExceptionCode.RESOLVE_USER_FAILED.getNumber() == code)) || (e.isPrefix("USR") && (LdapExceptionCode.USER_NOT_FOUND.getNumber() == code));
     }
 
     private static boolean checkForNamespaceFolder(final String fullName, final AccessedIMAPStore imapStore, final Session session, final int accountId) throws MessagingException, OXException {

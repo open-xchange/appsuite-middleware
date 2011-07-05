@@ -70,7 +70,7 @@ import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -305,7 +305,7 @@ public abstract class Consistency implements ConsistencyMBean {
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws OXException;
     protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException, DBPoolingException, OXException;
     protected abstract List<Context> getAllContexts() throws OXException;
-    protected abstract User getAdmin(Context ctx) throws LdapException;
+    protected abstract User getAdmin(Context ctx) throws OXException;
 
 
 
@@ -751,7 +751,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 }
 
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 LOG1.error("", e);
             }
         }

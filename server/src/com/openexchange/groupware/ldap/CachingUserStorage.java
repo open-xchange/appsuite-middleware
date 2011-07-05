@@ -65,10 +65,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -104,32 +102,21 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public User getUser(final int uid, final Context context) throws LdapException {
+    public User getUser(final int uid, final Context context) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUser(uid, context);
         }
-        try {
-            return createProxy(context, uid, cacheService, null);
-        } catch (UserException e) {
-            throw new LdapException(e);
-        }
+        return createProxy(context, uid, cacheService, null);
     }
 
-    private User createProxy(final Context ctx, final int userId, final CacheService cacheService, final User user) throws UserException {
+    private User createProxy(final Context ctx, final int userId, final CacheService cacheService, final User user) throws OXException {
         final UserFactory factory = new UserFactory(delegate, cacheService, cacheLock, ctx, userId);
-        try {
-            return null == user ? new UserReloader(factory, REGION_NAME) : new UserReloader(factory, user, REGION_NAME);
-        } catch (final AbstractOXException e) {
-            if (e instanceof UserException) {
-                throw (UserException) e;
-            }
-            throw new UserException(e);
-        }
+        return null == user ? new UserReloader(factory, REGION_NAME) : new UserReloader(factory, user, REGION_NAME);
     }
 
     @Override
-    public User getUser(final Context ctx, final int userId, Connection con) throws UserException {
+    public User getUser(final Context ctx, final int userId, final Connection con) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUser(ctx, userId, con);
@@ -139,23 +126,18 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public User[] getUser(final Context ctx) throws UserException {
+    public User[] getUser(final Context ctx) throws OXException {
         return getUser(ctx, listAllUser(ctx));
     }
 
     @Override
-    public User[] getUser(final Context ctx, int[] userIds) throws UserException {
+    public User[] getUser(final Context ctx, final int[] userIds) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUser(ctx);
         }
-        final Cache cache;
-        try {
-            cache = cacheService.getCache(REGION_NAME);
-        } catch (final CacheException e) {
-            throw new UserException(e);
-        }
-        Map<Integer, User> map = new HashMap<Integer, User>(userIds.length, 1);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Map<Integer, User> map = new HashMap<Integer, User>(userIds.length, 1);
         final List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
         for (final int userId : userIds) {
             final UserFactory factory = new UserFactory(delegate, cacheService, cacheLock, ctx, userId);
@@ -163,8 +145,8 @@ public class CachingUserStorage extends UserStorage {
             if (object instanceof User) {
                 try {
                     map.put(I(userId), new UserReloader(factory, (User) object, REGION_NAME));
-                } catch (final CacheException e) {
-                    throw new UserException(e);
+                } catch (final OXException e) {
+                    throw e;
                 }
             } else {
                 toLoad.add(I(userId));
@@ -175,24 +157,24 @@ public class CachingUserStorage extends UserStorage {
             map.put(I(user.getId()), createProxy(ctx, user.getId(), cacheService, user));
         }
         final List<User> retval = new ArrayList<User>(userIds.length);
-        for (int userId : userIds) {
+        for (final int userId : userIds) {
             retval.add(map.get(I(userId)));
         }
         return retval.toArray(new User[retval.size()]);
     }
 
     @Override
-    public void updateUserInternal(final User user, final Context context) throws LdapException {
+    public void updateUserInternal(final User user, final Context context) throws OXException {
         delegate.updateUser(user, context);
         try {
             invalidateUser(context, user.getId());
-        } catch (final UserException e) {
-            throw new LdapException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
     @Override
-    public String getUserAttribute(String name, int userId, Context context) throws LdapException {
+    public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUserAttribute(name, userId, context);
@@ -202,27 +184,27 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public void setUserAttribute(String name, String value, int userId, Context context) throws LdapException {
+    public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         delegate.setUserAttribute(name, value, userId, context);
         try {
             invalidateUser(context, userId);
-        } catch (final UserException e) {
-            throw new LdapException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
     @Override
-    public void setAttribute(String name, String value, int userId, Context context) throws LdapException {
+    public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         delegate.setAttribute(name, value, userId, context);
         try {
             invalidateUser(context, userId);
-        } catch (final UserException e) {
-            throw new LdapException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
     
     @Override
-    public int getUserId(final String uid, final Context context) throws LdapException {
+    public int getUserId(final String uid, final Context context) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
             return delegate.getUserId(uid, context);
@@ -244,8 +226,8 @@ public class CachingUserStorage extends UserStorage {
                 identifier = delegate.getUserId(uid, context);
                 try {
                     cache.put(key, Integer.valueOf(identifier));
-                } catch (final CacheException e) {
-                    throw LdapException.Code.CACHE_PROBLEM.create("USR", e);
+                } catch (final OXException e) {
+                    throw LdapExceptionCode.CACHE_PROBLEM.create("USR", e);
                 }
             } else {
                 if (LOG.isTraceEnabled()) {
@@ -254,30 +236,30 @@ public class CachingUserStorage extends UserStorage {
                 identifier = tmp.intValue();
             }
             return identifier;
-        } catch (final CacheException e) {
-            throw LdapException.Code.CACHE_PROBLEM.create("USR", e);
+        } catch (final OXException e) {
+            throw LdapExceptionCode.CACHE_PROBLEM.create("USR", e);
         }
     }
 
     @Override
-    public int[] listModifiedUser(final Date modifiedSince, final Context context) throws LdapException {
+    public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
         // Caching doesn't make any sense here.
         return delegate.listModifiedUser(modifiedSince, context);
     }
 
     @Override
-    public User searchUser(final String email, final Context context) throws LdapException {
+    public User searchUser(final String email, final Context context) throws OXException {
         // Caching doesn't make any sense here.
         return delegate.searchUser(email, context);
     }
 
     @Override
-    public int[] listAllUser(final Context ctx) throws UserException {
+    public int[] listAllUser(final Context ctx) throws OXException {
         return delegate.listAllUser(ctx);
     }
 
     @Override
-    public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
+    public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
             return delegate.resolveIMAPLogin(imapLogin, context);
@@ -298,26 +280,26 @@ public class CachingUserStorage extends UserStorage {
                 try {
                     cache.put(key, identifiers);
                 } catch (final CacheException e) {
-                    throw UserException.Code.CACHE_PROBLEM.create(e);
+                    throw UserExceptionCode.CACHE_PROBLEM.create(e);
                 }
             } else {
                 identifiers = tmp;
             }
             return identifiers;
         } catch (final CacheException e) {
-            throw UserException.Code.CACHE_PROBLEM.create(e);
+            throw UserExceptionCode.CACHE_PROBLEM.create(e);
         }
     }
 
     @Override
-    public void invalidateUser(final Context ctx, final int userId) throws UserException {
+    public void invalidateUser(final Context ctx, final int userId) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
                 cache.remove(cache.newCacheKey(ctx.getContextId(), userId));
             } catch (final CacheException e) {
-                throw UserException.Code.CACHE_PROBLEM.create(e);
+                throw UserExceptionCode.CACHE_PROBLEM.create(e);
             }
         }
     }
@@ -328,13 +310,13 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    protected void stopInternal() throws UserException {
+    protected void stopInternal() throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService != null) {
             try {
                 cacheService.freeCache(REGION_NAME);
             } catch (final CacheException e) {
-                throw new UserException(e);
+                throw new OXException(e);
             }
         }
     }

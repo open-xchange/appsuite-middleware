@@ -82,7 +82,7 @@ import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -217,7 +217,7 @@ public class ICalExporter implements Exporter {
             user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
         } catch (final OXException e) {
             throw new ImportExportException(e);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new ImportExportException(e);
         }
         String icalText;

@@ -74,7 +74,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -985,7 +985,7 @@ public class OXFolderTools {
                 String creatorDisplayName;
                 try {
                     creatorDisplayName = userStore.getUser(fo.getCreatedBy(), ctx).getDisplayName();
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                         throw e;
                     }
@@ -1048,7 +1048,7 @@ public class OXFolderTools {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.LDAP_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final Throwable t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));

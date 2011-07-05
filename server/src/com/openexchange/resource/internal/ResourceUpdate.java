@@ -54,7 +54,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -105,7 +105,7 @@ public final class ResourceUpdate {
         if (null == orig) {
             try {
                 orig = storage.getResource(resource.getIdentifier(), ctx);
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 throw new ResourceException(e);
             }
         }
@@ -229,7 +229,7 @@ public final class ResourceUpdate {
                     throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
                 }
             }
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new ResourceException(e);
         }
     }

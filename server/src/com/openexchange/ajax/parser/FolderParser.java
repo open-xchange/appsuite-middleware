@@ -57,7 +57,7 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
@@ -179,7 +179,7 @@ public class FolderParser {
                 try {
                     final String entityStr = elem.getString(FolderFields.ENTITY);
                     entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
-                } catch (final LdapException e1) {
+                } catch (final OXException e1) {
                     LOG.error(e.getMessage(), e);
                     throw new OXException(e1);
                 }

@@ -76,11 +76,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -120,12 +117,12 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int getUserId(final String uid, final Context context) throws LdapException {
+    public int getUserId(final String uid, final Context context) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final DBPoolingException e) {
-            throw LdapException.Code.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -138,10 +135,10 @@ public class RdbUserStorage extends UserStorage {
             if (result.next()) {
                 userId = result.getInt(1);
             } else {
-                throw LdapException.Code.USER_NOT_FOUND.create("USR", uid, I(context.getContextId()));
+                throw LdapExceptionCode.USER_NOT_FOUND.create("USR", uid, I(context.getContextId()));
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -150,28 +147,28 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User getUser(final int userId, final Context context) throws LdapException {
+    public User getUser(final int userId, final Context context) throws OXException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final DBPoolingException e) {
-            throw LdapException.Code.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         try {
             return getUser(context, con, new int[] { userId })[0];
-        } catch (final UserException e) {
-            throw new LdapException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
         }
     }
 
     @Override
-    public User getUser(final Context ctx, final int userId, final Connection con) throws UserException {
+    public User getUser(final Context ctx, final int userId, final Connection con) throws OXException {
         return getUser(ctx, con, new int[] { userId })[0];
     }
 
-    private User[] getUser(final Context ctx, final Connection con, final int[] userIds) throws UserException {
+    private User[] getUser(final Context ctx, final Connection con, final int[] userIds) throws OXException {
         final int length = userIds.length;
         if (0 == length) {
             return new User[0];
@@ -216,11 +213,11 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw UserException.Code.LOAD_FAILED.create(e, e.getMessage());
+            throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
         }
         for (final int userId : userIds) {
             if (!users.containsKey(I(userId))) {
-                throw UserException.Code.USER_NOT_FOUND.create(I(userId), I(ctx.getContextId()));
+                throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(ctx.getContextId()));
             }
         }
         loadLoginInfo(ctx, con, users);
@@ -235,12 +232,12 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User[] getUser(final Context ctx) throws UserException {
+    public User[] getUser(final Context ctx) throws OXException {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
-            throw new UserException(e);
+            throw new OXException(e);
         }
         try {
             return getUser(ctx, con, listAllUser(ctx, con));
@@ -250,7 +247,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User[] getUser(final Context ctx, final int[] userIds) throws UserException {
+    public User[] getUser(final Context ctx, final int[] userIds) throws OXException {
         if (0 == userIds.length) {
             return new User[0];
         }
@@ -258,7 +255,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
-            throw new UserException(e);
+            throw new OXException(e);
         }
         try {
             return getUser(ctx, con, userIds);
@@ -267,7 +264,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void loadLoginInfo(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
+    private void loadLoginInfo(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws OXException {
         try {
             final Iterator<Integer> iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
@@ -290,11 +287,11 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void loadContact(final Context ctx, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
+    private void loadContact(final Context ctx, final Connection con, final Map<Integer, UserImpl> users) throws OXException {
         try {
             final Iterator<UserImpl> iter = users.values().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
@@ -324,11 +321,11 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void loadGroups(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
+    private void loadGroups(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws OXException {
         final Map<Integer, List<Integer>> tmp = new HashMap<Integer, List<Integer>>(users.size(), 1);
         for (final User user : users.values()) {
             final List<Integer> userGroups = new ArrayList<Integer>();
@@ -358,14 +355,14 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         for (final UserImpl user : users.values()) {
             user.setGroups(I2i(tmp.get(I(user.getId()))));
         }
     }
 
-    private void loadAttributes(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
+    private void loadAttributes(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws OXException {
         final Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
         try {
             final Iterator<Integer> iter = users.keySet().iterator();
@@ -399,7 +396,7 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         for (final UserImpl user : users.values()) {
             final Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
@@ -421,7 +418,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public void updateUserInternal(final User user, final Context context) throws LdapException {
+    public void updateUserInternal(final User user, final Context context) throws OXException {
         final int contextId = context.getContextId();
         final int userId = user.getId();
         final String timeZone = user.getTimeZone();
@@ -434,7 +431,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickupWriteable(context);
         } catch (final DBPoolingException e) {
-            throw LdapException.Code.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         try {
             con.setAutoCommit(false);
@@ -480,10 +477,10 @@ public class RdbUserStorage extends UserStorage {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
-        } catch (final UserException e) {
+            throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
+        } catch (final OXException e) {
             rollback(con);
-            throw new LdapException(e);
+            throw new OXException(e);
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(context, con);
@@ -491,21 +488,21 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws LdapException {
+    public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         final String attrName = new StringBuilder("attr_").append(name).toString();
         setAttribute(attrName, value, userId, context);
     }
 
     @Override
-    public void setAttribute(final String name, final String value, final int userId, final Context context) throws LdapException {
+    public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         if (null == name) {
-            throw LdapException.Code.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
         }
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
         } catch (final DBPoolingException e) {
-            throw LdapException.Code.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         try {
             con.setAutoCommit(false);
@@ -513,10 +510,10 @@ public class RdbUserStorage extends UserStorage {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
         } catch (final Exception e) {
             rollback(con);
-            throw LdapException.Code.UNEXPECTED_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", e, e.getMessage());
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(context, con);
@@ -554,16 +551,16 @@ public class RdbUserStorage extends UserStorage {
     @Override
     public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
         if (null == name) {
-            throw LdapException.Code.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
         }
         final Connection con = DBPool.pickup(context);
         try {
             final String attrName = new StringBuilder("attr_").append(name).toString();
             return getAttribute(context.getContextId(), con, userId, attrName);
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
         } catch (final Exception e) {
-            throw LdapException.Code.UNEXPECTED_ERROR.create("USR", e, e.getMessage());
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("USR", e, e.getMessage());
         } finally {
             DBPool.closeWriterSilent(context, con);
         }
@@ -585,7 +582,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updateAttributes(final Context ctx, final User user, final Connection con) throws SQLException, UserException {
+    private void updateAttributes(final Context ctx, final User user, final Connection con) throws SQLException, OXException {
         final int contextId = ctx.getContextId();
         final int userId = user.getId();
         final UserImpl load = new UserImpl();
@@ -621,7 +618,7 @@ public class RdbUserStorage extends UserStorage {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    final UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
+                    final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -650,7 +647,7 @@ public class RdbUserStorage extends UserStorage {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    final UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
+                    final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -680,7 +677,7 @@ public class RdbUserStorage extends UserStorage {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    final UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
+                    final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -760,13 +757,13 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User searchUser(final String email, final Context context) throws LdapException {
+    public User searchUser(final String email, final Context context) throws OXException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
         Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final DBPoolingException e) {
-            throw LdapException.Code.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         try {
             final String pattern = StringCollection.prepareForSearch(email, false, true);
@@ -782,7 +779,7 @@ public class RdbUserStorage extends UserStorage {
                     userId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
+                throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -800,16 +797,16 @@ public class RdbUserStorage extends UserStorage {
                     }
                 }
                 if (userId == -1) {
-                    throw LdapException.Code.NO_USER_BY_MAIL.create("USR", email);
+                    throw LdapExceptionCode.NO_USER_BY_MAIL.create("USR", email);
                 }
                 return getUser(context, con, new int[] { userId })[0];
             } catch (final SQLException e) {
-                throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
+                throw LdapExceptionCode.SQL_ERROR.create("USR", e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
             }
-        } catch (final UserException e) {
-            throw new LdapException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
         }
@@ -817,12 +814,12 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context)
-        throws LdapException {
+        throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("USR", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         final String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.contactId=prg_contacts.intfield01) WHERE cid=? AND changing_date>=?";
         int[] users;
@@ -842,7 +839,7 @@ public class RdbUserStorage extends UserStorage {
                 users[i] = tmp.get(i).intValue();
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("USR", e,
+            throw LdapExceptionCode.SQL_ERROR.create("USR", e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -852,12 +849,12 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listAllUser(final Context context) throws UserException {
+    public int[] listAllUser(final Context context) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw UserException.Code.NO_CONNECTION.create(e);
+            throw UserExceptionCode.NO_CONNECTION.create(e);
         }
         try {
             return listAllUser(context, con);
@@ -866,7 +863,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private int[] listAllUser(final Context ctx, final Connection con) throws UserException {
+    private int[] listAllUser(final Context ctx, final Connection con) throws OXException {
         final int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -880,7 +877,7 @@ public class RdbUserStorage extends UserStorage {
             }
             users = tmp.toNativeArray();
         } catch (final SQLException e) {
-            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -888,12 +885,12 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
+    public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw UserException.Code.NO_CONNECTION.create(e);
+            throw UserExceptionCode.NO_CONNECTION.create(e);
         }
         final int[] users;
         PreparedStatement stmt = null;
@@ -910,12 +907,12 @@ public class RdbUserStorage extends UserStorage {
                     sia.append(result.getInt(1));
                 } while (result.next());
             } else {
-                throw UserException.Code.USER_NOT_FOUND.create(
+                throw UserExceptionCode.USER_NOT_FOUND.create(
                         imapLogin, I(cid));
             }
             users = sia.toArray();
         } catch (final SQLException e) {
-            throw UserException.Code.SQL_ERROR.create(e, e
+            throw UserExceptionCode.SQL_ERROR.create(e, e
                 .getMessage());
         } finally {
             closeSQLStuff(result, stmt);

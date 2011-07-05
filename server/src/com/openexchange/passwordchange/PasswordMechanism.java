@@ -50,7 +50,7 @@ package com.openexchange.passwordchange;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.mechs.SHACrypt;
 import com.openexchange.passwordchange.mechs.UnixCrypt;
 
@@ -69,7 +69,7 @@ public class PasswordMechanism {
      * @return The encoded password
      * @throws UnsupportedEncodingException 
      * @throws NoSuchAlgorithmException 
-     * @throws UserException If encoding the new password fails
+     * @throws OXException If encoding the new password fails
      */
     public static final String getEncodedPassword(final String mech, final String newPassword) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         if (MECH_CRYPT.equals(mech)) {

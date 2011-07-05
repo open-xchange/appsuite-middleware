@@ -52,7 +52,7 @@ package com.openexchange.resource.storage;
 import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceGroup;
@@ -119,11 +119,11 @@ public abstract class ResourceStorage {
      * @param groupId Identifier of the resource group.
      * @param context The context.
      * @return a resource group object.
-     * @throws LdapException if an error occurs while reading from the persistent storage or the resource group doesn't exist.
+     * @throws OXException if an error occurs while reading from the persistent storage or the resource group doesn't exist.
      */
-    public abstract ResourceGroup getGroup(int groupId, Context context) throws LdapException;
+    public abstract ResourceGroup getGroup(int groupId, Context context) throws OXException;
 
-    public abstract ResourceGroup[] getGroups(Context context) throws LdapException;
+    public abstract ResourceGroup[] getGroups(Context context) throws OXException;
 
     /**
      * Reads a resource from the underlying persistent storage and returns it in a data object.
@@ -131,9 +131,9 @@ public abstract class ResourceStorage {
      * @param resourceId The unique identifier of the resource to return.
      * @param context The context.
      * @return The data object of the resource.
-     * @throws LdapException If the resource can't be found or an exception appears while reading it.
+     * @throws OXException If the resource can't be found or an exception appears while reading it.
      */
-    public abstract Resource getResource(int resourceId, Context context) throws LdapException;
+    public abstract Resource getResource(int resourceId, Context context) throws OXException;
 
     /**
      * Searches all groups whose identifier matches the given pattern.
@@ -141,18 +141,18 @@ public abstract class ResourceStorage {
      * @param pattern The identifier of all returned groups will match this pattern.
      * @param context The context.
      * @return a string array with resource group identifiers. If no identifiers match an empty array will be returned.
-     * @throws LdapException If an exception occurs while reading from the underlying persistent storage.
+     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
      */
-    public abstract ResourceGroup[] searchGroups(String pattern, Context context) throws LdapException;
+    public abstract ResourceGroup[] searchGroups(String pattern, Context context) throws OXException;
 
     /**
      * Gets all resources located in specified context
      * 
      * @param context The context
      * @return All resources located in specified context
-     * @throws LdapException If an exception occurs while reading from the underlying persistent storage.
+     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
      */
-    public Resource[] getAllResources(final Context context) throws LdapException {
+    public Resource[] getAllResources(final Context context) throws OXException {
         return searchResources(SEARCH_PATTERN_ALL, context);
     }
 
@@ -162,9 +162,9 @@ public abstract class ResourceStorage {
      * @param pattern The identifier of all returned resources will match this pattern.
      * @param context The context.
      * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
-     * @throws LdapException If an exception occurs while reading from the underlying persistent storage.
+     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
      */
-    public abstract Resource[] searchResources(String pattern, Context context) throws LdapException;
+    public abstract Resource[] searchResources(String pattern, Context context) throws OXException;
 
     /**
      * Searches all resources whose email address matches the given pattern.
@@ -172,9 +172,9 @@ public abstract class ResourceStorage {
      * @param pattern The email address pattern to search for
      * @param context The context
      * @return An array of {@link Resource resources} whose email address matches the given pattern.
-     * @throws LdapException If searching for resources fails
+     * @throws OXException If searching for resources fails
      */
-    public abstract Resource[] searchResourcesByMail(String pattern, Context context) throws LdapException;
+    public abstract Resource[] searchResourcesByMail(String pattern, Context context) throws OXException;
 
     /**
      * This method returns resources that have been modified since the given timestamp.
@@ -182,9 +182,9 @@ public abstract class ResourceStorage {
      * @param modifiedSince timestamp after that the resources have been modified.
      * @param context The context.
      * @return an array of resources.
-     * @throws LdapException If an error occurs.
+     * @throws OXException If an error occurs.
      */
-    public abstract Resource[] listModified(Date modifiedSince, Context context) throws LdapException;
+    public abstract Resource[] listModified(Date modifiedSince, Context context) throws OXException;
 
 
     /**
@@ -193,9 +193,9 @@ public abstract class ResourceStorage {
      * @param modifiedSince timestamp after that the resources have been modified.
      * @param context The context.
      * @return an array of resources.
-     * @throws LdapException If an error occurs.
+     * @throws OXException If an error occurs.
      */
-    public abstract Resource[] listDeleted(Date modifiedSince, Context context) throws LdapException;
+    public abstract Resource[] listDeleted(Date modifiedSince, Context context) throws OXException;
     
     /**
      * This method inserts a resource into the storage.

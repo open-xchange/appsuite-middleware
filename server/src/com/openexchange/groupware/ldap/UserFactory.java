@@ -77,7 +77,7 @@ class UserFactory implements OXObjectFactory<User> {
         return cacheService.newCacheKey(ctx.getContextId(), userId);
     }
 
-    public User load() throws LdapException, OXException {
+    public User load() throws OXException, OXException {
         return delegate.getUser(userId, ctx);
     }
 

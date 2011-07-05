@@ -73,7 +73,7 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -329,7 +329,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 }
                 lock.setOwner(displayName);
                 
-            } catch (LdapException e) {
+            } catch (OXException e) {
                 // Ignore, if lookup fails set no owner.
             }
         }

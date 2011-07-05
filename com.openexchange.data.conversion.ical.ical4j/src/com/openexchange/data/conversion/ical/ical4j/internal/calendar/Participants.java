@@ -88,7 +88,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -211,7 +211,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             try {
                 final User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
                 address = user.getMail();
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 throw new ConversionError(index, e);
             } catch (final OXException e) {
                 throw new ConversionError(index, e);
@@ -253,7 +253,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         List<User> users;
         try {
             users = userResolver.findUsers(new ArrayList<String>(mails.keySet()), ctx);
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             throw new ConversionError(index, e);
         } catch (final OXException e) {
             throw new ConversionError(index, e);

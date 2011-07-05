@@ -62,9 +62,9 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
@@ -132,7 +132,7 @@ final class Update {
         if (null == orig) {
             try {
                 orig = storage.getGroup(changed.getIdentifier(), ctx);
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }
@@ -155,10 +155,10 @@ final class Update {
             if (changed.getIdentifier() == GroupTools.GROUP_ZERO.getIdentifier()) {
                 try {
                     throw GroupExceptionCodes.NO_GROUP_UPDATE.create(GroupTools.getGroupZero(ctx).getDisplayName());
-                } catch (final UserException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
                 }
@@ -291,7 +291,7 @@ final class Update {
         final UserStorage storage = UserStorage.getInstance();
         try {
             storage.invalidateUser(ctx, tmp);
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         // The time stamp of folder must be increased. The GUI the reloads the

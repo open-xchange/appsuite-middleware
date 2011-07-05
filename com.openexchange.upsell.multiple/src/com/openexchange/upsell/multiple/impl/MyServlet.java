@@ -111,7 +111,7 @@ public final class MyServlet extends DataServlet {
 				jsonObj = convertParameter2JSONObject(req);
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
-				response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+				response.setException(new OXJSONException(OXJSONException.LdapExceptionCode.JSON_BUILD_ERROR, e));
 				writeResponse(response, resp);
 				return;
 			}
@@ -124,7 +124,7 @@ public final class MyServlet extends DataServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final JSONException e) {
-			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+			final OXJSONException oje = new OXJSONException(OXJSONException.LdapExceptionCode.JSON_WRITE_ERROR, e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
 		}

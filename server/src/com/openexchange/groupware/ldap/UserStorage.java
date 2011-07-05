@@ -312,7 +312,7 @@ public abstract class UserStorage {
     public static User getStorageUser(final int uid, final int contextId) {
         try {
             return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
         } catch (final OXException e) {

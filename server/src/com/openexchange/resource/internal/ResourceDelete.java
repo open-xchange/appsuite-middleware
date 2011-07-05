@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteRegistry;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -109,7 +109,7 @@ public final class ResourceDelete {
         if (null == orig) {
             try {
                 orig = storage.getResource(resource.getIdentifier(), ctx);
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 throw new ResourceException(e);
             }
         }

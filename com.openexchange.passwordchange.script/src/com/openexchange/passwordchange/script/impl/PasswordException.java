@@ -99,7 +99,7 @@ public class PasswordException extends AbstractOXException {
      * OX exception.
      * @param cause the cause.
      */
-    /*    public PasswordException(final LdapException cause) {
+    /*    public PasswordException(final OXException cause) {
         super(cause);
         detail = Detail.ERROR;
     }
@@ -112,7 +112,7 @@ public class PasswordException extends AbstractOXException {
     }
 
     /**
-     * Detail information for the LdapException.
+     * Detail information for the OXException.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
     public enum Detail {

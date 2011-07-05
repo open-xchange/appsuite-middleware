@@ -51,9 +51,9 @@ package com.openexchange.user;
 
 import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link UserService} - Offers access method to user module.
@@ -69,9 +69,9 @@ public interface UserService {
      * @param userId The user identifier
      * @param context The context
      * @return The attribute value
-     * @throws LdapException If user attribute cannot be returned
+     * @throws OXException If user attribute cannot be returned
      */
-    String getUserAttribute(String name, int userId, Context context) throws UserException;
+    String getUserAttribute(String name, int userId, Context context) throws OXException;
 
     /**
      * Sets specified user attribute.
@@ -80,9 +80,9 @@ public interface UserService {
      * @param value The attribute value
      * @param userId The user identifier
      * @param context The context
-     * @throws LdapException If user attribute cannot be set
+     * @throws OXException If user attribute cannot be set
      */
-    void setUserAttribute(String name, String value, int userId, Context context) throws UserException;
+    void setUserAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
      * Sets specified unscoped user attribute.
@@ -91,9 +91,9 @@ public interface UserService {
      * @param value The attribute value
      * @param userId The user identifier
      * @param context The context
-     * @throws LdapException If user attribute cannot be set
+     * @throws OXException If user attribute cannot be set
      */
-    void setAttribute(String name, String value, int userId, Context context) throws UserException;
+    void setAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
      * Searches for a user whose login matches the given uid.
@@ -101,9 +101,9 @@ public interface UserService {
      * @param loginInfo Login name of the user.
      * @param context The context.
      * @return The unique identifier of the user.
-     * @throws UserException if an error occurs while searching the user or the user doesn't exist.
+     * @throws OXException if an error occurs while searching the user or the user doesn't exist.
      */
-    int getUserId(String loginInfo, Context context) throws UserException;
+    int getUserId(String loginInfo, Context context) throws OXException;
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
@@ -111,9 +111,9 @@ public interface UserService {
      * @param uid User identifier.
      * @return a user object.
      * @param context The context.
-     * @throws UserException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
      */
-    User getUser(int uid, Context context) throws UserException;
+    User getUser(int uid, Context context) throws OXException;
 
     /**
      * Reads the data for a set of user from the underlying persistent data storage.
@@ -121,9 +121,9 @@ public interface UserService {
      * @param userIds User identifier.
      * @return the users objects.
      * @param context The context.
-     * @throws UserException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
      */
-    User[] getUser(Context context, int[] userIds) throws UserException;
+    User[] getUser(Context context, int[] userIds) throws OXException;
 
     /**
      * Reads all user for the given context. Use this method if you need a lot of users from that context because this method uses
@@ -131,16 +131,16 @@ public interface UserService {
      * @param ctx the context
      * @return an array with all users from the given context.
      */
-    User[] getUser(Context ctx) throws UserException;
+    User[] getUser(Context ctx) throws OXException;
 
     /**
      * This method updates some values of a user.
      * 
      * @param user user object with the updated values.
      * @param context The context.
-     * @throws UserException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    void updateUser(User user, Context context) throws UserException;
+    void updateUser(User user, Context context) throws OXException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to appointments.
@@ -148,18 +148,18 @@ public interface UserService {
      * @param email the email address of the user.
      * @param context The context.
      * @return a User object if the user was found by its email address or <code>null</code> if no user could be found.
-     * @throws UserException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    User searchUser(String email, Context context) throws UserException;
+    User searchUser(String email, Context context) throws OXException;
     
     /**
      * Returns an array with all user identifier of the context.
      * 
      * @param context The context.
      * @return an array with all user identifier of the context.
-     * @throws UserException if generating this list fails.
+     * @throws OXException if generating this list fails.
      */
-    int[] listAllUser(Context context) throws UserException;
+    int[] listAllUser(Context context) throws OXException;
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
@@ -167,9 +167,9 @@ public interface UserService {
      * @param imapLogin the IMAP login name to search for
      * @param context The context.
      * @return The unique identifiers of the users.
-     * @throws UserException if an error occurs during the search.
+     * @throws OXException if an error occurs during the search.
      */
-    int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
+    int[] resolveIMAPLogin(String imapLogin, Context context) throws OXException;
 
     /**
      * Searches users who where modified later than the given date.
@@ -177,18 +177,18 @@ public interface UserService {
      * @param modifiedSince Date after that the returned users are modified.
      * @param context The context.
      * @return a string array with the uids of the matching user.
-     * @throws UserException if an error occurs during the search.
+     * @throws OXException if an error occurs during the search.
      */
-    int[] listModifiedUser(Date modifiedSince, Context context) throws UserException;
+    int[] listModifiedUser(Date modifiedSince, Context context) throws OXException;
 
     /**
      * Removes a user from the cache if caching is used.
      * 
      * @param ctx Context.
      * @param userId unique identifier of the user.
-     * @throws UserException if removing gives an exception.
+     * @throws OXException if removing gives an exception.
      */
-    void invalidateUser(Context ctx, int userId) throws UserException;
+    void invalidateUser(Context ctx, int userId) throws OXException;
 
     /**
      * Authenticates the given password against the given user object.
@@ -196,9 +196,9 @@ public interface UserService {
      * @param user user that password is compared with given one.
      * @param password password to check.
      * @return <code>true</code> if the password matches.
-     * @throws UserException if password check mechanism has problems.
+     * @throws OXException if password check mechanism has problems.
      */
-    boolean authenticate(User user, String password) throws UserException;
+    boolean authenticate(User user, String password) throws OXException;
 
 
 }

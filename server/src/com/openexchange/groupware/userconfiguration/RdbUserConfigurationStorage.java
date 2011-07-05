@@ -59,7 +59,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
@@ -99,7 +99,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
         try {
             return loadUserConfiguration(userId, groups, ctx);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final DBPoolingException e) {
             throw new OXException(e);
@@ -248,12 +248,12 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      * @param ctx - the context
      * @return the instance of <code>{@link UserConfiguration}</code>
      * @throws SQLException - if user configuration could not be loaded from database
-     * @throws LdapException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
+     * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
      *             implementation
      * @throws DBPoolingException - if a readable connection could not be obtained from connection pool
      * @throws OXException - if no matching user configuration is kept in database
      */
-    public static UserConfiguration loadUserConfiguration(final int userId, final Context ctx) throws SQLException, LdapException, DBPoolingException, OXException {
+    public static UserConfiguration loadUserConfiguration(final int userId, final Context ctx) throws SQLException, OXException, DBPoolingException, OXException {
         return loadUserConfiguration(userId, null, ctx, null);
     }
 
@@ -265,12 +265,12 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      * @param ctx - the context
      * @return the instance of <code>{@link UserConfiguration}</code>
      * @throws SQLException - if user configuration could not be loaded from database
-     * @throws LdapException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
+     * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
      *             implementation
      * @throws DBPoolingException - if a readable connection could not be obtained from connection pool
      * @throws OXException - if no matching user configuration is kept in database
      */
-    public static UserConfiguration loadUserConfiguration(final int userId, final int[] groups, final Context ctx) throws SQLException, LdapException, DBPoolingException, OXException {
+    public static UserConfiguration loadUserConfiguration(final int userId, final int[] groups, final Context ctx) throws SQLException, OXException, DBPoolingException, OXException {
         return loadUserConfiguration(userId, groups, ctx, null);
     }
 
@@ -360,12 +360,12 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      * @param readConArg - the readable context; may be <code>null</code>
      * @return the instance of <code>{@link UserConfiguration}</code>
      * @throws SQLException - if user configuration could not be loaded from database
-     * @throws LdapException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
+     * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
      *             implementation
      * @throws OXException - if a readable connection could not be obtained from connection pool
      * @throws OXException - if no matching user configuration is kept in database
      */
-    public static UserConfiguration loadUserConfiguration(final int userId, final int[] groupsArg, final Context ctx, final Connection readConArg) throws SQLException, LdapException, OXException, OXException {
+    public static UserConfiguration loadUserConfiguration(final int userId, final int[] groupsArg, final Context ctx, final Connection readConArg) throws SQLException, OXException, OXException, OXException {
         final int[] groups = groupsArg == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg;
         Connection readCon = readConArg;
         boolean closeCon = false;

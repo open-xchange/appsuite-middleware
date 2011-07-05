@@ -33,7 +33,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
@@ -154,7 +154,7 @@ public final class MyServletRequest  {
 			// load admin for custom data like redirect url
 			this.admin = UserStorage.getInstance().getUser(this.ctx.getMailadmin(), ctx);
 			
-		} catch (final LdapException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXException(e);
 		}		
@@ -186,7 +186,7 @@ public final class MyServletRequest  {
 			// UI must send feature, upsell package and hostname
 			retval = actionTriggerEmailUpsell(jsonObject,request_src_hostname);
 		}else {
-			throw new AjaxException(AjaxException.Code.UnknownAction, action);
+			throw new AjaxException(AjaxException.LdapExceptionCode.UnknownAction, action);
 		}
 		
 		return retval;

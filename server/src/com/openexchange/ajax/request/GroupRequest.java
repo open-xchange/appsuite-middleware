@@ -69,7 +69,7 @@ import com.openexchange.group.Group.Field;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.exception.OXException;
@@ -132,7 +132,7 @@ public class GroupRequest {
     }
 
 
-    public JSONValue actionUpdates(JSONObject jsonObject) throws JSONException, OXException, OXException, LdapException {
+    public JSONValue actionUpdates(JSONObject jsonObject) throws JSONException, OXException, OXException, OXException {
         timestamp = new Date(0);
         final GroupStorage groupStorage = GroupStorage.getInstance();
         Date modifiedSince = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -166,7 +166,7 @@ public class GroupRequest {
         return retVal;
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, LdapException, OXException, OXException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXException, OXException, OXException {
         final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
         timestamp = new Date(0);
         Date lastModified = null;
@@ -187,7 +187,7 @@ public class GroupRequest {
         return jsonResponseArray;
     }
 
-    public JSONObject actionGet(final JSONObject json) throws JSONException, LdapException, OXException, OXException {
+    public JSONObject actionGet(final JSONObject json) throws JSONException, OXException, OXException, OXException {
         final int groupId = DataParser.checkInt(json, PARAMETER_ID);
         timestamp = new Date(0);
         final GroupStorage groupStorage = GroupStorage.getInstance();
@@ -199,7 +199,7 @@ public class GroupRequest {
         return retval;
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, LdapException, OXException, OXException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXException, OXException, OXException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
 
         String searchpattern = null;
@@ -228,7 +228,7 @@ public class GroupRequest {
         return jsonResponseArray;
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, LdapException, OXException, OXException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException, OXException, OXException {
         timestamp = new Date(0);
         
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");

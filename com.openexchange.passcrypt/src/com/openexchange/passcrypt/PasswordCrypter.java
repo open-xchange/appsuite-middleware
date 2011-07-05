@@ -54,7 +54,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.login.LoginHandlerService;
@@ -111,7 +111,7 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
                     attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, user, login.getContext());
                 }
             }
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         } catch (final CryptoException e) {
             throw new LoginException(e);

@@ -51,7 +51,7 @@ package com.openexchange.groupware.settings.impl;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -80,7 +80,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
             final UserImpl newUser = new UserImpl(user);
             setValue(newUser, setting.getSingleValue().toString(), user);
             UserStorage.getInstance().updateUser(newUser, ctx);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

@@ -57,7 +57,7 @@ import java.util.Locale;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.OXException;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -152,7 +152,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
             } catch (final OXException e) {
                 throw new OXException(e);
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }

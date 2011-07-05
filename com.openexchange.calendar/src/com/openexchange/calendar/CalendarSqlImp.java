@@ -62,7 +62,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -126,11 +126,11 @@ public interface CalendarSqlImp {
 
     Participants getParticipants(CalendarDataObject cdao, Connection readcon) throws SQLException;
 
-    CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, Session so) throws SQLException, LdapException, OXException;
+    CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, Session so) throws SQLException, OXException, OXException;
 
-    CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
+    CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException;
 
-    CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, Session so, Context ctx, int inFolder, Connection con) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
+    CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, Session so, Context ctx, int inFolder, Connection con) throws SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException;
 
     void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
 

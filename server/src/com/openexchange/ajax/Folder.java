@@ -104,7 +104,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -621,7 +621,7 @@ public class Folder extends SessionServlet {
                             String creatorDisplayName;
                             try {
                                 creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
-                            } catch (final LdapException e) {
+                            } catch (final OXException e) {
                                 if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                                     throw new AbstractOXException(e);
                                 }
@@ -1412,7 +1412,7 @@ public class Folder extends SessionServlet {
                                 String creatorDisplayName;
                                 try {
                                     creatorDisplayName = us.getUser(fo.getCreatedBy(), ctx).getDisplayName();
-                                } catch (final LdapException e) {
+                                } catch (final OXException e) {
                                     if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                                         throw new AbstractOXException(e);
                                     }

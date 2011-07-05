@@ -56,7 +56,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException.Code;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
@@ -84,7 +84,7 @@ public final class GroupTools {
         try {
             retval = (Group) GROUP_ZERO.clone();
         } catch (final CloneNotSupportedException e) {
-            throw Code.NOT_CLONEABLE.create(e, Group.class.getName());
+            throw UserExceptionCode.NOT_CLONEABLE.create(e, Group.class.getName());
         }
         final UserStorage ustor = UserStorage.getInstance();
         retval.setMember(ustor.listAllUser(ctx));

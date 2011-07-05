@@ -103,9 +103,9 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
@@ -263,7 +263,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     // Override for testing
 
-    protected Set<Integer> loadAllUsersSet(final Context ctx) throws UserException {
+    protected Set<Integer> loadAllUsersSet(final Context ctx) throws OXException {
         final int[] uids = UserStorage.getInstance().listAllUser(ctx);
         final Set<Integer> allIds = new HashSet<Integer>(uids.length);
         for (final int id : uids) {
@@ -272,7 +272,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return allIds;
     }
 
-    protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
+    protected User[] resolveUsers(final Context ctx, final int... ids) throws OXException {
         final User[] r = new User[ids.length];
         for (int i = 0; i < ids.length; i++) {
             r[i] = UserStorage.getInstance().getUser(ids[i], ctx);
@@ -280,7 +280,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return r;
     }
 
-    protected Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
+    protected Group[] resolveGroups(final Context ctx, final int... ids) throws OXException {
         final GroupStorage groups = GroupStorage.getInstance();
         final Group[] r = new Group[ids.length];
         int i = 0;
@@ -290,7 +290,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return r;
     }
 
-    protected Resource[] resolveResources(final Context ctx, final int... ids) throws LdapException {
+    protected Resource[] resolveResources(final Context ctx, final int... ids) throws OXException {
         final ResourceStorage resources = ResourceStorage.getInstance();
         final Resource[] r = new Resource[ids.length];
         int i = 0;
@@ -300,7 +300,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return r;
     }
 
-    protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, LdapException, DBPoolingException, OXException {
+    protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, OXException, DBPoolingException, OXException {
         return RdbUserConfigurationStorage.loadUserConfiguration(id, groups, context);
     }
 
@@ -602,7 +602,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         Set<Integer> allUserIds = null;
         try {
             allUserIds = loadAllUsersSet(session.getContext());
-        } catch (final UserException ue) {
+        } catch (final OXException ue) {
             LL.log(ue);
             return Collections.emptyList();
         }
@@ -1204,7 +1204,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             if (0 != newObj.getCreatedBy()) {
                 try {
                     createdByDisplayName = resolveUsers(ctx, newObj.getCreatedBy())[0].getDisplayName();
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     createdByDisplayName = STR_UNKNOWN;
                     LL.log(e);
                 }
@@ -1212,7 +1212,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             String modifiedByDisplayName = STR_UNKNOWN;
             try {
                 modifiedByDisplayName = resolveUsers(ctx, session.getUserId())[0].getDisplayName();
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 modifiedByDisplayName = STR_UNKNOWN;
                 LL.log(e);
             }
@@ -1221,7 +1221,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
             try {
                 onBehalfDisplayName = resolveUsers(ctx, oxfa.getFolderOwner(newObj.getParentFolderID()))[0].getDisplayName();
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 LL.log(e);
             } catch (final OXException e) {
                 LL.log(e);
@@ -1430,7 +1430,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                                 }
                             }
                         }
-                    } catch (final LdapException e) {
+                    } catch (final OXException e) {
                         LL.log(e);
                     }
                     break;
@@ -1603,7 +1603,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
                         }
                     }
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     LL.log(e);
                 }
                 break;
@@ -1674,7 +1674,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
                         }
                     }
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     LL.log(e);
                 }
                 break;
@@ -1699,7 +1699,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             user = resolveUsers(session.getContext(), session.getUserId())[0];
             l = user.getLocale();
             tz = getCalendarTools().getTimeZone(user.getTimeZone());
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             // Should not happen
             LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
             l = Locale.getDefault();
@@ -1749,7 +1749,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 // System.out.println("PERSONAL FOLDER ID FOR PARTICIPANT "+
                 // userParticipant.getIdentifier()+": "+folderId);
             }
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LL.log(e);
         }
 
@@ -1804,7 +1804,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             if (displayName == null) {
                 displayName = participant.getDisplayName();
             }
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LL.log(e);
         }
 
@@ -1812,7 +1812,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             final User user = resolveUsers(session.getContext(), session.getUserId())[0];
             l = user.getLocale();
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             // Should not happen
             LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
             l = Locale.getDefault();
@@ -1886,7 +1886,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 null,
                 false);
             addReceiver(emailable, receivers, all);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LL.log(e);
         }
     }

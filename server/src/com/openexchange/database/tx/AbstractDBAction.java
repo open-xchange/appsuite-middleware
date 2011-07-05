@@ -157,13 +157,13 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		
 	}
 	
-	protected static class OXException extends Exception {
+	protected static class OXExceptionRenamed extends Exception {
 		
 		private static final long serialVersionUID = -3823990951502455901L;
 		private final UpdateBlock update;
 		private final SQLException sqle;
 
-		public OXException(final SQLException sqle, final UpdateBlock update) {
+		public OXExceptionRenamed(final SQLException sqle, final UpdateBlock update) {
 			super(sqle);
 			this.sqle = sqle;
 			this.update = update;

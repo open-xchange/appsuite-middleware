@@ -62,7 +62,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.user.UserService;
 
 /**
@@ -116,7 +116,7 @@ public class UserConfigProvider implements ConfigProviderService {
                 public void set(final String value) throws OXException {
                     try {
                         users.setAttribute(DYNAMIC_ATTR_PREFIX+property, value, userId, ctx);
-                    } catch (final UserException e) {
+                    } catch (final OXException e) {
                         throw new OXException(e);
                     }
                 }

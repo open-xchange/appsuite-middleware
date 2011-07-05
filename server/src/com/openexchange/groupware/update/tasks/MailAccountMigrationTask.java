@@ -68,7 +68,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.RdbUserStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -229,12 +229,12 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 }
             }
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
 
-    private static User loadUser(final Context ctx, final int userId) throws OXException, UserException {
+    private static User loadUser(final Context ctx, final int userId) throws OXException, OXException {
         final Connection con;
         try {
             con = Database.get(ctx, true);

@@ -61,9 +61,9 @@ import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.configuration.DirectoryService;
-import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.tools.file.TagFiller;
 import com.openexchange.tools.file.TagFillerAdapter;
 import com.openexchange.tools.tag.LineParserUtility;
@@ -130,10 +130,10 @@ public final class LdapUtility {
      * @param propname name of the property containing the search base dn.
      * @param cred credentials for ldap authentication.
      * @return the appropriate base dn for the search.
-     * @throws LdapException if the property can't be found.
+     * @throws OXException if the property can't be found.
      */
     static String getSearchBaseDN(final String propname, final Credentials cred)
-        throws LdapException {
+        throws OXException {
         String retval = findProperty(propname, true);
         if (retval.length() > 0 && retval.charAt(0) == '['
             && retval.charAt(retval.length() - 1) == ']') {
@@ -235,7 +235,7 @@ public final class LdapUtility {
             } else if (temp.values != null && tag.endsWith("BaseDN")) {
                 try {
                     retval = LdapUtility.getSearchBaseDN(tag, temp.values);
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     retval = e.getMessage();
                 }
             } else {
@@ -246,7 +246,7 @@ public final class LdapUtility {
                         retval = LineParserUtility.parseLine(property, this,
                             data);
                     }
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     retval = tag;
                 }
@@ -264,14 +264,14 @@ public final class LdapUtility {
     *        NamingException if the property can't be found.
     * @return the value of the property or <code>null</code> if the property
     * can't be found and <code>mustExist</code> is false.
-    * @throws LdapException if the property can't be found and the parameter
+    * @throws OXException if the property can't be found and the parameter
     * <code>mustExist</code> is <code>true</code>.
     */
    static String findProperty(final String propname, final boolean mustExist)
-       throws LdapException {
+       throws OXException {
        final String retval = getCustomization().getProperty(propname);
        if (retval == null && mustExist) {
-           throw new LdapException(EnumComponent.LDAP, Code.PROPERTY_MISSING,
+           throw new OXException(EnumComponent.LDAP, LdapExceptionCode.PROPERTY_MISSING,
                propname);
        }
        return retval;
@@ -282,9 +282,9 @@ public final class LdapUtility {
      * property to search will only be preceded by the package name to find it.
      * @param propname name of the property to search
      * @return the value of the property and never <code>null</code>.
-     * @throws LdapException if the property can't be found.
+     * @throws OXException if the property can't be found.
      */
-    static String findProperty(final String propname) throws LdapException {
+    static String findProperty(final String propname) throws OXException {
         return findProperty(propname, true);
     }
 
@@ -317,14 +317,14 @@ public final class LdapUtility {
      * @param className Name of the class.
      * @param clazz super type of the class to load.
      * @return the class.
-     * @throws LdapException if the class can not be loaded.
+     * @throws OXException if the class can not be loaded.
      */
     public static <U> Class< ? extends U> getImplementation(
-        final String className, final Class<U> clazz) throws LdapException {
+        final String className, final Class<U> clazz) throws OXException {
         try {
             return Class.forName(className).asSubclass(clazz);
         } catch (final ClassNotFoundException e) {
-            throw new LdapException(EnumComponent.LDAP, Code.CLASS_NOT_FOUND, e,
+            throw new OXException(EnumComponent.LDAP, LdapExceptionCode.CLASS_NOT_FOUND, e,
                 className);
         }
     }
@@ -335,30 +335,30 @@ public final class LdapUtility {
      * @param clazz class that should be instantiated.
      * @param context Context.
      * @return an instance implementing the resources interface.
-     * @throws LdapException if the instance can't be created.
+     * @throws OXException if the instance can't be created.
      */
     public static <T extends Object> T getInstance(final Class< ? extends T> clazz)
-        throws LdapException {
+        throws OXException {
         try {
             final Constructor< ? extends T> cons = clazz.getConstructor(new Class[0]);
             return cons.newInstance(new Object[0]);
         } catch (final SecurityException e) {
-            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new OXException(EnumComponent.LDAP, LdapExceptionCode.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (final NoSuchMethodException e) {
-            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new OXException(EnumComponent.LDAP, LdapExceptionCode.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (final InstantiationException e) {
-            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new OXException(EnumComponent.LDAP, LdapExceptionCode.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (final IllegalAccessException e) {
-            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new OXException(EnumComponent.LDAP, LdapExceptionCode.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (final IllegalArgumentException e) {
-            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new OXException(EnumComponent.LDAP, LdapExceptionCode.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (final InvocationTargetException e) {
-            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new OXException(EnumComponent.LDAP, LdapExceptionCode.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         }
     }

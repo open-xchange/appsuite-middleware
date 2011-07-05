@@ -62,7 +62,7 @@ import java.util.concurrent.Executor;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
@@ -164,7 +164,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
             } catch (final ServiceException e) {
                 throw new UnifiedINBOXException(e);
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 throw new UnifiedINBOXException(e);
             }
         }
@@ -291,7 +291,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
             } catch (final ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, MailException.class);
             }
@@ -450,7 +450,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 return messages.toArray(new MailMessage[messages.size()]);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
             } catch (final ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, MailException.class);
             }
@@ -555,7 +555,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 return messages.toArray(new MailMessage[messages.size()]);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
             } catch (final ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, MailException.class);
             }
@@ -639,7 +639,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
@@ -743,7 +743,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
@@ -823,7 +823,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);

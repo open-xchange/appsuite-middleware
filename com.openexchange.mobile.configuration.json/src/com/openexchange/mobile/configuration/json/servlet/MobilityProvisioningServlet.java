@@ -66,7 +66,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mobile.configuration.json.action.ActionException;
@@ -132,7 +132,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			response.setException(e);
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
-            response.setException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e) );
+            response.setException(new OXJSONException(OXJSONException.LdapExceptionCode.JSON_WRITE_ERROR, e) );
 		}
 		
 		response.setData(obj);
@@ -213,7 +213,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			    	} catch (ContextException e) {
 			    		LOG.error(e.getLocalizedMessage(), e);
 			    		response.setException(MobileProvisioningJsonExceptionCodes.CONTEXT_ERROR.create(e, session.getContextId()));
-					} catch (LdapException e) {
+					} catch (OXException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 						response.setException(MobileProvisioningJsonExceptionCodes.USER_ERROR.create(e, session.getUserId()));
 					} catch (ServiceException e) {
@@ -240,7 +240,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
             response.setException(
-            	new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e)
+            	new OXJSONException(OXJSONException.LdapExceptionCode.JSON_WRITE_ERROR, e)
             );
 		}
 		

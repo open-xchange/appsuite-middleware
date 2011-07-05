@@ -96,7 +96,7 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -1053,16 +1053,16 @@ public class OXContainerConverter {
         try {
             final User uo = UserStorage.getInstance().searchUser(mail, ctx);
             return uo != null;
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             return false;
         }
     }
 
     /**
      * Finds an internal user by its e-mail address. Note that an e-mail address is unique, but the identifier for an internal user is its
-     * id. Should only be called after using <code>isInternalUser</code> or you have to live with the LdapException.
+     * id. Should only be called after using <code>isInternalUser</code> or you have to live with the OXException.
      */
-    public User getInternalUser(final String mail) throws LdapException {
+    public User getInternalUser(final String mail) throws OXException {
         return UserStorage.getInstance().searchUser(mail, ctx);
     }
 

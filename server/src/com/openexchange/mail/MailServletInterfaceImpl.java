@@ -98,7 +98,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.exception.OXException;
@@ -262,7 +262,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             try {
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
-            } catch (final com.openexchange.groupware.ldap.UserException e) {
+            } catch (final com.openexchange.groupware.ldap.OXException e) {
                 LOG.warn(e.getMessage(), e);
                 return Locale.ENGLISH;
             }
@@ -1974,7 +1974,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     transport.sendMailMessage(composedMail, ComposeType.NEW);
                 }
             }
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final OXException e) {
             throw new OXException(e);

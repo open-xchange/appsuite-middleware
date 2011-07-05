@@ -77,7 +77,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -296,7 +296,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     public User resolveUser(final int uid) throws WebdavProtocolException {
         try {
             return users.getUser(uid, getContext());
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(new WebdavPath(), 500);
         }

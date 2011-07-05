@@ -65,7 +65,7 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.DefaultMessagingPermission;
@@ -278,7 +278,7 @@ public final class MessagingFolderParser {
             }
         } catch (final JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

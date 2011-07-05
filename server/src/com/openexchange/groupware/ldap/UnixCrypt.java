@@ -61,6 +61,7 @@
 package com.openexchange.groupware.ldap;
 
 import java.io.UnsupportedEncodingException;
+import com.openexchange.exception.OXException;
 
 public class UnixCrypt {
     
@@ -716,17 +717,17 @@ public class UnixCrypt {
      * @param enteredPassword The password as entered by the user (or
      * otherwise aquired).
      * @return <B>true</B> if the password should be considered correct.
-     * @throws UserException 
+     * @throws OXException 
      * @throws UnsupportedEncodingException 
      */
-    public final static boolean matches(final String encryptedPassword, final String enteredPassword) throws UserException
+    public final static boolean matches(final String encryptedPassword, final String enteredPassword) throws OXException
     {
       final String salt = encryptedPassword.substring(0, 3);
       String newCrypt;
       try {
           newCrypt = crypt(salt, enteredPassword);
       } catch (final UnsupportedEncodingException e) {
-          throw UserException.Code.UNSUPPORTED_ENCODING.create(e, encoding);
+          throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, encoding);
       }
       
       return newCrypt.equals(encryptedPassword);

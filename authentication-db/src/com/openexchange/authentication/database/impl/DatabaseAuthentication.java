@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.user.UserService;
 
 /**
@@ -101,14 +101,14 @@ public class DatabaseAuthentication implements AuthenticationService {
             final int userId;
             try {
                 userId = userService.getUserId(splitted[1], ctx);
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 throw INVALID_CREDENTIALS.create();
             }
             final User user = userService.getUser(userId, ctx);
             if (!userService.authenticate(user, password)) {
                 throw INVALID_CREDENTIALS.create();
             }
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         return new Authenticated() {

@@ -55,7 +55,7 @@ import java.util.Collection;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
@@ -108,7 +108,7 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
     protected User loadUser(Context ctx, int userId) throws PublicationException {
         try {
             return users.getUser(userId, ctx);
-        } catch (UserException e) {
+        } catch (OXException e) {
             throw new PublicationException(e);
         }
     }

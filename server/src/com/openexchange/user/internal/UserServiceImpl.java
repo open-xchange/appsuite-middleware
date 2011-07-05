@@ -51,9 +51,9 @@ package com.openexchange.user.internal;
 
 import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.user.UserService;
 
@@ -71,94 +71,94 @@ public final class UserServiceImpl implements UserService {
         super();
     }
 
-    public String getUserAttribute(String name, int userId, Context context) throws UserException {
+    public String getUserAttribute(String name, int userId, Context context) throws OXException {
         try {
             return UserStorage.getInstance().getUserAttribute(name, userId, context);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
-    public void setUserAttribute(String name, String value, int userId, Context context) throws UserException {
+    public void setUserAttribute(String name, String value, int userId, Context context) throws OXException {
         try {
             UserStorage.getInstance().setUserAttribute(name, value, userId, context);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
-    public void setAttribute(String name, String value, int userId, Context context) throws UserException {
+    public void setAttribute(String name, String value, int userId, Context context) throws OXException {
         try {
             UserStorage.getInstance().setAttribute(name, value, userId, context);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
-    public User getUser(int uid, Context context) throws UserException {
+    public User getUser(int uid, Context context) throws OXException {
         try {
             return UserStorage.getInstance().getUser(uid, context);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
-    public User[] getUser(Context context, int[] userIds) throws UserException {
+    public User[] getUser(Context context, int[] userIds) throws OXException {
         return UserStorage.getInstance().getUser(context, userIds);
     }
 
-    public User[] getUser(Context context) throws UserException {
+    public User[] getUser(Context context) throws OXException {
         return UserStorage.getInstance().getUser(context);
     }
 
-    public int getUserId(final String loginInfo, final Context context) throws UserException {
+    public int getUserId(final String loginInfo, final Context context) throws OXException {
         try {
             return UserStorage.getInstance().getUserId(loginInfo, context);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
-    public void invalidateUser(final Context ctx, final int userId) throws UserException {
+    public void invalidateUser(final Context ctx, final int userId) throws OXException {
         UserStorage.getInstance().invalidateUser(ctx, userId);
     }
 
-    public int[] listAllUser(final Context context) throws UserException {
+    public int[] listAllUser(final Context context) throws OXException {
         return UserStorage.getInstance().listAllUser(context);
     }
 
-    public int[] listModifiedUser(final Date modifiedSince, final Context context) throws UserException {
+    public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
         try {
             return UserStorage.getInstance().listModifiedUser(modifiedSince, context);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
-    public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
+    public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws OXException {
         return UserStorage.getInstance().resolveIMAPLogin(imapLogin, context);
     }
 
-    public User searchUser(final String email, final Context context) throws UserException {
+    public User searchUser(final String email, final Context context) throws OXException {
         try {
             return UserStorage.getInstance().searchUser(email, context);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
-    public void updateUser(final User user, final Context context) throws UserException {
+    public void updateUser(final User user, final Context context) throws OXException {
         try {
             UserStorage.getInstance().updateUser(user, context);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean authenticate(final User user, final String password) throws UserException {
+    public boolean authenticate(final User user, final String password) throws OXException {
         return UserStorage.authenticate(user, password);
     }
 

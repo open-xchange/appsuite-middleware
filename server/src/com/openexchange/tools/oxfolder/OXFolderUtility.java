@@ -66,7 +66,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -194,7 +194,7 @@ public final class OXFolderUtility {
                                 // so
                             }
                         }
-                    } catch (final LdapException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 } else {
@@ -802,7 +802,7 @@ public final class OXFolderUtility {
                 for (int j = 0; j < members.length; j++) {
                     users.add(Integer.valueOf(members[j]));
                 }
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         } else {
@@ -865,7 +865,7 @@ public final class OXFolderUtility {
         final User u;
         try {
             u = UserStorage.getInstance().getUser(userId, ctx);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             return String.valueOf(userId);
         }
         if (u == null) {
@@ -902,7 +902,7 @@ public final class OXFolderUtility {
         final Group g;
         try {
             g = GroupStorage.getInstance().getGroup(groupId, ctx);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             return String.valueOf(groupId);
         }
         if (g == null) {

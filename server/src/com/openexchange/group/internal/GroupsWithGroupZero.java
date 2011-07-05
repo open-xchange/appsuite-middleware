@@ -60,8 +60,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException;
 
 /**
  * Implementation of the group storage that adds group with identifier 0 to all requests.
@@ -142,9 +142,9 @@ public final class GroupsWithGroupZero extends GroupStorage {
         final Group zero;
         try {
             zero = GroupTools.getGroupZero(ctx);
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         final Matcher match = pat.matcher(zero.getDisplayName());

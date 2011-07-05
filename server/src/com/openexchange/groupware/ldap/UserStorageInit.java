@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.ldap;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
@@ -83,7 +84,7 @@ public final class UserStorageInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void start() throws UserException {
+    public void start() throws OXException {
         UserStorage.start();
         ServerServiceRegistry.getInstance().addService(UserService.class, new UserServiceImpl());
     }
@@ -91,7 +92,7 @@ public final class UserStorageInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void stop() throws UserException {
+    public void stop() throws OXException {
         ServerServiceRegistry.getInstance().removeService(UserService.class);
         UserStorage.stop();
     }

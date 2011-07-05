@@ -61,7 +61,7 @@ import java.util.concurrent.Executor;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -271,7 +271,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             return UnifiedINBOXFolderConverter.mergeAccountDefaultFolders(list, FULLNAMES, names);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+            throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
         } catch (final ExecutionException e) {
             throw ThreadPools.launderThrowable(e, MailException.class);
         }
@@ -322,7 +322,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             return retval;
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+            throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
         } catch (final ExecutionException e) {
             throw ThreadPools.launderThrowable(e, MailException.class);
         }
@@ -404,7 +404,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             return folders.toArray(new MailFolder[folders.size()]);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+            throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
         } catch (final ExecutionException e) {
             throw ThreadPools.launderThrowable(e, MailException.class);
         }
@@ -512,7 +512,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
             } catch (final ServiceException e) {
                 throw new UnifiedINBOXException(e);
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 throw new UnifiedINBOXException(e);
             }
         }

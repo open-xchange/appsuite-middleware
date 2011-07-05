@@ -95,7 +95,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HTMLService;
@@ -341,7 +341,7 @@ public class MIMEMessageFiller {
                 }
             } catch (final OXException e) {
                 throw new OXException(e);
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
             /*

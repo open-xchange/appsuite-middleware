@@ -8,7 +8,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -37,7 +37,7 @@ public class CalendarRequest {
 					if(foundUser == null)
 						continue;
 					participants[pos] = new UserParticipant(foundUser.getId());
-				} catch (UserException e) {
+				} catch (OXException e) {
 					log.error(e); //...and continue doing this for the remaining users
 				}
 			}

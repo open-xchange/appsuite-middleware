@@ -80,9 +80,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -372,7 +373,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws OXException if the session can not be found.
      */
-    public ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, LdapException, UserException {
+    public ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, OXException, OXException {
         return getSession(hashSource, req, sessionId, sessiondService);
     }
 
@@ -385,7 +386,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public static ServerSession getSession(final CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, LdapException, UserException {
+    public static ServerSession getSession(final CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, OXException, OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
@@ -404,7 +405,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
         } catch (final UndeclaredThrowableException e) {
-            throw UserException.Code.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
+            throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
         }
         return new ServerSessionAdapter(session, context, user);
     }

@@ -91,7 +91,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -312,7 +312,7 @@ public final class ical extends PermissionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (final OXException e) {

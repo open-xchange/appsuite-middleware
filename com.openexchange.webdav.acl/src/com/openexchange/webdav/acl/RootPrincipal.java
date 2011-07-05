@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.mixins.PrincipalURL;
 import com.openexchange.webdav.protocol.Protocol.Property;
@@ -134,7 +134,7 @@ public class RootPrincipal extends AbstractCollection {
                 children.add(new UserPrincipalResource(factory, u));
             }
             return children;
-        } catch (UserException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), 403);
         }
     }
@@ -146,7 +146,7 @@ public class RootPrincipal extends AbstractCollection {
             int userId = users.getUserId(name, factory.getContext());
             User user = users.getUser(userId, factory.getContext());
             return new UserPrincipalResource(factory, user);
-        } catch (UserException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(url, 500);
         }
     }

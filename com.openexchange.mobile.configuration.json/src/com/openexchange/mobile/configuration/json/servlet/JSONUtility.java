@@ -21,7 +21,7 @@ public class JSONUtility {
     protected static String checkStringParameter(final HttpServletRequest request, final String parameterName) throws AjaxException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp || 0 == tmp.length()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+            throw new AjaxException(AjaxException.LdapExceptionCode.MISSING_PARAMETER, parameterName);
         }
         return tmp;
     }

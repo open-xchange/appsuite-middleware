@@ -65,7 +65,7 @@ public class ResourceException extends AbstractOXException {
     private static final long serialVersionUID = -6738209089912459855L;
 
     /**
-     * Detail information for the LdapException.
+     * Detail information for the OXException.
      * 
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */

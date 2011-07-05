@@ -61,7 +61,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
@@ -202,7 +202,7 @@ public final class Create {
         final UserStorage storage = UserStorage.getInstance();
         try {
             storage.invalidateUser(ctx, group.getMember());
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

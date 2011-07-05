@@ -89,7 +89,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -591,7 +591,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         simpleDataCheck(cdao, edao, uid);
         try {
             fillUserParticipants(cdao);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);

@@ -55,7 +55,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -98,7 +98,7 @@ public final class GroupServiceImpl implements GroupService {
     public Group getGroup(Context ctx, int groupId) throws OXException {
         try {
             return GroupStorage.getInstance().getGroup(groupId, ctx);
-        } catch (LdapException e) {
+        } catch (OXException e) {
             throw new OXException(e);
         }
     }

@@ -53,7 +53,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Quota;
@@ -109,7 +109,7 @@ public final class TwitterFolderStorage extends MailFolderStorage {
                 user = userService.getUser(session.getUserId(), ctx);
             } catch (final OXException e) {
                 throw new OXException(e);
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }

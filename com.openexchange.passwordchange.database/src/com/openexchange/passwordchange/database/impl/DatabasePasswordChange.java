@@ -60,7 +60,8 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -78,13 +79,13 @@ public final class DatabasePasswordChange extends PasswordChangeService {
     }
 
     @Override
-    protected void update(final PasswordChangeEvent event) throws UserException {
+    protected void update(final PasswordChangeEvent event) throws OXException {
         final String encodedPassword;
         final Context ctx = event.getContext();
         {
             final UserService userService = getServiceRegistry().getService(UserService.class);
             if (userService == null) {
-                throw new UserException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName()));
+                throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName()));
             }
             final User user = userService.getUser(event.getSession().getUserId(), ctx);
             // Get encoded version of new password
@@ -96,9 +97,9 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             writeCon = Database.get(ctx, true);
             writeCon.setAutoCommit(false);
         } catch (final DBPoolingException e) {
-            throw new UserException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
-            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         try {
             update(writeCon, encodedPassword, event.getSession().getUserId(), ctx.getContextId());
@@ -106,10 +107,10 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             writeCon.commit();
         } catch (final SQLException e) {
             rollback(writeCon);
-            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             rollback(writeCon);
-            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(writeCon);
             Database.back(ctx, true, writeCon);

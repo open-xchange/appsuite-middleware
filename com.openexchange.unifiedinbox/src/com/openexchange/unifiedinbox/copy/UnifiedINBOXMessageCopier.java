@@ -292,7 +292,7 @@ public final class UnifiedINBOXMessageCopier {
             }
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+            throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
         } catch (final ExecutionException e) {
             throw ThreadPools.launderThrowable(e, MailException.class);
         }

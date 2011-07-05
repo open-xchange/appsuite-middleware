@@ -62,7 +62,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.TargetFolderSession;
@@ -217,7 +217,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         public UserConfiguration userConfig;    
         public ServerSession serverSession;
         
-        public InfostoreSession(TargetFolderDefinition target) throws OXException, UserException, AbstractOXException {
+        public InfostoreSession(TargetFolderDefinition target) throws OXException, OXException, AbstractOXException {
             user = users.getUser(target.getUserId(), target.getContext());
             userConfig = userConfigs.getUserConfiguration(target.getUserId(), target.getContext());
        

@@ -64,7 +64,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -139,7 +139,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                                 LOG.debug("Auto-Insert system-folder-read permission for group " + GroupStorage.getInstance().getGroup(
                                     groups[j],
                                     ctx).getDisplayName() + " to folder " + folderId);
-                            } catch (final LdapException e) {
+                            } catch (final OXException e) {
                                 LOG.trace("Logging failed", e);
                             }
                         }

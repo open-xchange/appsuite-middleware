@@ -52,6 +52,7 @@ package com.openexchange.groupware.ldap;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -82,9 +83,9 @@ public final class UserTools {
      * returns the base64 encoded value of the hash.
      * @param password clear text password.
      * @return the base64 encoded value of the hash.
-     * @throws UserException if the password can't be hashed.
+     * @throws OXException if the password can't be hashed.
      */
-    static String hashPassword(final String password) throws UserException {
+    static String hashPassword(final String password) throws OXException {
         String hashed = null;
         try {
             final MessageDigest sha = MessageDigest.getInstance(HASH_ALGO);
@@ -92,9 +93,9 @@ public final class UserTools {
             final byte[] hash = sha.digest();
             hashed = Base64.encode(hash);
         } catch (final NoSuchAlgorithmException e) {
-            throw UserException.Code.HASHING.create(e, HASH_ALGO);
+            throw UserExceptionCode.HASHING.create(e, HASH_ALGO);
         } catch (final UnsupportedEncodingException e) {
-            throw UserException.Code.UNSUPPORTED_ENCODING.create(e,
+            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e,
                 UTF_8);
         }
         return hashed;

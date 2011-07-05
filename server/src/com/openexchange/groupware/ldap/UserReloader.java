@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * This class is used overall behind the User interface and it manages to reload
@@ -77,14 +77,14 @@ final class UserReloader extends Refresher<User> implements User {
      * Default constructor.
      * @param factory Factory for loading the object from the database.
      * @param regionName Name of the cache region that stores the object.
-     * @throws AbstractOXException if initially loading the object fails.
+     * @throws OXException if initially loading the object fails.
      */
-    UserReloader(final OXObjectFactory<User> factory, final String regionName) throws AbstractOXException {
+    UserReloader(final OXObjectFactory<User> factory, final String regionName) throws OXException {
         super(factory, regionName);
         this.delegate = refresh();
     }
 
-    public UserReloader(OXObjectFactory<User> factory, User user, String regionName) throws CacheException {
+    public UserReloader(final OXObjectFactory<User> factory, final User user, final String regionName) throws OXException {
         super(factory, regionName);
         delegate = user;
         cache(user);
@@ -288,7 +288,7 @@ final class UserReloader extends Refresher<User> implements User {
     private void updateDelegate() throws RuntimeException {
         try {
             this.delegate = refresh();
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }

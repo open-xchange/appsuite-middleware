@@ -57,7 +57,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.services.SPWServiceRegistry;
@@ -92,19 +92,19 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 	}
 
 	@Override
-	protected void update(final PasswordChangeEvent event) throws UserException {
+	protected void update(final PasswordChangeEvent event) throws OXException {
 
 		String shellscript_to_execute = null;
 		try {
 			shellscript_to_execute = getShellCommand();
 		} catch (OXException e1) {
-			throw new UserException(e1);
+			throw new OXException(e1);
 		}
 		User user = null;
 		{
 			final UserService userService = getServiceRegistry().getService(UserService.class);
 			if (userService == null) {
-				throw new UserException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName()));
+				throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName()));
 			}
 			user = userService.getUser(event.getSession().getUserId(), event.getContext());
 
@@ -148,25 +148,25 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		        LOG.error("Passwordchange script returned exit code != 0, ret="+ret);
 		        switch(ret){
 		        case 1:
-		            throw new UserException(new PasswordException(PasswordException.Code.PASSWORD_FAILED," failed with return code "+ret+" "));
+		            throw new OXException(new PasswordException(PasswordException.Code.PASSWORD_FAILED," failed with return code "+ret+" "));
 		        case 2:
-		            throw new UserException(new PasswordException(PasswordException.Code.PASSWORD_SHORT));
+		            throw new OXException(new PasswordException(PasswordException.Code.PASSWORD_SHORT));
 		        case 3:
-		            throw new UserException(new PasswordException(PasswordException.Code.PASSWORD_WEAK));
+		            throw new OXException(new PasswordException(PasswordException.Code.PASSWORD_WEAK));
 		        case 4:
-		            throw new UserException(new PasswordException(PasswordException.Code.PASSWORD_NOUSER));
+		            throw new OXException(new PasswordException(PasswordException.Code.PASSWORD_NOUSER));
 		        case 5:
-		            throw new UserException(new PasswordException(PasswordException.Code.LDAP_ERROR));
+		            throw new OXException(new PasswordException(PasswordException.Code.LDAP_ERROR));
 		        default:
-		            throw new UserException(new OXException(ServiceExceptionCode.IO_ERROR));
+		            throw new OXException(new OXException(ServiceExceptionCode.IO_ERROR));
 		        }
 		    }
 		} catch (IOException e) {
 			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
-			throw new UserException(ServiceExceptionCode.IO_ERROR.create( e));			
+			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));			
 		} catch (InterruptedException e) {
 			LOG.fatal("Error while changing password for user "+usern+" in context "+cid+"\n",e);
-			throw new UserException(ServiceExceptionCode.IO_ERROR.create( e));			
+			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));			
 		}
 		
 	}

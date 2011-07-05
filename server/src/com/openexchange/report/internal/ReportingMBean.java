@@ -86,7 +86,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.OXException;
@@ -163,7 +163,7 @@ public class ReportingMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
             } catch (OXException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (UserException e) {
+            } catch (OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             return total;
@@ -201,7 +201,7 @@ public class ReportingMBean implements DynamicMBean {
             LOG.error(e.getMessage(), e);
         } catch (OpenDataException e) {
             LOG.error(e.getMessage(), e);
-        } catch (UserException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
@@ -211,7 +211,7 @@ public class ReportingMBean implements DynamicMBean {
         return detail;
     }
 
-    private void consolidateAccessCombinations(UserConfiguration[] configs, UserService userService, TabularDataSupport moduleAccessCombinations) throws OpenDataException, UserException {
+    private void consolidateAccessCombinations(UserConfiguration[] configs, UserService userService, TabularDataSupport moduleAccessCombinations) throws OpenDataException, OXException {
         Map<Integer, Integer[]> combinations = new HashMap<Integer, Integer[]>();
         for (UserConfiguration config : configs) {
             User user = userService.getUser(config.getUserId(), config.getContext());
@@ -243,7 +243,7 @@ public class ReportingMBean implements DynamicMBean {
         return I(-1);
     }
 
-    private UserConfiguration[] getUserConfigurations(UserService userService, UserConfigurationService configurationService, Context ctx) throws UserException, OXException {
+    private UserConfiguration[] getUserConfigurations(UserService userService, UserConfigurationService configurationService, Context ctx) throws OXException, OXException {
         User[] users = userService.getUser(ctx);
         UserConfiguration[] configurations = configurationService.getUserConfiguration(ctx, users);
         return configurations;

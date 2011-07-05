@@ -75,7 +75,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
@@ -1401,9 +1402,9 @@ public final class OXFolderAdminHelper {
             final int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, readCon, ctx);
             final String newDisplayName = getUserDisplayName(userId, cid, readCon == null ? writeCon : readCon);
             if (newDisplayName == null) {
-                throw new LdapException(
+                throw new OXException(
                     EnumComponent.USER,
-                    LdapException.Code.USER_NOT_FOUND,
+                    LdapExceptionCode.USER_NOT_FOUND,
                     Integer.valueOf(userId),
                     Integer.valueOf(cid));
             }
@@ -1421,7 +1422,7 @@ public final class OXFolderAdminHelper {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.LDAP_ERROR.create(e, Integer.valueOf(cid));
         }
     }

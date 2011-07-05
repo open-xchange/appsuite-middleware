@@ -78,9 +78,10 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailExceptionCode;
@@ -306,12 +307,12 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             User user = null;
             try {
                 user = userService.searchUser(address.getAddress(), ctx);
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 /*
                  * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
                  * Therefore check for this special error code and throw an exception if it is not equal.
                  */
-                if (LdapException.Code.NO_USER_BY_MAIL.getDetailNumber() != e.getDetailNumber()) {
+                if (LdapExceptionCode.NO_USER_BY_MAIL.getDetailNumber() != e.getDetailNumber()) {
                     throw new OXException(e);
                 }
                 /*
@@ -319,8 +320,8 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                  */
                 try {
                     user = userService.searchUser(QuotedInternetAddress.toIDN(address.getAddress()), ctx);
-                } catch (final UserException inner) {
-                    if (LdapException.Code.NO_USER_BY_MAIL.getDetailNumber() != inner.getDetailNumber()) {
+                } catch (final OXException inner) {
+                    if (LdapExceptionCode.NO_USER_BY_MAIL.getDetailNumber() != inner.getDetailNumber()) {
                         throw new OXException(inner);
                     }
                 }
@@ -395,7 +396,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
         try {
             return UserStorage.getInstance().getUser(session.getUserId(), getContext());
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

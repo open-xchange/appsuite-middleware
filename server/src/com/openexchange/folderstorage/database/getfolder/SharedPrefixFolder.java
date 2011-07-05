@@ -65,7 +65,7 @@ import com.openexchange.folderstorage.database.FolderIdNamePair;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -178,7 +178,7 @@ public final class SharedPrefixFolder {
         String creatorDisplayName;
         try {
             creatorDisplayName = UserStorage.getInstance().getUser(sharedOwner, ctx).getDisplayName();
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             if (sharedOwner != OCLPermission.ALL_GROUPS_AND_USERS) {
                 throw new OXException(e);
             }

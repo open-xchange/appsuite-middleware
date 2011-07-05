@@ -56,7 +56,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
@@ -112,7 +112,7 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
 
 
-    private User getUser(Publication publication) throws PublicationException, UserException {
+    private User getUser(Publication publication) throws PublicationException, OXException {
         return users.getUser(publication.getUserId(), publication.getContext());
     }
 

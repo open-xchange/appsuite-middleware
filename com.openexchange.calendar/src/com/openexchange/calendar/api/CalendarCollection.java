@@ -110,7 +110,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.exception.OXException;
@@ -2020,7 +2020,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     newp[check.length] = p;
                     cdao.setParticipants(newp);
                 }
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         } else {

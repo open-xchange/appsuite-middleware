@@ -52,9 +52,9 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.user.UserService;
 
@@ -72,7 +72,7 @@ public class OXUserResolver implements UserResolver {
         super();
     }
 
-    public List<User> findUsers(final List<String> mails, final Context ctx) throws UserException, OXException {
+    public List<User> findUsers(final List<String> mails, final Context ctx) throws OXException, OXException {
         final List<User> users = new ArrayList<User>();
         if (mails.isEmpty()) {
             return users;
@@ -83,8 +83,8 @@ public class OXUserResolver implements UserResolver {
         for(final String mail : mails) {
             try {
                 users.add(userService.searchUser(mail, ctx));
-            } catch (final UserException x) {
-                if (x.getDetailNumber() != LdapException.Code.NO_USER_BY_MAIL.getDetailNumber()) {
+            } catch (final OXException x) {
+                if (x.getDetailNumber() != LdapExceptionCode.NO_USER_BY_MAIL.getDetailNumber()) {
                     throw x;
                 }
             }
@@ -92,7 +92,7 @@ public class OXUserResolver implements UserResolver {
         return users;
     }
 
-    public User loadUser(final int userId, final Context ctx) throws UserException, OXException {
+    public User loadUser(final int userId, final Context ctx) throws OXException, OXException {
         if (null == userService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
         }

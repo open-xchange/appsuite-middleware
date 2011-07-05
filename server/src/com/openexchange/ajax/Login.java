@@ -90,7 +90,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
@@ -279,7 +279,7 @@ public class Login extends AJAXServlet {
                 } catch (final OXException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -344,7 +344,7 @@ public class Login extends AJAXServlet {
                 } catch (final OXException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -473,7 +473,7 @@ public class Login extends AJAXServlet {
                 } catch (final OXException e) {
                     LOG.debug(e.getMessage(), e);
                     response.setException(e);
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     LOG.debug(e.getMessage(), e);
                     response.setException(e);
                 } catch (final LoginException e) {

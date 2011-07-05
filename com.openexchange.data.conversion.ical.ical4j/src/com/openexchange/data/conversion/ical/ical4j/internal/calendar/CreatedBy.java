@@ -63,7 +63,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -99,7 +99,7 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
             organizer.setValue("mailto:" + address);
         } catch (final URISyntaxException e) {
             warnings.add(new ConversionWarning(index, "URI problem.", e));
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             warnings.add(new ConversionWarning(index, e));
         } catch (final OXException e) {
             warnings.add(new ConversionWarning(index, e));

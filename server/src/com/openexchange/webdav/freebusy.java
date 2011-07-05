@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
@@ -296,7 +296,7 @@ public class freebusy extends HttpServlet {
             user = service.searchUser(mailAddress, ctx);
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
-        } catch (UserException e) {
+        } catch (OXException e) {
             LOG.debug("User '" + mailAddress + "' not found.");
         }
 

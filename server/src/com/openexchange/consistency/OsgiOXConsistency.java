@@ -62,7 +62,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.OXException;
@@ -156,7 +156,7 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected User getAdmin(final Context ctx) throws LdapException {
+    protected User getAdmin(final Context ctx) throws OXException {
         return UserStorage.getStorageUser(ctx.getMailadmin(),ctx);
     }
 

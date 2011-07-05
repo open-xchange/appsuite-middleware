@@ -79,7 +79,7 @@ public abstract class SessionIdGenerator {
      * 
      * @param context Context.
      * @return an instance implementing the group storage interface.
-     * @throws LdapException if the instance can't be created.
+     * @throws OXException if the instance can't be created.
      */
     public static SessionIdGenerator getInstance() throws SessiondException {
         try {

@@ -114,7 +114,7 @@ public final class UnifiedINBOXException extends MIMEMailException {
         /**
          * Folder %1$s does not hold messages and is therefore not selectable.
          */
-        FOLDER_DOES_NOT_HOLD_MESSAGES(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES),
+        FOLDER_DOES_NOT_HOLD_MESSAGES(MailException.UserExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES),
         /**
          * Mail folder could not be found: %1$s.
          */
@@ -149,13 +149,13 @@ public final class UnifiedINBOXException extends MIMEMailException {
             this.category = category;
         }
 
-        private Code(final MailException.Code code) {
+        private Code(final UserExceptionCode.Code code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();
         }
 
-        private Code(final MIMEMailException.Code code) {
+        private Code(final MIMEMailException.UserExceptionCode code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();

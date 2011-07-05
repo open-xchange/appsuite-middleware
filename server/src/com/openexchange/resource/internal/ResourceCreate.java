@@ -55,7 +55,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -191,7 +191,7 @@ public final class ResourceCreate {
             if (storage.searchResourcesByMail(resource.getMail(), ctx).length > 0) {
                 throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
             }
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new ResourceException(e);
         }
 

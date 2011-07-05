@@ -60,8 +60,8 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.LdapException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
@@ -91,13 +91,13 @@ public class RdbResourceStorage extends ResourceStorage {
     }
 
     @Override
-    public ResourceGroup getGroup(final int groupId, final Context context) throws LdapException {
+    public ResourceGroup getGroup(final int groupId, final Context context) throws OXException {
         final ResourceGroup[] groups = getGroups(new int[] { groupId }, context);
         if (null == groups || groups.length == 0) {
-            throw LdapException.Code.RESOURCEGROUP_NOT_FOUND.create("RES", Integer.valueOf(groupId));
+            throw LdapExceptionCode.RESOURCEGROUP_NOT_FOUND.create("RES", Integer.valueOf(groupId));
         }
         if (groups.length > 1) {
-            throw LdapException.Code.RESOURCEGROUP_CONFLICT.create("RES", Integer.valueOf(groupId));
+            throw LdapExceptionCode.RESOURCEGROUP_CONFLICT.create("RES", Integer.valueOf(groupId));
         }
         return groups[0];
     }
@@ -105,12 +105,12 @@ public class RdbResourceStorage extends ResourceStorage {
     private static final String SQL_SELECT_GROUP = "SELECT id,identifier,displayName,available " + "FROM resource_group WHERE cid = ?";
 
     @Override
-    public ResourceGroup[] getGroups(final Context context) throws LdapException {
+    public ResourceGroup[] getGroups(final Context context) throws OXException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
         }
         final List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         PreparedStatement stmt = null;
@@ -130,7 +130,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -145,9 +145,9 @@ public class RdbResourceStorage extends ResourceStorage {
      * 
      * @param groupId array with unique identifier of the resource groups to read.
      * @return an array with the read resource groups.
-     * @throws LdapException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    private ResourceGroup[] getGroups(final int[] groupId, final Context context) throws LdapException {
+    private ResourceGroup[] getGroups(final int[] groupId, final Context context) throws OXException {
         if (null == groupId || groupId.length == 0) {
             return new ResourceGroup[0];
         }
@@ -155,7 +155,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
         }
         final StringBuilder ids = new StringBuilder(16);
         ids.append('(').append(groupId[0]);
@@ -181,7 +181,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -225,13 +225,13 @@ public class RdbResourceStorage extends ResourceStorage {
      * {@inheritDoc}
      */
     @Override
-    public Resource getResource(final int resourceId, final Context context) throws LdapException {
+    public Resource getResource(final int resourceId, final Context context) throws OXException {
         final Resource[] resources = getResources(new int[] { resourceId }, context);
         if (resources.length == 0) {
-            throw LdapException.Code.RESOURCE_NOT_FOUND.create("RES", Integer.valueOf(resourceId));
+            throw LdapExceptionCode.RESOURCE_NOT_FOUND.create("RES", Integer.valueOf(resourceId));
         }
         if (resources.length > 1) {
-            throw LdapException.Code.RESOURCE_CONFLICT.create("RES", Integer.valueOf(resourceId));
+            throw LdapExceptionCode.RESOURCE_CONFLICT.create("RES", Integer.valueOf(resourceId));
         }
         return resources[0];
     }
@@ -243,9 +243,9 @@ public class RdbResourceStorage extends ResourceStorage {
      * 
      * @param resourceId array with unique identifier of the resources to read.
      * @return an array with the read resources.
-     * @throws LdapException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    private Resource[] getResources(final int[] resourceId, final Context context) throws LdapException {
+    private Resource[] getResources(final int[] resourceId, final Context context) throws OXException {
         if (null == resourceId || resourceId.length == 0) {
             return new Resource[0];
         }
@@ -253,7 +253,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
         }
         final StringBuilder ids = new StringBuilder(16);
         ids.append('(').append(resourceId[0]);
@@ -272,7 +272,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -283,12 +283,12 @@ public class RdbResourceStorage extends ResourceStorage {
     private static final String SQL_SELECT_GROUP3 = "SELECT id,identifier,displayName,available " + "FROM resource_group WHERE cid=? AND identifier LIKE ?";
 
     @Override
-    public ResourceGroup[] searchGroups(final String pattern, final Context context) throws LdapException {
+    public ResourceGroup[] searchGroups(final String pattern, final Context context) throws OXException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
         }
         final List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         PreparedStatement stmt = null;
@@ -309,7 +309,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -320,12 +320,12 @@ public class RdbResourceStorage extends ResourceStorage {
     private static final String SQL_SELECT_RESOURCE2 = "SELECT id,identifier,displayName,mail,available,description,lastModified FROM resource WHERE cid = ? AND (identifier LIKE ? OR displayName LIKE ?)";
 
     @Override
-    public Resource[] searchResources(final String pattern, final Context context) throws LdapException {
+    public Resource[] searchResources(final String pattern, final Context context) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -340,7 +340,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -351,12 +351,12 @@ public class RdbResourceStorage extends ResourceStorage {
     private static final String SQL_SELECT_RESOURCE4 = "SELECT id,identifier,displayName,mail,available,description,lastModified FROM resource WHERE cid = ? AND mail LIKE ?";
 
     @Override
-    public Resource[] searchResourcesByMail(final String pattern, final Context context) throws LdapException {
+    public Resource[] searchResourcesByMail(final String pattern, final Context context) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -370,7 +370,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -382,21 +382,21 @@ public class RdbResourceStorage extends ResourceStorage {
     private static final String SQL_SELECT_DELETED_RESOURCE = "SELECT id,identifier,displayName,mail,available,description,lastModified " + "FROM del_resource WHERE cid = ? AND lastModified > ?";
 
     @Override
-    public Resource[] listModified(final Date modifiedSince, final Context context) throws LdapException {
+    public Resource[] listModified(final Date modifiedSince, final Context context) throws OXException {
         return listModifiedOrDeleted(modifiedSince, context, SQL_SELECT_RESOURCE);
     }
     
     @Override
-    public Resource[] listDeleted(final Date modifiedSince, final Context context) throws LdapException {
+    public Resource[] listDeleted(final Date modifiedSince, final Context context) throws OXException {
         return listModifiedOrDeleted(modifiedSince, context, SQL_SELECT_DELETED_RESOURCE);
     }
 
-    private Resource[] listModifiedOrDeleted(final Date modifiedSince, final Context context, String statement) throws LdapException {
+    private Resource[] listModifiedOrDeleted(final Date modifiedSince, final Context context, String statement) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("RES", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("RES", e);
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -410,7 +410,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
+            throw LdapExceptionCode.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);

@@ -64,7 +64,8 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.server.impl.DBPool;
 
@@ -230,12 +231,12 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
             } else {
-                throw LdapException.Code.GROUP_NOT_FOUND.create("GRP", 
+                throw LdapExceptionCode.GROUP_NOT_FOUND.create("GRP", 
                     Integer.valueOf(gid), Integer.valueOf(context.getContextId()));
             }
             group.setMember(selectMember(con, context, group.getIdentifier()));
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("GRP", e,
+            throw LdapExceptionCode.SQL_ERROR.create("GRP", e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -245,21 +246,21 @@ public class RdbGroupStorage extends GroupStorage {
     }
 
     @Override
-    public Group[] listModifiedGroups(final Date modifiedSince, final Context context) throws LdapException {
+    public Group[] listModifiedGroups(final Date modifiedSince, final Context context) throws OXException {
         return listModifiedOrDeletedGroups(modifiedSince, context, SELECT_GROUPS);
     }
 
     @Override
-    public Group[] listDeletedGroups(final Date modifiedSince, final Context context) throws LdapException {
+    public Group[] listDeletedGroups(final Date modifiedSince, final Context context) throws OXException {
         return listModifiedOrDeletedGroups(modifiedSince, context, SELECT_DELETED_GROUPS);
     }
     
-    private Group[] listModifiedOrDeletedGroups(final Date modifiedSince, final Context context, final String statement) throws LdapException {
+    private Group[] listModifiedOrDeletedGroups(final Date modifiedSince, final Context context, final String statement) throws OXException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("GRP", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("GRP", e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -283,7 +284,7 @@ public class RdbGroupStorage extends GroupStorage {
             }
             groups = tmp.toArray(new Group[tmp.size()]);
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("GRP", e,
+            throw LdapExceptionCode.SQL_ERROR.create("GRP", e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -341,12 +342,12 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] getGroups(final boolean loadMembers, final Context context) throws LdapException {
+    public Group[] getGroups(final boolean loadMembers, final Context context) throws OXException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw LdapException.Code.NO_CONNECTION.create("GRP", e);
+            throw LdapExceptionCode.NO_CONNECTION.create("GRP", e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -370,7 +371,7 @@ public class RdbGroupStorage extends GroupStorage {
             }
             groups = tmp.toArray(new Group[tmp.size()]);
         } catch (final SQLException e) {
-            throw LdapException.Code.SQL_ERROR.create("GRP", e,
+            throw LdapExceptionCode.SQL_ERROR.create("GRP", e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

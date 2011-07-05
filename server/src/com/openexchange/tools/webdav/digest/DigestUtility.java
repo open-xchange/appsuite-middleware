@@ -66,7 +66,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -310,7 +310,7 @@ public final class DigestUtility {
             final UserStorage userStorage = UserStorage.getInstance();
             try {
                 userId = userStorage.getUserId(splitted[1], ctx);
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 throw new WebdavException(WebdavException.Code.RESOLVING_USER_NAME_FAILED, userName);
             }
             final User user = userStorage.getUser(userId, ctx);
@@ -324,7 +324,7 @@ public final class DigestUtility {
             return cryptoService.decrypt(passCrypt, key);
         } catch (final OXException e) {
             throw new WebdavException(e);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new WebdavException(e);
         } catch (final OXException e) {
             throw new WebdavException(e);

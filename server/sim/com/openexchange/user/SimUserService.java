@@ -52,7 +52,7 @@ package com.openexchange.user;
 import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -62,12 +62,12 @@ import com.openexchange.groupware.ldap.UserException;
  */
 public class SimUserService implements UserService {
 
-    public String getUserAttribute(String name, int userId, Context context) throws UserException {
+    public String getUserAttribute(String name, int userId, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public void setUserAttribute(String name, String value, int userId, Context context) throws UserException {
+    public void setUserAttribute(String name, String value, int userId, Context context) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -75,7 +75,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#authenticate(com.openexchange.groupware.ldap.User, java.lang.String)
      */
-    public boolean authenticate(User user, String password) throws UserException {
+    public boolean authenticate(User user, String password) throws OXException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -83,12 +83,12 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#getUser(int, com.openexchange.groupware.contexts.Context)
      */
-    public User getUser(int uid, Context context) throws UserException {
+    public User getUser(int uid, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public User[] getUser(Context context, int[] userIds) throws UserException {
+    public User[] getUser(Context context, int[] userIds) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -96,7 +96,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#getUser(com.openexchange.groupware.contexts.Context)
      */
-    public User[] getUser(Context ctx) throws UserException {
+    public User[] getUser(Context ctx) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -104,7 +104,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#getUserId(java.lang.String, com.openexchange.groupware.contexts.Context)
      */
-    public int getUserId(String loginInfo, Context context) throws UserException {
+    public int getUserId(String loginInfo, Context context) throws OXException {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -112,7 +112,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#invalidateUser(com.openexchange.groupware.contexts.Context, int)
      */
-    public void invalidateUser(Context ctx, int userId) throws UserException {
+    public void invalidateUser(Context ctx, int userId) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -120,7 +120,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#listAllUser(com.openexchange.groupware.contexts.Context)
      */
-    public int[] listAllUser(Context context) throws UserException {
+    public int[] listAllUser(Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -128,7 +128,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#listModifiedUser(java.util.Date, com.openexchange.groupware.contexts.Context)
      */
-    public int[] listModifiedUser(Date modifiedSince, Context context) throws UserException {
+    public int[] listModifiedUser(Date modifiedSince, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -136,7 +136,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#resolveIMAPLogin(java.lang.String, com.openexchange.groupware.contexts.Context)
      */
-    public int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException {
+    public int[] resolveIMAPLogin(String imapLogin, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -144,7 +144,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#searchUser(java.lang.String, com.openexchange.groupware.contexts.Context)
      */
-    public User searchUser(String email, Context context) throws UserException {
+    public User searchUser(String email, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -152,7 +152,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#updateUser(com.openexchange.groupware.ldap.User, com.openexchange.groupware.contexts.Context)
      */
-    public void updateUser(User user, Context context) throws UserException {
+    public void updateUser(User user, Context context) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -160,7 +160,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#setAttribute(java.lang.String, java.lang.String, int, com.openexchange.groupware.contexts.Context)
      */
-    public void setAttribute(String name, String value, int userId, Context context) throws UserException {
+    public void setAttribute(String name, String value, int userId, Context context) throws OXException {
         // TODO Auto-generated method stub
         
     }

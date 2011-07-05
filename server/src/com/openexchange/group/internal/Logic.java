@@ -57,7 +57,7 @@ import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 
 /**
@@ -219,7 +219,7 @@ public final class Logic {
                         .valueOf(userId));
                 }
             }
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

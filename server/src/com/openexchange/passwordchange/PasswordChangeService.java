@@ -59,7 +59,8 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -93,9 +94,9 @@ public abstract class PasswordChangeService {
      * 
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
-     * @throws UserException If password update fails
+     * @throws OXException If password update fails
      */
-    public final void perform(final PasswordChangeEvent event) throws UserException {
+    public final void perform(final PasswordChangeEvent event) throws OXException {
         allow(event);
         check(event);
         update(event);
@@ -107,19 +108,19 @@ public abstract class PasswordChangeService {
      * 
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
-     * @throws UserException If permission is denied to update password
+     * @throws OXException If permission is denied to update password
      */
-    protected void allow(final PasswordChangeEvent event) throws UserException {
+    protected void allow(final PasswordChangeEvent event) throws OXException {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
         try {
             final Context context = event.getContext();
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(event.getSession().getUserId(), context).isEditPassword()) {
-                throw UserException.Code.PERMISSION.create(Integer.valueOf(context.getContextId()));
+                throw UserExceptionCode.PERMISSION.create(Integer.valueOf(context.getContextId()));
             }
         } catch (final OXException e1) {
-            throw new UserException(e1);
+            throw new OXException(e1);
         }
         /*
          * TODO: Remove statements above and replace with commented call below
@@ -132,15 +133,15 @@ public abstract class PasswordChangeService {
      * 
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
-     * @throws UserException If old password is invalid
+     * @throws OXException If old password is invalid
      */
-    protected void check(final PasswordChangeEvent event) throws UserException {
+    protected void check(final PasswordChangeEvent event) throws OXException {
         /*
          * Verify old password prior to applying new one
          */
         final AuthenticationService authenticationService = Authentication.getService();
         if (authenticationService == null) {
-            throw new UserException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName()));
+            throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName()));
         }
         try {
             /*
@@ -153,14 +154,14 @@ public abstract class PasswordChangeService {
             /*
              * Verification of old password failed
              */
-            throw new UserException(e);
+            throw new OXException(e);
         }
         /*
          * No validation of new password since admin daemon does no validation, too
          */
         /*-
          * if (!validatePassword(event.getNewPassword())) {
-         *     throw new UserException(UserException.Code.INVALID_PASSWORD);
+         *     throw new OXException(OXException.Code.INVALID_PASSWORD);
          * }
          */
     }
@@ -171,18 +172,18 @@ public abstract class PasswordChangeService {
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
      * @see #getEncodedPassword(String, String)
-     * @throws UserException If updating the password fails
+     * @throws OXException If updating the password fails
      */
-    protected abstract void update(final PasswordChangeEvent event) throws UserException;
+    protected abstract void update(final PasswordChangeEvent event) throws OXException;
 
     /**
      * Propagates changed password throughout system: invalidate caches, propagate to sub-systems like mail, etc.
      * 
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
-     * @throws UserException If propagating the password change fails
+     * @throws OXException If propagating the password change fails
      */
-    protected void propagate(final PasswordChangeEvent event) throws UserException {
+    protected void propagate(final PasswordChangeEvent event) throws OXException {
         /*
          * Remove possible session-bound cached default mail access
          */
@@ -191,7 +192,7 @@ public abstract class PasswordChangeService {
             MailAccess.getMailAccessCache().removeMailAccess(session, MailAccount.DEFAULT_ID);
         } catch (final OXException e) {
             LOG.error("Removing cached mail access failed", e);
-            throw new UserException(e);
+            throw new OXException(e);
         }
         /*
          * Invalidate user cache
@@ -202,13 +203,13 @@ public abstract class PasswordChangeService {
          */
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
-            throw new UserException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName()));
+            throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName()));
         }
         try {
             sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());
         } catch (final SessiondException e) {
             LOG.error("Updating password in user session failed", e);
-            throw new UserException(e);
+            throw new OXException(e);
         }
     }
 
@@ -218,21 +219,21 @@ public abstract class PasswordChangeService {
      * @param mech The encoding mechanism; currently supported values: <code>&quot;{CRYPT}&quot;</code> and <code>&quot;{SHA}&quot;</code>
      * @param newPassword The new password to encode
      * @return The encoded password
-     * @throws UserException If encoding the new password fails
+     * @throws OXException If encoding the new password fails
      */
-    protected static final String getEncodedPassword(final String mech, final String newPassword) throws UserException {
+    protected static final String getEncodedPassword(final String mech, final String newPassword) throws OXException {
         try {
             final String cryptedPassword = PasswordMechanism.getEncodedPassword(mech, newPassword);
             if (null == cryptedPassword) {
-                throw UserException.Code.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
+                throw UserExceptionCode.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
             }
             return cryptedPassword;
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Error encrypting password according to CRYPT mechanism", e);
-            throw UserException.Code.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         } catch (final NoSuchAlgorithmException e) {
             LOG.error("Error encrypting password according to SHA mechanism", e);
-            throw UserException.Code.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
     }
     

@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -856,7 +856,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public boolean isMultipleMailAccounts() {
         try {
             return hasBetaEnabled() && hasPermission(MULTIPLE_MAIL_ACCOUNTS);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         /*
@@ -883,7 +883,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public boolean isSubscription() {
         try {
             return hasBetaEnabled() && hasPermission(SUBSCRIPTION);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         /*
@@ -910,7 +910,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public boolean isPublication() {
         try {
             return hasBetaEnabled() && hasPermission(PUBLICATION);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         /*
@@ -1090,9 +1090,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * Checks whether configuration's user has beta features enabled.
      * 
      * @return <code>true</code> if configuration's user has beta features enabled; otherwise <code>false</code>
-     * @throws LdapException If user cannot be fetched from storage
+     * @throws OXException If user cannot be fetched from storage
      */
-    private boolean hasBetaEnabled() throws LdapException {
+    private boolean hasBetaEnabled() throws OXException {
         final UserAttributeAccess uaa = UserAttributeAccess.getDefaultInstance();
         return uaa.getBooleanAttribute(BETA, UserStorage.getInstance().getUser(userId, ctx), uaa.getBooleanProperty(PROP_BETA, true));
     }

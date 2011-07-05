@@ -181,9 +181,9 @@ public final class UserAttributeAccess {
      * @param value The attribute <code>boolean</code> value
      * @param user The user
      * @param context The context
-     * @throws LdapException If setting <code>boolean</code> attribute fails
+     * @throws OXException If setting <code>boolean</code> attribute fails
      */
-    public void setBooleanAttribute(final String name, final boolean value, final int userId, final int contextId) throws LdapException {
+    public void setBooleanAttribute(final String name, final boolean value, final int userId, final int contextId) throws OXException {
         Context context = null;
         try {
             context = ContextStorage.getStorageContext(contextId);
@@ -201,9 +201,9 @@ public final class UserAttributeAccess {
      * @param value The attribute <code>boolean</code> value
      * @param user The user
      * @param context The context
-     * @throws LdapException If setting <code>boolean</code> attribute fails
+     * @throws OXException If setting <code>boolean</code> attribute fails
      */
-    public void setBooleanAttribute(final String name, final boolean value, final User user, final Context context) throws LdapException {
+    public void setBooleanAttribute(final String name, final boolean value, final User user, final Context context) throws OXException {
         setAttribute(name, String.valueOf(value), user, context);
     }
 
@@ -214,9 +214,9 @@ public final class UserAttributeAccess {
      * @param value The attribute value
      * @param user The user
      * @param context The context
-     * @throws LdapException If setting attribute fails
+     * @throws OXException If setting attribute fails
      */
-    public void setAttribute(final String name, final String value, final User user, final Context context) throws LdapException {
+    public void setAttribute(final String name, final String value, final User user, final Context context) throws OXException {
         final Map<String, Set<String>> attributes = user.getAttributes();
         final Map<String, Set<String>> newAttributes = new HashMap<String, Set<String>>(attributes.size());
         for (Map.Entry<String, Set<String>> entry : attributes.entrySet()) {

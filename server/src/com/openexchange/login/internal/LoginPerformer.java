@@ -67,9 +67,9 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -162,7 +162,7 @@ public final class LoginPerformer {
         } catch (final OXException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
-        } catch (final UserException e) {
+        } catch (final OXException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
         } catch (final SessiondException e) {
@@ -212,7 +212,7 @@ public final class LoginPerformer {
         return context;
     }
 
-    private User findUser(final Context ctx, final String userInfo) throws UserException {
+    private User findUser(final Context ctx, final String userInfo) throws OXException {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         final UserStorage us = UserStorage.getInstance();
         final User u;
@@ -224,8 +224,8 @@ public final class LoginPerformer {
                 userId = us.getUserId(userInfo, ctx);
             }
             u = us.getUser(userId, ctx);
-        } catch (final LdapException e) {
-            throw new UserException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
         return u;
     }

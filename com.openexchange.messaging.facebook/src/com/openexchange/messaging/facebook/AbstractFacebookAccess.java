@@ -65,7 +65,7 @@ import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.impl.OXException;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
@@ -139,7 +139,7 @@ public abstract class AbstractFacebookAccess {
                 userLocale = tmp = getServiceRegistry().getService(UserService.class).getUser(user, cs.getContext(cid)).getLocale();
             } catch (final OXException e) {
                 throw new MessagingException(e);
-            } catch (final UserException e) {
+            } catch (final OXException e) {
                 throw new MessagingException(e);
             } catch (final OXException e) {
                 throw new MessagingException(e);

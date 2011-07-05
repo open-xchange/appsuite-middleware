@@ -74,7 +74,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
@@ -297,7 +297,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         return args;
     }
 
-    private User getUser(final Publication publication) throws UserException {
+    private User getUser(final Publication publication) throws OXException {
         final Context context = publication.getContext();
         final int uid = publication.getUserId();
         final User user = userService.getUser(uid, context);

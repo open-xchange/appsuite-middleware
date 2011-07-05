@@ -51,7 +51,7 @@ package com.openexchange.resource.internal;
 
 import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
@@ -103,7 +103,7 @@ public final class ResourceServiceImpl implements ResourceService {
     public Resource getResource(final int resourceId, final Context context) throws ResourceException {
         try {
             return ResourceStorage.getInstance().getResource(resourceId, context);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new ResourceException(e);
         }
     }
@@ -111,7 +111,7 @@ public final class ResourceServiceImpl implements ResourceService {
     public Resource[] listModified(final Date modifiedSince, final Context context) throws ResourceException {
         try {
             return ResourceStorage.getInstance().listModified(modifiedSince, context);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new ResourceException(e);
         }
     }
@@ -119,7 +119,7 @@ public final class ResourceServiceImpl implements ResourceService {
     public Resource[] listDeleted(final Date modifiedSince, final Context context) throws ResourceException {
         try {
             return ResourceStorage.getInstance().listDeleted(modifiedSince, context);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new ResourceException(e);
         }
     }
@@ -127,7 +127,7 @@ public final class ResourceServiceImpl implements ResourceService {
     public Resource[] searchResources(final String pattern, final Context context) throws ResourceException {
         try {
             return ResourceStorage.getInstance().searchResources(pattern, context);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new ResourceException(e);
         }
     }
@@ -135,7 +135,7 @@ public final class ResourceServiceImpl implements ResourceService {
     public Resource[] searchResourcesByMail(final String pattern, final Context context) throws ResourceException {
         try {
             return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             throw new ResourceException(e);
         }
     }
