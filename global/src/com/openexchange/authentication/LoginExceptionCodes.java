@@ -63,58 +63,67 @@ import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_HTT
 import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_ACTIVE_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_FOUND_MSG;
-import com.openexchange.authentication.exception.LoginExceptionFactory;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Defines all error messages for the LoginException.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum LoginExceptionCodes implements OXErrorMessage {
+public enum LoginExceptionCodes implements OXExceptionCode {
 
     /** Account "%s" is locked. */
-    ACCOUNT_LOCKED(ACCOUNT_LOCKED_MSG, Category.PERMISSION, 1),
+    ACCOUNT_LOCKED(ACCOUNT_LOCKED_MSG, Category.CATEGORY_PERMISSION_DENIED, 1),
     /** Account "%s" is not ready yet. */
-    ACCOUNT_NOT_READY_YET(ACCOUNT_NOT_READY_YET_MSG, Category.TRY_AGAIN, 2),
+    ACCOUNT_NOT_READY_YET(ACCOUNT_NOT_READY_YET_MSG, Category.CATEGORY_TRY_AGAIN, 2),
     /** Unknown problem: "%s". */
-    UNKNOWN(UNKNOWN_MSG, Category.CODE_ERROR, 3),
+    UNKNOWN(UNKNOWN_MSG, Category.CATEGORY_ERROR, 3),
     /** Login not possible at the moment. Please try again later. */
-    COMMUNICATION(COMMUNICATION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
+    COMMUNICATION(COMMUNICATION_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
     /** Invalid credentials. */
-    INVALID_CREDENTIALS(INVALID_CREDENTIALS_MSG, Category.USER_INPUT, 6),
+    INVALID_CREDENTIALS(INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
     /** Instantiating the class failed. */
     @Deprecated
-    INSTANTIATION_FAILED(INSTANTIATION_FAILED_MSG, Category.CODE_ERROR, 7),
+    INSTANTIATION_FAILED(INSTANTIATION_FAILED_MSG, Category.CATEGORY_ERROR, 7),
     /** Class %1$s can not be found. */
     @Deprecated
-    CLASS_NOT_FOUND(CLASS_NOT_FOUND_MSG, Category.SETUP_ERROR, 8),
+    CLASS_NOT_FOUND(CLASS_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 8),
     /** Missing property %1$s. */
-    MISSING_PROPERTY(MISSING_PROPERTY_MSG, Category.SETUP_ERROR, 9),
+    MISSING_PROPERTY(MISSING_PROPERTY_MSG, Category.CATEGORY_CONFIGURATION, 9),
     /** database down. */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10),
+    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.CATEGORY_SERVICE_DOWN, 10),
     /** Your password expired. */
-    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.PERMISSION, 11),
+    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.CATEGORY_PERMISSION_DENIED, 11),
     /** User %1$s could not be found in context %2$s. */
-    USER_NOT_FOUND(USER_NOT_FOUND_MSG, Category.CODE_ERROR, 12),
+    USER_NOT_FOUND(USER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 12),
     /** User is not activated. */
-    USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.PERMISSION, 13),
+    USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 13),
     /** Client "%1$s" is not activated. */
-    CLIENT_DENIED(CLIENT_DENIED_MSG, Category.USER_CONFIGURATION, 14),
+    CLIENT_DENIED(CLIENT_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 14),
     /** Method "%1$s" in HTTP header authorization is not supported. */
-    UNKNOWN_HTTP_AUTHORIZATION(UNKNOWN_HTTP_AUTHORIZATION_MSG, Category.TRY_AGAIN, 15);
+    UNKNOWN_HTTP_AUTHORIZATION(UNKNOWN_HTTP_AUTHORIZATION_MSG, Category.CATEGORY_TRY_AGAIN, 15);
 
-    final String message;
+    private final String message;
 
-    final Category category;
+    private final Category category;
 
-    final int number;
+    private final int number;
+
+    private final boolean display;
 
     private LoginExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         number = detailNumber;
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
+    }
+
+    public String getPrefix() {
+        return "LGI";
     }
 
     public Category getCategory() {
@@ -125,20 +134,47 @@ public enum LoginExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return number;
     }
 
-    public String getHelp() {
-        // TODO Auto-generated method stub
-        return null;
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return create(new Object[0]);
     }
 
-    public LoginException create(final Object... messageArgs) {
-        return LoginExceptionFactory.getInstance().create(this, messageArgs);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return create((Throwable) null, args);
     }
 
-    public LoginException create(final Throwable cause, final Object... messageArgs) {
-        return LoginExceptionFactory.getInstance().create(this, cause, messageArgs);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        final OXException ret;
+        if (display) {
+            ret = new OXException(number, message, cause, args);
+        } else {
+            ret =
+                new OXException(
+                    number,
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
+        }
+        return ret.addCategory(category).setPrefix(getPrefix());
     }
 }

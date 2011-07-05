@@ -86,7 +86,7 @@ public class DatabaseAuthentication implements AuthenticationService {
      * {@inheritDoc}
      */
     public Authenticated handleLoginInfo(final LoginInfo loginInfo)
-        throws LoginException {
+        throws LoginException, com.openexchange.exception.OXException {
         final String password = loginInfo.getPassword();
         if (null == password || 0 == password.length()) {
             throw INVALID_CREDENTIALS.create();

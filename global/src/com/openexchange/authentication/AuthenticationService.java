@@ -49,6 +49,8 @@
 
 package com.openexchange.authentication;
 
+import com.openexchange.exception.OXException;
+
 /**
  * This interface defines the methods for handling the login information. E.g. the login information <code>user@domain.tld</code> is split
  * into <code>user</code> and <code>domain.tld</code> and the context part will be used to resolve the context while the user part will be
@@ -65,8 +67,9 @@ public interface AuthenticationService {
      * @param loginInfo the complete login information from the login screen.
      * @return a string array with two elements in which the first contains the login info for the context and the second contains the login
      *         info for the user.
-     * @throws LoginException if something with the login info is wrong.
+     * @throws OXException TODO
+     * @throws OXException if something with the login info is wrong.
      */
-    Authenticated handleLoginInfo(LoginInfo loginInfo) throws LoginException;
+    Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException;
 
 }
