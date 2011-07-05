@@ -53,9 +53,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.DataRetrievalExceptionCodes;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
 import com.openexchange.mail.FullnameArgument;
@@ -84,7 +83,7 @@ public class MailAttachmentDataProvider implements DataProvider<MailAttachmentSt
 
     private MailService mailService = null;
 
-    public MailAttachmentDataProvider(MailService mailService) {
+    public MailAttachmentDataProvider(final MailService mailService) {
         this.mailService = mailService;
     }
 
@@ -96,31 +95,31 @@ public class MailAttachmentDataProvider implements DataProvider<MailAttachmentSt
         return new MailAttachmentState();
     }
 
-    public void close(MailAttachmentState state) {
+    public void close(final MailAttachmentState state) {
         state.close();
     }
 
-    public InputStream retrieve(MailAttachmentState state, Map<String, Object> specification, ServerSession session) throws AbstractOXException {
+    public InputStream retrieve(final MailAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
         check(specification, PARAMETER_FOLDERID, PARAMETER_ID, PARAMETER_MAILATTACHMENT);
         final String folderPath = specification.get(PARAMETER_FOLDERID).toString();
         final String uid = specification.get(PARAMETER_ID).toString();
         final String sequenceId = specification.get(PARAMETER_MAILATTACHMENT).toString();
 
-        FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(folderPath);
+        final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(folderPath);
 
-        int accountId = argument.getAccountId();
+        final int accountId = argument.getAccountId();
 
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = state.getMailAccess(
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = state.getMailAccess(
             mailService,
             session,
             accountId);
-        MailPart part = mailAccess.getMessageStorage().getAttachment(argument.getFullname(), uid, sequenceId);
+        final MailPart part = mailAccess.getMessageStorage().getAttachment(argument.getFullname(), uid, sequenceId);
         return part.getInputStream();
     }
 
-    private void check(Map<String, Object> specification, String... parameters) throws OXException {
-        List<String> missing = new ArrayList<String>(parameters.length);
-        for (String paramName : parameters) {
+    private void check(final Map<String, Object> specification, final String... parameters) throws OXException {
+        final List<String> missing = new ArrayList<String>(parameters.length);
+        for (final String paramName : parameters) {
             if (!specification.containsKey(paramName)) {
                 missing.add(paramName);
             }
@@ -130,20 +129,20 @@ public class MailAttachmentDataProvider implements DataProvider<MailAttachmentSt
         }
     }
 
-    public FileMetadata retrieveMetadata(MailAttachmentState state, Map<String, Object> specification, ServerSession session) throws AbstractOXException {
+    public FileMetadata retrieveMetadata(final MailAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
         final String folderPath = specification.get(PARAMETER_FOLDERID).toString();
         final String uid = specification.get(PARAMETER_ID).toString();
         final String sequenceId = specification.get(PARAMETER_MAILATTACHMENT).toString();
 
-        FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(folderPath);
+        final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(folderPath);
 
-        int accountId = argument.getAccountId();
+        final int accountId = argument.getAccountId();
 
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = state.getMailAccess(
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = state.getMailAccess(
             mailService,
             session,
             accountId);
-        MailPart part = mailAccess.getMessageStorage().getAttachment(argument.getFullname(), uid, sequenceId);
+        final MailPart part = mailAccess.getMessageStorage().getAttachment(argument.getFullname(), uid, sequenceId);
         return new MailFileMetadata(part);
     }
 
@@ -151,7 +150,7 @@ public class MailAttachmentDataProvider implements DataProvider<MailAttachmentSt
 
         private MailPart mailPart = null;
 
-        public MailFileMetadata(MailPart mailPart) {
+        public MailFileMetadata(final MailPart mailPart) {
             this.mailPart = mailPart;
         }
 

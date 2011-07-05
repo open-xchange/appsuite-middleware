@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.dataRetrieval.mail;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -66,7 +66,7 @@ public class MailAttachmentState {
     private  MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
     private int accountId;
     
-    public  MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(MailService mailService, ServerSession session, int accountId) throws AbstractOXException {
+    public  MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailService mailService, final ServerSession session, final int accountId) throws OXException {
         if(mailAccess != null) {
             if(this.accountId == accountId) {
                 return mailAccess;
@@ -75,7 +75,7 @@ public class MailAttachmentState {
         }
         
         this.accountId = accountId;
-        mailAccess = (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>)  mailService.getMailAccess(session, accountId);
+        mailAccess = mailService.getMailAccess(session, accountId);
         
         mailAccess.connect();
         return mailAccess;
