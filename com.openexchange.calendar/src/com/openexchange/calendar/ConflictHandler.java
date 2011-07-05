@@ -62,7 +62,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
@@ -94,8 +93,8 @@ public class ConflictHandler {
     public static final CalendarDataObject NO_CONFLICTS[] = new CalendarDataObject[0];
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ConflictHandler.class));
-    private CalendarDataObject edao;
-    private CalendarCollection recColl;
+    private final CalendarDataObject edao;
+    private final CalendarCollection recColl;
 
     public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final boolean create) {
         this.cdao = cdao;
@@ -144,7 +143,7 @@ public class ConflictHandler {
         return NO_CONFLICTS;
     }
 
-    private CalendarDataObject[] prepareResolving(boolean request_participants) throws OXException {
+    private CalendarDataObject[] prepareResolving(final boolean request_participants) throws OXException {
         /*
          * Using original method {@link #resolveResourceConflicts(Date, Date)}
          * for non series appointments.
@@ -176,11 +175,11 @@ public class ConflictHandler {
 	}
 
     private CalendarDataObject[] resolveParticipantsRecurring() throws OXException {
-        long limit = CalendarConfig.getSeriesConflictLimit() ? System.currentTimeMillis() + Constants.MILLI_YEAR : 0;
-        RecurringResultsInterface rresults = recColl.calculateRecurring(cdao, 0, limit , 0);
+        final long limit = CalendarConfig.getSeriesConflictLimit() ? System.currentTimeMillis() + Constants.MILLI_YEAR : 0;
+        final RecurringResultsInterface rresults = recColl.calculateRecurring(cdao, 0, limit , 0);
         for (int i = 0; i < rresults.size(); i++) {
-            RecurringResultInterface recurringResult = rresults.getRecurringResult(i);
-            CalendarDataObject[] conflicts = resolveParticipantConflicts(new Date(recurringResult.getStart()), new Date(recurringResult.getEnd()));
+            final RecurringResultInterface recurringResult = rresults.getRecurringResult(i);
+            final CalendarDataObject[] conflicts = resolveParticipantConflicts(new Date(recurringResult.getStart()), new Date(recurringResult.getEnd()));
             if (conflicts.length > 0) {
                 return conflicts;
             }
@@ -250,10 +249,6 @@ public class ConflictHandler {
                 return ret;
             }
             return NO_CONFLICTS;
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
-        } catch (final AbstractOXException sie) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(sie, Integer.valueOf(12));
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
@@ -261,7 +256,7 @@ public class ConflictHandler {
                 if (null != si) {
                     try {
                         si.close();
-                    } catch (final AbstractOXException sie) {
+                    } catch (final OXException sie) {
                         LOG.error("Error closing SearchIterator" ,sie);
                     }
                 }
@@ -275,7 +270,7 @@ public class ConflictHandler {
         }
     }
 
-    boolean shouldConflict(CalendarDataObject cdao, CalendarDataObject conflictDao) {
+    boolean shouldConflict(final CalendarDataObject cdao, final CalendarDataObject conflictDao) {
         if (create) {
             return true;
         }
@@ -292,8 +287,8 @@ public class ConflictHandler {
     }
 
     private List<UserParticipant> getConflictUsers() {
-        List<UserParticipant> relevantUsers = new ArrayList<UserParticipant>();
-        for (UserParticipant user : cdao.getUsers()) {
+        final List<UserParticipant> relevantUsers = new ArrayList<UserParticipant>();
+        for (final UserParticipant user : cdao.getUsers()) {
             switch (user.getConfirm()) {
             case CalendarObject.ACCEPT:
                 relevantUsers.add(user);
@@ -384,17 +379,13 @@ public class ConflictHandler {
                 return ret;
             }
             return NO_CONFLICTS;
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
-        } catch (final AbstractOXException sie) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(sie, Integer.valueOf(13));
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             if (close_connection && si != null) {
                 try {
                     si.close();
-                } catch (final AbstractOXException sie) {
+                } catch (final OXException sie) {
                     LOG.error("Error closing SearchIterator" ,sie);
                 }
                 recColl.closeResultSet(rs);
@@ -485,17 +476,13 @@ public class ConflictHandler {
                 return ret;
             }
             return NO_CONFLICTS;
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
-        } catch (final AbstractOXException sie) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(sie, Integer.valueOf(13));
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             if (close_connection && si != null) {
                 try {
                     si.close();
-                } catch (final AbstractOXException sie) {
+                } catch (final OXException sie) {
                     LOG.error("Error closing SearchIterator" ,sie);
                 }
                 recColl.closeResultSet(rs);
