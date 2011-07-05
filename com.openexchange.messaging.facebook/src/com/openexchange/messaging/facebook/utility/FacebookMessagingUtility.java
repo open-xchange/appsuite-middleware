@@ -64,7 +64,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.exceptions.OXException;
+import org.scribe.exceptions.OAuthException;
 import org.w3c.dom.Element;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;

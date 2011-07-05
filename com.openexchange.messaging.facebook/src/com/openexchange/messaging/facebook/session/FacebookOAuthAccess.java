@@ -169,7 +169,7 @@ public final class FacebookOAuthAccess {
             facebookUserName = object.getString("name");
         } catch (final OXException e) {
             throw new FacebookMessagingException(e);
-        } catch (final org.scribe.exceptions.OXException e) {
+        } catch (final org.scribe.exceptions.OAuthException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -262,7 +262,7 @@ public final class FacebookOAuthAccess {
             final OAuthRequest request = new OAuthRequest(Verb.GET, url);
             facebookOAuthService.signRequest(facebookAccessToken, request);
             return request.send().getBody();
-        } catch (final org.scribe.exceptions.OXException e) {
+        } catch (final org.scribe.exceptions.OAuthException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

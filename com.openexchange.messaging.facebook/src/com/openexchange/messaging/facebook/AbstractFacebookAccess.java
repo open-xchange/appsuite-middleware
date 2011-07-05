@@ -61,7 +61,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.scribe.exceptions.OXException;
+import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.impl.OXException;
