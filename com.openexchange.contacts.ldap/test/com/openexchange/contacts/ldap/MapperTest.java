@@ -12,11 +12,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.contacts.ldap.contacts.Mapper;
-import com.openexchange.contacts.ldap.exceptions.OXException;
-import com.openexchange.contacts.ldap.exceptions.OXException;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 

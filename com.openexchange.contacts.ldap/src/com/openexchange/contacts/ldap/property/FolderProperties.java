@@ -52,6 +52,7 @@ package com.openexchange.contacts.ldap.property;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.exceptions.LdapConfigurationExceptionCode;
+import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
 import com.openexchange.exception.OXException;
 
 /**
@@ -246,7 +247,7 @@ public class FolderProperties {
         final CheckStringPropertyEnumParameter parameterObject = new CheckStringPropertyEnumParameter(conf, logBuilder, prefix, name);
 
         checkStringPropertyNonOptional(parameterObject, Parameters.foldername, new SetterClosure() {
-            public void set(String string) {
+            public void set(final String string) {
                 retval.setFoldername(string);
             }
         });
@@ -256,16 +257,16 @@ public class FolderProperties {
         logBuilder.append("-------------------------------------------------------------------------------").append('\n');
 
         checkStringPropertyEnum(parameterObject, Parameters.contactTypes, LdapConfigurationExceptionCode.CONTACT_TYPES_WRONG, new SetterEnumClosure<ContactTypes>() {
-            public void set(ContactTypes enumeration) {
+            public void set(final ContactTypes enumeration) {
                 retval.setContacttypes(enumeration);
             }
-            public ContactTypes valueOf(String string) throws IllegalArgumentException {
+            public ContactTypes valueOf(final String string) throws IllegalArgumentException {
                 return ContactTypes.valueOf(string);
             }
         });
 
         checkStringPropertyNonOptional(parameterObject, Parameters.searchfilter, new SetterClosure() {
-            public void set(String string) {
+            public void set(final String string) {
                 retval.setSearchfilter(string);
             }
         }); 
@@ -273,14 +274,14 @@ public class FolderProperties {
 
         // Here we iterate over all properties...
         checkStringPropertyNonOptional(parameterObject, Parameters.uri, new SetterClosure() {
-            public void set(String string) {
+            public void set(final String string) {
                 retval.setUri(string);
             }
         });
         logBuilder.append("\tUri: ").append(retval.getUri()).append('\n');
         
         checkStringPropertyNonOptional(parameterObject, Parameters.baseDN, new SetterClosure() {
-            public void set(String string) {
+            public void set(final String string) {
                 retval.setBaseDN(string);
             }
         });
@@ -300,43 +301,43 @@ public class FolderProperties {
         });
         
         checkStringPropertyEnum(parameterObject, Parameters.searchScope, LdapConfigurationExceptionCode.SEARCH_SCOPE_WRONG, new SetterEnumClosure<SearchScope>() {
-            public void set(SearchScope enumeration) {
+            public void set(final SearchScope enumeration) {
                 retval.setSearchScope(enumeration);
             }
-            public SearchScope valueOf(String string) throws IllegalArgumentException {
+            public SearchScope valueOf(final String string) throws IllegalArgumentException {
                 return SearchScope.valueOf(string);
             }
         });
 
         checkStringPropertyEnum(parameterObject , Parameters.authtype, LdapConfigurationExceptionCode.AUTH_TYPE_WRONG, new SetterEnumClosure<AuthType>() {
-            public void set(AuthType enumeration) {
+            public void set(final AuthType enumeration) {
                 retval.setAuthtype(enumeration);
             }
-            public AuthType valueOf(String string) throws IllegalArgumentException {
+            public AuthType valueOf(final String string) throws IllegalArgumentException {
                 return AuthType.valueOf(string);
             }
         });
 
         checkStringPropertyEnum(parameterObject, Parameters.sorting, LdapConfigurationExceptionCode.SORTING_WRONG, new SetterEnumClosure<Sorting>() {
-            public void set(Sorting enumeration) {
+            public void set(final Sorting enumeration) {
                 retval.setSorting(enumeration);
             }
-            public Sorting valueOf(String string) throws IllegalArgumentException {
+            public Sorting valueOf(final String string) throws IllegalArgumentException {
                 return Sorting.valueOf(string);
             }
         });
 
         checkStringPropertyEnum(parameterObject, Parameters.userLoginSource, LdapConfigurationExceptionCode.USER_LOGIN_SOURCE_WRONG, new SetterEnumClosure<LoginSource>() {
-            public void set(LoginSource enumeration) {
+            public void set(final LoginSource enumeration) {
                 retval.setUserLoginSource(enumeration);
             }
-            public LoginSource valueOf(String string) throws IllegalArgumentException {
+            public LoginSource valueOf(final String string) throws IllegalArgumentException {
                 return LoginSource.valueOf(string);
             }
         });
         
         checkStringProperty(parameterObject, Parameters.userSearchFilter, new SetterClosure() {
-            public void set(String string) {
+            public void set(final String string) {
                 retval.setUserSearchFilter(string);
             }
         });
@@ -355,7 +356,7 @@ public class FolderProperties {
         logBuilder.append("\tuserSearchScope: ").append(retval.getUserSearchScope()).append('\n');
         
         checkStringProperty(parameterObject, Parameters.userSearchAttribute, new SetterClosure() {
-            public void set(String string) {
+            public void set(final String string) {
                 retval.setUserSearchAttribute(string);
             }
         });
@@ -374,7 +375,7 @@ public class FolderProperties {
             try {
                 retval.setUserAuthType(UserAuthType.valueOf(userAuthTypeString));
             } catch (final IllegalArgumentException e) {
-                throw new OXException(LdapConfigurationExceptionCode.USER_AUTH_TYPE_WRONG);
+                throw LdapConfigurationExceptionCode.USER_AUTH_TYPE_WRONG.create();
             }
         }
         logBuilder.append("\tuserAuthType: ").append(retval.getUserAuthType()).append('\n');
@@ -395,7 +396,7 @@ public class FolderProperties {
         }
         
         checkStringProperty(parameterObject, Parameters.searchfilter_distributionlist, new SetterFallbackClosure() {
-            public void set(String string) {
+            public void set(final String string) {
                 retval.setSearchfilterDistributionlist(string);
             }
 
@@ -418,7 +419,7 @@ public class FolderProperties {
         logBuilder.append("\tsearchScope_distributionlist: ").append(retval.getSearchScopeDistributionlist()).append('\n');
         
         checkStringProperty(parameterObject, Parameters.baseDN_distributionlist, new SetterFallbackClosure() {
-            public void set(String string) {
+            public void set(final String string) {
                 retval.setBaseDNDistributionlist(string);
             }
 
@@ -436,10 +437,10 @@ public class FolderProperties {
         logBuilder.append("\tADS_deletion_support: ").append(retval.isAds_deletion_support()).append('\n');
         
         checkStringPropertyEnum(parameterObject, Parameters.referrals, LdapConfigurationExceptionCode.REFERRALS_WRONG, new SetterEnumClosure<ReferralTypes>() {
-            public void set(ReferralTypes enumeration) {
+            public void set(final ReferralTypes enumeration) {
                 retval.setReferrals(enumeration);
             }
-            public ReferralTypes valueOf(String string) throws IllegalArgumentException {
+            public ReferralTypes valueOf(final String string) throws IllegalArgumentException {
                 return ReferralTypes.valueOf(string);
             }
         });
@@ -674,7 +675,7 @@ public class FolderProperties {
         this.adminDN = adminDN;
     }
 
-    private void setAds_deletion_support(boolean ads_deletion_support) {
+    private void setAds_deletion_support(final boolean ads_deletion_support) {
         this.ads_deletion_support = ads_deletion_support;
     }
 
@@ -695,7 +696,7 @@ public class FolderProperties {
         this.contacttypes = contacttypes;
     }
 
-    private void setDerefAliases(DerefAliases derefAliases) {
+    private void setDerefAliases(final DerefAliases derefAliases) {
         this.derefAliases = derefAliases;
     }
 
@@ -711,7 +712,7 @@ public class FolderProperties {
         this.memorymapping = memorymapping;
     }
 
-    private final void setOutlook_support(boolean outlook_support) {
+    private final void setOutlook_support(final boolean outlook_support) {
         this.outlook_support = outlook_support;
     }
 
@@ -719,15 +720,15 @@ public class FolderProperties {
         this.pagesize = pagesize;
     }
     
-    private void setPooltimeout(int pooltimeout) {
+    private void setPooltimeout(final int pooltimeout) {
         this.pooltimeout = pooltimeout;
     }
 
-    private void setReferrals(ReferralTypes referrals) {
+    private void setReferrals(final ReferralTypes referrals) {
         this.referrals = referrals;
     }
 
-    private void setRefreshinterval(int refreshinterval) {
+    private void setRefreshinterval(final int refreshinterval) {
         this.refreshinterval = refreshinterval;
     }
 
@@ -759,14 +760,14 @@ public class FolderProperties {
     /**
      * @param userAdminDN
      */
-    private void setUserAdminDN(String userAdminDN) {
+    private void setUserAdminDN(final String userAdminDN) {
         this.userAdminDN = userAdminDN;
     }
     
     /**
      * @param userAuthType
      */
-    private void setUserAuthType(UserAuthType userAuthType) {
+    private void setUserAuthType(final UserAuthType userAuthType) {
         this.userAuthType = userAuthType;
     }
     
@@ -807,15 +808,15 @@ public class FolderProperties {
 
     public static class CheckStringPropertyEnumParameter {
 
-        private Properties m_props;
+        private final Properties m_props;
 
-        private StringBuilder m_log;
+        private final StringBuilder m_log;
 
-        private String m_prefix;
+        private final String m_prefix;
 
-        private String m_filename;
+        private final String m_filename;
 
-        public CheckStringPropertyEnumParameter(Properties props, StringBuilder log, String prefix, String filename) {
+        public CheckStringPropertyEnumParameter(final Properties props, final StringBuilder log, final String prefix, final String filename) {
             m_props = props;
             m_log = log;
             m_prefix = prefix;
@@ -852,7 +853,7 @@ public class FolderProperties {
                 setter.set(valueOf);
                 parameterObject.getLog().append("\t").append(paramname).append(": ").append(valueOf).append('\n');
             } catch (final IllegalArgumentException e) {
-                throw new OXException(code, property);
+                throw LdapExceptionCode.MISSING_ATTRIBUTE.create(property);
             }
         } else {
             throw LdapConfigurationExceptionCode.PARAMETER_NOT_SET.create(parameterObject.getPrefix() + paramname, parameterObject.getFilename());
@@ -888,7 +889,7 @@ public class FolderProperties {
         return PropertyHandler.checkStringProperty(parameterObject.getProps(), parameterObject.getPrefix() + param.getName());
     }
 
-    private void setSearchfilterDistributionlist(String searchfilterDistriutionlist) {
+    private void setSearchfilterDistributionlist(final String searchfilterDistriutionlist) {
         this.searchfilterDistributionlist = searchfilterDistriutionlist;
     }
 
@@ -896,7 +897,7 @@ public class FolderProperties {
         return searchfilterDistributionlist;
     }
 
-    private void setBaseDNDistributionlist(String baseDNDistriutionlist) {
+    private void setBaseDNDistributionlist(final String baseDNDistriutionlist) {
         this.baseDNDistributionlist = baseDNDistriutionlist;
     }
 
@@ -904,7 +905,7 @@ public class FolderProperties {
         return baseDNDistributionlist;
     }
 
-    private void setSearchScopeDistributionlist(SearchScope searchScoprDistributionlist) {
+    private void setSearchScopeDistributionlist(final SearchScope searchScoprDistributionlist) {
         this.searchScopeDistributionlist = searchScoprDistributionlist;
     }
 
