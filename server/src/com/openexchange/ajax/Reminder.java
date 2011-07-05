@@ -66,7 +66,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -112,7 +112,7 @@ public class Reminder extends DataServlet {
 		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (final AjaxException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final OXJSONException exc) {
@@ -186,7 +186,7 @@ public class Reminder extends DataServlet {
 		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (final AjaxException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final AbstractOXException exc) {

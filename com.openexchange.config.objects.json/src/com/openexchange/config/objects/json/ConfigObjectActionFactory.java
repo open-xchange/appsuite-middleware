@@ -58,7 +58,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.config.objects.ConfigObjectRegistry;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,7 +80,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
         this.registryFactory = registryFactory;
     }
     
-    public AJAXActionService createActionService(String action) throws AjaxException {
+    public AJAXActionService createActionService(String action) throws OXException {
         if(!GET.equals(action)) {
             throw AjaxExceptionCodes.UnknownAction.create( action);
         }

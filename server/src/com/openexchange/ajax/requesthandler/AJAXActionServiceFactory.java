@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AJAXActionServiceFactory} a factory for creating action services.
@@ -63,8 +63,8 @@ public interface AJAXActionServiceFactory {
      * 
      * @param action The name of the action
      * @return The action service implementation and never <code>null</code>.
-     * @throws AjaxException If an action service can not be created for the given name.
+     * @throws OXException If an action service can not be created for the given name.
      */
-    AJAXActionService createActionService(String action) throws AjaxException;
+    AJAXActionService createActionService(String action) throws OXException;
 
 }

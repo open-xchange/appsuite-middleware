@@ -57,7 +57,7 @@ import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,7 +75,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         super();
     }
 
-    protected Map<String, Object> processOAuthArguments(final AJAXRequestData request, final ServerSession session, final OAuthServiceMetaData service) throws AjaxException {
+    protected Map<String, Object> processOAuthArguments(final AJAXRequestData request, final ServerSession session, final OAuthServiceMetaData service) throws OXException {
         /*
          * Parse OAuth parameters
          */

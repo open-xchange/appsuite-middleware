@@ -78,7 +78,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Logging;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -246,7 +246,7 @@ public class Contact extends DataServlet {
                     final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
 
                     if (uploadFile == null) {
-                        throw new AjaxException(AjaxExceptionCodes.NoUploadImage);
+                        throw new OXException(AjaxExceptionCodes.NoUploadImage);
                     }
 
                     final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);

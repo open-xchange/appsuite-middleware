@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.Utility;
@@ -189,9 +189,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>Long</code> value or <code>null</code> if not present
-     * @throws AjaxException If parameter is invalid in given request
+     * @throws OXException If parameter is invalid in given request
      */
-    protected static Long parseLongParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
+    protected static Long parseLongParameter(final AJAXRequestData request, final String parameterName) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             return null;
@@ -210,9 +210,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>long</code> value
-     * @throws AjaxException If parameter is invalid in given request
+     * @throws OXException If parameter is invalid in given request
      */
-    protected static long checkLongParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
+    protected static long checkLongParameter(final AJAXRequestData request, final String parameterName) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
@@ -232,9 +232,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param defaultValue The default value to return if parameter is missing
      * @return The parsed <code>int</code> value
-     * @throws AjaxException If parameter is invalid in given request
+     * @throws OXException If parameter is invalid in given request
      */
-    protected static int parseIntParameter(final AJAXRequestData request, final String parameterName, final int defaultValue) throws AjaxException {
+    protected static int parseIntParameter(final AJAXRequestData request, final String parameterName, final int defaultValue) throws OXException {
         final int i = parseIntParameter(request, parameterName);
         return i < 0 ? defaultValue : i;
     }
@@ -245,9 +245,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>int</code> value or <code>-1</code> if not present
-     * @throws AjaxException If parameter is invalid in given request
+     * @throws OXException If parameter is invalid in given request
      */
-    protected static int parseIntParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
+    protected static int parseIntParameter(final AJAXRequestData request, final String parameterName) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             return -1;
@@ -266,9 +266,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>int</code> value
-     * @throws AjaxException If parameter is not present or invalid in given request
+     * @throws OXException If parameter is not present or invalid in given request
      */
-    protected static int checkIntParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
+    protected static int checkIntParameter(final AJAXRequestData request, final String parameterName) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
@@ -287,9 +287,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>String</code> value
-     * @throws AjaxException If parameter is not present or invalid in given request
+     * @throws OXException If parameter is not present or invalid in given request
      */
-    protected static String checkStringParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
+    protected static String checkStringParameter(final AJAXRequestData request, final String parameterName) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp || 0 == tmp.length()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
@@ -303,9 +303,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param request The request
      * @param parameterNames The parameter names
      * @return The parameter value at the same position as its name; others are <code>null</code>
-     * @throws AjaxException If more than one or none parameter is not present
+     * @throws OXException If more than one or none parameter is not present
      */
-    protected static String[] checkEitherOfStringParameter(final AJAXRequestData request, final String... parameterNames) throws AjaxException {
+    protected static String[] checkEitherOfStringParameter(final AJAXRequestData request, final String... parameterNames) throws OXException {
         final int length = parameterNames.length;
         final String[] retval = new String[length];
         String foundName = null;
@@ -349,9 +349,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed array of <code>int</code>
-     * @throws AjaxException If parameter is not present in given request
+     * @throws OXException If parameter is not present in given request
      */
-    protected static int[] parseIntArrayParameter(final AJAXRequestData request, final String parameterName) throws AjaxException {
+    protected static int[] parseIntArrayParameter(final AJAXRequestData request, final String parameterName) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);

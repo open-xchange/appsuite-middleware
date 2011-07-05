@@ -116,7 +116,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                             jsonArray = new JSONArray(data.toString());
                         } catch (final JSONException je) {
                             log.error("Request data is not a JSON array.", je);
-                            // throw new AjaxException(AjaxException.Code.JSONError, je, je.getMessage());
+                            // throw new OXException(OXException.Code.JSONError, je, je.getMessage());
                         }
                     }
                 }

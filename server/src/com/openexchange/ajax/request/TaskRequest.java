@@ -89,7 +89,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
@@ -173,7 +173,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws JSONException, OXJSONException, AjaxException, OXException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws JSONException, OXJSONException, OXException, OXException {
         final Task task = new Task();
 
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
@@ -193,7 +193,7 @@ public class TaskRequest extends CalendarRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
+    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, OXJSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -284,7 +284,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXJSONException, OXException {
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
         final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
@@ -393,7 +393,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = new Date(0);
@@ -410,7 +410,7 @@ public class TaskRequest extends CalendarRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionConfirm(JSONObject json) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException, JSONException {
+    public JSONObject actionConfirm(JSONObject json) throws OXMandatoryFieldException, OXException, OXException, OXJSONException, JSONException {
         JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
         Task task = new Task();
         new TaskParser(timeZone).parse(task, data);
@@ -513,7 +513,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);

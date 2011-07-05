@@ -67,7 +67,7 @@ import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
 import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.Paths;
 import com.openexchange.session.RandomTokenContainer;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,7 +89,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
         this.paramMap = paramMap;
     }
 
-    public AJAXActionService createActionService(final String action) throws AjaxException {
+    public AJAXActionService createActionService(final String action) throws OXException {
         if (!action.equals(REGISTER)) {
             throw AjaxExceptionCodes.UnknownAction.create( action);
         }
@@ -132,7 +132,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
             return request.constructURL(configuration.getForcedProtocol() , Paths.FILE_DELIVERY_PATH, true, "token=" + token).toString();
         }
 
-        private JSONObject toJSON(final FileMetadata metadata, String uri) throws AjaxException {
+        private JSONObject toJSON(final FileMetadata metadata, String uri) throws OXException {
             try {
                 final JSONObject json = new JSONObject();
                 if (metadata.getFilename() != null) {

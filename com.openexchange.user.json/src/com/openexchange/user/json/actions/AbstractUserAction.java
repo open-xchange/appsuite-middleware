@@ -65,7 +65,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.json.filter.ContactCensorship;
@@ -101,9 +101,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
      * @param expectedParameterNames The expected parameter names
      * @param request The request
      * @return The attribute parameters
-     * @throws AjaxException If parsing attribute parameters fails
+     * @throws OXException If parsing attribute parameters fails
      */
-    protected static Map<String, List<String>> getAttributeParameters(final Set<String> expectedParameterNames, final AJAXRequestData request) throws AjaxException {
+    protected static Map<String, List<String>> getAttributeParameters(final Set<String> expectedParameterNames, final AJAXRequestData request) throws OXException {
         final Iterator<Entry<String, String>> nonMatchingParameters = request.getNonMatchingParameters(expectedParameterNames);
         if (!nonMatchingParameters.hasNext()) {
             return Collections.emptyMap();
@@ -140,9 +140,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>Long</code> value or <code>null</code> if not present
-     * @throws AjaxException If parameter is invalid in given request
+     * @throws OXException If parameter is invalid in given request
      */
-    protected static Long parseLongParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static Long parseLongParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             return null;
@@ -161,9 +161,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>long</code> value
-     * @throws AjaxException If parameter is invalid in given request
+     * @throws OXException If parameter is invalid in given request
      */
-    protected static long checkLongParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static long checkLongParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
@@ -182,9 +182,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code> value or <code>-1</code> if not present
-     * @throws AjaxException If parameter is invalid in given request
+     * @throws OXException If parameter is invalid in given request
      */
-    protected static int parseIntParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static int parseIntParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             return -1;
@@ -203,9 +203,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code> value
-     * @throws AjaxException If parameter is not present or invalid in given request
+     * @throws OXException If parameter is not present or invalid in given request
      */
-    protected static int checkIntParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static int checkIntParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
@@ -224,9 +224,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code> value
-     * @throws AjaxException If parameter is not present or invalid in given request
+     * @throws OXException If parameter is not present or invalid in given request
      */
-    protected static String checkStringParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static String checkStringParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
@@ -248,9 +248,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>
-     * @throws AjaxException If parameter is not present in given request
+     * @throws OXException If parameter is not present in given request
      */
-    protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);

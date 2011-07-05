@@ -55,7 +55,7 @@ import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -134,16 +134,16 @@ public abstract class AbstractRequest {
         try {
             final String username = getUsername();
             return new Credentials(loginName, password, userId, contextId, username);
-        } catch (AjaxException e) {
+        } catch (OXException e) {
             return new Credentials(loginName, password, userId, contextId);
         }        
     }
     
     /**
      * @return the action
-     * @throws AjaxException
+     * @throws OXException
      */
-    public Action getAction() throws AjaxException {
+    public Action getAction() throws OXException {
         final Parameter action = Parameter.ACTION;
         if (null == parameters) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( action.getName());
@@ -159,7 +159,7 @@ public abstract class AbstractRequest {
         return retval;
     }
     
-    private String getUsername() throws AjaxException {
+    private String getUsername() throws OXException {
         final Parameter pUsername = Parameter.USERNAME;        
         final String username = parameters.getParameter(pUsername);
         if (username == null) {
@@ -170,6 +170,6 @@ public abstract class AbstractRequest {
     }
 
     public interface Parameters {
-        String getParameter(Parameter param) throws AjaxException;
+        String getParameter(Parameter param) throws OXException;
     }
 }

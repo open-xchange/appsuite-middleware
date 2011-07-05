@@ -65,7 +65,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.Utility;
 import com.openexchange.user.json.field.DistributionListField;
@@ -1196,9 +1196,9 @@ public final class UserWriter {
      * @param contact The user's contact
      * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying requested fields of given user
-     * @throws AjaxException If writing JSON array fails
+     * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeSingle2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
+    public static JSONArray writeSingle2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
         for (final int col : cols) {
@@ -1233,9 +1233,9 @@ public final class UserWriter {
      * @param contacts The users' contacts
      * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying JSON arrays of given users
-     * @throws AjaxException If writing JSON array fails
+     * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
+    public static JSONArray writeMultiple2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
         for (final int col : cols) {
@@ -1275,9 +1275,9 @@ public final class UserWriter {
      * @param contact The user's contact
      * @param timeZoneId The optional time zone ID
      * @return The JSON object carrying requested fields of given user
-     * @throws AjaxException If writing JSON object fails
+     * @throws OXException If writing JSON object fails
      */
-    public static JSONObject writeSingle2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
+    public static JSONObject writeSingle2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
         for (final int col : cols) {
@@ -1312,9 +1312,9 @@ public final class UserWriter {
      * @param contacts The users' contacts
      * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying JSON objects of given folders
-     * @throws AjaxException If writing JSON array fails
+     * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
+    public static JSONArray writeMultiple2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
         for (final int col : cols) {

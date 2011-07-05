@@ -111,7 +111,7 @@ import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Authorization;
@@ -172,7 +172,7 @@ public class Login extends AJAXServlet {
                 // Look-up necessary credentials
                 try {
                     doLogin(req, resp);
-                } catch (final AjaxException e) {
+                } catch (final OXException e) {
                     logAndSendException(resp, e);
                 }
             }
@@ -459,7 +459,7 @@ public class Login extends AJAXServlet {
                         }
                     }
                     response.setException(e);
-                } catch (final AjaxException e) {
+                } catch (final OXException e) {
                     LOG.debug(e.getMessage(), e);
                     response.setException(e);
                 } catch (final OXJSONException e) {
@@ -504,7 +504,7 @@ public class Login extends AJAXServlet {
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doFormLogin(req, resp);
-                } catch (final AjaxException e) {
+                } catch (final OXException e) {
                     final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                     resp.setContentType(CONTENTTYPE_HTML);
                     resp.getWriter().write(errorPage);
@@ -718,7 +718,7 @@ public class Login extends AJAXServlet {
         }
     }
 
-    private void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws AjaxException, IOException {
+    private void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 
@@ -770,7 +770,7 @@ public class Login extends AJAXServlet {
         }
     }
 
-    private LoginRequest parseLogin(final HttpServletRequest req, final String loginParamName, final boolean strict) throws AjaxException {
+    private LoginRequest parseLogin(final HttpServletRequest req, final String loginParamName, final boolean strict) throws OXException {
         final String login = req.getParameter(loginParamName);
         if (null == login) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( loginParamName);
@@ -883,7 +883,7 @@ public class Login extends AJAXServlet {
         return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
     }
 
-    private void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws AjaxException, LoginException, IOException {
+    private void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, LoginException, IOException {
         final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM ,true);
         final LoginResult result = LoginPerformer.getInstance().doLogin(request);
         final Session session = result.getSession();

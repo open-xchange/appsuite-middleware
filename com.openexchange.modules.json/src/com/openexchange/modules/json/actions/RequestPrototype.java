@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.modules.json.ModelParser;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Model;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,7 +86,7 @@ public class RequestPrototype<T extends Model<T>> {
         this.session = session;
     }
 
-    public boolean require(String... params) throws AjaxException {
+    public boolean require(String... params) throws OXException {
         List<String> missingParameters = req.getMissingParameters(params);
         if (missingParameters.isEmpty()) {
             return true;

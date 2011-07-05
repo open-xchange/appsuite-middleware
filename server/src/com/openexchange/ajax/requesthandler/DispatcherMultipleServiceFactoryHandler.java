@@ -50,7 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -70,7 +70,7 @@ public class DispatcherMultipleServiceFactoryHandler implements AJAXActionServic
         this.module = module;
     }
 
-    public AJAXActionService createActionService(String action) throws AjaxException {
+    public AJAXActionService createActionService(String action) throws OXException {
         return new DispatcherActionService(module, action, dispatcher);
     }
     

@@ -55,7 +55,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -297,8 +297,8 @@ public class DefaultDispatcherTest extends TestCase {
 
         try {
             dispatcher.perform(requestData, null);
-            fail("Should have produced an AjaxException");
-        } catch (AjaxException x) {
+            fail("Should have produced an OXException");
+        } catch (OXException x) {
             // All Done
         }
         
@@ -317,8 +317,8 @@ public class DefaultDispatcherTest extends TestCase {
 
         try {
             dispatcher.perform(requestData, null);
-            fail("Should have produced an AjaxException");
-        } catch (AjaxException x) {
+            fail("Should have produced an OXException");
+        } catch (OXException x) {
             // All Done
         }
     }
@@ -428,7 +428,7 @@ public class DefaultDispatcherTest extends TestCase {
             this.actionService = actionService;
         }
 
-        public AJAXActionService createActionService(String action) throws AjaxException {
+        public AJAXActionService createActionService(String action) throws OXException {
             this.action = action;
             return actionService;
         }

@@ -62,7 +62,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.json.FileTest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.SimUser;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link InfostoreRequestTest}
@@ -206,13 +206,13 @@ public class InfostoreRequestTest extends FileTest {
         assertEquals(FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, timestamp);
     }
     
-    public void testGetIDs() throws JSONException, AjaxException {
+    public void testGetIDs() throws JSONException, OXException {
         List<String> ids = request().body(new JSONArray("[{id: 'id1', folder: 'folder'}, {id: 'id2', folder: 'folder'}]")).getIds();
         assertEquals(Arrays.asList("id1", "id2"), ids);
         
     }
     
-    public void testGetVersions() throws JSONException, AjaxException {
+    public void testGetVersions() throws JSONException, OXException {
         int[] versions = request().body(new JSONArray("[1,3,5]")).getVersions();
         
         assertEquals(1, versions[0]);
@@ -259,7 +259,7 @@ public class InfostoreRequestTest extends FileTest {
         assertEquals(FileStorageFileAccess.ALL_FOLDERS, searchFolderId);
     }
     
-    public void testSearchQuery() throws JSONException, AjaxException {
+    public void testSearchQuery() throws JSONException, OXException {
         String searchQuery = request().body(new JSONObject("{pattern: 'somePattern'}")).getSearchQuery();
         assertEquals("somePattern", searchQuery);
     }

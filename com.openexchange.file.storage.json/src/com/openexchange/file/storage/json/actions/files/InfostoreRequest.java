@@ -60,7 +60,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -71,11 +71,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface InfostoreRequest {
 
-    InfostoreRequest require(Param...params) throws AjaxException ;
+    InfostoreRequest require(Param...params) throws OXException ;
     
-    InfostoreRequest requireBody() throws AjaxException;
+    InfostoreRequest requireBody() throws OXException;
 
-    InfostoreRequest requireFileMetadata() throws AjaxException;
+    InfostoreRequest requireFileMetadata() throws OXException;
 
     public IDBasedFileAccess getFileAccess() throws AbstractOXException;
 
@@ -93,17 +93,17 @@ public interface InfostoreRequest {
  
     TimeZone getTimezone() throws AbstractOXException;
     
-    ServerSession getSession() throws AjaxException;
+    ServerSession getSession() throws OXException;
 
-    long getTimestamp() throws AjaxException;
+    long getTimestamp() throws OXException;
 
-    Set<String> getIgnore() throws AjaxException;
+    Set<String> getIgnore() throws OXException;
 
-    List<String> getIds() throws AjaxException;
+    List<String> getIds() throws OXException;
 
-    String getFolderForID(String id) throws AjaxException;
+    String getFolderForID(String id) throws OXException;
 
-    int[] getVersions() throws AjaxException;
+    int[] getVersions() throws OXException;
 
     long getDiff() throws AbstractOXException;
 

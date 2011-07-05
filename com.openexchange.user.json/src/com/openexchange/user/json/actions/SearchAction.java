@@ -75,7 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
@@ -234,7 +234,7 @@ public final class SearchAction extends AbstractUserAction {
              */
             return new AJAXRequestResult(jsonArray, lastModified);
         } catch (final OXException e) {
-            throw new AjaxException(e);
+            throw new OXException(e);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }

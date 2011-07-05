@@ -54,7 +54,7 @@ import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -75,7 +75,7 @@ public class UWAActions implements AJAXActionServiceFactory {
         actions.put("delete", new DeleteAction(factory));
     }
 
-    public AJAXActionService createActionService(String action) throws AjaxException {
+    public AJAXActionService createActionService(String action) throws OXException {
         if (!actions.containsKey(action)) {
             throw AjaxExceptionCodes.UnknownAction.create( action);
         }

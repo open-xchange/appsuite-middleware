@@ -78,7 +78,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -120,7 +120,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         this.session = session;
     }
 
-    public InfostoreRequest require(Param... params) throws AjaxException {
+    public InfostoreRequest require(Param... params) throws OXException {
         String[] names = new String[params.length];
         for (int i = 0; i < params.length; i++) {
             names[i] = params[i].getName();
@@ -132,7 +132,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return this;
     }
 
-    public InfostoreRequest requireBody() throws AjaxException {
+    public InfostoreRequest requireBody() throws OXException {
         if (data.getData() == null && !data.hasUploads() && data.getParameter("json") == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
         }
@@ -143,7 +143,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return data.getParameter(paramName) != null;
     }
     
-    public InfostoreRequest requireFileMetadata() throws AjaxException {
+    public InfostoreRequest requireFileMetadata() throws OXException {
         return requireBody(); 
     }
 
@@ -256,17 +256,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return Long.parseLong(parameter);
     }
 
-    public List<String> getIds() throws AjaxException {
+    public List<String> getIds() throws OXException {
         parseIDList();
         return ids;
     }
 
-    public String getFolderForID(String id) throws AjaxException {
+    public String getFolderForID(String id) throws OXException {
         parseIDList();
         return folderMapping.get(id);
     }
 
-    private void parseIDList() throws AjaxException {
+    private void parseIDList() throws OXException {
         try {
             if (ids != null) {
                 return;
@@ -295,7 +295,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return folders;
     }
 
-    public int[] getVersions() throws AjaxException {
+    public int[] getVersions() throws OXException {
         if (versions != null) {
             return versions;
         }
@@ -347,7 +347,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return getFolderId();
     }
 
-    public String getSearchQuery() throws AjaxException {
+    public String getSearchQuery() throws OXException {
         Object data2 = data.getData();
         if(data2 == null) {
             return "";

@@ -58,7 +58,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -100,7 +100,7 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
         this.registry = registry;
     } 
     
-    public AJAXActionService createActionService(final String action) throws AjaxException {
+    public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }
     

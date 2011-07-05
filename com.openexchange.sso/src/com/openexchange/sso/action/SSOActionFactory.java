@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -89,7 +89,7 @@ public final class SSOActionFactory implements AJAXActionServiceFactory {
         actions = initActions();
     }
 
-    public AJAXActionService createActionService(final String action) throws AjaxException {
+    public AJAXActionService createActionService(final String action) throws OXException {
         final AJAXActionService retval = actions.get(action);
         if (null == retval) {
             throw AjaxExceptionCodes.UnknownAction.create( action);

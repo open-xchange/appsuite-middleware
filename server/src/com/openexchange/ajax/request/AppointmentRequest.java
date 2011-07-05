@@ -111,7 +111,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.OXJSONException.Code;
@@ -223,7 +223,7 @@ public class AppointmentRequest extends CalendarRequest {
         return json;
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, AjaxException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, OXException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         final TimeZone timeZone;
         {
@@ -267,7 +267,7 @@ public class AppointmentRequest extends CalendarRequest {
     }
 
     
-	public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, OXJSONException, AjaxException {
+	public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, OXJSONException, OXException {
         final int objectId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -484,7 +484,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, OXException {
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
@@ -890,7 +890,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXException, OXJSONException, AjaxException {
+    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXException, OXJSONException, OXException {
         timestamp = null;
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -946,7 +946,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionConfirm(final JSONObject jsonObj) throws OXException, AjaxException, OXJSONException, JSONException {
+    public JSONObject actionConfirm(final JSONObject jsonObj) throws OXException, OXException, OXJSONException, JSONException {
         final int objectId = DataParser.checkInt(jsonObj, DataFields.ID);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
@@ -974,7 +974,7 @@ public class AppointmentRequest extends CalendarRequest {
         return new JSONObject();
     }
 
-    public JSONArray actionHas(final JSONObject jsonObj) throws JSONException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionHas(final JSONObject jsonObj) throws JSONException, OXException, OXJSONException, OXException {
         final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
         final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
 
@@ -1219,7 +1219,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionCopy(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXObjectNotFoundException, OXException, OXJSONException, AjaxException {
+    public JSONObject actionCopy(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXObjectNotFoundException, OXException, OXJSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final boolean ignoreConflicts = DataParser.checkBoolean(jsonObj, AppointmentFields.IGNORE_CONFLICTS);

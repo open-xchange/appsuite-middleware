@@ -93,7 +93,7 @@ import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
@@ -142,10 +142,10 @@ public final class MailAccountRequest {
      * @throws OXException If a server-related error occurs
      * @throws JSONException If a JSON error occurs
      * @throws SearchIteratorException If a search-iterator error occurs
-     * @throws AjaxException If an AJAX error occurs
+     * @throws OXException If an AJAX error occurs
      * @throws OXJSONException If a JSON error occurs
      */
-    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, OXException, OXJSONException {
         if (AJAXServlet.ACTION_DELETE.equalsIgnoreCase(action)) {
             return actionDelete(jsonObject);
         } else if (AJAXServlet.ACTION_NEW.equalsIgnoreCase(action)) {
@@ -167,7 +167,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONObject actionGet(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
+    private JSONObject actionGet(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, OXException {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
         try {
@@ -198,7 +198,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONObject actionGetTree(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
+    private JSONObject actionGetTree(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, OXException {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
         try {
@@ -230,7 +230,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
+    private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, OXException {
         final int[] ids = DataParser.checkJSONIntArray(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         final JSONArray jsonArray = new JSONArray();
@@ -264,7 +264,7 @@ public final class MailAccountRequest {
         return jsonArray;
     }
 
-    private JSONObject actionNew(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
+    private JSONObject actionNew(final JSONObject jsonObject) throws OXException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
@@ -306,7 +306,7 @@ public final class MailAccountRequest {
         return secretService.getSecret(session);
     }
 
-    private Object actionValidate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
+    private Object actionValidate(final JSONObject jsonObject) throws OXException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
@@ -569,7 +569,7 @@ public final class MailAccountRequest {
             Attribute.TRASH_FULLNAME_LITERAL,
             Attribute.TRASH_LITERAL);
 
-    private JSONObject actionUpate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
+    private JSONObject actionUpate(final JSONObject jsonObject) throws OXException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         try {
@@ -728,7 +728,7 @@ public final class MailAccountRequest {
         return MailAccount.DEFAULT_ID == mailAccount.getId();
     }
 
-    private static void checkNeededFields(final MailAccountDescription accountDescription) throws AjaxException {
+    private static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
         // Check needed fields
         if (null == accountDescription.getMailServer()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.MAIL_URL);

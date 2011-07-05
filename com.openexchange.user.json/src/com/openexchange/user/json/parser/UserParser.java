@@ -63,7 +63,7 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.field.DistributionListField;
 import com.openexchange.user.json.field.UserField;
@@ -88,9 +88,9 @@ public final class UserParser {
      * @param userJSONObject The JSON object containing user data
      * @param userId The user ID
      * @return The parsed user
-     * @throws AjaxException If parsing user data fails
+     * @throws OXException If parsing user data fails
      */
-    public static ParsedUser parseUserData(final JSONObject userJSONObject, final int userId) throws AjaxException {
+    public static ParsedUser parseUserData(final JSONObject userJSONObject, final int userId) throws OXException {
         try {
             final ParsedUser user = new ParsedUser();
             if (userJSONObject.has(UserField.LOCALE.getName())) {
@@ -112,9 +112,9 @@ public final class UserParser {
      * @param userJSONObject The JSON object containing user contact data
      * @param timeZone The time zone of requesting session's user
      * @return The parsed user contact
-     * @throws AjaxException If parsing user contact fails
+     * @throws OXException If parsing user contact fails
      */
-    public static Contact parseUserContact(final JSONObject userJSONObject, final TimeZone timeZone) throws AjaxException {
+    public static Contact parseUserContact(final JSONObject userJSONObject, final TimeZone timeZone) throws OXException {
         try {
             final Contact contact = new Contact();
             for (final JSONAttributeMapper element : mapping) {
@@ -177,7 +177,7 @@ public final class UserParser {
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         } catch (final ContactException e) {
-            throw new AjaxException(e);
+            throw new OXException(e);
         }
     }
 
@@ -232,9 +232,9 @@ public final class UserParser {
      * 
      * @param localeStr The locale string to parse
      * @return The parsed instance of {@link Locale}
-     * @throws AjaxException If locale string is invalid
+     * @throws OXException If locale string is invalid
      */
-    private static Locale parseLocaleString(final String localeStr) throws AjaxException {
+    private static Locale parseLocaleString(final String localeStr) throws OXException {
         final Matcher match = identifierPattern.matcher(localeStr);
         Locale retval = null;
         if (match.matches()) {

@@ -67,7 +67,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.strings.StringParser;
 
@@ -118,9 +118,9 @@ public class AJAXRequestData {
      * Initializes a new {@link AJAXRequestData}.
      * 
      * @param json The JSON data
-     * @throws AjaxException If an AJAX error occurs
+     * @throws OXException If an AJAX error occurs
      */
-    public AJAXRequestData(final JSONObject json) throws AjaxException {
+    public AJAXRequestData(final JSONObject json) throws OXException {
         this();
         data = DataParser.checkJSONObject(json, RequestConstants.DATA);
     }
@@ -129,9 +129,9 @@ public class AJAXRequestData {
      * Initializes a new {@link AJAXRequestData}.
      * 
      * @param data The payload to use data
-     * @throws AjaxException If an AJAX error occurs
+     * @throws OXException If an AJAX error occurs
      */
-    public AJAXRequestData(final Object data) throws AjaxException {
+    public AJAXRequestData(final Object data) throws OXException {
         this();
         this.data = data;
     }

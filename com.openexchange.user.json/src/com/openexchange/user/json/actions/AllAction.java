@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
@@ -254,7 +254,7 @@ public final class AllAction extends AbstractUserAction {
              */
             return new AJAXRequestResult(jsonArray, lastModified);
         } catch (final OXException e) {
-            throw new AjaxException(e);
+            throw new OXException(e);
         }
     }
 }

@@ -88,7 +88,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
@@ -141,7 +141,7 @@ public final class ReminderRequest {
      * @throws OXException If a server-related error occurs
      * @throws JSONException If a JSON error occurs
      * @throws SearchIteratorException If a search-iterator error occurs
-     * @throws AjaxException If an AJAX error occurs
+     * @throws OXException If an AJAX error occurs
      * @throws OXJSONException If a JSON error occurs
      */
     public JSONValue action(final String action, final JSONObject jsonObject) throws JSONException, AbstractOXException{
@@ -158,7 +158,7 @@ public final class ReminderRequest {
         }
     }
 
-    private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
+    private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, OXException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
         final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
@@ -242,7 +242,7 @@ public final class ReminderRequest {
         }
     }
 
-    private JSONObject actionRemindAgain(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+    private JSONObject actionRemindAgain(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, OXException {
         // timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
         final int reminderId = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
         final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
@@ -296,7 +296,7 @@ public final class ReminderRequest {
         return jsonReminderObj;
     }
 
-    private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+    private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, OXException {
         final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
         final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
         final TimeZone timeZone;

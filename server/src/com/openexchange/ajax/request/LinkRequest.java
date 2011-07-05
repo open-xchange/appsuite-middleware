@@ -70,7 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 
@@ -115,10 +115,10 @@ public class LinkRequest {
 	 * @throws OXMandatoryFieldException If handling action fails due to missing mandatory field
 	 * @throws OXException If handling action fails due to an OX server error
 	 * @throws JSONException If handling action fails due to a JSON error
-	 * @throws AjaxException If handling action fails due to an AJAX error
+	 * @throws OXException If handling action fails due to an AJAX error
 	 * @throws OXJSONException If handling action fails due to a JSON error
 	 */
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException, OXJSONException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, OXException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			actionAll(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -131,7 +131,7 @@ public class LinkRequest {
 	}
 	
 	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException,
-			OXJSONException, AjaxException {
+			OXJSONException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
@@ -184,7 +184,7 @@ public class LinkRequest {
 		}
 	}
 
-	public void actionNew(final JSONObject jsonObj) throws JSONException, OXException, AjaxException {
+	public void actionNew(final JSONObject jsonObj) throws JSONException, OXException, OXException {
 		final LinkObject lo = new LinkObject();
 		final int user = this.user.getId();
 		final int[] group =	this.user.getGroups();
@@ -220,7 +220,7 @@ public class LinkRequest {
 
 	}
 
-	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
+	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);

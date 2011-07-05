@@ -61,6 +61,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.mail.MailException;
@@ -76,16 +77,14 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -131,9 +130,9 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code>
-     * @throws AjaxException If parameter is not present in given request
+     * @throws OXException If parameter is not present in given request
      */
-    protected static int parseIntParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static int parseIntParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
@@ -149,9 +148,9 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>
-     * @throws AjaxException If parameter is not present in given request
+     * @throws OXException If parameter is not present in given request
      */
-    protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+    protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
@@ -192,7 +191,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         return UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
     }
 
-    protected static void checkNeededFields(final MailAccountDescription accountDescription) throws AjaxException {
+    protected static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
         // Check needed fields
         if (null == accountDescription.getMailServer()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.MAIL_URL);

@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -128,7 +128,7 @@ public class Link extends DataServlet {
 			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
-		} catch (final AjaxException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final AbstractOXException e) {
@@ -199,7 +199,7 @@ public class Link extends DataServlet {
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (final AjaxException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final AbstractOXException e) {

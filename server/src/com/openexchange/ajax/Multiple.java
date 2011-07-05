@@ -80,7 +80,7 @@ import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.exceptions.LoggingLogic;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -132,7 +132,7 @@ public class Multiple extends SessionServlet {
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
-        } catch (final AjaxException e) {
+        } catch (final OXException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         } catch (final AbstractOXException e) {
@@ -155,7 +155,7 @@ public class Multiple extends SessionServlet {
         writer.flush();
     }
 
-    protected static final void parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos, final ServerSession session, final HttpServletRequest req) throws JSONException, AjaxException {
+    protected static final void parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos, final ServerSession session, final HttpServletRequest req) throws JSONException, OXException {
         final JSONObject jsonObj = dataArray.getJSONObject(pos);
 
         final String module;
@@ -320,10 +320,10 @@ public class Multiple extends SessionServlet {
                     final AttachmentRequest request = new AttachmentRequest(session, jsonWriter);
                     request.action(action, new JSONSimpleRequest(jsonObj));
             } else {
-                final AjaxException ajaxException = AjaxExceptionCodes.UNKNOWN_MODULE.create( module);
-                LOG.error(ajaxException.getMessage(), ajaxException);
+                final OXException OXException = AjaxExceptionCodes.UNKNOWN_MODULE.create( module);
+                LOG.error(OXException.getMessage(), OXException);
                 jsonWriter.object();
-                ResponseWriter.writeException(ajaxException, jsonWriter);
+                ResponseWriter.writeException(OXException, jsonWriter);
                 jsonWriter.endObject();
             }
         } catch (final JSONException e) {
