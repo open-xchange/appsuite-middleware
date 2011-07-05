@@ -49,6 +49,7 @@
 
 package com.openexchange.conversion;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -66,9 +67,9 @@ public interface DataSource {
      * @param dataArguments The data arguments needed for obtaining data
      * @param session The session providing needed user data
      * @return The data of this data source in desired type for conversion purpose
-     * @throws DataException If data of this data source cannot be returned
+     * @throws OXException If data of this data source cannot be returned
      */
-    public <D extends Object> Data<D> getData(Class<? extends D> type, DataArguments dataArguments, Session session) throws DataException;
+    public <D extends Object> Data<D> getData(Class<? extends D> type, DataArguments dataArguments, Session session) throws OXException;
 
     /**
      * Gets the required arguments which must be present in corresponding instance of {@link DataArguments} when performing the

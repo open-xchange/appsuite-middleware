@@ -49,6 +49,7 @@
 
 package com.openexchange.conversion;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -80,7 +81,7 @@ public interface DataHandler {
      * @param dataArguments The data arguments needed for processing data
      * @param session The session providing needed user data
      * @return The result of converted data ready for being put into JSON response
-     * @throws DataException If data cannot be handled by this data handler
+     * @throws OXException If data cannot be handled by this data handler
      */
-    public Object processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws DataException;
+    public Object processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException;
 }

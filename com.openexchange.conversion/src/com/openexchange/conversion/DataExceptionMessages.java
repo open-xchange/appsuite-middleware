@@ -49,7 +49,7 @@
 
 package com.openexchange.conversion;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * Exception messages for {@link DataException} that must be translated.

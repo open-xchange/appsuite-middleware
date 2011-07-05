@@ -49,13 +49,8 @@
 
 package com.openexchange.conversion.osgi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.conversion.DataException;
-import com.openexchange.conversion.exception.DataExceptionFactory;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 /**
  * Activator for this bundle that registers a new Component.
@@ -63,10 +58,6 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConversionActivator implements BundleActivator {
-
-    private static final Log LOG = LogFactory.getLog(ConversionActivator.class);
-
-    private ComponentRegistration convComponent;
 
     /**
      * Default constructor.
@@ -79,22 +70,13 @@ public final class ConversionActivator implements BundleActivator {
      * {@inheritDoc}
      */
     public void start(final BundleContext context) throws Exception {
-        convComponent = new ComponentRegistration(
-            context,
-            DataException.CONV_COMPONENT,
-            "com.openexchange.conversion",
-            DataExceptionFactory.getInstance());
+        // Nope
     }
 
     /**
      * {@inheritDoc}
      */
     public void stop(final BundleContext context) throws Exception {
-        try {
-            convComponent.unregister();
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
+        // Nope
     }
 }

@@ -50,6 +50,7 @@
 package com.openexchange.conversion;
 
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -93,9 +94,9 @@ public interface ConversionService {
      * @param dataHandlerArguments The data handler arguments
      * @param session The session providing needed user data
      * @return The resulting object from data handler
-     * @throws DataException If conversion fails
+     * @throws OXException If conversion fails
      */
-    public Object convert(String dataSourceIdentifier, DataArguments dataSourceArguments, String dataHandlerIdentifier, DataArguments dataHandlerArguments, Session session) throws DataException;
+    public Object convert(String dataSourceIdentifier, DataArguments dataSourceArguments, String dataHandlerIdentifier, DataArguments dataHandlerArguments, Session session) throws OXException;
 
     /**
      * Looks-up and checks appropriate {@link DataHandler data handler}. Then the
@@ -107,8 +108,8 @@ public interface ConversionService {
      * @param dataHandlerArguments The data handler arguments
      * @param session The session providing needed user data
      * @return The resulting object from data handler
-     * @throws DataException If conversion fails
+     * @throws OXException If conversion fails
      */
-    public Object convert(InputStream inputStream, String dataHandlerIdentifier, DataArguments dataHandlerArguments, Session session) throws DataException;
+    public Object convert(InputStream inputStream, String dataHandlerIdentifier, DataArguments dataHandlerArguments, Session session) throws OXException;
 
 }
