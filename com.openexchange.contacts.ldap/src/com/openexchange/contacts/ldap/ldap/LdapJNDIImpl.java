@@ -650,17 +650,16 @@ public class LdapJNDIImpl implements LdapInterface {
             searchControls.setCountLimit(0);
             searchControls.setReturningAttributes(new String[]{"dn"});
             final NamingEnumeration<SearchResult> search = retval.search(folderprop.getUserSearchBaseDN(), setUpFilter(username), searchControls);
-            if (search.hasMore()) {
-                final SearchResult next = search.next();
-                if (search.hasMore()) {
-                    throw LdapExceptionCode.TOO_MANY_USER_RESULTS.create();
-                }
-                final String userdn = next.getNameInNamespace();
-                MAPPINGTABLE_USERNAME_LDAPBIND.put(username, userdn);
-                return userdn;
-            } else {
+            if (!search.hasMore()) {
                 throw LdapExceptionCode.NO_USER_RESULTS.create(username);
             }
+            final SearchResult next = search.next();
+            if (search.hasMore()) {
+                throw LdapExceptionCode.TOO_MANY_USER_RESULTS.create();
+            }
+            final String userdn = next.getNameInNamespace();
+            MAPPINGTABLE_USERNAME_LDAPBIND.put(username, userdn);
+            return userdn;
         } finally {
             retval.close();
         }
