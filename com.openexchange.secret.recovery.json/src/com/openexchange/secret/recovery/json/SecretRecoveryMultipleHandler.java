@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.secret.SecretService;
@@ -98,7 +99,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws OXException, JSONException {
         if(action.equals(CHECK)) {
             return check(jsonObject, session);
         } else if (action.equals(MIGRATE)) {
@@ -108,7 +109,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         }
     }
 
-    private Object check(final JSONObject request, final ServerSession session) throws AbstractOXException, JSONException {
+    private Object check(final JSONObject request, final ServerSession session) throws OXException, JSONException {
         final String diagnosis = detector.isSecretWorking(session);
         final JSONObject object = new JSONObject();
         object.put("secretWorks", diagnosis == null);
@@ -119,7 +120,7 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
         return object;
     }
 
-    private Object migrate(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+    private Object migrate(final JSONObject request, final ServerSession session) throws JSONException, OXException {
         final String password = request.getString("password");
         final String secret = secretService.getSecret(session);
         

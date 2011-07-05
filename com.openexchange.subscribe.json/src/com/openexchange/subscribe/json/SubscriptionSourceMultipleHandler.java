@@ -61,6 +61,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.I18nService;
@@ -100,7 +101,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         return Collections.<AbstractOXException> emptySet();
     }
 
-    public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+    public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws JSONException, OXException {
         try {
             if(null == action) {
                 MISSING_PARAMETER.throwException("action");

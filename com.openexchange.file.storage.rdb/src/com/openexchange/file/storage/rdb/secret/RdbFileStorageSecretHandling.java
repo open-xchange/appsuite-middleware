@@ -53,7 +53,6 @@ import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
@@ -83,7 +82,7 @@ public abstract class RdbFileStorageSecretHandling implements SecretConsistencyC
         return null;
     }
 
-    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Collection<FileStorageService> messagingServices = getFileStorageServices();
         for (final FileStorageService messagingService : messagingServices) {
             final FileStorageAccountManager accountManager = messagingService.getAccountManager();

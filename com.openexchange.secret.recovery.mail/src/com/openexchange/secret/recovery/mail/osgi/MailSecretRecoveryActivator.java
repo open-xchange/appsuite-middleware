@@ -51,7 +51,6 @@ package com.openexchange.secret.recovery.mail.osgi;
 
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -97,7 +96,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
         
         migratorReg = context.registerService(SecretMigrator.class.getName(), new SecretMigrator() {
 
-            public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
+            public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
                 mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
             }
             

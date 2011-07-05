@@ -49,7 +49,7 @@
 
 package com.openexchange.secret.recovery;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -59,5 +59,5 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SecretMigrator {
-    public void migrate(String oldSecret, String newSecret, ServerSession session) throws AbstractOXException;
+    public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException;
 }

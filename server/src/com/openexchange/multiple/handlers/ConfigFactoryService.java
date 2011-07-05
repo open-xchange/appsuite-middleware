@@ -55,6 +55,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -96,7 +97,7 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
             return Collections.emptyList();
         }
 
-        public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
+        public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws JSONException, OXException {
            
             final SettingStorage stor = SettingStorage.getInstance(session);
             Setting setting = ConfigTree.getSettingByPath(path);

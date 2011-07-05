@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.sso.action.SSOActionFactory;
@@ -80,7 +81,7 @@ public final class SSOMultipleHandler implements MultipleHandler {
         super();
     }
 
-    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = SSOActionFactory.getInstance().createActionService(action);
         if (null == actionService) {
             throw AjaxExceptionCodes.UnknownAction.create( action);

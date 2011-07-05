@@ -54,7 +54,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserAttributeAccess;
@@ -127,7 +126,7 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
         return null;
     }
 
-    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class, true);
         final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
         /*

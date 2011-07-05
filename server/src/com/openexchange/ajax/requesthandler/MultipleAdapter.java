@@ -56,6 +56,7 @@ import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -85,7 +86,7 @@ public class MultipleAdapter implements MultipleHandler {
         this.factory = factory;
     }
 
-    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = factory.createActionService(action);
         if (null == actionService) {
             throw AjaxExceptionCodes.UnknownAction.create( action);

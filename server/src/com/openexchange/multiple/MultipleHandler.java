@@ -54,6 +54,7 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -92,10 +93,10 @@ public interface MultipleHandler {
      * @param session The session providing needed user data
      * @param secure <code>true</code> for a secure connection such as HTTPS; otherwise <code>false</code>
      * @return A {@link JSONValue} as a result of the performed request
-     * @throws AbstractOXException If performing the request fails
      * @throws JSONException If a JSON error occurs
+     * @throws OXException If performing the request fails
      */
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException;
+    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws JSONException, OXException;
 
     /**
      * Gets the time stamp when {@link #performRequest()} has been called.

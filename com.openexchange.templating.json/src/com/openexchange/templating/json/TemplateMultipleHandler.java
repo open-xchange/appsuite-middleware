@@ -59,6 +59,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.server.ServiceLookup;
@@ -101,7 +102,7 @@ public class TemplateMultipleHandler implements MultipleHandler {
         return Collections.emptyList();
     }
 
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
+    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws JSONException, OXException {
         if(action.equalsIgnoreCase(Action.names.name())) {
             return names(jsonObject, session);
         } else {

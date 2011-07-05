@@ -52,7 +52,6 @@ package com.openexchange.messaging.generic.secret;
 import java.util.Collection;
 import java.util.Collections;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
@@ -79,7 +78,7 @@ public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMi
         return null;
     }
 
-    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Collection<MessagingService> messagingServices = getMessagingServices();
         for (final MessagingService messagingService : messagingServices) {
             final MessagingAccountManager accountManager = messagingService.getAccountManager();

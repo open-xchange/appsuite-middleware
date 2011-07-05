@@ -55,6 +55,7 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.request.ResourceRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
@@ -98,7 +99,7 @@ public final class ResourceFactoryService implements MultipleHandlerFactoryServi
             return timestamp;
         }
 
-        public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+        public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
             final ResourceRequest request = new ResourceRequest(session);
             final Object retval = request.action(action, jsonObject);
             timestamp = request.getTimestamp();

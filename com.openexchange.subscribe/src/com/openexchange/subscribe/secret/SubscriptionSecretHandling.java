@@ -52,7 +52,6 @@ package com.openexchange.subscribe.secret;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.subscribe.SubscribeService;
@@ -94,7 +93,7 @@ public class SubscriptionSecretHandling implements SecretConsistencyCheck, Secre
         return null;
     }
 
-    public void migrate(String oldSecret, String newSecret, ServerSession session) throws AbstractOXException {
+    public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
         List<SubscriptionSource> sources = discovery.getSources();
         for (SubscriptionSource subscriptionSource : sources) {
             Set<String> passwordFields = subscriptionSource.getPasswordFields();

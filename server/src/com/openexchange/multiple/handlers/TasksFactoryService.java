@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.request.TaskRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
@@ -99,7 +100,7 @@ public final class TasksFactoryService implements MultipleHandlerFactoryService 
             return timestamp;
         }
 
-        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
             final TaskRequest request = new TaskRequest(session);
             final JSONValue retval = request.action(action, jsonObject);
             timestamp = request.getTimestamp();

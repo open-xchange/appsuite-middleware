@@ -51,7 +51,7 @@ package com.openexchange.secret.recovery.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -66,7 +66,7 @@ public class WhiteboardSecretMigrator extends ServiceTracker implements SecretMi
         super(context, SecretMigrator.class.getName(), null);
     }
 
-    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws AbstractOXException {
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Object[] services = getServices();
         for (final Object object : services) {
             if(object == this) {
