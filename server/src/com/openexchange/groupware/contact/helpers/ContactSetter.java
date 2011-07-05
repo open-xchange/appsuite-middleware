@@ -52,7 +52,7 @@ package com.openexchange.groupware.contact.helpers;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -66,1311 +66,1421 @@ import com.openexchange.groupware.container.LinkEntryObject;
  */
 public class ContactSetter implements ContactSwitcher {
 
-    public Object displayname(final Object... objects) throws ContactException {
+    public Object displayname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DisplayName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
-        if(objects[1] == null)
+        }
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setDisplayName(value);
         return conObj;
     }
 
-    public Object surname(final Object... objects) throws ContactException {
+    public Object surname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SurName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setSurName(value);
         return conObj;
     }
 
-    public Object givenname(final Object... objects) throws ContactException {
+    public Object givenname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("GivenName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setGivenName(value);
         return conObj;
     }
 
-    public Object middlename(final Object... objects) throws ContactException {
+    public Object middlename(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MiddleName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setMiddleName(value);
         return conObj;
     }
 
-    public Object suffix(final Object... objects) throws ContactException {
+    public Object suffix(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Suffix");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setSuffix(value);
         return conObj;
     }
 
-    public Object title(final Object... objects) throws ContactException {
+    public Object title(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Title");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTitle(value);
         return conObj;
     }
 
-    public Object streethome(final Object... objects) throws ContactException {
+    public Object streethome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setStreetHome(value);
         return conObj;
     }
 
-    public Object postalcodehome(final Object... objects) throws ContactException {
+    public Object postalcodehome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setPostalCodeHome(value);
         return conObj;
     }
 
-    public Object cityhome(final Object... objects) throws ContactException {
+    public Object cityhome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCityHome(value);
         return conObj;
     }
 
-    public Object statehome(final Object... objects) throws ContactException {
+    public Object statehome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setStateHome(value);
         return conObj;
     }
 
-    public Object countryhome(final Object... objects) throws ContactException {
+    public Object countryhome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCountryHome(value);
         return conObj;
     }
 
-    public Object maritalstatus(final Object... objects) throws ContactException {
+    public Object maritalstatus(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MaritalStatus");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setMaritalStatus(value);
         return conObj;
     }
 
-    public Object numberofchildren(final Object... objects) throws ContactException {
+    public Object numberofchildren(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfChildren");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setNumberOfChildren(value);
         return conObj;
     }
 
-    public Object profession(final Object... objects) throws ContactException {
+    public Object profession(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Profession");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setProfession(value);
         return conObj;
     }
 
-    public Object nickname(final Object... objects) throws ContactException {
+    public Object nickname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Nickname");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setNickname(value);
         return conObj;
     }
 
-    public Object spousename(final Object... objects) throws ContactException {
+    public Object spousename(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SpouseName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setSpouseName(value);
         return conObj;
     }
 
-    public Object note(final Object... objects) throws ContactException {
+    public Object note(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Note");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setNote(value);
         return conObj;
     }
 
-    public Object company(final Object... objects) throws ContactException {
+    public Object company(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Company");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCompany(value);
         return conObj;
     }
 
-    public Object department(final Object... objects) throws ContactException {
+    public Object department(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Department");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setDepartment(value);
         return conObj;
     }
 
-    public Object position(final Object... objects) throws ContactException {
+    public Object position(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Position");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setPosition(value);
         return conObj;
     }
 
-    public Object employeetype(final Object... objects) throws ContactException {
+    public Object employeetype(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("EmployeeType");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setEmployeeType(value);
         return conObj;
     }
 
-    public Object roomnumber(final Object... objects) throws ContactException {
+    public Object roomnumber(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("RoomNumber");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setRoomNumber(value);
         return conObj;
     }
 
-    public Object streetbusiness(final Object... objects) throws ContactException {
+    public Object streetbusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setStreetBusiness(value);
         return conObj;
     }
 
-    public Object postalcodebusiness(final Object... objects) throws ContactException {
+    public Object postalcodebusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setPostalCodeBusiness(value);
         return conObj;
     }
 
-    public Object citybusiness(final Object... objects) throws ContactException {
+    public Object citybusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCityBusiness(value);
         return conObj;
     }
 
-    public Object statebusiness(final Object... objects) throws ContactException {
+    public Object statebusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setStateBusiness(value);
         return conObj;
     }
 
-    public Object countrybusiness(final Object... objects) throws ContactException {
+    public Object countrybusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCountryBusiness(value);
         return conObj;
     }
 
-    public Object numberofemployee(final Object... objects) throws ContactException {
+    public Object numberofemployee(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfEmployee");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setNumberOfEmployee(value);
         return conObj;
     }
 
-    public Object salesvolume(final Object... objects) throws ContactException {
+    public Object salesvolume(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SalesVolume");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setSalesVolume(value);
         return conObj;
     }
 
-    public Object taxid(final Object... objects) throws ContactException {
+    public Object taxid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TaxID");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTaxID(value);
         return conObj;
     }
 
-    public Object commercialregister(final Object... objects) throws ContactException {
+    public Object commercialregister(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CommercialRegister");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCommercialRegister(value);
         return conObj;
     }
 
-    public Object branches(final Object... objects) throws ContactException {
+    public Object branches(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Branches");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setBranches(value);
         return conObj;
     }
 
-    public Object businesscategory(final Object... objects) throws ContactException {
+    public Object businesscategory(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("BusinessCategory");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setBusinessCategory(value);
         return conObj;
     }
 
-    public Object info(final Object... objects) throws ContactException {
+    public Object info(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Info");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setInfo(value);
         return conObj;
     }
 
-    public Object managername(final Object... objects) throws ContactException {
+    public Object managername(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ManagerName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setManagerName(value);
         return conObj;
     }
 
-    public Object assistantname(final Object... objects) throws ContactException {
+    public Object assistantname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("AssistantName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setAssistantName(value);
         return conObj;
     }
 
-    public Object streetother(final Object... objects) throws ContactException {
+    public Object streetother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setStreetOther(value);
         return conObj;
     }
 
-    public Object postalcodeother(final Object... objects) throws ContactException {
+    public Object postalcodeother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setPostalCodeOther(value);
         return conObj;
     }
 
-    public Object cityother(final Object... objects) throws ContactException {
+    public Object cityother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCityOther(value);
         return conObj;
     }
 
-    public Object stateother(final Object... objects) throws ContactException {
+    public Object stateother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setStateOther(value);
         return conObj;
     }
 
-    public Object countryother(final Object... objects) throws ContactException {
+    public Object countryother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCountryOther(value);
         return conObj;
     }
 
-    public Object telephoneassistant(final Object... objects) throws ContactException {
+    public Object telephoneassistant(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneAssistant");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneAssistant(value);
         return conObj;
     }
 
-    public Object telephonebusiness1(final Object... objects) throws ContactException {
+    public Object telephonebusiness1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneBusiness1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneBusiness1(value);
         return conObj;
     }
 
-    public Object telephonebusiness2(final Object... objects) throws ContactException {
+    public Object telephonebusiness2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneBusiness2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneBusiness2(value);
         return conObj;
     }
 
-    public Object faxbusiness(final Object... objects) throws ContactException {
+    public Object faxbusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setFaxBusiness(value);
         return conObj;
     }
 
-    public Object telephonecallback(final Object... objects) throws ContactException {
+    public Object telephonecallback(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCallback");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneCallback(value);
         return conObj;
     }
 
-    public Object telephonecar(final Object... objects) throws ContactException {
+    public Object telephonecar(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCar");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneCar(value);
         return conObj;
     }
 
-    public Object telephonecompany(final Object... objects) throws ContactException {
+    public Object telephonecompany(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCompany");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneCompany(value);
         return conObj;
     }
 
-    public Object telephonehome1(final Object... objects) throws ContactException {
+    public Object telephonehome1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneHome1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneHome1(value);
         return conObj;
     }
 
-    public Object telephonehome2(final Object... objects) throws ContactException {
+    public Object telephonehome2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneHome2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneHome2(value);
         return conObj;
     }
 
-    public Object faxhome(final Object... objects) throws ContactException {
+    public Object faxhome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setFaxHome(value);
         return conObj;
     }
 
-    public Object telephoneisdn(final Object... objects) throws ContactException {
+    public Object telephoneisdn(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneISDN");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneISDN(value);
         return conObj;
     }
 
-    public Object cellulartelephone1(final Object... objects) throws ContactException {
+    public Object cellulartelephone1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CellularTelephone1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCellularTelephone1(value);
         return conObj;
     }
 
-    public Object cellulartelephone2(final Object... objects) throws ContactException {
+    public Object cellulartelephone2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CellularTelephone2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCellularTelephone2(value);
         return conObj;
     }
 
-    public Object telephoneother(final Object... objects) throws ContactException {
+    public Object telephoneother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneOther(value);
         return conObj;
     }
 
-    public Object faxother(final Object... objects) throws ContactException {
+    public Object faxother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setFaxOther(value);
         return conObj;
     }
 
-    public Object telephonepager(final Object... objects) throws ContactException {
+    public Object telephonepager(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephonePager");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephonePager(value);
         return conObj;
     }
 
-    public Object telephoneprimary(final Object... objects) throws ContactException {
+    public Object telephoneprimary(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephonePrimary");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephonePrimary(value);
         return conObj;
     }
 
-    public Object telephoneradio(final Object... objects) throws ContactException {
+    public Object telephoneradio(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneRadio");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneRadio(value);
         return conObj;
     }
 
-    public Object telephonetelex(final Object... objects) throws ContactException {
+    public Object telephonetelex(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneTelex");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneTelex(value);
         return conObj;
     }
 
-    public Object telephonettyttd(final Object... objects) throws ContactException {
+    public Object telephonettyttd(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneTTYTTD");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneTTYTTD(value);
         return conObj;
     }
 
-    public Object instantmessenger1(final Object... objects) throws ContactException {
+    public Object instantmessenger1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InstantMessenger1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setInstantMessenger1(value);
         return conObj;
     }
 
-    public Object instantmessenger2(final Object... objects) throws ContactException {
+    public Object instantmessenger2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InstantMessenger2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setInstantMessenger2(value);
         return conObj;
     }
 
-    public Object telephoneip(final Object... objects) throws ContactException {
+    public Object telephoneip(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneIP");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setTelephoneIP(value);
         return conObj;
     }
 
-    public Object email1(final Object... objects) throws ContactException {
+    public Object email1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setEmail1(value);
         return conObj;
     }
 
-    public Object email2(final Object... objects) throws ContactException {
+    public Object email2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setEmail2(value);
         return conObj;
     }
 
-    public Object email3(final Object... objects) throws ContactException {
+    public Object email3(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email3");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setEmail3(value);
         return conObj;
     }
 
-    public Object url(final Object... objects) throws ContactException {
+    public Object url(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("URL");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setURL(value);
         return conObj;
     }
 
-    public Object categories(final Object... objects) throws ContactException {
+    public Object categories(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Categories");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setCategories(value);
         return conObj;
     }
 
-    public Object userfield01(final Object... objects) throws ContactException {
+    public Object userfield01(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField01");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField01(value);
         return conObj;
     }
 
-    public Object userfield02(final Object... objects) throws ContactException {
+    public Object userfield02(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField02");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField02(value);
         return conObj;
     }
 
-    public Object userfield03(final Object... objects) throws ContactException {
+    public Object userfield03(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField03");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField03(value);
         return conObj;
     }
 
-    public Object userfield04(final Object... objects) throws ContactException {
+    public Object userfield04(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField04");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField04(value);
         return conObj;
     }
 
-    public Object userfield05(final Object... objects) throws ContactException {
+    public Object userfield05(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField05");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField05(value);
         return conObj;
     }
 
-    public Object userfield06(final Object... objects) throws ContactException {
+    public Object userfield06(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField06");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField06(value);
         return conObj;
     }
 
-    public Object userfield07(final Object... objects) throws ContactException {
+    public Object userfield07(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField07");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField07(value);
         return conObj;
     }
 
-    public Object userfield08(final Object... objects) throws ContactException {
+    public Object userfield08(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField08");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField08(value);
         return conObj;
     }
 
-    public Object userfield09(final Object... objects) throws ContactException {
+    public Object userfield09(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField09");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField09(value);
         return conObj;
     }
 
-    public Object userfield10(final Object... objects) throws ContactException {
+    public Object userfield10(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField10");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField10(value);
         return conObj;
     }
 
-    public Object userfield11(final Object... objects) throws ContactException {
+    public Object userfield11(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField11");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField11(value);
         return conObj;
     }
 
-    public Object userfield12(final Object... objects) throws ContactException {
+    public Object userfield12(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField12");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField12(value);
         return conObj;
     }
 
-    public Object userfield13(final Object... objects) throws ContactException {
+    public Object userfield13(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField13");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField13(value);
         return conObj;
     }
 
-    public Object userfield14(final Object... objects) throws ContactException {
+    public Object userfield14(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField14");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField14(value);
         return conObj;
     }
 
-    public Object userfield15(final Object... objects) throws ContactException {
+    public Object userfield15(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField15");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField15(value);
         return conObj;
     }
 
-    public Object userfield16(final Object... objects) throws ContactException {
+    public Object userfield16(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField16");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField16(value);
         return conObj;
     }
 
-    public Object userfield17(final Object... objects) throws ContactException {
+    public Object userfield17(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField17");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField17(value);
         return conObj;
     }
 
-    public Object userfield18(final Object... objects) throws ContactException {
+    public Object userfield18(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField18");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField18(value);
         return conObj;
     }
 
-    public Object userfield19(final Object... objects) throws ContactException {
+    public Object userfield19(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField19");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField19(value);
         return conObj;
     }
 
-    public Object userfield20(final Object... objects) throws ContactException {
+    public Object userfield20(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField20");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setUserField20(value);
         return conObj;
     }
 
-    public Object objectid(final Object... objects) throws ContactException {
+    public Object objectid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ObjectID");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setObjectID(value);
         return conObj;
     }
 
-    public Object numberofdistributionlists(final Object... objects) throws ContactException {
+    public Object numberofdistributionlists(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfDistributionLists");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setNumberOfDistributionLists(value);
         return conObj;
     }
 
-    public Object numberoflinks(final Object... objects) throws ContactException {
+    public Object numberoflinks(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfLinks");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setNumberOfLinks(value);
         return conObj;
     }
 
-    public Object distributionlist(final Object... objects) throws ContactException {
+    public Object distributionlist(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DistributionList");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final DistributionListEntryObject[] value = (DistributionListEntryObject[]) objects[1];
         conObj.setDistributionList(value);
         return conObj;
     }
 
-    public Object links(final Object... objects) throws ContactException {
+    public Object links(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Links");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final LinkEntryObject[] value = (LinkEntryObject[]) objects[1];
         conObj.setLinks(value);
         return conObj;
     }
 
-    public Object parentfolderid(final Object... objects) throws ContactException {
+    public Object parentfolderid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ParentFolderID");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setParentFolderID(value);
         return conObj;
     }
 
-    public Object contextid(final Object... objects) throws ContactException {
+    public Object contextid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ContextId");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setContextId(value);
         return conObj;
     }
 
-    public Object privateflag(final Object... objects) throws ContactException {
+    public Object privateflag(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PrivateFlag");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final boolean value = b((Boolean) objects[1]);
         conObj.setPrivateFlag(value);
         return conObj;
     }
 
-    public Object createdby(final Object... objects) throws ContactException {
+    public Object createdby(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreatedBy");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setCreatedBy(value);
         return conObj;
     }
 
-    public Object modifiedby(final Object... objects) throws ContactException {
+    public Object modifiedby(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ModifiedBy");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setModifiedBy(value);
         return conObj;
     }
 
-    public Object creationdate(final Object... objects) throws ContactException {
+    public Object creationdate(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreationDate");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final Date value = (Date) objects[1];
         conObj.setCreationDate(value);
         return conObj;
     }
 
-    public Object lastmodified(final Object... objects) throws ContactException {
+    public Object lastmodified(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("LastModified");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final Date value = (Date) objects[1];
         conObj.setLastModified(value);
         return conObj;
     }
 
-    public Object birthday(final Object... objects) throws ContactException {
+    public Object birthday(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Birthday");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final Date value = (Date) objects[1];
         conObj.setBirthday(value);
         return conObj;
     }
 
-    public Object anniversary(final Object... objects) throws ContactException {
+    public Object anniversary(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Anniversary");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final Date value = (Date) objects[1];
         conObj.setAnniversary(value);
         return conObj;
     }
 
-    public Object imagelastmodified(final Object... objects) throws ContactException {
+    public Object imagelastmodified(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ImageLastModified");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final Date value = (Date) objects[1];
         conObj.setImageLastModified(value);
         return conObj;
     }
 
-    public Object internaluserid(final Object... objects) throws ContactException {
+    public Object internaluserid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InternalUserId");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setInternalUserId(value);
         return conObj;
     }
 
-    public Object label(final Object... objects) throws ContactException {
+    public Object label(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Label");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setLabel(value);
         return conObj;
     }
 
-    public Object fileas(final Object... objects) throws ContactException {
+    public Object fileas(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FileAs");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final String value = (String) objects[1];
         conObj.setFileAs(value);
         return conObj;
     }
 
-    public Object defaultaddress(final Object... objects) throws ContactException {
+    public Object defaultaddress(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DefaultAddress");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setDefaultAddress(value);
         return conObj;
     }
 
-    public Object numberofattachments(final Object... objects) throws ContactException {
+    public Object numberofattachments(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfAttachments");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null)
+        if(objects[1] == null) {
             return conObj;
+        }
         final int value = toInt(objects[1]);
         conObj.setNumberOfAttachments(value);
         return conObj;
@@ -1379,14 +1489,14 @@ public class ContactSetter implements ContactSwitcher {
 
 
 
-    private int toInt(Object candidate) {
+    private int toInt(final Object candidate) {
         if (candidate instanceof Integer) {
             return i((Integer) candidate);
         }
         return Integer.parseInt(candidate.toString());
     }
 
-    private boolean isMatching(String needle, ContactField haystack){
+    private boolean isMatching(final String needle, final ContactField haystack){
         return(
             needle.matches(haystack.getAjaxName())
          || needle.matches(haystack.getDBName())
@@ -1395,23 +1505,25 @@ public class ContactSetter implements ContactSwitcher {
         );
     }
 
-    private boolean markasdistributionlist(Contact contact, Object value2) {
+    private boolean markasdistributionlist(final Contact contact, final Object value2) {
         Boolean value;
         try {
             value = (Boolean) value2;
-        } catch (ClassCastException c) {
+        } catch (final ClassCastException c) {
             value = Boolean.valueOf((String) value2);
         }
         contact.setMarkAsDistributionlist(b(value));
         return true;
     }
 
-    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) {
-        if(fieldname == null || fieldname.equals(""))
+    public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) {
+        if(fieldname == null || fieldname.equals("")) {
             return false;
+        }
 
-        if(isMatching(fieldname, ContactField.MARK_AS_DISTRIBUTIONLIST))
+        if(isMatching(fieldname, ContactField.MARK_AS_DISTRIBUTIONLIST)) {
             return markasdistributionlist(contact, value);
+        }
 
         return false;
     }

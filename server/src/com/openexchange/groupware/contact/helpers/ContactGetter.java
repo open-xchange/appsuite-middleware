@@ -51,7 +51,7 @@ package com.openexchange.groupware.contact.helpers;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 
@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class ContactGetter implements ContactSwitcher {
 
-    public Object displayname(final Object... objects) throws ContactException {
+    public Object displayname(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("DisplayName");
         }
@@ -71,7 +71,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getDisplayName();
     }
 
-    public Object surname(final Object... objects) throws ContactException {
+    public Object surname(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("SurName");
         }
@@ -79,7 +79,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getSurName();
     }
 
-    public Object givenname(final Object... objects) throws ContactException {
+    public Object givenname(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("GivenName");
         }
@@ -87,7 +87,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getGivenName();
     }
 
-    public Object middlename(final Object... objects) throws ContactException {
+    public Object middlename(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("MiddleName");
         }
@@ -95,7 +95,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getMiddleName();
     }
 
-    public Object suffix(final Object... objects) throws ContactException {
+    public Object suffix(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Suffix");
         }
@@ -103,7 +103,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getSuffix();
     }
 
-    public Object title(final Object... objects) throws ContactException {
+    public Object title(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Title");
         }
@@ -111,7 +111,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTitle();
     }
 
-    public Object streethome(final Object... objects) throws ContactException {
+    public Object streethome(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("StreetHome");
         }
@@ -119,7 +119,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getStreetHome();
     }
 
-    public Object postalcodehome(final Object... objects) throws ContactException {
+    public Object postalcodehome(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("PostalCodeHome");
         }
@@ -127,7 +127,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getPostalCodeHome();
     }
 
-    public Object cityhome(final Object... objects) throws ContactException {
+    public Object cityhome(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CityHome");
         }
@@ -135,7 +135,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCityHome();
     }
 
-    public Object statehome(final Object... objects) throws ContactException {
+    public Object statehome(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("StateHome");
         }
@@ -143,7 +143,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getStateHome();
     }
 
-    public Object countryhome(final Object... objects) throws ContactException {
+    public Object countryhome(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CountryHome");
         }
@@ -151,7 +151,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCountryHome();
     }
 
-    public Object maritalstatus(final Object... objects) throws ContactException {
+    public Object maritalstatus(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("MaritalStatus");
         }
@@ -159,7 +159,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getMaritalStatus();
     }
 
-    public Object numberofchildren(final Object... objects) throws ContactException {
+    public Object numberofchildren(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfChildren");
         }
@@ -167,7 +167,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getNumberOfChildren();
     }
 
-    public Object profession(final Object... objects) throws ContactException {
+    public Object profession(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Profession");
         }
@@ -175,7 +175,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getProfession();
     }
 
-    public Object nickname(final Object... objects) throws ContactException {
+    public Object nickname(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Nickname");
         }
@@ -183,7 +183,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getNickname();
     }
 
-    public Object spousename(final Object... objects) throws ContactException {
+    public Object spousename(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("SpouseName");
         }
@@ -191,7 +191,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getSpouseName();
     }
 
-    public Object note(final Object... objects) throws ContactException {
+    public Object note(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Note");
         }
@@ -199,7 +199,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getNote();
     }
 
-    public Object company(final Object... objects) throws ContactException {
+    public Object company(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Company");
         }
@@ -207,7 +207,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCompany();
     }
 
-    public Object department(final Object... objects) throws ContactException {
+    public Object department(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Department");
         }
@@ -215,7 +215,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getDepartment();
     }
 
-    public Object position(final Object... objects) throws ContactException {
+    public Object position(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Position");
         }
@@ -223,7 +223,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getPosition();
     }
 
-    public Object employeetype(final Object... objects) throws ContactException {
+    public Object employeetype(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("EmployeeType");
         }
@@ -231,7 +231,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getEmployeeType();
     }
 
-    public Object roomnumber(final Object... objects) throws ContactException {
+    public Object roomnumber(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("RoomNumber");
         }
@@ -239,7 +239,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getRoomNumber();
     }
 
-    public Object streetbusiness(final Object... objects) throws ContactException {
+    public Object streetbusiness(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("StreetBusiness");
         }
@@ -247,7 +247,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getStreetBusiness();
     }
 
-    public Object postalcodebusiness(final Object... objects) throws ContactException {
+    public Object postalcodebusiness(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("PostalCodeBusiness");
         }
@@ -255,7 +255,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getPostalCodeBusiness();
     }
 
-    public Object citybusiness(final Object... objects) throws ContactException {
+    public Object citybusiness(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CityBusiness");
         }
@@ -263,7 +263,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCityBusiness();
     }
 
-    public Object statebusiness(final Object... objects) throws ContactException {
+    public Object statebusiness(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("StateBusiness");
         }
@@ -271,7 +271,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getStateBusiness();
     }
 
-    public Object countrybusiness(final Object... objects) throws ContactException {
+    public Object countrybusiness(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CountryBusiness");
         }
@@ -279,7 +279,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCountryBusiness();
     }
 
-    public Object numberofemployee(final Object... objects) throws ContactException {
+    public Object numberofemployee(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfEmployee");
         }
@@ -287,7 +287,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getNumberOfEmployee();
     }
 
-    public Object salesvolume(final Object... objects) throws ContactException {
+    public Object salesvolume(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("SalesVolume");
         }
@@ -295,7 +295,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getSalesVolume();
     }
 
-    public Object taxid(final Object... objects) throws ContactException {
+    public Object taxid(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TaxID");
         }
@@ -303,7 +303,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTaxID();
     }
 
-    public Object commercialregister(final Object... objects) throws ContactException {
+    public Object commercialregister(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CommercialRegister");
         }
@@ -311,7 +311,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCommercialRegister();
     }
 
-    public Object branches(final Object... objects) throws ContactException {
+    public Object branches(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Branches");
         }
@@ -319,7 +319,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getBranches();
     }
 
-    public Object businesscategory(final Object... objects) throws ContactException {
+    public Object businesscategory(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("BusinessCategory");
         }
@@ -327,7 +327,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getBusinessCategory();
     }
 
-    public Object info(final Object... objects) throws ContactException {
+    public Object info(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Info");
         }
@@ -335,7 +335,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getInfo();
     }
 
-    public Object managername(final Object... objects) throws ContactException {
+    public Object managername(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("ManagerName");
         }
@@ -343,7 +343,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getManagerName();
     }
 
-    public Object assistantname(final Object... objects) throws ContactException {
+    public Object assistantname(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("AssistantName");
         }
@@ -351,7 +351,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getAssistantName();
     }
 
-    public Object streetother(final Object... objects) throws ContactException {
+    public Object streetother(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("StreetOther");
         }
@@ -359,7 +359,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getStreetOther();
     }
 
-    public Object postalcodeother(final Object... objects) throws ContactException {
+    public Object postalcodeother(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("PostalCodeOther");
         }
@@ -367,7 +367,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getPostalCodeOther();
     }
 
-    public Object cityother(final Object... objects) throws ContactException {
+    public Object cityother(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CityOther");
         }
@@ -375,7 +375,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCityOther();
     }
 
-    public Object stateother(final Object... objects) throws ContactException {
+    public Object stateother(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("StateOther");
         }
@@ -383,7 +383,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getStateOther();
     }
 
-    public Object countryother(final Object... objects) throws ContactException {
+    public Object countryother(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CountryOther");
         }
@@ -391,7 +391,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCountryOther();
     }
 
-    public Object telephoneassistant(final Object... objects) throws ContactException {
+    public Object telephoneassistant(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneAssistant");
         }
@@ -399,7 +399,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneAssistant();
     }
 
-    public Object telephonebusiness1(final Object... objects) throws ContactException {
+    public Object telephonebusiness1(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneBusiness1");
         }
@@ -407,7 +407,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneBusiness1();
     }
 
-    public Object telephonebusiness2(final Object... objects) throws ContactException {
+    public Object telephonebusiness2(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneBusiness2");
         }
@@ -415,7 +415,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneBusiness2();
     }
 
-    public Object faxbusiness(final Object... objects) throws ContactException {
+    public Object faxbusiness(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("FaxBusiness");
         }
@@ -423,7 +423,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getFaxBusiness();
     }
 
-    public Object telephonecallback(final Object... objects) throws ContactException {
+    public Object telephonecallback(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneCallback");
         }
@@ -431,7 +431,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneCallback();
     }
 
-    public Object telephonecar(final Object... objects) throws ContactException {
+    public Object telephonecar(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneCar");
         }
@@ -439,7 +439,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneCar();
     }
 
-    public Object telephonecompany(final Object... objects) throws ContactException {
+    public Object telephonecompany(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneCompany");
         }
@@ -447,7 +447,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneCompany();
     }
 
-    public Object telephonehome1(final Object... objects) throws ContactException {
+    public Object telephonehome1(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneHome1");
         }
@@ -455,7 +455,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneHome1();
     }
 
-    public Object telephonehome2(final Object... objects) throws ContactException {
+    public Object telephonehome2(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneHome2");
         }
@@ -463,7 +463,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneHome2();
     }
 
-    public Object faxhome(final Object... objects) throws ContactException {
+    public Object faxhome(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("FaxHome");
         }
@@ -471,7 +471,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getFaxHome();
     }
 
-    public Object telephoneisdn(final Object... objects) throws ContactException {
+    public Object telephoneisdn(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneISDN");
         }
@@ -479,7 +479,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneISDN();
     }
 
-    public Object cellulartelephone1(final Object... objects) throws ContactException {
+    public Object cellulartelephone1(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CellularTelephone1");
         }
@@ -487,7 +487,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCellularTelephone1();
     }
 
-    public Object cellulartelephone2(final Object... objects) throws ContactException {
+    public Object cellulartelephone2(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CellularTelephone2");
         }
@@ -495,7 +495,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCellularTelephone2();
     }
 
-    public Object telephoneother(final Object... objects) throws ContactException {
+    public Object telephoneother(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneOther");
         }
@@ -503,7 +503,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneOther();
     }
 
-    public Object faxother(final Object... objects) throws ContactException {
+    public Object faxother(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("FaxOther");
         }
@@ -511,7 +511,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getFaxOther();
     }
 
-    public Object telephonepager(final Object... objects) throws ContactException {
+    public Object telephonepager(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephonePager");
         }
@@ -519,7 +519,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephonePager();
     }
 
-    public Object telephoneprimary(final Object... objects) throws ContactException {
+    public Object telephoneprimary(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephonePrimary");
         }
@@ -527,7 +527,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephonePrimary();
     }
 
-    public Object telephoneradio(final Object... objects) throws ContactException {
+    public Object telephoneradio(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneRadio");
         }
@@ -535,7 +535,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneRadio();
     }
 
-    public Object telephonetelex(final Object... objects) throws ContactException {
+    public Object telephonetelex(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneTelex");
         }
@@ -543,7 +543,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneTelex();
     }
 
-    public Object telephonettyttd(final Object... objects) throws ContactException {
+    public Object telephonettyttd(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneTTYTTD");
         }
@@ -551,7 +551,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneTTYTTD();
     }
 
-    public Object instantmessenger1(final Object... objects) throws ContactException {
+    public Object instantmessenger1(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("InstantMessenger1");
         }
@@ -559,7 +559,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getInstantMessenger1();
     }
 
-    public Object instantmessenger2(final Object... objects) throws ContactException {
+    public Object instantmessenger2(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("InstantMessenger2");
         }
@@ -567,7 +567,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getInstantMessenger2();
     }
 
-    public Object telephoneip(final Object... objects) throws ContactException {
+    public Object telephoneip(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("TelephoneIP");
         }
@@ -575,7 +575,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getTelephoneIP();
     }
 
-    public Object email1(final Object... objects) throws ContactException {
+    public Object email1(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Email1");
         }
@@ -583,7 +583,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getEmail1();
     }
 
-    public Object email2(final Object... objects) throws ContactException {
+    public Object email2(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Email2");
         }
@@ -591,7 +591,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getEmail2();
     }
 
-    public Object email3(final Object... objects) throws ContactException {
+    public Object email3(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Email3");
         }
@@ -599,7 +599,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getEmail3();
     }
 
-    public Object url(final Object... objects) throws ContactException {
+    public Object url(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("URL");
         }
@@ -607,7 +607,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getURL();
     }
 
-    public Object categories(final Object... objects) throws ContactException {
+    public Object categories(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Categories");
         }
@@ -615,7 +615,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCategories();
     }
 
-    public Object userfield01(final Object... objects) throws ContactException {
+    public Object userfield01(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField01");
         }
@@ -623,7 +623,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField01();
     }
 
-    public Object userfield02(final Object... objects) throws ContactException {
+    public Object userfield02(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField02");
         }
@@ -631,7 +631,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField02();
     }
 
-    public Object userfield03(final Object... objects) throws ContactException {
+    public Object userfield03(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField03");
         }
@@ -639,7 +639,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField03();
     }
 
-    public Object userfield04(final Object... objects) throws ContactException {
+    public Object userfield04(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField04");
         }
@@ -647,7 +647,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField04();
     }
 
-    public Object userfield05(final Object... objects) throws ContactException {
+    public Object userfield05(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField05");
         }
@@ -655,7 +655,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField05();
     }
 
-    public Object userfield06(final Object... objects) throws ContactException {
+    public Object userfield06(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField06");
         }
@@ -663,7 +663,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField06();
     }
 
-    public Object userfield07(final Object... objects) throws ContactException {
+    public Object userfield07(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField07");
         }
@@ -671,7 +671,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField07();
     }
 
-    public Object userfield08(final Object... objects) throws ContactException {
+    public Object userfield08(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField08");
         }
@@ -679,7 +679,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField08();
     }
 
-    public Object userfield09(final Object... objects) throws ContactException {
+    public Object userfield09(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField09");
         }
@@ -687,7 +687,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField09();
     }
 
-    public Object userfield10(final Object... objects) throws ContactException {
+    public Object userfield10(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField10");
         }
@@ -695,7 +695,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField10();
     }
 
-    public Object userfield11(final Object... objects) throws ContactException {
+    public Object userfield11(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField11");
         }
@@ -703,7 +703,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField11();
     }
 
-    public Object userfield12(final Object... objects) throws ContactException {
+    public Object userfield12(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField12");
         }
@@ -711,7 +711,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField12();
     }
 
-    public Object userfield13(final Object... objects) throws ContactException {
+    public Object userfield13(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField13");
         }
@@ -719,7 +719,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField13();
     }
 
-    public Object userfield14(final Object... objects) throws ContactException {
+    public Object userfield14(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField14");
         }
@@ -727,7 +727,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField14();
     }
 
-    public Object userfield15(final Object... objects) throws ContactException {
+    public Object userfield15(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField15");
         }
@@ -735,7 +735,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField15();
     }
 
-    public Object userfield16(final Object... objects) throws ContactException {
+    public Object userfield16(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField16");
         }
@@ -743,7 +743,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField16();
     }
 
-    public Object userfield17(final Object... objects) throws ContactException {
+    public Object userfield17(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField17");
         }
@@ -751,7 +751,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField17();
     }
 
-    public Object userfield18(final Object... objects) throws ContactException {
+    public Object userfield18(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField18");
         }
@@ -759,7 +759,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField18();
     }
 
-    public Object userfield19(final Object... objects) throws ContactException {
+    public Object userfield19(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField19");
         }
@@ -767,7 +767,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField19();
     }
 
-    public Object userfield20(final Object... objects) throws ContactException {
+    public Object userfield20(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UserField20");
         }
@@ -775,7 +775,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getUserField20();
     }
 
-    public Object objectid(final Object... objects) throws ContactException {
+    public Object objectid(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("ObjectID");
         }
@@ -783,7 +783,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getObjectID());
     }
 
-    public Object numberofdistributionlists(final Object... objects) throws ContactException {
+    public Object numberofdistributionlists(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfDistributionLists");
         }
@@ -791,7 +791,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getNumberOfDistributionLists());
     }
 
-    public Object numberoflinks(final Object... objects) throws ContactException {
+    public Object numberoflinks(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfLinks");
         }
@@ -799,7 +799,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getNumberOfLinks());
     }
 
-    public Object distributionlist(final Object... objects) throws ContactException {
+    public Object distributionlist(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("DistributionList");
         }
@@ -807,7 +807,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getDistributionList();
     }
 
-    public Object links(final Object... objects) throws ContactException {
+    public Object links(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Links");
         }
@@ -815,7 +815,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getLinks();
     }
 
-    public Object parentfolderid(final Object... objects) throws ContactException {
+    public Object parentfolderid(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("ParentFolderID");
         }
@@ -823,7 +823,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getParentFolderID());
     }
 
-    public Object contextid(final Object... objects) throws ContactException {
+    public Object contextid(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("ContextId");
         }
@@ -831,7 +831,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getContextId());
     }
 
-    public Object privateflag(final Object... objects) throws ContactException {
+    public Object privateflag(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("PrivateFlag");
         }
@@ -839,7 +839,7 @@ public class ContactGetter implements ContactSwitcher {
         return B(conObj.getPrivateFlag());
     }
 
-    public Object createdby(final Object... objects) throws ContactException {
+    public Object createdby(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CreatedBy");
         }
@@ -847,7 +847,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getCreatedBy());
     }
 
-    public Object modifiedby(final Object... objects) throws ContactException {
+    public Object modifiedby(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("ModifiedBy");
         }
@@ -855,7 +855,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getModifiedBy());
     }
 
-    public Object creationdate(final Object... objects) throws ContactException {
+    public Object creationdate(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("CreationDate");
         }
@@ -863,7 +863,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getCreationDate();
     }
 
-    public Object lastmodified(final Object... objects) throws ContactException {
+    public Object lastmodified(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("LastModified");
         }
@@ -871,7 +871,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getLastModified();
     }
 
-    public Object birthday(final Object... objects) throws ContactException {
+    public Object birthday(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Birthday");
         }
@@ -879,7 +879,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getBirthday();
     }
 
-    public Object anniversary(final Object... objects) throws ContactException {
+    public Object anniversary(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Anniversary");
         }
@@ -887,7 +887,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getAnniversary();
     }
 
-    public Object imagelastmodified(final Object... objects) throws ContactException {
+    public Object imagelastmodified(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("ImageLastModified");
         }
@@ -895,7 +895,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getImageLastModified();
     }
 
-    public Object internaluserid(final Object... objects) throws ContactException {
+    public Object internaluserid(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("InternalUserId");
         }
@@ -903,7 +903,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getInternalUserId());
     }
 
-    public Object label(final Object... objects) throws ContactException {
+    public Object label(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Label");
         }
@@ -911,7 +911,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getLabel());
     }
 
-    public Object fileas(final Object... objects) throws ContactException {
+    public Object fileas(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("FileAs");
         }
@@ -919,7 +919,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getFileAs();
     }
 
-    public Object defaultaddress(final Object... objects) throws ContactException {
+    public Object defaultaddress(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("DefaultAddress");
         }
@@ -927,7 +927,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getDefaultAddress());
     }
 
-    public Object numberofattachments(final Object... objects) throws ContactException {
+    public Object numberofattachments(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfAttachments");
         }
@@ -935,7 +935,7 @@ public class ContactGetter implements ContactSwitcher {
         return I(conObj.getNumberOfAttachments());
     }
 
-    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects){
+    public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects){
         return false;
     }
 }

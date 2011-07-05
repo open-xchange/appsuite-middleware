@@ -60,15 +60,13 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
-import com.openexchange.groupware.AbstractOXException.Truncated;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -120,12 +118,7 @@ public final class ContactInsertDataHandler implements DataHandler {
         } catch (final NumberFormatException e) {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
         }
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(session);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Context ctx = ContextStorage.getStorageContext(session);
         /*
          * Parse input stream
          */
@@ -196,8 +189,8 @@ public final class ContactInsertDataHandler implements DataHandler {
         }
     }
 
-    private static OXException handleDataTruncation(final AbstractOXException e) {
-        if (e.getCategory() == Category.TRUNCATED) {
+    private static OXException handleDataTruncation(final OXException e) {
+        if (Category.EnumType.TRUNCATED.equals(e.getCategories().get(0).getType())) {
             final String separator = ", ";
             final StringBuilder bob = new StringBuilder();
             final ProblematicAttribute[] problematics = e.getProblematics();
@@ -211,7 +204,7 @@ public final class ContactInsertDataHandler implements DataHandler {
             bob.setLength(bob.length() - separator.length());
             return DataExceptionCodes.TRUNCATED.create(bob.toString());
         }
-        return new OXException(e);
+        return e;
     }
 
     private static String getNameForFieldInTruncationError(final int id) {

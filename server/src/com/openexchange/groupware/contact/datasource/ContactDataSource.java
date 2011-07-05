@@ -60,7 +60,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
@@ -69,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -133,7 +131,7 @@ public final class ContactDataSource implements DataSource {
          * Get contact
          */
         final Contact[] contacts = new Contact[len];
-        try {
+        {
             final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
                 ContactInterfaceDiscoveryService.class,
                 true);
@@ -147,10 +145,6 @@ public final class ContactDataSource implements DataSource {
                 }
                 contacts[i] = contactInterface.getObjectById(objectIds[i], folderId);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         /*
          * Create necessary objects
