@@ -238,7 +238,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
                 new OXException(
                     detailNumber,
                     Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                    new Object[0]);
+                    new Object[0]).setLogMessage(message, args);
         }
         return ret.addCategory(category).setPrefix(getPrefix());
     }

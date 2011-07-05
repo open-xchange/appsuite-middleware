@@ -154,7 +154,7 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
                 new OXException(
                     number,
                     Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                    new Object[0]);
+                    new Object[0]).setLogMessage(message, args);
         }
         return ret.addCategory(category).setPrefix(getPrefix());
     }
