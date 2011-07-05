@@ -63,7 +63,6 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.database.provider.RequestDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.TransactionAware;
