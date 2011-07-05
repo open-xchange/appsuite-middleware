@@ -116,7 +116,7 @@ public abstract class PasswordChangeService {
         try {
             final Context context = event.getContext();
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(event.getSession().getUserId(), context).isEditPassword()) {
-                throw new UserException(UserException.Code.PERMISSION, Integer.valueOf(context.getContextId()));
+                throw UserException.Code.PERMISSION.create(Integer.valueOf(context.getContextId()));
             }
         } catch (final OXException e1) {
             throw new UserException(e1);
@@ -224,15 +224,15 @@ public abstract class PasswordChangeService {
         try {
             final String cryptedPassword = PasswordMechanism.getEncodedPassword(mech, newPassword);
             if (null == cryptedPassword) {
-                throw new UserException(UserException.Code.MISSING_PASSWORD_MECH, mech == null ? "" : mech);
+                throw UserException.Code.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
             }
             return cryptedPassword;
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Error encrypting password according to CRYPT mechanism", e);
-            throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
+            throw UserException.Code.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         } catch (final NoSuchAlgorithmException e) {
             LOG.error("Error encrypting password according to SHA mechanism", e);
-            throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
+            throw UserException.Code.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
     }
     

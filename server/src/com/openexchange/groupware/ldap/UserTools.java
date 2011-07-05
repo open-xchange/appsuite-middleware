@@ -92,9 +92,9 @@ public final class UserTools {
             final byte[] hash = sha.digest();
             hashed = Base64.encode(hash);
         } catch (final NoSuchAlgorithmException e) {
-            throw new UserException(UserException.Code.HASHING, e, HASH_ALGO);
+            throw UserException.Code.HASHING.create(e, HASH_ALGO);
         } catch (final UnsupportedEncodingException e) {
-            throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e,
+            throw UserException.Code.UNSUPPORTED_ENCODING.create(e,
                 UTF_8);
         }
         return hashed;

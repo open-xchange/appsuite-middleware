@@ -98,7 +98,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         } catch (final DBPoolingException e) {
             throw new UserException(e);
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
         }
         try {
             update(writeCon, encodedPassword, event.getSession().getUserId(), ctx.getContextId());
@@ -106,10 +106,10 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             writeCon.commit();
         } catch (final SQLException e) {
             rollback(writeCon);
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             rollback(writeCon);
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(writeCon);
             Database.back(ctx, true, writeCon);

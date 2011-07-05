@@ -85,7 +85,7 @@ public final class GroupTools {
         try {
             retval = (Group) GROUP_ZERO.clone();
         } catch (CloneNotSupportedException e) {
-            throw new UserException(Code.NOT_CLONEABLE, e, Group.class.getName());
+            throw Code.NOT_CLONEABLE.create(e, Group.class.getName());
         }
         final UserStorage ustor = UserStorage.getInstance();
         retval.setMember(ustor.listAllUser(ctx));

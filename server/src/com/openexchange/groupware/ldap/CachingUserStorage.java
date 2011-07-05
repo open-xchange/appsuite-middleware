@@ -298,14 +298,14 @@ public class CachingUserStorage extends UserStorage {
                 try {
                     cache.put(key, identifiers);
                 } catch (final CacheException e) {
-                    throw new UserException(UserException.Code.CACHE_PROBLEM, e);
+                    throw UserException.Code.CACHE_PROBLEM.create(e);
                 }
             } else {
                 identifiers = tmp;
             }
             return identifiers;
         } catch (final CacheException e) {
-            throw new UserException(UserException.Code.CACHE_PROBLEM, e);
+            throw UserException.Code.CACHE_PROBLEM.create(e);
         }
     }
 
@@ -317,7 +317,7 @@ public class CachingUserStorage extends UserStorage {
                 final Cache cache = cacheService.getCache(REGION_NAME);
                 cache.remove(cache.newCacheKey(ctx.getContextId(), userId));
             } catch (final CacheException e) {
-                throw new UserException(UserException.Code.CACHE_PROBLEM, e);
+                throw UserException.Code.CACHE_PROBLEM.create(e);
             }
         }
     }

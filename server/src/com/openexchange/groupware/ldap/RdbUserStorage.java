@@ -215,11 +215,11 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.LOAD_FAILED, e, e.getMessage());
+            throw UserException.Code.LOAD_FAILED.create(e, e.getMessage());
         }
         for (final int userId : userIds) {
             if (!users.containsKey(I(userId))) {
-                throw new UserException(UserException.Code.USER_NOT_FOUND, I(userId), I(ctx.getContextId()));
+                throw UserException.Code.USER_NOT_FOUND.create(I(userId), I(ctx.getContextId()));
             }
         }
         loadLoginInfo(ctx, con, users);
@@ -289,7 +289,7 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -323,7 +323,7 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -357,7 +357,7 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
         }
         for (final UserImpl user : users.values()) {
             user.setGroups(I2i(tmp.get(I(user.getId()))));
@@ -398,7 +398,7 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
         }
         for (final UserImpl user : users.values()) {
             final Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
@@ -625,7 +625,7 @@ public class RdbUserStorage extends UserStorage {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    UserException e = new UserException(UserException.Code.UPDATE_ATTRIBUTES_FAILED, I(contextId), I(userId));
+                    UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -654,7 +654,7 @@ public class RdbUserStorage extends UserStorage {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    UserException e = new UserException(UserException.Code.UPDATE_ATTRIBUTES_FAILED, I(contextId), I(userId));
+                    UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -684,7 +684,7 @@ public class RdbUserStorage extends UserStorage {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    UserException e = new UserException(UserException.Code.UPDATE_ATTRIBUTES_FAILED, I(contextId), I(userId));
+                    UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -861,7 +861,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new UserException(UserException.Code.NO_CONNECTION, e);
+            throw UserException.Code.NO_CONNECTION.create(e);
         }
         try {
             return listAllUser(context, con);
@@ -884,7 +884,7 @@ public class RdbUserStorage extends UserStorage {
             }
             users = tmp.toNativeArray();
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+            throw UserException.Code.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -897,7 +897,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new UserException(UserException.Code.NO_CONNECTION, e);
+            throw UserException.Code.NO_CONNECTION.create(e);
         }
         final int[] users;
         PreparedStatement stmt = null;
@@ -914,12 +914,12 @@ public class RdbUserStorage extends UserStorage {
                     sia.append(result.getInt(1));
                 } while (result.next());
             } else {
-                throw new UserException(UserException.Code.USER_NOT_FOUND,
+                throw UserException.Code.USER_NOT_FOUND.create(
                         imapLogin, I(cid));
             }
             users = sia.toArray();
         } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e
+            throw UserException.Code.SQL_ERROR.create(e, e
                 .getMessage());
         } finally {
             closeSQLStuff(result, stmt);

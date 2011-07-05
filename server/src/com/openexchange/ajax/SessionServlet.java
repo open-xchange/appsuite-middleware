@@ -183,7 +183,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    protected void initializeSession(final HttpServletRequest req) throws SessiondException, AbstractOXException {
+    protected void initializeSession(final HttpServletRequest req) throws OXException {
         if (null != getSessionObject(req)) {
             return;
         }
@@ -192,7 +192,7 @@ public abstract class SessionServlet extends AJAXServlet {
          */
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
-            throw new SessiondException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName()));
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
         final String sessionId = getSessionId(req);
         final ServerSession session = getSession(req, sessionId, sessiondService);
@@ -254,7 +254,7 @@ public abstract class SessionServlet extends AJAXServlet {
         super.service(req, resp);
     }
 
-    private void checkIP(final Session session, final String actual) throws SessiondException {
+    private void checkIP(final Session session, final String actual) throws OXException {
         checkIP(checkIP, getRanges(), session, actual);
     }
 
@@ -293,7 +293,7 @@ public abstract class SessionServlet extends AJAXServlet {
      */
     public static boolean isIpCheckError(final SessiondException sessiondException) {
         final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
-        return (code.getDetailNumber() == sessiondException.getDetailNumber()) && code.getCategory().equals(sessiondException.getCategory());
+        return (code.getNumber() == sessiondException.getDetailNumber()) && code.getCategory().equals(sessiondException.getCategory());
     }
 
     /**
@@ -303,9 +303,9 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param ranges The white-list ranges
      * @param session session object
      * @param actual IP address of the current request.
-     * @throws SessionException if the IP addresses don't match.
+     * @throws OXException if the IP addresses don't match.
      */
-    public static void checkIP(final boolean checkIP, final Queue<IPRange> ranges, final Session session, final String actual) throws SessiondException {
+    public static void checkIP(final boolean checkIP, final Queue<IPRange> ranges, final Session session, final String actual) throws OXException {
         if (null == actual || (!isWhitelistedFromIPCheck(actual, ranges) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
                 LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
@@ -338,9 +338,9 @@ public abstract class SessionServlet extends AJAXServlet {
      * 
      * @param req servlet request.
      * @return the cookie identifier.
-     * @throws SessionException if the cookie identifier can not be found.
+     * @throws OXException if the cookie identifier can not be found.
      */
-    protected static String getSessionId(final ServletRequest req) throws SessiondException {
+    protected static String getSessionId(final ServletRequest req) throws OXException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
             /*
@@ -370,7 +370,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
-     * @throws SessionException if the session can not be found.
+     * @throws OXException if the session can not be found.
      */
     public ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, LdapException, UserException {
         return getSession(hashSource, req, sessionId, sessiondService);
@@ -404,7 +404,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
         } catch (final UndeclaredThrowableException e) {
-            throw new UserException(UserException.Code.USER_NOT_FOUND, e, I(session.getUserId()), I(session.getContextId()));
+            throw UserException.Code.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
         }
         return new ServerSessionAdapter(session, context, user);
     }

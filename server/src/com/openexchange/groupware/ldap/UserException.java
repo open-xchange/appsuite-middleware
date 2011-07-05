@@ -99,7 +99,7 @@ public class UserException extends OXException {
     }
 
     /**
-     * {@link Code}
+     * {@link Code} - The user error codes.
      *
      * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
      */

@@ -726,7 +726,7 @@ public class UnixCrypt {
       try {
           newCrypt = crypt(salt, enteredPassword);
       } catch (final UnsupportedEncodingException e) {
-          throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, encoding);
+          throw UserException.Code.UNSUPPORTED_ENCODING.create(e, encoding);
       }
       
       return newCrypt.equals(encryptedPassword);
