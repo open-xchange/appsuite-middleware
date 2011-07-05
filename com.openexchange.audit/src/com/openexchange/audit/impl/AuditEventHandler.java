@@ -78,7 +78,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -264,8 +263,6 @@ public class AuditEventHandler implements EventHandler {
 			    retval = iter.next().getFolderName() + "/" + retval;
 			}
 		} catch (final OXException e) {
-			e.printStackTrace();
-		} catch (final SearchIteratorException e) {
 			e.printStackTrace();
 		}
 		
