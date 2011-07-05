@@ -245,7 +245,7 @@ public class CachingUserStorage extends UserStorage {
                 try {
                     cache.put(key, Integer.valueOf(identifier));
                 } catch (final CacheException e) {
-                    throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
+                    throw LdapException.Code.CACHE_PROBLEM.create("USR", e);
                 }
             } else {
                 if (LOG.isTraceEnabled()) {
@@ -255,7 +255,7 @@ public class CachingUserStorage extends UserStorage {
             }
             return identifier;
         } catch (final CacheException e) {
-            throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
+            throw LdapException.Code.CACHE_PROBLEM.create("USR", e);
         }
     }
 

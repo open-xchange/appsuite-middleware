@@ -77,6 +77,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
@@ -124,7 +125,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("USR", e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -137,10 +138,10 @@ public class RdbUserStorage extends UserStorage {
             if (result.next()) {
                 userId = result.getInt(1);
             } else {
-                throw new LdapException(EnumComponent.USER, Code.USER_NOT_FOUND, uid, I(context.getContextId()));
+                throw LdapException.Code.USER_NOT_FOUND.create("USR", uid, I(context.getContextId()));
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -154,7 +155,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("USR", e);
         }
         try {
             return getUser(context, con, new int[] { userId })[0];
@@ -166,7 +167,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User getUser(Context ctx, int userId, Connection con) throws UserException {
+    public User getUser(final Context ctx, final int userId, final Connection con) throws UserException {
         return getUser(ctx, con, new int[] { userId })[0];
     }
 
@@ -226,7 +227,7 @@ public class RdbUserStorage extends UserStorage {
         loadContact(ctx, con, users);
         loadGroups(ctx, con, users);
         loadAttributes(ctx, con, users);
-        User[] retval = new User[users.size()];
+        final User[] retval = new User[users.size()];
         for (int i = 0; i < length; i++) {
             retval[i] = users.get(I(userIds[i]));
         }
@@ -268,12 +269,12 @@ public class RdbUserStorage extends UserStorage {
 
     private void loadLoginInfo(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
         try {
-            Iterator<Integer> iter = users.keySet().iterator();
+            final Iterator<Integer> iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
                 try {
-                    int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    final int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
                     stmt = con.prepareStatement(getIN(SELECT_LOGIN, length));
                     int pos = 1;
                     stmt.setInt(pos++, context.getContextId());
@@ -295,18 +296,18 @@ public class RdbUserStorage extends UserStorage {
 
     private void loadContact(final Context ctx, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
         try {
-            Iterator<UserImpl> iter = users.values().iterator();
+            final Iterator<UserImpl> iter = users.values().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
                 try {
-                    int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    final int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
                     stmt = con.prepareStatement(getIN(SELECT_CONTACT, length));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     final Map<Integer, UserImpl> userByContactId = new HashMap<Integer, UserImpl>(length, 1);
                     for (int j = 0; j < length; j++) {
-                        UserImpl user = iter.next();
+                        final UserImpl user = iter.next();
                         stmt.setInt(pos++, user.getContactId());
                         userByContactId.put(I(user.getContactId()), user);
                     }
@@ -335,12 +336,12 @@ public class RdbUserStorage extends UserStorage {
             tmp.put(I(user.getId()), userGroups);
         }
         try {
-            Iterator<Integer> iter = users.keySet().iterator();
+            final Iterator<Integer> iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
                 try {
-                    int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    final int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
                     final String sql = getIN("SELECT member,id FROM groups_member WHERE cid=? AND member IN (", length);
                     stmt = con.prepareStatement(sql);
                     int pos = 1;
@@ -367,17 +368,17 @@ public class RdbUserStorage extends UserStorage {
     private void loadAttributes(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
         final Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
         try {
-            Iterator<Integer> iter = users.keySet().iterator();
+            final Iterator<Integer> iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
                 try {
-                    int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    final int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
                     stmt = con.prepareStatement(getIN(SELECT_ATTRS, length));
                     int pos = 1;
                     stmt.setInt(pos++, context.getContextId());
                     for (int j = 0; j < length; j++) {
-                        int userId = i(iter.next());
+                        final int userId = i(iter.next());
                         stmt.setInt(pos++, userId);
                         usersAttrs.put(I(userId), new HashMap<String, Set<String>>());
                     }
@@ -421,19 +422,19 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public void updateUserInternal(final User user, final Context context) throws LdapException {
-        int contextId = context.getContextId();
-        int userId = user.getId();
-        String timeZone = user.getTimeZone();
-        String preferredLanguage = user.getPreferredLanguage();
-        String password = user.getUserPassword();
-        String mech = user.getPasswordMech();
-        int shadowLastChanged = user.getShadowLastChange();
+        final int contextId = context.getContextId();
+        final int userId = user.getId();
+        final String timeZone = user.getTimeZone();
+        final String preferredLanguage = user.getPreferredLanguage();
+        final String password = user.getUserPassword();
+        final String mech = user.getPasswordMech();
+        final int shadowLastChanged = user.getShadowLastChange();
 
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
-        } catch (DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+        } catch (final DBPoolingException e) {
+            throw LdapException.Code.NO_CONNECTION.create("USR", e);
         }
         try {
             con.setAutoCommit(false);
@@ -441,7 +442,7 @@ public class RdbUserStorage extends UserStorage {
             if (null != timeZone && null != preferredLanguage) {
                 PreparedStatement stmt = null;
                 try {
-                    String sql = "UPDATE user SET timeZone=?,preferredLanguage=? WHERE cid=? AND id=?";
+                    final String sql = "UPDATE user SET timeZone=?,preferredLanguage=? WHERE cid=? AND id=?";
                     stmt = con.prepareStatement(sql);
                     int pos = 1;
                     stmt.setString(pos++, timeZone);
@@ -468,19 +469,19 @@ public class RdbUserStorage extends UserStorage {
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
                     stmt.execute();
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                     throw new SQLException(e.toString());
-                } catch (NoSuchAlgorithmException e) {
+                } catch (final NoSuchAlgorithmException e) {
                     throw new SQLException(e.toString());
                 } finally {
                     closeSQLStuff(stmt);
                 }
             }
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
-        } catch (UserException e) {
+            throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
+        } catch (final UserException e) {
             rollback(con);
             throw new LdapException(e);
         } finally {
@@ -498,13 +499,13 @@ public class RdbUserStorage extends UserStorage {
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws LdapException {
         if (null == name) {
-            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, "Attribute name is null.");
+            throw LdapException.Code.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
         }
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
         } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("USR", e);
         }
         try {
             con.setAutoCommit(false);
@@ -512,10 +513,10 @@ public class RdbUserStorage extends UserStorage {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
         } catch (final Exception e) {
             rollback(con);
-            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw LdapException.Code.UNEXPECTED_ERROR.create("USR", e, e.getMessage());
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(context, con);
@@ -551,23 +552,18 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public String getUserAttribute(final String name, final int userId, final Context context) throws LdapException {
+    public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
         if (null == name) {
-            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, "Attribute name is null.");
+            throw LdapException.Code.UNEXPECTED_ERROR.create("USR", "Attribute name is null.");
         }
-        final Connection con;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
-        }
+        final Connection con = DBPool.pickup(context);
         try {
             final String attrName = new StringBuilder("attr_").append(name).toString();
             return getAttribute(context.getContextId(), con, userId, attrName);
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.USER, Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw LdapException.Code.UNEXPECTED_ERROR.create("USR", e, e.getMessage());
         } finally {
             DBPool.closeWriterSilent(context, con);
         }
@@ -589,19 +585,19 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updateAttributes(Context ctx, User user, Connection con) throws SQLException, UserException {
-        int contextId = ctx.getContextId();
-        int userId = user.getId();
-        UserImpl load = new UserImpl();
+    private void updateAttributes(final Context ctx, final User user, final Connection con) throws SQLException, UserException {
+        final int contextId = ctx.getContextId();
+        final int userId = user.getId();
+        final UserImpl load = new UserImpl();
         load.setId(userId);
-        Map<Integer, UserImpl> loadMap = new HashMap<Integer, UserImpl>(1);
+        final Map<Integer, UserImpl> loadMap = new HashMap<Integer, UserImpl>(1);
         loadMap.put(I(userId), load);
         loadAttributes(ctx, con, loadMap);
-        Map<String, Set<String>> oldAttributes = load.getAttributes();
-        Map<String, Set<String>> attributes = user.getAttributes();
-        Map<String, Set<String>> added = new HashMap<String, Set<String>>();
-        Map<String, Set<String>> removed = new HashMap<String, Set<String>>();
-        Map<String, Set<String[]>> changed = new HashMap<String, Set<String[]>>();
+        final Map<String, Set<String>> oldAttributes = load.getAttributes();
+        final Map<String, Set<String>> attributes = user.getAttributes();
+        final Map<String, Set<String>> added = new HashMap<String, Set<String>>();
+        final Map<String, Set<String>> removed = new HashMap<String, Set<String>>();
+        final Map<String, Set<String[]>> changed = new HashMap<String, Set<String[]>>();
         calculateDifferences(oldAttributes, attributes, added, removed, changed);
         PreparedStatement stmt = null;
         // Add new attributes
@@ -611,7 +607,7 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 int size = 0;
-                for (Map.Entry<String, Set<String>> entry : added.entrySet()) {
+                for (final Map.Entry<String, Set<String>> entry : added.entrySet()) {
                     for (final String value : entry.getValue()) {
                         stmt.setString(3, entry.getKey());
                         stmt.setString(4, value);
@@ -619,13 +615,13 @@ public class RdbUserStorage extends UserStorage {
                         size++;
                     }
                 }
-                int[] mLines = stmt.executeBatch();
+                final int[] mLines = stmt.executeBatch();
                 int lines = 0;
-                for (int mLine : mLines) {
+                for (final int mLine : mLines) {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
+                    final UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -640,7 +636,7 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 int size = 0;
-                for (Map.Entry<String, Set<String>> entry : removed.entrySet()) {
+                for (final Map.Entry<String, Set<String>> entry : removed.entrySet()) {
                     for (final String value : entry.getValue()) {
                         stmt.setString(3, entry.getKey());
                         stmt.setString(4, value);
@@ -648,13 +644,13 @@ public class RdbUserStorage extends UserStorage {
                         size++;
                     }
                 }
-                int[] mLines = stmt.executeBatch();
+                final int[] mLines = stmt.executeBatch();
                 int lines = 0;
-                for (int mLine : mLines) {
+                for (final int mLine : mLines) {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
+                    final UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -669,8 +665,8 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 int size = 0;
-                for (Map.Entry<String, Set<String[]>> entry : changed.entrySet()) {
-                    for (String[] value : entry.getValue()) {
+                for (final Map.Entry<String, Set<String[]>> entry : changed.entrySet()) {
+                    for (final String[] value : entry.getValue()) {
                         stmt.setString(4, entry.getKey());
                         stmt.setString(5, value[0]);
                         stmt.setString(1, value[1]);
@@ -678,13 +674,13 @@ public class RdbUserStorage extends UserStorage {
                         size++;
                     }
                 }
-                int[] mLines = stmt.executeBatch();
+                final int[] mLines = stmt.executeBatch();
                 int lines = 0;
-                for (int mLine : mLines) {
+                for (final int mLine : mLines) {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
+                    final UserException e = UserException.Code.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                     LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
@@ -694,12 +690,12 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private String toString(Map<String, Set<String[]>> changed) {
-        StringBuilder sb = new StringBuilder("{");
-        for (Map.Entry<String, Set<String[]>> entry : changed.entrySet()) {
+    private String toString(final Map<String, Set<String[]>> changed) {
+        final StringBuilder sb = new StringBuilder("{");
+        for (final Map.Entry<String, Set<String[]>> entry : changed.entrySet()) {
             sb.append(entry.getKey());
             sb.append("=[");
-            for (String[] value : entry.getValue()) {
+            for (final String[] value : entry.getValue()) {
                 sb.append(value[0]);
                 sb.append("=>");
                 sb.append(value[1]);
@@ -712,32 +708,32 @@ public class RdbUserStorage extends UserStorage {
         return sb.toString();
     }
 
-    static void calculateDifferences(Map<String, Set<String>> oldAttributes, Map<String, Set<String>> newAttributes, Map<String, Set<String>> added, Map<String, Set<String>> removed, Map<String, Set<String[]>> changed) {
+    static void calculateDifferences(final Map<String, Set<String>> oldAttributes, final Map<String, Set<String>> newAttributes, final Map<String, Set<String>> added, final Map<String, Set<String>> removed, final Map<String, Set<String[]>> changed) {
         // Find added keys
         added.putAll(newAttributes);
-        for (String key : oldAttributes.keySet()) { added.remove(key); }
+        for (final String key : oldAttributes.keySet()) { added.remove(key); }
         // Find removed keys
         removed.putAll(oldAttributes);
-        for (String key : newAttributes.keySet()) { removed.remove(key); }
+        for (final String key : newAttributes.keySet()) { removed.remove(key); }
         // Now the keys that are contained in old and new attributes.
-        for (String key : newAttributes.keySet()) {
+        for (final String key : newAttributes.keySet()) {
             if (oldAttributes.containsKey(key)) {
                 compareValues(key, oldAttributes.get(key), newAttributes.get(key), added, removed, changed);
             }
         }
     }
 
-    private static void compareValues(String name, Set<String> oldSet, Set<String> newSet, Map<String, Set<String>> added, Map<String, Set<String>> removed, Map<String, Set<String[]>> changed) {
-        Set<String> addedValues = new HashSet<String>();
-        Set<String> removedValues = new HashSet<String>();
+    private static void compareValues(final String name, final Set<String> oldSet, final Set<String> newSet, final Map<String, Set<String>> added, final Map<String, Set<String>> removed, final Map<String, Set<String[]>> changed) {
+        final Set<String> addedValues = new HashSet<String>();
+        final Set<String> removedValues = new HashSet<String>();
         // Find added values for a key.
         addedValues.addAll(newSet);
         addedValues.removeAll(oldSet);
         // Find removed values for a key.
         removedValues.addAll(oldSet);
         removedValues.removeAll(newSet);
-        Iterator<String> addedIter = addedValues.iterator();
-        Iterator<String> removedIter = removedValues.iterator();
+        final Iterator<String> addedIter = addedValues.iterator();
+        final Iterator<String> removedIter = removedValues.iterator();
         while (addedIter.hasNext() && removedIter.hasNext()) {
             Set<String[]> values = changed.get(name);
             if (null == values) {
@@ -754,7 +750,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static void add(Map<String, Set<String>> attributes, String name, String value) {
+    private static void add(final Map<String, Set<String>> attributes, final String name, final String value) {
         Set<String> values = attributes.get(name);
         if (null == values) {
             values = new HashSet<String>();
@@ -770,7 +766,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final DBPoolingException e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("USR", e);
         }
         try {
             final String pattern = StringCollection.prepareForSearch(email, false, true);
@@ -786,7 +782,7 @@ public class RdbUserStorage extends UserStorage {
                     userId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+                throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -804,11 +800,11 @@ public class RdbUserStorage extends UserStorage {
                     }
                 }
                 if (userId == -1) {
-                    throw new LdapException(EnumComponent.USER, Code.NO_USER_BY_MAIL, email);
+                    throw LdapException.Code.NO_USER_BY_MAIL.create("USR", email);
                 }
                 return getUser(context, con, new int[] { userId })[0];
             } catch (final SQLException e) {
-                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
+                throw LdapException.Code.SQL_ERROR.create("USR", e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -826,7 +822,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("USR", e);
         }
         final String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.contactId=prg_contacts.intfield01) WHERE cid=? AND changing_date>=?";
         int[] users;
@@ -846,7 +842,7 @@ public class RdbUserStorage extends UserStorage {
                 users[i] = tmp.get(i).intValue();
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
+            throw LdapException.Code.SQL_ERROR.create("USR", e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

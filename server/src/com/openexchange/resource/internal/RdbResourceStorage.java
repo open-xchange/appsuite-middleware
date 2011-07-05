@@ -94,10 +94,10 @@ public class RdbResourceStorage extends ResourceStorage {
     public ResourceGroup getGroup(final int groupId, final Context context) throws LdapException {
         final ResourceGroup[] groups = getGroups(new int[] { groupId }, context);
         if (null == groups || groups.length == 0) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.RESOURCEGROUP_NOT_FOUND, Integer.valueOf(groupId));
+            throw LdapException.Code.RESOURCEGROUP_NOT_FOUND.create("RES", Integer.valueOf(groupId));
         }
         if (groups.length > 1) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.RESOURCEGROUP_CONFLICT, Integer.valueOf(groupId));
+            throw LdapException.Code.RESOURCEGROUP_CONFLICT.create("RES", Integer.valueOf(groupId));
         }
         return groups[0];
     }
@@ -110,7 +110,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("RES", e);
         }
         final List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         PreparedStatement stmt = null;
@@ -130,7 +130,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -155,7 +155,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("RES", e);
         }
         final StringBuilder ids = new StringBuilder(16);
         ids.append('(').append(groupId[0]);
@@ -181,7 +181,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -228,10 +228,10 @@ public class RdbResourceStorage extends ResourceStorage {
     public Resource getResource(final int resourceId, final Context context) throws LdapException {
         final Resource[] resources = getResources(new int[] { resourceId }, context);
         if (resources.length == 0) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.RESOURCE_NOT_FOUND, Integer.valueOf(resourceId));
+            throw LdapException.Code.RESOURCE_NOT_FOUND.create("RES", Integer.valueOf(resourceId));
         }
         if (resources.length > 1) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.RESOURCE_CONFLICT, Integer.valueOf(resourceId));
+            throw LdapException.Code.RESOURCE_CONFLICT.create("RES", Integer.valueOf(resourceId));
         }
         return resources[0];
     }
@@ -253,7 +253,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("RES", e);
         }
         final StringBuilder ids = new StringBuilder(16);
         ids.append('(').append(resourceId[0]);
@@ -272,7 +272,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -288,7 +288,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("RES", e);
         }
         final List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         PreparedStatement stmt = null;
@@ -309,7 +309,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -325,7 +325,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("RES", e);
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -340,7 +340,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -356,7 +356,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("RES", e);
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -370,7 +370,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -396,7 +396,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
+            throw LdapException.Code.NO_CONNECTION.create("RES", e);
         }
         final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
@@ -410,7 +410,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e, e.getMessage());
+            throw LdapException.Code.SQL_ERROR.create("RES", e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);

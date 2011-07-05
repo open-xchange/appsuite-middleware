@@ -84,19 +84,19 @@ public abstract class UserStorage {
      * @param loginInfo Login name of the user.
      * @param context The context.
      * @return The unique identifier of the user.
-     * @throws LdapException if an error occurs while searching the user or the
+     * @throws OXException if an error occurs while searching the user or the
      * user doesn't exist.
      */
-    public abstract int getUserId(String loginInfo, Context context) throws LdapException;
+    public abstract int getUserId(String loginInfo, Context context) throws OXException;
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
      * @param uid User identifier.
      * @param context The context.
      * @return a user object.
-     * @throws LdapException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
      */
-    public abstract User getUser(int uid, Context context) throws LdapException;
+    public abstract User getUser(int uid, Context context) throws OXException;
 
     /**
      * Reads the data from a user from the underlying persistent data storage by through using the given database connection.
@@ -104,20 +104,20 @@ public abstract class UserStorage {
      * @param userId User identifier.
      * @param con a readable database connection.
      * @return a user object.
-     * @throws LdapException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
      */
-    public abstract User getUser(Context ctx, int userId, Connection con) throws UserException;
+    public abstract User getUser(Context ctx, int userId, Connection con) throws OXException;
 
-    public abstract User[] getUser(Context ctx, int[] userIds) throws UserException;
+    public abstract User[] getUser(Context ctx, int[] userIds) throws OXException;
 
     /**
      * Reads the data of all user from the persistent data storage. This method is faster than getting each user information with the
      * {@link #getUser(int, Context)} method if nearly all users are needed from a context.
      * @param ctx the context.
      * @return an array with all user objects from a context.
-     * @throws UserException if all user objects can not be loaded from the persistent storage.
+     * @throws OXException if all user objects can not be loaded from the persistent storage.
      */
-    public abstract User[] getUser(Context ctx) throws UserException;
+    public abstract User[] getUser(Context ctx) throws OXException;
 
     /**
      * This method updates some values of a user.
@@ -130,9 +130,9 @@ public abstract class UserStorage {
      * </ul>
      * @param user user object with the updated values.
      * @param context The context.
-     * @throws LdapException  if an error occurs.
+     * @throws OXException  if an error occurs.
      */
-    public final void updateUser(User user, Context context) throws LdapException{
+    public final void updateUser(final User user, final Context context) throws OXException{
         updateUserInternal(user, context);
         // Drop possible cached locale-sensitive folder data.
         // TODO We need some logic layer above the storage layer for users. Every component then needs to be refactored to use the
@@ -140,7 +140,7 @@ public abstract class UserStorage {
         CacheFolderStorage.dropUserEntries(user.getId(), context.getContextId());
     }
 
-    protected abstract void updateUserInternal(User user, Context context) throws LdapException;
+    protected abstract void updateUserInternal(User user, Context context) throws OXException;
 
     /**
      * Gets specified user attribute.
@@ -149,9 +149,9 @@ public abstract class UserStorage {
      * @param userId The user identifier
      * @param context The context
      * @return The attribute value
-     * @throws LdapException If user attribute cannot be returned
+     * @throws OXException If user attribute cannot be returned
      */
-    public abstract String getUserAttribute(String name, int userId, Context context) throws LdapException;
+    public abstract String getUserAttribute(String name, int userId, Context context) throws OXException;
 
     /**
      * Sets specified user attribute.
@@ -160,9 +160,9 @@ public abstract class UserStorage {
      * @param value The attribute value
      * @param userId The user identifier
      * @param context The context
-     * @throws LdapException If user attribute cannot be set
+     * @throws OXException If user attribute cannot be set
      */
-    public abstract void setUserAttribute(String name, String value, int userId, Context context) throws LdapException;
+    public abstract void setUserAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
      * Sets specified unscoped attribute.
@@ -171,9 +171,9 @@ public abstract class UserStorage {
      * @param value The attribute value
      * @param userId The user identifier
      * @param context The context
-     * @throws LdapException If user attribute cannot be set
+     * @throws OXException If user attribute cannot be set
      */
-    public abstract void setAttribute(String name, String value, int userId, Context context) throws LdapException;
+    public abstract void setAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to
@@ -182,65 +182,65 @@ public abstract class UserStorage {
      * @param context The context.
      * @return a User object if the user was found by its email address or
      * <code>null</code> if no user could be found.
-     * @throws LdapException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public abstract User searchUser(String email, Context context) throws LdapException;
+    public abstract User searchUser(String email, Context context) throws OXException;
 
     /**
      * Returns an array with all user identifier of the context.
      * @param context The context.
      * @return an array with all user identifier of the context.
-     * @throws UserException if generating this list fails.
+     * @throws OXException if generating this list fails.
      */
-    public abstract int[] listAllUser(Context context) throws UserException;
+    public abstract int[] listAllUser(Context context) throws OXException;
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
      * @param imapLogin the IMAP login name to search for
      * @param context The context.
      * @return The unique identifiers of the users.
-     * @throws UserException if an error occurs during the search.
+     * @throws OXException if an error occurs during the search.
      */
-    public abstract int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
+    public abstract int[] resolveIMAPLogin(String imapLogin, Context context) throws OXException;
 
     /**
      * Performs internal start-up
-     * @throws UserException If internal start-up fails
+     * @throws OXException If internal start-up fails
      */
-    protected abstract void startInternal() throws UserException;
+    protected abstract void startInternal() throws OXException;
 
     /**
      * Performs internal shut-down
-     * @throws UserException If internal shut-down fails
+     * @throws OXException If internal shut-down fails
      */
-    protected abstract void stopInternal() throws UserException;
+    protected abstract void stopInternal() throws OXException;
 
     /**
      * Searches users who where modified later than the given date.
      * @param modifiedSince Date after that the returned users are modified.
      * @param context The context.
      * @return a string array with the uids of the matching user.
-     * @throws LdapException if an error occurs during the search.
+     * @throws OXException if an error occurs during the search.
      */
     public abstract int[] listModifiedUser(Date modifiedSince, Context context)
-        throws LdapException;
+        throws OXException;
 
     /**
      * Removes a user from the cache if caching is used.
      * @param ctx Context.
      * @param userId unique identifier of the user.
-     * @throws UserException if removing gives an exception.
+     * @throws OXException if removing gives an exception.
      */
-    public abstract void invalidateUser(final Context ctx, final int userId) throws UserException;
+    public abstract void invalidateUser(final Context ctx, final int userId) throws OXException;
 
-    public final void invalidateUser(final Context ctx, final int[] userIds) throws UserException {
+    public final void invalidateUser(final Context ctx, final int[] userIds) throws OXException {
         for (final int member : userIds) {
             invalidateUser(ctx, member);
         }
     }
 
     public static final boolean authenticate(final User user,
-        final String password) throws UserException {
+        final String password) throws OXException {
         boolean retval = false;
         if ("{CRYPT}".equals(user.getPasswordMech())) {
             retval = UnixCrypt.matches(user.getUserPassword(), password);
@@ -255,7 +255,7 @@ public abstract class UserStorage {
      * Initialization.
      * @throws OXException if initialization of contexts fails.
      */
-    public static void start() throws UserException {
+    public static void start() throws OXException {
         if (null != instance) {
             LOG.error("Duplicate initialization of UserStorage.");
             return;
@@ -267,7 +267,7 @@ public abstract class UserStorage {
     /**
      * Shutdown.
      */
-    public static void stop() throws UserException {
+    public static void stop() throws OXException {
         if (null == instance) {
             LOG.error("Duplicate shutdown of UserStorage.");
             return;
@@ -296,7 +296,7 @@ public abstract class UserStorage {
     public static User getStorageUser(final int uid, final Context context) {
         try {
             return getInstance().getUser(uid, context);
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
         }
