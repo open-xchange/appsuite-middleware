@@ -50,7 +50,7 @@
 package com.openexchange.imap.acl;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -85,7 +85,7 @@ public final class ACLExtensionInit implements Initialization {
         started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (started.get()) {
             LOG.error(ACLExtensionInit.class.getName() + " already started");
             return;
@@ -128,7 +128,7 @@ public final class ACLExtensionInit implements Initialization {
          */
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.get()) {
             LOG.error(ACLExtensionInit.class.getName() + " cannot be stopped since it has not been started before");
             return;

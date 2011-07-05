@@ -58,6 +58,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 
@@ -105,9 +106,9 @@ public final class Entity2ACLAutoDetector {
      * @param imapConfig The IMAP configuration
      * @return the IMAP server's depending {@link Entity2ACL} implementation
      * @throws IOException - if an I/O error occurs
-     * @throws Entity2ACLException - if a server greeting could not be mapped to a supported IMAP server
+     * @throws OXException - if a server greeting could not be mapped to a supported IMAP server
      */
-    public static Entity2ACL getEntity2ACLImpl(final IMAPConfig imapConfig) throws IOException, Entity2ACLException {
+    public static Entity2ACL getEntity2ACLImpl(final IMAPConfig imapConfig) throws IOException, OXException {
         final InetSocketAddress key = new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort());
         Future<Entity2ACL> cached = map.get(key);
         if (null == cached) {
@@ -128,8 +129,8 @@ public final class Entity2ACLAutoDetector {
             throw new IOException(e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            if (cause instanceof Entity2ACLException) {
-                throw ((Entity2ACLException) cause);
+            if (cause instanceof OXException) {
+                throw ((OXException) cause);
             }
             if (cause instanceof IOException) {
                 throw ((IOException) cause);
@@ -169,9 +170,9 @@ public final class Entity2ACLAutoDetector {
      * @param greeting The greeting
      * @param imapConfig The IMAP configuration
      * @return The appropriate {@link Entity2ACL} implementation
-     * @throws Entity2ACLException If an error occurs
+     * @throws OXException If an error occurs
      */
-    protected static Entity2ACL implFor(final String greeting, final IMAPConfig imapConfig) throws Entity2ACLException {
+    protected static Entity2ACL implFor(final String greeting, final IMAPConfig imapConfig) throws OXException {
         /*
          * Map greeting to a known IMAP server
          */
@@ -184,7 +185,7 @@ public final class Entity2ACLAutoDetector {
         return entity2Acl;
     }
 
-    private static IMAPServer mapInfo2IMAPServer(final String info, final IMAPConfig imapConfig) throws Entity2ACLException {
+    private static IMAPServer mapInfo2IMAPServer(final String info, final IMAPConfig imapConfig) throws OXException {
         final IMAPServer[] imapServers = IMAPServer.values();
         for (int i = 0; i < imapServers.length; i++) {
             final IMAPServer imapServer = imapServers[i];
@@ -210,7 +211,7 @@ public final class Entity2ACLAutoDetector {
             }
             return IMAPServer.CYRUS;
         }
-        throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
+        throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(info);
     }
 
 }

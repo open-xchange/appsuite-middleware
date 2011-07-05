@@ -79,6 +79,7 @@ import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.event.FolderEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
@@ -1616,7 +1617,7 @@ public final class IMAPCommandsCollection {
                             final int[] ni = new int[limit];
                             System.arraycopy(tmp, 0, ni, 0, limit);
                             newMsgSeqNums = ni;
-                        } catch (final IMAPException e) {
+                        } catch (final OXException e) {
                             throw wrapException(e, null);
                         } catch (final MessagingException e) {
                             throw wrapException(e, null);
@@ -1834,9 +1835,9 @@ public final class IMAPCommandsCollection {
      * 
      * @param folder The IMAP folder
      * @return <code>true</code> is IMAP folder is marked as READ-ONLY; otherwise <code>false</code>
-     * @throws IMAPException
+     * @throws OXException
      */
-    public static boolean isReadOnly(final IMAPFolder f) throws IMAPException {
+    public static boolean isReadOnly(final IMAPFolder f) throws OXException {
         try {
             final Boolean val = (Boolean) f.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -1882,9 +1883,9 @@ public final class IMAPCommandsCollection {
      * @param mode The desired open mode
      * @return <code>true</code> if IMAP folder denoted by specified fullname is allowed to be opened in desired mode; otherwise
      *         <code>false</code>
-     * @throws IMAPException If an IMAP error occurs
+     * @throws OXException If an IMAP error occurs
      */
-    public static boolean canBeOpened(final IMAPFolder f, final String fullname, final int mode) throws IMAPException {
+    public static boolean canBeOpened(final IMAPFolder f, final String fullname, final int mode) throws OXException {
         if ((Folder.READ_ONLY != mode) && (Folder.READ_WRITE != mode)) {
             IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
         }

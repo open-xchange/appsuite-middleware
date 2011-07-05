@@ -58,11 +58,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.sun.mail.imap.IMAPFolder;
 
 /**

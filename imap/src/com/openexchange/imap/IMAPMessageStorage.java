@@ -75,7 +75,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.AllFetch.LowCostItem;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
@@ -95,7 +95,6 @@ import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -110,16 +109,15 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.user.UserService;
@@ -204,10 +202,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            } catch (final OXException e) {
-                throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
             } catch (final RuntimeException e) {
                 throw handleRuntimeException(e);
             }
@@ -220,10 +214,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
-            } catch (final OXException e) {
-                throw new OXException(e);
-            } catch (final UserException e) {
-                throw new OXException(e);
             } catch (final RuntimeException e) {
                 throw handleRuntimeException(e);
             }
@@ -416,7 +406,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 mail.setMailId(String.valueOf(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
             } catch (final OXException e) {
-                if (OXException.Code.MESSAGE_REMOVED.getNumber() == e.getDetailNumber()) {
+                if (MIMEMailExceptionCode.MESSAGE_REMOVED.getNumber() == e.getCode() && e.isPrefix("MSG")) {
                     /*
                      * Obviously message was removed in the meantime
                      */
@@ -425,7 +415,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check for generic messaging error
                  */
-                if (OXException.Code.MESSAGING_ERROR.getNumber() == e.getDetailNumber()) {
+                if (MIMEMailExceptionCode.MESSAGING_ERROR.getNumber() == e.getCode() && e.isPrefix("MSG")) {
                     /*-
                      * Detected generic messaging error. This most likely hints to a severe JavaMail problem.
                      * 
@@ -2010,9 +2000,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param destFullName The destination folder's full name
      * @return The corresponding UIDs in destination folder
      * @throws MessagingException
-     * @throws IMAPException
+     * @throws OXException
      */
-    private long[] getDestinationUIDs(final long[] msgUIDs, final String destFullName) throws MessagingException, IMAPException {
+    private long[] getDestinationUIDs(final long[] msgUIDs, final String destFullName) throws MessagingException, OXException {
         /*
          * No COPYUID present in response code. Since UIDs are assigned in strictly ascending order in the mailbox (refer to IMAPv4 rfc3501,
          * section 2.3.1.1), we can discover corresponding UIDs by selecting the destination mailbox and detecting the location of messages
@@ -2081,7 +2071,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Handle spam
                  */
-                try {
+                {
                     SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance()).handleSpam(
                         accountId,
                         imapFolder.getFullName(),
@@ -2093,8 +2083,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      */
                     resetIMAPFolder();
                     imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
-                } catch (final OXException e) {
-                    throw new IMAPException(e);
                 }
                 return;
             }
@@ -2107,7 +2095,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Handle ham.
              */
-            try {
+            {
                 SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance()).handleHam(
                     accountId,
                     imapFolder.getFullName(),
@@ -2119,8 +2107,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 resetIMAPFolder();
                 imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
-            } catch (final OXException e) {
-                throw new IMAPException(e);
             }
         }
     }

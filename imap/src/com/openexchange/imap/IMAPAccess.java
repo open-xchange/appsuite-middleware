@@ -64,7 +64,7 @@ import javax.mail.MessagingException;
 import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -75,25 +75,21 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
-import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -732,22 +728,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         initMaps();
         IMAPCapabilityAndGreetingCache.init();
         MBoxEnabledCache.init();
-        try {
-            ACLExtensionInit.getInstance().start();
-        } catch (final OXException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
-        }
-        try {
-            Entity2ACLInit.getInstance().start();
-        } catch (final Entity2ACLException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
-        }
+        ACLExtensionInit.getInstance().start();
+        Entity2ACLInit.getInstance().start();
     }
 
     private static synchronized void initMaps() {
@@ -795,22 +777,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void shutdown() throws OXException {
-        try {
-            Entity2ACLInit.getInstance().stop();
-        } catch (final Entity2ACLException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
-        }
-        try {
-            ACLExtensionInit.getInstance().stop();
-        } catch (final OXException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
-        }
+        Entity2ACLInit.getInstance().stop();
+        ACLExtensionInit.getInstance().stop();
         IMAPCapabilityAndGreetingCache.tearDown();
         MBoxEnabledCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
@@ -979,14 +947,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
-        try {
-            final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
-            return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
-        } catch (final OXException e) {
-            throw new IMAPException(e);
-        } catch (final OXException e) {
-            throw new IMAPException(e);
-        }
+        final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
+        return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
     private static javax.mail.Session setConnectProperties(final int port, final boolean isSecure, final int timeout, final int connectionTimeout, final Properties imapProps) {

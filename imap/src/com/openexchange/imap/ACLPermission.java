@@ -49,7 +49,7 @@
 
 package com.openexchange.imap;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.config.IMAPConfig;
@@ -188,9 +188,9 @@ public final class ACLPermission extends MailPermission {
      * @param imapStore The IMAP store
      * @param ctx The context
      * @return An instance of {@link ACL} representing this permission's rights
-     * @throws AbstractOXException If this permission cannot be mapped to an instance of {@link ACL}
+     * @throws OXException If this permission cannot be mapped to an instance of {@link ACL}
      */
-    public ACL getPermissionACL(final Entity2ACLArgs args, final IMAPConfig imapConfig, IMAPStore imapStore, final Context ctx) throws AbstractOXException {
+    public ACL getPermissionACL(final Entity2ACLArgs args, final IMAPConfig imapConfig, final IMAPStore imapStore, final Context ctx) throws OXException {
         if (acl != null) {
             /*
              * Return caches ACL
@@ -209,9 +209,9 @@ public final class ACLPermission extends MailPermission {
      * @param imapStore The IMAP store
      * @param imapConfig The user's IMAP configuration
      * @param ctx The context
-     * @throws AbstractOXException If given ACL cannot be applied to this permission
+     * @throws OXException If given ACL cannot be applied to this permission
      */
-    public void parseACL(final ACL acl, final Entity2ACLArgs args, IMAPStore imapStore, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
+    public void parseACL(final ACL acl, final Entity2ACLArgs args, final IMAPStore imapStore, final IMAPConfig imapConfig, final Context ctx) throws OXException {
         final UserGroupID res = Entity2ACL.getInstance(imapStore, imapConfig).getEntityID(acl.getName(), ctx, args);
         setEntity(res.getId());
         setGroupPermission(res.isGroup());

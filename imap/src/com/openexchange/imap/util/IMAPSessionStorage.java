@@ -60,10 +60,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.sun.mail.imap.IMAPFolder;
 
 /**

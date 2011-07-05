@@ -57,11 +57,11 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.search.SearchTerm;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.config.MailProperties;
@@ -218,7 +218,7 @@ public final class IMAPSearch {
                 }
             }
             if (LOG.isWarnEnabled()) {
-                final IMAPException imapException = IMAPException.create(IMAPException.Code.IMAP_SEARCH_FAILED, e, e.getMessage());
+                final OXException imapException = IMAPException.Code.IMAP_SEARCH_FAILED.create(e, e.getMessage());
                 LOG.warn(imapException.getMessage(), imapException);
             }
             return null;

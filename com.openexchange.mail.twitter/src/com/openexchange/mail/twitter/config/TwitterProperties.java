@@ -49,9 +49,9 @@
 
 package com.openexchange.mail.twitter.config;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 
 /**
@@ -72,7 +72,7 @@ public final class TwitterProperties extends AbstractProtocolProperties implemen
     }
 
     @Override
-    protected void loadProperties0() throws MailConfigException {
+    protected void loadProperties0() throws OXException {
         // Nothing to do
     }
 

@@ -69,9 +69,8 @@ import javax.mail.Quota;
 import javax.mail.Quota.Resource;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.FolderCache;
@@ -89,23 +88,21 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
-import com.openexchange.imap.entity2acl.Entity2ACLException;
+import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -154,19 +151,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
      * @param session The session providing needed user data
-     * @throws IMAPException If context loading fails
+     * @throws OXException If context loading fails
      */
-    public IMAPFolderStorage(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws IMAPException {
+    public IMAPFolderStorage(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
         accountId = imapAccess.getAccountId();
         this.session = session;
-        try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new IMAPException(e);
-        }
+        ctx = ContextStorage.getStorageContext(session.getContextId());
         imapConfig = imapAccess.getIMAPConfig();
     }
 
@@ -974,11 +967,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
-        } catch (final IMAPException e) {
+        } catch (final OXException e) {
             /*
              * No folder deletion on IMAP error "NO_ADMINISTER_ACCESS_ON_INITIAL"
              */
-            if (IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL.getNumber() != e.getDetailNumber()) {
+            if (e.isPrefix("MSG") && IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL.getNumber() != e.getCode()) {
                 if (createMe != null && created) {
                     try {
                         if (doesExist(createMe, false)) {
@@ -993,34 +986,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
             throw e;
-        } catch (final OXException e) {
-            if (createMe != null && created) {
-                try {
-                    if (doesExist(createMe, false)) {
-                        createMe.delete(true);
-                    }
-                } catch (final Throwable e2) {
-                    LOG.error(
-                        new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "\" could not be deleted"),
-                        e2);
-                }
-            }
-            throw e;
-        } catch (final AbstractOXException e) {
-            if (createMe != null && created) {
-                try {
-                    if (doesExist(createMe, false)) {
-                        createMe.delete(true);
-                    }
-                } catch (final Throwable e2) {
-                    LOG.error(
-                        new StringBuilder().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "\" could not be deleted"),
-                        e2);
-                }
-            }
-            throw new IMAPException(e);
         } catch (final RuntimeException e) {
             if (createMe != null && created) {
                 try {
@@ -1054,7 +1019,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private Entity2ACL getEntity2ACL() throws Entity2ACLException, OXException {
+    private Entity2ACL getEntity2ACL() throws OXException {
         return Entity2ACL.getInstance(imapStore, imapConfig);
     }
 
@@ -1679,8 +1644,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IMAPException e) {
             throw e;
-        } catch (final AbstractOXException e) {
-            throw new IMAPException(e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -1985,8 +1948,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
-        } catch (final AbstractOXException e) {
-            throw new IMAPException(e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -2304,7 +2265,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         UserFlagsCache.removeUserFlags(deleteMe, session, accountId);
     }
 
-    private boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws AbstractOXException {
+    private boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws OXException {
         /*
          * Ensure that owner still holds full rights
          */
@@ -2496,7 +2457,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          */
         IMAPCommandsCollection.forceSetSubscribed(imapStore, moveFullname, false);
         if (!toMove.delete(true) && LOG.isWarnEnabled()) {
-            final IMAPException e = IMAPException.create(IMAPException.Code.DELETE_FAILED, moveFullname);
+            final OXException e = IMAPException.create(IMAPException.Code.DELETE_FAILED, moveFullname);
             LOG.warn(e.getMessage(), e);
         }
         /*
@@ -2514,7 +2475,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return newFolder;
     }
 
-    private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws AbstractOXException, MessagingException {
+    private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws OXException, MessagingException {
         final List<ACL> acls = new ArrayList<ACL>(perms.length);
         for (int i = 0; i < perms.length; i++) {
             final ACLPermission aclPermission = getACLPermission(perms[i]);
@@ -2524,8 +2485,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     imapConfig,
                     imapStore,
                     ctx));
-            } catch (final Entity2ACLException e) {
-                if (Entity2ACLException.Code.UNKNOWN_USER.getNumber() == e.getDetailNumber()) {
+            } catch (final OXException e) {
+                if (Entity2ACLExceptionCode.UNKNOWN_USER.getNumber() == e.getCode() && e.isPrefix("ACL")) {
                     // Obviously the user is not known, skip
                     if (DEBUG) {
                         LOG.debug(new StringBuilder().append("User ").append(aclPermission.getEntity()).append(
@@ -2570,7 +2531,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private static boolean isKnownEntity(final String entity, final Entity2ACL entity2ACL, final Context ctx, final Entity2ACLArgs args) {
         try {
             return !UserGroupID.NULL.equals(entity2ACL.getEntityID(entity, ctx, args));
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             return false;
         }
     }

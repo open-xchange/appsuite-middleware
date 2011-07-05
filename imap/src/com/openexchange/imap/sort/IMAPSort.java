@@ -59,6 +59,7 @@ import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
@@ -178,8 +179,8 @@ public final class IMAPSort {
                  * Caused by a protocol error such as a socket error. No retry in this case.
                  */
                 throw e;
-            } catch (final IMAPException e) {
-                if (e.getDetailNumber() == IMAPException.Code.UNSUPPORTED_SORT_FIELD.getNumber()) {
+            } catch (final OXException e) {
+                if (e.isPrefix("MSG") && e.getCode() == IMAPException.Code.UNSUPPORTED_SORT_FIELD.getNumber()) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(e.getMessage(), e);
                     }
@@ -213,7 +214,7 @@ public final class IMAPSort {
                     }
                 }
                 if (LOG.isWarnEnabled()) {
-                    final IMAPException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
+                    final OXException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
                     LOG.warn(imapException.getMessage(), imapException);
                 }
                 applicationSort = true;
@@ -256,9 +257,9 @@ public final class IMAPSort {
      * @param sortField The sort field
      * @param descendingDirection The order direction
      * @return The sort criteria ready for being used inside IMAP's <i>SORT</i> command
-     * @throws IMAPException If an unsupported sort field is specified
+     * @throws OXException If an unsupported sort field is specified
      */
-    public static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) throws IMAPException {
+    public static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) throws OXException {
         final StringBuilder imapSortCritBuilder = new StringBuilder(16).append(descendingDirection ? "REVERSE " : "");
         switch (sortField) {
         case SENT_DATE:
@@ -325,7 +326,7 @@ public final class IMAPSort {
 
         private final boolean descending;
 
-        public SORTProtocolCommand(boolean descending) {
+        public SORTProtocolCommand(final boolean descending) {
             this.descending = descending;
         }
 

@@ -51,7 +51,7 @@ package com.openexchange.imap.entity2acl;
 
 import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.server.Initialization;
 
@@ -85,7 +85,7 @@ public final class Entity2ACLInit implements Initialization {
         started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(MessageFormat.format("{0} already started", Entity2ACLInit.class.getName()));
             return;
@@ -95,7 +95,7 @@ public final class Entity2ACLInit implements Initialization {
             if (null == implementingClass) {
                 final String classNameProp = IMAPProperties.getInstance().getEntity2AclImpl();
                 if ((null == classNameProp) || (classNameProp.length() == 0)) {
-                    throw new Entity2ACLException(Entity2ACLException.Code.MISSING_SETTING, "com.openexchange.imap.User2ACLImpl");
+                    throw Entity2ACLExceptionCode.MISSING_SETTING.create("com.openexchange.imap.User2ACLImpl");
                 }
                 if ("auto".equalsIgnoreCase(classNameProp)) {
                     /*
@@ -119,15 +119,15 @@ public final class Entity2ACLInit implements Initialization {
                 }
             }
         } catch (final ClassNotFoundException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.CLASS_NOT_FOUND, e, new Object[0]);
+            throw Entity2ACLExceptionCode.CLASS_NOT_FOUND.create(e, new Object[0]);
         } catch (final InstantiationException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
+            throw Entity2ACLExceptionCode.INSTANTIATION_FAILED.create(e, new Object[0]);
         } catch (final IllegalAccessException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
+            throw Entity2ACLExceptionCode.INSTANTIATION_FAILED.create(e, new Object[0]);
         }
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(Entity2ACLInit.class.getName() + " cannot be stopped since it has not been started before");
             return;

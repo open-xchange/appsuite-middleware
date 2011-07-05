@@ -50,8 +50,8 @@
 package com.openexchange.mail.headercache;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AbstractProtocolProperties;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 
 /**
@@ -90,7 +90,7 @@ public final class HeaderCacheStaticProperties extends AbstractProtocolPropertie
     }
 
     @Override
-    protected void loadProperties0() throws MailConfigException {
+    protected void loadProperties0() throws OXException {
         final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(HeaderCacheStaticProperties.class);
 
         final StringBuilder logBuilder = new StringBuilder(256);

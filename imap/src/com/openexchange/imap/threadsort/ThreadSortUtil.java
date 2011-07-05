@@ -52,7 +52,7 @@ package com.openexchange.imap.threadsort;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -150,7 +150,7 @@ public final class ThreadSortUtil {
      * 
      * @return Parsed thread-sort string in a structured data type
      */
-    public static List<ThreadSortNode> parseThreadResponse(final String threadResponse) throws IMAPException {
+    public static List<ThreadSortNode> parseThreadResponse(final String threadResponse) throws OXException {
         /*
          * Now parse the odd THREAD response string.
          */

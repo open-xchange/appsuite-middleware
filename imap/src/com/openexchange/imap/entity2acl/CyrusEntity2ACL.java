@@ -51,12 +51,11 @@ package com.openexchange.imap.entity2acl;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
@@ -102,7 +101,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
     }
 
     @Override
-    public String getACLName(final int userId, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws AbstractOXException {
+    public String getACLName(final int userId, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws OXException {
         if (OCLPermission.ALL_GROUPS_AND_USERS == userId) {
             return AUTH_ID_ANYONE;
         }
@@ -117,15 +116,14 @@ public final class CyrusEntity2ACL extends Entity2ACL {
         }
         final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
         if (args == null || args.length == 0) {
-            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
+            throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
         try {
             return MailConfig.getMailLogin(
                 storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()),
                 userLoginInfo);
         } catch (final OXException e) {
-            throw new Entity2ACLException(
-                Entity2ACLException.Code.UNKNOWN_USER,
+            throw Entity2ACLExceptionCode.UNKNOWN_USER.create(
                 Integer.valueOf(userId),
                 Integer.valueOf(ctx.getContextId()),
                 args[1].toString());
@@ -133,13 +131,13 @@ public final class CyrusEntity2ACL extends Entity2ACL {
     }
 
     @Override
-    public UserGroupID getEntityID(final String pattern, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws AbstractOXException {
+    public UserGroupID getEntityID(final String pattern, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws OXException {
         if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
             return ALL_GROUPS_AND_USERS;
         }
         final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
         if (args == null || args.length == 0) {
-            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
+            throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
         final int accountId;
         final InetSocketAddress imapAddr;
@@ -149,15 +147,15 @@ public final class CyrusEntity2ACL extends Entity2ACL {
             imapAddr = (InetSocketAddress) args[1];
             sessionUser = ((Integer) args[2]).intValue();
         } catch (final ClassCastException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG, e, new Object[0]);
+            throw Entity2ACLExceptionCode.MISSING_ARG.create(e, new Object[0]);
         }
         return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
     }
 
-    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr, final int sessionUser) throws AbstractOXException {
+    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr, final int sessionUser) throws OXException {
         final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, imapAddr, ctx);
         if (0 == ids.length) {
-            throw new Entity2ACLException(Entity2ACLException.Code.RESOLVE_USER_FAILED, pattern);
+            throw Entity2ACLExceptionCode.RESOLVE_USER_FAILED.create(pattern);
         }
         if (1 == ids.length) {
             return ids[0];

@@ -51,6 +51,7 @@ package com.openexchange.imap.threadsort;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
 
 /**
@@ -78,13 +79,13 @@ final class ThreadSortParser {
      * Parses specified IMAP server's thread-sort string.
      * 
      * @param threadList The thread-sort string.
-     * @throws IMAPException If parsing thread-sort string fails.
+     * @throws OXException If parsing thread-sort string fails.
      */
-    void parse(final String threadList) throws IMAPException {
+    void parse(final String threadList) throws OXException {
         parse(threadList, threads);
     }
 
-    private void parse(final String threadList, final List<ThreadSortNode> recthreads) throws IMAPException {
+    private void parse(final String threadList, final List<ThreadSortNode> recthreads) throws OXException {
         if (DEBUG) {
             LOG.debug(new StringBuilder("Start parse: ").append(threadList).toString());
         }

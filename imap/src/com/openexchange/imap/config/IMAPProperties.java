@@ -57,10 +57,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
@@ -141,7 +141,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    protected void loadProperties0() throws MailConfigException {
+    protected void loadProperties0() throws OXException {
         final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global IMAP properties...\n");
 
@@ -273,7 +273,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         {
             entity2AclImpl = configuration.getProperty("com.openexchange.imap.User2ACLImpl");
             if (null == entity2AclImpl) {
-                throw new MailConfigException("Missing IMAP property \"com.openexchange.imap.User2ACLImpl\"");
+                throw MailConfigException.create("Missing IMAP property \"com.openexchange.imap.User2ACLImpl\"");
             }
             entity2AclImpl = entity2AclImpl.trim();
         }

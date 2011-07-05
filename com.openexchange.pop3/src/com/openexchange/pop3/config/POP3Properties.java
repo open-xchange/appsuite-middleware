@@ -52,9 +52,9 @@ package com.openexchange.pop3.config;
 import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegistry;
 import java.nio.charset.Charset;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.spamhandler.SpamHandler;
 
@@ -107,7 +107,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    protected void loadProperties0() throws MailConfigException {
+    protected void loadProperties0() throws OXException {
         final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global POP3 properties...\n");
 

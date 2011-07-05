@@ -51,11 +51,10 @@ package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
 import javax.mail.MessagingException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.IMAPStore;
@@ -84,9 +83,9 @@ public abstract class Entity2ACL {
      * 
      * @param imapConfig The user's IMAP config
      * @return an instance implementing the {@link Entity2ACL} interface.
-     * @throws Entity2ACLException if the instance can't be created.
+     * @throws OXException if the instance can't be created.
      */
-    public static final Entity2ACL getInstance(final IMAPConfig imapConfig) throws Entity2ACLException {
+    public static final Entity2ACL getInstance(final IMAPConfig imapConfig) throws OXException {
         if (instantiated && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
             /*
              * Auto-detection is turned off, return configured implementation
@@ -99,7 +98,7 @@ public abstract class Entity2ACL {
         try {
             return Entity2ACLAutoDetector.getEntity2ACLImpl(imapConfig);
         } catch (final IOException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
+            throw Entity2ACLExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -111,10 +110,9 @@ public abstract class Entity2ACL {
      * @param imapStore The IMAP store
      * @param imapConfig The user's IMAP configuration
      * @return an instance implementing the {@link Entity2ACL} interface.
-     * @throws Entity2ACLException if the instance can't be created.
      * @throws OXException If a mail error occurs
      */
-    public static final Entity2ACL getInstance(final IMAPStore imapStore, final IMAPConfig imapConfig) throws Entity2ACLException, OXException {
+    public static final Entity2ACL getInstance(final IMAPStore imapStore, final IMAPConfig imapConfig) throws OXException {
         if (instantiated && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
             /*
              * Auto-detection is turned off, return configured implementation
@@ -182,9 +180,9 @@ public abstract class Entity2ACL {
      * @param ctx The context
      * @param args The arguments container
      * @return the IMAP login of the user/group whose ID matches given <code>entity</code>
-     * @throws AbstractOXException If user/group could not be found
+     * @throws OXException IF user/group could not be found
      */
-    public abstract String getACLName(int entity, Context ctx, Entity2ACLArgs args) throws AbstractOXException;
+    public abstract String getACLName(int entity, Context ctx, Entity2ACLArgs args) throws OXException;
 
     /**
      * Determines the user/group ID whose either ACL entity name or user name matches given <code>pattern</code>.
@@ -194,8 +192,8 @@ public abstract class Entity2ACL {
      * @param args The arguments container
      * @return An instance of {@link UserGroupID} providing the user/group identifier whose IMAP login matches given <code>pattern</code> or
      *         {@link UserGroupID#NULL} if none found.
-     * @throws AbstractOXException If user/group search fails
+     * @throws OXException If user/group search fails
      */
-    public abstract UserGroupID getEntityID(final String pattern, Context ctx, Entity2ACLArgs args) throws AbstractOXException;
+    public abstract UserGroupID getEntityID(final String pattern, Context ctx, Entity2ACLArgs args) throws OXException;
 
 }

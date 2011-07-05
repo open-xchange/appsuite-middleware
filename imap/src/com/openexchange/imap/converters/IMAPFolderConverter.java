@@ -55,9 +55,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.MessagingException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.imap.ACLPermission;
@@ -74,15 +72,14 @@ import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
-import com.openexchange.imap.entity2acl.Entity2ACLException;
+import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.IMAPServer;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.ProtocolException;
@@ -131,7 +128,7 @@ public final class IMAPFolderConverter {
             this.separator = separator;
         }
 
-        public Object[] getArguments(final IMAPServer imapServer) throws AbstractOXException {
+        public Object[] getArguments(final IMAPServer imapServer) throws OXException {
             return imapServer.getArguments(accountId, imapServerAddress, sessionUser, fullname, separator);
         }
     }
@@ -617,7 +614,7 @@ public final class IMAPFolderConverter {
                 aclPerm.parseACL(acls[j], args, (IMAPStore) imapFolder.getStore(), imapConfig, ctx);
                 userPermAdded |= (session.getUserId() == aclPerm.getEntity());
                 mailFolder.addPermission(aclPerm);
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 if (!isUnknownEntityError(e)) {
                     throw new OXException(e);
                 }
@@ -661,10 +658,9 @@ public final class IMAPFolderConverter {
         mailFolder.addPermission(aclPerm);
     }
 
-    private static boolean isUnknownEntityError(final AbstractOXException e) {
-        final Component component = e.getComponent();
-        final int detailNumber = e.getDetailNumber();
-        return (EnumComponent.ACL_ERROR.equals(component) && (Entity2ACLException.Code.RESOLVE_USER_FAILED.getNumber() == detailNumber)) || (EnumComponent.USER.equals(component) && (LdapException.Code.USER_NOT_FOUND.getDetailNumber() == detailNumber));
+    private static boolean isUnknownEntityError(final OXException e) {
+        final int code = e.getCode();
+        return (e.isPrefix("ACL") && (Entity2ACLExceptionCode.RESOLVE_USER_FAILED.getNumber() == code)) || (e.isPrefix("USR") && (LdapException.Code.USER_NOT_FOUND.getNumber() == code));
     }
 
     private static boolean checkForNamespaceFolder(final String fullName, final AccessedIMAPStore imapStore, final Session session, final int accountId) throws MessagingException, OXException {

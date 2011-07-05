@@ -50,7 +50,7 @@
 package com.openexchange.mail.api;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractProtocolProperties} - Super class of protocol-specific global properties
@@ -81,10 +81,9 @@ public abstract class AbstractProtocolProperties {
 
     /**
      * Exclusively loads protocol's global properties
-     * 
-     * @throws MailConfigException If loading of protocol's global properties fails
+     * @throws OXException If loading properties fails
      */
-    public void loadProperties() throws MailConfigException {
+    public void loadProperties() throws OXException {
         if (!loaded.get()) {
             synchronized (loaded) {
                 if (!loaded.get()) {
@@ -128,10 +127,9 @@ public abstract class AbstractProtocolProperties {
 
     /**
      * Loads protocol's global properties
-     * 
-     * @throws MailConfigException If loading of protocol's global properties fails
+     * @throws OXException If loading of protocol's global properties fails
      */
-    protected abstract void loadProperties0() throws MailConfigException;
+    protected abstract void loadProperties0() throws OXException;
 
     /**
      * Resets protocol's global properties' fields

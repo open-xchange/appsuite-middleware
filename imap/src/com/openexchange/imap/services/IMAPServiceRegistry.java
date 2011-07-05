@@ -49,7 +49,7 @@
 
 package com.openexchange.imap.services;
 
-import com.openexchange.server.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**

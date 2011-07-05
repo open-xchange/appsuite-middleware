@@ -54,8 +54,8 @@ import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -64,12 +64,11 @@ import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -123,19 +122,15 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
      * @param session The session providing needed user data
-     * @throws IMAPException If context lading fails
+     * @throws OXException If context lading fails
      */
-    public IMAPFolderWorker(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws IMAPException {
+    public IMAPFolderWorker(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
         accountId = imapAccess.getAccountId();
         this.session = session;
-        try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new IMAPException(e);
-        }
+        ctx = ContextStorage.getStorageContext(session.getContextId());
         usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
         imapConfig = imapAccess.getIMAPConfig();
         aclExtension = imapConfig.getACLExtension();

@@ -58,6 +58,7 @@ import java.util.concurrent.Future;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
@@ -65,12 +66,11 @@ import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
@@ -78,10 +78,8 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
@@ -278,7 +276,7 @@ public final class IMAPDefaultFolderChecker {
                      */
                     final boolean isSpamOptionEnabled;
                     final MailAccount mailAccount;
-                    try {
+                    {
                         mailAccount =
                             IMAPServiceRegistry.getService(MailAccountStorageService.class, true).getMailAccount(
                                 accountId,
@@ -286,10 +284,6 @@ public final class IMAPDefaultFolderChecker {
                                 session.getContextId());
                         final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
                         isSpamOptionEnabled = usm.isSpamOptionEnabled();
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    } catch (final OXException e) {
-                        throw new OXException(e);
                     }
                     /*
                      * Check default folders
@@ -354,13 +348,11 @@ public final class IMAPDefaultFolderChecker {
                                     mailSessionCache);
                             }
                         }
-                        try {
+                        {
                             completionFuture =
                                 IMAPServiceRegistry.getService(ThreadPoolService.class, true).invoke(
                                     tasks,
                                     CallerRunsBehavior.getInstance());
-                        } catch (final OXException e) {
-                            throw new IMAPException(e);
                         }
                         count = tasks.size();
                     }
@@ -370,8 +362,8 @@ public final class IMAPDefaultFolderChecker {
                             final Future<Object> f = completionFuture.take();
                             if (null == f) {
                                 // Waiting time elapsed
-                                throw new OXException(
-                                    MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED,
+                                throw 
+                                    MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED.create(
                                     imapConfig.getServer(),
                                     imapConfig.getLogin(),
                                     Integer.valueOf(session.getUserId()),
@@ -431,7 +423,7 @@ public final class IMAPDefaultFolderChecker {
         });
     }
 
-    private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final ListLsubEntry inboxListEntry, final MailSessionCache mailSessionCache) throws MessagingException, IMAPException {
+    private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final ListLsubEntry inboxListEntry, final MailSessionCache mailSessionCache) throws MessagingException, OXException {
         /*
          * Check for NAMESPACE capability
          */
@@ -695,7 +687,7 @@ public final class IMAPDefaultFolderChecker {
                         default:
                             throw new MessagingException("Unexpected index: " + index);
                         }
-                        try {
+                        {
                             final MailAccountStorageService storageService =
                                 IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
                             final SecretService secretService = IMAPServiceRegistry.getService(SecretService.class);
@@ -706,10 +698,6 @@ public final class IMAPDefaultFolderChecker {
                                 session.getUserId(),
                                 session.getContextId(),
                                 secretService.getSecret(session));
-                        } catch (final OXException e) {
-                            throw new IMAPException(e);
-                        } catch (final OXException e) {
-                            throw new IMAPException(e);
                         }
                         final String fn = tmp.append(prefix).append(candidate).toString();
                         tmp.setLength(0);
@@ -720,8 +708,7 @@ public final class IMAPDefaultFolderChecker {
             /*-
              * 
              * 
-            final IMAPException oxme = new IMAPException(
-                IMAPException.Code.NO_DEFAULT_FOLDER_CREATION,
+            final IMAPException oxme = IMAPException.Code.NO_DEFAULT_FOLDER_CREATION.create(
                 tmp.append(prefix).append(name).toString());
             tmp.setLength(0);
             LOG.error(oxme.getMessage(), oxme);

@@ -57,6 +57,7 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.acl.ACLExtension;
@@ -214,9 +215,9 @@ public final class IMAPConfig extends MailConfig {
      * 
      * @param imapStore The IMAP store from which to fetch the capabilities
      * @param session The session possibly caching capabilities information
-     * @throws MailConfigException If IMAP capabilities cannot be initialized
+     * @throws OXException If IMAP capabilities cannot be initialized
      */
-    public void initializeCapabilities(final IMAPStore imapStore, final Session session) throws MailConfigException {
+    public void initializeCapabilities(final IMAPStore imapStore, final Session session) throws OXException {
         if (imapCapabilities == null) {
             synchronized (this) {
                 if (imapCapabilities != null) {
@@ -229,7 +230,7 @@ public final class IMAPConfig extends MailConfig {
                     capabilities = response.getMap();
                     aclExtension = response.getAclExtension();
                 } catch (final MessagingException e) {
-                    throw new MailConfigException(e);
+                    throw MailConfigException.create(e);
                 }
             }
         }
@@ -282,12 +283,12 @@ public final class IMAPConfig extends MailConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) throws IMAPException {
+    protected void parseServerURL(final String serverURL) throws OXException {
         final URI uri;
         try {
             uri = URIParser.parse(serverURL, URIDefaults.IMAP);
         } catch (final URISyntaxException e) {
-            throw IMAPException.create(IMAPException.Code.URI_PARSE_FAILED, e, serverURL);
+            throw IMAPException.Code.URI_PARSE_FAILED.create(e, serverURL);
         }
         secure = PROTOCOL_IMAP_SECURE.equals(uri.getScheme());
         imapServer = uri.getHost();
@@ -298,16 +299,16 @@ public final class IMAPConfig extends MailConfig {
      * Gets the internet address of the IMAP server.
      * 
      * @return The internet address of the IMAP server.
-     * @throws IMAPException If IMAP server cannot be resolved
+     * @throws OXException If IMAP server cannot be resolved
      */
-    public InetAddress getImapServerAddress() throws IMAPException {
+    public InetAddress getImapServerAddress() throws OXException {
         if (null == imapServerAddress) {
             try {
                 imapServerAddress = InetAddress.getByName(imapServer);
                 // TODO: Touch address for proper equality check?
                 // imapServerAddress.toString();
             } catch (final UnknownHostException e) {
-                throw IMAPException.create(IMAPException.Code.IO_ERROR, e, e.getMessage());
+                throw IMAPException.Code.IO_ERROR.create(e, e.getMessage());
             }
         }
         return imapServerAddress;
@@ -317,9 +318,9 @@ public final class IMAPConfig extends MailConfig {
      * Gets the socket address (internet address + port) of the IMAP server.
      * 
      * @return The socket address (internet address + port) of the IMAP server.
-     * @throws IMAPException If IMAP server cannot be resolved
+     * @throws OXException If IMAP server cannot be resolved
      */
-    public InetSocketAddress getImapServerSocketAddress() throws IMAPException {
+    public InetSocketAddress getImapServerSocketAddress() throws OXException {
         if (null == imapServerSocketAddress) {
             imapServerSocketAddress = new InetSocketAddress(getImapServerAddress(), imapPort);
         }

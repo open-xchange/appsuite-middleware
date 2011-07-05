@@ -49,7 +49,7 @@
 
 package com.openexchange.imap.entity2acl;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Entity2ACLArgs} - Offers implementation-specific arguments for proper
@@ -66,8 +66,8 @@ public interface Entity2ACLArgs {
 	 * @param imapServer
 	 *            The current IMAP server
 	 * @return An array of {@link Object}
-	 * @throws AbstractOXException
+	 * @throws OXException If an error occurs
 	 */
-	public Object[] getArguments(IMAPServer imapServer) throws AbstractOXException;
+	public Object[] getArguments(IMAPServer imapServer) throws OXException;
 
 }
