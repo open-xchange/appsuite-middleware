@@ -58,7 +58,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
@@ -94,7 +93,7 @@ public class ServerUserSetting {
     private static final Attribute<Integer> CONTACT_COLLECT_FOLDER = new Attribute<Integer>() {
 
         public Integer getAttribute(final ResultSet rs) throws SQLException {
-            int retval = rs.getInt(getColumnName());
+            final int retval = rs.getInt(getColumnName());
             return rs.wasNull() ? null : I(retval);
         }
 
@@ -194,8 +193,8 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> FOLDER_TREE = new Attribute<Integer>() {
 
-        public Integer getAttribute(ResultSet rs) throws SQLException {
-            int tmp = rs.getInt(getColumnName());
+        public Integer getAttribute(final ResultSet rs) throws SQLException {
+            final int tmp = rs.getInt(getColumnName());
             final Integer retval;
             if (rs.wasNull()) {
                 retval = null;
@@ -209,7 +208,7 @@ public class ServerUserSetting {
             return "folderTree";
         }
 
-        public void setAttribute(PreparedStatement pstmt, Integer value) throws SQLException {
+        public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);
             } else {
@@ -408,22 +407,18 @@ public class ServerUserSetting {
      * @return the selected folder tree or <code>null</code>
      * @throws OXException if reading the value from the database fails.
      */
-    public Integer getFolderTree(int cid, int user) throws OXException {
+    public Integer getFolderTree(final int cid, final int user) throws OXException {
         return getAttribute(cid, user, FOLDER_TREE);
     }
 
-    public void setFolderTree(int cid, int user, Integer value) throws OXException {
+    public void setFolderTree(final int cid, final int user, final Integer value) throws OXException {
         setAttribute(cid, user, FOLDER_TREE, value);
     }
 
     private <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute) throws OXException {
         final Connection con;
         if (connection == null) {
-            try {
-                con = Database.get(cid, false);
-            } catch (final DBPoolingException e) {
-                throw new OXException(e);
-            }
+            con = Database.get(cid, false);
         } else {
             con = connection;
         }
@@ -439,11 +434,7 @@ public class ServerUserSetting {
     private <T> void setAttribute(final int cid, final int user, final Attribute<T> attribute, final T value) throws OXException {
         final Connection con;
         if (connection == null) {
-            try {
-                con = Database.get(cid, true);
-            } catch (final DBPoolingException e) {
-                throw new OXException(e);
-            }
+            con = Database.get(cid, true);
         } else {
             con = connection;
         }
@@ -460,14 +451,10 @@ public class ServerUserSetting {
         }
     }
 
-    void deleteEntry(int cid, int user) throws OXException {
+    void deleteEntry(final int cid, final int user) throws OXException {
         final Connection con;
         if (connection == null) {
-            try {
-                con = Database.get(cid, true);
-            } catch (final DBPoolingException e) {
-                throw new OXException(e);
-            }
+            con = Database.get(cid, true);
         } else {
             con = connection;
         }
