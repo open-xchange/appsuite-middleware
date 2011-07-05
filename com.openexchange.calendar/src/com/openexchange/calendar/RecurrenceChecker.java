@@ -61,129 +61,161 @@ import com.openexchange.groupware.container.CalendarObject;
  */
 public class RecurrenceChecker {
 
-    public static void check(CalendarObject cdao) throws OXException {
-        if (!containsRecurrenceInformation(cdao))
+    public static void check(final CalendarObject cdao) throws OXException {
+        if (!containsRecurrenceInformation(cdao)) {
             return;
+        }
 
-        if (!cdao.containsRecurrenceType())
+        if (!cdao.containsRecurrenceType()) {
             throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_TYPE.create();
+        }
 
         if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             checkNo(cdao);
             return;
         }
 
-        if (!cdao.containsInterval())
+        if (!cdao.containsInterval()) {
             throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL.create();
+        }
 
-        if (cdao.containsUntil() && cdao.containsOccurrence() && !(cdao.getUntil() == null && cdao.getOccurrence() == 0))
+        if (cdao.containsUntil() && cdao.containsOccurrence() && !(cdao.getUntil() == null && cdao.getOccurrence() == 0)) {
             throw OXCalendarExceptionCodes.REDUNDANT_UNTIL_OCCURRENCES.create();
+        }
 
-        if (cdao.getRecurrenceType() == CalendarObject.DAILY)
+        if (cdao.getRecurrenceType() == CalendarObject.DAILY) {
             checkDaily(cdao);
+        }
 
-        if (cdao.getRecurrenceType() == CalendarObject.WEEKLY)
+        if (cdao.getRecurrenceType() == CalendarObject.WEEKLY) {
             checkWeekly(cdao);
+        }
 
-        if (cdao.getRecurrenceType() == CalendarObject.MONTHLY)
+        if (cdao.getRecurrenceType() == CalendarObject.MONTHLY) {
             checkMonthly(cdao);
+        }
 
-        if (cdao.getRecurrenceType() == CalendarObject.YEARLY)
+        if (cdao.getRecurrenceType() == CalendarObject.YEARLY) {
             checkYearly(cdao);
+        }
     }
 
-    private static void checkNo(CalendarObject cdao) throws OXException {
-        if (containsRecurrenceInformation(cdao, CalendarObject.RECURRENCE_TYPE))
+    private static void checkNo(final CalendarObject cdao) throws OXException {
+        if (containsRecurrenceInformation(cdao, CalendarObject.RECURRENCE_TYPE)) {
             throw OXCalendarExceptionCodes.UNNECESSARY_RECURRENCE_INFORMATION_NO.create();
+        }
     }
 
-    private static void checkDaily(CalendarObject cdao) throws OXException {
-        if (cdao.containsDays())
+    private static void checkDaily(final CalendarObject cdao) throws OXException {
+        if (cdao.containsDays()) {
             throw unnecessary("days", "daily");
+        }
 
-        if (cdao.containsDayInMonth())
+        if (cdao.containsDayInMonth()) {
             throw unnecessary("dayInMonth", "daily");
+        }
 
-        if (cdao.containsMonth())
+        if (cdao.containsMonth()) {
             throw unnecessary("month", "daily");
+        }
     }
 
-    private static void checkWeekly(CalendarObject cdao) throws OXException {
-        if (cdao.containsDayInMonth())
+    private static void checkWeekly(final CalendarObject cdao) throws OXException {
+        if (cdao.containsDayInMonth()) {
             throw unnecessary("dayInMonth", "weekly");
+        }
 
-        if (cdao.containsMonth())
+        if (cdao.containsMonth()) {
             throw unnecessary("month", "weekly");
+        }
 
-        if (!cdao.containsDays())
+        if (!cdao.containsDays()) {
             throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_WEEKDAY.create();
+        }
         
-        if (cdao.getDays() < 1 || cdao.getDays() > 127)
+        if (cdao.getDays() < 1 || cdao.getDays() > 127) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());
+        }
     }
 
-    private static void checkMonthly(CalendarObject cdao) throws OXException {
-        if (cdao.containsMonth())
+    private static void checkMonthly(final CalendarObject cdao) throws OXException {
+        if (cdao.containsMonth()) {
             throw unnecessary("month", "monthly");
+        }
 
-        if (!cdao.containsDayInMonth())
+        if (!cdao.containsDayInMonth()) {
             throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create();
+        }
 
-        if (!cdao.containsDays())
+        if (!cdao.containsDays()) {
             checkMonthly1(cdao);
-        else
+        } else {
             checkMonthly2(cdao);
+        }
     }
 
-    private static void checkMonthly1(CalendarObject cdao) throws OXException {
-        if (cdao.containsDays())
+    private static void checkMonthly1(final CalendarObject cdao) throws OXException {
+        if (cdao.containsDays()) {
             throw unnecessary("days", "monthly1");
+        }
 
-        if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 31)
+        if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 31) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL.create(cdao.getDayInMonth());
+        }
     }
 
-    private static void checkMonthly2(CalendarObject cdao) throws OXException {
-        if (!cdao.containsDays())
+    private static void checkMonthly2(final CalendarObject cdao) throws OXException {
+        if (!cdao.containsDays()) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create();
+        }
         
-        if (cdao.getDays() < 1 || cdao.getDays() > 127)
+        if (cdao.getDays() < 1 || cdao.getDays() > 127) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());
+        }
 
-        if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5)
-            throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_.create(2, cdao.getDayInMonth());
+        if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5) {
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(cdao.getDayInMonth());
+        }
     }
 
-    private static void checkYearly(CalendarObject cdao) throws OXException {
-        if (!cdao.containsDayInMonth())
+    private static void checkYearly(final CalendarObject cdao) throws OXException {
+        if (!cdao.containsDayInMonth()) {
             throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_MONTHDAY.create();
+        }
 
-        if (!cdao.containsMonth())
+        if (!cdao.containsMonth()) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create(I(-1));
+        }
 
-        if (!cdao.containsDays())
+        if (!cdao.containsDays()) {
             checkYearly1(cdao);
-        else
+        } else {
             checkYearly2(cdao);
+        }
     }
 
-    private static void checkYearly1(CalendarObject cdao) throws OXException {
-        if (cdao.containsDays())
+    private static void checkYearly1(final CalendarObject cdao) throws OXException {
+        if (cdao.containsDays()) {
             throw unnecessary("days", "yearly1");
+        }
 
-        if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 31)
+        if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 31) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(cdao.getDayInMonth());
+        }
     }
 
-    private static void checkYearly2(CalendarObject cdao) throws OXException {
-        if (!cdao.containsDays())
+    private static void checkYearly2(final CalendarObject cdao) throws OXException {
+        if (!cdao.containsDays()) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create();
+        }
         
-        if (cdao.getDays() < 1 || cdao.getDays() > 127)
+        if (cdao.getDays() < 1 || cdao.getDays() > 127) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());
+        }
 
-        if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5)
+        if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(cdao.getDayInMonth());
+        }
 
     }
 
@@ -194,8 +226,8 @@ public class RecurrenceChecker {
      * @param exceptions Recurrence fields, which will not be checked
      * @return
      */
-    public static boolean containsRecurrenceInformation(CalendarObject cdao, int... exceptions) {
-        Set<Integer> recurrenceFields = new HashSet<Integer>() {
+    public static boolean containsRecurrenceInformation(final CalendarObject cdao, final int... exceptions) {
+        final Set<Integer> recurrenceFields = new HashSet<Integer>() {
 
             {
                 add(CalendarObject.INTERVAL);
@@ -209,32 +241,36 @@ public class RecurrenceChecker {
 
         boolean skipType = false;
         
-        for (int exception : exceptions) {
+        for (final int exception : exceptions) {
             recurrenceFields.remove(exception);
-            if (exception == CalendarObject.RECURRENCE_TYPE)
+            if (exception == CalendarObject.RECURRENCE_TYPE) {
                 skipType = true;
+            }
         }
 
-        if (!skipType && cdao.contains(CalendarObject.RECURRENCE_TYPE) && (Integer)cdao.get(CalendarObject.RECURRENCE_TYPE) != CalendarObject.NO_RECURRENCE)
+        if (!skipType && cdao.contains(CalendarObject.RECURRENCE_TYPE) && (Integer)cdao.get(CalendarObject.RECURRENCE_TYPE) != CalendarObject.NO_RECURRENCE) {
             return true;
+        }
         
-        for (int recurrenceField : recurrenceFields) {
-            if (cdao.contains(recurrenceField))
+        for (final int recurrenceField : recurrenceFields) {
+            if (cdao.contains(recurrenceField)) {
                 return true;
+            }
         }
 
         return false;
     }
 
-    public static boolean containsOneOfFields(CalendarObject cdao, int... fields) {
-        for (int field : fields) {
-            if (cdao.contains(field))
+    public static boolean containsOneOfFields(final CalendarObject cdao, final int... fields) {
+        for (final int field : fields) {
+            if (cdao.contains(field)) {
                 return true;
+            }
         }
         return false;
     }
 
-    private static OXException unnecessary(String field, String type) {
+    private static OXException unnecessary(final String field, final String type) {
         return OXCalendarExceptionCodes.UNNECESSARY_RECURRENCE_INFORMATION.create(field, type);
     }
 
