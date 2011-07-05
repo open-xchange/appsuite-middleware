@@ -86,32 +86,32 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     
     private static final Log LOG = LogFactory.getLog(ConfigProviderService.class);
     
-    private ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
+    private final ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
 
-    public ConfigProviderServiceImpl(ConfigurationService configService) {
+    public ConfigProviderServiceImpl(final ConfigurationService configService) throws OXException {
         setConfigService(configService);
     }
     
-    public ServerProperty get(String property, int context, int user) throws OXException {
-        ServerProperty basicProperty = properties.get(property);
+    public ServerProperty get(final String property, final int context, final int user) throws OXException {
+        final ServerProperty basicProperty = properties.get(property);
         if (basicProperty != null) {
             return basicProperty;
         }
-        ServerProperty retval = new ServerProperty();
-        String value = configService.getProperty(property);
+        final ServerProperty retval = new ServerProperty();
+        final String value = configService.getProperty(property);
         retval.setDefined(value != null);
         retval.set(value);
         
-        ServerProperty alreadyDefined = properties.putIfAbsent(property, retval);
+        final ServerProperty alreadyDefined = properties.putIfAbsent(property, retval);
         if(alreadyDefined != null) {
             return alreadyDefined;
         }
         return retval;
     }
 
-    public Collection<String> getAllPropertyNames(int context, int user) throws OXException {
-        Iterator<String> propertyNames = configService.propertyNames();
-        Set<String> retval = new HashSet<String>();
+    public Collection<String> getAllPropertyNames(final int context, final int user) throws OXException {
+        final Iterator<String> propertyNames = configService.propertyNames();
+        final Set<String> retval = new HashSet<String>();
         while (propertyNames.hasNext()) {
             retval.add(propertyNames.next());
         }
@@ -119,41 +119,41 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         return retval;
     }
 
-    public void setConfigService(ConfigurationService configService) {
+    public void setConfigService(final ConfigurationService configService) throws OXException {
         this.configService = configService;
         initSettings(configService);
         initMetadata(configService);
     }
 
-    private void initSettings(ConfigurationService config) {
-        Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
-        for(Object propName : propertiesInFolder.keySet()) {
-            ServerProperty serverProperty = get((String) propName, -1, -1);
+    private void initSettings(final ConfigurationService config) throws OXException {
+        final Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
+        for(final Object propName : propertiesInFolder.keySet()) {
+            final ServerProperty serverProperty = get((String) propName, -1, -1);
             serverProperty.set(PREFRENCE_PATH, (String) propName);
             if(serverProperty.get(PROTECTED) == null) {
-                serverProperty.set(PROTECTED, (String) TRUE);
+                serverProperty.set(PROTECTED, TRUE);
             }
             
         }
         
     }
 
-    private void initMetadata(ConfigurationService config) {
-        Map<String, Object> yamlInFolder = config.getYamlInFolder(META);
-        for(Object o : yamlInFolder.values()) {
+    private void initMetadata(final ConfigurationService config) throws OXException {
+        final Map<String, Object> yamlInFolder = config.getYamlInFolder(META);
+        for(final Object o : yamlInFolder.values()) {
             if (! checkMap(o)) {
                 continue;
             }
-            Map<String, Object> metadataDef = (Map<String, Object>) o;
-            for(Map.Entry<String, Object> entry : metadataDef.entrySet()) {
-                String propertyName = entry.getKey();
-                Object value2 = entry.getValue();
+            final Map<String, Object> metadataDef = (Map<String, Object>) o;
+            for(final Map.Entry<String, Object> entry : metadataDef.entrySet()) {
+                final String propertyName = entry.getKey();
+                final Object value2 = entry.getValue();
                 if (! checkMap(value2)) {
                     continue;
                 }
-                Map<String, Object> metadata = (Map<String, Object>) value2;
-                ServerProperty basicProperty = get(propertyName, -1, -1);
-                for(Map.Entry<String, Object> metadataProp : metadata.entrySet()) {
+                final Map<String, Object> metadata = (Map<String, Object>) value2;
+                final ServerProperty basicProperty = get(propertyName, -1, -1);
+                for(final Map.Entry<String, Object> metadataProp : metadata.entrySet()) {
                     if(metadataProp.getValue() != null) {
                         basicProperty.set(metadataProp.getKey(), metadataProp.getValue().toString());
                     }
@@ -169,9 +169,9 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         }
     }
 
-    private boolean checkMap(Object o) {
+    private boolean checkMap(final Object o) {
         if (! Map.class.isInstance(o)) {
-            StringBuilder b = new StringBuilder("One of the .yml files in the meta configuration directory is improperly formatted\n");
+            final StringBuilder b = new StringBuilder("One of the .yml files in the meta configuration directory is improperly formatted\n");
             b.append("Please make sure they are formatted in this fashion:\n");
             b.append("ui/somepath:\n");
             b.append("\tprotected: false\n\n");
