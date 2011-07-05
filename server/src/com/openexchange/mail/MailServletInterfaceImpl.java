@@ -1625,8 +1625,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
             } catch (final OXException e) {
-                final int number = e.getDetailNumber();
-                if (number == MIMEMailException.Code.LOGIN_FAILED.getNumber() || number == MIMEMailException.Code.INVALID_CREDENTIALS.getNumber()) {
+                final int number = e.getCode();
+                if (e.isPrefix("MSG") && (number == MIMEMailException.Code.LOGIN_FAILED.getNumber() || number == MIMEMailException.Code.INVALID_CREDENTIALS.getNumber())) {
                     MailServletInterface.mailInterfaceMonitor.changeNumFailedLogins(true);
                 }
                 throw e;
@@ -2442,10 +2442,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } catch (final AddressException e) {
             throw MIMEMailException.handleMessagingException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         /*
          * Initialize
