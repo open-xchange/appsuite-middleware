@@ -54,7 +54,7 @@ import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 
 /**
@@ -81,7 +81,7 @@ public final class UserSettingMailDeleteListener implements DeleteListener {
             try {
                 getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);
             } catch (final AbstractOXException e) {
-                throw new DeleteFailedException(e);
+                throw new OXException(e);
             }
         }
     }

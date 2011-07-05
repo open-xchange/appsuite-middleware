@@ -60,7 +60,8 @@ import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageExcepti
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.server.OXException;
@@ -144,21 +145,21 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
         } catch (final GenericConfigStorageException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            throw new DeleteFailedException(DeleteFailedException.Code.ERROR, e, e.getMessage());
+            throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private <S> S getService(final Class<? extends S> clazz) throws DeleteFailedException {
+    private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
             return MessagingGenericServiceRegistry.getServiceRegistry().getService(clazz, true);
         } catch (final OXException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         }
     }
 

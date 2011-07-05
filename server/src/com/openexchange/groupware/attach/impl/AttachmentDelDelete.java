@@ -55,7 +55,8 @@ import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -75,7 +76,7 @@ public class AttachmentDelDelete extends ContextDelete {
             stmt.setInt(1, event.getContext().getContextId());
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }

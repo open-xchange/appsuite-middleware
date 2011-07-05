@@ -55,7 +55,7 @@ import java.util.Date;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -240,7 +240,7 @@ public final class ResourceDelete {
         final DeleteEvent event = new DeleteEvent(getOrig(), resource.getIdentifier(), DeleteEvent.TYPE_RESOURCE, ctx);
         try {
             DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
-        } catch (final DeleteFailedException e) {
+        } catch (final OXException e) {
             throw new ResourceException(e);
         }
     }

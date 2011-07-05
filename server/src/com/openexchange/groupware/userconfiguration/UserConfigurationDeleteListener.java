@@ -54,7 +54,8 @@ import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 
 /**
@@ -87,10 +88,10 @@ public final class UserConfigurationDeleteListener implements DeleteListener {
 						.getContext());
 			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+				throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
 			} catch (final DBPoolingException e) {
 				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(e);
+				throw new OXException(e);
 			}
 		}
 	}

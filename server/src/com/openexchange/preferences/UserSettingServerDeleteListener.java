@@ -52,7 +52,7 @@ package com.openexchange.preferences;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.settings.SettingException;
 
@@ -77,7 +77,7 @@ public final class UserSettingServerDeleteListener implements DeleteListener {
             try {
                 ServerUserSetting.getInstance(writeCon).deleteEntry(event.getContext().getContextId(), event.getId());
             } catch (final SettingException e) {
-                throw new DeleteFailedException(e);
+                throw new OXException(e);
             }
         }
     }

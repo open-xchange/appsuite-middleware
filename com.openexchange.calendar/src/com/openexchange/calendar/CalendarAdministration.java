@@ -77,7 +77,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeFailedExceptionCode;
@@ -132,10 +133,10 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 // Do nothing.
                 break;
             default:
-	        	throw new DeleteFailedException(DeleteFailedException.Code.UNKNOWN_TYPE, Integer.valueOf(deleteEvent.getType()));
+	        	throw DeleteFailedExceptionCodes.UNKNOWN_TYPE.create(Integer.valueOf(deleteEvent.getType()));
 	        }
         } catch (final SQLException e) {
-        	throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+        	throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -287,7 +288,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
     
-    private final void deleteUser(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, SQLException {
+    private final void deleteUser(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
         try {
             //  Delete all appointments where the user is the only participant (and where the app is private) !! NO MOVE TO del_* !!
             //  Delete the user from the participant list and update the appointment
@@ -295,20 +296,20 @@ public class CalendarAdministration implements CalendarAdministrationService {
             //  Update all changed_from and changing_dates WHERE the user is the editor
             deleteUserFromAppointments(deleteEvent, readcon, writecon);
         } catch (final OXException ex) {
-            throw new DeleteFailedException(ex);
+            throw new OXException(ex);
         }
     }
     
     
-    private final void deleteGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, SQLException {
+    private final void deleteGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.GROUP);
     }
     
-    private final void deleteResource(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, SQLException {
+    private final void deleteResource(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.RESOURCE);
     }
     
-    private final void deleteResourceGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, SQLException {
+    private final void deleteResourceGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.RESOURCEGROUP);
     }
     
@@ -437,7 +438,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         handledObjects.add(I(objectId));
     }
     
-    private final void deleteObjects(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon, final String table, final int type) throws DeleteFailedException, SQLException {
+    private final void deleteObjects(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon, final String table, final int type) throws OXException, SQLException {
         PreparedStatement pst = null;
         ResultSet rs = null;
         try {
@@ -463,9 +464,9 @@ public class CalendarAdministration implements CalendarAdministrationService {
             update.executeBatch();
             update.close();
         } catch (final OXException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         } catch (LdapException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         } finally {
             closeSQLStuff(rs, pst);
         }

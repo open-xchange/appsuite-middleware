@@ -54,7 +54,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 
 public class AttachmentContextDelete extends ContextDelete {
 
@@ -65,7 +65,7 @@ public class AttachmentContextDelete extends ContextDelete {
         try {
             new AttachmentBaseImpl(new SimpleDBProvider(readCon, writeCon)).deleteAll(deleteEvent.getContext());
         } catch (OXException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         }
     }
 }

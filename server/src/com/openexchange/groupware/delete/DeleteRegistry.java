@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.outlook.OutlookFolderDeleteListener;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
@@ -229,9 +230,9 @@ public final class DeleteRegistry {
      * @param deleteEvent The delete event
      * @param readCon A readable connection
      * @param writeCon A writable connection
-     * @throws DeleteFailedException If delete event could not be performed
+     * @throws OXException If delete event could not be performed
      */
-    public void fireDeleteEvent(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void fireDeleteEvent(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         /*
          * At first trigger dynamically added listeners
          */

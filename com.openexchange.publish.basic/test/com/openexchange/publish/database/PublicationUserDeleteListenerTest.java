@@ -56,7 +56,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
@@ -102,7 +102,7 @@ public class PublicationUserDeleteListenerTest extends AbstractPublicationSQLSto
         super.tearDown();
     }
 
-    public void testShouldPerformDeletionAttempt() throws DeleteFailedException, SQLException, PublicationException, DBPoolingException {
+    public void testShouldPerformDeletionAttempt() throws OXException, SQLException, PublicationException, DBPoolingException {
         DeleteEvent event = new DeleteEvent(user, user.getId(), DeleteEvent.TYPE_USER, ctx);
         storage.rememberPublication(pub1);
         listener.deletePerformed(event, readCon , writeCon );

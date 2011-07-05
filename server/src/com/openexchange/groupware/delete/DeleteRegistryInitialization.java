@@ -50,7 +50,7 @@
 package com.openexchange.groupware.delete;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -70,14 +70,14 @@ public final class DeleteRegistryInitialization implements Initialization {
         started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
         }
         DeleteRegistry.initInstance();
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;
         }

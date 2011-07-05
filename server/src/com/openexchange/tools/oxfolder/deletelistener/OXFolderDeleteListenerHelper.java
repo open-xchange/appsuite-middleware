@@ -52,7 +52,8 @@ package com.openexchange.tools.oxfolder.deletelistener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 import com.openexchange.tools.oxfolder.deletelistener.sql.DetectCorruptPermissions;
 import com.openexchange.tools.oxfolder.deletelistener.sql.GroupPermissionMerger;
@@ -78,9 +79,9 @@ public final class OXFolderDeleteListenerHelper {
      * Ensures folder data consistency after user/group delete operation
      * 
      * @param ctx The context
-     * @throws DeleteFailedException If checking folder data consistency fails
+     * @throws OXException If checking folder data consistency fails
      */
-    public static void ensureConsistency(final Context ctx, final Connection writeCon) throws DeleteFailedException {
+    public static void ensureConsistency(final Context ctx, final Connection writeCon) throws OXException {
         try {
             /*
              * Check user permissions
@@ -91,9 +92,9 @@ public final class OXFolderDeleteListenerHelper {
              */
             checkGroupPermissions(ctx.getContextId(), writeCon);
         } catch (final SQLException e) {
-            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            throw new DeleteFailedException(DeleteFailedException.Code.ERROR, e, e.getMessage());
+            throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
 

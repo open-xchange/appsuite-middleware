@@ -56,7 +56,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
@@ -72,7 +72,7 @@ import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
  */
 public class SubscriptionUserDeleteListenerTest extends AbstractSubscriptionSQLStorageTest {
 
-    public void testShouldDeleteSubscriptionOnDeletionOfUser() throws SubscriptionException, DBPoolingException, DeleteFailedException, SQLException {
+    public void testShouldDeleteSubscriptionOnDeletionOfUser() throws SubscriptionException, DBPoolingException, OXException, SQLException {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
 
         SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener() {

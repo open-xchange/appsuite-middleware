@@ -55,7 +55,8 @@ import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 import com.openexchange.server.OXException;
@@ -84,9 +85,9 @@ public final class HeaderCacheDeleteListener implements DeleteListener {
                 wc = databaseService.getWritable(contextId);
                 wc.setAutoCommit(false); // BEGIN;
             } catch (final DBPoolingException e) {
-                throw new DeleteFailedException(e);
+                throw new OXException(e);
             } catch (final SQLException e) {
-                throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             }
             final int user = event.getId();
             PreparedStatement stmt = null;
@@ -111,10 +112,10 @@ public final class HeaderCacheDeleteListener implements DeleteListener {
                 wc.commit(); // COMMIT
             } catch (final SQLException e) {
                 DBUtils.rollback(wc); // ROLL-BACK
-                throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } catch (final Exception e) {
                 DBUtils.rollback(wc); // ROLL-BACK
-                throw new DeleteFailedException(DeleteFailedException.Code.ERROR, e, e.getMessage());
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
                 DBUtils.autocommit(wc);
@@ -123,12 +124,12 @@ public final class HeaderCacheDeleteListener implements DeleteListener {
         }
     }
 
-    private static DatabaseService getDBService() throws DeleteFailedException {
+    private static DatabaseService getDBService() throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = HeaderCacheServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         }
         return databaseService;
     }

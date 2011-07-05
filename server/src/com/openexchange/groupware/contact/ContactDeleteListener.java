@@ -58,7 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -90,7 +90,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 Contacts.trashAllUserContacts(deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
             }
         } catch (final OXException ox) {
-            throw new DeleteFailedException(ox);
+            throw new OXException(ox);
         }
     }
 

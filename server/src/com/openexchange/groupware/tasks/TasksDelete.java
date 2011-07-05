@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.session.Session;
@@ -103,9 +103,9 @@ public class TasksDelete implements DeleteListener {
      * Delete a user from all tasks.
      * @param event Event.
      * @param con writable database connection.
-     * @throws DeleteFailedException if the delete gives an error.
+     * @throws OXException if the delete gives an error.
      */
-    private void deleteUser(DeleteEvent event, Connection con) throws DeleteFailedException {
+    private void deleteUser(DeleteEvent event, Connection con) throws OXException {
         try {
             // First remove the user from the participants of tasks. Then only
             // tasks exist that have other users as participants or no one.
@@ -124,7 +124,7 @@ public class TasksDelete implements DeleteListener {
             // Change createdFrom and modifiedBy attributes of left over tasks.
             changeCFMB(event, con);
         } catch (final TaskException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         }
     }
 
@@ -227,9 +227,9 @@ public class TasksDelete implements DeleteListener {
      * @param event Event.
      * @param readCon readable database connection.
      * @param writeCon writable database connection.
-     * @throws DeleteFailedException if the delete gives an error.
+     * @throws OXException if the delete gives an error.
      */
-    private void deleteGroup(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
+    private void deleteGroup(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         final Context ctx = event.getContext();
         final int groupId = event.getId();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
@@ -244,7 +244,7 @@ public class TasksDelete implements DeleteListener {
                 }
             }
         } catch (TaskException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         }
     }
 

@@ -83,7 +83,7 @@ final class POP3DeleteListener implements DeleteListener {
                 stmt.setInt(pos++, user);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
-                throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }

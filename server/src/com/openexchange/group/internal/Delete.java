@@ -63,7 +63,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.group.GroupStorage.StorageType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -219,7 +219,7 @@ public final class Delete {
             DeleteEvent.TYPE_GROUP, ctx);
         try {
             DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
-        } catch (final DeleteFailedException e) {
+        } catch (final OXException e) {
             throw new GroupException(e);
         }
     }

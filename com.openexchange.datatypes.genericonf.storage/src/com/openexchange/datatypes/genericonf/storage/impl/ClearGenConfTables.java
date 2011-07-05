@@ -56,8 +56,8 @@ import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteFailedException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 
 /**
  * {@link ClearGenConfTables}
@@ -79,14 +79,14 @@ public class ClearGenConfTables extends ContextDelete {
         }
     }
 
-    private void execute(int cid, Connection con, String sql) throws DeleteFailedException {
+    private void execute(int cid, Connection con, String sql) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(sql);
             stmt.setInt(1, cid);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DeleteFailedException(Code.SQL_ERROR, e, e.getMessage());
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }

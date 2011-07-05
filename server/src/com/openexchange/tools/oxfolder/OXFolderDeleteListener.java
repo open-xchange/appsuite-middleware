@@ -57,7 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.oxfolder.deletelistener.OXFolderDeleteListenerHelper;
 
@@ -111,7 +112,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 	private void handleGroupDeletion(final DeleteEvent delEvent,
 			final Connection readCon, final Connection writeCon,
 			final Context ctx, final long lastModified)
-			throws DeleteFailedException {
+			throws OXException {
 		try {
 		    final int groupId = delEvent.getId();
 		    /*
@@ -176,20 +177,20 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    }
 		} catch (final OXException e) {
 		    LOG.error(e.getMessage(), e);
-		    throw new DeleteFailedException(e);
+		    throw new OXException(e);
 		} catch (final SQLException e) {
 		    LOG.error(e.getMessage(), e);
-		    throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+		    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
 		} catch (final DBPoolingException e) {
 		    LOG.error(e.getMessage(), e);
-		    throw new DeleteFailedException(e);
+		    throw new OXException(e);
 		}
 	}
 
 	protected void handleUserDeletion(final DeleteEvent delEvent,
 			final Connection readCon, final Connection writeCon,
 			final Context ctx, final long lastModified)
-			throws DeleteFailedException {
+			throws OXException {
 		try {
 		    final int userId = delEvent.getId();
 		    /*
@@ -307,13 +308,13 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    }
 		} catch (final OXException e) {
 		    LOG.error(e.getMessage(), e);
-		    throw new DeleteFailedException(e);
+		    throw new OXException(e);
 		} catch (final SQLException e) {
 		    LOG.error(e.getMessage(), e);
-		    throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+		    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
 		} catch (final DBPoolingException e) {
 		    LOG.error(e.getMessage(), e);
-		    throw new DeleteFailedException(e);
+		    throw new OXException(e);
 		}
 	}
 

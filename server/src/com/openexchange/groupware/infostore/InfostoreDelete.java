@@ -53,7 +53,7 @@ import java.sql.Connection;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -75,7 +75,7 @@ public class InfostoreDelete implements DeleteListener {
             database.removeUser(event.getId(), event.getContext(), new ServerSessionAdapter(event
                     .getSession(), event.getContext()));
         } catch (OXException e) {
-            throw new DeleteFailedException(e);
+            throw new OXException(e);
         }
     }
 }

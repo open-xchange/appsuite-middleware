@@ -54,7 +54,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -92,9 +93,9 @@ public final class OAuthDeleteListener implements DeleteListener {
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            throw new DeleteFailedException(DeleteFailedException.Code.ERROR, e, e.getMessage());
+            throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
