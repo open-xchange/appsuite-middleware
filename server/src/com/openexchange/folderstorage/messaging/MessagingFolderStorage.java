@@ -218,8 +218,6 @@ public final class MessagingFolderStorage implements FolderStorage {
                         session);
             } catch (final MessagingException e) {
                 throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
             }
             final MessagingAccountAccess prev = accesses.putIfAbsent(key, accountAccess);
             if (null != prev) {
@@ -602,8 +600,6 @@ public final class MessagingFolderStorage implements FolderStorage {
             return retval;
         } catch (final MessagingException e) {
             throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -764,10 +760,6 @@ public final class MessagingFolderStorage implements FolderStorage {
             }
             return list.toArray(new SortableId[list.size()]);
         } catch (final MessagingException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
