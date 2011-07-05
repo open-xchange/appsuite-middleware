@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.LocalizableStrings;
 
 /**

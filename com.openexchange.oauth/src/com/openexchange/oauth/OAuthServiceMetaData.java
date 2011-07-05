@@ -50,6 +50,7 @@
 package com.openexchange.oauth;
 
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 
 /**

@@ -49,9 +49,9 @@
 
 package com.openexchange.oauth.exception;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 
 /**

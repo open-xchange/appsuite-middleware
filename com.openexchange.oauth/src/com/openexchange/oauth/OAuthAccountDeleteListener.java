@@ -51,6 +51,7 @@ package com.openexchange.oauth;
 
 import java.sql.Connection;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link OAuthAccountDeleteListener} - Listener interface for OAuth account deletion.

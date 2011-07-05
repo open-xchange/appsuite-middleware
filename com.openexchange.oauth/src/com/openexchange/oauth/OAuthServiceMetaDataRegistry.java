@@ -50,6 +50,7 @@
 package com.openexchange.oauth;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link OAuthServiceMetaDataRegistry}
