@@ -50,8 +50,8 @@
 package com.openexchange.contacts.ldap.property;
 
 import java.util.Properties;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException.Code;
+import com.openexchange.contacts.ldap.exceptions.LdapConfigurationExceptionCode;
+import com.openexchange.exception.OXException;
 
 /**
  * This class contains the mapping properties, specifying what LDAP attributes
@@ -277,7 +277,7 @@ public class Mappings {
     private String userfield19;
     private String userfield20;
 
-    public static Mappings getMappingsFromProperties(final Properties props, final String prefix, final String mappingfile) throws LdapConfigurationException {
+    public static Mappings getMappingsFromProperties(final Properties props, final String prefix, final String mappingfile) throws OXException {
         final Mappings retval = new Mappings();
         Parameters.setPrefix(prefix);
         
@@ -517,13 +517,13 @@ public class Mappings {
         }
     }
 
-    private static String checkStringProperty(final CheckStringPropertyParameter parameterObject, final Parameters param) throws LdapConfigurationException {
+    private static String checkStringProperty(final CheckStringPropertyParameter parameterObject, final Parameters param) throws OXException {
         final String name = param.getName();
         final String checkStringProperty = PropertyHandler.checkStringProperty(parameterObject.getProps(), name);
         if (null != checkStringProperty && 0 != checkStringProperty.length()) {
             return checkStringProperty;
         } else {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, name, parameterObject.getMappingfile());
+            throw LdapConfigurationExceptionCode.PARAMETER_NOT_SET.create(name, parameterObject.getMappingfile());
         }
     }
 

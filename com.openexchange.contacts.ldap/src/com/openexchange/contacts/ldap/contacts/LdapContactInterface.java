@@ -61,8 +61,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.contact.LdapServer;
-import com.openexchange.contacts.ldap.exceptions.LdapException;
-import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
+import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapInterface;
 import com.openexchange.contacts.ldap.ldap.LdapInterface.FillClosure;
@@ -73,11 +72,10 @@ import com.openexchange.contacts.ldap.property.FolderProperties.ContactTypes;
 import com.openexchange.contacts.ldap.property.FolderProperties.LoginSource;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.contacts.ldap.property.Mappings;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -117,7 +115,7 @@ public class LdapContactInterface implements ContactInterface {
                 } finally {
                     this._contactIFace.rwlock_cached_contacts.writeLock().unlock();
                 }
-            } catch (final LdapException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
 
@@ -236,19 +234,19 @@ public class LdapContactInterface implements ContactInterface {
 
 
     public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException {
-        throw new LdapException(Code.DELETE_NOT_POSSIBLE);
+        throw LdapExceptionCode.DELETE_NOT_POSSIBLE.create();
     }
 
-    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, Order order, final String collation, final int[] cols) throws OXException {
+    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
         final Set<Integer> columns = getColumnSet(cols);
         final int folderId;
         {
             final int[] folders = searchobject.getFolders();
             if (null == folders) {
-                throw new LdapException(Code.FOLDERID_OBJECT_NULL);
+                throw LdapExceptionCode.FOLDERID_OBJECT_NULL.create();
             }
             if (folders.length != 1) {
-                throw new LdapException(Code.TOO_MANY_FOLDERS);
+                throw LdapExceptionCode.TOO_MANY_FOLDERS.create();
             }
             folderId = folders[0];
         }
@@ -428,7 +426,7 @@ public class LdapContactInterface implements ContactInterface {
         return null;
     }
 
-    public Contact[] getUsersById(int[] userIds, boolean performReadCheck) throws OXException {
+    public Contact[] getUsersById(final int[] userIds, final boolean performReadCheck) throws OXException {
         LOG.info("Called getUsersById");
         return null;
     }
@@ -439,7 +437,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     public void insertContactObject(final Contact co) throws OXException {
-        throw new LdapException(Code.INSERT_NOT_POSSIBLE);
+        throw LdapExceptionCode.INSERT_NOT_POSSIBLE.create();
     }
 
     public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final Order order, final int[] cols) throws OXException {
@@ -452,11 +450,11 @@ public class LdapContactInterface implements ContactInterface {
         initMappingTable();
     }
     
-    public void updateContactObject(final Contact co, final int fid, final Date d) throws OXException, OXConcurrentModificationException, ContactException {
+    public void updateContactObject(final Contact co, final int fid, final Date d) throws OXException, OXConcurrentModificationException {
         LOG.info("Called updateContactObject");
     }
 
-    public void updateUserContact(Contact contact, Date lastmodified) throws OXException {
+    public void updateUserContact(final Contact contact, final Date lastmodified) throws OXException {
         LOG.info("Called updateUserContact");
     }
 
@@ -516,13 +514,13 @@ public class LdapContactInterface implements ContactInterface {
 
 
     @SuppressWarnings("unchecked")
-    private Map<Integer, String> getKeyMappingTable() throws LdapException {
+    private Map<Integer, String> getKeyMappingTable() throws OXException {
         if (contentTheSameForAll()) {
             return this.contactIFace.keytable;
         } else {
             final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
             if (null == keys) {
-                throw new LdapException(Code.NO_KEYS_MAPPING_TABLE_FOUND);
+                throw LdapExceptionCode.NO_KEYS_MAPPING_TABLE_FOUND.create();
             }
             final Map<Integer, String> table = (Map<Integer, String>) keys;
             return table;
@@ -530,7 +528,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField, final boolean deleted) throws LdapException {
+    ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField, final boolean deleted) throws OXException {
         final ArrayList<Contact> arrayList = new ArrayList<Contact>();
         final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
         final boolean distributionlist = both || ContactTypes.distributionlists.equals(folderprop.getContacttypes());
@@ -562,28 +560,28 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private String getLogin() throws LdapException {
+    private String getLogin() throws OXException {
         final User user = getUserObject();
         final LoginSource userLoginSource = folderprop.getUserLoginSource();
         switch (userLoginSource) {
         case login:
             final String imapLogin = user.getImapLogin();
             if (null == imapLogin) {
-                throw new LdapException(Code.IMAP_LOGIN_NULL, user.getLoginInfo());
+                throw LdapExceptionCode.IMAP_LOGIN_NULL.create(user.getLoginInfo());
             } else {
                 return imapLogin;
             }
         case mail:
             final String mail = user.getMail();
             if (null == mail) {
-                throw new LdapException(Code.PRIMARY_MAIL_NULL, user.getLoginInfo());
+                throw LdapExceptionCode.PRIMARY_MAIL_NULL.create(user.getLoginInfo());
             } else {
                 return mail;
             }
         case name:
             return user.getLoginInfo();
         default:
-            throw new LdapException(Code.GIVEN_USER_LOGIN_SOURCE_NOT_FOUND, userLoginSource);
+            throw LdapExceptionCode.GIVEN_USER_LOGIN_SOURCE_NOT_FOUND.create(userLoginSource);
         }
     }
 
@@ -621,11 +619,11 @@ public class LdapContactInterface implements ContactInterface {
     private UidInterface getUidInterface() {
         return new UidInterface() {
 
-            public Integer getUid(final String uid) throws LdapException {
+            public Integer getUid(final String uid) throws OXException {
                 return ldapUidToOxUid(uid, getValuesMappingTable(), getKeyMappingTable());
             }
 
-            private Integer ldapUidToOxUid(final String uid, final Map<String, Integer> values, final Map<Integer, String> keys) throws LdapException {
+            private Integer ldapUidToOxUid(final String uid, final Map<String, Integer> values, final Map<Integer, String> keys) throws OXException {
                 final Integer number = values.get(uid);
                 if (null != number) {
                     return number;
@@ -641,25 +639,25 @@ public class LdapContactInterface implements ContactInterface {
         };
     }
 
-    private User getUserObject() throws LdapException {
+    private User getUserObject() throws OXException {
         final User user;
         try {
             user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
         } catch (final OXException e) {
-            throw new LdapException(Code.ERROR_GETTING_USER_Object, e);
+            throw LdapExceptionCode.ERROR_GETTING_USER_Object.create(e);
         }
         return user;
     }
 
 
     @SuppressWarnings("unchecked")
-    private Map<String, Integer> getValuesMappingTable() throws LdapException {
+    private Map<String, Integer> getValuesMappingTable() throws OXException {
         if (contentTheSameForAll()) {
             return this.contactIFace.valuetable;
         } else {
             final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
             if (null == values) {
-                throw new LdapException(Code.NO_VALUES_MAPPING_TABLE_FOUND);
+                throw LdapExceptionCode.NO_VALUES_MAPPING_TABLE_FOUND.create();
             }
             final Map<String, Integer> table = (Map<String, Integer>) values;
             return table;
@@ -701,14 +699,14 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private String oxUidToLdapUid(final int uid) throws LdapException {
+    private String oxUidToLdapUid(final int uid) throws OXException {
         if (folderprop.isMemorymapping()) {
             final Map<Integer, String> keys = getKeyMappingTable();
             final String ldapUid = keys.get(Autoboxing.I(uid));
             if (null != ldapUid) {
                 return ldapUid;
             } else {
-                throw new LdapException(Code.NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND, String.valueOf(uid));
+                throw LdapExceptionCode.NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND.create(String.valueOf(uid));
             }
         } else {
             return String.valueOf(uid);
@@ -726,10 +724,10 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<Contact> arrayList, final LdapInterface iface) throws LdapException {
+    private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<Contact> arrayList, final LdapInterface iface) throws OXException {
         iface.search(baseDN, filter, distributionslist, columns, new FillClosure() {
 
-            public void execute(final LdapGetter ldapGetter) throws LdapException {
+            public void execute(final LdapGetter ldapGetter) throws OXException {
                 if (distributionslist) {
                     final Contact retval = Mapper.getDistriContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, admin_id, attributes);
                     arrayList.add(retval);
@@ -752,29 +750,29 @@ public class LdapContactInterface implements ContactInterface {
         }
     }
 
-    public void associateTwoContacts(Contact master, Contact slave) throws OXException {
+    public void associateTwoContacts(final Contact master, final Contact slave) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public List<Contact> getAssociatedContacts(Contact contact) throws OXException {
+    public List<Contact> getAssociatedContacts(final Contact contact) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException {
+    public ContactUnificationState getAssociationBetween(final Contact c1, final Contact c2) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public Contact getContactByUUID(String uuid) throws OXException {
+    public Contact getContactByUUID(final String uuid) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public void separateTwoContacts(Contact master, Contact slave) throws OXException {
+    public void separateTwoContacts(final Contact master, final Contact slave) throws OXException {
         throw new UnsupportedOperationException();
     }
 
 	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
-			SearchTerm<T> searchterm, int orderBy, Order order,
-			String collation, int[] cols) throws OXException {
+			final SearchTerm<T> searchterm, final int orderBy, final Order order,
+			final String collation, final int[] cols) throws OXException {
         throw new UnsupportedOperationException();
 	}
 }

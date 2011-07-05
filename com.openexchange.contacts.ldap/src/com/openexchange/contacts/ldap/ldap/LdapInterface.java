@@ -50,7 +50,7 @@
 package com.openexchange.contacts.ldap.ldap;
 
 import java.util.Set;
-import com.openexchange.contacts.ldap.exceptions.LdapException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -66,11 +66,11 @@ public interface LdapInterface {
     
     public interface FillClosure {
 
-        public void execute(LdapGetter ldapGetter) throws LdapException;
+        public void execute(LdapGetter ldapGetter) throws OXException;
 
     }
 
-    public void search(final String ownBaseDN, final String ownFilter, final boolean distributionslist, final Set<Integer> columns, final FillClosure closure) throws LdapException;
+    public void search(final String ownBaseDN, final String ownFilter, final boolean distributionslist, final Set<Integer> columns, final FillClosure closure) throws OXException;
 
-    public void close() throws LdapException;
+    public void close() throws OXException;
 }

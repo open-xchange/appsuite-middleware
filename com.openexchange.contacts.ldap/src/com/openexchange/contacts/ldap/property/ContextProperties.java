@@ -54,7 +54,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -74,7 +74,7 @@ public class ContextProperties {
         this.folderproperties = new ArrayList<FolderProperties>();
     }
     
-    public static ContextProperties getContextPropertiesFromDir(final ConfigurationService service, final File dir, final int contextid, StringBuilder logBuilder) throws LdapConfigurationException {
+    public static ContextProperties getContextPropertiesFromDir(final ConfigurationService service, final File dir, final int contextid, StringBuilder logBuilder) throws OXException {
         final ContextProperties retval = new ContextProperties();
         // First list the folderdirs which should be registered to that context
         final File[] files = dir.listFiles(new FileFilter() {

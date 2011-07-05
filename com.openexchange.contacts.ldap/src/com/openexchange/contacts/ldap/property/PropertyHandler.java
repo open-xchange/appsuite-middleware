@@ -56,9 +56,9 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException.Code;
+import com.openexchange.contacts.ldap.exceptions.LdapConfigurationExceptionCode;
 import com.openexchange.contacts.ldap.osgi.LDAPServiceRegistry;
+import com.openexchange.exception.OXException;
 
 /**
  * A class which will deal with all property related actions.
@@ -86,7 +86,7 @@ public class PropertyHandler {
         return contextdetails;
     }
     
-    public void loadProperties() throws LdapConfigurationException {
+    public void loadProperties() throws OXException {
         final StringBuilder logBuilder = new StringBuilder();
 
         final File[] dirs;
@@ -95,7 +95,7 @@ public class PropertyHandler {
             dirs = directorylisting(new File(pathname));
 
             if (null == dirs) {
-                throw new LdapConfigurationException(LdapConfigurationException.Code.NOT_DIRECTORY, pathname);
+                throw LdapConfigurationExceptionCode.NOT_DIRECTORY.create(pathname);
             }
         }
 
@@ -109,7 +109,7 @@ public class PropertyHandler {
                 contextid = Integer.parseInt(dir.getName());
             } catch (final NumberFormatException e) {
                 // TODO right exception here
-                throw new LdapConfigurationException(Code.DIRECTORY_IS_NOT_A_CONTEXT_ID, dir.getName());
+                throw LdapConfigurationExceptionCode.DIRECTORY_IS_NOT_A_CONTEXT_ID.create(dir.getName());
             }
             final ContextProperties contextprops = ContextProperties.getContextPropertiesFromDir(configuration, dir, contextid, logBuilder);
             this.contextdetails.put(contextid, contextprops);
@@ -155,7 +155,7 @@ public class PropertyHandler {
         }
     }
     
-//    private List<Integer> getContexts(String name) throws LdapConfigurationException {
+//    private List<Integer> getContexts(String name) throws OXException {
 //        final String property = this.properties.getProperty(name);
 //        if (null != property) {
 //            final List<Integer> retval = new ArrayList<Integer>();
@@ -164,12 +164,12 @@ public class PropertyHandler {
 //                try {
 //                    retval.add(Integer.parseInt(ctx));
 //                } catch (final NumberFormatException e) {
-//                    throw new LdapConfigurationException(Code.NO_INTEGER_VALUE, ctx);
+//                    throw new OXException(Code.NO_INTEGER_VALUE, ctx);
 //                }
 //            }
 //            return retval;
 //        } else {
-//            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, name);
+//            throw new OXException(Code.PARAMETER_NOT_SET, name);
 //        }
 //    }
 }

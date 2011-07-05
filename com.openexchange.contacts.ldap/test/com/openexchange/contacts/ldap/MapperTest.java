@@ -12,8 +12,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.contacts.ldap.contacts.Mapper;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
-import com.openexchange.contacts.ldap.exceptions.LdapException;
+import com.openexchange.contacts.ldap.exceptions.OXException;
+import com.openexchange.contacts.ldap.exceptions.OXException;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
@@ -26,7 +26,7 @@ public class MapperTest extends Mapper {
     private Mappings mappingsFromProperties;
     
     @Before
-    public void setUp() throws LdapConfigurationException, FileNotFoundException, IOException {
+    public void setUp() throws OXException, FileNotFoundException, IOException {
         final Properties props = new Properties();
         final String mappingfile = "etc/contacts-ldap/mapping.ads.properties.example";
         props.load(new FileInputStream(mappingfile));
@@ -34,7 +34,7 @@ public class MapperTest extends Mapper {
     }
     
     @Test
-    public void testCommonPartsBothDates() throws LdapException, LdapConfigurationException {
+    public void testCommonPartsBothDates() throws OXException, OXException {
         final Set<Integer> cols = new HashSet<Integer>();
         cols.add(DataObject.CREATION_DATE);
         cols.add(DataObject.LAST_MODIFIED);
@@ -53,7 +53,7 @@ public class MapperTest extends Mapper {
     }
 
     @Test
-    public void testCommonPartsCreationDateOnly() throws LdapException, LdapConfigurationException {
+    public void testCommonPartsCreationDateOnly() throws OXException, OXException {
         final Set<Integer> cols = new HashSet<Integer>();
         cols.add(DataObject.CREATION_DATE);
         cols.add(DataObject.LAST_MODIFIED);
@@ -70,7 +70,7 @@ public class MapperTest extends Mapper {
     }
     
     @Test
-    public void testCommonPartsModifiedDateOnly() throws LdapException, LdapConfigurationException {
+    public void testCommonPartsModifiedDateOnly() throws OXException, OXException {
         final Set<Integer> cols = new HashSet<Integer>();
         cols.add(DataObject.CREATION_DATE);
         cols.add(DataObject.LAST_MODIFIED);
@@ -87,7 +87,7 @@ public class MapperTest extends Mapper {
     }
     
     @Test
-    public void testCommonPartsNoDates() throws LdapException, LdapConfigurationException {
+    public void testCommonPartsNoDates() throws OXException, OXException {
         final Set<Integer> cols = new HashSet<Integer>();
         cols.add(DataObject.CREATION_DATE);
         cols.add(DataObject.LAST_MODIFIED);
@@ -102,7 +102,7 @@ public class MapperTest extends Mapper {
     }
     
     @Test
-    public void testCommonPartsLastModifiedOnlyColOnly() throws LdapException, LdapConfigurationException {
+    public void testCommonPartsLastModifiedOnlyColOnly() throws OXException, OXException {
         final Set<Integer> cols = new HashSet<Integer>();
         cols.add(DataObject.LAST_MODIFIED);
         
@@ -118,7 +118,7 @@ public class MapperTest extends Mapper {
     }
     
     @Test
-    public void testCommonPartsLastModifiedMissingColOnly() throws LdapException, LdapConfigurationException {
+    public void testCommonPartsLastModifiedMissingColOnly() throws OXException, OXException {
         final Set<Integer> cols = new HashSet<Integer>();
         cols.add(DataObject.LAST_MODIFIED);
         
@@ -132,7 +132,7 @@ public class MapperTest extends Mapper {
     }
     
     @Test
-    public void testCommonPartsCreationOnlyColOnly() throws LdapException, LdapConfigurationException {
+    public void testCommonPartsCreationOnlyColOnly() throws OXException, OXException {
         final Set<Integer> cols = new HashSet<Integer>();
         cols.add(DataObject.CREATION_DATE);
         
@@ -148,7 +148,7 @@ public class MapperTest extends Mapper {
     }
     
     @Test
-    public void testCommonPartsCreationMissingColOnly() throws LdapException, LdapConfigurationException {
+    public void testCommonPartsCreationMissingColOnly() throws OXException, OXException {
         final Set<Integer> cols = new HashSet<Integer>();
         cols.add(DataObject.CREATION_DATE);
         
@@ -164,23 +164,23 @@ public class MapperTest extends Mapper {
     private LdapGetter getLdapGetter(final Mappings mappingsFromProperties, final Date creationdate, final Date modifieddate) {
         return new LdapGetter() {
             
-            public String getObjectFullName() throws LdapException {
+            public String getObjectFullName() throws OXException {
                 return "Test";
             }
             
-            public List<String> getMultiValueAttribute(String attributename) throws LdapException {
+            public List<String> getMultiValueAttribute(String attributename) throws OXException {
                 return null;
             }
             
-            public LdapGetter getLdapGetterForDN(String dn, String[] attributes) throws LdapException {
+            public LdapGetter getLdapGetterForDN(String dn, String[] attributes) throws OXException {
                 return null;
             }
             
-            public int getIntAttribute(String attributename) throws LdapException {
+            public int getIntAttribute(String attributename) throws OXException {
                 return 0;
             }
             
-            public Date getDateAttribute(String attributename) throws LdapException {
+            public Date getDateAttribute(String attributename) throws OXException {
                 if (mappingsFromProperties.getCreationdate().equals(attributename)) {
                     return creationdate;
                 }
@@ -190,7 +190,7 @@ public class MapperTest extends Mapper {
                 return null;
             }
             
-            public String getAttribute(String attributename) throws LdapException {
+            public String getAttribute(String attributename) throws OXException {
                 return null;
             }
         };

@@ -60,8 +60,8 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.ldap.LdapContext;
-import com.openexchange.contacts.ldap.exceptions.LdapException;
-import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
+import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
+import com.openexchange.exception.OXException;
 
 /**
  * An implementation of the {@link LdapGetter} interface which used JNDI to
@@ -85,7 +85,7 @@ public class LdapGetterJNDIImpl implements LdapGetter {
         this.objectfullname = objectfullname;
     }
 
-    public String getAttribute(final String attributename) throws LdapException {
+    public String getAttribute(final String attributename) throws OXException {
         try {
             final Attribute attribute = attributes.get(attributename);
             if (null != attribute) {
@@ -99,16 +99,16 @@ public class LdapGetterJNDIImpl implements LdapGetter {
                 return null;
             }
         } catch (final NamingException e) {
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e.getMessage());
         }
     }
 
-    public Date getDateAttribute(final String attributename) throws LdapException {
+    public Date getDateAttribute(final String attributename) throws OXException {
         try {
             final Attribute attribute = attributes.get(attributename);
             if (null != attribute) {
                 if (1 < attribute.size()) {
-                    throw new LdapException(Code.MULTIVALUE_NOT_ALLOWED_DATE, attributename);
+                    throw LdapExceptionCode.MULTIVALUE_NOT_ALLOWED_DATE.create(attributename);
                 } else {
                     // final DirContext attributeDefinition = attribute.getAttributeDefinition();
                     // final Attributes attributes2 = attributeDefinition.getAttributes("");
@@ -128,18 +128,18 @@ public class LdapGetterJNDIImpl implements LdapGetter {
                 return null;
             }
         } catch (final ParseException e) {
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e, e.getMessage());
         } catch (final NamingException e) {
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e, e.getMessage());
         }
     }
 
-    public int getIntAttribute(final String attributename) throws LdapException {
+    public int getIntAttribute(final String attributename) throws OXException {
         try {
             final Attribute attribute = attributes.get(attributename);
             if (null != attribute) {
                 if (1 < attribute.size()) {
-                    throw new LdapException(Code.MULTIVALUE_NOT_ALLOWED_INT, attributename);
+                    throw LdapExceptionCode.MULTIVALUE_NOT_ALLOWED_INT.create(attributename);
                 } else {
                     return Integer.parseInt((String) attribute.get());
                 }
@@ -147,21 +147,21 @@ public class LdapGetterJNDIImpl implements LdapGetter {
                 return -1;
             }
         } catch (final NumberFormatException e) {
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, "Attributename: " + attributename + " - " + e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create("Attributename: " + attributename + " - " + e.getMessage());
         } catch (final NamingException e) {
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, "Attributename: " + attributename + " - " + e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create("Attributename: " + attributename + " - " + e.getMessage());
         }
     }
 
-    public LdapGetter getLdapGetterForDN(final String dn, String[] attributes) throws LdapException {
+    public LdapGetter getLdapGetterForDN(final String dn, String[] attributes) throws OXException {
         try {
             return new LdapGetterJNDIImpl(context.getAttributes(dn, attributes), context, dn);
         } catch (final NamingException e) {
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, "AttributeDN: " + dn + " - " + e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create("AttributeDN: " + dn + " - " + e.getMessage());
         }
     }
 
-    public List<String> getMultiValueAttribute(final String attributename) throws LdapException {
+    public List<String> getMultiValueAttribute(final String attributename) throws OXException {
         final List<String> retval = new ArrayList<String>();
         try {
             final Attribute attribute = attributes.get(attributename);
@@ -183,11 +183,11 @@ public class LdapGetterJNDIImpl implements LdapGetter {
                 return retval;
             }
         } catch (final NamingException e) {
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e.getMessage());
         }
     }
 
-    public String getObjectFullName() throws LdapException {
+    public String getObjectFullName() throws OXException {
         return objectfullname;
     }
 

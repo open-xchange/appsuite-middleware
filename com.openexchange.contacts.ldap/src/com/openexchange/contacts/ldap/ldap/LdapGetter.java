@@ -51,7 +51,7 @@ package com.openexchange.contacts.ldap.ldap;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.contacts.ldap.exceptions.LdapException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -67,27 +67,27 @@ public interface LdapGetter {
      * 
      * @param attributename The name of the attribute
      * @return null if the attribute is not available
-     * @throws LdapException If something went wrong
+     * @throws OXException If something went wrong
      */
-    public String getAttribute(final String attributename) throws LdapException;
+    public String getAttribute(final String attributename) throws OXException;
 
     /**
      * Gets the value of the object with the given name as Date
      * 
      * @param birthday
      * @return null if the attribute is not available
-     * @throws LdapException If something went wrong
+     * @throws OXException If something went wrong
      */
-    public Date getDateAttribute(final String attributename) throws LdapException;
+    public Date getDateAttribute(final String attributename) throws OXException;
     
     /**
      * Gets the value of the object with the given name as int
      * 
      * @param attributename The name of the attribute
      * @return -1 if the attribute is not available
-     * @throws LdapException If something went wrong
+     * @throws OXException If something went wrong
      */
-    public int getIntAttribute(final String attributename) throws LdapException;
+    public int getIntAttribute(final String attributename) throws OXException;
 
     /**
      * Gets an LdapGetter object for getting the attributes below the object with
@@ -96,9 +96,9 @@ public interface LdapGetter {
      * @param dn The dn for which the getter should be returned
      * @param attributes The attributes which should be fetched (not all are needed)
      * @return null if no such object was found
-     * @throws LdapException
+     * @throws OXException
      */
-    public LdapGetter getLdapGetterForDN(final String dn, final String[] attributes) throws LdapException;
+    public LdapGetter getLdapGetterForDN(final String dn, final String[] attributes) throws OXException;
     
     /**
      * Gets the values of the object with the given name as array used
@@ -106,15 +106,15 @@ public interface LdapGetter {
      * 
      * @param attributename
      * @return
-     * @throws LdapException
+     * @throws OXException
      */
-    public List<String> getMultiValueAttribute(final String attributename) throws LdapException;
+    public List<String> getMultiValueAttribute(final String attributename) throws OXException;
     
     /**
      * Gets the fullname of the object to which the attributes belong
      * 
      * @return
-     * @throws LdapException
+     * @throws OXException
      */
-    public String getObjectFullName() throws LdapException;
+    public String getObjectFullName() throws OXException;
 }

@@ -71,13 +71,13 @@ import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortControl;
 import javax.naming.ldap.SortKey;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterface.SortInfo;
-import com.openexchange.contacts.ldap.exceptions.LdapException;
-import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
+import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.FolderProperties.DerefAliases;
 import com.openexchange.contacts.ldap.property.FolderProperties.SearchScope;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.contacts.ldap.property.Mappings;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
@@ -127,14 +127,14 @@ public class LdapJNDIImpl implements LdapInterface {
 
     private static Map<String, String> MAPPINGTABLE_USERNAME_LDAPBIND = new ConcurrentHashMap<String, String>();
     
-    public LdapJNDIImpl(final String login, final String password, final FolderProperties folderprop, final boolean deleted, final boolean distributionlist, final SortInfo sortField) throws LdapException {
+    public LdapJNDIImpl(final String login, final String password, final FolderProperties folderprop, final boolean deleted, final boolean distributionlist, final SortInfo sortField) throws OXException {
         this.folderprop = folderprop;
         this.deleted = deleted;
         try {
             this.context = createContext(login, password);
         } catch (final NamingException e1) {
             LOG.error(e1.getMessage(), e1);
-            throw new LdapException(Code.INITIAL_LDAP_ERROR, e1.getMessage());
+            throw LdapExceptionCode.INITIAL_LDAP_ERROR.create(e1.getMessage());
         }
         // TODO Implement right check if server supports pagedResults
 //      final boolean pagedResultControlSupported = isPagedResultControlSupported(context);
@@ -146,15 +146,15 @@ public class LdapJNDIImpl implements LdapInterface {
             this.context.setRequestControls(getControls(sortField, distributionlist, folderprop.getPagesize()));
         } catch (final NamingException e) {
             LOG.error(e.getMessage(), e);
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e.getMessage());
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e.getMessage());
         }
         
     }
     
-    public void search(final String baseDN, final String filter, final boolean distributionslist, final Set<Integer> columns, final FillClosure closure) throws LdapException {
+    public void search(final String baseDN, final String filter, final boolean distributionslist, final Set<Integer> columns, final FillClosure closure) throws OXException {
         final String defaultNamingContext;
         if (deleted) {
             defaultNamingContext = getDefaultNamingContext(context);
@@ -212,7 +212,7 @@ public class LdapJNDIImpl implements LdapInterface {
             for (final LdapGetter ldapGetter : ldapGetterList) {
                 try {
                     closure.execute(ldapGetter);
-                } catch (final LdapException e) {
+                } catch (final OXException e) {
                     LOG.error("Error occured on distributionlist " + ldapGetter.getObjectFullName());
                     throw e;
                 }
@@ -220,10 +220,10 @@ public class LdapJNDIImpl implements LdapInterface {
 
         } catch (final NamingException e) {
             LOG.error(e.getMessage(), e);
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e.getMessage());
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e.getMessage());
         }
 
     }
@@ -265,7 +265,7 @@ public class LdapJNDIImpl implements LdapInterface {
         return searchControls;
     }
 
-    private SearchControls getSearchControlDistri(final Set<Integer> columns, boolean deleted) {
+    private SearchControls getSearchControlDistri(final Set<Integer> columns, final boolean deleted) {
         final SearchControls searchControls = new SearchControls();
         searchControls.setSearchScope(getSearchControl(folderprop.getSearchScopeDistributionlist()));
         searchControls.setCountLimit(0);
@@ -281,7 +281,7 @@ public class LdapJNDIImpl implements LdapInterface {
         return new LdapGetterJNDIImpl(attributes, context, objectfullname);
     }
 
-    private List<String> getAttributes(final Set<Integer> columns, boolean distributionlist) {
+    private List<String> getAttributes(final Set<Integer> columns, final boolean distributionlist) {
         final List<String> retval = new ArrayList<String>();
         for (final Integer col : columns) {
             final String fieldFromColumn = getFieldFromColumn(col, distributionlist);
@@ -506,20 +506,20 @@ public class LdapJNDIImpl implements LdapInterface {
         }
     }
 
-    private static String getDefaultNamingContext(final LdapContext ctx) throws LdapException {
+    private static String getDefaultNamingContext(final LdapContext ctx) throws OXException {
         try {
-            SearchControls searchCtls2 = new SearchControls();
+            final SearchControls searchCtls2 = new SearchControls();
             searchCtls2.setSearchScope(SearchControls.OBJECT_SCOPE);
             searchCtls2.setReturningAttributes(new String[]{"defaultnamingcontext"});
             final NamingEnumeration<SearchResult> search = ctx.search("", "(objectclass=*)", searchCtls2);
             while (search.hasMoreElements()) {
-                SearchResult sr = (SearchResult)search.next();
-                Attributes attrs = sr.getAttributes();
+                final SearchResult sr = search.next();
+                final Attributes attrs = sr.getAttributes();
                 if (attrs != null) {
-                    for (NamingEnumeration<?> ae = attrs.getAll();ae.hasMoreElements();) {
-                        Attribute attr = (Attribute)ae.next();
+                    for (final NamingEnumeration<?> ae = attrs.getAll();ae.hasMoreElements();) {
+                        final Attribute attr = (Attribute)ae.next();
                         if (null != attr) {
-                            for (NamingEnumeration<?> e = attr.getAll(); e.hasMore();) {
+                            for (final NamingEnumeration<?> e = attr.getAll(); e.hasMore();) {
                                 final Object next = e.next();
                                 if (null != next) {
                                     return next.toString();
@@ -529,23 +529,23 @@ public class LdapJNDIImpl implements LdapInterface {
                     }
                 } 
             }
-            throw new LdapException(Code.ERROR_GETTING_DEFAULT_NAMING_CONTEXT);
+            throw LdapExceptionCode.ERROR_GETTING_DEFAULT_NAMING_CONTEXT.create();
         } catch (final NamingException e) {
-            throw new LdapException(Code.ERROR_GETTING_DEFAULT_NAMING_CONTEXT, e);
+            throw LdapExceptionCode.ERROR_GETTING_DEFAULT_NAMING_CONTEXT.create(e);
         }
     }
 
 
-    public void close() throws LdapException {
+    public void close() throws OXException {
         try {
             this.context.close();
         } catch (final NamingException e) {
             LOG.error(e.getMessage(), e);
-            throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+            throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e.getMessage());
         }
     }
 
-    public LdapContext createContext(final String username, final String password) throws NamingException, LdapException {
+    public LdapContext createContext(final String username, final String password) throws NamingException, OXException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Creating new connection.");
         }
@@ -627,43 +627,42 @@ public class LdapJNDIImpl implements LdapInterface {
         return env;
     }
 
-    private String getUserBindDN(final String username) throws NamingException, LdapException {
+    private String getUserBindDN(final String username) throws NamingException, OXException {
         final String userbinddn = MAPPINGTABLE_USERNAME_LDAPBIND.get(username);
         if (null != userbinddn) {
             return userbinddn;
-        } else {
-            final Hashtable<String, String> basicFolderProperties = getBasicLDAPProperties();
-            switch (folderprop.getUserAuthType()) {
-            case AdminDN:
-                basicFolderProperties.put(Context.SECURITY_AUTHENTICATION, "simple");
-                basicFolderProperties.put(Context.SECURITY_PRINCIPAL, folderprop.getUserAdminDN());
-                basicFolderProperties.put(Context.SECURITY_CREDENTIALS, folderprop.getUserAdminBindPW());
-                break;
-            case anonymous:
-                basicFolderProperties.put(Context.SECURITY_AUTHENTICATION, "none");
-                break;
-            }
-            final LdapContext retval = new InitialLdapContext(basicFolderProperties, null);
-            try {
-                final SearchControls searchControls = new SearchControls();
-                searchControls.setSearchScope(getSearchControl(folderprop.getUserSearchScope()));
-                searchControls.setCountLimit(0);
-                searchControls.setReturningAttributes(new String[]{"dn"});
-                final NamingEnumeration<SearchResult> search = retval.search(folderprop.getUserSearchBaseDN(), setUpFilter(username), searchControls);
+        }
+        final Hashtable<String, String> basicFolderProperties = getBasicLDAPProperties();
+        switch (folderprop.getUserAuthType()) {
+        case AdminDN:
+            basicFolderProperties.put(Context.SECURITY_AUTHENTICATION, "simple");
+            basicFolderProperties.put(Context.SECURITY_PRINCIPAL, folderprop.getUserAdminDN());
+            basicFolderProperties.put(Context.SECURITY_CREDENTIALS, folderprop.getUserAdminBindPW());
+            break;
+        case anonymous:
+            basicFolderProperties.put(Context.SECURITY_AUTHENTICATION, "none");
+            break;
+        }
+        final LdapContext retval = new InitialLdapContext(basicFolderProperties, null);
+        try {
+            final SearchControls searchControls = new SearchControls();
+            searchControls.setSearchScope(getSearchControl(folderprop.getUserSearchScope()));
+            searchControls.setCountLimit(0);
+            searchControls.setReturningAttributes(new String[]{"dn"});
+            final NamingEnumeration<SearchResult> search = retval.search(folderprop.getUserSearchBaseDN(), setUpFilter(username), searchControls);
+            if (search.hasMore()) {
+                final SearchResult next = search.next();
                 if (search.hasMore()) {
-                    final SearchResult next = search.next();
-                    if (search.hasMore()) {
-                        throw new LdapException(Code.TOO_MANY_USER_RESULTS);
-                    }
-                    final String userdn = next.getNameInNamespace();
-                    MAPPINGTABLE_USERNAME_LDAPBIND.put(username, userdn);
-                    return userdn;
-                } else {
-                    throw new LdapException(Code.NO_USER_RESULTS, username);
+                    throw LdapExceptionCode.TOO_MANY_USER_RESULTS.create();
                 }
-            } finally {
-                retval.close();
+                final String userdn = next.getNameInNamespace();
+                MAPPINGTABLE_USERNAME_LDAPBIND.put(username, userdn);
+                return userdn;
+            } else {
+                throw LdapExceptionCode.NO_USER_RESULTS.create(username);
             }
+        } finally {
+            retval.close();
         }
     }
 

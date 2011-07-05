@@ -54,7 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.contacts.ldap.property.FolderProperties;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -96,7 +96,7 @@ public class LdapGlobalFolderCreator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapGlobalFolderCreator.class);
     
-    public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, SQLException, DBPoolingException {
+    public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, SQLException {
         // First search for a folder with the name if is doesn't exist create it
         int ldapFolderID;
         final int admin_user_id;
@@ -263,16 +263,16 @@ public class LdapGlobalFolderCreator {
                 return null;
             }
 
-            public void setClient(String client) {
+            public void setClient(final String client) {
                 // Nothing to do.
             }
 
-            public void setLocalIp(String ip) {
+            public void setLocalIp(final String ip) {
                 // TODO Auto-generated method stub
                 
             }
 
-            public void setHash(String hash) {
+            public void setHash(final String hash) {
                 // TODO Auto-generated method stub
                 
             }

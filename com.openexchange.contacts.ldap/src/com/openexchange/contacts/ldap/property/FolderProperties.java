@@ -51,8 +51,8 @@ package com.openexchange.contacts.ldap.property;
 
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
-import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException.Code;
+import com.openexchange.contacts.ldap.exceptions.LdapConfigurationExceptionCode;
+import com.openexchange.exception.OXException;
 
 /**
  * Holds all folder specific properties
@@ -237,7 +237,7 @@ public class FolderProperties {
     
     private DerefAliases derefAliases;
     
-    public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
+    public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws OXException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
         
         final Properties conf = configuration.getFile(name);
@@ -255,7 +255,7 @@ public class FolderProperties {
         logBuilder.append("Properties for Context: ").append(contextnr).append(" Propertyfile: ").append(name).append(':').append(" Foldername: ").append(retval.getFoldername()).append('\n');
         logBuilder.append("-------------------------------------------------------------------------------").append('\n');
 
-        checkStringPropertyEnum(parameterObject, Parameters.contactTypes, Code.CONTACT_TYPES_WRONG, new SetterEnumClosure<ContactTypes>() {
+        checkStringPropertyEnum(parameterObject, Parameters.contactTypes, LdapConfigurationExceptionCode.CONTACT_TYPES_WRONG, new SetterEnumClosure<ContactTypes>() {
             public void set(ContactTypes enumeration) {
                 retval.setContacttypes(enumeration);
             }
@@ -299,7 +299,7 @@ public class FolderProperties {
             }
         });
         
-        checkStringPropertyEnum(parameterObject, Parameters.searchScope, Code.SEARCH_SCOPE_WRONG, new SetterEnumClosure<SearchScope>() {
+        checkStringPropertyEnum(parameterObject, Parameters.searchScope, LdapConfigurationExceptionCode.SEARCH_SCOPE_WRONG, new SetterEnumClosure<SearchScope>() {
             public void set(SearchScope enumeration) {
                 retval.setSearchScope(enumeration);
             }
@@ -308,7 +308,7 @@ public class FolderProperties {
             }
         });
 
-        checkStringPropertyEnum(parameterObject , Parameters.authtype, Code.AUTH_TYPE_WRONG, new SetterEnumClosure<AuthType>() {
+        checkStringPropertyEnum(parameterObject , Parameters.authtype, LdapConfigurationExceptionCode.AUTH_TYPE_WRONG, new SetterEnumClosure<AuthType>() {
             public void set(AuthType enumeration) {
                 retval.setAuthtype(enumeration);
             }
@@ -317,7 +317,7 @@ public class FolderProperties {
             }
         });
 
-        checkStringPropertyEnum(parameterObject, Parameters.sorting, Code.SORTING_WRONG, new SetterEnumClosure<Sorting>() {
+        checkStringPropertyEnum(parameterObject, Parameters.sorting, LdapConfigurationExceptionCode.SORTING_WRONG, new SetterEnumClosure<Sorting>() {
             public void set(Sorting enumeration) {
                 retval.setSorting(enumeration);
             }
@@ -326,7 +326,7 @@ public class FolderProperties {
             }
         });
 
-        checkStringPropertyEnum(parameterObject, Parameters.userLoginSource, Code.USER_LOGIN_SOURCE_WRONG, new SetterEnumClosure<LoginSource>() {
+        checkStringPropertyEnum(parameterObject, Parameters.userLoginSource, LdapConfigurationExceptionCode.USER_LOGIN_SOURCE_WRONG, new SetterEnumClosure<LoginSource>() {
             public void set(LoginSource enumeration) {
                 retval.setUserLoginSource(enumeration);
             }
@@ -347,7 +347,7 @@ public class FolderProperties {
             try {
                 retval.setUserSearchScope(SearchScope.valueOf(userSearchScopeString));
             } catch (final IllegalArgumentException e) {
-                throw new LdapConfigurationException(Code.USER_SEARCH_SCOPE_WRONG, userSearchScopeString);
+                throw LdapConfigurationExceptionCode.USER_SEARCH_SCOPE_WRONG.create(userSearchScopeString);
             }
         } else {
             retval.setUserSearchScope(retval.getSearchScope());
@@ -374,7 +374,7 @@ public class FolderProperties {
             try {
                 retval.setUserAuthType(UserAuthType.valueOf(userAuthTypeString));
             } catch (final IllegalArgumentException e) {
-                throw new LdapConfigurationException(Code.USER_AUTH_TYPE_WRONG);
+                throw new OXException(LdapConfigurationExceptionCode.USER_AUTH_TYPE_WRONG);
             }
         }
         logBuilder.append("\tuserAuthType: ").append(retval.getUserAuthType()).append('\n');
@@ -410,7 +410,7 @@ public class FolderProperties {
             try {
                 retval.setSearchScopeDistributionlist(SearchScope.valueOf(searchScopeString));
             } catch (final IllegalArgumentException e) {
-                throw new LdapConfigurationException(Code.SEARCH_SCOPE_DISTRI_WRONG, searchScopeString);
+                throw LdapConfigurationExceptionCode.SEARCH_SCOPE_DISTRI_WRONG.create(searchScopeString);
             }
         } else {
             retval.setSearchScopeDistributionlist(retval.getSearchScope());
@@ -435,7 +435,7 @@ public class FolderProperties {
         retval.setAds_deletion_support(Boolean.parseBoolean(ads_deletion_supportString));
         logBuilder.append("\tADS_deletion_support: ").append(retval.isAds_deletion_support()).append('\n');
         
-        checkStringPropertyEnum(parameterObject, Parameters.referrals, Code.REFERRALS_WRONG, new SetterEnumClosure<ReferralTypes>() {
+        checkStringPropertyEnum(parameterObject, Parameters.referrals, LdapConfigurationExceptionCode.REFERRALS_WRONG, new SetterEnumClosure<ReferralTypes>() {
             public void set(ReferralTypes enumeration) {
                 retval.setReferrals(enumeration);
             }
@@ -453,7 +453,7 @@ public class FolderProperties {
             }
             logBuilder.append("\trefreshinterval: ").append(retval.getRefreshinterval()).append('\n');
         } catch (final NumberFormatException e) {
-            throw new LdapConfigurationException(Code.INVALID_REFRESHINTERVAL, refreshintervalstring);
+            throw LdapConfigurationExceptionCode.INVALID_REFRESHINTERVAL.create(refreshintervalstring);
         }
 
         final String pooltimeoutString = checkStringProperty(parameterObject, Parameters.pooltimeout);
@@ -465,7 +465,7 @@ public class FolderProperties {
             }
             logBuilder.append("\tpooltimeout (-1 for not set): ").append(retval.getPooltimeout()).append('\n');
         } catch (final NumberFormatException e) {
-            throw new LdapConfigurationException(Code.INVALID_POOLTIMEOUT, pooltimeoutString, parameterObject.getFilename());
+            throw LdapConfigurationExceptionCode.INVALID_POOLTIMEOUT.create(pooltimeoutString, parameterObject.getFilename());
         }
         
         final String derefAliasesString = checkStringProperty(parameterObject, Parameters.derefAliases);
@@ -473,7 +473,7 @@ public class FolderProperties {
             try {
                 retval.setDerefAliases(DerefAliases.valueOf(derefAliasesString));
             } catch (final IllegalArgumentException e) {
-                throw new LdapConfigurationException(Code.DEREF_ALIASES_WRONG, derefAliasesString, parameterObject.getFilename());
+                throw LdapConfigurationExceptionCode.DEREF_ALIASES_WRONG.create(derefAliasesString, parameterObject.getFilename());
             }
         }
         logBuilder.append("\tderefAliases (null for not set): ").append(retval.getDerefAliases()).append('\n');
@@ -489,21 +489,21 @@ public class FolderProperties {
             retval.setPagesize(Integer.parseInt(pagesizestring));
             logBuilder.append("\tpagesize: ").append(retval.getPagesize()).append('\n');
         } catch (final NumberFormatException e) {
-            throw new LdapConfigurationException(Code.INVALID_PAGESIZE, pagesizestring);
+            throw LdapConfigurationExceptionCode.INVALID_PAGESIZE.create(pagesizestring);
         }
 
         final String mappingfile = checkStringProperty(parameterObject, Parameters.mappingfile);
         if (null != mappingfile) {
             final Properties mapprops = configuration.getFile(mappingfile);
             if (mapprops.isEmpty()) {
-                throw new LdapConfigurationException(Code.INVALID_MAPPING_FILE, mappingfile);
+                throw LdapConfigurationExceptionCode.INVALID_MAPPING_FILE.create(mappingfile);
             } else {
                 retval.setMappings(Mappings.getMappingsFromProperties(mapprops, PropertyHandler.bundlename + mappingfile.replace(
                     ".properties",
                     ""), mappingfile));
             }
         } else {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, parameterObject.getPrefix() + Parameters.mappingfile.getName(), parameterObject.getFilename());
+            throw LdapConfigurationExceptionCode.PARAMETER_NOT_SET.create(parameterObject.getPrefix() + Parameters.mappingfile.getName(), parameterObject.getFilename());
         }
         
         return retval;
@@ -843,7 +843,7 @@ public class FolderProperties {
         public void set(final String string);
     }
 
-    private static <T> void checkStringPropertyEnum(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final Code code, final SetterEnumClosure<T> setter) throws LdapConfigurationException {
+    private static <T> void checkStringPropertyEnum(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final LdapConfigurationExceptionCode code, final SetterEnumClosure<T> setter) throws OXException {
         final String paramname = param.getName();
         final String property = parameterObject.getProps().getProperty(parameterObject.getPrefix() + paramname);
         if (null != property && 0 != property.length()) {
@@ -852,21 +852,21 @@ public class FolderProperties {
                 setter.set(valueOf);
                 parameterObject.getLog().append("\t").append(paramname).append(": ").append(valueOf).append('\n');
             } catch (final IllegalArgumentException e) {
-                throw new LdapConfigurationException(code, property);
+                throw new OXException(code, property);
             }
         } else {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, parameterObject.getPrefix() + paramname, parameterObject.getFilename());
+            throw LdapConfigurationExceptionCode.PARAMETER_NOT_SET.create(parameterObject.getPrefix() + paramname, parameterObject.getFilename());
         }
     }
 
-    private static void checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterClosure setter) throws LdapConfigurationException {
+    private static void checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterClosure setter) throws OXException {
         final String property = checkStringProperty(parameterObject, param);
         if (null != property) {
             setter.set(property);
         }
     }
 
-    private static void checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterFallbackClosure setter) throws LdapConfigurationException {
+    private static void checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterFallbackClosure setter) throws OXException {
         final String property = checkStringProperty(parameterObject, param);
         if (null != property) {
             setter.set(property);
@@ -875,16 +875,16 @@ public class FolderProperties {
         }
     }
 
-    private static void checkStringPropertyNonOptional(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterClosure setter) throws LdapConfigurationException {
+    private static void checkStringPropertyNonOptional(final CheckStringPropertyEnumParameter parameterObject, final Parameters param, final SetterClosure setter) throws OXException {
         final String property = checkStringProperty(parameterObject, param);
         if (null != property) {
             setter.set(property);
         } else {
-            throw new LdapConfigurationException(Code.PARAMETER_NOT_SET, parameterObject.getPrefix() + param.getName(), parameterObject.getFilename());
+            throw LdapConfigurationExceptionCode.PARAMETER_NOT_SET.create(parameterObject.getPrefix() + param.getName(), parameterObject.getFilename());
         }
     }
     
-    private static String checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param) throws LdapConfigurationException {
+    private static String checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param) throws OXException {
         return PropertyHandler.checkStringProperty(parameterObject.getProps(), parameterObject.getPrefix() + param.getName());
     }
 

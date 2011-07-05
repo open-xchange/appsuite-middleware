@@ -52,7 +52,7 @@ package com.openexchange.contacts.ldap.folder;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.authentication.LoginException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -77,7 +77,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(final LoginResult login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws OXException {
         // Here we create the users personal LDAP Folder
         final Session session = login.getSession();
         final int cid = session.getContextId();
@@ -160,7 +160,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
         return newFolder;
     }
 
-    public void handleLogout(final LoginResult logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws OXException {
         // Nothing to do on logout
     }
 }
