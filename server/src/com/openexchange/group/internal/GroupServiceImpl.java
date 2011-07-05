@@ -50,8 +50,8 @@
 package com.openexchange.group.internal;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
@@ -75,7 +75,7 @@ public final class GroupServiceImpl implements GroupService {
      * {@inheritDoc}
      */
     public void create(final Context ctx, final User user, final Group group)
-        throws GroupException {
+        throws OXException {
         final Create create = new Create(ctx, user, group);
         create.perform();
     }
@@ -84,22 +84,22 @@ public final class GroupServiceImpl implements GroupService {
      * {@inheritDoc}
      */
     public void update(final Context ctx, final User user, final Group group,
-        final Date lastRead) throws GroupException {
+        final Date lastRead) throws OXException {
         final Update update = new Update(ctx, user, group, lastRead);
         update.perform();
     }
 
     public void delete(final Context ctx, final User user, final int groupId,
-        final Date lastRead) throws GroupException {
+        final Date lastRead) throws OXException {
         final Delete delete = new Delete(ctx, user, groupId, lastRead);
         delete.perform();
     }
 
-    public Group getGroup(Context ctx, int groupId) throws GroupException {
+    public Group getGroup(Context ctx, int groupId) throws OXException {
         try {
             return GroupStorage.getInstance().getGroup(groupId, ctx);
         } catch (LdapException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         }
     }
 }

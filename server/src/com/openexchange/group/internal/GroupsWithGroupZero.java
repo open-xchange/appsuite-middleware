@@ -56,16 +56,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserException;
 
 /**
- * Implementation of the group storage that adds group with identifier 0 to all
- * requests.
+ * Implementation of the group storage that adds group with identifier 0 to all requests.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GroupsWithGroupZero extends GroupStorage {
@@ -77,6 +77,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
 
     /**
      * Default constructor.
+     * 
      * @param ctx Context.
      * @param delegate underlying group storage.
      */
@@ -89,14 +90,10 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group getGroup(final int gid, final Context ctx) throws LdapException {
+    public Group getGroup(final int gid, final Context ctx) throws OXException {
         final Group retval;
         if (GroupTools.GROUP_ZERO.getIdentifier() == gid) {
-            try {
-                retval = GroupTools.getGroupZero(ctx);
-            } catch (final UserException e) {
-                throw new LdapException(e);
-            }
+            retval = GroupTools.getGroupZero(ctx);
         } else {
             retval = delegate.getGroup(gid, ctx);
         }
@@ -107,14 +104,10 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] getGroups(boolean loadMembers, final Context ctx) throws LdapException {
+    public Group[] getGroups(final boolean loadMembers, final Context ctx) throws OXException {
         final Group[] groups = delegate.getGroups(loadMembers, ctx);
         final Group[] retval = new Group[groups.length + 1];
-        try {
-            retval[0] = GroupTools.getGroupZero(ctx);
-        } catch (final UserException e) {
-            throw new LdapException(e);
-        }
+        retval[0] = GroupTools.getGroupZero(ctx);
         System.arraycopy(groups, 0, retval, 1, groups.length);
         return retval;
     }
@@ -123,28 +116,19 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] listModifiedGroups(final Date modifiedSince, final Context ctx)
-        throws LdapException {
+    public Group[] listModifiedGroups(final Date modifiedSince, final Context ctx) throws OXException {
         final Group[] groups = delegate.listModifiedGroups(modifiedSince, ctx);
         final Group[] retval = new Group[groups.length + 1];
-        try {
-            retval[0] = GroupTools.getGroupZero(ctx);
-        } catch (final UserException e) {
-            throw new LdapException(e);
-        }
+        retval[0] = GroupTools.getGroupZero(ctx);
         System.arraycopy(groups, 0, retval, 1, groups.length);
         return retval;
     }
-    
+
     @Override
-    public Group[] listDeletedGroups(Date modifiedSince, Context ctx) throws LdapException {
+    public Group[] listDeletedGroups(final Date modifiedSince, final Context ctx) throws OXException {
         final Group[] groups = delegate.listDeletedGroups(modifiedSince, ctx);
         final Group[] retval = new Group[groups.length + 1];
-        try {
-            retval[0] = GroupTools.getGroupZero(ctx);
-        } catch (final UserException e) {
-            throw new LdapException(e);
-        }
+        retval[0] = GroupTools.getGroupZero(ctx);
         System.arraycopy(groups, 0, retval, 1, groups.length);
         return retval;
     }
@@ -153,16 +137,15 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context ctx) throws GroupException {
-        final Pattern pat = Pattern.compile(pattern.replace("*", ".*"), Pattern
-            .CASE_INSENSITIVE);
+    public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context ctx) throws OXException {
+        final Pattern pat = Pattern.compile(pattern.replace("*", ".*"), Pattern.CASE_INSENSITIVE);
         final Group zero;
         try {
             zero = GroupTools.getGroupZero(ctx);
         } catch (final UserException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         } catch (final LdapException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         }
         final Matcher match = pat.matcher(zero.getDisplayName());
         final List<Group> groups = new ArrayList<Group>();
@@ -177,32 +160,27 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void insertGroup(final Context ctx, final Connection con,
-        final Group group, final StorageType type) throws GroupException {
+    public void insertGroup(final Context ctx, final Connection con, final Group group, final StorageType type) throws OXException {
         delegate.insertGroup(ctx, con, group, type);
     }
 
     @Override
-    public void deleteMember(final Context ctx, final Connection con,
-        final Group group, final int[] members) throws GroupException {
+    public void deleteMember(final Context ctx, final Connection con, final Group group, final int[] members) throws OXException {
         delegate.deleteMember(ctx, con, group, members);
     }
 
     @Override
-    public void insertMember(final Context ctx, final Connection con,
-        final Group group, final int[] members) throws GroupException {
+    public void insertMember(final Context ctx, final Connection con, final Group group, final int[] members) throws OXException {
         delegate.insertMember(ctx, con, group, members);
     }
 
     @Override
-    public void updateGroup(final Context ctx, final Connection con,
-        final Group group, final Date lastRead) throws GroupException {
+    public void updateGroup(final Context ctx, final Connection con, final Group group, final Date lastRead) throws OXException {
         delegate.updateGroup(ctx, con, group, lastRead);
     }
 
     @Override
-    public void deleteGroup(final Context ctx, final Connection con,
-        final int groupId, final Date lastRead) throws GroupException {
+    public void deleteGroup(final Context ctx, final Connection con, final int groupId, final Date lastRead) throws OXException {
         delegate.deleteGroup(ctx, con, groupId, lastRead);
     }
 

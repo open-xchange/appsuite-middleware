@@ -51,8 +51,8 @@ package com.openexchange.group;
 
 import java.sql.Connection;
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 
 /**
  * This class defines the storage API for groups. This is a low level API for reading and writing groups into some storage - normally
@@ -79,9 +79,9 @@ public abstract class GroupStorage {
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group to insert.
-     * @throws GroupException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    public final void insertGroup(final Context ctx, final Connection con, final Group group) throws GroupException {
+    public final void insertGroup(final Context ctx, final Connection con, final Group group) throws OXException {
         insertGroup(ctx, con, group, StorageType.ACTIVE);
     }
 
@@ -92,9 +92,9 @@ public abstract class GroupStorage {
      * @param con writable database connection.
      * @param group group to insert.
      * @param type defines if group is inserted ACTIVE or DELETED.
-     * @throws GroupException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    public abstract void insertGroup(Context ctx, Connection con, Group group, StorageType type) throws GroupException;
+    public abstract void insertGroup(Context ctx, Connection con, Group group, StorageType type) throws OXException;
 
     /**
      * This method updates group field in the storage.
@@ -103,13 +103,13 @@ public abstract class GroupStorage {
      * @param con writable database connection.
      * @param group group with fields to update.
      * @param lastRead timestamp when the group has been read last.
-     * @throws GroupException if updating does not finish successfully.
+     * @throws OXException if updating does not finish successfully.
      */
-    public abstract void updateGroup(Context ctx, Connection con, Group group, Date lastRead) throws GroupException;
+    public abstract void updateGroup(Context ctx, Connection con, Group group, Date lastRead) throws OXException;
 
-    public abstract void insertMember(Context ctx, Connection con, Group group, int[] members) throws GroupException;
+    public abstract void insertMember(Context ctx, Connection con, Group group, int[] members) throws OXException;
 
-    public abstract void deleteMember(Context ctx, Connection con, Group group, int[] members) throws GroupException;
+    public abstract void deleteMember(Context ctx, Connection con, Group group, int[] members) throws OXException;
 
     /**
      * This method deletes a group from the database. Before all its members must be removed.
@@ -118,9 +118,9 @@ public abstract class GroupStorage {
      * @param con writable database connection.
      * @param groupId unique identifier of the group to delete.
      * @param lastRead timestamp when the group has been read last.
-     * @throws GroupException if deleting fails.
+     * @throws OXException if deleting fails.
      */
-    public abstract void deleteGroup(Context ctx, Connection con, int groupId, Date lastRead) throws GroupException;
+    public abstract void deleteGroup(Context ctx, Connection con, int groupId, Date lastRead) throws OXException;
 
     /**
      * Reads a group from the persistent storage.
@@ -128,9 +128,9 @@ public abstract class GroupStorage {
      * @param gid Unique identifier of the group.
      * @param The context.
      * @return The group data object.
-     * @throws LdapException if an error occurs.
+     * @throws OXException If an error occurs
      */
-    public abstract Group getGroup(int gid, Context context) throws LdapException;
+    public abstract Group getGroup(int gid, Context context) throws OXException;
 
     /**
      * This method implements a universal search for groups. You have to define additionally to the search pattern the attributes that
@@ -142,9 +142,9 @@ public abstract class GroupStorage {
      * @param loadMembers - switch whether members should be loaded, too (decreases performance, don't use if not needed)
      * @param The context.
      * @return an array of groups that match the search pattern.
-     * @throws GroupException if searching has some storage related problem.
+     * @throws OXException if searching has some storage related problem.
      */
-    public abstract Group[] searchGroups(String pattern, boolean loadMembers, Context context) throws GroupException;
+    public abstract Group[] searchGroups(String pattern, boolean loadMembers, Context context) throws OXException;
 
     /**
      * This method returns groups that have been modified since the given timestamp.
@@ -152,9 +152,9 @@ public abstract class GroupStorage {
      * @param modifiedSince timestamp after that the groups have been modified.
      * @param The context.
      * @return an array of groups.
-     * @throws LdapException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public abstract Group[] listModifiedGroups(Date modifiedSince, Context context) throws LdapException;
+    public abstract Group[] listModifiedGroups(Date modifiedSince, Context context) throws OXException;
 
     /**
      * This metods returns groups that have been deleted since the given timestamp
@@ -162,19 +162,19 @@ public abstract class GroupStorage {
      * @param modifiedSince timestamp after that the groups have been deleted.
      * @param The context.
      * @return an array of groups.
-     * @throws LdapException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public abstract Group[] listDeletedGroups(Date modifiedSince, Context context) throws LdapException;
-    
+    public abstract Group[] listDeletedGroups(Date modifiedSince, Context context) throws OXException;
+
     /**
      * Returns the data objects of all groups.
      * 
      * @param context - the context.
-     * @param loadMembers - switch whether members should be loaded, too (decreases performance, don't use if not needed) 
+     * @param loadMembers - switch whether members should be loaded, too (decreases performance, don't use if not needed)
      * @return all groups.
-     * @throws LdapException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public abstract Group[] getGroups(boolean loadMembers, Context context) throws LdapException;
+    public abstract Group[] getGroups(boolean loadMembers, Context context) throws OXException;
 
     /**
      * Creates a new instance implementing the group storage interface.
@@ -200,6 +200,5 @@ public abstract class GroupStorage {
          */
         DELETED
     }
-
 
 }

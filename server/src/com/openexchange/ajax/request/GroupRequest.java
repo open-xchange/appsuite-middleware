@@ -66,7 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.group.Group;
 import com.openexchange.group.Group.Field;
-import com.openexchange.group.GroupException;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.LdapException;
@@ -199,7 +199,7 @@ public class GroupRequest {
         return retval;
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, LdapException, GroupException, OXException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, LdapException, OXException, OXException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
 
         String searchpattern = null;
@@ -228,7 +228,7 @@ public class GroupRequest {
         return jsonResponseArray;
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, LdapException, GroupException, OXException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, LdapException, OXException, OXException {
         timestamp = new Date(0);
         
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");

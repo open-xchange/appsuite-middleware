@@ -50,13 +50,12 @@
 package com.openexchange.group.internal;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserException.Code;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
@@ -80,11 +79,11 @@ public final class GroupTools {
         super();
     }
 
-    public static Group getGroupZero(final Context ctx) throws UserException, LdapException {
+    public static Group getGroupZero(final Context ctx) throws OXException {
         final Group retval;
         try {
             retval = (Group) GROUP_ZERO.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             throw Code.NOT_CLONEABLE.create(e, Group.class.getName());
         }
         final UserStorage ustor = UserStorage.getInstance();

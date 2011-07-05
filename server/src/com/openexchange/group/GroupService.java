@@ -50,6 +50,7 @@
 package com.openexchange.group;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -64,9 +65,9 @@ public interface GroupService {
      * @param ctx Context.
      * @param user User for permission checks.
      * @param group group to create.
-     * @throws GroupException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    void create(Context ctx, User user, Group group) throws GroupException;
+    void create(Context ctx, User user, Group group) throws OXException;
 
     /**
      * Updates a group.
@@ -74,10 +75,10 @@ public interface GroupService {
      * @param user User for permission checks.
      * @param group group to update.
      * @param lastRead timestamp when the group to update has last been read.
-     * @throws GroupException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
     void update(Context ctx, User user, Group group, Date lastRead) throws
-        GroupException;
+        OXException;
 
     /**
      * Deletes a group.
@@ -85,11 +86,11 @@ public interface GroupService {
      * @param user User for permission checks.
      * @param groupId unique identifier of the group to delete.
      * @param lastModified timestamp when the group to delete has last been read.
-     * @throws GroupException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
     void delete(Context ctx, User user, int groupId, Date lastModified) throws
-        GroupException;
+        OXException;
 
-    Group getGroup(Context ctx, int groupId) throws GroupException;
+    Group getGroup(Context ctx, int groupId) throws OXException;
 
 }

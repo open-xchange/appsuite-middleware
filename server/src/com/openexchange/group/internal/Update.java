@@ -57,17 +57,15 @@ import java.sql.SQLException;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
-import com.openexchange.group.GroupException.Code;
+import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -130,18 +128,18 @@ final class Update {
         this.lastRead = lastRead;
     }
 
-    Group getOrig() throws GroupException {
+    Group getOrig() throws OXException {
         if (null == orig) {
             try {
                 orig = storage.getGroup(changed.getIdentifier(), ctx);
             } catch (final LdapException e) {
-                throw new GroupException(e);
+                throw new OXException(e);
             }
         }
         return orig;
     }
 
-    void perform() throws GroupException {
+    void perform() throws OXException {
         allowed();
         check();
         prepare();
@@ -149,37 +147,37 @@ final class Update {
         propagate();
     }
 
-    private void allowed() throws GroupException {
+    private void allowed() throws OXException {
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
-                throw new GroupException(Code.NO_MODIFY_PERMISSION);
+                throw GroupExceptionCodes.NO_MODIFY_PERMISSION.create();
             }
             if (changed.getIdentifier() == GroupTools.GROUP_ZERO.getIdentifier()) {
                 try {
-                    throw new GroupException(Code.NO_GROUP_UPDATE, GroupTools.getGroupZero(ctx).getDisplayName());
+                    throw GroupExceptionCodes.NO_GROUP_UPDATE.create(GroupTools.getGroupZero(ctx).getDisplayName());
                 } catch (final UserException e) {
                     LOG.error(e.getMessage(), e);
-                    throw new GroupException(Code.NO_GROUP_UPDATE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
+                    throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
                 } catch (final LdapException e) {
                     LOG.error(e.getMessage(), e);
-                    throw new GroupException(Code.NO_GROUP_UPDATE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
+                    throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
                 }
             }
         } catch (final OXException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         }
     }
 
-    private void check() throws GroupException {
+    private void check() throws OXException {
         if (null == changed) {
-            throw new GroupException(Code.NULL);
+            throw GroupExceptionCodes.NULL.create();
         }
         if (GroupStorage.GROUP_ZERO_IDENTIFIER == changed.getIdentifier()) {
-            throw new GroupException(Code.NO_GROUP_UPDATE, getOrig().getDisplayName());
+            throw GroupExceptionCodes.NO_GROUP_UPDATE.create(getOrig().getDisplayName());
         }
         // Does the group exist? Are timestamps okay?
         if (getOrig().getLastModified().after(lastRead)) {
-            throw new GroupException(Code.MODIFIED);
+            throw GroupExceptionCodes.MODIFIED.create();
         }
         Logic.checkMandatoryForUpdate(changed);
         Logic.validateSimpleName(changed);
@@ -188,12 +186,12 @@ final class Update {
         Logic.doMembersExist(ctx, changed);
     }
 
-    private void prepare() throws GroupException {
+    private void prepare() throws OXException {
         prepareFields();
         prepareMember();
     }
 
-    private void prepareFields() throws GroupException {
+    private void prepareFields() throws OXException {
         if (!changed.isDisplayNameSet()) {
             changed.setDisplayName(getOrig().getDisplayName());
         }
@@ -207,7 +205,7 @@ final class Update {
      */
     private boolean memberPrepared = false;
 
-    private void prepareMember() throws GroupException {
+    private void prepareMember() throws OXException {
         if (memberPrepared) {
             return;
         }
@@ -230,23 +228,18 @@ final class Update {
 
     /**
      * Updates all data for the group in the database.
-     * @throws GroupException
+     * @throws OXException
      */
-    private void update() throws GroupException {
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new GroupException(Code.NO_CONNECTION, e);
-        }
+    private void update() throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             update(con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (final GroupException e) {
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
             DBUtils.rollback(con);
             throw e;
         } finally {
@@ -262,9 +255,9 @@ final class Update {
     /**
      * This method calls the plain update methods.
      * @param con writable database connection in transaction or not.
-     * @throws GroupException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    public void update(final Connection con) throws GroupException {
+    public void update(final Connection con) throws OXException {
         storage.updateGroup(ctx, con, changed, lastRead);
         int[] tmp = new int[addedMembers.size()];
         TIntIterator iter = addedMembers.iterator();
@@ -282,9 +275,9 @@ final class Update {
 
     /**
      * Inform the rest of the system about the changed group.
-     * @throws GroupException if something during propagate fails.
+     * @throws OXException if something during propagate fails.
      */
-    private void propagate() throws GroupException {
+    private void propagate() throws OXException {
         final int[] tmp = new int[addedMembers.size() + removedMembers.size()];
         TIntIterator iter = addedMembers.iterator();
         int i = 0;
@@ -299,25 +292,20 @@ final class Update {
         try {
             storage.invalidateUser(ctx, tmp);
         } catch (final UserException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         }
         // The time stamp of folder must be increased. The GUI the reloads the
         // folder. This must be done because through this change some folders
         // may get visible or invisible.
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new GroupException(Code.NO_CONNECTION, e);
-        }
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             propagate(con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (final GroupException e) {
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
             DBUtils.rollback(con);
             throw e;
         } finally {
@@ -330,11 +318,11 @@ final class Update {
         }
     }
 
-    private void propagate(final Connection con) throws GroupException {
+    private void propagate(final Connection con) throws OXException {
         try {
             OXFolderAdminHelper.propagateGroupModification(changed.getIdentifier(), con, con, ctx.getContextId());
         } catch (final SQLException e) {
-            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 }

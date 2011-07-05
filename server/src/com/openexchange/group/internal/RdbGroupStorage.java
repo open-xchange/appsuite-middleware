@@ -59,14 +59,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.server.impl.DBPool;
 
@@ -89,7 +87,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void insertGroup(final Context ctx, final Connection con, final Group group, final StorageType type) throws GroupException {
+    public void insertGroup(final Context ctx, final Connection con, final Group group, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_GROUP.get(type));
@@ -102,7 +100,7 @@ public class RdbGroupStorage extends GroupStorage {
             stmt.setInt(pos++, 65534);
             stmt.execute();
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -112,7 +110,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void updateGroup(final Context ctx, final Connection con, final Group group, final Date lastRead) throws GroupException {
+    public void updateGroup(final Context ctx, final Connection con, final Group group, final Date lastRead) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE groups SET identifier=?,"
@@ -126,10 +124,10 @@ public class RdbGroupStorage extends GroupStorage {
             stmt.setLong(pos++, lastRead.getTime());
             final int rows = stmt.executeUpdate();
             if (1 != rows) {
-                throw new GroupException(GroupException.Code.MODIFIED);
+                throw GroupExceptionCodes.MODIFIED.create();
             }
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -139,7 +137,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void insertMember(final Context ctx, final Connection con, final Group group, final int[] members) throws GroupException {
+    public void insertMember(final Context ctx, final Connection con, final Group group, final int[] members) throws OXException {
         if (0 == members.length) {
             return;
         }
@@ -155,7 +153,7 @@ public class RdbGroupStorage extends GroupStorage {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -166,7 +164,7 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
     public void deleteMember(final Context ctx, final Connection con,
-        final Group group, final int[] members) throws GroupException {
+        final Group group, final int[] members) throws OXException {
         if (0 == members.length) {
             return;
         }
@@ -182,7 +180,7 @@ public class RdbGroupStorage extends GroupStorage {
             }
             stmt.execute();
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -192,7 +190,7 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void deleteGroup(final Context ctx, final Connection con, final int groupId, final Date lastRead) throws GroupException {
+    public void deleteGroup(final Context ctx, final Connection con, final int groupId, final Date lastRead) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=? AND lastModified<=?");
@@ -201,10 +199,10 @@ public class RdbGroupStorage extends GroupStorage {
             stmt.setLong(3, lastRead.getTime());
             final int rows = stmt.executeUpdate();
             if (1 != rows) {
-                throw new GroupException(GroupException.Code.MODIFIED);
+                throw GroupExceptionCodes.MODIFIED.create();
             }
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -214,13 +212,8 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group getGroup(final int gid, final Context context) throws LdapException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
-            throw LdapException.Code.NO_CONNECTION.create("GRP", e);
-        }
+    public Group getGroup(final int gid, final Context context) throws OXException {
+        final Connection con = DBPool.pickup(context);
         PreparedStatement stmt = null;
         ResultSet result = null;
         Group group = null;
@@ -261,7 +254,7 @@ public class RdbGroupStorage extends GroupStorage {
         return listModifiedOrDeletedGroups(modifiedSince, context, SELECT_DELETED_GROUPS);
     }
     
-    private Group[] listModifiedOrDeletedGroups(final Date modifiedSince, final Context context, String statement) throws LdapException {
+    private Group[] listModifiedOrDeletedGroups(final Date modifiedSince, final Context context, final String statement) throws LdapException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -304,12 +297,12 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context context) throws GroupException {
+    public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context context) throws OXException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
-            throw new GroupException(GroupException.Code.NO_CONNECTION, e);
+            throw GroupExceptionCodes.NO_CONNECTION.create(e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -329,12 +322,13 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
-                if(loadMembers)
-                	group.setMember(selectMember(con, context, group.getIdentifier()));
+                if(loadMembers) {
+                    group.setMember(selectMember(con, context, group.getIdentifier()));
+                }
                 groups.add(group);
             }
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e,
+            throw GroupExceptionCodes.SQL_ERROR.create(e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -369,8 +363,9 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
-                if(loadMembers)
-                	group.setMember(selectMember(con, context, group.getIdentifier()));
+                if(loadMembers) {
+                    group.setMember(selectMember(con, context, group.getIdentifier()));
+                }
                 tmp.add(group);
             }
             groups = tmp.toArray(new Group[tmp.size()]);

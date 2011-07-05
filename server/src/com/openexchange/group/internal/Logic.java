@@ -51,9 +51,9 @@ package com.openexchange.group.internal;
 
 import gnu.trove.TIntHashSet;
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
-import com.openexchange.group.GroupException.Code;
+import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
@@ -76,23 +76,23 @@ public final class Logic {
     /**
      * 
      * @param group
-     * @throws GroupException
+     * @throws OXException
      */
     final static void checkMandatoryForCreate(final Group group)
-        throws GroupException {
+        throws OXException {
         if (!group.isSimpleNameSet()) {
-            throw new GroupException(Code.MANDATORY_MISSING, "simpleName");
+            throw GroupExceptionCodes.MANDATORY_MISSING.create("simpleName");
         }
         String tmp = group.getSimpleName();
         if (null == tmp || tmp.length() == 0) {
-            throw new GroupException(Code.MANDATORY_MISSING, "simpleName");
+            throw GroupExceptionCodes.MANDATORY_MISSING.create("simpleName");
         }
         if (!group.isDisplayNameSet()) {
-            throw new GroupException(Code.MANDATORY_MISSING, "displayName");
+            throw GroupExceptionCodes.MANDATORY_MISSING.create("displayName");
         }
         tmp = group.getDisplayName();
         if (null == tmp || tmp.length() == 0) {
-            throw new GroupException(Code.MANDATORY_MISSING, "displayName");
+            throw GroupExceptionCodes.MANDATORY_MISSING.create("displayName");
         }
         // lastModified is set here, to be able to simply store it in the
         // storage class. This allows storing a given lastModified.
@@ -106,23 +106,23 @@ public final class Logic {
     /**
      * 
      * @param group
-     * @throws GroupException
+     * @throws OXException
      */
     final static void checkMandatoryForUpdate(final Group group)
-        throws GroupException {
+        throws OXException {
         if (!group.isIdentifierSet()) {
-            throw new GroupException(Code.MANDATORY_MISSING, "identifier");
+            throw GroupExceptionCodes.MANDATORY_MISSING.create("identifier");
         }
         if (group.isSimpleNameSet()) {
             final String tmp = group.getSimpleName();
             if (null == tmp || tmp.length() == 0) {
-                throw new GroupException(Code.MANDATORY_MISSING, "simpleName");
+                throw GroupExceptionCodes.MANDATORY_MISSING.create("simpleName");
             }
         }
         if (group.isDisplayNameSet()) {
             final String tmp = group.getDisplayName();
             if (null == tmp || tmp.length() == 0) {
-                throw new GroupException(Code.MANDATORY_MISSING, "displayName");
+                throw GroupExceptionCodes.MANDATORY_MISSING.create("displayName");
             }
         }
         // lastModified is set here, to be able to simply store it in the
@@ -140,10 +140,10 @@ public final class Logic {
      * Validates of the simple name of the group only contains allowed
      * characters.
      * @param group Group.
-     * @throws GroupException if the name contains not allowed characters.
+     * @throws OXException if the name contains not allowed characters.
      */
     final static void validateSimpleName(final Group group)
-        throws GroupException {
+        throws OXException {
         if (!group.isSimpleNameSet()) {
             return;
         }
@@ -152,23 +152,23 @@ public final class Logic {
         final String groupName = group.getSimpleName();
         final String illegal = groupName.replaceAll(ALLOWED_CHARS, "");
         if (illegal.length() > 0) {
-            throw new GroupException(Code.NOT_ALLOWED_SIMPLE_NAME, illegal);
+            throw GroupExceptionCodes.NOT_ALLOWED_SIMPLE_NAME.create(illegal);
         }
     }
 
     /**
      * Checks if some string contains problematic data.
      * @param group Group.
-     * @throws GroupException if some string contains problematic data.
+     * @throws OXException if some string contains problematic data.
      */
-    final static void checkData(final Group group) throws GroupException {
+    final static void checkData(final Group group) throws OXException {
         if (!group.isDisplayNameSet()) {
             return;
         }
         final String result = Check.containsInvalidChars(group
             .getDisplayName());
         if (null != result) {
-            throw new GroupException(Code.INVALID_DATA, result);
+            throw GroupExceptionCodes.INVALID_DATA.create(result);
         }
     }
 
@@ -177,11 +177,11 @@ public final class Logic {
      * @param storage Storage implementation.
      * @param ctx Context.
      * @param group Group to check for duplicates.
-     * @throws GroupException if a duplicate is detected.
+     * @throws OXException if a duplicate is detected.
      */
     final static void checkForDuplicate(final GroupStorage storage,
         final Context ctx, final Group group)
-        throws GroupException {
+        throws OXException {
         if (!group.isSimpleNameSet()) {
             return;
         }
@@ -189,7 +189,7 @@ public final class Logic {
         for (final Group other : others) {
             if (group.getSimpleName().equals(other.getSimpleName())
                 && group.getIdentifier() != other.getIdentifier()) {
-                throw new GroupException(Code.DUPLICATE, Integer.valueOf(other
+                throw GroupExceptionCodes.DUPLICATE.create(Integer.valueOf(other
                     .getIdentifier()));
             }
         }
@@ -199,11 +199,11 @@ public final class Logic {
      * This method checks if all members of the group exist in the database.
      * @param ctx Context.
      * @param group Group.
-     * @throws GroupException if a member identifier is not found in the
+     * @throws OXException if a member identifier is not found in the
      * database.
      */
     final static void doMembersExist(final Context ctx, final Group group)
-        throws GroupException {
+        throws OXException {
         if (!group.isMemberSet()) {
             return;
         }
@@ -215,12 +215,12 @@ public final class Logic {
             }
             for (final int userId : group.getMember()) {
                 if (!set.contains(userId)) {
-                    throw new GroupException(Code.NOT_EXISTING_MEMBER, Integer
+                    throw GroupExceptionCodes.NOT_EXISTING_MEMBER.create(Integer
                         .valueOf(userId));
                 }
             }
         } catch (final UserException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         }
     }
 }

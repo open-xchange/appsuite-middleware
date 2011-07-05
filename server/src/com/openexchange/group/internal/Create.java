@@ -53,10 +53,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
-import com.openexchange.group.GroupException.Code;
+import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -64,7 +63,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
@@ -115,9 +113,9 @@ public final class Create {
     /**
      * This method glues all operations together. That includes all checks and
      * the operations to be done.
-     * @throws GroupException
+     * @throws OXException
      */
-    void perform() throws GroupException {
+    void perform() throws OXException {
         allowed();
         check();
         insert();
@@ -126,25 +124,25 @@ public final class Create {
 
     /**
      * Check if the user is allowed to create groups.
-     * @throws GroupException if the user is not allowed to create groups.
+     * @throws OXException if the user is not allowed to create groups.
      */
-    private void allowed() throws GroupException {
+    private void allowed() throws OXException {
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
-                throw new GroupException(Code.NO_CREATE_PERMISSION);
+                throw GroupExceptionCodes.NO_CREATE_PERMISSION.create();
             }
         } catch (final OXException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         }
     }
 
     /**
      * This method performs all necessary checks before creating a group.
-     * @throws GroupException if a problem was detected during checks.
+     * @throws OXException if a problem was detected during checks.
      */
-    private void check() throws GroupException {
+    private void check() throws OXException {
         if (null == group) {
-            throw new GroupException(Code.NULL);
+            throw GroupExceptionCodes.NULL.create();
         }
         Logic.checkMandatoryForCreate(group);
         Logic.validateSimpleName(group);
@@ -155,23 +153,18 @@ public final class Create {
 
     /**
      * Inserts all data for the group into the database.
-     * @throws GroupException
+     * @throws OXException
      */
-    private void insert() throws GroupException {
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new GroupException(Code.NO_CONNECTION, e);
-        }
+    private void insert() throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             insert(con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (final GroupException e) {
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
             DBUtils.rollback(con);
             throw e;
         } finally {
@@ -187,9 +180,9 @@ public final class Create {
     /**
      * This method calls the plain insert methods.
      * @param con writable database connection in transaction or not.
-     * @throws GroupException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    public void insert(final Connection con) throws GroupException {
+    public void insert(final Connection con) throws OXException {
         try {
             final int identifier = IDGenerator.getId(ctx.getContextId(),
                 Types.PRINCIPAL, con);
@@ -197,20 +190,20 @@ public final class Create {
             storage.insertGroup(ctx, con, group);
             storage.insertMember(ctx, con, group, group.getMember());
         } catch (final SQLException e) {
-            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }            
     }
 
     /**
      * Inform the rest of the system about the new group.
-     * @throws GroupException 
+     * @throws OXException 
      */
-    private void propagate() throws GroupException {
-        UserStorage storage = UserStorage.getInstance();
+    private void propagate() throws OXException {
+        final UserStorage storage = UserStorage.getInstance();
         try {
             storage.invalidateUser(ctx, group.getMember());
-        } catch (UserException e) {
-            throw new GroupException(e);
+        } catch (final UserException e) {
+            throw new OXException(e);
         }
     }
 }

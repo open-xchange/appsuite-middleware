@@ -52,8 +52,8 @@ package com.openexchange.group.internal;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -81,7 +81,7 @@ public final class GroupInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (initialized.get()) {
             LOG.debug("GroupStorage duplicate initialization.");
         }
@@ -92,7 +92,7 @@ public final class GroupInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!initialized.get()) {
             LOG.debug("GroupStorage duplicate shutdown.");
         }

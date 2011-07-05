@@ -55,21 +55,18 @@ import java.sql.SQLException;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
-import com.openexchange.group.GroupException.Code;
+import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.GroupStorage.StorageType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
@@ -127,12 +124,12 @@ public final class Delete {
         this.lastRead = lastRead;
     }
 
-    Group getOrig() throws GroupException {
+    Group getOrig() throws OXException {
         if (null == orig) {
             try {
                 orig = storage.getGroup(groupId, ctx);
             } catch (final LdapException e) {
-                throw new GroupException(e);
+                throw new OXException(e);
             }
         }
         return orig;
@@ -141,57 +138,52 @@ public final class Delete {
     /**
      * This method integrates all several methods for the different operations
      * of deleting a group.
-     * @throws GroupException if something during delete fails.
+     * @throws OXException if something during delete fails.
      */
-    void perform() throws GroupException {
+    void perform() throws OXException {
         allowed();
         check();
         delete();
         propagate();
     }
 
-    private void allowed() throws GroupException {
+    private void allowed() throws OXException {
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
-                throw new GroupException(Code.NO_DELETE_PERMISSION);
+                throw GroupExceptionCodes.NO_DELETE_PERMISSION.create();
             }
             if (groupId == GroupTools.GROUP_ZERO.getIdentifier()) {
                 try {
-                    throw new GroupException(Code.NO_GROUP_DELETE, GroupTools.getGroupZero(ctx).getDisplayName());
+                    throw GroupExceptionCodes.NO_GROUP_DELETE.create(GroupTools.getGroupZero(ctx).getDisplayName());
                 } catch (final UserException e) {
                     LOG.error(e.getMessage(), e);
-                    throw new GroupException(Code.NO_GROUP_DELETE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
+                    throw GroupExceptionCodes.NO_GROUP_DELETE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
                 } catch (final LdapException e) {
                     LOG.error(e.getMessage(), e);
-                    throw new GroupException(Code.NO_GROUP_DELETE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
+                    throw GroupExceptionCodes.NO_GROUP_DELETE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
                 }
             }
         } catch (final OXException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         }
     }
 
-    private void check() throws GroupException {
+    private void check() throws OXException {
         // Does the group exist?
         getOrig();
         // Group 1 can not be deleted
         if (GroupStorage.GROUP_ZERO_IDENTIFIER == groupId || 1 == groupId) {
-            throw new GroupException(Code.NO_GROUP_DELETE, getOrig().getDisplayName());
+            throw GroupExceptionCodes.NO_GROUP_DELETE.create(getOrig().getDisplayName());
         }
     }
 
     /**
      * Deletes all data for the group in the database. This includes deleting
      * everything that references the group.
-     * @throws GroupException
+     * @throws OXException
      */
-    private void delete() throws GroupException {
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new GroupException(Code.NO_CONNECTION, e);
-        }
+    private void delete() throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             propagateDelete(con);
@@ -199,8 +191,8 @@ public final class Delete {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (final GroupException e) {
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
             DBUtils.rollback(con);
             throw e;
         } finally {
@@ -213,18 +205,18 @@ public final class Delete {
         }
     }
 
-    private void propagateDelete(final Connection con) throws GroupException {
+    private void propagateDelete(final Connection con) throws OXException {
         // Delete all references to that group.
         final DeleteEvent event = new DeleteEvent(getOrig(), groupId,
             DeleteEvent.TYPE_GROUP, ctx);
         try {
             DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
         } catch (final OXException e) {
-            throw new GroupException(e);
+            throw new OXException(e);
         }
     }
 
-    private void delete(final Connection con) throws GroupException {
+    private void delete(final Connection con) throws OXException {
         // Delete the group.
         storage.deleteMember(ctx, con, getOrig(), getOrig().getMember());
         storage.deleteGroup(ctx, con, groupId, lastRead);
@@ -240,14 +232,14 @@ public final class Delete {
 
     /**
      * Inform the rest of the system about the deleted group.
-     * @throws GroupException if something during propagate fails.
+     * @throws OXException if something during propagate fails.
      */
-    private void propagate() throws GroupException {
-        UserStorage storage = UserStorage.getInstance();
+    private void propagate() throws OXException {
+        final UserStorage storage = UserStorage.getInstance();
         try {
             storage.invalidateUser(ctx, getOrig().getMember());
-        } catch (UserException e) {
-            throw new GroupException(e);
+        } catch (final UserException e) {
+            throw new OXException(e);
         }
     }
 }

@@ -56,7 +56,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.printing.days.CalendarTools;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupException;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
@@ -178,7 +178,7 @@ public class CPAppointment {
                     retval.add(service.getGroup(context, participant.getIdentifier()).getDisplayName());
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
-                } catch (final GroupException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 break;

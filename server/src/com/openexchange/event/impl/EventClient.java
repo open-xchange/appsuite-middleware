@@ -69,7 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
@@ -650,7 +650,7 @@ public class EventClient {
     protected void triggerEvent(final Event event) throws OXException {
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
         if (eventAdmin == null) {
-            throw new EventException("event service not available");
+            throw new OXException().setLogMessage("event service not available");
         }
         eventAdmin.postEvent(event);
     }
@@ -674,11 +674,9 @@ public class EventClient {
             try {
                 addFolderToAffectedMap(retval, folder);
             } catch (final OXException e) {
-                throw new EventException(e);
-            } catch (final GroupException e) {
-                throw new EventException(e);
+                throw e;
             } catch (final OXException e) {
-                throw new EventException(e);
+                throw new OXException(e);
             }
         }
         return retval;
@@ -710,20 +708,18 @@ public class EventClient {
                     final FolderObject folder = folderService.getFolderObject(folderId, contextId);
                     addFolderToAffectedMap(retval, folder);
                 } catch (final OXException e) {
-                    throw new EventException(e);
+                    throw e;
                 } catch (final FolderException e) {
-                    throw new EventException(e);
-                } catch (final GroupException e) {
-                    throw new EventException(e);
+                    throw new OXException(e);
                 } catch (final OXException e) {
-                    throw new EventException(e);
+                    throw new OXException(e);
                 }
             }
         }
         return retval;
     }
 
-    private void addFolderToAffectedMap(final Map<Integer, Set<Integer>> retval, final FolderObject folder) throws OXException, GroupException, OXException {
+    private void addFolderToAffectedMap(final Map<Integer, Set<Integer>> retval, final FolderObject folder) throws OXException {
         for (final OCLPermission permission : folder.getPermissions()) {
             if (permission.isFolderVisible()) {
                 if (permission.isGroupPermission()) {
