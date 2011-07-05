@@ -94,28 +94,20 @@ public class CachingContextStorage extends ContextStorage {
         if (null == cacheService) {
             return persistantImpl.getContextId(loginInfo);
         }
-        try {
-            final Cache cache = cacheService.getCache(REGION_NAME);
-            Integer contextId = (Integer) cache.get(loginInfo);
-            if (null == contextId) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Cache MISS. Login info: " + loginInfo);
-                }
-                contextId = I(persistantImpl.getContextId(loginInfo));
-                if (NOT_FOUND != contextId.intValue()) {
-                    try {
-                        cache.put(loginInfo, contextId);
-                    } catch (final CacheException e) {
-                        throw new OXException(e);
-                    }
-                }
-            } else if (LOG.isTraceEnabled()) {
-                LOG.trace("Cache HIT. Login info: " + loginInfo);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        Integer contextId = (Integer) cache.get(loginInfo);
+        if (null == contextId) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Cache MISS. Login info: " + loginInfo);
             }
-            return contextId.intValue();
-        } catch (final CacheException e) {
-            throw new OXException(e);
+            contextId = I(persistantImpl.getContextId(loginInfo));
+            if (NOT_FOUND != contextId.intValue()) {
+                cache.put(loginInfo, contextId);
+            }
+        } else if (LOG.isTraceEnabled()) {
+            LOG.trace("Cache HIT. Login info: " + loginInfo);
         }
+        return contextId.intValue();
     }
 
     @Override
@@ -131,12 +123,12 @@ public class CachingContextStorage extends ContextStorage {
                 // Nearly all accesses to the ContextStorage need then to be replaced with an access to the ContextService.
                 final Updater updater = Updater.getInstance();
                 try {
-                    UpdateStatus status = updater.getStatus(retval);
+                    final UpdateStatus status = updater.getStatus(retval);
                     retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
                     if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
                         updater.startUpdate(retval);
                     }
-                } catch (UpdateException e) {
+                } catch (final UpdateException e) {
                     if (SchemaExceptionCodes.DATABASE_DOWN.getDetailNumber() == e.getDetailNumber()) {
                         LOG.warn("Switching to read only mode for context " + contextId + " because master database is down.", e);
                         retval.setReadOnly(true);
@@ -148,17 +140,10 @@ public class CachingContextStorage extends ContextStorage {
                 return CachingContextStorage.this.getCacheLock();
             }
         };
-        try {
-            if (cacheService == null) {
-                return factory.load();
-            }
-            return new ContextReloader(factory, REGION_NAME);
-        } catch (final AbstractOXException e) {
-            if (e instanceof OXException) {
-                throw (OXException) e;
-            }
-            throw new OXException(e);
+        if (cacheService == null) {
+            return factory.load();
         }
+        return new ContextReloader(factory, REGION_NAME);
     }
 
     @Override
@@ -186,7 +171,7 @@ public class CachingContextStorage extends ContextStorage {
         if (cacheService != null) {
             try {
                 cacheService.freeCache(REGION_NAME);
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -201,18 +186,12 @@ public class CachingContextStorage extends ContextStorage {
             // Cache not initialized.
             return;
         }
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        cacheLock.lock();
         try {
-            final Cache cache = cacheService.getCache(REGION_NAME);
-            cacheLock.lock();
-            try {
-                cache.remove(Integer.valueOf(contextId));
-            } catch (final CacheException e) {
-                throw ContextExceptionCodes.CACHE_REMOVE.create(e, String.valueOf(contextId));
-            } finally {
-                cacheLock.unlock();
-            }
-        } catch (final CacheException e) {
-            throw new OXException(e);
+            cache.remove(Integer.valueOf(contextId));
+        } finally {
+            cacheLock.unlock();
         }
     }
 
@@ -223,18 +202,12 @@ public class CachingContextStorage extends ContextStorage {
             // Cache not initialized.
             return;
         }
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        cacheLock.lock();
         try {
-            final Cache cache = cacheService.getCache(REGION_NAME);
-            cacheLock.lock();
-            try {
-                cache.remove(loginContextInfo);
-            } catch (final CacheException e) {
-                throw ContextExceptionCodes.CACHE_REMOVE.create(e, loginContextInfo);
-            } finally {
-                cacheLock.unlock();
-            }
-        } catch (final CacheException e) {
-            throw new OXException(e);
+            cache.remove(loginContextInfo);
+        } finally {
+            cacheLock.unlock();
         }
     }
 

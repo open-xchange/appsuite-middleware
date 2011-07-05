@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * Context object delegator that reloads the backed delegate newly into cache if it times out.
@@ -68,9 +68,9 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
 
     /**
      * Default constructor.
-     * @throws AbstractOXException if some problem occurs with refreshing.
+     * @throws OXException if some problem occurs with refreshing.
      */
-    public ContextReloader(OXObjectFactory<ContextExtended> factory, String regionName) throws AbstractOXException {
+    public ContextReloader(final OXObjectFactory<ContextExtended> factory, final String regionName) throws OXException {
         super(factory, regionName);
         this.delegate = refresh();
     }
@@ -97,7 +97,7 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
         delegate.setUpdating(updating);
     }
 
-    public void setReadOnly(boolean readOnly) {
+    public void setReadOnly(final boolean readOnly) {
         updateDelegate();
         delegate.setReadOnly(readOnly);
     }
@@ -162,7 +162,7 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
     private void updateDelegate() throws RuntimeException {
         try {
             this.delegate = refresh();
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
