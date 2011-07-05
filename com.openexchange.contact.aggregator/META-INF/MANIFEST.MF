@@ -7,6 +7,9 @@ Bundle-Activator: com.openexchange.contact.aggregator.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.api2,
+ com.openexchange.folder,
+ com.openexchange.folderstorage,
+ com.openexchange.folderstorage.type,
  com.openexchange.groupware,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.container,

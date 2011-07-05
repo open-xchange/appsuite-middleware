@@ -89,7 +89,7 @@ public class ContactAggregator {
                         update(knownContact, newContact);
                     } else {
                         currentContacts.add(newContact);
-                    }
+                    }   
                 }
             }
         }
