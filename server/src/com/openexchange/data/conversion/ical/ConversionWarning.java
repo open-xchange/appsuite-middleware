@@ -50,9 +50,10 @@
 package com.openexchange.data.conversion.ical;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -70,9 +71,11 @@ public class ConversionWarning extends OXException {
      * @deprecated use {@link #ConversionWarning(Code, Object...)}.
      */
     @Deprecated
-    public ConversionWarning(final int index, final String message, final Object...args) {
-        super(EnumComponent.ICAL, Category.CODE_ERROR, 9999, message, null);
-        setMessageArgs(args);
+    public ConversionWarning(final int index, final String message, final Object... args) {
+        super(9999, OXExceptionStrings.MESSAGE, null, new Object[0]);
+        addCategory(Category.CATEGORY_ERROR);
+        setLogMessage(message, args);
+        setPrefix("ICA");
         this.index = index;
     }
 
@@ -81,7 +84,7 @@ public class ConversionWarning extends OXException {
      */
     @Deprecated
     public String getFormattedMessage() {
-        return String.format(super.getOrigMessage(), super.getMessageArgs());
+        return getLogMessage();
     }
 
     public ConversionWarning(final int index, final Code code, final Object... args) {
@@ -89,89 +92,93 @@ public class ConversionWarning extends OXException {
     }
 
     public ConversionWarning(final int index, final Code code, final Throwable cause, final Object... args) {
-        super(EnumComponent.ICAL, code.getCategory(), code.getNumber(),
-            code.getMessage(), cause);
-        setMessageArgs(args);
+        super(
+            code.getNumber(),
+            isDisplay(code) ? code.getMessage() : OXExceptionStrings.MESSAGE,
+            cause,
+            isDisplay(code) ? args : new Object[0]);
+        if (!isDisplay(code)) {
+            setLogMessage(code.getMessage(), args);
+        }
+        addCategory(code.getCategory());
+        setPrefix(code.getPrefix());
         this.index = index;
     }
 
-    public ConversionWarning(final int index, final AbstractOXException cause) {
-        super(cause);
-        this.index = index;
+    private static boolean isDisplay(final Code code) {
+        return code.getCategory().getLogLevel().implies(LogLevel.DEBUG);
     }
 
     public int getIndex() {
         return index;
     }
 
-
-    public enum Code {
+    public static enum Code implements OXExceptionCode {
         /**
          * Unable to convert task status "%1$s".
          */
-        INVALID_STATUS("Unable to convert task status \"%1$s\".", Category.USER_INPUT, 1),
+        INVALID_STATUS("Unable to convert task status \"%1$s\".", Category.CATEGORY_USER_INPUT, 1),
         /**
          * Unable to convert task priority %1$d.
          */
-        INVALID_PRIORITY("Unable to convert task priority %d.", Category.USER_INPUT, 2),
-        CANT_CREATE_RRULE("Can not create recurrence rule: %s", Category.CODE_ERROR, 3),
+        INVALID_PRIORITY("Unable to convert task priority %d.", Category.CATEGORY_USER_INPUT, 2),
+        CANT_CREATE_RRULE("Can not create recurrence rule: %s", Category.CATEGORY_ERROR, 3),
         /**
          * Invalid session given to implementation "%1$s".
          */
-        INVALID_SESSION("Invalid session given to implementation \"%1$s\".", Category.CODE_ERROR, 4),
+        INVALID_SESSION("Invalid session given to implementation \"%1$s\".", Category.CATEGORY_ERROR, 4),
         /**
          * Can't generate uid.
          */
-        CANT_GENERATE_UID("Can not generate uid.", Category.CODE_ERROR, 5),
+        CANT_GENERATE_UID("Can not generate uid.", Category.CATEGORY_ERROR, 5),
         /**
          * Problem writing to stream.
          */
-        WRITE_PROBLEM("Problem writing to stream.", Category.SOCKET_CONNECTION, 6),
+        WRITE_PROBLEM("Problem writing to stream.", Category.CATEGORY_CONNECTIVITY, 6),
         /**
          * Validation of calendar failed.
          */
-        VALIDATION("Validation of calendar failed.", Category.CODE_ERROR, 7),
+        VALIDATION("Validation of calendar failed.", Category.CATEGORY_ERROR, 7),
 
-        CANT_RESOLVE_USER("Can not resolve user: %d", Category.CODE_ERROR, 8),
+        CANT_RESOLVE_USER("Can not resolve user: %d", Category.CATEGORY_ERROR, 8),
 
-        PARSE_EXCEPTION("Parsing error parsing ical: %s", Category.USER_INPUT, 9),
+        PARSE_EXCEPTION("Parsing error parsing ical: %s", Category.CATEGORY_USER_INPUT, 9),
         /**
          * Unknown Class: %1$s
          */
-        UNKNOWN_CLASS("Unknown Class: %1$s", Category.USER_INPUT, 10),
+        UNKNOWN_CLASS("Unknown Class: %1$s", Category.CATEGORY_USER_INPUT, 10),
         /**
          * Cowardly refusing to convert confidential classified objects.
          */
-        CLASS_CONFIDENTIAL("Cowardly refusing to convert confidential classified objects.",
-            Category.USER_INPUT, 11),
+        CLASS_CONFIDENTIAL("Cowardly refusing to convert confidential classified objects.", Category.CATEGORY_USER_INPUT, 11),
         /**
          * Missing DTStart in appointment
          */
-        MISSING_DTSTART("Missing DTSTART", Category.USER_INPUT, 12),
+        MISSING_DTSTART("Missing DTSTART", Category.CATEGORY_USER_INPUT, 12),
         /**
          * Can not resolve resource: %d
          */
-        CANT_RESOLVE_RESOURCE("Can not resolve resource: %1$s", Category.CODE_ERROR, 13),
+        CANT_RESOLVE_RESOURCE("Can not resolve resource: %1$s", Category.CATEGORY_ERROR, 13),
         /**
          *
          */
-        PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS("Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.",Category.USER_INPUT, 14),
+        PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS("Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.", Category.CATEGORY_USER_INPUT, 14),
         /**
          * Not supported recurrence pattern: BYMONTH
          */
-        BYMONTH_NOT_SUPPORTED("Not supported recurrence pattern: BYMONTH", Category.USER_INPUT, 15),
+        BYMONTH_NOT_SUPPORTED("Not supported recurrence pattern: BYMONTH", Category.CATEGORY_USER_INPUT, 15),
         /**
          * This does not look like an iCal file. Please check the file.
          */
-        DOES_NOT_LOOK_LIKE_ICAL_FILE("This does not look like an iCal file. Please check the file.", Category.USER_INPUT,16),
+        DOES_NOT_LOOK_LIKE_ICAL_FILE("This does not look like an iCal file. Please check the file.", Category.CATEGORY_USER_INPUT, 16),
         /**
          * Empty "CLASS" element.
          */
-        EMPTY_CLASS("Empty \"CLASS\" element.", Category.USER_INPUT, 17),
+        EMPTY_CLASS("Empty \"CLASS\" element.", Category.CATEGORY_USER_INPUT, 17),
         /**
          * 
          */
-        INSUFFICIENT_INFORMATION("Insufficient information for parsing/writing this element.",Category.CODE_ERROR, 18);
+        INSUFFICIENT_INFORMATION("Insufficient information for parsing/writing this element.", Category.CATEGORY_ERROR, 18);
 
         /**
          * Message of the exception.
@@ -190,15 +197,19 @@ public class ConversionWarning extends OXException {
 
         /**
          * Default constructor.
+         * 
          * @param message message.
          * @param category category.
          * @param number detail number.
          */
-        private Code(final String message, final Category category,
-            final int number) {
+        private Code(final String message, final Category category, final int number) {
             this.message = message;
             this.category = category;
             this.number = number;
+        }
+
+        public String getPrefix() {
+            return "ICA";
         }
 
         /**
@@ -221,5 +232,6 @@ public class ConversionWarning extends OXException {
         public int getNumber() {
             return number;
         }
+
     }
 }
