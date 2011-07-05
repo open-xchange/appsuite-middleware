@@ -86,7 +86,8 @@ import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -153,7 +154,7 @@ public final class AJAXFile extends PermissionServlet {
             ResponseWriter.write(actionKeepAlive(ParamContainer.getInstance(req, EnumComponent.UPLOAD, resp)), resp.getWriter());
         } catch (final JSONException e) {
             final Response response = new Response();
-            response.setException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+            response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
             try {
                 ResponseWriter.write(response, resp.getWriter());
             } catch (final JSONException e1) {
@@ -391,7 +392,7 @@ public final class AJAXFile extends PermissionServlet {
 					e.getAction() == null ? STR_NULL : e.getAction()),
 					e.getMessage(), e);
         } catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             JSONObject responseObj = null;
             try {
                 final Response response = new Response();

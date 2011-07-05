@@ -1,0 +1,97 @@
+package com.openexchange.tools.servlet;
+
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
+
+/**
+ * Error codes for JSON exceptions.
+ */
+public enum OXJSONExceptionCodes implements OXExceptionCode {
+    /** Exception while writing JSON. */
+    JSON_WRITE_ERROR("Exception while writing JSON.", Category.CATEGORY_ERROR, 1),
+    /** Exception while parsing JSON: "%s". */
+    JSON_READ_ERROR("Exception while parsing JSON: \"%s\".", Category.CATEGORY_ERROR, 2),
+    /** Invalid cookie. */
+    INVALID_COOKIE("Invalid cookie.", Category.CATEGORY_TRY_AGAIN, 3),
+    /** Exception while building JSON. */
+    JSON_BUILD_ERROR("Exception while building JSON.", Category.CATEGORY_ERROR, 4),
+    /** Value "%1$s" of attribute %s contains non digit characters. */
+    CONTAINS_NON_DIGITS("Value \"%1$s\" of attribute %2$s contains non digit characters.", Category.CATEGORY_USER_INPUT, 5),
+    /** Too many digits within field %1$s. */
+    TOO_BIG_NUMBER("Too many digits within field %1$s.", Category.CATEGORY_USER_INPUT, 6),
+    /** Unable to parse value "%1$s" within field %2$s as a number. */
+    NUMBER_PARSING("Unable to parse value \"%1$s\" within field %2$s as a number.", Category.CATEGORY_ERROR, 7),
+    /** Invalid value \"%2$s\" in JSON attribute \"%1$s\". */
+    INVALID_VALUE("Invalid value \"%2$s\" in JSON attribute \"%1$s\".", Category.CATEGORY_USER_INPUT, 8);
+
+    private final String message;
+    private final Category category;
+    private final int number;
+    private final boolean display;
+
+    private OXJSONExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        this.category = category;
+        number = detailNumber;
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public String getPrefix() {
+        return "JSON";
+    }
+    
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return create(new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return create((Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        final OXException ret;
+        if (display) {
+            ret = new OXException(number, message, cause, args);
+        } else {
+            ret =
+                new OXException(
+                    number,
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
+        }
+        return ret.addCategory(category).setPrefix(getPrefix());
+    }
+}

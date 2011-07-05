@@ -58,7 +58,8 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * TaskParser
@@ -76,17 +77,17 @@ public class TaskParser extends CalendarParser {
     }
 
     public void parse(final Task taskobject, final JSONObject jsonobject)
-        throws OXJSONException {
+        throws OXException {
         try {
             parseElementTask(taskobject, jsonobject);
-        } catch (final OXJSONException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, e.getMessage());
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }
 
-    protected void parseElementTask(Task taskobject, JSONObject json) throws JSONException, OXJSONException, OXConflictException {
+    protected void parseElementTask(Task taskobject, JSONObject json) throws JSONException, OXException, OXConflictException {
         if (json.has(CalendarFields.START_DATE)) {
             taskobject.setStartDate(parseDate(json, CalendarFields.START_DATE));
         }

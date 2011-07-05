@@ -112,7 +112,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -165,7 +166,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, OXException, AbstractOXException, OXJSONException {
+    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, OXException, AbstractOXException, OXException {
         if (!session.getUserConfiguration().hasContact()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
         }
@@ -211,7 +212,7 @@ public class ContactRequest {
 
 
 
-	public JSONValue actionGetByUuid(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXJSONException {
+	public JSONValue actionGetByUuid(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         
         Contact contactObj = getFinalContact(contactInterface, jsonObj);
@@ -230,7 +231,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONValue actionGetAssociation(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXJSONException {
+    public JSONValue actionGetAssociation(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
         
@@ -239,7 +240,7 @@ public class ContactRequest {
         return ret;
     }
 
-    private JSONValue actionGetAssociated(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXJSONException {
+    private JSONValue actionGetAssociated(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         Contact contact  = getFinalContact(contactInterface, jsonObject);
         
@@ -258,7 +259,7 @@ public class ContactRequest {
         return ret;
     }
 
-    private JSONValue actionDissociate(JSONObject jsonObject) throws OXMandatoryFieldException, OXException, OXException, OXJSONException {
+    private JSONValue actionDissociate(JSONObject jsonObject) throws OXMandatoryFieldException, OXException, OXException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
         
@@ -267,7 +268,7 @@ public class ContactRequest {
         return null;
     }
 
-    private JSONValue actionAssociate(JSONObject jsonObject) throws OXMandatoryFieldException, OXException, OXException, OXJSONException {
+    private JSONValue actionAssociate(JSONObject jsonObject) throws OXMandatoryFieldException, OXException, OXException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
         
@@ -276,7 +277,7 @@ public class ContactRequest {
         return null;
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXJSONException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
 
         final Contact contactObj = new Contact();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
@@ -300,7 +301,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, OXException, OXJSONException, OXException {
+    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, OXException, OXException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -396,7 +397,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, OXException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
@@ -500,7 +501,7 @@ public class ContactRequest {
             } catch (final OXException e) {
                 throw e;
             } catch (final JSONException e) {
-                throw new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
 
             return jsonResponseArray;
@@ -548,7 +549,7 @@ public class ContactRequest {
                 }
             }
         } catch (final JSONException e) {
-            throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+            throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
         }
 
         return jsonResponseArray;
@@ -627,7 +628,7 @@ public class ContactRequest {
         return helper.toNativeArray();
     }
 
-    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, OXException {
+    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         final TimeZone timeZone;
@@ -653,7 +654,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionGetUser(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, OXException {
+    public JSONObject actionGetUser(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final TimeZone timeZone;
         {
@@ -818,7 +819,7 @@ public class ContactRequest {
         return jsonResponseArray;
     }
 
-    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, AbstractOXException, OXJSONException, OXException {
+    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, AbstractOXException, OXException, OXException {
         timestamp = new Date(0);
 
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
@@ -1019,7 +1020,7 @@ public class ContactRequest {
         return (FinalContactInterface) contactInterfaceTemp;
     }
     
-    protected Contact[] getTwoFinalContacts(FinalContactInterface contactInterface, JSONObject jsonObject) throws OXJSONException, OXException, OXException{
+    protected Contact[] getTwoFinalContacts(FinalContactInterface contactInterface, JSONObject jsonObject) throws OXException, OXException, OXException{
         UUID uuid1 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID1.getName());
         UUID uuid2 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID2.getName());
         Contact c1, c2;
@@ -1041,7 +1042,7 @@ public class ContactRequest {
         return new Contact[]{c1,c2};
     }
     
-    protected Contact getFinalContact(FinalContactInterface contactInterface, JSONObject jsonObject) throws OXJSONException, OXException, OXException{
+    protected Contact getFinalContact(FinalContactInterface contactInterface, JSONObject jsonObject) throws OXException, OXException, OXException{
         UUID uuid = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID.getName());
         Contact c;
         if( uuid == null){

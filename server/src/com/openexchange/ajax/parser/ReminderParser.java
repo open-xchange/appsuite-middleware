@@ -55,7 +55,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * JSON Parser for reminder objects.
@@ -76,20 +77,20 @@ public class ReminderParser extends DataParser {
      * object.
      * @param reminder attributes will be stored in this reminder object.
      * @param json a JSON object containing a reminder.
-     * @throws OXJSONException if parsing fails.
+     * @throws OXException if parsing fails.
      */
     public void parse(final ReminderObject reminder, final JSONObject json)
-        throws OXJSONException {
+        throws OXException {
         try {
             parseElementReminder(reminder, json);
         } catch (final JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e,
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e,
                 json.toString());
         }
     }
 
     protected void parseElementReminder(final ReminderObject reminder,
-        final JSONObject json) throws JSONException, OXJSONException {
+        final JSONObject json) throws JSONException, OXException {
         if (json.has(ReminderFields.LAST_MODIFIED)) {
             reminder.setLastModified(parseDate(json, ReminderFields.LAST_MODIFIED));
         }

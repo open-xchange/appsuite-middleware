@@ -149,7 +149,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -401,7 +402,7 @@ public class Folder extends SessionServlet {
                 resp.getWriter());
         } catch (final JSONException e) {
             try {
-                ResponseWriter.writeException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]), new JSONWriter(
+                ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
@@ -1080,7 +1081,7 @@ public class Folder extends SessionServlet {
                 resp.getWriter());
         } catch (final JSONException e) {
             try {
-                ResponseWriter.writeException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]), new JSONWriter(
+                ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
@@ -1344,7 +1345,7 @@ public class Folder extends SessionServlet {
                 resp.getWriter());
         } catch (final JSONException e) {
             try {
-                ResponseWriter.writeException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]), new JSONWriter(
+                ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
@@ -1712,7 +1713,7 @@ public class Folder extends SessionServlet {
                 resp.getWriter());
         } catch (final JSONException e) {
             try {
-                ResponseWriter.writeException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]), new JSONWriter(
+                ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
@@ -1842,7 +1843,7 @@ public class Folder extends SessionServlet {
                 resp)), resp.getWriter());
         } catch (final JSONException e) {
             try {
-                ResponseWriter.writeException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]), new JSONWriter(
+                ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
@@ -1982,7 +1983,7 @@ public class Folder extends SessionServlet {
                 resp)), resp.getWriter());
         } catch (final JSONException e) {
             try {
-                ResponseWriter.writeException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]), new JSONWriter(
+                ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
@@ -2095,7 +2096,7 @@ public class Folder extends SessionServlet {
                 resp)), resp.getWriter());
         } catch (final JSONException e) {
             try {
-                ResponseWriter.writeException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]), new JSONWriter(
+                ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
@@ -2221,7 +2222,7 @@ public class Folder extends SessionServlet {
                 resp)), resp.getWriter());
         } catch (final JSONException e) {
             try {
-                ResponseWriter.writeException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]), new JSONWriter(
+                ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);

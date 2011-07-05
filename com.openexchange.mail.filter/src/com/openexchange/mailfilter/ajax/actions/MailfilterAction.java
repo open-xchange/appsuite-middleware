@@ -93,7 +93,8 @@ import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  *
@@ -231,7 +232,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final SieveException e) {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
         } catch (final JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, EMPTY_ARGS);
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
         } catch (final NumberFormatException nfe) {
@@ -289,7 +290,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final SieveException e) {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
         } catch (final JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, EMPTY_ARGS);
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
         } catch (final NumberFormatException nfe) {
@@ -367,7 +368,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final SieveException e) {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
         } catch (final JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, e.getMessage());
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
         } catch (final NumberFormatException nfe) {
@@ -431,7 +432,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final SieveException e) {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
         } catch (final JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, EMPTY_ARGS);
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
         } catch (final NumberFormatException nfe) {
@@ -502,7 +503,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final SieveException e) {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
         } catch (final JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, EMPTY_ARGS);
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
         } catch (final NumberFormatException nfe) {

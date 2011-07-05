@@ -61,7 +61,8 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link MailAccountParser} - Parses a JSON object to a mail account.
@@ -82,18 +83,18 @@ public class MailAccountParser extends DataParser {
      * 
      * @param account Any attributes will be stored in this account object.
      * @param json A JSON object containing a reminder.
-     * @throws OXJSONException If parsing fails.
+     * @throws OXException If parsing fails.
      * @throws OXException If parsing fails
      */
-    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json) throws OXJSONException, OXException {
+    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json) throws OXException, OXException {
         try {
             return parseElementAccount(account, json);
         } catch (final JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, json.toString());
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json.toString());
         }
     }
 
-    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json) throws JSONException, OXJSONException, OXException {
+    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json) throws JSONException, OXException, OXException {
         final Set<Attribute> attributes = new HashSet<Attribute>();
         if (json.has(MailAccountFields.ID)) {
             account.setId(parseInt(json, MailAccountFields.ID));

@@ -54,7 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.group.Group;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
 
 /**
  * This class parses a JSON into a group object.
@@ -70,7 +70,7 @@ public class GroupParser extends DataParser {
     }
 
     public void parse(final Group group, final JSONObject json)
-        throws OXJSONException, JSONException {
+        throws OXException, JSONException {
         if (json.has(GroupFields.IDENTIFIER)) {
             group.setIdentifier(parseInt(json, GroupFields.IDENTIFIER));
         }

@@ -67,7 +67,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -104,7 +105,7 @@ public class Link extends DataServlet {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
-				response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 				writeResponse(response, httpServletResponse);
 				return;
 			}
@@ -118,14 +119,14 @@ public class Link extends DataServlet {
 		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (final OXJSONException exc) {
+		} catch (final OXException exc) {
 			LOG.error(exc.getMessage(), exc);
 			response.setException(exc);
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final JSONException e) {
-			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
 		} catch (final OXException e) {
@@ -170,7 +171,7 @@ public class Link extends DataServlet {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (final JSONException e) {
 					LOG.error(e.getMessage(), e);
-					response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+					response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 					writeResponse(response, httpServletResponse);
 					return;
 				}
@@ -186,11 +187,11 @@ public class Link extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
-		} catch (final OXJSONException exc) {
+		} catch (final OXException exc) {
 			LOG.error(exc.getMessage(), exc);
 			response.setException(exc);
 		} catch (final JSONException e) {
-			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
 		} catch (final OXConflictException e) {

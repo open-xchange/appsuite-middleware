@@ -71,8 +71,8 @@ import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.tools.servlet.OXJSONException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -145,7 +145,7 @@ public class ImportServlet extends ImportExport {
                 writer.writeObjects(importResult);
                 resObj.setData(writer.getObject());
             } catch (final JSONException e) {
-                throw new OXJSONException(Code.JSON_BUILD_ERROR, e);
+                throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
             }
         } catch (final AbstractOXException e) {
             if (Category.USER_INPUT.equals(e.getCategory())) {

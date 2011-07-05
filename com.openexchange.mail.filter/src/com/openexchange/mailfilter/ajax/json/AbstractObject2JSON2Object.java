@@ -53,7 +53,7 @@ import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
 
 /**
  * 
@@ -78,7 +78,7 @@ public abstract class AbstractObject2JSON2Object<T> {
         return json;
     }
 
-    public T parse(final JSONObject json) throws JSONException, SieveException, OXJSONException {
+    public T parse(final JSONObject json) throws JSONException, SieveException, OXException {
         final T obj = createObject();
         for (final Mapper<T> mapper : allMapper()) {
             final String attrName = mapper.getAttrName();
@@ -93,7 +93,7 @@ public abstract class AbstractObject2JSON2Object<T> {
         return obj;
     }
 
-    public T parse(final T obj, final JSONObject json) throws JSONException, SieveException, OXJSONException {
+    public T parse(final T obj, final JSONObject json) throws JSONException, SieveException, OXException {
         for (final Mapper<T> mapper : allMapper()) {
             final String attrName = mapper.getAttrName();
             if (json.has(attrName)) {
@@ -169,7 +169,7 @@ public abstract class AbstractObject2JSON2Object<T> {
 
         Object getAttribute(T obj) throws JSONException;
 
-        void setAttribute(T obj, Object attr) throws JSONException, SieveException, OXJSONException;
+        void setAttribute(T obj, Object attr) throws JSONException, SieveException, OXException;
     }
 
     protected abstract Mapper<T>[] allMapper();

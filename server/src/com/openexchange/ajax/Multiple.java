@@ -82,7 +82,8 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -114,7 +115,7 @@ public class Multiple extends SessionServlet {
         try {
             dataArray = new JSONArray(data);
         } catch (final JSONException e) {
-            final AbstractOXException exc = new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, data);
+            final AbstractOXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
             LOG.error(exc.getMessage() + Tools.logHeaderForError(req), exc);
             dataArray = new JSONArray();
         }
@@ -230,7 +231,7 @@ public class Multiple extends SessionServlet {
                     }
                     ResponseWriter.writeException(e, jsonWriter);
                 } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                    final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     LOG.error(oje.getMessage(), oje);
                     if (jsonWriter.isExpectingValue()) {
                         jsonWriter.value("");
@@ -261,7 +262,7 @@ public class Multiple extends SessionServlet {
                     ResponseWriter.writeException(e, jsonWriter);
                     jsonWriter.endObject();
                 } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                    final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     LOG.error(oje.getMessage(), oje);
                     jsonWriter.object();
                     ResponseWriter.writeException(oje, jsonWriter);
@@ -310,7 +311,7 @@ public class Multiple extends SessionServlet {
                     ResponseWriter.writeException(e, jsonWriter);
                     jsonWriter.endObject();
                 } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                    final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     LOG.error(oje.getMessage(), oje);
                     jsonWriter.object();
                     ResponseWriter.writeException(oje, jsonWriter);

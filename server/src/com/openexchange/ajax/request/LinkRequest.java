@@ -72,7 +72,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link LinkRequest} - Handles request to link module.
@@ -116,9 +116,9 @@ public class LinkRequest {
 	 * @throws OXException If handling action fails due to an OX server error
 	 * @throws JSONException If handling action fails due to a JSON error
 	 * @throws OXException If handling action fails due to an AJAX error
-	 * @throws OXJSONException If handling action fails due to a JSON error
+	 * @throws OXException If handling action fails due to a JSON error
 	 */
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, OXException, OXJSONException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, OXException, OXException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			actionAll(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -131,7 +131,7 @@ public class LinkRequest {
 	}
 	
 	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException,
-			OXJSONException, OXException {
+			OXException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
@@ -220,7 +220,7 @@ public class LinkRequest {
 
 	}
 
-	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);

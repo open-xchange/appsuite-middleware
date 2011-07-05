@@ -56,7 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
 
 /**
  * FolderChildParser
@@ -78,7 +78,7 @@ public class FolderChildParser extends DataParser {
         super(parseAll, timeZone);
     }
 
-    protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
+    protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final JSONObject jsonobject) throws JSONException, OXException {
 		if (jsonobject.has(FolderChildFields.FOLDER_ID)) {
 			folderchildobject.setParentFolderID(parseInt(jsonobject, FolderChildFields.FOLDER_ID));
 		}

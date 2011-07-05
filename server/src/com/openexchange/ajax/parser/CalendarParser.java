@@ -69,7 +69,8 @@ import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * CalendarParser
@@ -90,7 +91,7 @@ public class CalendarParser extends CommonParser {
         super(parseAll, timeZone);
     }
 
-    protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXJSONException {
+    protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXException {
         if (jsonobject.has(CalendarFields.TITLE)) {
             calendarobject.setTitle(parseString(jsonobject, CalendarFields.TITLE));
         }
@@ -138,7 +139,7 @@ public class CalendarParser extends CommonParser {
 
         if (jsonobject.has(CalendarFields.UNTIL) && jsonobject.has(CalendarFields.OCCURRENCES)) {
             if(jsonobject.isNull(CalendarFields.UNTIL) != (jsonobject.isNull(CalendarFields.OCCURRENCES) || Integer.parseInt(jsonobject.getString(CalendarFields.OCCURRENCES)) == 0)) {
-                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Illegal combination of until and occurrences value.");
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Illegal combination of until and occurrences value.");
             }
         }
 
@@ -196,7 +197,7 @@ public class CalendarParser extends CommonParser {
         parseElementCommon(calendarobject, jsonobject);
     }
 
-    public static Participant[] parseParticipants(final JSONObject jsonObj, final Participants participants) throws JSONException, OXConflictException, OXJSONException {
+    public static Participant[] parseParticipants(final JSONObject jsonObj, final Participants participants) throws JSONException, OXConflictException, OXException {
         final JSONArray jparticipants = jsonObj.getJSONArray(CalendarFields.PARTICIPANTS);
         final Participant[] participant = new Participant[jparticipants.length()];
         for (int i = 0; i < jparticipants.length(); i++) {
@@ -213,14 +214,14 @@ public class CalendarParser extends CommonParser {
             switch (type) {
                 case Participant.USER:
                     if (Participant.NO_ID == id) {
-                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create(
                             jparticipant.get(ParticipantsFields.ID));
                     }
                     p = new UserParticipant(id);
                     break;
                 case Participant.GROUP:
                     if (Participant.NO_ID == id) {
-                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create(
                             jparticipant.get(ParticipantsFields.ID));
                     }
                     p = new GroupParticipant(id);
@@ -229,14 +230,14 @@ public class CalendarParser extends CommonParser {
                     break;
                 case Participant.RESOURCE:
                     if (Participant.NO_ID == id) {
-                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create(
                             jparticipant.get(ParticipantsFields.ID));
                     }
                     p = new ResourceParticipant(id);
                     break;
                 case Participant.RESOURCEGROUP:
                     if (Participant.NO_ID == id) {
-                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create(
                             jparticipant.get(ParticipantsFields.ID));
                     }
                     p = new ResourceGroupParticipant(id);
@@ -300,12 +301,12 @@ public class CalendarParser extends CommonParser {
         }
     }
 
-    protected void parseField(boolean parseAlles, CalendarObject obj, TimeZone tz, JSONObject json) throws OXJSONException {
+    protected void parseField(boolean parseAlles, CalendarObject obj, TimeZone tz, JSONObject json) throws OXException {
         for (FieldParser<CalendarObject> parser : PARSERS) {
             try {
                 parser.parse(parseAlles, obj, tz, json);
             } catch (JSONException e) {
-                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, e.getMessage());
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
             }
         }
     }

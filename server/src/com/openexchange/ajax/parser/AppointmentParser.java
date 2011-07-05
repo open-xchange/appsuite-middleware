@@ -57,7 +57,7 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
 
 /**
  * AppointmentParser
@@ -89,7 +89,7 @@ public class AppointmentParser extends CalendarParser {
         }
     }
     
-    protected void parseElementAppointment(final Appointment appointmentobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXJSONException {
+    protected void parseElementAppointment(final Appointment appointmentobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXException {
         boolean isFullTime = false;
         
         if (jsonobject.has(AppointmentFields.FULL_TIME)) {

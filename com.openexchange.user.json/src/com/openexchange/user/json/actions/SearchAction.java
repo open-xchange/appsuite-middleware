@@ -77,7 +77,8 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
@@ -267,7 +268,7 @@ public final class SearchAction extends AbstractUserAction {
         return jsonObj.getBoolean(name);
     }
 
-    private static int[] parseJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+    private static int[] parseJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXException {
         if (!jsonObj.has(name)) {
             return null;
         }
@@ -285,7 +286,7 @@ public final class SearchAction extends AbstractUserAction {
 
             return i;
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(OXJSONException.Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
 
@@ -309,7 +310,7 @@ public final class SearchAction extends AbstractUserAction {
         return s;
     }
 
-    private static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+    private static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXException {
         if (!jsonObj.has(name)) {
             return null;
         }
@@ -327,7 +328,7 @@ public final class SearchAction extends AbstractUserAction {
 
             return d;
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(OXJSONException.Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
 

@@ -94,7 +94,8 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -263,7 +264,7 @@ public final class ICalJSONDataHandler implements DataHandler {
             } catch (final OXException e) {
                 throw new OXException(e);
             } catch (final JSONException e) {
-                throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+                throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
             }
         }
         /*
@@ -281,7 +282,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                     objects.put(jsonTask);
                 }
             } catch (final JSONException e) {
-                throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+                throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
             }
         }
         return objects;

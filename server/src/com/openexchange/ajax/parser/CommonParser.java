@@ -54,7 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
 
 /**
  * CommonParser
@@ -75,7 +75,7 @@ public class CommonParser extends FolderChildParser {
         super(parseAll, timeZone);
     }
 
-    protected void parseElementCommon(final CommonObject obj, final JSONObject json) throws JSONException, OXJSONException {
+    protected void parseElementCommon(final CommonObject obj, final JSONObject json) throws JSONException, OXException {
         if (json.has(CommonFields.CATEGORIES)) {
             obj.setCategories(parseString(json, CommonFields.CATEGORIES));
         }

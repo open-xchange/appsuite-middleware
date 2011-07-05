@@ -67,7 +67,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class Reminder extends DataServlet {
@@ -91,7 +92,7 @@ public class Reminder extends DataServlet {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+	            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
@@ -115,12 +116,11 @@ public class Reminder extends DataServlet {
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (final OXJSONException exc) {
+		} catch (final OXException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
 		} catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
 		} catch (final AbstractOXException exc) {
@@ -145,7 +145,7 @@ public class Reminder extends DataServlet {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+	            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
@@ -172,12 +172,11 @@ public class Reminder extends DataServlet {
 		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (final OXJSONException exc) {
+		} catch (final OXException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
 		} catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
 		} catch (final OXException e) {

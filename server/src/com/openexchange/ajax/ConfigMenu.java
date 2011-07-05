@@ -70,7 +70,8 @@ import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -109,7 +110,7 @@ public class ConfigMenu extends SessionServlet {
         } catch (AbstractOXException e) {
             response.setException(e);
         } catch (JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         }
@@ -203,7 +204,7 @@ public class ConfigMenu extends SessionServlet {
             log(e.getMessage(), e);
             response.setException(e);
         } catch (JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         }

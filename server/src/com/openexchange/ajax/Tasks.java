@@ -62,7 +62,8 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.TaskRequest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -87,7 +88,7 @@ public class Tasks extends DataServlet {
                  jsonObj = convertParameter2JSONObject(httpServletRequest);
             } catch (final JSONException e) {
                 LOG.error(e.getMessage(), e);
-                response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                 writeResponse(response, httpServletResponse);
                 return;
             }
@@ -103,7 +104,7 @@ public class Tasks extends DataServlet {
             }
             response.setException(e);
          } catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         }
@@ -126,7 +127,7 @@ public class Tasks extends DataServlet {
                     jsonObj = convertParameter2JSONObject(httpServletRequest);
                 } catch (final JSONException e) {
                     LOG.error(e.getMessage(), e);
-                    response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                    response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                     writeResponse(response, httpServletResponse);
                     return;
                 }
@@ -152,7 +153,7 @@ public class Tasks extends DataServlet {
                 httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
             }
         } catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         } catch (final AbstractOXException e) {

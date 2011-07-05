@@ -62,8 +62,8 @@ import com.openexchange.groupware.AbstractOXException.Parsing;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.tools.servlet.OXJSONException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * DataParser
@@ -91,7 +91,7 @@ public abstract class DataParser {
         this.timeZone = timeZone;
     }
 
-    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
+    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException, OXException {
         if (jsonobject.has(DataFields.ID)) {
             dataobject.setObjectID(parseInt(jsonobject, DataFields.ID));
         }
@@ -134,7 +134,7 @@ public abstract class DataParser {
         return retval;
     }
 
-    public static int parseInt(JSONObject json, String name) throws JSONException, OXJSONException {
+    public static int parseInt(JSONObject json, String name) throws JSONException, OXException {
         if (!json.has(name)) {
             return NO_INT;
         }
@@ -145,7 +145,7 @@ public abstract class DataParser {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException e) {
-            throw new OXJSONException(Code.NUMBER_PARSING, e, tmp, name);
+            throw OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
         }
     }
 
@@ -157,7 +157,7 @@ public abstract class DataParser {
         return jsonObj.getBoolean(name);
     }
 
-    public static Float parseFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+    public static Float parseFloat(final JSONObject jsonObj, final String name) throws JSONException, OXException {
         if (!jsonObj.has(name)) {
             return null;
         }
@@ -168,13 +168,13 @@ public abstract class DataParser {
         try {
             return Float.valueOf(tmp);
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
 
     private static final Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
 
-    public static Long parseLong(final JSONObject jsonObj, final String name) throws OXJSONException {
+    public static Long parseLong(final JSONObject jsonObj, final String name) throws OXException {
         final String tmp;
         try {
             tmp = jsonObj.getString(name);
@@ -191,7 +191,7 @@ public abstract class DataParser {
         };
         // Check for non digit characters and give specialized exception for this.
         if (!DIGITS.matcher(tmp).matches()) {
-            final OXJSONException e = new OXJSONException(Code.CONTAINS_NON_DIGITS, tmp, name);
+            final OXException e = OXJSONExceptionCodes.CONTAINS_NON_DIGITS.create(tmp, name);
             e.addProblematic(parsing);
             throw e;
         }
@@ -201,11 +201,11 @@ public abstract class DataParser {
             // Check if it parses into a BigInteger.
             try {
                 new BigInteger(tmp);
-                final OXJSONException e = new OXJSONException(Code.TOO_BIG_NUMBER, e1, name);
+                final OXException e = OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e1, name);
                 e.addProblematic(parsing);
                 throw e;
             } catch (final NumberFormatException e2) {
-                final OXJSONException e = new OXJSONException(Code.NUMBER_PARSING, e1, tmp, name);
+                final OXException e = OXJSONExceptionCodes.NUMBER_PARSING.create(e1, tmp, name);
                 e.addProblematic(parsing);
                 throw e;
             }
@@ -257,7 +257,7 @@ public abstract class DataParser {
         return tmp;
     }
 
-    public static int checkInt(JSONObject json, String name) throws OXJSONException, OXException {
+    public static int checkInt(JSONObject json, String name) throws OXException, OXException {
         final String tmp = checkString(json, name);
         if (tmp == null || tmp.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -265,7 +265,7 @@ public abstract class DataParser {
         try {
             return Integer.parseInt(tmp);
         } catch (NumberFormatException e) {
-            throw new OXJSONException(Code.NUMBER_PARSING, e, tmp, name);
+            throw OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
         }
     }
 
@@ -277,7 +277,7 @@ public abstract class DataParser {
         return Boolean.parseBoolean(tmp);
     }
 
-    public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, OXException {
+    public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXException, OXException {
         final String tmp = jsonObj.getString(name);
         if (tmp == null || tmp.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -286,11 +286,11 @@ public abstract class DataParser {
         try {
             return Float.parseFloat(tmp);
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
 
-    public static Date checkDate(final JSONObject jsonObj, final String name) throws OXJSONException, OXException {
+    public static Date checkDate(final JSONObject jsonObj, final String name) throws OXException, OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -299,11 +299,11 @@ public abstract class DataParser {
         try {
             return new Date(Long.parseLong(tmp));
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
 
-    public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws OXJSONException, OXException {
+    public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws OXException, OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -314,11 +314,11 @@ public abstract class DataParser {
             d.setTime(d.getTime()-offset);
             return d;
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
     
-    public static UUID checkUUID(final JSONObject jsonObj, final String name) throws OXJSONException, OXException {
+    public static UUID checkUUID(final JSONObject jsonObj, final String name) throws OXException, OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -326,7 +326,7 @@ public abstract class DataParser {
         try {
             return UUID.fromString(tmp);
         } catch (final IllegalArgumentException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
 
@@ -346,7 +346,7 @@ public abstract class DataParser {
         return tmp;
     }
 
-    public static int[] parseJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+    public static int[] parseJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXException {
         if (!jsonObj.has(name)) {
             return null;
         }
@@ -364,7 +364,7 @@ public abstract class DataParser {
 
             return i;
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
 
@@ -392,7 +392,7 @@ public abstract class DataParser {
         return s;
     }
     
-    public static UUID parseUUID(final JSONObject jsonObj, final String name) throws OXJSONException, OXException {
+    public static UUID parseUUID(final JSONObject jsonObj, final String name) throws OXException, OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
             return null;
@@ -404,7 +404,7 @@ public abstract class DataParser {
         }
     }
 
-    public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+    public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXException {
         if (!jsonObj.has(name)) {
             return null;
         }
@@ -422,11 +422,11 @@ public abstract class DataParser {
 
             return d;
         } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
 
-    public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, OXException {
+    public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXException, OXException {
         final int[] i = parseJSONIntArray(jsonObj, name);
         if (i == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);

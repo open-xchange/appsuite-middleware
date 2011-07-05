@@ -59,7 +59,8 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class Quota extends SessionServlet {
@@ -96,7 +97,7 @@ public class Quota extends SessionServlet {
                  */
                 throw (IOException) cause;
             }
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         } catch (final AbstractOXException e) {

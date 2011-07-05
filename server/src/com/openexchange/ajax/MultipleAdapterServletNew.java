@@ -80,7 +80,8 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -199,7 +200,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 ResponseWriter.write(response, resp.getWriter());
             }
         } catch (final JSONException e) {
-            final OXJSONException e1 = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            final OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(e1.getMessage(), e1);
             sendError(resp);
         }

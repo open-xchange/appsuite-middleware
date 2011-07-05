@@ -113,7 +113,8 @@ import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Tools;
@@ -384,7 +385,7 @@ public class Login extends AJAXServlet {
 
                     final Cookie[] cookies = req.getCookies();
                     if (cookies == null) {
-                        throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
+                        throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                     }
 
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
@@ -443,7 +444,7 @@ public class Login extends AJAXServlet {
                     if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
                         SessionServlet.removeOXCookies(hash, req, resp);
                         SessionServlet.removeJSESSIONID(req, resp);
-                        throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
+                        throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                     }
                 } catch (final SessiondException e) {
                     LOG.debug(e.getMessage(), e);
@@ -462,11 +463,11 @@ public class Login extends AJAXServlet {
                 } catch (final OXException e) {
                     LOG.debug(e.getMessage(), e);
                     response.setException(e);
-                } catch (final OXJSONException e) {
+                } catch (final OXException e) {
                     LOG.debug(e.getMessage(), e);
                     response.setException(e);
                 } catch (final JSONException e) {
-                    final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                    final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     LOG.error(oje.getMessage(), oje);
                     response.setException(oje);
                 } catch (final OXException e) {
@@ -743,7 +744,7 @@ public class Login extends AJAXServlet {
             }
             response.setException(e);
         } catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         }

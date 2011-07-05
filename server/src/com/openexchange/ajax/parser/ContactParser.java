@@ -59,7 +59,8 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * Parses JSON to contact objects.
@@ -76,15 +77,15 @@ public class ContactParser extends CommonParser {
         super(parseAll, timeZone);
     }
 
-    public void parse(final Contact contactobject, final JSONObject jsonobject) throws OXJSONException, ContactException {
+    public void parse(final Contact contactobject, final JSONObject jsonobject) throws OXException, ContactException {
         try {
             parseElementContact(contactobject, jsonobject);
         } catch (JSONException e) {
-            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
     }
 
-    protected void parseElementContact(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXJSONException, ContactException {
+    protected void parseElementContact(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXException, ContactException {
         for (int i = 0; i < mapping.length; i++) {
             if (mapping[i].jsonObjectContains(jsonobject)) {
                 mapping[i].setObject(contactobject, jsonobject);
@@ -99,7 +100,7 @@ public class ContactParser extends CommonParser {
         parseElementCommon(contactobject, jsonobject);
     }
 
-    protected void parseDistributionList(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXJSONException, ContactException {
+    protected void parseDistributionList(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXException, ContactException {
         final JSONArray jdistributionlist = jsonobject.getJSONArray(ContactFields.DISTRIBUTIONLIST);
         final DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jdistributionlist.length()];
         for (int a = 0; a < jdistributionlist.length(); a++) {
@@ -124,7 +125,7 @@ public class ContactParser extends CommonParser {
         oxobject.setDistributionList(distributionlist);
     }
 
-    protected void parseLinks(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
+    protected void parseLinks(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXException {
         final JSONArray jlinks = jsonobject.getJSONArray(ContactFields.LINKS);
         final LinkEntryObject[] links = new LinkEntryObject[jlinks.length()];
         for (int a = 0; a < links.length; a++) {
@@ -141,7 +142,7 @@ public class ContactParser extends CommonParser {
 
     private interface JSONAttributeMapper {
         boolean jsonObjectContains(JSONObject jsonobject);
-        void setObject(Contact contactobject, JSONObject jsonobject) throws JSONException, OXJSONException;
+        void setObject(Contact contactobject, JSONObject jsonobject) throws JSONException, OXException;
     }
 
     private final JSONAttributeMapper[] mapping = new JSONAttributeMapper[] {
@@ -301,7 +302,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.DEFAULT_ADDRESS);
             }
-            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXException {
                 contactobject.setDefaultAddress(parseInt(jsonobject, ContactFields.DEFAULT_ADDRESS));
             }
         },
@@ -738,7 +739,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USE_COUNT);
             }
-            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXException {
                 contactobject.setUseCount(parseInt(jsonobject, ContactFields.USE_COUNT));
             }
         },

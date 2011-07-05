@@ -95,7 +95,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -143,9 +143,9 @@ public final class MailAccountRequest {
      * @throws JSONException If a JSON error occurs
      * @throws SearchIteratorException If a search-iterator error occurs
      * @throws OXException If an AJAX error occurs
-     * @throws OXJSONException If a JSON error occurs
+     * @throws OXException If a JSON error occurs
      */
-    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, OXException, OXJSONException {
+    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, OXException, OXException {
         if (AJAXServlet.ACTION_DELETE.equalsIgnoreCase(action)) {
             return actionDelete(jsonObject);
         } else if (AJAXServlet.ACTION_NEW.equalsIgnoreCase(action)) {
@@ -167,7 +167,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONObject actionGet(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, OXException {
+    private JSONObject actionGet(final JSONObject jsonObject) throws JSONException, OXException, OXException, OXException {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
         try {
@@ -198,7 +198,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONObject actionGetTree(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, OXException {
+    private JSONObject actionGetTree(final JSONObject jsonObject) throws JSONException, OXException, OXException, OXException {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
         try {
@@ -230,7 +230,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, OXException {
+    private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXException, OXException {
         final int[] ids = DataParser.checkJSONIntArray(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         final JSONArray jsonArray = new JSONArray();

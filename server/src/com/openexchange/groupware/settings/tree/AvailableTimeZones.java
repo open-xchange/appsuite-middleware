@@ -62,7 +62,8 @@ import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.I18nServices;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link AvailableTimezones}
@@ -95,7 +96,7 @@ public class AvailableTimeZones implements PreferencesItemService {
                     try {
                         json.put(timeZoneID, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));
                     } catch (JSONException e) {
-                        OXJSONException e1 = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+                        OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                         throw new SettingException(e1);
                     }
                 }

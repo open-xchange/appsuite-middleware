@@ -69,7 +69,8 @@ import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mailfilter.ajax.fields.RuleFields;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * @author cutmasta
@@ -370,7 +371,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return (null == obj.getTestCommand());
             }
 
-            public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXJSONException {
+            public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXException {
                 final JSONObject jobj = (JSONObject) obj;
                 final String id = jobj.getString(GeneralFields.ID);
                 final TestCommand testCommand = rule.getTestCommand();
@@ -384,7 +385,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
 
-            private TestCommand createTestCommandFromJSON(final JSONObject jobj, final String id) throws JSONException, SieveException, OXJSONException {
+            private TestCommand createTestCommandFromJSON(final JSONObject jobj, final String id) throws JSONException, SieveException, OXException {
                 if (TestCommand.Commands.ADDRESS.getCommandname().equals(id)) {
                     return createAddressEnvelopeOrHeaderTest(jobj, TestCommand.Commands.ADDRESS);
                 } else if (TestCommand.Commands.ENVELOPE.getCommandname().equals(id)) {
@@ -418,10 +419,10 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                             if (null != extensionkey) {
                                 argList.add(extensionvalue);
                             } else {
-                                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Body rule: The extensionkey content needs a mime value but none given");
+                                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionkey content needs a mime value but none given");
                             }
                         } else {
-                            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
+                            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
                         }
                     }
                     argList.add(JSONArrayToStringList(getJSONArray(jobj, AddressEnvelopeAndHeaderTestFields.VALUES, id)));
@@ -438,13 +439,13 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         argList.add(createTagArg("value"));
                         argList.add(getArrayFromString("le"));
                     } else {
-                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Currentdate rule: The comparison \"" + comparison + "\" is not a valid comparison");
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The comparison \"" + comparison + "\" is not a valid comparison");
                     }
                     final String datepart = getString(jobj, CurrentDateTestFields.DATEPART, id);
                     if ("date".equals(datepart)) {
                         argList.add(getArrayFromString(datepart));
                     } else {
-                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
                     }
                     argList.add(JSONDateArrayToStringList(getJSONArray(jobj, CurrentDateTestFields.DATEVALUE, id)));
                     return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
@@ -463,7 +464,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return retval;
             }
 
-            private TestCommand createAllofOrAnyofTestCommand(final JSONObject jobj, final String id, final Commands command) throws JSONException, SieveException, OXJSONException {
+            private TestCommand createAllofOrAnyofTestCommand(final JSONObject jobj, final String id, final Commands command) throws JSONException, SieveException, OXException {
                 final JSONArray jarray = getJSONArray(jobj, AllofOrAnyOfTestFields.TESTS, id);
                 final ArrayList<TestCommand> commandlist = new ArrayList<TestCommand>(jarray.length());
                 for (int i = 0; i < jarray.length(); i++) {
@@ -573,7 +574,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 tmp.put(AllofOrAnyOfTestFields.TESTS, array);
             }
 
-            private TestCommand createAddressEnvelopeOrHeaderTest(final JSONObject jobj, final Commands command) throws JSONException, SieveException, OXJSONException {
+            private TestCommand createAddressEnvelopeOrHeaderTest(final JSONObject jobj, final Commands command) throws JSONException, SieveException, OXException {
                 final List<Object> argList = new ArrayList<Object>();
                 argList.add(createTagArg(getString(jobj, AddressEnvelopeAndHeaderTestFields.COMPARISON, command.getCommandname())));
                 argList.add(JSONArrayToStringList(getJSONArray(jobj, AddressEnvelopeAndHeaderTestFields.HEADERS, command.getCommandname())));
@@ -581,19 +582,19 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return new TestCommand(command, argList, new ArrayList<TestCommand>());
             }
             
-            private JSONArray getJSONArray(final JSONObject jobj, final String value, final String component) throws OXJSONException {
+            private JSONArray getJSONArray(final JSONObject jobj, final String value, final String component) throws OXException {
                 try {
                     return jobj.getJSONArray(value);
                 } catch (final JSONException e) {
-                    throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, "Error while reading TestCommand " + component + ": " + e.getMessage());
+                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading TestCommand " + component + ": " + e.getMessage());
                 }
             }
             
-            private String getString(final JSONObject jobj, final String value, final String component) throws OXJSONException {
+            private String getString(final JSONObject jobj, final String value, final String component) throws OXException {
                 try {
                     return jobj.getString(value);
                 } catch (final JSONException e) {
-                    throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, "Error while reading TestCommand " + component + ": " + e.getMessage());
+                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading TestCommand " + component + ": " + e.getMessage());
                 }
             }
         },

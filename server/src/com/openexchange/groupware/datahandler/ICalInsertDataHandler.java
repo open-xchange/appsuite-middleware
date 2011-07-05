@@ -73,7 +73,8 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link ICalInsertDataHandler} - The data handler to insert appointments and
@@ -188,7 +189,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             } catch (final OXException e) {
                 throw new OXException(e);
             } catch (final JSONException e) {
-                throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+                throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
             }
         }
         if (!tasks.isEmpty()) {
@@ -200,7 +201,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             } catch (final OXException e) {
                 throw new OXException(e);
             } catch (final JSONException e) {
-                throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+                throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
             }
         }
         return folderAndIdArray;

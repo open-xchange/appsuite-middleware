@@ -64,7 +64,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseOutputter;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 
 /**
@@ -105,7 +106,7 @@ public class JSONResponseOutputter implements ResponseOutputter {
                 ResponseWriter.write(response, resp.getWriter());
             }
         } catch (final JSONException e) {
-            final OXJSONException e1 = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+            final OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(e1.getMessage(), e1);
             try {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

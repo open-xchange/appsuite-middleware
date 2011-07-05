@@ -73,7 +73,8 @@ import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RejectActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.VacationActionFields;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
@@ -102,7 +103,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
         return (null == obj.getIfCommand());
     }
 
-    public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXJSONException {
+    public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXException {
         final JSONArray jarray = (JSONArray) obj;
         final IfCommand ifCommand = rule.getIfCommand();
         if (null == ifCommand) {
@@ -117,7 +118,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
         }
     }
 
-    private ActionCommand createActionCommandFromJSON(final JSONObject object) throws JSONException, SieveException, OXJSONException {
+    private ActionCommand createActionCommandFromJSON(final JSONObject object) throws JSONException, SieveException, OXException {
         final String id = object.getString(GeneralFields.ID);
         if (ActionCommand.Commands.KEEP.getJsonname().equals(id)) {
             return new ActionCommand(ActionCommand.Commands.KEEP, new ArrayList<Object>());
@@ -151,8 +152,8 @@ final class ActionCommandMapper implements Mapper<Rule> {
             }
             final String text = object.getString(VacationActionFields.TEXT.getFieldname());
             if (null == text) {
-                throw new OXJSONException(
-                    OXJSONException.Code.JSON_READ_ERROR,
+                throw new OXException(
+                    OXJSONExceptionCodes.JSON_READ_ERROR,
                     "Parameter " + VacationActionFields.TEXT.getFieldname() + " is missing for " + ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
             }
             arrayList.add(stringToList(text.replaceAll("(\r)?\n", "\r\n")));
@@ -160,8 +161,8 @@ final class ActionCommandMapper implements Mapper<Rule> {
         } else if (ActionCommand.Commands.ADDFLAG.getJsonname().equals(id)) {
             final JSONArray array = object.getJSONArray(AddFlagsActionFields.FLAGS);
             if (null == array) {
-                throw new OXJSONException(
-                    OXJSONException.Code.JSON_READ_ERROR,
+                throw new OXException(
+                    OXJSONExceptionCodes.JSON_READ_ERROR,
                     "Parameter " + AddFlagsActionFields.FLAGS + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
             }
             final ArrayList<Object> arrayList = new ArrayList<Object>();
@@ -172,7 +173,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
         }
     }
 
-    private ActionCommand createOneParameterActionCommand(final JSONObject object, final String parameter, final ActionCommand.Commands command) throws JSONException, SieveException, OXJSONException {
+    private ActionCommand createOneParameterActionCommand(final JSONObject object, final String parameter, final ActionCommand.Commands command) throws JSONException, SieveException, OXException {
         final String stringparam = getString(object, parameter, command.getCommandname());
         if (null == stringparam) {
             throw new JSONException("The parameter " + parameter + " is missing for action command " + command.getCommandname() + ".");
@@ -188,7 +189,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
         return new ActionCommand(command, createArrayArray(stringparam));
     }
 
-    private ActionCommand createFileintoActionCommand(final JSONObject object, final String parameter, final ActionCommand.Commands command) throws JSONException, SieveException, OXJSONException {
+    private ActionCommand createFileintoActionCommand(final JSONObject object, final String parameter, final ActionCommand.Commands command) throws JSONException, SieveException, OXException {
         final String stringparam = getString(object, parameter, command.getCommandname());
         if (null == stringparam) {
             throw new JSONException("The parameter " + parameter + " is missing for action command " + command.getCommandname() + ".");
@@ -296,12 +297,12 @@ final class ActionCommandMapper implements Mapper<Rule> {
         tmp.put(field, MailFolderUtility.prepareFullname(0, folderName));
     }
 
-    private String getString(final JSONObject jobj, final String value, final String component) throws OXJSONException {
+    private String getString(final JSONObject jobj, final String value, final String component) throws OXException {
         try {
             return jobj.getString(value);
         } catch (final JSONException e) {
-            throw new OXJSONException(
-                OXJSONException.Code.JSON_READ_ERROR,
+            throw new OXException(
+                OXJSONExceptionCodes.JSON_READ_ERROR,
                 e,
                 "Error while reading ActionCommand " + component + ": " + e.getMessage());
         }
