@@ -465,7 +465,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      * @throws SearchIteratorException If a search iterator error occurs
      */
-    public static SearchIterator<FolderObject> getUserRootFoldersIterator(final int userId, final int[] memberInGroups, final UserConfiguration userConfig, final Context ctx) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getUserRootFoldersIterator(final int userId, final int[] memberInGroups, final UserConfiguration userConfig, final Context ctx) throws OXException {
         StringBuilder condBuilder =
             new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.SYSTEM_TYPE).append(") AND (ot.parent = 0)");
         /*
@@ -524,7 +524,7 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible sub folders of a
      * certain parent folder.
      */
-    public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig, final Timestamp since) throws SQLException, OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig, final Timestamp since) throws SQLException, OXException {
         return getVisibleSubfoldersIterator(parentFolderId, userId, groups, ctx, userConfig, since, null);
     }
 
@@ -532,7 +532,7 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible sub folders of a
      * certain parent folder.
      */
-    public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig, final Timestamp since, final Connection con) throws SQLException, OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig, final Timestamp since, final Connection con) throws SQLException, OXException {
         if (parentFolderId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID) {
             return getVisiblePrivateFolders(userId, groups, userConfig.getAccessibleModules(), ctx, since, con);
         } else if (parentFolderId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
@@ -643,7 +643,7 @@ public final class OXFolderIteratorSQL {
     /**
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's public folder.
      */
-    private static SearchIterator<FolderObject> getVisiblePublicFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
+    private static SearchIterator<FolderObject> getVisiblePublicFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final SQLStuff sqlStuff = getVisiblePublicFolders0(userId, groups, accessibleModules, ctx, since, con);
         return new FolderObjectIterator(sqlStuff.rs, sqlStuff.stmt, false, ctx, sqlStuff.readCon, sqlStuff.closeCon);
     }
@@ -705,14 +705,14 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which offer a share right for given user and therefore
      * should appear right beneath system's shared folder in displayed folder tree.
      */
-    private static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
+    private static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         return getVisibleSharedFolders(userId, groups, accessibleModules, -1, ctx, since, con);
     }
 
     /**
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath given parent folder.
      */
-    private static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final FolderObject parentFolder, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
+    private static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final FolderObject parentFolder, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final boolean shared = parentFolder.isShared(userId);
         final StringBuilder condBuilder = new StringBuilder(32);
         if (shared) {
@@ -912,7 +912,7 @@ public final class OXFolderIteratorSQL {
     /**
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances of user-visible shared folders.
      */
-    public static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final SQLStuff stuff = getVisibleSharedFolders0(userId, memberInGroups, accessibleModules, owner, ctx, since, con);
         try {
             return new FolderObjectIterator(stuff.rs, stuff.stmt, false, ctx, stuff.readCon, stuff.closeCon);
@@ -1279,7 +1279,7 @@ public final class OXFolderIteratorSQL {
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> which represent all visible folders lying on path from given
      * folder to root folder.
      */
-    public static SearchIterator<FolderObject> getFoldersOnPathToRoot(final int folderId, final int userId, final UserConfiguration userConfig, final Locale locale, final Context ctx) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getFoldersOnPathToRoot(final int folderId, final int userId, final UserConfiguration userConfig, final Locale locale, final Context ctx) throws OXException {
         final List<FolderObject> folderList = new ArrayList<FolderObject>();
         fillAncestor(folderList, folderId, userId, userConfig, locale, null, ctx);
         return new FolderObjectIterator(folderList, false);
@@ -1452,7 +1452,7 @@ public final class OXFolderIteratorSQL {
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
      * type regardless of their parent folder.
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Context ctx) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Context ctx) throws OXException {
         return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, type, modules, null, ctx, null);
     }
 
@@ -1460,7 +1460,7 @@ public final class OXFolderIteratorSQL {
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
      * type regardless of their parent folder.
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Context ctx, final Connection con) throws OXException {
         return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, type, modules, null, ctx, con);
     }
 
@@ -1468,7 +1468,7 @@ public final class OXFolderIteratorSQL {
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
      * type and a certain parent folder.
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final int parent, final Context ctx) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final int parent, final Context ctx) throws OXException {
         return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, type, modules, Integer.valueOf(parent), ctx, null);
     }
 
@@ -1476,7 +1476,7 @@ public final class OXFolderIteratorSQL {
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
      * type and a certain parent folder.
      */
-    private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
+    private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx, final Connection con) throws OXException {
         final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.module IN (");
         condBuilder.append(modules[0]);
         for (int i = 1; i < modules.length; i++) {
@@ -1537,14 +1537,14 @@ public final class OXFolderIteratorSQL {
     /**
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances of a certain module
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx) throws OXException {
         return getAllVisibleFoldersIteratorOfModule(userId, memberInGroups, accessibleModules, module, ctx, null);
     }
 
     /**
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances of a certain module
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection readConArg) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection readConArg) throws OXException {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
@@ -1603,7 +1603,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      * @throws SearchIteratorException If a search iterator error occurs
      */
-    public static SearchIterator<FolderObject> getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx) throws OXException {
         return getDeletedFoldersSince(since, userId, memberInGroups, accessibleModules, ctx, null);
     }
 
@@ -1620,7 +1620,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      * @throws SearchIteratorException If a search iterator error occurs
      */
-    public static SearchIterator<FolderObject> getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
         final String fields = FolderObjectIterator.getFieldsForSQL(STR_OT);
         final String condition =
             since == null ? null : new StringBuilder(" AND (ot.changing_date > ").append(since.getTime()).append(')').toString();
@@ -1677,7 +1677,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      * @throws SearchIteratorException If a search iterator error occurs
      */
-    public static SearchIterator<FolderObject> getModifiedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final boolean userFoldersOnly, final Context ctx) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getModifiedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final boolean userFoldersOnly, final Context ctx) throws OXException {
         final StringBuilder condBuilder =
             new StringBuilder(32).append("AND (changing_date > ").append(since.getTime()).append(") AND (module IN ").append(
                 FolderObject.SQL_IN_STR_STANDARD_MODULES).append(')');
@@ -1744,9 +1744,8 @@ public final class OXFolderIteratorSQL {
      * @param ctx The context
      * @return <b>All</b> modified folders since given time stamp
      * @throws OXException If a folder error occurs
-     * @throws SearchIteratorException If a search iterator error occurs
      */
-    public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx) throws OXException {
         return getAllModifiedFoldersSince(since, ctx, null);
     }
 
@@ -1768,9 +1767,8 @@ public final class OXFolderIteratorSQL {
      * @param con The connection to use
      * @return <b>All</b> modified folders since given time stamp
      * @throws OXException If a folder error occurs
-     * @throws SearchIteratorException If a search iterator error occurs
      */
-    public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
+    public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx, final Connection con) throws OXException {
         final String sqlSelectStr =
             new StringBuilder(256).append(SQL_SELECT_FOLDERS_START).append("AND (changing_date > ?) AND (module IN ").append(
                 FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(") ").append(
