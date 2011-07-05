@@ -55,7 +55,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
-import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * This exception is used if problems occur in the ldap DAOs.
@@ -252,47 +252,38 @@ public class LdapException extends OXException {
 			return message;
 		}
 		
-		/**
-         * Creates a new {@link LdapException} instance pre-filled with this code's attributes.
-         * 
-         * @param prefix The prefix to use
-         * @return The newly created {@link LdapException} instance
-         */
-        public LdapException create(final String prefix) {
-            return create(prefix, new Object[0]);
-        }
+		public boolean equals(final OXException e) {
+	        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+	    }
 
-        /**
-         * Creates a new {@link LdapException} instance pre-filled with this code's attributes.
-         * 
-         * @param prefix The prefix to use
-         * @param args The message arguments in case of printf-style message
-         * @return The newly created {@link LdapException} instance
-         */
-        public LdapException create(final String prefix, final Object... args) {
-            return create(prefix, (Throwable) null, args);
-        }
+	    /**
+	     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+	     * 
+	     * @return The newly created {@link OXException} instance
+	     */
+	    public OXException create() {
+	        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+	    }
 
-        /**
-         * Creates a new {@link LdapException} instance pre-filled with this code's attributes.
-         * 
-         * @param prefix The prefix to use
-         * @param cause The optional initial cause
-         * @param args The message arguments in case of printf-style message
-         * @return The newly created {@link LdapException} instance
-         */
-        public LdapException create(final String prefix, final Throwable cause, final Object... args) {
-            final LdapException ret;
-            if (display) {
-                ret = new LdapException(detailNumber, message, cause, detail, args);
-            } else {
-                final String msg = Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
-                ret = new LdapException(detailNumber, msg, null, detail, new Object[0]);
-                ret.setLogMessage(message, args);
-            }
-            ret.addCategory(category);
-            ret.setPrefix(prefix);
-            return ret;
-        }
+	    /**
+	     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+	     * 
+	     * @param args The message arguments in case of printf-style message
+	     * @return The newly created {@link OXException} instance
+	     */
+	    public OXException create(final Object... args) {
+	        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+	    }
+
+	    /**
+	     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+	     * 
+	     * @param cause The optional initial cause
+	     * @param args The message arguments in case of printf-style message
+	     * @return The newly created {@link OXException} instance
+	     */
+	    public OXException create(final Throwable cause, final Object... args) {
+	        return OXExceptionFactory.getInstance().create(this, cause, args);
+	    }
     }
 }

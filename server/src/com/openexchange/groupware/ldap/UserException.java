@@ -246,6 +246,10 @@ public class UserException extends OXException {
         public String getPrefix() {
             return "USR";
         }
+
+        public boolean equals(final OXException e) {
+            return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        }
         
         /**
          * Creates a new {@link UserException} instance pre-filled with this code's attributes.

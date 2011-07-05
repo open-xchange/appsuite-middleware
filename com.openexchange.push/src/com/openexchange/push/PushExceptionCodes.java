@@ -85,7 +85,7 @@ public enum PushExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "PUSH";
     }
@@ -102,6 +102,9 @@ public enum PushExceptionCodes implements OXExceptionCode {
         return detailNumber;
     }
 
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+    }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.

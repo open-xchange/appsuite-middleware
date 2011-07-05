@@ -4,7 +4,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
-import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * Error codes for the file storage exception.
@@ -82,13 +82,17 @@ public enum FileStorageCodes implements OXExceptionCode {
         return message;
     }
     
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+    }
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
      * @return The newly created {@link OXException} instance
      */
-    public com.openexchange.exception.OXException create() {
-        return create(new Object[0]);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
@@ -97,8 +101,8 @@ public enum FileStorageCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public com.openexchange.exception.OXException create(final Object... args) {
-        return create((Throwable) null, args);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
     /**
@@ -108,17 +112,7 @@ public enum FileStorageCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public com.openexchange.exception.OXException create(final Throwable cause, final Object... args) {
-        final com.openexchange.exception.OXException ret;
-        if (display) {
-            ret = new com.openexchange.exception.OXException(number, message, cause, args);
-        } else {
-            ret =
-                new com.openexchange.exception.OXException(
-                    number,
-                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                    new Object[0]).setLogMessage(message, args);
-        }
-        return ret.addCategory(category).setPrefix(getPrefix());
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

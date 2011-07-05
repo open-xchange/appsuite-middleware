@@ -52,6 +52,10 @@ public enum ConversionServletExceptionCode implements OXExceptionCode {
         return message;
     }
     
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+    }
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 

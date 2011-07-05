@@ -58,6 +58,14 @@ package com.openexchange.exception;
 public interface OXExceptionCode {
 
     /**
+     * Checks if specified {@link OXException}'s attributes matches this code's ones.
+     * 
+     * @param e The exception to check
+     * @return <code>true</code> if specified {@link OXException}'s attributes matches this code's ones; otherwise <code>false</code>
+     */
+    boolean equals(OXException e);
+
+    /**
      * Gets the {@link OXException}'s code number.
      * 
      * @return The code number

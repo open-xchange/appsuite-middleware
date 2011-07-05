@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -64,7 +63,6 @@ import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -84,11 +82,11 @@ public final class UpdateExecutor {
 
     private final int contextId;
 
-    private List<UpdateTask> tasks;
+    private final List<UpdateTask> tasks;
 
     private SeparatedTasks separatedTasks;
 
-    public UpdateExecutor(SchemaUpdateState state, int contextId, List<UpdateTask> tasks) {
+    public UpdateExecutor(final SchemaUpdateState state, final int contextId, final List<UpdateTask> tasks) {
         super();
         this.state = state;
         this.contextId = contextId;
@@ -105,7 +103,7 @@ public final class UpdateExecutor {
                 runUpdates(false);
             }
         } else {
-            SeparatedTasks forCheck = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(state);
+            final SeparatedTasks forCheck = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(state);
             if (forCheck.getBlocking().size() > 0) {
                 runUpdates(true);
             }
@@ -115,20 +113,20 @@ public final class UpdateExecutor {
         }
     }
 
-    private void runUpdates(boolean blocking) throws OXException {
+    private void runUpdates(final boolean blocking) throws OXException {
         LOG.info("Starting " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
         try {
             lockSchema(blocking);
-        } catch (SchemaException e) {
-            if (e.getDetailNumber() != SchemaExceptionCodes.ALREADY_LOCKED.getDetailNumber()) {
+        } catch (final OXException e) {
+            if (e.getCode() != SchemaExceptionCodes.ALREADY_LOCKED.getNumber()) {
                 // Try to unlock schema
                 try {
                     unlockSchema(blocking);
-                } catch (SchemaException e1) {
+                } catch (final SchemaException e1) {
                     LOG.error(e1.getMessage(), e1);
                 }
             }
-            throw new OXException(e);
+            throw e;
         }
         // Lock successfully obtained, thus remember to unlock
         try {
@@ -145,20 +143,20 @@ public final class UpdateExecutor {
                 scheduled.addAll(blocking ? separatedTasks.getBlocking() : separatedTasks.getBackground());
             }
             // Perform updates
-            for (UpdateTask task : scheduled) {
-                String taskName = task.getClass().getSimpleName();
+            for (final UpdateTask task : scheduled) {
+                final String taskName = task.getClass().getSimpleName();
                 boolean success = false;
                 try {
                     LOG.info("Starting update task " + taskName + " on schema " + state.getSchema() + ".");
                     if (task instanceof UpdateTaskV2) {
-                        ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
-                        PerformParameters params = new PerformParametersImpl(state, contextId, logger);
+                        final ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
+                        final PerformParameters params = new PerformParametersImpl(state, contextId, logger);
                         ((UpdateTaskV2) task).perform(params);
                     } else {
                         task.perform(state, contextId);
                     }
                     success = true;
-                } catch (AbstractOXException e) {
+                } catch (final AbstractOXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 if (success) {
@@ -169,11 +167,11 @@ public final class UpdateExecutor {
                 addExecutedTask(task.getClass().getName(), success);
             }
             LOG.info("Finished " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
-        } catch (SchemaException e) {
+        } catch (final SchemaException e) {
             throw new OXException(e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw e;
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
         } finally {
             try {
@@ -182,34 +180,34 @@ public final class UpdateExecutor {
                 if (blocking) {
                     removeContexts();
                 }
-            } catch (SchemaException e) {
+            } catch (final SchemaException e) {
                 throw new OXException(e);
             }
         }
     }
 
-    private final void lockSchema(boolean blocking) throws SchemaException {
+    private final void lockSchema(final boolean blocking) throws SchemaException {
         store.lockSchema(state, contextId, !blocking);
     }
 
-    private final void unlockSchema(boolean blocking) throws SchemaException {
+    private final void unlockSchema(final boolean blocking) throws SchemaException {
         store.unlockSchema(state, contextId, !blocking);
     }
 
-    private final void addExecutedTask(String taskName, boolean success) throws SchemaException {
+    private final void addExecutedTask(final String taskName, final boolean success) throws SchemaException {
         store.addExecutedTask(contextId, taskName, success);
     }
 
     private final void removeContexts() throws OXException {
-        ContextStorage contextStorage = ContextStorage.getInstance();
+        final ContextStorage contextStorage = ContextStorage.getInstance();
         try {
-            int[] contextIds = Database.getContextsInSameSchema(contextId);
+            final int[] contextIds = Database.getContextsInSameSchema(contextId);
             for (final int cid : contextIds) {
                 contextStorage.invalidateContext(cid);
             }
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new OXException(e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

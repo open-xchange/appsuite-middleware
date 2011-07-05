@@ -54,10 +54,9 @@ import static com.openexchange.tx.TransactionExceptionMessages.CANNOT_FINISH_MSG
 import static com.openexchange.tx.TransactionExceptionMessages.CANNOT_ROLLBACK_MSG;
 import static com.openexchange.tx.TransactionExceptionMessages.NO_COMPLETE_ROLLBACK_MSG;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
-import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * The error code enumeration for transaction errors.
@@ -79,13 +78,10 @@ public enum TransactionExceptionCodes implements OXExceptionCode {
 
     private final int number;
 
-    private final boolean display;
-
     private TransactionExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     public int getNumber() {
@@ -108,13 +104,17 @@ public enum TransactionExceptionCodes implements OXExceptionCode {
         return category;
     }
 
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+    }
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return create(new Object[0]);
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
@@ -124,7 +124,7 @@ public enum TransactionExceptionCodes implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return create((Throwable) null, args);
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
     /**
@@ -135,17 +135,7 @@ public enum TransactionExceptionCodes implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        final OXException ret;
-        if (display) {
-            ret = new OXException(number, message, cause, args);
-        } else {
-            ret =
-                new OXException(
-                    number,
-                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                    new Object[0]).setLogMessage(message, args);
-        }
-        return ret.addCategory(category).setPrefix(getPrefix());
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
 }

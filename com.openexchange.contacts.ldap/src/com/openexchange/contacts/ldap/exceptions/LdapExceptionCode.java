@@ -166,6 +166,10 @@ public enum LdapExceptionCode implements OXExceptionCode {
         return number;
     }
     
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+    }
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 

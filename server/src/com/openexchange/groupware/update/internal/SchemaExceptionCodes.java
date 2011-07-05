@@ -151,6 +151,10 @@ public enum SchemaExceptionCodes implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
+    
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+    }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
@@ -181,4 +185,5 @@ public enum SchemaExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }
