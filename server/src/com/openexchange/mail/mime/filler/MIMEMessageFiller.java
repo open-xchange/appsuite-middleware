@@ -125,7 +125,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.server.impl.DBPool;
@@ -328,7 +328,7 @@ public class MIMEMessageFiller {
                             }
                         }
                     }
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     /*
                      * Conflict during look-up
                      */

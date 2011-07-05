@@ -49,96 +49,99 @@
 
 package com.openexchange.mailaccount;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link MailAccountExceptionMessages} - The error messages for mail account exceptions.
+ * {@link MailAccountExceptionCodes} - The error messages for mail account exceptions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum MailAccountExceptionMessages implements OXErrorMessage {
+public enum MailAccountExceptionCodes implements OXExceptionCode {
 
     /**
      * Unexpected error: %1$s.
      */
-    UNEXPECTED_ERROR(MailAccountExceptionStrings.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(MailAccountExceptionStrings.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
      */
-    NOT_FOUND(MailAccountExceptionStrings.NOT_FOUND_MSG, Category.CODE_ERROR, 2),
+    NOT_FOUND(MailAccountExceptionStrings.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
      */
-    CONFLICT(MailAccountExceptionStrings.CONFLICT_MSG, Category.CODE_ERROR, 3),
+    CONFLICT(MailAccountExceptionStrings.CONFLICT_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * A SQL error occurred: %1$s.
      */
-    SQL_ERROR(MailAccountExceptionStrings.SQL_ERROR_MSG, Category.CODE_ERROR, 4),
+    SQL_ERROR(MailAccountExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * A host could not be resolved: %1$s.
      */
-    UNKNOWN_HOST_ERROR(MailAccountExceptionStrings.UNKNOWN_HOST_ERROR_MSG, Category.CODE_ERROR, 5),
+    UNKNOWN_HOST_ERROR(MailAccountExceptionStrings.UNKNOWN_HOST_ERROR_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * Denied deletion of default mail account of user %1$s in context %2$s.
      */
-    NO_DEFAULT_DELETE(MailAccountExceptionStrings.NO_DEFAULT_DELETE_MSG, Category.CODE_ERROR, 6),
+    NO_DEFAULT_DELETE(MailAccountExceptionStrings.NO_DEFAULT_DELETE_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Denied update of default mail account of user %1$s in context %2$s.
      */
-    NO_DEFAULT_UPDATE(MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG, Category.CODE_ERROR, 7),
+    NO_DEFAULT_UPDATE(MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * No duplicate default account allowed.
      */
-    NO_DUPLICATE_DEFAULT(MailAccountExceptionStrings.NO_DUPLICATE_DEFAULT_MSG, Category.CODE_ERROR, 8),
+    NO_DUPLICATE_DEFAULT(MailAccountExceptionStrings.NO_DUPLICATE_DEFAULT_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * Password encryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
      */
-    PASSWORD_ENCRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_ENCRYPTION_FAILED_MSG, Category.CODE_ERROR, 9),
+    PASSWORD_ENCRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_ENCRYPTION_FAILED_MSG, Category.CATEGORY_ERROR, 9),
     /**
      * Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
      */
-    PASSWORD_DECRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_DECRYPTION_FAILED_MSG, Category.CODE_ERROR, 10),
+    PASSWORD_DECRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_DECRYPTION_FAILED_MSG, Category.CATEGORY_ERROR, 10),
     /**
      * The Unified INBOX account already exists for user %1$s in context %2$s.
      */
-    DUPLICATE_UNIFIED_INBOX_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG, Category.CODE_ERROR, 11),
+    DUPLICATE_UNIFIED_INBOX_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG, Category.CATEGORY_ERROR, 11),
     /**
      * Mail account creation failed.
      */
-    CREATION_FAILED(MailAccountExceptionStrings.CREATION_FAILED_MSG, Category.CODE_ERROR, 12),
+    CREATION_FAILED(MailAccountExceptionStrings.CREATION_FAILED_MSG, Category.CATEGORY_ERROR, 12),
     /**
      * Mail account validation failed.
      */
-    VALIDATION_FAILED(MailAccountExceptionStrings.VALIDATION_FAILED_MSG, Category.CODE_ERROR, 13),
+    VALIDATION_FAILED(MailAccountExceptionStrings.VALIDATION_FAILED_MSG, Category.CATEGORY_ERROR, 13),
     /**
      * Multiple mail accounts not enabled for user %1$s in context %2$s.
      */
-    NOT_ENABLED(MailAccountExceptionStrings.NOT_ENABLED_MSG, Category.USER_CONFIGURATION, 14),
+    NOT_ENABLED(MailAccountExceptionStrings.NOT_ENABLED_MSG, Category.CATEGORY_PERMISSION_DENIED, 14),
     /**
      * Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
      */
-    CONFLICT_ADDR(MailAccountExceptionStrings.CONFLICT_ADDR_MSG, Category.CODE_ERROR, 15),
+    CONFLICT_ADDR(MailAccountExceptionStrings.CONFLICT_ADDR_MSG, Category.CATEGORY_ERROR, 15),
     /**
      * Invalid mail account name: %1$s
      */
-    INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CODE_ERROR, 16),
+    INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CATEGORY_ERROR, 16),
     /**
      * Duplicate mail account for user %1$s in context %2$s.
      */
-    DUPLICATE_MAIL_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_MAIL_ACCOUNT_MSG, Category.CODE_ERROR, 17),
+    DUPLICATE_MAIL_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_MAIL_ACCOUNT_MSG, Category.CATEGORY_ERROR, 17),
     /**
      * Duplicate transport account for user %1$s in context %2$s.
      */
-    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CODE_ERROR, 17),
+    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CATEGORY_ERROR, 17),
     /**
      * Unable to parse mail server URI "%1$s".
      */
-    URI_PARSE_FAILED(MailAccountExceptionStrings.URI_PARSE_FAILED_MSG, Category.SETUP_ERROR, 18),
+    URI_PARSE_FAILED(MailAccountExceptionStrings.URI_PARSE_FAILED_MSG, Category.CATEGORY_ERROR, 18),
     /**
      * Invalid host name: %1$s
      */
-    INVALID_HOST_NAME(MailAccountExceptionStrings.INVALID_HOST_NAME_MSG, Category.USER_INPUT, 19),
+    INVALID_HOST_NAME(MailAccountExceptionStrings.INVALID_HOST_NAME_MSG, Category.CATEGORY_USER_INPUT, 19),
     
     ;
 
@@ -157,24 +160,31 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
      */
     private final int number;
 
+    private final boolean display;
+
     /**
      * Default constructor.
      * 
      * @param message message.
      * @param category category.
-     * @param detailNumber detail number.
+     * @param number number.
      */
-    private MailAccountExceptionMessages(final String message, final Category category, final int detailNumber) {
+    private MailAccountExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
-        number = detailNumber;
+        this.number = number;
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
+    }
+
+    public String getPrefix() {
+        return "ACC";
     }
 
     public Category getCategory() {
         return category;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return number;
     }
 
@@ -187,24 +197,42 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
     }
 
     /**
-     * Creates a new mail account exception instance with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments.
-     * @return A new mail account exception instance with specified message arguments.
+     * @return The newly created {@link OXException} instance
      */
-    public MailAccountException create(final Object... messageArgs) {
-        return MailAccountExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return create(new Object[0]);
     }
 
     /**
-     * Creates a new mail account exception instance with specified message arguments. <br>
-     * Exception's init cause is set to provided {@link Throwable} instance.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The init cause.
-     * @param messageArgs The message arguments.
-     * @return A new mail account exception instance with specified message arguments and init cause.
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public MailAccountException create(final Throwable cause, final Object... messageArgs) {
-        return MailAccountExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return create((Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        final OXException ret;
+        if (display) {
+            ret = new OXException(number, message, cause, args);
+        } else {
+            ret =
+                new OXException(
+                    number,
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
+        }
+        return ret.addCategory(category).setPrefix(getPrefix());
     }
 }

@@ -54,12 +54,11 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
@@ -477,13 +476,13 @@ public abstract class AbstractMailAccount implements MailAccount {
      * Parses specified mail server URL.
      * 
      * @param mailServerURL The mail server URL to parse
-     * @throws MailAccountException if parsing the URL fails.
+     * @throws OXException if parsing the URL fails.
      */
-    public void parseMailServerURL(final String mailServerURL) throws MailAccountException {
+    public void parseMailServerURL(final String mailServerURL) throws OXException {
         try {
             setMailServer(URIParser.parse(mailServerURL, URIDefaults.IMAP));
         } catch (final URISyntaxException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, mailServerURL);
+            throw MailAccountExceptionCodes.URI_PARSE_FAILED.create(e, mailServerURL);
         }
     }
 
@@ -509,9 +508,9 @@ public abstract class AbstractMailAccount implements MailAccount {
      * Parses specified transport server URL.
      * 
      * @param mailServerURL The transport server URL to parse
-     * @throws MailAccountException if parsing the URL fails.
+     * @throws OXException if parsing the URL fails.
      */
-    public void parseTransportServerURL(final String transportServerURL) throws MailAccountException {
+    public void parseTransportServerURL(final String transportServerURL) throws OXException {
         if (null == transportServerURL) {
             setTransportServer((String) null);
             return;

@@ -49,6 +49,8 @@
 
 package com.openexchange.mailaccount;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link AttributeSwitch}
@@ -60,8 +62,8 @@ public interface AttributeSwitch {
     public Object id();
     public Object login();
     public Object password();
-    public Object mailURL() throws MailAccountException;
-    public Object transportURL() throws MailAccountException;
+    public Object mailURL() throws OXException;
+    public Object transportURL() throws OXException;
     public Object name();
     public Object primaryAddress();
     public Object personal();

@@ -143,7 +143,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.push.PushEventConstants;
@@ -2447,7 +2447,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         /*

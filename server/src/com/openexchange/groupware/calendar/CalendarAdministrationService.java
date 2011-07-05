@@ -50,8 +50,8 @@
 package com.openexchange.groupware.calendar;
 
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
@@ -59,7 +59,7 @@ import com.openexchange.groupware.downgrade.DowngradeListener;
 
 public interface CalendarAdministrationService extends DeleteListener {
 
-    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException;
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException;
 
     public void downgradePerformed(final DowngradeEvent downgradeEvent) throws DowngradeFailedException;
 

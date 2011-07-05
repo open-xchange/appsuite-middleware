@@ -76,7 +76,7 @@ public final class ContactDeleteListener implements DeleteListener {
         super();
     }
 
-    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         try {
             if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
                 /*

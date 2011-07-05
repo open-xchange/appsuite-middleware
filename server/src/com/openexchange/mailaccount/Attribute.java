@@ -53,6 +53,7 @@ import gnu.trove.TIntObjectHashMap;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 
 /**
@@ -123,7 +124,7 @@ public enum Attribute {
         this.id = id;
     }
 
-    public Object doSwitch(final AttributeSwitch switcher) throws MailAccountException {
+    public Object doSwitch(final AttributeSwitch switcher) throws OXException {
         switch (this) {
         case ID_LITERAL:
             return switcher.id();

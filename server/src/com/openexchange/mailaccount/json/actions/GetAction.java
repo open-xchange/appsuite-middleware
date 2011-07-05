@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -92,7 +92,7 @@ public final class GetAction extends AbstractMailAccountAction {
 
             if (isUnifiedINBOXAccount(mailAccount)) {
                 // Treat as no hit
-                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                throw MailAccountExceptionCodes.NOT_FOUND.create(
                     Integer.valueOf(id),
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
@@ -100,7 +100,7 @@ public final class GetAction extends AbstractMailAccountAction {
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }

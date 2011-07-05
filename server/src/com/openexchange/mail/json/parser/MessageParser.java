@@ -117,7 +117,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -968,7 +968,7 @@ public final class MessageParser {
                 return new MailPath(arg.getAccountId(), arg.getFullname(), msgref.getMailID());
             }
             return msgref;
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }

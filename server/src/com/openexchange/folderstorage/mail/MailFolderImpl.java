@@ -84,7 +84,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.impl.OCLPermission;
@@ -328,7 +328,7 @@ public final class MailFolderImpl extends AbstractFolder {
         try {
             return UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(MailServiceRegistry.getServiceRegistry().getService(
                 MailAccountStorageService.class).getMailAccount(accountId, userId, contextId).getMailProtocol());
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }

@@ -74,7 +74,7 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -236,7 +236,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 }
             } catch (final OXException e) {
                 throw new MailException(e);
-            } catch (final MailAccountException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             }
         }

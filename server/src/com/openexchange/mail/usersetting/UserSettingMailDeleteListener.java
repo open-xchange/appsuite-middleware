@@ -51,6 +51,7 @@ package com.openexchange.mail.usersetting;
 
 import static com.openexchange.mail.usersetting.UserSettingMailStorage.getInstance;
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -75,7 +76,7 @@ public final class UserSettingMailDeleteListener implements DeleteListener {
      * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
      * java.sql.Connection, java.sql.Connection)
      */
-    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
             try {
                 getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);

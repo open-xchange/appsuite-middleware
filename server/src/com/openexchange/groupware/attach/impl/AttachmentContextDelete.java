@@ -58,7 +58,7 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 
 public class AttachmentContextDelete extends ContextDelete {
 
-    public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws OXException {
         if (!isContextDelete(deleteEvent)) {
             return;
         }

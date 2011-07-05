@@ -57,10 +57,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -90,7 +89,7 @@ final class Sanitizer {
         public boolean execute(final int accountId) {
             try {
                 storageService.invalidateMailAccount(accountId, user, contextId);
-            } catch (final MailAccountException e) {
+            } catch (final OXException e) {
                 // Swallow
                 org.apache.commons.logging.LogFactory.getLog(Sanitizer.class).error(e.getMessage(), e);
             }
@@ -139,9 +138,9 @@ final class Sanitizer {
      * @param user The user identifier
      * @param contextId The context identifier
      * @param storageService The storage service
-     * @throws MailAccountException If sanitizing fails
+     * @throws OXException If sanitizing fails
      */
-    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService) throws MailAccountException {
+    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService) throws OXException {
         sanitize(user, contextId, storageService, URIDefaults.IMAP, "imap://localhost:143");
     }
 
@@ -151,17 +150,15 @@ final class Sanitizer {
      * @param user The user identifier
      * @param contextId The context identifier
      * @param storageService The storage service
-     * @throws MailAccountException If sanitizing fails
+     * @throws OXException If sanitizing fails
      */
-    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService, final URIDefaults defaults, final String fallbackUri) throws MailAccountException {
+    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService, final URIDefaults defaults, final String fallbackUri) throws OXException {
         final Connection con;
         try {
             con = Database.get(contextId, true);
             con.setAutoCommit(false);
         } catch (final SQLException e) {
-            throw MailAccountExceptionMessages.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            throw new MailAccountException(e);
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
         /*
          * A map to store broken accounts
@@ -210,17 +207,17 @@ final class Sanitizer {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw MailAccountExceptionMessages.SQL_ERROR.create(e, e.getMessage());
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
             DBUtils.rollback(con);
             final Throwable cause = e.getCause();
             if (null != cause) {
-                throw MailAccountExceptionMessages.SQL_ERROR.create(cause, cause.getMessage());
+                throw MailAccountExceptionCodes.SQL_ERROR.create(cause, cause.getMessage());
             }
-            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             DBUtils.rollback(con);
-            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             Database.back(contextId, true, con);

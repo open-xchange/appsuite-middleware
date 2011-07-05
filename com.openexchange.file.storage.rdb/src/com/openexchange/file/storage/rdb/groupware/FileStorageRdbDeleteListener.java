@@ -80,7 +80,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
         super();
     }
 
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws com.openexchange.exception.OXException {
         if (DeleteEvent.TYPE_USER != event.getType()) {
             return;
         }

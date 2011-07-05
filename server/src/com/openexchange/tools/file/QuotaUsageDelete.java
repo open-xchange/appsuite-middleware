@@ -52,6 +52,7 @@ package com.openexchange.tools.file;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -65,7 +66,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class QuotaUsageDelete extends ContextDelete {
 
-    public void deletePerformed(DeleteEvent sqlDelEvent, Connection readCon, Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(DeleteEvent sqlDelEvent, Connection readCon, Connection writeCon) throws OXException {
         if (!isContextDelete(sqlDelEvent)) {
             return;
         }

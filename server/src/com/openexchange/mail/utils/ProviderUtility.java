@@ -53,8 +53,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 
@@ -78,9 +78,9 @@ public final class ProviderUtility {
      * @param serverUrl The server URL
      * @param defaultPort The default port to use if server URL does not specify a port
      * @return An instance of {@link InetSocketAddress} denoting given server URL
-     * @throws MailAccountException if the server URL can not be parsed.
+     * @throws OXException if the server URL can not be parsed.
      */
-    public static InetSocketAddress toSocketAddr(final String serverUrl, final int defaultPort) throws MailAccountException {
+    public static InetSocketAddress toSocketAddr(final String serverUrl, final int defaultPort) throws OXException {
         final URI uri;
         try {
             uri = URIParser.parse(serverUrl, new URIDefaults() {
@@ -97,7 +97,7 @@ public final class ProviderUtility {
                     return defaultPort;
                 }});
         } catch (final URISyntaxException e) {
-            throw MailAccountExceptionMessages.URI_PARSE_FAILED.create(e, serverUrl);
+            throw MailAccountExceptionCodes.URI_PARSE_FAILED.create(e, serverUrl);
         }
         return new InetSocketAddress(uri.getHost(), uri.getPort());
     }

@@ -52,6 +52,7 @@ package com.openexchange.groupware.delete;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 final class POP3DeleteListener implements DeleteListener {
 
-    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
             PreparedStatement stmt = null;
             try {

@@ -55,6 +55,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
@@ -66,7 +67,8 @@ import com.openexchange.tools.net.URITools;
  */
 public final class MailAccountDescription implements Serializable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountDescription.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountDescription.class));
 
     private static final long serialVersionUID = -2443656355399068302L;
 
@@ -394,9 +396,9 @@ public final class MailAccountDescription implements Serializable {
      * Generates the mail server URL.
      * 
      * @return The generated mail server URL
-     * @throws MailAccountException If mail server URL is invalid
+     * @throws OXException If mail server URL is invalid
      */
-    public String generateMailServerURL() throws MailAccountException {
+    public String generateMailServerURL() throws OXException {
         if (null != mailServerUrl) {
             return mailServerUrl;
         }
@@ -411,8 +413,7 @@ public final class MailAccountDescription implements Serializable {
             if (mailSecure) {
                 sb.append('s');
             }
-            throw MailAccountExceptionFactory.getInstance().create(
-                MailAccountExceptionMessages.INVALID_HOST_NAME,
+            throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(
                 e,
                 sb.append("://").append(mailServer).append(':').append(mailPort).toString());
         }
@@ -422,9 +423,9 @@ public final class MailAccountDescription implements Serializable {
      * Parses specified mail server URL
      * 
      * @param mailServerURL The mail server URL to parse
-     * @throws MailAccountException If URL cannot be parsed
+     * @throws OXException If URL cannot be parsed
      */
-    public void parseMailServerURL(final String mailServerURL) throws MailAccountException {
+    public void parseMailServerURL(final String mailServerURL) throws OXException {
         if (null == mailServerURL) {
             setMailServer((String) null);
             return;
@@ -432,7 +433,7 @@ public final class MailAccountDescription implements Serializable {
         try {
             setMailServer(URIParser.parse(mailServerURL, URIDefaults.IMAP));
         } catch (final URISyntaxException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_HOST_NAME, e, mailServerURL);
+            throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, mailServerURL);
             // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
             // instead now.
             // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, mailServerURL);
@@ -479,9 +480,9 @@ public final class MailAccountDescription implements Serializable {
      * Parses specified transport server URL
      * 
      * @param mailServerURL The transport server URL to parse
-     * @throws MailAccountException If URL cannot be parsed
+     * @throws OXException If URL cannot be parsed
      */
-    public void parseTransportServerURL(final String transportServerURL) throws MailAccountException {
+    public void parseTransportServerURL(final String transportServerURL) throws OXException {
         if (null == transportServerURL) {
             setTransportServer((String) null);
             return;
@@ -489,14 +490,14 @@ public final class MailAccountDescription implements Serializable {
         try {
             setTransportServer(URIParser.parse(transportServerURL, URIDefaults.SMTP));
         } catch (final URISyntaxException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_HOST_NAME, e, transportServerURL);
+            throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, transportServerURL);
         }
     }
 
     public void setTransportServer(final URI transportServer) {
         if (null == transportServer) {
             // Parse like old parser to prevent problems.
-            setTransportServer(""); 
+            setTransportServer("");
         } else {
             final String protocol = transportServer.getScheme();
             if (protocol.endsWith("s")) {
@@ -515,9 +516,9 @@ public final class MailAccountDescription implements Serializable {
      * Generates transport server URL
      * 
      * @return The transport server URL
-     * @throws MailAccountException If URL cannot be parsed
+     * @throws OXException If URL cannot be parsed
      */
-    public String generateTransportServerURL() throws MailAccountException {
+    public String generateTransportServerURL() throws OXException {
         if (null != transportUrl) {
             return transportUrl;
         }
@@ -533,8 +534,7 @@ public final class MailAccountDescription implements Serializable {
             if (transportSecure) {
                 sb.append('s');
             }
-            throw MailAccountExceptionFactory.getInstance().create(
-                MailAccountExceptionMessages.INVALID_HOST_NAME,
+            throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(
                 e,
                 sb.append("://").append(transportServer).append(':').append(mailPort).toString());
         }

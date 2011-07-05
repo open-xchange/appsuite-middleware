@@ -52,7 +52,7 @@ package com.openexchange.push.malpoll;
 import java.sql.Connection;
 import java.util.Map;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MALPollMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for MAL Poll bundle.
@@ -68,11 +68,11 @@ public final class MALPollMailAccountDeleteListener implements MailAccountDelete
         super();
     }
 
-    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         // Nothing to do
     }
 
-    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         if (MALPollPushListener.getAccountId() == id) {
             MALPollPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
         }

@@ -64,7 +64,7 @@ public class InfostoreDelete implements DeleteListener {
         super();
     }
 
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (event.getType() != DeleteEvent.TYPE_USER) {
             return;
         }

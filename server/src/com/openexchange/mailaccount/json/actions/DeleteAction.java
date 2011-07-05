@@ -58,7 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -97,7 +97,7 @@ public final class DeleteAction extends AbstractMailAccountAction {
                     final int id = jsonArray.getInt(i);
                     if (MailAccount.DEFAULT_ID != id) {
                         throw MailAccountExceptionFactory.getInstance().create(
-                            MailAccountExceptionMessages.NOT_ENABLED,
+                            MailAccountExceptionCodes.NOT_ENABLED,
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()));
                     }

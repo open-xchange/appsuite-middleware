@@ -58,8 +58,8 @@ import java.util.Locale;
 import java.util.Map;
 import com.openexchange.mail.MailException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -85,11 +85,11 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
         super();
     }
 
-    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         // Nothing to do
     }
 
-    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         try {
             /*
              * Check if account denotes a POP3 account
@@ -112,7 +112,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
                     }
                     url = rs.getString(1).toLowerCase(Locale.ENGLISH);
                 } catch (final SQLException e) {
-                    throw MailAccountExceptionMessages.SQL_ERROR.create(e, e.getMessage());
+                    throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
                     DBUtils.closeSQLStuff(rs, stmt);
                 }
@@ -143,7 +143,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
             RdbPOP3StorageTrashContainer.dropTrash(id, user, cid, con);
             RdbPOP3StorageUIDLMap.dropIDs(id, user, cid, con);
         } catch (final MailException e) {
-            throw new MailAccountException(e);
+            throw new OXException(e);
         }
     }
 

@@ -95,7 +95,7 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
@@ -653,7 +653,7 @@ public final class SMTPTransport extends MailTransport {
             return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }

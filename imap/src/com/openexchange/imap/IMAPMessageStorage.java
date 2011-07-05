@@ -116,7 +116,7 @@ import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
@@ -205,7 +205,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (final OXException e) {
                 throw new MailException(e);
-            } catch (final MailAccountException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final RuntimeException e) {
                 throw handleRuntimeException(e);

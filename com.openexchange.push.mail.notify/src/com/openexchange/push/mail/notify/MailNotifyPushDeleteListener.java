@@ -50,6 +50,7 @@
 package com.openexchange.push.mail.notify;
 
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -69,7 +70,7 @@ public final class MailNotifyPushDeleteListener implements DeleteListener {
         super();
     }
 
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             try {
                 MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(event.getContext().getContextId(), event.getId());

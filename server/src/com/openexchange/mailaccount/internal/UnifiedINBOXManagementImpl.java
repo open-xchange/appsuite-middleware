@@ -56,7 +56,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -65,12 +64,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
@@ -93,18 +89,18 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         super();
     }
 
-    public void createUnifiedINBOX(final int userId, final int contextId) throws MailAccountException {
+    public void createUnifiedINBOX(final int userId, final int contextId) throws OXException {
         createUnifiedINBOX(userId, contextId, null);
     }
 
-    public void createUnifiedINBOX(final int userId, final int contextId, final Connection con) throws MailAccountException {
+    public void createUnifiedINBOX(final int userId, final int contextId, final Connection con) throws OXException {
         try {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             // Check if Unified INBOX account already exists for given user
             if (exists(userId, contextId, con)) {
                 // User already has the Unified INBOX account set
-                throw MailAccountExceptionMessages.DUPLICATE_UNIFIED_INBOX_ACCOUNT.create(
+                throw MailAccountExceptionCodes.DUPLICATE_UNIFIED_INBOX_ACCOUNT.create(
                     Integer.valueOf(userId),
                     Integer.valueOf(contextId));
             }
@@ -146,20 +142,16 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
                 storageService.insertMailAccount(mailAccountDescription, userId, ctx, null, con);
             }
         } catch (final OXException e) {
-            throw new MailAccountException(e);
-        } catch (final MailAccountException e) {
-            throw new MailAccountException(e);
-        } catch (final OXException e) {
-            throw new MailAccountException(e);
+            throw e;
         }
 
     }
 
-    public void deleteUnifiedINBOX(final int userId, final int contextId) throws MailAccountException {
+    public void deleteUnifiedINBOX(final int userId, final int contextId) throws OXException {
         deleteUnifiedINBOX(userId, contextId, null);
     }
 
-    public void deleteUnifiedINBOX(final int userId, final int contextId, final Connection con) throws MailAccountException {
+    public void deleteUnifiedINBOX(final int userId, final int contextId, final Connection con) throws OXException {
         try {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
@@ -181,19 +173,12 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
                 }
             }
         } catch (final OXException e) {
-            throw new MailAccountException(e);
-        } catch (final MailAccountException e) {
-            throw new MailAccountException(e);
+            throw e;
         }
     }
 
-    public boolean exists(final int userId, final int contextId) throws MailAccountException {
-        Connection con = null;
-        try {
-            con = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw new MailAccountException(e);
-        }
+    public boolean exists(final int userId, final int contextId) throws OXException {
+        final Connection con = Database.get(contextId, false);
         try {
             return exists(userId, contextId, con);
         } finally {
@@ -201,7 +186,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         }
     }
 
-    public boolean exists(final int userId, final int contextId, final Connection con) throws MailAccountException {
+    public boolean exists(final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -218,19 +203,14 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             }
             return false;
         } catch (final SQLException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
     }
 
-    public boolean isEnabled(final int userId, final int contextId) throws MailAccountException {
-        Connection con = null;
-        try {
-            con = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw new MailAccountException(e);
-        }
+    public boolean isEnabled(final int userId, final int contextId) throws OXException {
+        final Connection con = Database.get(contextId, false);
         try {
             return isEnabled(userId, contextId, con);
         } finally {
@@ -238,7 +218,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         }
     }
 
-    public boolean isEnabled(final int userId, final int contextId, final Connection con) throws MailAccountException {
+    public boolean isEnabled(final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -248,31 +228,25 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             rs = stmt.executeQuery();
             return rs.next();
         } catch (final SQLException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
     }
 
-    public int getUnifiedINBOXAccountID(final int userId, final int contextId) throws MailAccountException {
+    public int getUnifiedINBOXAccountID(final int userId, final int contextId) throws OXException {
         return getUnifiedINBOXAccountID(userId, contextId, null);
     }
 
-    public int getUnifiedINBOXAccountID(final int userId, final int contextId, final Connection con) throws MailAccountException {
+    public int getUnifiedINBOXAccountID(final int userId, final int contextId, final Connection con) throws OXException {
         try {
             final DatabaseService databaseService;
             final Connection connection;
             final boolean releaseConnection;
             if (null == con) {
-                try {
-                    databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-                    connection = databaseService.getReadOnly(contextId);
-                    releaseConnection = true;
-                } catch (final OXException e) {
-                    throw new MailAccountException(e);
-                } catch (final DBPoolingException e) {
-                    throw new MailAccountException(e);
-                }
+                databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+                connection = databaseService.getReadOnly(contextId);
+                releaseConnection = true;
             } else {
                 databaseService = null;
                 connection = con;
@@ -286,15 +260,15 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
                 rs = stmt.executeQuery();
                 return rs.next() ? rs.getInt(1) : -1;
             } catch (final SQLException e) {
-                throw MailAccountExceptionMessages.SQL_ERROR.create(e, e.getMessage());
+                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
                 if (releaseConnection && null != databaseService) {
                     databaseService.backReadOnly(contextId, connection);
                 }
             }
-        } catch (final MailAccountException e) {
-            throw new MailAccountException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
@@ -302,14 +276,14 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
      * +++++++++++++++++++++++++++++++++++++++++++++ HELPERS +++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static String getUserLogin(final int userId, final Context ctx) throws MailAccountException {
+    private static String getUserLogin(final int userId, final Context ctx) throws OXException {
         try {
             final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             return userService.getUser(userId, ctx).getLoginInfo();
         } catch (final OXException e) {
-            throw new MailAccountException(e);
+            throw new OXException(e);
         } catch (final UserException e) {
-            throw new MailAccountException(e);
+            throw new OXException(e);
         }
     }
 

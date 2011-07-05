@@ -76,7 +76,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.OXException;
@@ -173,7 +173,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
                     }
                 } catch (final OXException e) {
                     throw new LoginException(e);
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     throw new LoginException(e);
                 }
             }

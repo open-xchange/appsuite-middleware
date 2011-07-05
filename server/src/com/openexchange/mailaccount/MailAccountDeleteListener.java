@@ -51,6 +51,7 @@ package com.openexchange.mailaccount;
 
 import java.sql.Connection;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MailAccountDeleteListener} - Listener interface for mail account deletion.
@@ -67,9 +68,9 @@ public interface MailAccountDeleteListener {
      * @param user The user ID
      * @param cid The context ID
      * @param con The used connection <i>in transactional state</i>
-     * @throws MailAccountException If a critical error occurs which should abort mail account deletion
+     * @throws OXException If a critical error occurs which should abort mail account deletion
      */
-    public void onBeforeMailAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws MailAccountException;
+    public void onBeforeMailAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException;
 
     /**
      * Handles the event <i>after</i> the denoted mail account is deleted.
@@ -79,7 +80,7 @@ public interface MailAccountDeleteListener {
      * @param user The user ID
      * @param cid The context ID
      * @param con The used connection <i>in transactional state</i>
-     * @throws MailAccountException If a critical error occurs which should abort mail account deletion
+     * @throws OXException If a critical error occurs which should abort mail account deletion
      */
-    public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws MailAccountException;
+    public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException;
 }

@@ -52,7 +52,7 @@ package com.openexchange.mailaccount.internal;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.Initialization;
@@ -77,7 +77,7 @@ public final class MailAccountStorageInit implements Initialization {
         started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
         }
@@ -88,7 +88,7 @@ public final class MailAccountStorageInit implements Initialization {
         LOG.info("MailAccountStorageService successfully injected to server service registry");
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;
         }

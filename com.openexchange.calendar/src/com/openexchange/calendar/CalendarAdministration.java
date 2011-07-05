@@ -113,7 +113,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarAdministrationService#deletePerformed(com.openexchange.groupware.delete.DeleteEvent, java.sql.Connection, java.sql.Connection)
      */
-    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException {
         try {
             switch (deleteEvent.getType()) {
             case DeleteEvent.TYPE_USER:

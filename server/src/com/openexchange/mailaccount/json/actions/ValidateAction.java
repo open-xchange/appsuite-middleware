@@ -72,7 +72,7 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -108,7 +108,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -134,7 +134,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             checkNeededFields(accountDescription);
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
                 // Deny validation of Unified INBOX account
-                throw MailAccountExceptionMessages.VALIDATION_FAILED.create();
+                throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
             }
             // Check for tree parameter
             final boolean tree;
@@ -152,7 +152,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         } catch (final GeneralSecurityException e) {
             throw new OXException(MailAccountExceptionFactory.getInstance().create(
-                MailAccountExceptionMessages.UNEXPECTED_ERROR,
+                MailAccountExceptionCodes.UNEXPECTED_ERROR,
                 e,
                 e.getMessage()));
         }

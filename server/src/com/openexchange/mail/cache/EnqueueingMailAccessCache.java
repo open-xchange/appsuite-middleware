@@ -64,7 +64,7 @@ import com.openexchange.mail.cache.queue.MailAccessQueueImpl;
 import com.openexchange.mail.cache.queue.SingletonMailAccessQueue;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -328,7 +328,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             }
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }

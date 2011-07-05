@@ -91,7 +91,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
@@ -596,7 +596,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             final int[] ids =
                 storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
             return Arrays.binarySearch(ids, accountId) >= 0;
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }
@@ -984,7 +984,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
             throw new IMAPException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new IMAPException(e);
         }
     }

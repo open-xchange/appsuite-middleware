@@ -51,6 +51,7 @@ package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
 import java.util.EventListener;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DeleteListener} - Performs the action(s) related to a received delete event
@@ -63,10 +64,10 @@ public interface DeleteListener extends EventListener {
      * Performs the action(s) related to received delete event
      * 
      * @param event the delete event
-     * @param readCon a readonly connection
+     * @param readCon a read-only connection
      * @param writeCon a writable connection
-     * @throws DeleteFailedException if deletion fails
+     * @throws OXException If an error occurs handling the delete event for this listener
      */
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException;
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException;
 
 }

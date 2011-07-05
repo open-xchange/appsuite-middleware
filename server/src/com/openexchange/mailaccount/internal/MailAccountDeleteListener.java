@@ -51,13 +51,11 @@ package com.openexchange.mailaccount.internal;
 
 import java.sql.Connection;
 import java.util.Collections;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -74,22 +72,16 @@ public class MailAccountDeleteListener implements DeleteListener {
         super();
     }
 
-    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-            try {
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
-                final int user = deleteEvent.getId();
-                final int cid = deleteEvent.getContext().getContextId();
-                final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
-                for (final MailAccount account : accounts) {
-                    storageService.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
-                }
-            } catch (final OXException e) {
-                throw new DeleteFailedException(e);
-            } catch (final MailAccountException e) {
-                throw new DeleteFailedException(e);
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
+            final int user = deleteEvent.getId();
+            final int cid = deleteEvent.getContext().getContextId();
+            final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
+            for (final MailAccount account : accounts) {
+                storageService.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
             }
         }
     }

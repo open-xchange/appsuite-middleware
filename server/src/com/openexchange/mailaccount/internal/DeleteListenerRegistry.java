@@ -53,8 +53,8 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.mailaccount.MailAccountException;
 
 /**
  * {@link DeleteListenerRegistry} - Registry for mail account delete listeners.
@@ -124,7 +124,7 @@ public final class DeleteListenerRegistry {
     /**
      * Triggers the {@link MailAccountDeleteListener#onBeforeMailAccountDeletion()} event for registered listeners.
      */
-    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
         for (final MailAccountDeleteListener mailAccountDeleteListener : registry.values()) {
             mailAccountDeleteListener.onBeforeMailAccountDeletion(id, properties, user, cid, con);
         }
@@ -133,7 +133,7 @@ public final class DeleteListenerRegistry {
     /**
      * Triggers the {@link MailAccountDeleteListener#onAfterMailAccountDeletion()} event for registered listeners.
      */
-    public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
         for (final MailAccountDeleteListener mailAccountDeleteListener : registry.values()) {
             mailAccountDeleteListener.onAfterMailAccountDeletion(id, properties, user, cid, con);
         }

@@ -54,7 +54,7 @@ import java.util.Map;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.headercache.properties.RdbHeaderCacheProperties;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link HeaderCacheMailAccountDeleteListener}
@@ -70,15 +70,15 @@ public class HeaderCacheMailAccountDeleteListener implements MailAccountDeleteLi
         super();
     }
 
-    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         try {
             RdbHeaderCacheProperties.dropProperties(id, user, cid, con);
         } catch (final MailException e) {
-            throw new MailAccountException(e);
+            throw new OXException(e);
         }
     }
 
-    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws MailAccountException {
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         // Nothing to do
     }
 

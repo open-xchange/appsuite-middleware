@@ -63,9 +63,9 @@ import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
@@ -95,7 +95,7 @@ public final class NewAction extends AbstractMailAccountAction {
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -108,7 +108,7 @@ public final class NewAction extends AbstractMailAccountAction {
             // Check if account denotes a Unified INBOX account
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
                 // Deny creation of Unified INBOX account
-                throw MailAccountExceptionMessages.CREATION_FAILED.create();
+                throw MailAccountExceptionCodes.CREATION_FAILED.create();
             }
 
             final MailAccountStorageService storageService =
@@ -242,7 +242,7 @@ public final class NewAction extends AbstractMailAccountAction {
                 }
                 account.setTrashFullname(tmp.append(name).toString());
             }
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             /*
              * Checking full names failed
              */
@@ -298,7 +298,7 @@ public final class NewAction extends AbstractMailAccountAction {
         return retval;
     }
 
-    private static String getPrefix(final MailAccountDescription description, final ServerSession session) throws MailAccountException {
+    private static String getPrefix(final MailAccountDescription description, final ServerSession session) throws OXException {
         try {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = getMailAccess(description, session);
             access.connect(false);
@@ -308,7 +308,7 @@ public final class NewAction extends AbstractMailAccountAction {
                 access.close(true);
             }
         } catch (final MailException e) {
-            throw new MailAccountException(e);
+            throw new OXException(e);
         }
     }
 

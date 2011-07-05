@@ -52,7 +52,7 @@ package com.openexchange.mailaccount.internal;
 import java.util.Map;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 
 /**
@@ -72,9 +72,9 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
     /**
      * Initializes a new {@link MailAccountReloader}.
      * 
-     * @throws AbstractOXException If initial load of the object fails.
+     * @throws OXException If initial load of the object fails.
      */
-    public MailAccountReloader(final OXObjectFactory<MailAccount> factory, final String regionName) throws AbstractOXException {
+    public MailAccountReloader(final OXObjectFactory<MailAccount> factory, final String regionName) throws OXException {
         super(factory, regionName);
         delegate = refresh();
     }
@@ -85,7 +85,7 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
     private void updateDelegate() throws RuntimeException {
         try {
             delegate = refresh();
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }

@@ -164,7 +164,7 @@ import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
@@ -710,7 +710,7 @@ public final class ServerActivator extends DeferredActivator {
             ManagedFileExceptionFactory.getInstance()));
         componentRegistrationList.add(new ComponentRegistration(
             context,
-            MailAccountException.MAIL_ACCOUNT_COMPONENT,
+            OXException.MAIL_ACCOUNT_COMPONENT,
             "com.openexchange.mailaccount",
             MailAccountExceptionFactory.getInstance()));
     }

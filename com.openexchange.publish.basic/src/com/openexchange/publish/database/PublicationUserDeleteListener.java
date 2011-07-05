@@ -53,6 +53,7 @@ import java.sql.Connection;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -74,7 +75,7 @@ public class PublicationUserDeleteListener implements DeleteListener {
     private PublicationTargetDiscoveryService discoveryService;
     private GenericConfigurationStorageService genConfStorage;
 
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if(event.getType() != DeleteEvent.TYPE_USER) {
             return;
         }

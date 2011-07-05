@@ -76,7 +76,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
@@ -210,13 +210,13 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * 
      * @param session The session
      * @return The secret string
-     * @throws MailAccountException If secret string cannot be returned
+     * @throws OXException If secret string cannot be returned
      */
-    protected static String getSecret(final ServerSession session) throws MailAccountException {
+    protected static String getSecret(final ServerSession session) throws OXException {
         try {
             return ServerServiceRegistry.getInstance().getService(SecretService.class, true).getSecret(session);
         } catch (final OXException e) {
-            throw new MailAccountException(e);
+            throw new OXException(e);
         }
     }
 
@@ -268,9 +268,9 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @param accountDescription The mail account description
      * @param session The session providing needed user information
      * @return The appropriate {@link MailAccess} instance
-     * @throws MailAccountException If appropriate {@link MailAccess} instance cannot be determined
+     * @throws OXException If appropriate {@link MailAccess} instance cannot be determined
      */
-    protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session) throws MailAccountException {
+    protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session) throws OXException {
         try {
             final String mailServerURL = accountDescription.generateMailServerURL();
             // Get the appropriate mail provider by mail server URL
@@ -307,7 +307,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 session.setParameter("mail-account.request", null);
             }
         } catch (final MailException e) {
-            throw new MailAccountException(e);
+            throw new OXException(e);
         }
     }
 
@@ -457,7 +457,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
              */
             storageService.updateMailAccount(mad, attributes, session.getUserId(), session.getContextId(), session.getPassword());
             return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             /*
              * Checking full names failed
              */
@@ -514,7 +514,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         return retval;
     }
 
-    private static String getPrefix(final int accountId, final ServerSession session) throws MailAccountException {
+    private static String getPrefix(final int accountId, final ServerSession session) throws OXException {
         try {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access =
                 MailAccess.getInstance(session, accountId);
@@ -525,7 +525,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 access.close(true);
             }
         } catch (final MailException e) {
-            throw new MailAccountException(e);
+            throw new OXException(e);
         }
     }
 

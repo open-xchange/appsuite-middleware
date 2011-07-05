@@ -57,7 +57,7 @@ import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.config.MailAccountProperties;
 import com.openexchange.mail.twitter.config.TwitterConfig;
 import com.openexchange.mail.twitter.services.TwitterServiceRegistry;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
@@ -164,7 +164,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
             return new MailAccountProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }

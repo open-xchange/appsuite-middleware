@@ -51,7 +51,7 @@ package com.openexchange.mailaccount.json.fields;
 
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link GetSwitch}
@@ -88,7 +88,7 @@ public class GetSwitch implements AttributeSwitch {
         return desc.getLogin();
     }
 
-    public Object mailURL() throws MailAccountException {
+    public Object mailURL() throws OXException {
         return desc.generateMailServerURL();
     }
 
@@ -120,7 +120,7 @@ public class GetSwitch implements AttributeSwitch {
         return desc.getSpamHandler();
     }
 
-    public Object transportURL() throws MailAccountException {
+    public Object transportURL() throws OXException {
         return desc.generateTransportServerURL();
     }
 

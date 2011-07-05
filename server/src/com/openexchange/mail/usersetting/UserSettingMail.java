@@ -50,7 +50,7 @@
 package com.openexchange.mail.usersetting;
 
 import java.io.Serializable;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -719,7 +719,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(storage.getDefaultMailAccount(userId, cid)));
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (final MailAccountException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

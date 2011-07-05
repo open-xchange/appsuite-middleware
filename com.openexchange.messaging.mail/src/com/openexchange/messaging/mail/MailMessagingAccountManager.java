@@ -63,7 +63,7 @@ import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
@@ -167,7 +167,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 session.getPassword());
         } catch (final OXException e) {
             throw new MessagingException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -181,7 +181,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
         } catch (final OXException e) {
             throw new MessagingException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -194,7 +194,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             return convert2MessagingAccount(mailAccount);
         } catch (final OXException e) {
             throw new MessagingException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -260,7 +260,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             return list;
         } catch (final OXException e) {
             throw new MessagingException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -493,7 +493,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             mass.updateMailAccount(accountDescription, attributes, session.getUserId(), session.getContextId(), session.getPassword());
         } catch (final OXException e) {
             throw new MessagingException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

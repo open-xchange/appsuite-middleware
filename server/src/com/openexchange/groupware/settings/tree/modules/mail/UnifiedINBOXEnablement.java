@@ -54,7 +54,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -105,7 +105,7 @@ public class UnifiedINBOXEnablement implements PreferencesItemService {
                 }
                 try {
                     return Boolean.valueOf(management.getUnifiedINBOXAccountID(settings.getUserId(), settings.getCid()) >= 0);
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     return Boolean.FALSE;
                 }
@@ -137,7 +137,7 @@ public class UnifiedINBOXEnablement implements PreferencesItemService {
                     } else {
                         management.deleteUnifiedINBOX(userId, cid);
                     }
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }

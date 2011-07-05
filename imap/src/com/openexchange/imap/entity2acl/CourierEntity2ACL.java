@@ -58,7 +58,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
@@ -186,7 +186,7 @@ public class CourierEntity2ACL extends Entity2ACL {
         }
         try {
             return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new Entity2ACLException(
                 Entity2ACLException.Code.UNKNOWN_USER,
                 Integer.valueOf(userId),

@@ -52,6 +52,7 @@ package com.openexchange.groupware.userconfiguration;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -76,7 +77,7 @@ public final class UserConfigurationDeleteListener implements DeleteListener {
 	}
 
 	public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
+			throws OXException {
 		if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
 			try {
 				/*

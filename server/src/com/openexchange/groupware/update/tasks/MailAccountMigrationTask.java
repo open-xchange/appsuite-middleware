@@ -80,7 +80,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -225,7 +225,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                     handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
                 } catch (final UpdateException e) {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 }
             }
@@ -263,7 +263,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb, final org.apache.commons.logging.Log LOG) throws UpdateException, MailAccountException {
+    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb, final org.apache.commons.logging.Log LOG) throws UpdateException, OXException {
         /*
          * Insert
          */
@@ -276,7 +276,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static MailAccountDescription createAccountDescription(final User user, final FolderNameProvider folderNameProvdider) throws MailAccountException {
+    private static MailAccountDescription createAccountDescription(final User user, final FolderNameProvider folderNameProvdider) throws OXException {
         final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
         account.setConfirmedHam(prepareNonNullString(folderNameProvdider.getConfirmedHam()));
@@ -435,7 +435,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new UpdateException(e);
         } finally {
             closeSQLStuff(stmt);

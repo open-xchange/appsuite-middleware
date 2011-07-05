@@ -52,7 +52,7 @@ package com.openexchange.server.services;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.server.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**

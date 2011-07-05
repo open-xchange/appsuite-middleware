@@ -76,7 +76,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
@@ -226,7 +226,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                     isSpamOptionEnabled = usm.isSpamOptionEnabled();
                 } catch (final OXException e) {
                     throw new MailException(e);
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     throw new MailException(e);
                 }
                 /*

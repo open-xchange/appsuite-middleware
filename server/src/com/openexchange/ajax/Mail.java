@@ -167,8 +167,8 @@ import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.OXException;
@@ -4558,7 +4558,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final OXException e) {
             throw new OXException(e);
@@ -4585,7 +4585,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             if (accountId != -1) {
                 if (!session.getUserConfiguration().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
-                    throw MailAccountExceptionMessages.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
+                    throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
                 }
                 if (checkTransportSupport) {
                     final MailAccount account = storageService.getMailAccount(accountId, user, cid);
@@ -4596,7 +4596,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                 }
             }
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final OXException e) {
             throw new OXException(e);

@@ -117,7 +117,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
@@ -241,7 +241,7 @@ public final class MailFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -667,7 +667,7 @@ public final class MailFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -899,7 +899,7 @@ public final class MailFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);

@@ -75,7 +75,7 @@ public final class HeaderCacheDeleteListener implements DeleteListener {
         super();
     }
 
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws com.openexchange.exception.OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             final DatabaseService databaseService = getDBService();
             final int contextId = event.getContext().getContextId();

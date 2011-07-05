@@ -77,7 +77,7 @@ public final class FileStorageRemover extends ContextDelete {
     /**
      * {@inheritDoc}
      */
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (isContextDelete(event)) {
             removeFileStorage(event.getContext(), new SimpleDBProvider(readCon, writeCon));
         }

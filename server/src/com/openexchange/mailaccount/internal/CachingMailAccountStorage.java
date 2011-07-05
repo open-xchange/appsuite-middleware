@@ -65,12 +65,10 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -108,34 +106,30 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
     }
 
-    public void invalidateMailAccount(final int id, final int user, final int cid) throws MailAccountException {
+    public void invalidateMailAccount(final int id, final int user, final int cid) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
-            try {
-                final Cache cache = cacheService.getCache(REGION_NAME);
-                cache.remove(newCacheKey(cacheService, id, user, cid));
-            } catch (final CacheException e) {
-                throw new MailAccountException(e);
-            }
+            final Cache cache = cacheService.getCache(REGION_NAME);
+            cache.remove(newCacheKey(cacheService, id, user, cid));
         }
     }
 
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws MailAccountException {
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws OXException {
         delegate.deleteMailAccount(id, properties, user, cid, deletePrimary, con);
         invalidateMailAccount(id, user, cid);
     }
 
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws OXException {
         delegate.deleteMailAccount(id, properties, user, cid, deletePrimary);
         invalidateMailAccount(id, user, cid);
     }
 
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws MailAccountException {
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws OXException {
         delegate.deleteMailAccount(id, properties, user, cid);
         invalidateMailAccount(id, user, cid);
     }
 
-    public MailAccount getDefaultMailAccount(final int user, final int cid) throws MailAccountException {
+    public MailAccount getDefaultMailAccount(final int user, final int cid) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getDefaultMailAccount(user, cid);
@@ -148,7 +142,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return newCacheKey(cacheService, MailAccount.DEFAULT_ID, user, cid);
             }
 
-            public MailAccount load() throws MailAccountException, OXException {
+            public MailAccount load() throws OXException, OXException {
                 return d.getDefaultMailAccount(user, cid);
             }
 
@@ -156,17 +150,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return l;
             }
         };
-        try {
-            return new MailAccountReloader(factory, REGION_NAME);
-        } catch (final AbstractOXException e) {
-            if (e instanceof MailAccountException) {
-                throw (MailAccountException) e;
-            }
-            throw new MailAccountException(e);
-        }
+        return new MailAccountReloader(factory, REGION_NAME);
     }
 
-    public MailAccount getMailAccount(final int id, final int user, final int cid) throws MailAccountException {
+    public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getMailAccount(id, user, cid);
@@ -179,7 +166,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return newCacheKey(cacheService, id, user, cid);
             }
 
-            public MailAccount load() throws MailAccountException, OXException {
+            public MailAccount load() throws OXException, OXException {
                 return d.getMailAccount(id, user, cid);
             }
 
@@ -187,25 +174,18 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return l;
             }
         };
-        try {
-            return new MailAccountReloader(factory, REGION_NAME);
-        } catch (final AbstractOXException e) {
-            if (e instanceof MailAccountException) {
-                throw (MailAccountException) e;
-            }
-            throw new MailAccountException(e);
-        }
+        return new MailAccountReloader(factory, REGION_NAME);
     }
 
-    public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws MailAccountException {
+    public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws OXException {
         return delegate.getByPrimaryAddress(primaryAddress, user, cid);
     }
 
-    public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws MailAccountException {
+    public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws OXException {
         return delegate.getByHostNames(hostNames, user, cid);
     }
 
-    public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws MailAccountException {
+    public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws OXException {
         final int[] ids = delegate.getUserMailAccountIDs(user, cid, con);
         final MailAccount[] accounts = new MailAccount[ids.length];
         for (int i = 0; i < accounts.length; i++) {
@@ -214,58 +194,48 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return accounts;
     }
 
-    private MailAccount getMailAccount0(final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+    private MailAccount getMailAccount0(final int id, final int user, final int cid, final Connection con) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getMailAccount(id, user, cid);
         }
-        try {
-            final CacheKey key = newCacheKey(cacheService, id, user, cid);
-            final Cache cache = cacheService.getCache(REGION_NAME);
-            if (cache.get(key) == null) {
-                /*
-                 * Not contained in cache. Load with specified connection
-                 */
-                final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
-                cacheLock.lock();
-                try {
-                    cache.put(key, mailAccount);
-                } finally {
-                    cacheLock.unlock();
-                }
-            }
+        final CacheKey key = newCacheKey(cacheService, id, user, cid);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        if (cache.get(key) == null) {
             /*
-             * Return reloading mail account
+             * Not contained in cache. Load with specified connection
              */
-            final RdbMailAccountStorage d = delegate;
-            final Lock l = cacheLock;
-            final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
-    
-                public Serializable getKey() {
-                    return key;
-                }
-    
-                public MailAccount load() throws MailAccountException, OXException {
-                    return d.getMailAccount(id, user, cid);
-                }
-    
-                public Lock getCacheLock() {
-                    return l;
-                }
-            };
-            return new MailAccountReloader(factory, REGION_NAME);
-
-        } catch (final MailAccountException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            if (e instanceof MailAccountException) {
-                throw (MailAccountException) e;
+            final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
+            cacheLock.lock();
+            try {
+                cache.put(key, mailAccount);
+            } finally {
+                cacheLock.unlock();
             }
-            throw new MailAccountException(e);
         }
+        /*
+         * Return reloading mail account
+         */
+        final RdbMailAccountStorage d = delegate;
+        final Lock l = cacheLock;
+        final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
+
+            public Serializable getKey() {
+                return key;
+            }
+
+            public MailAccount load() throws OXException, OXException {
+                return d.getMailAccount(id, user, cid);
+            }
+
+            public Lock getCacheLock() {
+                return l;
+            }
+        };
+        return new MailAccountReloader(factory, REGION_NAME);
     }
 
-    public MailAccount[] getUserMailAccounts(final int user, final int cid) throws MailAccountException {
+    public MailAccount[] getUserMailAccounts(final int user, final int cid) throws OXException {
         final int[] ids = delegate.getUserMailAccountIDs(user, cid);
         final MailAccount[] accounts = new MailAccount[ids.length];
         for (int i = 0; i < accounts.length; i++) {
@@ -274,7 +244,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return accounts;
     }
 
-    public MailAccount[] resolveLogin(final String login, final int cid) throws MailAccountException {
+    public MailAccount[] resolveLogin(final String login, final int cid) throws OXException {
         final int[][] idsAndUsers = delegate.resolveLogin2IDs(login, cid);
         final MailAccount[] accounts = new MailAccount[idsAndUsers.length];
         for (int i = 0; i < accounts.length; i++) {
@@ -284,7 +254,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return accounts;
     }
 
-    public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws MailAccountException {
+    public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
         final int[][] idsAndUsers = delegate.resolveLogin2IDs(login, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
         for (final int[] idAndUser : idsAndUsers) {
@@ -296,30 +266,30 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return l.toArray(new MailAccount[l.size()]);
     }
 
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws OXException {
         delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword);
         invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
         delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, changePrimary);
         invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
-    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws MailAccountException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws OXException {
         delegate.updateMailAccount(mailAccount, user, cid, sessionPassword);
         invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws MailAccountException {
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws OXException {
         return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword);
     }
 
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws MailAccountException {
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws OXException {
         return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
     }
 
-    public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final int cid) throws MailAccountException {
+    public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final int cid) throws OXException {
         final int[][] idsAndUsers = delegate.resolvePrimaryAddr2IDs(primaryAddress, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
         for (final int[] idAndUser : idsAndUsers) {
@@ -328,7 +298,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return l.toArray(new MailAccount[l.size()]);
     }
 
-    public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws MailAccountException {
+    public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws OXException {
         final MailAccount account = getMailAccount(id, user, cid);
         if (null == account.getTransportServer()) {
             return getDefaultMailAccount(user, cid);
@@ -336,11 +306,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return account;
     }
 
-    public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws MailAccountException {
+    public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws OXException {
         return delegate.checkCanDecryptPasswords(user, cid, secret);
     }
 
-    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws MailAccountException {
+    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
         delegate.migratePasswords(user, cid, oldSecret, newSecret);
     }
 

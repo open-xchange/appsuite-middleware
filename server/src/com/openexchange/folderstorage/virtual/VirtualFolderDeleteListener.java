@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.virtual;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -70,7 +71,7 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
         super();
     }
 
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (event.getType() != DeleteEvent.TYPE_USER) {
             return;
         }

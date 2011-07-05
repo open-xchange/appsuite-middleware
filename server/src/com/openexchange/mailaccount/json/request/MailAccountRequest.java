@@ -82,9 +82,9 @@ import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
@@ -178,7 +178,7 @@ public final class MailAccountRequest {
 
             if (isUnifiedINBOXAccount(mailAccount)) {
                 // Treat as no hit
-                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                throw MailAccountExceptionCodes.NOT_FOUND.create(
                     Integer.valueOf(id),
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
@@ -186,7 +186,7 @@ public final class MailAccountRequest {
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -209,7 +209,7 @@ public final class MailAccountRequest {
 
             if (isUnifiedINBOXAccount(mailAccount)) {
                 // Treat as no hit
-                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                throw MailAccountExceptionCodes.NOT_FOUND.create(
                     Integer.valueOf(id),
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
@@ -217,7 +217,7 @@ public final class MailAccountRequest {
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -239,7 +239,7 @@ public final class MailAccountRequest {
                 for (final int id : ids) {
                     if (MailAccount.DEFAULT_ID != id) {
                         throw MailAccountExceptionFactory.getInstance().create(
-                            MailAccountExceptionMessages.NOT_ENABLED,
+                            MailAccountExceptionCodes.NOT_ENABLED,
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()));
                     }
@@ -270,7 +270,7 @@ public final class MailAccountRequest {
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -283,7 +283,7 @@ public final class MailAccountRequest {
             // Check if account denotes a Unified INBOX account
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
                 // Deny creation of Unified INBOX account
-                throw MailAccountExceptionMessages.CREATION_FAILED.create();
+                throw MailAccountExceptionCodes.CREATION_FAILED.create();
             }
 
             final MailAccountStorageService storageService =
@@ -312,7 +312,7 @@ public final class MailAccountRequest {
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -335,7 +335,7 @@ public final class MailAccountRequest {
             checkNeededFields(accountDescription);
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
                 // Deny validation of Unified INBOX account
-                throw MailAccountExceptionMessages.VALIDATION_FAILED.create();
+                throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
             }
             // Check for tree parameter
             final boolean tree = jsonObject.hasAndNotNull("tree") ? jsonObject.getBoolean("tree") : false;
@@ -347,13 +347,13 @@ public final class MailAccountRequest {
             throw new OXException(e);
         } catch (final GeneralSecurityException e) {
             throw new OXException(MailAccountExceptionFactory.getInstance().create(
-                MailAccountExceptionMessages.UNEXPECTED_ERROR,
+                MailAccountExceptionCodes.UNEXPECTED_ERROR,
                 e,
                 e.getMessage()));
         }
     }
 
-    private JSONObject actionValidateTree(final MailAccountDescription accountDescription) throws OXException, MailException, JSONException, MailAccountException {
+    private JSONObject actionValidateTree(final MailAccountDescription accountDescription) throws OXException, MailException, JSONException, OXException {
         if (!actionValidateBoolean(accountDescription).booleanValue()) {
             // TODO: How to indicate error if folder tree requested?
             return null;
@@ -430,7 +430,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription) throws MailException, MailAccountException {
+    private MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription) throws MailException, OXException {
         final String mailServerURL = accountDescription.generateMailServerURL();
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
@@ -479,7 +479,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException, MailAccountException {
+    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException, OXException {
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription);
         if (null == mailAccess) {
@@ -489,7 +489,7 @@ public final class MailAccountRequest {
         return mailAccess.ping();
     }
 
-    private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException, MailAccountException {
+    private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException, OXException {
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
@@ -578,7 +578,7 @@ public final class MailAccountRequest {
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -594,7 +594,7 @@ public final class MailAccountRequest {
             final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
             if (isUnifiedINBOXAccount(toUpdate)) {
                 // Treat as no hit
-                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                throw MailAccountExceptionCodes.NOT_FOUND.create(
                     Integer.valueOf(id),
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));

@@ -54,12 +54,12 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.tools.net.URIDefaults;
 
@@ -70,7 +70,9 @@ import com.openexchange.tools.net.URIDefaults;
  */
 final class SanitizingStorageService implements MailAccountStorageService {
 
-    private static final int URI_ERROR_NUMBER = MailAccountExceptionMessages.URI_PARSE_FAILED.getDetailNumber();
+    private static final int URI_ERROR_NUMBER = MailAccountExceptionCodes.URI_PARSE_FAILED.getNumber();
+
+    private static final String PREFIX = MailAccountExceptionCodes.URI_PARSE_FAILED.getPrefix();
 
     private final MailAccountStorageService storageService;
 
@@ -82,18 +84,18 @@ final class SanitizingStorageService implements MailAccountStorageService {
         this.storageService = storageService;
     }
 
-    private static boolean isURIError(final MailAccountException candidate) {
-        return URI_ERROR_NUMBER == candidate.getDetailNumber();
+    private static boolean isURIError(final OXException candidate) {
+        return PREFIX.equals(candidate.getPrefix()) && URI_ERROR_NUMBER == candidate.getCode();
     }
 
-    public void invalidateMailAccount(final int id, final int user, final int cid) throws MailAccountException {
+    public void invalidateMailAccount(final int id, final int user, final int cid) throws OXException {
         storageService.invalidateMailAccount(id, user, cid);
     }
 
-    public MailAccount getMailAccount(final int id, final int user, final int cid) throws MailAccountException {
+    public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
         try {
             return storageService.getMailAccount(id, user, cid);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -102,10 +104,10 @@ final class SanitizingStorageService implements MailAccountStorageService {
         }
     }
 
-    public MailAccount[] getUserMailAccounts(final int user, final int cid) throws MailAccountException {
+    public MailAccount[] getUserMailAccounts(final int user, final int cid) throws OXException {
         try {
             return storageService.getUserMailAccounts(user, cid);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -114,10 +116,10 @@ final class SanitizingStorageService implements MailAccountStorageService {
         }
     }
 
-    public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws MailAccountException {
+    public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws OXException {
         try {
             return storageService.getUserMailAccounts(user, cid, con);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -126,66 +128,66 @@ final class SanitizingStorageService implements MailAccountStorageService {
         }
     }
 
-    public MailAccount getDefaultMailAccount(final int user, final int cid) throws MailAccountException {
+    public MailAccount getDefaultMailAccount(final int user, final int cid) throws OXException {
         return storageService.getDefaultMailAccount(user, cid);
     }
 
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws MailAccountException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws OXException {
         storageService.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword);
     }
 
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
         storageService.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, changePrimary);
     }
 
-    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws MailAccountException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws OXException {
         storageService.updateMailAccount(mailAccount, user, cid, sessionPassword);
     }
 
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws MailAccountException {
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws OXException {
         return storageService.insertMailAccount(mailAccount, user, ctx, sessionPassword);
     }
 
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws MailAccountException {
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws OXException {
         return storageService.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
     }
 
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws MailAccountException {
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid);
     }
 
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws MailAccountException {
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid, deletePrimary);
     }
 
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws MailAccountException {
+    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid, deletePrimary, con);
     }
 
-    public MailAccount[] resolveLogin(final String login, final int cid) throws MailAccountException {
+    public MailAccount[] resolveLogin(final String login, final int cid) throws OXException {
         return storageService.resolveLogin(login, cid);
     }
 
-    public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws MailAccountException {
+    public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
         return storageService.resolveLogin(login, server, cid);
     }
 
-    public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final int cid) throws MailAccountException {
+    public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final int cid) throws OXException {
         return storageService.resolvePrimaryAddr(primaryAddress, cid);
     }
 
-    public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws MailAccountException {
+    public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws OXException {
         return storageService.getByPrimaryAddress(primaryAddress, user, cid);
     }
 
-    public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws MailAccountException {
+    public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws OXException {
         return storageService.getByHostNames(hostNames, user, cid);
     }
 
-    public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws MailAccountException {
+    public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws OXException {
         try {
             return storageService.getTransportAccountForID(id, user, cid);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -194,11 +196,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
         }
     }
 
-    public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws MailAccountException {
+    public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws OXException {
         return storageService.checkCanDecryptPasswords(user, cid, secret);
     }
 
-    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws MailAccountException {
+    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
         storageService.migratePasswords(user, cid, oldSecret, newSecret);
     }
 

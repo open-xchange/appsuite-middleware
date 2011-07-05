@@ -78,7 +78,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
@@ -178,7 +178,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 accountName = stripSpecials(storageService.getMailAccount(pop3AccountId, user, cid).getName());
             } catch (final OXException e) {
                 throw new MailException(e);
-            } catch (final MailAccountException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             }
             String fullname;

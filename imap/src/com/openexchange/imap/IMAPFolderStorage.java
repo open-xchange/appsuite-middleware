@@ -104,7 +104,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -1070,7 +1070,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } else {
                     try {
                         name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
-                    } catch (final MailAccountException e) {
+                    } catch (final OXException e) {
                         throw new MailException(e);
                     }
                 }

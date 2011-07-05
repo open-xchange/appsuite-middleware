@@ -65,7 +65,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
@@ -123,7 +123,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
                 mailAccount = storageService.getMailAccount(pop3AccountId, session.getUserId(), session.getContextId());
             } catch (final OXException e) {
                 throw new MailException(e);
-            } catch (final MailAccountException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             }
         }

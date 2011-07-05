@@ -126,7 +126,7 @@ import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.MessagingAccount;
@@ -1714,7 +1714,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
                     accounts = Arrays.asList(mass.getUserMailAccounts(user.getId(), contextId));
                     Collections.sort(accounts, new MailAccountComparator(locale));
-                } catch (final MailAccountException e) {
+                } catch (final OXException e) {
                     throw new FolderException(e);
                 }
                 if (accounts.isEmpty()) {
@@ -1735,7 +1735,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                             mailAccount.getId(),
                                             MailFolder.DEFAULT_FOLDER_ID));
                                     }
-                                } catch (final MailAccountException e) {
+                                } catch (final OXException e) {
                                     LOG.error(e.getMessage(), e);
                                 }
                             } else {

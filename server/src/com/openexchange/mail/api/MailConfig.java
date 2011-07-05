@@ -71,8 +71,8 @@ import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.OXException;
@@ -286,7 +286,7 @@ public abstract class MailConfig {
             }
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         mailConfig.accountId = accountId;
@@ -377,7 +377,7 @@ public abstract class MailConfig {
             return storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL();
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }
@@ -417,7 +417,7 @@ public abstract class MailConfig {
                     accounts = storageService.resolvePrimaryAddr(pattern, ctx.getContextId());
                     break;
                 default:
-                    throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
+                    throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
                 }
                 final Set<Integer> userIds = new HashSet<Integer>();
                 if (accounts.length == 1) {
@@ -435,7 +435,7 @@ public abstract class MailConfig {
                             shouldMatch = toSocketAddr(MailProperties.getInstance().getMailServer(), 143);
                             break;
                         default:
-                            throw MailAccountExceptionMessages.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
+                            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
                         }
                         if (server.equals(shouldMatch)) {
                             userIds.add(I(candidate.getUserId()));
@@ -578,7 +578,7 @@ public abstract class MailConfig {
                     final String secret = secretService.getSecret(session);
                     mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, secret);
                 } catch (final GeneralSecurityException e) {
-                    throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(
+                    throw new MailConfigException(MailAccountExceptionCodes.PASSWORD_DECRYPTION_FAILED.create(
                         e,
                         mailConfig.login,
                         mailAccount.getMailServer(),

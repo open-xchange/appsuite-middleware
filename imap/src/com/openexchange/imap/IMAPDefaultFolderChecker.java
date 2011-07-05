@@ -77,7 +77,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.OXException;
@@ -287,7 +287,7 @@ public final class IMAPDefaultFolderChecker {
                         isSpamOptionEnabled = usm.isSpamOptionEnabled();
                     } catch (final OXException e) {
                         throw new MailException(e);
-                    } catch (final MailAccountException e) {
+                    } catch (final OXException e) {
                         throw new MailException(e);
                     }
                     /*
@@ -707,7 +707,7 @@ public final class IMAPDefaultFolderChecker {
                                 secretService.getSecret(session));
                         } catch (final OXException e) {
                             throw new IMAPException(e);
-                        } catch (final MailAccountException e) {
+                        } catch (final OXException e) {
                             throw new IMAPException(e);
                         }
                         final String fn = tmp.append(prefix).append(candidate).toString();

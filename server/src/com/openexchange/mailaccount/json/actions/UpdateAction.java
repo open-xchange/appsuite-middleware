@@ -65,7 +65,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionFactory;
-import com.openexchange.mailaccount.MailAccountExceptionMessages;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
@@ -124,7 +124,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
             notAllowed.removeAll(WEBMAIL_ALLOWED);
             if (!session.getUserConfiguration().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
                 throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionMessages.NOT_ENABLED,
+                    MailAccountExceptionCodes.NOT_ENABLED,
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -140,7 +140,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
             final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
             if (isUnifiedINBOXAccount(toUpdate)) {
                 // Treat as no hit
-                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                throw MailAccountExceptionCodes.NOT_FOUND.create(
                     Integer.valueOf(id),
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));

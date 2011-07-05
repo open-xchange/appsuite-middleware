@@ -58,7 +58,7 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -181,7 +181,7 @@ public final class SpamHandlerRegistry {
             mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         final MailProviderGetter mailProviderGetter;

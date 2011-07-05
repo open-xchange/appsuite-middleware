@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -83,7 +84,7 @@ public class TasksDelete implements DeleteListener {
     /**
      * {@inheritDoc}
      */
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         switch (event.getType()) {
         case DeleteEvent.TYPE_USER:
             deleteUser(event, writeCon);
