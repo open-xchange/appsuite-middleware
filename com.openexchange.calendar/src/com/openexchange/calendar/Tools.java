@@ -61,15 +61,12 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -164,15 +161,10 @@ public final class Tools {
      * @param objectId The object ID
      * @param ctx The context
      * @return The appointment's title or <code>null</code>
-     * @throws OXCalendarException If determining appointment's title fails
+     * @throws OXException If determining appointment's title fails
      */
-    public static String getAppointmentTitle(final int objectId, final Context ctx) throws OXCalendarException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, false);
-        } catch (final DBPoolingException e) {
-            throw new OXCalendarException(e);
-        }
+    public static String getAppointmentTitle(final int objectId, final Context ctx) throws OXException {
+        final Connection con = Database.get(ctx, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -206,12 +198,7 @@ public final class Tools {
      * @throws OXException If determining appointment's folder fails
      */
     public static int getAppointmentFolder(final int objectId, final int userId, final Context ctx) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, false);
-        } catch (final DBPoolingException e) {
-            throw new OXCalendarException(e);
-        }
+        final Connection con = Database.get(ctx, false);
         int folderId;
         PreparedStatement stmt = null;
         ResultSet rs = null;

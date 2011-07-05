@@ -84,7 +84,6 @@ import com.openexchange.calendar.RecurringResult;
 import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
 import com.openexchange.calendar.recurrence.RecurringException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
@@ -111,7 +110,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.LdapException;
@@ -1797,8 +1795,6 @@ public final class CalendarCollection implements CalendarCollectionService {
             final CalendarSql csql = new CalendarSql(so);
             final CalendarDataObject cdao = csql.getObjectById(oid, fid);
             return checkPermissions(cdao, so, ctx, readcon, type, fid);
-        } catch(final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } catch(final OXPermissionException x) {
             return false; // Thrown when the user has no READ access.
         } finally {
@@ -2077,7 +2073,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
             cdao.setUsers(ret);
         } else {
-            throw OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_.create(2);
+            throw OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_2.create(2);
         }
     }
     
@@ -2097,7 +2093,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 cdao.setParticipants(ret);
             }
         } else {
-            throw OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_.create(2);
+            throw OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_2.create(2);
         }
     }        
     
@@ -2489,21 +2485,21 @@ public final class CalendarCollection implements CalendarCollectionService {
         return false;
     }
     
-    public CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, SearchIteratorException, OXException {
         return _getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon, false);
     }
 
-    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc) throws SQLException, SearchIteratorException, OXException {
         return _getVisibleAndReadableFolderObject(uid, groups, c, uc, null, true);
     }
     
-    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection con) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection con) throws SQLException, SearchIteratorException, OXException {
         return _getVisibleAndReadableFolderObject(uid, groups, c, uc, con, true);
     }
 
     private CalendarFolderObject _getVisibleAndReadableFolderObject(final int uid, final int groups[],
             final Context c, final UserConfiguration uc, final Connection readcon, final boolean fillShared) throws SQLException,
-            DBPoolingException, SearchIteratorException, OXException {
+            SearchIteratorException, OXException {
         final CalendarFolderObject check = new CalendarFolderObject(uid, c.getContextId(), fillShared);
         if (cache == null) {
             cache = CalendarCache.getInstance();
@@ -2539,8 +2535,6 @@ public final class CalendarCollection implements CalendarCollectionService {
         CalendarFolderObject cfo = null;
         try {
             cfo = getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon);
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } catch (final SearchIteratorException sie) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(sie, Integer.valueOf(1));
         }
@@ -2778,8 +2772,6 @@ public final class CalendarCollection implements CalendarCollectionService {
             pst.close();
         } catch(final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
-        } catch(final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } finally {
             if (close_write && writecon != null) {
                 DBPool.pushWrite(context, writecon);
@@ -2975,11 +2967,11 @@ public final class CalendarCollection implements CalendarCollectionService {
      */
     public void checkUserParticipantObject(final UserParticipant up, final int folder_type) throws OXException {
         if (up.getIdentifier() < 1) {
-            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_.create(1, Integer.valueOf(up.getIdentifier()), Integer.valueOf(folder_type));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_1.create(1, Integer.valueOf(up.getIdentifier()), Integer.valueOf(folder_type));
         } else if ((folder_type == FolderObject.PRIVATE || folder_type == FolderObject.SHARED) && up.getPersonalFolderId() < 1) {
-            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_.create(2, Integer.valueOf(up.getIdentifier()));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_2.create(2, Integer.valueOf(up.getIdentifier()));
         } else if (folder_type == FolderObject.PUBLIC && up.getPersonalFolderId() > 0) {
-            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_.create(3, Integer.valueOf(up.getIdentifier()));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_3.create(3, Integer.valueOf(up.getIdentifier()));
         }
     }
     
@@ -3052,8 +3044,6 @@ public final class CalendarCollection implements CalendarCollectionService {
                 it.close();
             }
             return null;
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } catch (final OXException e) {
@@ -3124,8 +3114,6 @@ public final class CalendarCollection implements CalendarCollectionService {
                 it.close();
             }
             return null;
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } catch (final OXException e) {
@@ -3202,8 +3190,6 @@ public final class CalendarCollection implements CalendarCollectionService {
                 it.close();
             }
             return retval.toArray(new CalendarDataObject[retval.size()]);
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } catch (final OXException e) {
@@ -3278,8 +3264,6 @@ public final class CalendarCollection implements CalendarCollectionService {
                 retval[i] = m.get(Integer.valueOf(ids[i]));
             }
             return retval;
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } catch (final OXException e) {
@@ -3335,8 +3319,6 @@ public final class CalendarCollection implements CalendarCollectionService {
                     ret = -1;
                 }
             }
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } finally {
