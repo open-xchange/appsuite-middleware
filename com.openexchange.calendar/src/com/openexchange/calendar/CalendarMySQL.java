@@ -3629,10 +3629,10 @@ public class CalendarMySQL implements CalendarSqlImp {
             final OXFolderAccess ofa = new OXFolderAccess(ctx);
             final EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
             if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {
-                throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_1.create(1);
+                throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_1.create();
             }
             if (!oclp.canWriteAllObjects()) {
-                throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_1.create(1);
+                throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_1.create();
             }
         }
     }
@@ -4938,8 +4938,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             dates.addAll(longs);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
         } finally {
             collection.closeResultSet(rs);
             collection.closePreparedStatement(prep);
@@ -5011,8 +5009,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
-        } catch (final DBPoolingException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
             DBUtils.closeResources(rs, stmt, null, true, ctx);
             DBPool.push(ctx, connection);
@@ -5051,8 +5047,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                 return rs.getInt(1);
             }
         } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
-        } catch (final DBPoolingException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
             DBUtils.closeResources(rs, stmt, null, true, ctx);

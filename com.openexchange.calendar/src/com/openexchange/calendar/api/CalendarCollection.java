@@ -702,7 +702,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     }
                 } else {
                     if (monthday > 5) {
-                        throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(2, Integer.valueOf(monthday));
+                        throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(Integer.valueOf(monthday));
                     }
                     dsf(recStrBuilder, 5);
                     dsf(recStrBuilder, 'i', interval);
@@ -1015,11 +1015,11 @@ public final class CalendarCollection implements CalendarCollectionService {
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL_2) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL_2.create(2, re, Integer.valueOf(re.getValue()));
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL_2.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY_2) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(2, re, Integer.valueOf(re.getValue()));
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_INTERVAL) {
                 throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_DAY) {
@@ -1274,7 +1274,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL.create(Integer.valueOf(cdao.getInterval()));
                 }
                 if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5) {
-                    throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(2, Integer.valueOf(cdao.getDayInMonth()));
+                    throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(Integer.valueOf(cdao.getDayInMonth()));
                 }
             } else {
                 if (cdao.getInterval() < 1) {
@@ -2967,11 +2967,11 @@ public final class CalendarCollection implements CalendarCollectionService {
      */
     public void checkUserParticipantObject(final UserParticipant up, final int folder_type) throws OXException {
         if (up.getIdentifier() < 1) {
-            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_1.create(1, Integer.valueOf(up.getIdentifier()), Integer.valueOf(folder_type));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_1.create(Integer.valueOf(up.getIdentifier()), Integer.valueOf(folder_type));
         } else if ((folder_type == FolderObject.PRIVATE || folder_type == FolderObject.SHARED) && up.getPersonalFolderId() < 1) {
-            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_2.create(2, Integer.valueOf(up.getIdentifier()));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_2.create(Integer.valueOf(up.getIdentifier()));
         } else if (folder_type == FolderObject.PUBLIC && up.getPersonalFolderId() > 0) {
-            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_3.create(3, Integer.valueOf(up.getIdentifier()));
+            throw OXCalendarExceptionCodes.INTERNAL_USER_PARTICIPANT_CHECK_3.create(Integer.valueOf(up.getIdentifier()));
         }
     }
     
