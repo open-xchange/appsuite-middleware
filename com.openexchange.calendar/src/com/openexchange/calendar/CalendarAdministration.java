@@ -80,7 +80,6 @@ import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedExceptionCode;
 import com.openexchange.groupware.downgrade.DowngradeListener;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -306,7 +305,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.RESOURCEGROUP);
     }
     
-    private final Set<Integer> resolveMembersOfGroups(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon) throws SQLException, LdapException {
+    private final Set<Integer> resolveMembersOfGroups(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon) throws SQLException, OXException {
         PreparedStatement rightsStatement = null;
         ResultSet rightsResultSet = null;
         final Set<Integer> usersInRightsTable = new HashSet<Integer>();
@@ -385,7 +384,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         return usersInMembersTable;
     }
     
-    private final void resolveDeletedGroupAndAddMembers(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon, final Connection writecon) throws SQLException, LdapException {
+    private final void resolveDeletedGroupAndAddMembers(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon, final Connection writecon) throws SQLException, OXException {
         if ( !(type == Participant.GROUP || type == Participant.RESOURCEGROUP)) {
             return;
         }

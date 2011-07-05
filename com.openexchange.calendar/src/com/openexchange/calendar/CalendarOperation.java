@@ -73,7 +73,6 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentException;
@@ -132,7 +131,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private int result_counter;
 
-    private final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(2);
+    private final List<OXException> warnings = new ArrayList<OXException>(2);
 
     private boolean has_next;
 
@@ -764,7 +763,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     public OXException[] getWarnings() {
-        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+        return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
     public boolean hasWarnings() {
@@ -1012,7 +1011,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         this.oids = oids;
     }
 
-    public static final void fillUserParticipants(final CalendarDataObject cdao) throws LdapException {
+    public static final void fillUserParticipants(final CalendarDataObject cdao) throws OXException {
         final Participant participants[] = cdao.getParticipants();
         if (participants == null) {
             return;

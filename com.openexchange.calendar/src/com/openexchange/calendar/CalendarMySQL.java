@@ -80,7 +80,6 @@ import com.openexchange.api2.ReminderService;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
@@ -2422,6 +2421,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                 throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
             } catch (final RuntimeException ex) {
                 throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, Integer.valueOf(2));
+            } catch (final CloneNotSupportedException ex) {
+                throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, Integer.valueOf(2));
             }
         }
 
@@ -3734,8 +3735,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         try {
             eventclient.modify(edao);
         } catch (final OXException e) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);
-        } catch (final EventException e) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);
         }
         return last_modified;
