@@ -72,7 +72,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -267,8 +266,6 @@ public class AuditEventHandler implements EventHandler {
 		} catch (final OXException e) {
 			e.printStackTrace();
 		} catch (final SearchIteratorException e) {
-			e.printStackTrace();
-		} catch (final OXException e) {
 			e.printStackTrace();
 		}
 		

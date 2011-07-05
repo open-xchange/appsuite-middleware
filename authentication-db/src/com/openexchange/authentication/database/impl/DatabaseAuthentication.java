@@ -50,13 +50,13 @@
 package com.openexchange.authentication.database.impl;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
+import javax.security.auth.login.LoginException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -86,7 +86,7 @@ public class DatabaseAuthentication implements AuthenticationService {
      * {@inheritDoc}
      */
     public Authenticated handleLoginInfo(final LoginInfo loginInfo)
-        throws LoginException, com.openexchange.exception.OXException {
+        throws OXException {
         final String password = loginInfo.getPassword();
         if (null == password || 0 == password.length()) {
             throw INVALID_CREDENTIALS.create();
@@ -108,10 +108,8 @@ public class DatabaseAuthentication implements AuthenticationService {
             if (!userService.authenticate(user, password)) {
                 throw INVALID_CREDENTIALS.create();
             }
-        } catch (final OXException e) {
-            throw new LoginException(e);
         } catch (final UserException e) {
-            throw new LoginException(e);
+            throw new OXException(e);
         }
         return new Authenticated() {
             public String getContextInfo() {
