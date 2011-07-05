@@ -155,6 +155,24 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Initializes a default {@link OXException}.
+     * 
+     * @param cause The cause
+     * @deprecated Consider this useless wrapping instance!
+     */
+    @Deprecated
+    public OXException(final OXException cause) {
+        super(cause);
+        code = CODE_DEFAULT;
+        count = COUNTER.incrementAndGet();
+        properties = new HashMap<String, String>(8);
+        categories = new LinkedList<Category>();
+        displayMessage = OXExceptionStrings.MESSAGE;
+        logMessage = null;
+        displayArgs = MESSAGE_ARGS_EMPTY;
+    }
+
+    /**
      * Initializes a new {@link OXException}.
      * 
      * @param code The numeric error code

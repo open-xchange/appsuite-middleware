@@ -100,7 +100,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarAdministration.class));
     
-    private Set<Integer> handledObjects = new HashSet<Integer>();
+    private final Set<Integer> handledObjects = new HashSet<Integer>();
     
     /**
      * Initializes a new {@link CalendarAdministration}
@@ -138,7 +138,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
 
-    public void downgradePerformed(DowngradeEvent downgradeEvent) throws OXException {
+    public void downgradePerformed(final DowngradeEvent downgradeEvent) throws OXException {
         if (!downgradeEvent.getNewUserConfiguration().hasCalendar()) {
             removePrivate(downgradeEvent);
             removeAppointmentsWhereDowngradedUserIsTheOnlyParticipant(downgradeEvent);
@@ -205,7 +205,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         } catch (final OXException e) {
             throw new OXException(e);
         } finally {
-            CalendarCollection collection = new CalendarCollection();
+            final CalendarCollection collection = new CalendarCollection();
             collection.closeResultSet(rs);
             collection.closePreparedStatement(stmt);
         }
@@ -254,7 +254,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 builder.append(" AND cid = ").append(ctx.getContextId());
 
                 final String oids = builder.toString();
-                Statement deleteFromDateExternal = con.createStatement();
+                final Statement deleteFromDateExternal = con.createStatement();
                 statements.add(deleteFromDateExternal);
                 deleteFromDateExternal.execute("DELETE FROM dateExternal WHERE objectId " + oids);
                 final PreparedStatement deleteFromDates = con.prepareStatement("DELETE FROM "+CalendarSql.DATES_TABLE_NAME+" WHERE intfield01 "+oids);
@@ -278,7 +278,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             LOG.error(e);
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            CalendarCollection collection = new CalendarCollection();
+            final CalendarCollection collection = new CalendarCollection();
             for(final Statement stmt : statements) {
                 collection.closeStatement(stmt);
             }
@@ -314,10 +314,10 @@ public class CalendarAdministration implements CalendarAdministrationService {
     private final Set<Integer> resolveMembersOfGroups(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon) throws SQLException, LdapException {
         PreparedStatement rightsStatement = null;
         ResultSet rightsResultSet = null;
-        Set<Integer> usersInRightsTable = new HashSet<Integer>();
+        final Set<Integer> usersInRightsTable = new HashSet<Integer>();
         
         try {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             sb.append("SELECT id, type FROM ");
             sb.append(CalendarSql.VIEW_TABLE_NAME);
             sb.append(" WHERE cid = ? AND object_id = ? AND type in (?, ?)");
@@ -341,8 +341,8 @@ public class CalendarAdministration implements CalendarAdministrationService {
                     if (rightsResultSet.getInt(1) == deleteEvent.getId()) {
                         continue;
                     }
-                    Group group = GroupStorage.getInstance().getGroup(rightsResultSet.getInt(1), deleteEvent.getContext());
-                    for (int memberUid : group.getMember()) {
+                    final Group group = GroupStorage.getInstance().getGroup(rightsResultSet.getInt(1), deleteEvent.getContext());
+                    for (final int memberUid : group.getMember()) {
                         usersInRightsTable.add(I(memberUid));
                     }
                 }
@@ -362,10 +362,10 @@ public class CalendarAdministration implements CalendarAdministrationService {
     private final Set<Integer> getUsers(final int objectId, final Context ctx, final Connection readcon) throws SQLException {
         PreparedStatement membersStatement = null;
         ResultSet membersResultSet = null;
-        Set<Integer> usersInMembersTable = new HashSet<Integer>();
+        final Set<Integer> usersInMembersTable = new HashSet<Integer>();
         
         try {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             sb.append("SELECT member_uid FROM ");
             sb.append(CalendarSql.PARTICIPANT_TABLE_NAME);
             sb.append(" WHERE cid = ? AND object_id = ?");
@@ -400,13 +400,13 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
         
         PreparedStatement insertStatement = null;
-        Set<Integer> usersToAdd = new HashSet<Integer>();
+        final Set<Integer> usersToAdd = new HashSet<Integer>();
         
         try {
             usersToAdd.addAll(getUsers(objectId, deleteEvent.getContext(), readcon));
             usersToAdd.removeAll(resolveMembersOfGroups(objectId, deleteEvent, type, readcon));
             
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             sb.append("INSERT INTO ");
             sb.append(CalendarSql.VIEW_TABLE_NAME);
             sb.append(" (object_id, cid, id, type) ");
@@ -415,7 +415,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
             insertStatement = writecon.prepareStatement(sb.toString());
             
-            for (int id : usersToAdd) {
+            for (final int id : usersToAdd) {
                 insertStatement.setInt(1, objectId);
                 insertStatement.setInt(2, deleteEvent.getContext().getContextId());
                 insertStatement.setInt(3, id);
@@ -461,10 +461,6 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
             update.executeBatch();
             update.close();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (LdapException e) {
-            throw new OXException(e);
         } finally {
             closeSQLStuff(rs, pst);
         }
@@ -538,7 +534,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 del_rights.executeBatch();
             }
         } finally {
-            CalendarCollection collection = new CalendarCollection();
+            final CalendarCollection collection = new CalendarCollection();
             if (rs != null) {
                 collection.closeResultSet(rs);
             }
@@ -566,7 +562,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         PreparedStatement pst4 = null;
         PreparedStatement pst5 = null;
         PreparedStatement pst6 = null;
-        CalendarCollection collection = new CalendarCollection();
+        final CalendarCollection collection = new CalendarCollection();
         try {
         	/*
         	 * Remove user's appointment reminder
@@ -708,7 +704,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
      * @see com.openexchange.calendar.CalendarAdministrationService#initializeUpdateString()
      */
     public final void initializeUpdateString() {
-        CalendarCollection collection = new CalendarCollection();
+        final CalendarCollection collection = new CalendarCollection();
         u1 = new StringBuilder(128);
         u1.append("UPDATE prg_dates pd SET ");
         u1.append(collection.getFieldName(Appointment.MODIFIED_BY));
@@ -725,7 +721,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         final CalendarSqlImp cimp = new CalendarMySQL();
         PreparedStatement prep = null;
         ResultSet rs = null;
-        CalendarCollection collection = new CalendarCollection();
+        final CalendarCollection collection = new CalendarCollection();
         try {
             prep =  cimp.getPreparedStatement(readcon, cimp.loadAppointment(object_id, context));
             rs = cimp.getResultSet(prep);

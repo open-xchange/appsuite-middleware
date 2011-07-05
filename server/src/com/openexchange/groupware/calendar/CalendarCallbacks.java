@@ -55,7 +55,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -67,7 +66,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CalendarCallbacks implements CalendarListener {
-    private List<CalendarListener> listeners = new ArrayList<CalendarListener>();
+    private final List<CalendarListener> listeners = new ArrayList<CalendarListener>();
     private List<CalendarListener> copyForReading = new ArrayList<CalendarListener>();
     
     private static final CalendarCallbacks INSTANCE = new CalendarCallbacks();
@@ -75,13 +74,13 @@ public class CalendarCallbacks implements CalendarListener {
 
     private boolean mustCopy;
 
-    private Lock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
 
     public static CalendarCallbacks getInstance() {
         return INSTANCE;
     }
 
-    public void addListener(CalendarListener listener) {
+    public void addListener(final CalendarListener listener) {
         try {
             lock.lock();
             mustCopy = true;
@@ -91,7 +90,7 @@ public class CalendarCallbacks implements CalendarListener {
         }
     }
 
-    public void removeListener(CalendarListener listener) {
+    public void removeListener(final CalendarListener listener) {
         try {
             lock.lock();
             mustCopy = true;
@@ -113,26 +112,26 @@ public class CalendarCallbacks implements CalendarListener {
         return copyForReading;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException, int inFolder, Session session) throws AbstractOXException {
-        ServerSession serverSession = getServerSession(session);
+    public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException, final int inFolder, final Session session) throws OXException {
+        final ServerSession serverSession = getServerSession(session);
         createdChangeExceptionInRecurringAppointment(master, changeException, inFolder, serverSession);
     }
 
-    private ServerSession getServerSession(Session session) throws OXException {
+    private ServerSession getServerSession(final Session session) throws OXException {
         if(ServerSession.class.isAssignableFrom(session.getClass())) {
             return (ServerSession) session;
         }
         return new ServerSessionAdapter(session);
     }
 
-    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException,int inFolder, ServerSession serverSession) throws AbstractOXException {
-        List<String> exceptionIDs = new ArrayList<String>();
-        for (CalendarListener listener : getListeners()) {
+    public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException,final int inFolder, final ServerSession serverSession) throws OXException {
+        final List<String> exceptionIDs = new ArrayList<String>();
+        for (final CalendarListener listener : getListeners()) {
             try {
                 listener.createdChangeExceptionInRecurringAppointment(master, changeException,inFolder, serverSession);
-            } catch (AbstractOXException x) {
+            } catch (final OXException x) {
                 LOG.error(x.getMessage(), x);
-                exceptionIDs.add(x.getExceptionID());
+                exceptionIDs.add(x.getExceptionId());
             }
         }
         if(!exceptionIDs.isEmpty()) {

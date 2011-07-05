@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.session.ServerSession;
 
@@ -61,6 +61,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface CalendarListener {
 
-    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException, int inFolder, ServerSession session) throws AbstractOXException;
+    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException, int inFolder, ServerSession session) throws OXException;
 
 }

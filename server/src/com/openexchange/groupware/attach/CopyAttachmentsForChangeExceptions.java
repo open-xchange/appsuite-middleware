@@ -49,6 +49,7 @@
 package com.openexchange.groupware.attach;
 
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -73,7 +74,7 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
         this.attachmentBase = attachmentBase;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment exception,int inFolder, ServerSession session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment exception,int inFolder, ServerSession session) throws OXException {
         try {
             attachmentBase.startTransaction();
             Context ctx = session.getContext();

@@ -50,7 +50,7 @@
 package com.openexchange.groupware.links;
 
 import com.openexchange.api2.LinkSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.container.Appointment;
@@ -70,7 +70,7 @@ public class CopyLinksForChangeExceptions implements CalendarListener {
         this.links = links;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException,int inFolder, ServerSession session) throws AbstractOXException {
+    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException,int inFolder, ServerSession session) throws OXException {
         int userId = session.getUserId();
         UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId,session.getContext());
         int[] groups = userConfig.getGroups();

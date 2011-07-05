@@ -50,7 +50,6 @@
 package com.openexchange.calendar;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -62,17 +61,17 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class AnonymizingIterator extends CachedCalendarIterator {
 
-    public AnonymizingIterator(SearchIterator<CalendarDataObject> non_cached_iterator, Context c, int uid) throws AbstractOXException {
+    public AnonymizingIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws OXException {
         super(non_cached_iterator, c, uid);
     }
 
-    public AnonymizingIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws AbstractOXException {
+    public AnonymizingIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws OXException {
         super(non_cached_iterator, c, uid, oids);
     }
 
     @Override
     public CalendarDataObject next() throws OXException {
-        CalendarDataObject app = super.next();
+        final CalendarDataObject app = super.next();
         if (null == app) {
             return null;
         }
@@ -82,7 +81,7 @@ public class AnonymizingIterator extends CachedCalendarIterator {
         if (app.getPrivateFlag() && app.getCreatedBy() == uid) {
             return app;
         }
-        CalendarDataObject anonymized = app.clone();
+        final CalendarDataObject anonymized = app.clone();
         anonymized.setTitle("Private");
         anonymized.removeAlarm();
         anonymized.removeCategories();

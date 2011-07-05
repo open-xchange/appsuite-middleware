@@ -3048,8 +3048,6 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } catch (final OXException e) {
             throw new OXException(e);
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } finally {
             if (closeResources) {
                 closeResultSet(rs);
@@ -3117,8 +3115,6 @@ public final class CalendarCollection implements CalendarCollectionService {
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final AbstractOXException e) {
             throw new OXException(e);
         } finally {
             if (closeResources) {
@@ -3194,8 +3190,6 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } catch (final OXException e) {
             throw new OXException(e);
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } finally {
             if (closeResources) {
                 closeResultSet(rs);
@@ -3267,8 +3261,6 @@ public final class CalendarCollection implements CalendarCollectionService {
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final AbstractOXException e) {
             throw new OXException(e);
         } finally {
             if (closeResources) {
