@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingException;
@@ -95,7 +95,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     private int ctxId;
 
-    public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws ConfigCascadeException, UWAWidgetException {
+    public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws OXException, UWAWidgetException {
         userScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
         contextScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
         positions = new PositionSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);

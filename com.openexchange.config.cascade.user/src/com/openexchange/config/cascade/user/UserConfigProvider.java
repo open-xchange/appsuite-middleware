@@ -56,12 +56,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -76,11 +74,11 @@ public class UserConfigProvider implements ConfigProviderService {
 
     private static final String DYNAMIC_ATTR_PREFIX = "config/";
 
-    private UserService users;
+    private final UserService users;
 
-    private ContextService contexts;
+    private final ContextService contexts;
     
-    public UserConfigProvider(UserService users, ContextService contexts) {
+    public UserConfigProvider(final UserService users, final ContextService contexts) {
         super();
         this.users = users;
         this.contexts = contexts;
@@ -90,7 +88,7 @@ public class UserConfigProvider implements ConfigProviderService {
         if(context == NO_CONTEXT && userId == NO_USER) {
             return NO_PROPERTY;
         }
-        try {
+        {
             final Context ctx = contexts.getContext(context);
             final User user = users.getUser(userId, ctx);
 
@@ -98,31 +96,31 @@ public class UserConfigProvider implements ConfigProviderService {
             return new BasicProperty() {
 
                 public String get() {
-                    Map<String, Set<String>> attributes = user.getAttributes();
+                    final Map<String, Set<String>> attributes = user.getAttributes();
                     
-                    Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
+                    final Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
                     if (set == null || set.isEmpty()) {
                         return null;
                     }
                     return set.iterator().next();
                 }
 
-                public String get(String metadataName) throws ConfigCascadeException {
+                public String get(final String metadataName) throws OXException {
                     return null;
                 }
 
-                public boolean isDefined() throws ConfigCascadeException {
+                public boolean isDefined() throws OXException {
                     return get() != null;
                 }
 
-                public void set(String value) throws ConfigCascadeException {
+                public void set(final String value) throws OXException {
                     try {
                         users.setAttribute(DYNAMIC_ATTR_PREFIX+property, value, userId, ctx);
-                    } catch (UserException e) {
-                        throw new ConfigCascadeException(e);
+                    } catch (final UserException e) {
+                        throw new OXException(e);
                     }
                 }
-                public void set(String metadataName, String value) throws ConfigCascadeException {
+                public void set(final String metadataName, final String value) throws OXException {
                     throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
                 }
 
@@ -131,30 +129,26 @@ public class UserConfigProvider implements ConfigProviderService {
                 }
                 
             };
-        } catch (AbstractOXException e) {
-            throw new ConfigCascadeException(e);
         }
 
     }
 
-    public Collection<String> getAllPropertyNames(int context, int userId) throws OXException {
+    public Collection<String> getAllPropertyNames(final int context, final int userId) throws OXException {
         if(context == NO_CONTEXT && userId == NO_CONTEXT) {
             return Collections.emptyList();
         }
-        try {
+        {
             final User user = users.getUser(userId, contexts.getContext(context));
-            Map<String, Set<String>> attributes = user.getAttributes();
-            Set<String> allNames = new HashSet<String>();
-            int snip = DYNAMIC_ATTR_PREFIX.length();
-            for(String name : attributes.keySet()) {
+            final Map<String, Set<String>> attributes = user.getAttributes();
+            final Set<String> allNames = new HashSet<String>();
+            final int snip = DYNAMIC_ATTR_PREFIX.length();
+            for(final String name : attributes.keySet()) {
                 if(name.startsWith(DYNAMIC_ATTR_PREFIX)) {
                     allNames.add(name.substring(snip));
                 }
             }
             return allNames;
-        } catch (AbstractOXException e) {
-            throw new ConfigCascadeException(e);
-        }   
+        } 
     }
 
 }

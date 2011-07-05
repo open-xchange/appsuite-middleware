@@ -54,7 +54,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.AbstractOXException;
@@ -77,7 +77,7 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
     public SubscriptionSourceDiscoveryService delegate = null;
     private ConfigView config;
     
-    public FilteredSubscriptionSourceDiscoveryService(int user, int context, SubscriptionSourceDiscoveryService delegate) throws ConfigCascadeException {
+    public FilteredSubscriptionSourceDiscoveryService(int user, int context, SubscriptionSourceDiscoveryService delegate) throws OXException {
         this.config = CONFIG_VIEW_FACTORY.getView(user, context);
         this.delegate = delegate;
     }
@@ -119,7 +119,7 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
                 return property.get();
             }
             return false;
-        } catch (ConfigCascadeException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             return false;
         }

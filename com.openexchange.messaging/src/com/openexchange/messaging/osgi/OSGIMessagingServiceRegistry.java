@@ -59,7 +59,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.messaging.MessagingException;
@@ -150,7 +150,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             }
             ComposedConfigProperty<Boolean> configProperty = configView.property(id, boolean.class);
             return (configProperty.isDefined() && configProperty.get());
-        } catch (ConfigCascadeException e) {
+        } catch (OXException e) {
             throw new MessagingException(e);
         }        
     }
@@ -168,7 +168,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
                     filteredList.add(messagingService);
                 }
             }
-        } catch (ConfigCascadeException x) {
+        } catch (OXException x) {
             throw new MessagingException(x);
         }
         
@@ -181,13 +181,13 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             if (property.isDefined() && property.get()) {
                 return true;
             }
-        } catch (ConfigCascadeException e) {
+        } catch (OXException e) {
             throw new MessagingException(e);
         }
         return false;
     }
 
-    private ConfigView getView(int user, int context) throws ConfigCascadeException {
+    private ConfigView getView(int user, int context) throws OXException {
         ConfigViewFactory service = (ConfigViewFactory) configTracker.getService();
         return service.getView(user, context);
     }

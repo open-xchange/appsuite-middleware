@@ -49,6 +49,8 @@
 
 package com.openexchange.config.cascade;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link ConfigViewFactory}
@@ -56,7 +58,7 @@ package com.openexchange.config.cascade;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ConfigViewFactory {
-    public ConfigView getView(int user, int context) throws ConfigCascadeException;
-    public ConfigView getView() throws ConfigCascadeException;
-    public String[] getSearchPath() throws ConfigCascadeException;
+    public ConfigView getView(int user, int context) throws OXException;
+    public ConfigView getView() throws OXException;
+    public String[] getSearchPath() throws OXException;
 }

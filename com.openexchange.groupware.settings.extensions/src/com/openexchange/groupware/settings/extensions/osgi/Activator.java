@@ -62,7 +62,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.contexts.Context;
@@ -120,7 +120,7 @@ public class Activator implements BundleActivator {
     
     // Maybe that is an overuse of anonymous inner classes. Better get around to refactoring this at some point.
     
-    private void export(final ConfigViewFactory viewFactory, ComposedConfigProperty<String> property, final String propertyName) throws ConfigCascadeException {
+    private void export(final ConfigViewFactory viewFactory, ComposedConfigProperty<String> property, final String propertyName) throws OXException {
         
         final String[] path = property.get(PREFERENCE_PATH).split("/");
         String finalScope = property.get("final");
@@ -159,7 +159,7 @@ public class Activator implements BundleActivator {
                             }
                             
                             setting.setSingleValue(value);
-                        } catch (ConfigCascadeException e) {
+                        } catch (OXException e) {
                             throw new SettingException(e);
                         }
                     }
@@ -197,7 +197,7 @@ public class Activator implements BundleActivator {
                             
                         } else {
                             
-                        }} catch (ConfigCascadeException e) {
+                        }} catch (OXException e) {
                             throw new SettingException(e);
                         }
                         
@@ -244,7 +244,7 @@ public class Activator implements BundleActivator {
                                 }
                                 
                                 setting.setSingleValue(value);
-                            } catch (ConfigCascadeException e) {
+                            } catch (OXException e) {
                                 throw new SettingException(e);
                             }
                         }
@@ -313,7 +313,7 @@ public class Activator implements BundleActivator {
         services.publishService(PreferencesItemService.class, configurableItem);
     }
 
-    private boolean isPreferenceItem(ComposedConfigProperty<String> property) throws ConfigCascadeException {
+    private boolean isPreferenceItem(ComposedConfigProperty<String> property) throws OXException {
         return property.get(PREFERENCE_PATH) != null;
     }
 

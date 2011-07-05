@@ -55,7 +55,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link ConfigCascadeExceptionCodes} - Enumeration of all {@link ConfigCascadeException}s.
+ * {@link ConfigCascadeExceptionCodes} - Enumeration of all {@link OXException}s.
  * 
  * @author francisco.laguna@open-xchange.com
  */

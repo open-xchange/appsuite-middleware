@@ -50,7 +50,7 @@
 package com.openexchange.frontend.uwa.internal;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.frontend.uwa.UWAWidgetException;
@@ -82,7 +82,7 @@ public class UWAWidgetServiceFactoryImpl implements UWAWidgetServiceFactory {
     public UWAWidgetService getService(int userId, int ctxId) throws UWAWidgetException {
         try {
             return new CompositeUWAService(dbService, configViews, config, idGenerator, userId, ctxId);
-        } catch (ConfigCascadeException e) {
+        } catch (OXException e) {
             throw new UWAWidgetException(e);
         }
     }

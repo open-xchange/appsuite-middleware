@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -90,11 +89,11 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
                 return set.iterator().next();
             }
 
-            public String get(final String metadataName) throws ConfigCascadeException {
+            public String get(final String metadataName) throws OXException {
                 return null;
             }
 
-            public boolean isDefined() throws ConfigCascadeException {
+            public boolean isDefined() throws OXException {
                 return get() != null;
             }
 

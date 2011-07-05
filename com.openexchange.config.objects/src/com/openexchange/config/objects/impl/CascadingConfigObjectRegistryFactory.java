@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.objects.ConfigObjectRegistry;
@@ -82,7 +82,7 @@ public class CascadingConfigObjectRegistryFactory implements ConfigObjectRegistr
     public ConfigObjectRegistry getView(int user, int context) throws ConfigObjectsException {
         try {
             return new CascadingConfigObjectRegistry(configFactory.getView(user, context), config, pathMapping);
-        } catch (ConfigCascadeException e) {
+        } catch (OXException e) {
             throw new ConfigObjectsException(e);
         }
     }
@@ -100,7 +100,7 @@ public class CascadingConfigObjectRegistryFactory implements ConfigObjectRegistr
                 }
             }
 
-        } catch (ConfigCascadeException e) {
+        } catch (OXException e) {
             throw new ConfigObjectsException(e);
         }
 

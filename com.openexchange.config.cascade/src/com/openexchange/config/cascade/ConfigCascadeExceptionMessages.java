@@ -52,7 +52,7 @@ package com.openexchange.config.cascade;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ConfigCascadeExceptionMessages} - Exception messages for {@link ConfigCascadeException} that needs to be translated.
+ * {@link ConfigCascadeExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  * 
  * @author francisco.laguna@open-xchange.com
  */

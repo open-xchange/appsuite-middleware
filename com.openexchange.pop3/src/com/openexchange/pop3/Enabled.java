@@ -50,7 +50,7 @@
 package com.openexchange.pop3;
 
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.contexts.Context;
@@ -98,7 +98,7 @@ public class Enabled implements PreferencesItemService {
                     } else {
                         setting.setSingleValue(Boolean.TRUE);
                     }
-                } catch (final ConfigCascadeException e) {
+                } catch (final OXException e) {
                     throw new SettingException(e);
                 }
             }

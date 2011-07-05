@@ -50,7 +50,7 @@
 package com.openexchange.frontend.uwa.json.preferences;
 
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.contexts.Context;
@@ -97,7 +97,7 @@ public class Enabled implements PreferencesItemService {
                     } else {
                         setting.setSingleValue(true);
                     }
-                } catch (ConfigCascadeException e) {
+                } catch (OXException e) {
                     throw new SettingException(e);
                 }
             }
