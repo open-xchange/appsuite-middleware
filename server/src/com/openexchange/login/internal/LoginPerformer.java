@@ -78,7 +78,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -141,7 +141,7 @@ public final class LoginPerformer {
             final AuthorizationService authService = Authorization.getService();
             if (null == authService) {
                 // FIXME: what todo??
-                final ServiceException e = new ServiceException(ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED);
+                final OXException e = new OXException(ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED);
                 LOG.error("unable to find AuthorizationService", e);
                 throw e;
             }
@@ -154,7 +154,7 @@ public final class LoginPerformer {
             retval.setSession(sessiondService.getSession(sessionId));
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             logLoginRequest(request, retval);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } catch (final LoginException e) {
@@ -242,7 +242,7 @@ public final class LoginPerformer {
         final SessiondService sessiondService;
         try {
             sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         }
         final Session session = sessiondService.getSession(sessionId);
@@ -413,7 +413,7 @@ public final class LoginPerformer {
     public Session lookupSession(final String sessionId) throws LoginException {
         try {
             return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
-        } catch (final ServiceException x) {
+        } catch (final OXException x) {
             throw new LoginException(x);
         }
     }

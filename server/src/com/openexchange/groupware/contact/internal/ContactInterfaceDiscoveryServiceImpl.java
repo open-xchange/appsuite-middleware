@@ -60,7 +60,7 @@ import com.openexchange.groupware.contact.ContactInterfaceProviderRegistration;
 import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -114,7 +114,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         super();
         try {
             rdbProviderCache = new RdbContactInterfaceProviderCache();
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -189,7 +189,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
 
         private final TimeoutConcurrentMap<Integer, RdbContactInterfaceProvider> map;
 
-        public RdbContactInterfaceProviderCache() throws ServiceException {
+        public RdbContactInterfaceProviderCache() throws OXException {
             super();
             this.map = new TimeoutConcurrentMap<Integer, RdbContactInterfaceProvider>(20);
         }

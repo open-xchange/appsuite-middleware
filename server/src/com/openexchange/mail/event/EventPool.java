@@ -63,7 +63,7 @@ import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.push.PushEventConstants;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -150,7 +150,7 @@ public final class EventPool implements Runnable {
         blocker = new ConcurrentBlocker();
         try {
             eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }

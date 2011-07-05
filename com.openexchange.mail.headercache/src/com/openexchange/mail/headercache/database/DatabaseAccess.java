@@ -89,7 +89,7 @@ import com.openexchange.mail.headercache.Constants;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 import com.openexchange.mail.headercache.sync.SyncData;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -1043,7 +1043,7 @@ public final class DatabaseAccess {
         final DatabaseService databaseService;
         try {
             databaseService = HeaderCacheServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         return databaseService;

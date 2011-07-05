@@ -62,7 +62,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
@@ -210,7 +210,7 @@ public final class SessiondActivator extends DeferredActivator {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("stopping bundle:\nRemaining active sessions were put into session cache for remote distribution\n");
                 }
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 LOG.warn("Missing caching service. Remaining active sessions could not be put into session cache for remote distribution.");
             }
             // Stop sessiond

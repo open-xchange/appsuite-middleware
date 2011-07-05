@@ -67,7 +67,7 @@ import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
@@ -106,7 +106,7 @@ public class GetArisingReminder {
         AppointmentSqlFactoryService factoryService;
         try {
             factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new ReminderException(e);
         }
         final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);

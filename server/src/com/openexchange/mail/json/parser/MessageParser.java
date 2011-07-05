@@ -119,7 +119,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -242,7 +242,7 @@ public final class MessageParser {
                 if (length > 0) {
                     final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
                     if (conversionService == null) {
-                        throw new MailException(new ServiceException(
+                        throw new MailException(new OXException(
                             ServiceExceptionCode.SERVICE_UNAVAILABLE,
                             ConversionService.class.getName()));
                     }

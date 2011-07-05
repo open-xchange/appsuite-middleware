@@ -88,7 +88,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.encoding.Charsets;
@@ -225,7 +225,7 @@ public class ICalExporter implements Exporter {
             final ICalEmitter emitter;
             try {
                 emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class, true);
-            } catch (ServiceException e) {
+            } catch (OXException e) {
                 throw ImportExportExceptionCodes.ICAL_EMITTER_SERVICE_MISSING.create(e);
             }
             final FolderObject fo;

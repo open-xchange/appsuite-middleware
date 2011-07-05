@@ -63,7 +63,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -147,7 +147,7 @@ public final class SessionHandler {
                     SessionCache.getInstance().putCachedSessionForRemoteRemoval(sessionControl.getSession().createCachedSession());
                 } catch (final CacheException e) {
                     LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
                 }
             }
@@ -304,7 +304,7 @@ public final class SessionHandler {
             }
         } catch (final CacheException e) {
             LOG.error("Unable to look-up session cache", e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             LOG.error("Unable to look-up session cache", e);
         }
         return sessionControl;
@@ -337,7 +337,7 @@ public final class SessionHandler {
             LOG.error(e.getMessage(), e);
         } catch (final SessiondException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         return null;

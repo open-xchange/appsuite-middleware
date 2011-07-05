@@ -99,7 +99,7 @@ import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -149,7 +149,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         this.session = session;
         try {
             fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }
@@ -244,7 +244,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
              * ... and in turn target's publication service
              */
             publisher = target.getPublicationService();
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         } catch (final PublicationException e) {
             throw new MailException(e);

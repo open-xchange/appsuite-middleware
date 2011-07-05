@@ -53,7 +53,7 @@ import java.sql.PreparedStatement;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 
 /**
  * {@link Utility}
@@ -79,7 +79,7 @@ public final class Utility {
         final DatabaseService databaseService;
         try {
             databaseService = OutlookServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
         return databaseService;

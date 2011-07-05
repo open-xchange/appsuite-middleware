@@ -106,7 +106,7 @@ import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -220,7 +220,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                         session);
             } catch (final MessagingException e) {
                 throw new FolderException(e);
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
             final MessagingAccountAccess prev = accesses.putIfAbsent(key, accountAccess);
@@ -604,7 +604,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             return retval;
         } catch (final MessagingException e) {
             throw new FolderException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -769,7 +769,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }

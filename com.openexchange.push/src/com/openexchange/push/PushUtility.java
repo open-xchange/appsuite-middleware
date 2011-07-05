@@ -54,7 +54,7 @@ import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.push.internal.ServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -107,7 +107,7 @@ public final class PushUtility {
                 LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(
                     userId).append(" in context ").append(contextId).toString());
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         }
     }

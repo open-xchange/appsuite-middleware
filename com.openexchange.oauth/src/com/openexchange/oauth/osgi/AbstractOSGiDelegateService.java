@@ -52,7 +52,7 @@ package com.openexchange.oauth.osgi;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.server.ServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -111,12 +111,12 @@ public abstract class AbstractOSGiDelegateService<S> {
      * Gets the service from service reference.
      * 
      * @return The service
-     * @throws ServiceException If service reference returned <code>null</code>
+     * @throws OXException If service reference returned <code>null</code>
      */
-    protected S getService() throws ServiceException {
+    protected S getService() throws OXException {
         final S serviceInst = service.get();
         if (null == serviceInst) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( clazz.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
         }
         return serviceInst;
     }

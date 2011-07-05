@@ -64,7 +64,6 @@ import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.oauth.exception.OAuthExceptionFactory;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.services.ServiceRegistry;

@@ -58,7 +58,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -139,7 +139,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         }
         try {
             timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         timeoutMap.setDefaultTimeoutListener(new MailAccessTimeoutListener());
@@ -223,7 +223,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
             for (final MailAccount mailAccount : accounts) {
                 timeoutMap.timeout(getUserKey(user, mailAccount.getId(), cid));
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         } catch (final MailAccountException e) {
             throw new MailException(e);

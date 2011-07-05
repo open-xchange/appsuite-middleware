@@ -92,7 +92,7 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -200,7 +200,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                         session);
             } catch (final OXException e) {
                 throw new FolderException(e);
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
             final FileStorageAccountAccess prev = accesses.putIfAbsent(key, accountAccess);
@@ -483,7 +483,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     final FileStorageAccount fsAccount =
                         fsService.getAccountManager().getAccount(accountId, storageParameters.getSession());
                     retval.setName(fsAccount.getDisplayName());
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     throw new FolderException(e);
                 }
                 hasSubfolders = rootFolder.hasSubfolders();
@@ -629,7 +629,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }

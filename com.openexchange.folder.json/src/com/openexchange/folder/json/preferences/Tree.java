@@ -63,7 +63,7 @@ import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -96,7 +96,7 @@ public class Tree implements PreferencesItemService {
                     final ConfigurationService configurationService;
                     try {
                         configurationService = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
-                    } catch (final ServiceException e) {
+                    } catch (final OXException e) {
                         throw new SettingException(e);
                     }
                     final String value = configurationService.getProperty(PROPERTY_NAME, "0");

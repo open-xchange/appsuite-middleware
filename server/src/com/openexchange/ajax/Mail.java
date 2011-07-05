@@ -171,7 +171,7 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
@@ -4560,7 +4560,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
         } catch (final MailAccountException e) {
             throw new OXException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -4598,7 +4598,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final MailAccountException e) {
             throw new OXException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         if (accountId == -1) {

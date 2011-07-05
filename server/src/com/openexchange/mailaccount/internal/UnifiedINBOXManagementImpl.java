@@ -70,7 +70,7 @@ import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
@@ -145,7 +145,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             } else {
                 storageService.insertMailAccount(mailAccountDescription, userId, ctx, null, con);
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailAccountException(e);
         } catch (final MailAccountException e) {
             throw new MailAccountException(e);
@@ -180,7 +180,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
                     storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false, con);
                 }
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailAccountException(e);
         } catch (final MailAccountException e) {
             throw new MailAccountException(e);
@@ -268,7 +268,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
                     databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
                     connection = databaseService.getReadOnly(contextId);
                     releaseConnection = true;
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     throw new MailAccountException(e);
                 } catch (final DBPoolingException e) {
                     throw new MailAccountException(e);
@@ -306,7 +306,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         try {
             final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             return userService.getUser(userId, ctx).getLoginInfo();
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailAccountException(e);
         } catch (final UserException e) {
             throw new MailAccountException(e);

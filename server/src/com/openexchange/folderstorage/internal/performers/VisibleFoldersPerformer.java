@@ -82,7 +82,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -223,7 +223,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             } else {
                 try {
                     completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     throw new FolderException(e);
                 }
                 paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);

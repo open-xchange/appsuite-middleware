@@ -61,7 +61,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.services.SPWServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.user.UserService;
 
@@ -83,7 +83,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 	}
 
 	private String getShellCommand()
-			throws com.openexchange.server.ServiceException {
+			throws com.openexchange.server.OXException {
 		ConfigurationService configservice = SPWServiceRegistry
 				.getServiceRegistry().getService(ConfigurationService.class,
 						true);
@@ -97,7 +97,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		String shellscript_to_execute = null;
 		try {
 			shellscript_to_execute = getShellCommand();
-		} catch (ServiceException e1) {
+		} catch (OXException e1) {
 			throw new UserException(e1);
 		}
 		User user = null;
@@ -158,7 +158,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		        case 5:
 		            throw new UserException(new PasswordException(PasswordException.Code.LDAP_ERROR));
 		        default:
-		            throw new UserException(new ServiceException(ServiceExceptionCode.IO_ERROR));
+		            throw new UserException(new OXException(ServiceExceptionCode.IO_ERROR));
 		        }
 		    }
 		} catch (IOException e) {

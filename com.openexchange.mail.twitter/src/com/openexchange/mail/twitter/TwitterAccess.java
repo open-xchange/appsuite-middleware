@@ -59,7 +59,7 @@ import com.openexchange.mail.twitter.config.TwitterConfig;
 import com.openexchange.mail.twitter.services.TwitterServiceRegistry;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.TwitterService;
 
@@ -146,7 +146,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
             final TwitterService twitterService = TwitterServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
             final TwitterConfig twitterConfig = getTwitterConfig();
             twitterAccess = twitterService.getTwitterAccess(twitterConfig.getLogin(), twitterConfig.getPassword());
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }
@@ -162,7 +162,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
             final MailAccountStorageService storageService =
                 TwitterServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         } catch (final MailAccountException e) {
             throw new MailException(e);

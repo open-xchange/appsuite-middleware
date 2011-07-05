@@ -76,7 +76,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -234,7 +234,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         queue = NO_RESTRICTION;
                     }
                 }
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);

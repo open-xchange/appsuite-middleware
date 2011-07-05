@@ -57,7 +57,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.objects.CachedSession;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -88,7 +88,7 @@ public final class SessionCache {
          * final Cache cache;
          * try {
          *     cache = getCache();
-         * } catch (final ServiceException e) {
+         * } catch (final OXException e) {
          *     throw new CacheException(e);
          * }
          * final ElementAttributes attributes = cache.getDefaultElementAttributes();
@@ -99,7 +99,7 @@ public final class SessionCache {
          */
     }
 
-    private Cache getCache() throws ServiceException, CacheException {
+    private Cache getCache() throws OXException, CacheException {
         final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
         if (null == cacheService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( CacheService.class.getName());
@@ -138,9 +138,9 @@ public final class SessionCache {
      * @param contextId The context ID
      * @return A cached session or <code>null</code>
      * @throws CacheException If removing from cache fails
-     * @throws ServiceException If caching service is not available
+     * @throws OXException If caching service is not available
      */
-    public CachedSession removeCachedSession(final String sessionId) throws CacheException, ServiceException {
+    public CachedSession removeCachedSession(final String sessionId) throws CacheException, OXException {
         final Cache cache = getCache();
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
@@ -192,9 +192,9 @@ public final class SessionCache {
      * @param cachedSession The cache-able session to put into cache
      * @return <code>true</code> if cache-able session could be successfully cached; otherwise <code>false</code>
      * @throws CacheException If put into cache fails
-     * @throws ServiceException If caching service is not available
+     * @throws OXException If caching service is not available
      */
-    public boolean putCachedSession(final CachedSession cachedSession) throws CacheException, ServiceException {
+    public boolean putCachedSession(final CachedSession cachedSession) throws CacheException, OXException {
         final Cache cache = getCache();
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
@@ -243,9 +243,9 @@ public final class SessionCache {
      * 
      * @param cachedSession The cached session which shall be removed in auxiliary caches
      * @throws CacheException If put into cache fails
-     * @throws ServiceException If caching service is not available
+     * @throws OXException If caching service is not available
      */
-    public void putCachedSessionForRemoteRemoval(final CachedSession cachedSession) throws CacheException, ServiceException {
+    public void putCachedSessionForRemoteRemoval(final CachedSession cachedSession) throws CacheException, OXException {
         final Cache cache = getCache();
         final Lock writeLock = readWriteLock.writeLock();
         writeLock.lock();
@@ -270,9 +270,9 @@ public final class SessionCache {
      * @param sessionId The secret cookie identifier (which is sent as <i>"session=..."</i> in every request)
      * @return <code>true</code> if a user-bound cached session is already present in cache; otherwise <code>false</code>
      * @throws CacheException If a caching error occurs
-     * @throws ServiceException If caching service is not available
+     * @throws OXException If caching service is not available
      */
-    public boolean containsCachedSession(final String sessionId) throws ServiceException, CacheException {
+    public boolean containsCachedSession(final String sessionId) throws OXException, CacheException {
         final Cache cache = getCache();
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
@@ -289,10 +289,10 @@ public final class SessionCache {
      * @param userId The user ID
      * @param contextId The context ID
      * @return The first encountered cached session for given user in specified context or <code>null</code> if none found
-     * @throws ServiceException If caching service is not available
+     * @throws OXException If caching service is not available
      * @throws CacheException If a caching error occurs
      */
-    public CachedSession getCachedSessionByUser(final int userId, final int contextId) throws ServiceException, CacheException {
+    public CachedSession getCachedSessionByUser(final int userId, final int contextId) throws OXException, CacheException {
         final Cache cache = getCache();
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();

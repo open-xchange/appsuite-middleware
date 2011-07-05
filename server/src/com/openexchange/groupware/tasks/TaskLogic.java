@@ -90,7 +90,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -394,7 +394,7 @@ public final class TaskLogic {
             recColl.checkRecurring(task);
         } catch (final OXException e) {
             throw new TaskException(e);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             throw new TaskException(e);
         }
         if (daysRemoved) {

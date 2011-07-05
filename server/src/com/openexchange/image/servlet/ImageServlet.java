@@ -66,7 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -159,7 +159,7 @@ public final class ImageServlet extends HttpServlet {
             sendErrorAndLog(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, null, e.getMessage(), e);
         } catch (final OXException e) {
             sendErrorAndLog(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, e.getMessage(), e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             sendErrorAndLog(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, null, e.getMessage(), e);
         }
     }

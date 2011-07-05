@@ -53,7 +53,7 @@ import static com.openexchange.server.services.ServerServiceRegistry.getInstance
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -82,9 +82,9 @@ public final class TimeoutConcurrentSet<E> {
      * Initializes a new {@link TimeoutConcurrentSet}.
      * 
      * @param shrinkerIntervalSeconds The shrinker interval in seconds
-     * @throws ServiceException If initialization fails due to missing {@link TimerService timer service}
+     * @throws OXException If initialization fails due to missing {@link TimerService timer service}
      */
-    public TimeoutConcurrentSet(final int shrinkerIntervalSeconds) throws ServiceException {
+    public TimeoutConcurrentSet(final int shrinkerIntervalSeconds) throws OXException {
         this(shrinkerIntervalSeconds, false);
     }
 
@@ -94,9 +94,9 @@ public final class TimeoutConcurrentSet<E> {
      * @param shrinkerIntervalSeconds The shrinker interval in seconds
      * @param forceTimeout <code>true</code> to force initial time-out of contained elements even if they were "touched"; otherwise
      *            <code>false</code> to keep them alive as long as not timed-out
-     * @throws ServiceException If initialization fails due to missing {@link TimerService timer service}
+     * @throws OXException If initialization fails due to missing {@link TimerService timer service}
      */
-    public TimeoutConcurrentSet(final int shrinkerIntervalSeconds, final boolean forceTimeout) throws ServiceException {
+    public TimeoutConcurrentSet(final int shrinkerIntervalSeconds, final boolean forceTimeout) throws OXException {
         super();
         this.forceTimeout = forceTimeout;
         map = new ConcurrentHashMap<E, ElementWrapper<E>>();

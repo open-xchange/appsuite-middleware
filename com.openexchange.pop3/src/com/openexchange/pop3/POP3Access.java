@@ -82,7 +82,7 @@ import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.pop3.util.POP3CapabilityCache;
 import com.openexchange.pop3.util.POP3StorageUtil;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Store;
 
@@ -542,7 +542,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             final MailAccountStorageService storageService =
                 POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new POP3Exception(e);
         } catch (final MailAccountException e) {
             throw new POP3Exception(e);

@@ -71,7 +71,7 @@ import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -121,7 +121,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
                     MailAccountStorageService.class,
                     true);
                 mailAccount = storageService.getMailAccount(pop3AccountId, session.getUserId(), session.getContextId());
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);

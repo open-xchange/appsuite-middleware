@@ -65,7 +65,7 @@ import com.google.gdata.data.calendar.CalendarEventEntry;
 import com.google.gdata.data.calendar.CalendarEventFeed;
 import com.google.gdata.data.extensions.When;
 import com.google.gdata.util.AuthenticationException;
-import com.google.gdata.util.ServiceException;
+import com.google.gdata.util.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.subscribe.SubscriptionException;
@@ -126,7 +126,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
             e.printStackTrace();
         } catch (AuthenticationException e) {
             e.printStackTrace();
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             e.printStackTrace();
         }
 

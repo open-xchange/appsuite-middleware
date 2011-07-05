@@ -70,7 +70,7 @@ import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.mail.services.MailMessagingServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -165,7 +165,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 session.getUserId(),
                 getContext(session.getContextId()),
                 session.getPassword());
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final MailAccountException e) {
             throw new MessagingException(e);
@@ -179,7 +179,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
             mass.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
 
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final MailAccountException e) {
             throw new MessagingException(e);
@@ -192,7 +192,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             final MailAccount mailAccount = mass.getMailAccount(id, session.getUserId(), session.getContextId());
             return convert2MessagingAccount(mailAccount);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final MailAccountException e) {
             throw new MessagingException(e);
@@ -258,7 +258,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 list.add(convert2MessagingAccount(mailAccount));
             }
             return list;
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final MailAccountException e) {
             throw new MessagingException(e);
@@ -491,7 +491,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             }
 
             mass.updateMailAccount(accountDescription, attributes, session.getUserId(), session.getContextId(), session.getPassword());
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final MailAccountException e) {
             throw new MessagingException(e);
@@ -584,7 +584,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         try {
             final ContextService service = MailMessagingServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
             return service.getContext(contextId);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailMessagingException(e);
         } catch (final OXException e) {
             throw new MailMessagingException(e);

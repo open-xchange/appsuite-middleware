@@ -57,7 +57,7 @@ import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 
 /**
  * {@link OSGiOAuthService}
@@ -76,7 +76,7 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
     private OAuthService getService0() throws OXException {
         try {
             return super.getService();
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

@@ -147,7 +147,7 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.push.PushEventConstants;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
@@ -904,7 +904,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final ManagedFileManagement mfm;
         try {
             mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         final ManagedFile[] files = new ManagedFile[parts.length];
@@ -1139,7 +1139,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 threadPool.submit(ThreadPools.task(new MailPrefetcherCallable(session, accountId, fullname, prefetchIds, false, threadPool)));
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         } else if (DEBUG_ENABLED) {
@@ -2445,7 +2445,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } catch (final AddressException e) {
             throw MIMEMailException.handleMessagingException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         } catch (final MailAccountException e) {
             throw new MailException(e);

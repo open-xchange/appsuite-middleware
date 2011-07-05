@@ -57,7 +57,7 @@ import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -88,7 +88,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
              */
             try {
                 worker.submit(new MemorizerTask(addresses, session));
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 /*
                  * Thread pool service is missing. Run with this thread
                  */
@@ -102,9 +102,9 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     /**
      * Starts this contact collector service implementation.
      * 
-     * @throws ServiceException If a needed service is missing
+     * @throws OXException If a needed service is missing
      */
-    public void start() throws ServiceException {
+    public void start() throws OXException {
         AliasesProvider.getInstance().start();
         worker = new MemorizerWorker();
     }

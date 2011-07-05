@@ -85,7 +85,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -900,7 +900,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                     }
                 }, PermissionLoader.class.getSimpleName()), CallerRunsBehavior.<Object> getInstance());
 
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new SearchIteratorException(e);
             }
         }

@@ -136,7 +136,7 @@ import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
@@ -2663,7 +2663,7 @@ public class Folder extends SessionServlet {
         return new com.openexchange.ajax.writer.MessagingFolderWriter.JSONObjectPutter();
     }
 
-    private static MessagingServiceRegistry messagingServiceRegistry() throws ServiceException {
+    private static MessagingServiceRegistry messagingServiceRegistry() throws OXException {
         return ServerServiceRegistry.getInstance().getService(MessagingServiceRegistry.class, true);
     }
 

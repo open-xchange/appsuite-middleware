@@ -54,7 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -113,9 +113,9 @@ public abstract class AbstractOSGiDelegateService<S> {
      * Gets the service from service reference.
      * 
      * @return The service
-     * @throws ServiceException If service reference returned <code>null</code>
+     * @throws OXException If service reference returned <code>null</code>
      */
-    protected S getService() throws ServiceException {
+    protected S getService() throws OXException {
         final S serviceInst = service.get();
         if (null == serviceInst) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( clazz.getName());

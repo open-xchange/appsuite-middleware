@@ -80,7 +80,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
@@ -285,7 +285,7 @@ public final class IMAPDefaultFolderChecker {
                                 session.getContextId());
                         final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
                         isSpamOptionEnabled = usm.isSpamOptionEnabled();
-                    } catch (final ServiceException e) {
+                    } catch (final OXException e) {
                         throw new MailException(e);
                     } catch (final MailAccountException e) {
                         throw new MailException(e);
@@ -358,7 +358,7 @@ public final class IMAPDefaultFolderChecker {
                                 IMAPServiceRegistry.getService(ThreadPoolService.class, true).invoke(
                                     tasks,
                                     CallerRunsBehavior.getInstance());
-                        } catch (final ServiceException e) {
+                        } catch (final OXException e) {
                             throw new IMAPException(e);
                         }
                         count = tasks.size();
@@ -705,7 +705,7 @@ public final class IMAPDefaultFolderChecker {
                                 session.getUserId(),
                                 session.getContextId(),
                                 secretService.getSecret(session));
-                        } catch (final ServiceException e) {
+                        } catch (final OXException e) {
                             throw new IMAPException(e);
                         } catch (final MailAccountException e) {
                             throw new IMAPException(e);

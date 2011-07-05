@@ -65,7 +65,7 @@ import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -245,7 +245,7 @@ public final class ImapIdlePushListener implements PushListener {
             } finally {
                 access.close(true);
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         } catch (final MailException e) {
             throw new PushException(e);

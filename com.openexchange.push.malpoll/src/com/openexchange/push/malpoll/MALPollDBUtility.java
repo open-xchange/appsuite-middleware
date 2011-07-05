@@ -65,7 +65,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 
 /**
  * {@link MALPollDBUtility} - DB utilities for MAL poll bundle.
@@ -449,7 +449,7 @@ public final class MALPollDBUtility {
         final DatabaseService databaseService;
         try {
             databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         }
         return databaseService;

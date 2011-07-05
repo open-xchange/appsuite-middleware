@@ -134,7 +134,7 @@ import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -260,7 +260,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         TimeoutConcurrentMap<Key, Future<List<SortableId>>> tcm;
         try {
             tcm = new TimeoutConcurrentMap<Key, Future<List<SortableId>>>(10, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             tcm = null;
         }
@@ -1539,7 +1539,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 new ThreadPoolCompletionService<TreeMap<String, List<String>>>(OutlookServiceRegistry.getServiceRegistry().getService(
                     ThreadPoolService.class,
                     true));
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
         int taskCount = 0;

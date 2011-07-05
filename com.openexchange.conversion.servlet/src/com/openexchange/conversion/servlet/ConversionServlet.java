@@ -65,7 +65,7 @@ import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -231,7 +231,7 @@ public final class ConversionServlet extends SessionServlet {
         final ConversionService conversionService;
         try {
             conversionService = ConversionServletServiceRegistry.getServiceRegistry().getService(ConversionService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new ConversionServletException(e);
         }
         final Object result = conversionService.convert(

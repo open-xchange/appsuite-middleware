@@ -65,7 +65,7 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -118,7 +118,7 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected List<Context> getContextsForDatabase(int databaseId) throws OXException, DBPoolingException, ServiceException {
+    protected List<Context> getContextsForDatabase(int databaseId) throws OXException, DBPoolingException, OXException {
         DatabaseService configDB = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         int[] contextIds = configDB.listContexts(databaseId);
         List<Integer> ctxIds = new ArrayList<Integer>(contextIds.length);

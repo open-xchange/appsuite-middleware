@@ -67,7 +67,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -118,7 +118,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             inputStreamProvider = tmp;
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             throw new MailException(e);
         } finally{
             if(fileAccess != null) {

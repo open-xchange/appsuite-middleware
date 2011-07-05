@@ -77,7 +77,7 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -204,7 +204,7 @@ public class freebusy extends HttpServlet {
         try {
             ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             context = service.getContext(contextId);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
         } catch (OXException e) {
@@ -253,7 +253,7 @@ public class freebusy extends HttpServlet {
             } finally {
                 it.close();
             }
-        }catch (final ServiceException e) {
+        }catch (final OXException e) {
                 LOG.error("Calendar service not found.", e);
         } catch (final AbstractOXException e) {
             LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
@@ -294,7 +294,7 @@ public class freebusy extends HttpServlet {
         try {
             UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             user = service.searchUser(mailAddress, ctx);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (UserException e) {
             LOG.debug("User '" + mailAddress + "' not found.");
@@ -307,7 +307,7 @@ public class freebusy extends HttpServlet {
             if (1 == resources.length) {
                 resource = resources[0];
             }
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (ResourceException e) {
             LOG.error("Resource '" + mailAddress + "' not found.");

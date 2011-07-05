@@ -79,7 +79,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -171,7 +171,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
                             }
                         }
                     }
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     throw new LoginException(e);
                 } catch (final MailAccountException e) {
                     throw new LoginException(e);

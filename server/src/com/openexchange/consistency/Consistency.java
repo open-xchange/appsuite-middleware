@@ -61,7 +61,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceException;
+import org.osgi.framework.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -303,7 +303,7 @@ public abstract class Consistency implements ConsistencyMBean {
     protected abstract AttachmentBase getAttachments();
     protected abstract FileStorage getFileStorage(Context ctx) throws OXException, FilestoreException;
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws OXException;
-    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException, DBPoolingException, ServiceException;
+    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException, DBPoolingException, OXException;
     protected abstract List<Context> getAllContexts() throws OXException;
     protected abstract User getAdmin(Context ctx) throws LdapException;
 

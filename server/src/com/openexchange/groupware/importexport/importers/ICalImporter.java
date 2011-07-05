@@ -94,7 +94,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskField;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.TimeZoneUtils;
@@ -517,7 +517,7 @@ public class ICalImporter extends AbstractImporter {
 		try {
 			return ServerServiceRegistry.getInstance().getService(
 					ICalParser.class, true);
-		} catch (ServiceException e) {
+		} catch (OXException e) {
 			throw ImportExportExceptionCodes.ICAL_PARSER_SERVICE_MISSING
 					.create(e);
 		}

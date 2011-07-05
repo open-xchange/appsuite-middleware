@@ -62,7 +62,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.services.WebDAVFileStorageServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -117,7 +117,7 @@ public final class WebDAVFileStorageService implements FileStorageService {
              * Retry
              */
             throw e;
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

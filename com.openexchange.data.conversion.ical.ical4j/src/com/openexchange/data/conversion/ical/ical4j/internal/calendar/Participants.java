@@ -94,7 +94,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -142,7 +142,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     displayName = resource.getDisplayName();
                 } catch (final ResourceException e) {
                     throw new ConversionError(index, e);
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     throw new ConversionError(index, e);
                 }
             }
@@ -214,7 +214,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 address = user.getMail();
             } catch (final UserException e) {
                 throw new ConversionError(index, e);
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new ConversionError(index, e);
             }
         }
@@ -256,7 +256,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             users = userResolver.findUsers(new ArrayList<String>(mails.keySet()), ctx);
         } catch (final UserException e) {
             throw new ConversionError(index, e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new ConversionError(index, e);
         }
 
@@ -323,7 +323,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             resources = resourceResolver.find(resourceNames, ctx);
         } catch (final ResourceException e) {
             throw new ConversionError(index, e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new ConversionError(index, e);
         }
 

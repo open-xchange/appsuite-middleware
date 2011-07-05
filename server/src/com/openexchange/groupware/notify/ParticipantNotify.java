@@ -144,7 +144,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -538,7 +538,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             (CalendarDataObject) oldApp);
                     }
                 } catch (final Exception e) {
-                    if (e instanceof ServiceException || e instanceof OXException) {
+                    if (e instanceof OXException || e instanceof OXException) {
                         final StringBuilder builder = new StringBuilder(256).append(
                             "Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
                             newObj.getObjectID()).append("). Cause:\n");

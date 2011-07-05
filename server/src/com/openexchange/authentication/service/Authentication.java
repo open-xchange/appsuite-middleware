@@ -56,7 +56,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -85,10 +85,10 @@ public final class Authentication {
      * login info for the context and the second contains the login info for the
      * user.
      * @throws LoginException if something with the login info is wrong.
-     * @throws ServiceException if the authentication service is not available.
+     * @throws OXException if the authentication service is not available.
      */
     public static Authenticated login(final String login, final String pass)
-        throws LoginException, ServiceException {
+        throws LoginException, OXException {
         return login(login, pass, Collections.<String, Object> emptyMap());
     }
 
@@ -101,10 +101,10 @@ public final class Authentication {
      * login info for the context and the second contains the login info for the
      * user.
      * @throws LoginException if something with the login info is wrong.
-     * @throws ServiceException if the authentication service is not available.
+     * @throws OXException if the authentication service is not available.
      */
     public static Authenticated login(final String login, final String pass, final Map<String, Object> properties)
-        throws LoginException, ServiceException {
+        throws LoginException, OXException {
         final AuthenticationService auth = SERVICE_REF.get();
         if (null == auth) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());

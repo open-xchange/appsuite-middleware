@@ -49,9 +49,9 @@
 
 package com.openexchange.oauth.osgi;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.id.IDException;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.server.ServiceException;
 
 /**
  * {@link OSGiIDGeneratorService}
@@ -70,7 +70,7 @@ public final class OSGiIDGeneratorService extends AbstractOSGiDelegateService<ID
     public int getId(final String type, final int contextId) throws IDException {
         try {
             return getService().getId(type, contextId);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new IDException(e);
         }
     }

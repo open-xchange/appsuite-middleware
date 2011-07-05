@@ -99,7 +99,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -315,7 +315,7 @@ public final class ical extends PermissionServlet {
         } catch (final LdapException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (final OXConflictException e) {

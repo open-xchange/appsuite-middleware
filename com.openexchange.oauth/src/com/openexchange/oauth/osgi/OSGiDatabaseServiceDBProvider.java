@@ -54,8 +54,8 @@ import java.sql.Connection;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceException;
 
 /**
  * {@link OSGiDatabaseServiceDBProvider} - The {@link DBProvider} backed by tracked {@link DatabaseService} instance.
@@ -74,7 +74,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
     public Connection getReadConnection(final Context ctx) throws DBPoolingException {
         try {
             return getService().getReadOnly(ctx);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new DBPoolingException(e);
         }
     }
@@ -92,7 +92,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
     public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
         try {
             return getService().getWritable(ctx);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new DBPoolingException(e);
         }
     }

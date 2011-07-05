@@ -66,7 +66,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -166,7 +166,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             final int configuredShrinkerSeconds = MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
             final int shrinkerMillis = (configuredShrinkerSeconds <= 0 ? 3 : configuredShrinkerSeconds) * 1000;
             timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), shrinkerMillis, shrinkerMillis);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }
@@ -326,7 +326,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                     orderlyClearQueue(keyFor(mailAccount.getId(), session));
                 }
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         } catch (final MailAccountException e) {
             throw new MailException(e);

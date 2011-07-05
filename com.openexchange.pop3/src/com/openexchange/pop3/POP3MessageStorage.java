@@ -69,7 +69,7 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -118,7 +118,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
                     MailAccountStorageService.class,
                     true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);

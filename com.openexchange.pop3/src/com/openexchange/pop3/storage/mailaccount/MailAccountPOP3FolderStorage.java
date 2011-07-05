@@ -81,7 +81,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
@@ -137,7 +137,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         if (null == ctx) {
             try {
                 return POP3ServiceRegistry.getServiceRegistry().getService(ContextService.class, true).getContext(session.getContextId());
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final OXException e) {
                 throw new MailException(e);
@@ -224,7 +224,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                             session.getContextId());
                     final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), getContext());
                     isSpamOptionEnabled = usm.isSpamOptionEnabled();
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     throw new MailException(e);
                 } catch (final MailAccountException e) {
                     throw new MailException(e);

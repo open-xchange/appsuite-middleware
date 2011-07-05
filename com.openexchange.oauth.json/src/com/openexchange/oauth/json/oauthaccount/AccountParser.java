@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.json.service.ServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 
 /**
  * Parses the JSON representation of an OAuth account.
@@ -93,7 +93,7 @@ public class AccountParser {
             }
 
             return account;
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

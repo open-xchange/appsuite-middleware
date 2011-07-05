@@ -67,7 +67,7 @@ import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 
 /**
  * Test implementation to write the organizer.
@@ -102,7 +102,7 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
             warnings.add(new ConversionWarning(index, "URI problem.", e));
         } catch (final UserException e) {
             warnings.add(new ConversionWarning(index, e));
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             warnings.add(new ConversionWarning(index, e));
         }
         component.getProperties().add(organizer);

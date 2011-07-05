@@ -58,7 +58,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -127,7 +127,7 @@ public final class HeaderCacheDeleteListener implements DeleteListener {
         final DatabaseService databaseService;
         try {
             databaseService = HeaderCacheServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new DeleteFailedException(e);
         }
         return databaseService;

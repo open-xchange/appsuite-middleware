@@ -118,7 +118,7 @@ import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.user.UserService;
@@ -203,7 +203,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);
@@ -219,7 +219,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final UserException e) {
                 throw new MailException(e);

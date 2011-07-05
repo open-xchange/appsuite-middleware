@@ -56,7 +56,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -97,7 +97,7 @@ public class UnifiedINBOXEnablement implements PreferencesItemService {
                 final UnifiedINBOXManagement management;
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class, true);
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
                     }
@@ -117,7 +117,7 @@ public class UnifiedINBOXEnablement implements PreferencesItemService {
                 final UnifiedINBOXManagement management;
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class, true);
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(
                             new StringBuilder().append(enable ? "Enabling" : "Disabling").append(" of Unified INBOX for user ").append(

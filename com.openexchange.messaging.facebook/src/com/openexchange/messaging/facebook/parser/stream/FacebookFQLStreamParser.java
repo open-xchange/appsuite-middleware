@@ -77,7 +77,7 @@ import com.openexchange.messaging.generic.internet.MimeDateMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -682,7 +682,7 @@ public final class FacebookFQLStreamParser {
                 FacebookMessagingServiceRegistry.getServiceRegistry().getService(HTMLService.class, true).replaceImages(
                     messageText.toString(),
                     session.getSessionID());
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
         final String subject = FacebookMessagingUtility.abbreviate(htmlContent, 140);

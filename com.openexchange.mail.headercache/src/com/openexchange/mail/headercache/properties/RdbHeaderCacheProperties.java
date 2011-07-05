@@ -57,7 +57,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -238,7 +238,7 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
         final DatabaseService databaseService;
         try {
             databaseService = HeaderCacheServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         return databaseService;

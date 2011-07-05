@@ -79,7 +79,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -263,7 +263,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 } else {
                     try {
                         completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
-                    } catch (final ServiceException e) {
+                    } catch (final OXException e) {
                         throw new FolderException(e);
                     }
                     paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
@@ -440,7 +440,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             try {
                 completionService =
                     new ThreadPoolCompletionService<List<SortableId>>(getInstance().getService(ThreadPoolService.class, true));
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
             /*
@@ -536,7 +536,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         } else {
             try {
                 completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
             paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);

@@ -146,7 +146,7 @@ public final class ResourceCreate {
     // final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
     // BundleAccessSecurityService.class);
     // if (securityService == null) {
-    // throw new ResourceException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+    // throw new ResourceException(new OXException(OXException.Code.SERVICE_UNAVAILABLE,
     // BundleAccessSecurityService.class.getName()));
     // }
     // final Set<String> permissions = user.getAttributes().get("permission");

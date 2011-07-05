@@ -70,7 +70,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -223,7 +223,7 @@ public abstract class OXServlet extends WebDavServlet {
         Session session;
         try {
             session = findSessionByCookie(req, resp);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             return false;
@@ -300,7 +300,7 @@ public abstract class OXServlet extends WebDavServlet {
     private static void removeSession(String sessionID) {
         try {
             ServerServiceRegistry.getInstance().getService(SessiondService.class, true).removeSession(sessionID);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             // Ignore. Probably we're just about to shut down.
         }
     }
@@ -418,7 +418,7 @@ public abstract class OXServlet extends WebDavServlet {
         return loginPerformer.doLogin(request).getSession();
     }
 
-    private static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws ServiceException {
+    private static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
         final Cookie[] cookies = req.getCookies();
         String sessionId = null;
         if (null != cookies) {

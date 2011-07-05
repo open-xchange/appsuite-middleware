@@ -81,7 +81,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -674,7 +674,7 @@ public class EventClient {
         for (FolderObject folder : folders) {
             try {
                 addFolderToAffectedMap(retval, folder);
-            } catch (ServiceException e) {
+            } catch (OXException e) {
                 throw new EventException(e);
             } catch (GroupException e) {
                 throw new EventException(e);
@@ -710,7 +710,7 @@ public class EventClient {
                     FolderService folderService = ServerServiceRegistry.getInstance().getService(FolderService.class, true);
                     FolderObject folder = folderService.getFolderObject(folderId, contextId);
                     addFolderToAffectedMap(retval, folder);
-                } catch (ServiceException e) {
+                } catch (OXException e) {
                     throw new EventException(e);
                 } catch (FolderException e) {
                     throw new EventException(e);
@@ -724,7 +724,7 @@ public class EventClient {
         return retval;
     }
 
-    private void addFolderToAffectedMap(Map<Integer, Set<Integer>> retval, FolderObject folder) throws ServiceException, GroupException, OXException {
+    private void addFolderToAffectedMap(Map<Integer, Set<Integer>> retval, FolderObject folder) throws OXException, GroupException, OXException {
         for (OCLPermission permission : folder.getPermissions()) {
             if (permission.isFolderVisible()) {
                 if (permission.isGroupPermission()) {
@@ -749,7 +749,7 @@ public class EventClient {
         return retval;
     }
 
-    private static Context getContext(int contextId) throws ServiceException, OXException {
+    private static Context getContext(int contextId) throws OXException, OXException {
         ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
         return contextService.getContext(contextId);
     }

@@ -58,7 +58,7 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.voipnow.json.services.ServiceRegistry;
 
@@ -89,7 +89,7 @@ public class VoipNowFaxAddress implements PreferencesItemService {
                 try {
                     setting.setSingleValue(ServiceRegistry.getInstance().getService(ConfigurationService.class, true).getProperty(
                         "com.4psa.voipnow.faxaddress"));
-                } catch (final ServiceException e) {
+                } catch (final OXException e) {
                     throw new SettingException(e);
                 }
             }

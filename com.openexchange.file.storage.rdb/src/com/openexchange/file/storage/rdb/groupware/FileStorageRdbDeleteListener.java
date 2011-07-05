@@ -63,7 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -157,7 +157,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
     private <S> S getService(final Class<? extends S> clazz) throws DeleteFailedException {
         try {
             return FileStorageRdbServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new DeleteFailedException(e);
         }
     }

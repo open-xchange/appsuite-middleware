@@ -127,7 +127,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -343,7 +343,7 @@ public class MIMEMessageFiller {
                 for (final String alias : user.getAliases()) {
                     aliases.add(new QuotedInternetAddress(alias));
                 }
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final UserException e) {
                 throw new MailException(e);

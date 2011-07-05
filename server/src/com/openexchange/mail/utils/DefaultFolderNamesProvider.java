@@ -66,7 +66,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -104,7 +104,7 @@ public final class DefaultFolderNamesProvider {
                 final MailAccountStorageService storageService =
                     ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                 fallbackProvider = new DefaultAccountProvider(storageService.getDefaultMailAccount(user, cid));
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);

@@ -70,7 +70,7 @@ import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -137,7 +137,7 @@ public abstract class AbstractFacebookAccess {
             try {
                 final ContextService cs = getServiceRegistry().getService(ContextService.class, true);
                 userLocale = tmp = getServiceRegistry().getService(UserService.class).getUser(user, cs.getContext(cid)).getLocale();
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MessagingException(e);
             } catch (final UserException e) {
                 throw new MessagingException(e);

@@ -58,7 +58,7 @@ import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 
@@ -109,7 +109,7 @@ public class UpdaterImpl extends Updater {
         final TimerService timerService;
         try {
             timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             throw new UpdateException(e);
         }
         timerService.schedule(new UpdateProcess(contextId), 0);

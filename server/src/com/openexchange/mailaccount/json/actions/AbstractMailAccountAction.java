@@ -81,7 +81,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -215,7 +215,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected static String getSecret(final ServerSession session) throws MailAccountException {
         try {
             return ServerServiceRegistry.getInstance().getService(SecretService.class, true).getSecret(session);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailAccountException(e);
         }
     }

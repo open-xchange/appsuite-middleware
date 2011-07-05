@@ -68,7 +68,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -179,7 +179,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
     private <S> S getService(final Class<? extends S> clazz) throws UpdateException {
         try {
             return FileStorageRdbServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new UpdateException(e);
         }
     }

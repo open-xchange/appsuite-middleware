@@ -54,7 +54,7 @@ import java.util.List;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -70,7 +70,7 @@ public interface UserResolver {
         }
     };
 
-    List<User> findUsers(List<String> mails, Context ctx) throws UserException, ServiceException;
+    List<User> findUsers(List<String> mails, Context ctx) throws UserException, OXException;
 
-    User loadUser(int userId, Context ctx) throws UserException, ServiceException;
+    User loadUser(int userId, Context ctx) throws UserException, OXException;
 }

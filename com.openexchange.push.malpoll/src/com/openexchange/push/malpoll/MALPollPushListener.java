@@ -69,7 +69,7 @@ import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -197,7 +197,7 @@ public final class MALPollPushListener implements PushListener {
             final TimerService timerService;
             try {
                 timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class, true);
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new PushException(e);
             }
             timerTask = timerService.scheduleWithFixedDelay(new MALPollPushListenerRunnable(this), 1000, periodMillis);
@@ -256,7 +256,7 @@ public final class MALPollPushListener implements PushListener {
             if (context.isReadOnly()) {
                 return;
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         } catch (final OXException e) {
             throw new PushException(e);
@@ -269,7 +269,7 @@ public final class MALPollPushListener implements PushListener {
                 firstRun(mailService);
                 started = true;
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         } catch (final MailException e) {
             throw new PushException(e);

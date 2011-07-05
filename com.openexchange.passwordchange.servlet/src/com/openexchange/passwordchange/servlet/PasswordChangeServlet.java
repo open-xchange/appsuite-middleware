@@ -65,7 +65,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
@@ -195,13 +195,13 @@ public final class PasswordChangeServlet extends SessionServlet {
              */
             final PasswordChangeService passwordChangeService = getServiceRegistry().getService(PasswordChangeService.class);
             if (passwordChangeService == null) {
-                throw new PasswordChangeServletException(new ServiceException(
+                throw new PasswordChangeServletException(new OXException(
                     ServiceExceptionCode.SERVICE_UNAVAILABLE,
                     PasswordChangeService.class.getName()));
             }
             final ContextService contextService = getServiceRegistry().getService(ContextService.class);
             if (contextService == null) {
-                throw new PasswordChangeServletException(new ServiceException(
+                throw new PasswordChangeServletException(new OXException(
                     ServiceExceptionCode.SERVICE_UNAVAILABLE,
                     ContextService.class.getName()));
             }

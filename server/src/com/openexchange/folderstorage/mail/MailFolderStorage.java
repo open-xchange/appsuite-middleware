@@ -121,7 +121,7 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -239,7 +239,7 @@ public final class MailFolderStorage implements FolderStorage {
             return list.toArray(new SortableId[list.size()]);
         } catch (final MailException e) {
             throw new FolderException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final MailAccountException e) {
             throw new FolderException(e);
@@ -665,7 +665,7 @@ public final class MailFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final MailAccountException e) {
             throw new FolderException(e);
@@ -897,7 +897,7 @@ public final class MailFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final MailAccountException e) {
             throw new FolderException(e);

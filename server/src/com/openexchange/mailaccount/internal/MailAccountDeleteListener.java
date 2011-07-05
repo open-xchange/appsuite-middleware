@@ -57,7 +57,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -86,7 +86,7 @@ public class MailAccountDeleteListener implements DeleteListener {
                 for (final MailAccount account : accounts) {
                     storageService.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
                 }
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new DeleteFailedException(e);
             } catch (final MailAccountException e) {
                 throw new DeleteFailedException(e);

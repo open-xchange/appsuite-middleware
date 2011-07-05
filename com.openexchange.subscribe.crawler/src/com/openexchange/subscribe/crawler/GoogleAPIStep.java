@@ -73,7 +73,7 @@ import com.google.gdata.data.extensions.Im;
 import com.google.gdata.data.extensions.Organization;
 import com.google.gdata.data.extensions.PhoneNumber;
 import com.google.gdata.data.extensions.StructuredPostalAddress;
-import com.google.gdata.util.ServiceException;
+import com.google.gdata.util.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
@@ -290,7 +290,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         } catch (final InvalidCredentialsException e) {
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             LOG.error(e);
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();

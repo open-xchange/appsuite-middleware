@@ -61,7 +61,7 @@ import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.TwitterAccess;
@@ -101,7 +101,7 @@ public abstract class AbstractTwitterMessagingAccess {
             twitterService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
             secret = TwitterMessagingServiceRegistry.getServiceRegistry().getService(SecretService.class, true).getSecret(session);
 
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
         final int contextId = session.getContextId();
@@ -165,7 +165,7 @@ public abstract class AbstractTwitterMessagingAccess {
                 }
             } catch (final TwitterException e) {
                 throw new MessagingException(e);
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MessagingException(e);
             } catch (final OXException e) {
                 throw new MessagingException(e);

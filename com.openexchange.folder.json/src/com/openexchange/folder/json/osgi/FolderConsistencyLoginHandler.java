@@ -55,7 +55,7 @@ import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 
 
 /**
@@ -77,7 +77,7 @@ public final class FolderConsistencyLoginHandler implements LoginHandlerService 
             final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
             folderService.checkConsistency("1", login.getSession());
             folderService.checkConsistency("0", login.getSession());
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         } catch (final FolderException e) {
             throw new LoginException(e);

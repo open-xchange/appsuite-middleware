@@ -71,7 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.webdav.WebdavException;
 
@@ -326,7 +326,7 @@ public final class DigestUtility {
             throw new WebdavException(e);
         } catch (final LdapException e) {
             throw new WebdavException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new WebdavException(e);
         } catch (final CryptoException e) {
             throw new WebdavException(e);

@@ -85,7 +85,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -123,9 +123,9 @@ public final class MemorizerWorker {
     /**
      * Initializes a new {@link MemorizerWorker}.
      * 
-     * @throws ServiceException If thread pool service is missing
+     * @throws OXException If thread pool service is missing
      */
-    public MemorizerWorker() throws ServiceException {
+    public MemorizerWorker() throws OXException {
         super();
         readWriteLock = new ReentrantReadWriteLock();
         this.flag = new AtomicBoolean(true);
@@ -157,9 +157,9 @@ public final class MemorizerWorker {
      * Submits specified task.
      * 
      * @param memorizerTask The task
-     * @throws ServiceException If thread pool service is missing
+     * @throws OXException If thread pool service is missing
      */
-    public void submit(final MemorizerTask memorizerTask) throws ServiceException {
+    public void submit(final MemorizerTask memorizerTask) throws OXException {
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {

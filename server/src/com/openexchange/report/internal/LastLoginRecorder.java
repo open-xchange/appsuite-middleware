@@ -61,7 +61,7 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
 
@@ -104,7 +104,7 @@ public class LastLoginRecorder implements LoginHandlerService {
         try {
             service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             service.updateUser(newUser, ctx);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             throw new LoginException(e);
         } catch (UserException e) {
             throw new LoginException(e);

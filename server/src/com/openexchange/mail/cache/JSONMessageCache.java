@@ -68,7 +68,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -154,7 +154,7 @@ public final class JSONMessageCache {
                 }
 
             });
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }
@@ -200,7 +200,7 @@ public final class JSONMessageCache {
                 if (DEBUG) {
                     newMap.setDefaultTimeoutListener(new FolderRemovalLogger(LOG, accountId, fullname, userId, cid));
                 }
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             }
             // A user map is valid for one hour

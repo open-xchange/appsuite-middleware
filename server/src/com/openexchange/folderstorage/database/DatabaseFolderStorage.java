@@ -108,7 +108,7 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -1302,7 +1302,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
             return true;
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
@@ -1671,7 +1671,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Context context = storageParameters.getContext();
             connection = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
             return new ClosingConnectionProvider(connection, modify, databaseService, context.getContextId());
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final DBPoolingException e) {
             throw new FolderException(e);

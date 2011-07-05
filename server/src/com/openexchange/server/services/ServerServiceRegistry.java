@@ -52,7 +52,7 @@ package com.openexchange.server.services;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -132,13 +132,13 @@ public final class ServerServiceRegistry {
      * 
      * @param <S> The type of service's class
      * @param clazz The service's class
-     * @param failOnError <code>true</code> to throw an appropriate {@link ServiceException} if service is missing; otherwise
+     * @param failOnError <code>true</code> to throw an appropriate {@link OXException} if service is missing; otherwise
      *            <code>false</code>
-     * @return The service if found; otherwise <code>null</code> or an appropriate {@link ServiceException} is thrown dependent on
+     * @return The service if found; otherwise <code>null</code> or an appropriate {@link OXException} is thrown dependent on
      *         <code>failOnError</code> parameter.
-     * @throws ServiceException If <code>failOnError</code> parameter is set to <code>true</code> and service is missing
+     * @throws OXException If <code>failOnError</code> parameter is set to <code>true</code> and service is missing
      */
-    public <S extends Object> S getService(final Class<? extends S> clazz, final boolean failOnError) throws ServiceException {
+    public <S extends Object> S getService(final Class<? extends S> clazz, final boolean failOnError) throws OXException {
         final Object service = services.get(clazz);
         if (null == service) {
             /*

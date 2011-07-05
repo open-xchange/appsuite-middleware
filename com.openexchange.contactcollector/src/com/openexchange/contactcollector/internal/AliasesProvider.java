@@ -63,7 +63,7 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.user.UserService;
 
 
@@ -172,9 +172,9 @@ public final class AliasesProvider {
     /**
      * Starts this contact collector service implementation.
      * 
-     * @throws ServiceException If a needed service is missing
+     * @throws OXException If a needed service is missing
      */
-    public void start() throws ServiceException {
+    public void start() throws OXException {
         aliasesMap = new TimeoutConcurrentMap<Integer, Future<Set<InternetAddress>>>(60, true);
     }
 

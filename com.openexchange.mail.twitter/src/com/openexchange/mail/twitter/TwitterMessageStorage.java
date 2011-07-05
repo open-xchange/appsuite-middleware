@@ -74,7 +74,7 @@ import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.TwitterAccess;
@@ -118,7 +118,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             ctx = contextService.getContext(session.getContextId());
         } catch (final OXException e) {
             throw new MailException(e);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }
@@ -129,7 +129,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
                 final MailAccountStorageService storageService =
                     TwitterServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);
@@ -149,7 +149,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             try {
                 final UserService userService = TwitterServiceRegistry.getServiceRegistry().getService(UserService.class, true);
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final UserException e) {
                 throw new MailException(e);

@@ -89,7 +89,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
@@ -145,7 +145,7 @@ public class ReportingMBean implements DynamicMBean {
             contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             configurationService = ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             throw new MBeanException(new Exception(e.getMessage()));
         }

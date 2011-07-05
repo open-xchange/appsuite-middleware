@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.headercache.services;
 
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -88,9 +88,9 @@ public final class HeaderCacheServiceRegistry {
      * @param clazz The service's class
      * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
      * @return The service if found; otherwise <code>null</code> if <code>errorOnAbsence</code> is <code>false</code>
-     * @throws ServiceException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
+     * @throws OXException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws ServiceException {
+    public static <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws OXException {
         return REGISTRY.getService(clazz, errorOnAbsence);
     }
 

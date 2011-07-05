@@ -53,7 +53,6 @@ import java.util.List;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceException;
 
 /**
  * {@link OSGiContextService}
@@ -72,7 +71,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     public List<Integer> getAllContextIds() throws OXException {
         try {
             return getService().getAllContextIds();
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -80,7 +79,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     public Context getContext(final int contextId) throws OXException {
         try {
             return getService().getContext(contextId);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -88,7 +87,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     public int getContextId(final String loginContextInfo) throws OXException {
         try {
             return getService().getContextId(loginContextInfo);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -96,7 +95,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     public void invalidateContext(final int contextId) throws OXException {
         try {
             getService().invalidateContext(contextId);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -104,7 +103,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
         try {
             getService().invalidateLoginInfo(loginContextInfo);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -112,7 +111,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     public Context loadContext(final int contextId) throws OXException {
         try {
             return getService().loadContext(contextId);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

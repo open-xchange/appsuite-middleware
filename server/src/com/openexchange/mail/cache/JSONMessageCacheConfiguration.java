@@ -51,7 +51,7 @@ package com.openexchange.mail.cache;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -152,7 +152,7 @@ public final class JSONMessageCacheConfiguration {
         final ConfigurationService configuration;
         try {
             configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
 

@@ -62,7 +62,7 @@ import com.openexchange.proxy.ProxyExceptionCodes;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.proxy.servlet.services.ServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -103,7 +103,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
             if (!sessiondService.refreshSession(sessionId)) {
                 throw ProxyExceptionCodes.INVALID_SESSION_ID.create(sessionId);
             }
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new ProxyException(e);
         }
         /*

@@ -92,7 +92,7 @@ import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.pop3.storage.mailaccount.util.Utility;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Message;
@@ -176,7 +176,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     MailAccountStorageService.class,
                     true);
                 accountName = stripSpecials(storageService.getMailAccount(pop3AccountId, user, cid).getName());
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);

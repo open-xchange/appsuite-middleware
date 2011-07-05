@@ -103,7 +103,6 @@ import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sql.builder.StatementBuilder;
@@ -754,7 +753,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         try {
             final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
             return cryptoService.encrypt(toEncrypt, password);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final CryptoException e) {
             throw new OXException(e);
@@ -768,7 +767,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         try {
             final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
             return cryptoService.decrypt(toDecrypt, password);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final CryptoException e) {
             LOG.error(e.getMessage(), e);

@@ -57,7 +57,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -87,7 +87,7 @@ public final class Update {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
         // Get a connection

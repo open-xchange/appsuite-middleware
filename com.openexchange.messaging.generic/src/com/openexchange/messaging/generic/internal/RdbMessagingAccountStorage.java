@@ -77,7 +77,7 @@ import com.openexchange.messaging.generic.DefaultMessagingAccount;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -516,7 +516,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
     private static <S> S getService(final Class<? extends S> clazz) throws MessagingException {
         try {
             return MessagingGenericServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

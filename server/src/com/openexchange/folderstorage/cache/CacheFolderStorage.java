@@ -93,7 +93,7 @@ import com.openexchange.folderstorage.internal.performers.StorageParametersProvi
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -162,7 +162,7 @@ public final class CacheFolderStorage implements FolderStorage {
             cacheService = CacheServiceRegistry.getServiceRegistry().getService(CacheService.class, true);
             globalCache = cacheService.getCache("GlobalFolderCache");
             // userCache = cacheService.getCache("UserFolderCache");
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final CacheException e) {
             throw new FolderException(e);
@@ -1216,7 +1216,7 @@ public final class CacheFolderStorage implements FolderStorage {
         } else {
             try {
                 completionService = new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true));
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
             final Session session = storageParameters.getSession();

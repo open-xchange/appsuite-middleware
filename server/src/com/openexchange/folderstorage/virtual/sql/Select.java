@@ -74,7 +74,7 @@ import com.openexchange.folderstorage.virtual.VirtualFolder;
 import com.openexchange.folderstorage.virtual.VirtualPermission;
 import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.server.ServiceException;
+import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -142,7 +142,7 @@ public final class Select {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
         // Get a connection
@@ -189,7 +189,7 @@ public final class Select {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
         // Get a connection
@@ -341,7 +341,7 @@ public final class Select {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
         // Get a connection
