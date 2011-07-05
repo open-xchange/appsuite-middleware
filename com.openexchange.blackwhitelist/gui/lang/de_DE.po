@@ -10,17 +10,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
 
-msgid "Antispam Settings"
-msgstr "Antispam Einstellungen"
+msgid "Add"
+msgstr "Hinzufügen"
 
-msgid "Blacklist"
-msgstr "Schwarze Liste"
-
-msgid "Whitelist"
-msgstr "Weiße Liste"
+msgid "Remove"
+msgstr "Entfernen"
 
 msgid "Your current blacklisted addresses"
-msgstr "Ihre Adressen auf der schwarzen Liste"
+msgstr "Ihre Adressen in der Blacklist"
 
 msgid "Email Addresses / Domains"
 msgstr "eMail Adressen / Domänen"
@@ -32,7 +29,7 @@ msgid "List"
 msgstr "Liste"
 
 msgid "Your current whitelisted addresses"
-msgstr "Ihre Adressen auf der weissen Liste"
+msgstr "Ihre Adressen in der Whitelist"
 
 msgid "Add new address"
 msgstr "Neue Adresse hinzufügen"
