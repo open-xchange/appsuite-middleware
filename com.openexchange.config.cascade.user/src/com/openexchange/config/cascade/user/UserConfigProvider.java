@@ -60,6 +60,7 @@ import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -85,7 +86,7 @@ public class UserConfigProvider implements ConfigProviderService {
         this.contexts = contexts;
     }
 
-    public BasicProperty get(final String property, final int context, final int userId) throws ConfigCascadeException {
+    public BasicProperty get(final String property, final int context, final int userId) throws OXException {
         if(context == NO_CONTEXT && userId == NO_USER) {
             return NO_PROPERTY;
         }
@@ -125,7 +126,7 @@ public class UserConfigProvider implements ConfigProviderService {
                     throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
                 }
 
-                public List<String> getMetadataNames() throws ConfigCascadeException {
+                public List<String> getMetadataNames() throws OXException {
                     return Collections.emptyList();
                 }
                 
@@ -136,7 +137,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     }
 
-    public Collection<String> getAllPropertyNames(int context, int userId) throws ConfigCascadeException {
+    public Collection<String> getAllPropertyNames(int context, int userId) throws OXException {
         if(context == NO_CONTEXT && userId == NO_CONTEXT) {
             return Collections.emptyList();
         }

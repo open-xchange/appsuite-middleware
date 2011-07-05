@@ -52,6 +52,7 @@ package com.openexchange.config.cascade;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -66,34 +67,34 @@ public interface ConfigProviderService {
     
     public static final BasicProperty NO_PROPERTY = new BasicProperty() {
 
-        public String get() throws ConfigCascadeException {
+        public String get() throws OXException {
             return null;
         }
 
-        public String get(String metadataName) throws ConfigCascadeException {
+        public String get(final String metadataName) throws OXException {
             return null;
         }
 
-        public boolean isDefined() throws ConfigCascadeException {
+        public boolean isDefined() throws OXException {
             return false;
         }
 
-        public void set(String value) throws ConfigCascadeException {
+        public void set(final String value) throws OXException {
             
         }
 
-        public void set(String metadataName, String value) throws ConfigCascadeException {
+        public void set(final String metadataName, final String value) throws OXException {
             
         }
 
-        public List<String> getMetadataNames() throws ConfigCascadeException {
+        public List<String> getMetadataNames() throws OXException {
             return Collections.emptyList();
         }
         
     };
 
-    BasicProperty get(String property, int context, int user) throws ConfigCascadeException;
+    BasicProperty get(String property, int context, int user) throws OXException;
     
-    Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException;
+    Collection<String> getAllPropertyNames(int context, int user) throws OXException;
 
 }

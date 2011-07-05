@@ -51,9 +51,9 @@ package com.openexchange.config.cascade.impl;
 
 import java.util.List;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.strings.StringParser;
 
 /**
@@ -63,63 +63,63 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class CoercingConfigProperty<T> implements ConfigProperty<T> {
 
-    private Class<T> type;
+    private final Class<T> type;
 
-    private BasicProperty delegate;
+    private final BasicProperty delegate;
 
-    private StringParser parser;
+    private final StringParser parser;
 
-    public CoercingConfigProperty(Class<T> type, BasicProperty delegate, StringParser parser) {
+    public CoercingConfigProperty(final Class<T> type, final BasicProperty delegate, final StringParser parser) {
         super();
         this.type = type;
         this.delegate = delegate;
         this.parser = parser;
     }
 
-    public T get() throws ConfigCascadeException {
-        String value = delegate.get();
+    public T get() throws OXException {
+        final String value = delegate.get();
         return parse(value, type);
     }
 
-    private <S> S parse(String value, Class<S> s) throws ConfigCascadeException {
+    private <S> S parse(final String value, final Class<S> s) throws OXException {
         if (value == null) {
             return null;
         }
 
-        S parsed = parser.parse(value, s);
+        final S parsed = parser.parse(value, s);
         if (parsed == null) {
             throw ConfigCascadeExceptionCodes.COULD_NOT_COERCE_VALUE.create(value, s.getName());
         }
         return parsed;
     }
 
-    public String get(String metadataName) throws ConfigCascadeException {
+    public String get(final String metadataName) throws OXException {
         return delegate.get(metadataName);
     }
 
-    public <M> M get(String metadataName, Class<M> m) throws ConfigCascadeException {
+    public <M> M get(final String metadataName, final Class<M> m) throws OXException {
         return parse(delegate.get(metadataName), m);
     }
 
-    public boolean isDefined() throws ConfigCascadeException {
+    public boolean isDefined() throws OXException {
         return delegate.isDefined();
     }
 
-    public CoercingConfigProperty<T> set(T value) throws ConfigCascadeException {
+    public CoercingConfigProperty<T> set(final T value) throws OXException {
         delegate.set(value.toString()); // We assume good toString methods that allow reparsing
         return this;
     }
 
-    public <M> CoercingConfigProperty<T> set(String metadataName, M value) throws ConfigCascadeException {
+    public <M> CoercingConfigProperty<T> set(final String metadataName, final M value) throws OXException {
         delegate.set(metadataName, value.toString());
         return this;
     }
 
-    public <M> ConfigProperty<M> to(Class<M> otherType) {
+    public <M> ConfigProperty<M> to(final Class<M> otherType) throws OXException {
         return new CoercingConfigProperty<M>(otherType, delegate, parser);
     }
 
-    public List<String> getMetadataNames() throws ConfigCascadeException {
+    public List<String> getMetadataNames() throws OXException {
         return delegate.getMetadataNames();
     }
 

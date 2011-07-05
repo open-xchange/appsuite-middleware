@@ -49,8 +49,7 @@
 
 package com.openexchange.config.cascade;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Component;
 
 /**
@@ -58,7 +57,7 @@ import com.openexchange.groupware.Component;
  * 
  * francisco.laguna@open-xchange.com
  */
-public class ConfigCascadeException extends AbstractOXException {
+public class ConfigCascadeException extends OXException {
 
     private static final long serialVersionUID = -3554129943396182447L;
 
@@ -76,81 +75,8 @@ public class ConfigCascadeException extends AbstractOXException {
         }
     };
 
-    /**
-     * Initializes a new {@link ConfigCascadeException}.
-     * 
-     * @param cause The cause
-     */
-    public ConfigCascadeException(final AbstractOXException cause) {
-        super(cause);
-    }
-
-    /**
-     * Initializes a new {@link ConfigCascadeException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     */
-    public ConfigCascadeException(final String message, final AbstractOXException cause) {
-        super(COMPONENT, message, cause);
-    }
-
-    /**
-     * Initializes a new {@link ConfigCascadeException}.
-     * 
-     * @param category The category
-     * @param detailNumber The detail number
-     * @param message The message
-     * @param cause The cause
-     */
-    public ConfigCascadeException(final Category category, final int detailNumber, final String message, final Throwable cause) {
-        super(COMPONENT, category, detailNumber, message, cause);
-    }
-
-    /**
-     * Initializes a new {@link ConfigCascadeException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     */
-    public ConfigCascadeException(final ErrorMessage message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Initializes a new {@link ConfigCascadeException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     * @param messageArguments The message arguments
-     */
-    public ConfigCascadeException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
-        super(message, cause);
-        setMessageArgs(messageArguments);
-    }
-
-    /**
-     * Initializes a new {@link ConfigCascadeException}.
-     * 
-     * @param component The component
-     * @param message The message
-     * @param cause The cause
-     */
-    protected ConfigCascadeException(final Component component, final String message, final AbstractOXException cause) {
-        super(component, message, cause);
-    }
-
-    /**
-     * Initializes a new {@link ConfigCascadeException}.
-     * 
-     * @param component The component
-     * @param category The category
-     * @param detailNumber The detail number
-     * @param message The message
-     * @param cause The cause
-     */
-    protected ConfigCascadeException(final Component component, final Category category, final int detailNumber, final String message, final Throwable cause) {
-        super(component, category, detailNumber, message, cause);
+    private ConfigCascadeException() {
+        super();
     }
 
 }

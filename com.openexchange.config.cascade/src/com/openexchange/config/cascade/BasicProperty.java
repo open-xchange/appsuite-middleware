@@ -50,6 +50,7 @@
 package com.openexchange.config.cascade;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -58,15 +59,15 @@ import java.util.List;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface BasicProperty {
-    void set(String value) throws ConfigCascadeException;
+    void set(String value) throws OXException;
 
-    String get() throws ConfigCascadeException;
+    String get() throws OXException;
 
-    void set(String metadataName, String value) throws ConfigCascadeException;
+    void set(String metadataName, String value) throws OXException;
 
-    String get(String metadataName) throws ConfigCascadeException;
+    String get(String metadataName) throws OXException;
     
-    public boolean isDefined() throws ConfigCascadeException;
+    public boolean isDefined() throws OXException;
 
-    List<String> getMetadataNames() throws ConfigCascadeException;
+    List<String> getMetadataNames() throws OXException;
 }

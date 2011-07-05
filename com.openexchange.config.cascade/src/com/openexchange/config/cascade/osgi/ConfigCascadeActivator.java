@@ -56,13 +56,10 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.exception.ConfigCascadeExceptionFactory;
 import com.openexchange.config.cascade.impl.ConfigCascade;
-import com.openexchange.exceptions.StringComponent;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.strings.StringParser;
 
@@ -80,11 +77,9 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     private boolean configured = false;
 
-    private ComponentRegistration componentRegistration;
-
     private ConfigCascade configCascade;
 
-    private int INFINITY = 10;
+    private final int INFINITY = 10;
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -93,33 +88,30 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
-        componentRegistration = new ComponentRegistration(context, new StringComponent("CCA"), "com.openexchange.config.cascade", ConfigCascadeExceptionFactory.getInstance());
-        
-        
         configCascade = new ConfigCascade();
         
         final ServiceTracker stringParsers = track(StringParser.class);
         
         configCascade.setStringParser(new StringParser() {
 
-            public <T> T parse(String s, Class<T> t) {
-                Object service = stringParsers.getService();
+            public <T> T parse(final String s, final Class<T> t) {
+                final Object service = stringParsers.getService();
                 if(service == null) {
                     LOG.fatal("Could not find suitable string parser in OSGi system");
                     return null;
                 }
-                StringParser parser = (StringParser) service;
+                final StringParser parser = (StringParser) service;
                 return parser.parse(s, t);
             }
             
         });
         
-        ServiceTracker serverProviders = track(createFilter("server"), new ServiceTrackerCustomizer() {
+        final ServiceTracker serverProviders = track(createFilter("server"), new ServiceTrackerCustomizer() {
 
-            public Object addingService(ServiceReference reference) {
-                ConfigProviderService provider = (ConfigProviderService) context.getService(reference);
+            public Object addingService(final ServiceReference reference) {
+                final ConfigProviderService provider = (ConfigProviderService) context.getService(reference);
                 if (isServerProvider(reference)) {
-                    String scopes = getScopes(provider);
+                    final String scopes = getScopes(provider);
                     configure(scopes, configCascade);
                     configCascade.setProvider("server", provider);
                     registerService(ConfigViewFactory.class, configCascade);
@@ -127,11 +119,11 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 return provider;
             }
 
-            public void modifiedService(ServiceReference reference, Object service) {
+            public void modifiedService(final ServiceReference reference, final Object service) {
                 // IGNORE
             }
 
-            public void removedService(ServiceReference reference, Object service) {
+            public void removedService(final ServiceReference reference, final Object service) {
             
             }
             
@@ -147,27 +139,24 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     
     @Override
     protected void stopBundle() throws Exception {
-        if(componentRegistration != null) {
-            componentRegistration.unregister();
-        }
         super.stopBundle();
     }
     
-    boolean isServerProvider(ServiceReference reference) {
-        Object scope = reference.getProperty("scope");
+    boolean isServerProvider(final ServiceReference reference) {
+        final Object scope = reference.getProperty("scope");
         return scope != null && scope.equals("server");
     }
     
-    String getScopes(ConfigProviderService config) {
+    String getScopes(final ConfigProviderService config) {
         try {
             return config.get("com.openexchange.config.cascade.scopes", ConfigProviderService.NO_CONTEXT, ConfigProviderService.NO_USER).get();
-        } catch (ConfigCascadeException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         return null;
     }
     
-    void configure(String scopes, ConfigCascade cascade) {
+    void configure(String scopes, final ConfigCascade cascade) {
         if(configured) {
             return;
         }
@@ -176,24 +165,24 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         }
         configured = true;
         
-        String[] searchPath = scopes.split("\\s*,\\s*");
+        final String[] searchPath = scopes.split("\\s*,\\s*");
         cascade.setSearchPath(searchPath);
    
-        for (String scope : searchPath) {
+        for (final String scope : searchPath) {
             if(scope.equals("server")) {
                 continue;
             }
             
-            ServiceTracker tracker = track(createFilter(scope));
+            final ServiceTracker tracker = track(createFilter(scope));
             cascade.setProvider(scope, new TrackingProvider(tracker));
             tracker.open();
         }
     }
     
-    Filter createFilter(String scope) {
+    Filter createFilter(final String scope) {
         try {
             return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");
-        } catch (InvalidSyntaxException e) {
+        } catch (final InvalidSyntaxException e) {
             LOG.fatal(e.getMessage(), e);
         }
         return null;

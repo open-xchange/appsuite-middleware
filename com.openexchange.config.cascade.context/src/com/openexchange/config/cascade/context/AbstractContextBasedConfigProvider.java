@@ -52,11 +52,10 @@ package com.openexchange.config.cascade.context;
 import java.util.Collection;
 import java.util.Collections;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 
 /**
  * {@link AbstractContextBasedConfigProvider}
@@ -67,34 +66,26 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
 
     protected ContextService contexts;
 
-    public AbstractContextBasedConfigProvider(ContextService contexts) {
+    public AbstractContextBasedConfigProvider(final ContextService contexts) {
         this.contexts = contexts;
     }
 
-    public BasicProperty get(String property, int context, int user) throws ConfigCascadeException {
+    public BasicProperty get(final String property, final int context, final int user) throws OXException {
         if (context == NO_CONTEXT) {
             return NO_PROPERTY;
         }
-        try {
-            return get(property, contexts.getContext(context), user);
-        } catch (OXException e) {
-            throw new ConfigCascadeException(e);
-        }
+        return get(property, contexts.getContext(context), user);
     }
 
-    public Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException {
+    public Collection<String> getAllPropertyNames(final int context, final int user) throws OXException {
         if (context == NO_CONTEXT) {
             return Collections.emptyList();
         }
-        try {
-            return getAllPropertyNames(contexts.getContext(context));
-        } catch (OXException e) {
-            throw new ConfigCascadeException(e);
-        }
+        return getAllPropertyNames(contexts.getContext(context));
     }
 
     protected abstract Collection<String> getAllPropertyNames(Context context);
 
-    protected abstract BasicProperty get(String property, Context context, int user) throws ConfigCascadeException;
+    protected abstract BasicProperty get(String property, Context context, int user) throws OXException;
 
 }

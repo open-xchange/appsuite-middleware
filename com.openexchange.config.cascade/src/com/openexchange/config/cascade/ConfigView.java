@@ -50,6 +50,7 @@
 package com.openexchange.config.cascade;
 
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -59,14 +60,14 @@ import java.util.Map;
  */
 public interface ConfigView {
 
-    <T> void set(String scope, String property, T value) throws ConfigCascadeException;
+    <T> void set(String scope, String property, T value) throws OXException;
 
-    <T> T get(String property, Class<T> coerceTo) throws ConfigCascadeException;
+    <T> T get(String property, Class<T> coerceTo) throws OXException;
 
-    <T> ConfigProperty<T> property(String scope, String property, Class<T> coerceTo) throws ConfigCascadeException;
+    <T> ConfigProperty<T> property(String scope, String property, Class<T> coerceTo) throws OXException;
 
-    <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) throws ConfigCascadeException;
+    <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) throws OXException;
 
-    Map<String, ComposedConfigProperty<String>> all() throws ConfigCascadeException;
+    Map<String, ComposedConfigProperty<String>> all() throws OXException;
     
 }

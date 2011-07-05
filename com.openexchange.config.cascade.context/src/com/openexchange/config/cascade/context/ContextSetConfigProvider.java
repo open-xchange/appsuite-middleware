@@ -150,7 +150,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     @Override
-    protected BasicProperty get(final String property, Context context, int user) throws ConfigCascadeException {
+    protected BasicProperty get(final String property, Context context, int user) throws OXException {
         final List<Map<String, Object>> config = getConfigData(getSpecification(context, getUserConfiguration(context, user)));
 
         final String value = findFirst(config, property);
@@ -177,7 +177,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
                 throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, SCOPE);
             }
 
-            public List<String> getMetadataNames() throws ConfigCascadeException {
+            public List<String> getMetadataNames() throws OXException {
                 return Collections.emptyList();
             }
             

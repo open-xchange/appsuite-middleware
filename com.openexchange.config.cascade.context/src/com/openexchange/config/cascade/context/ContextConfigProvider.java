@@ -59,6 +59,7 @@ import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -75,7 +76,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
     }
 
     @Override
-    public BasicProperty get(final String property, final Context ctx, int user) {
+    public BasicProperty get(final String property, final Context ctx, int user) throws OXException {
 
         return new BasicProperty() {
 
@@ -105,7 +106,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
                 throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
             }
 
-            public List<String> getMetadataNames() throws ConfigCascadeException {
+            public List<String> getMetadataNames() throws OXException {
                 return Collections.emptyList();
             }
 

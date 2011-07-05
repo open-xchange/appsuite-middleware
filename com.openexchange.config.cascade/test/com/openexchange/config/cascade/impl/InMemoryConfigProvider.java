@@ -54,8 +54,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -69,22 +69,22 @@ public class InMemoryConfigProvider implements ConfigProviderService{
     ConcurrentHashMap<String, ConcurrentHashMap<String, String>> metadata = new ConcurrentHashMap<String, ConcurrentHashMap<String, String>>();
     
     
-    public BasicProperty get(final String property, final int context, final int user) {
+    public BasicProperty get(final String property, final int context, final int user) throws OXException {
         return new BasicProperty() {
 
-            public String get() {
+            public String get() throws OXException {
                 return values.get(property);
             }
 
-            public void set(String value) {
+            public void set(String value) throws OXException {
                 values.put(property, value);
             }
 
-            public String get(String metadataName) {
+            public String get(String metadataName) throws OXException {
                 return getMetadata().get(metadataName);
             }
 
-            public void set(String metadataName, String value) {
+            public void set(String metadataName, String value) throws OXException {
                 getMetadata().put(metadataName, value);
             }
 
@@ -99,11 +99,11 @@ public class InMemoryConfigProvider implements ConfigProviderService{
                 return retval;
             }
 
-            public boolean isDefined() {
+            public boolean isDefined() throws OXException {
                 return values.contains(property);
             }
 
-            public List<String> getMetadataNames() throws ConfigCascadeException {
+            public List<String> getMetadataNames() throws OXException {
                 return Collections.emptyList();
             }
             
@@ -111,7 +111,7 @@ public class InMemoryConfigProvider implements ConfigProviderService{
     }
 
 
-    public Collection<String> getAllPropertyNames(int context, int user) {
+    public Collection<String> getAllPropertyNames(int context, int user) throws OXException {
         return values.keySet();
     }
 

@@ -52,8 +52,8 @@ package com.openexchange.config.cascade.impl;
 import java.util.Map;
 import junit.framework.TestCase;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 
 
@@ -64,7 +64,7 @@ import com.openexchange.tools.strings.BasicTypesStringParser;
  */
 public class CascadingConfigurationImplTest extends TestCase {
     
-    private ConfigCascade cascade = new ConfigCascade();
+    private final ConfigCascade cascade = new ConfigCascade();
     private ConfigView view = null;
     
     @Override
@@ -80,7 +80,7 @@ public class CascadingConfigurationImplTest extends TestCase {
         view = cascade.getView(1, 23);
     }
     
-    public void testCascadingProperty() throws ConfigCascadeException {
+    public void testCascadingProperty() throws OXException {
         view.set("server", "com.openexchange.test.property", "Rosebud");
         assertEquals("Rosebud", view.get("com.openexchange.test.property", String.class));
     
@@ -100,7 +100,7 @@ public class CascadingConfigurationImplTest extends TestCase {
     
     }
     
-    public void testPropertyMetadata() throws ConfigCascadeException {
+    public void testPropertyMetadata() throws OXException {
         view.property("server", "com.openexchange.test.property", String.class).set("published", "true");
         
         assertTrue(view.property("com.openexchange.test.property", String.class).get("published", boolean.class));
@@ -115,7 +115,7 @@ public class CascadingConfigurationImplTest extends TestCase {
     }
 
     
-    public void testFinalProperty() throws ConfigCascadeException {
+    public void testFinalProperty() throws OXException {
         // The metadata key "final" points to the Scope where the search iteration should stop, effectively prohibiting that a value is overridden
         view.set("server", "com.openexchange.test.property", "Rosebud");
         view.set("context", "com.openexchange.test.property", "Lemongrass");
@@ -127,7 +127,7 @@ public class CascadingConfigurationImplTest extends TestCase {
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
     
-    public void testFinalPropertyInversesSearchOrder() throws ConfigCascadeException {
+    public void testFinalPropertyInversesSearchOrder() throws OXException {
         // The metadata key "final" points to the Scope where the search iteration should stop, effectively prohibiting that a value is overridden
         view.set("server", "com.openexchange.test.property", "Rosebud");
         view.set("context", "com.openexchange.test.property", "Lemongrass");
@@ -140,7 +140,7 @@ public class CascadingConfigurationImplTest extends TestCase {
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
     
-    public void testAllProperties() throws ConfigCascadeException {
+    public void testAllProperties() throws OXException {
         view.set("server", "com.openexchange.test.property1", "Rosebud");
         view.set("server", "com.openexchange.test.property2", "Rosebud");
         view.set("server", "com.openexchange.test.property3", "Rosebud");
@@ -155,7 +155,7 @@ public class CascadingConfigurationImplTest extends TestCase {
         view.set("user", "com.openexchange.test.property3", "Rootbeer");
         view.set("user", "com.openexchange.test.property4", "Rootbeer");
 
-        Map<String, ComposedConfigProperty<String>> allProps = view.all();
+        final Map<String, ComposedConfigProperty<String>> allProps = view.all();
         
         assertNotNull(allProps);
         assertEquals(4, allProps.size());

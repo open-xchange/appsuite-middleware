@@ -49,24 +49,25 @@
 
 package com.openexchange.config.cascade;
 
-import com.openexchange.config.cascade.exception.ConfigCascadeExceptionFactory;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link ConfigCascadeExceptionCodes} - Enumeration of all {@link ConfigCascadeException}s.
  * 
  * @author francisco.laguna@open-xchange.com
  */
-public enum ConfigCascadeExceptionCodes implements OXErrorMessage {
+public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(ConfigCascadeExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
-    COULD_NOT_COERCE_VALUE(ConfigCascadeExceptionMessages.COULD_NOT_COERCE_VALUE_MSG, Category.CODE_ERROR, 2),
-    CAN_NOT_DEFINE_METADATA(ConfigCascadeExceptionMessages.CAN_NOT_DEFINE_METADATA_MSG, Category.CODE_ERROR, 3),
-    CAN_NOT_SET_PROPERTY(ConfigCascadeExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, Category.CODE_ERROR, 4),
+    UNEXPECTED_ERROR(ConfigCascadeExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    COULD_NOT_COERCE_VALUE(ConfigCascadeExceptionMessages.COULD_NOT_COERCE_VALUE_MSG, Category.CATEGORY_ERROR, 2),
+    CAN_NOT_DEFINE_METADATA(ConfigCascadeExceptionMessages.CAN_NOT_DEFINE_METADATA_MSG, Category.CATEGORY_ERROR, 3),
+    CAN_NOT_SET_PROPERTY(ConfigCascadeExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, Category.CATEGORY_ERROR, 4),
     ;
 
     private final Category category;
@@ -80,6 +81,10 @@ public enum ConfigCascadeExceptionCodes implements OXErrorMessage {
         this.detailNumber = detailNumber;
         this.category = category;
     }
+    
+    public String getPrefix() {
+        return "CONF";
+    }
 
     public Category getCategory() {
         return category;
@@ -89,7 +94,7 @@ public enum ConfigCascadeExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
@@ -97,35 +102,33 @@ public enum ConfigCascadeExceptionCodes implements OXErrorMessage {
         return null;
     }
 
-    private static final Object[] EMPTY = new Object[0];
-
     /**
-     * Creates a new file storage exception of this error type with no message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance
      */
-    public ConfigCascadeException create() {
-        return ConfigCascadeExceptionFactory.getInstance().create(this, EMPTY);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new file storage exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public ConfigCascadeException create(final Object... messageArgs) {
-        return ConfigCascadeExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
     /**
-     * Creates a new file storage exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public ConfigCascadeException create(final Throwable cause, final Object... messageArgs) {
-        return ConfigCascadeExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

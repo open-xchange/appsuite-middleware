@@ -49,6 +49,8 @@
 
 package com.openexchange.config.cascade;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link ComposedConfigProperty}
@@ -56,10 +58,10 @@ package com.openexchange.config.cascade;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
-    public ComposedConfigProperty<T> precedence(String...scopes) throws ConfigCascadeException;
-    public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws ConfigCascadeException;
+    public ComposedConfigProperty<T> precedence(String...scopes) throws OXException;
+    public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws OXException;
     
-    public ComposedConfigProperty<T> set(T value) throws ConfigCascadeException;
-    public <M> ComposedConfigProperty<T> set(String metadataName, M value) throws ConfigCascadeException;
+    public ComposedConfigProperty<T> set(T value) throws OXException;
+    public <M> ComposedConfigProperty<T> set(String metadataName, M value) throws OXException;
     
 }

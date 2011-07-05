@@ -61,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ConfigProviderServiceImpl}
@@ -91,7 +92,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         setConfigService(configService);
     }
     
-    public ServerProperty get(String property, int context, int user) {
+    public ServerProperty get(String property, int context, int user) throws OXException {
         ServerProperty basicProperty = properties.get(property);
         if (basicProperty != null) {
             return basicProperty;
@@ -108,7 +109,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         return retval;
     }
 
-    public Collection<String> getAllPropertyNames(int context, int user) {
+    public Collection<String> getAllPropertyNames(int context, int user) throws OXException {
         Iterator<String> propertyNames = configService.propertyNames();
         Set<String> retval = new HashSet<String>();
         while (propertyNames.hasNext()) {

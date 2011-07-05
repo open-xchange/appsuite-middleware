@@ -59,8 +59,8 @@ import java.util.Set;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -81,7 +81,7 @@ public class TrackingProvider implements ConfigProviderService {
         this.tracker = providers;
     }
 
-    public BasicProperty get(final String property, int context, int user) throws ConfigCascadeException {
+    public BasicProperty get(final String property, int context, int user) throws OXException {
         ServiceReference[] serviceReferences = tracker.getServiceReferences();
         if(serviceReferences == null) {
             serviceReferences = new ServiceReference[0];
@@ -120,27 +120,27 @@ public class TrackingProvider implements ConfigProviderService {
         if(first == null) {
             first = new BasicProperty() {
 
-                public String get() {
+                public String get() throws OXException {
                     return null;
                 }
 
-                public String get(String metadataName) {
+                public String get(String metadataName) throws OXException {
                     return null;
                 }
 
-                public boolean isDefined() {
+                public boolean isDefined() throws OXException {
                     return false;
                 }
 
-                public void set(String value) {
+                public void set(String value) throws OXException {
                     throw new UnsupportedOperationException("Can't save setting "+property+". No ConfigProvider is specified for this value");
                 }
 
-                public void set(String metadataName, String value) {
+                public void set(String metadataName, String value) throws OXException {
                     throw new UnsupportedOperationException("Can't save metadata "+metadataName+" on property "+property+". No ConfigProvider is specified for this value");    
                 }
 
-                public List<String> getMetadataNames() throws ConfigCascadeException {
+                public List<String> getMetadataNames() throws OXException {
                     return Collections.emptyList();
                 }  
             };
@@ -148,7 +148,7 @@ public class TrackingProvider implements ConfigProviderService {
         return first;
     }
 
-    public Collection<String> getAllPropertyNames(int context, int user) throws ConfigCascadeException {
+    public Collection<String> getAllPropertyNames(int context, int user) throws OXException {
         Object[] services = tracker.getServices();
         if(services == null) {
             return Collections.emptyList();
