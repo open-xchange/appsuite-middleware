@@ -53,7 +53,6 @@ import java.sql.PreparedStatement;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
-import com.openexchange.server.OXException;
 
 /**
  * {@link Utility}
@@ -76,13 +75,7 @@ public final class Utility {
      * @throws OXException If {@link DatabaseService} is not contained in service registry
      */
     public static DatabaseService getDatabaseService() throws OXException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = OutlookServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        return databaseService;
+        return OutlookServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
     }
 
     /**

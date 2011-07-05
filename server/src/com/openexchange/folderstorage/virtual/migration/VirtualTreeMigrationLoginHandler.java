@@ -60,26 +60,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -100,24 +94,19 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(final LoginResult login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws OXException {
         final Session session = login.getSession();
         final int cid = session.getContextId();
         // Get a connection
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new LoginException(e);
-        }
+        final Connection con = Database.get(cid, true);
         try {
             con.setAutoCommit(false); // BEGIN
             handleLogin0(session, con);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLLBACK
-            throw new LoginException(FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage()));
-        } catch (final LoginException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
             DBUtils.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
@@ -129,8 +118,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
         }
     }
 
-    private void handleLogin0(final Session s, final Connection con) throws LoginException {
-        try {
+    private void handleLogin0(final Session s, final Connection con) throws OXException {
             /*
              * Check if migration has been performed for logged in user
              */
@@ -145,7 +133,6 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
              * Append mail folders of external mail accounts
              */
             if (session.getUserConfiguration().isMultipleMailAccounts()) {
-                try {
                     /*
                      * Get external mail accounts on top level
                      */
@@ -171,39 +158,25 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
                             }
                         }
                     }
-                } catch (final OXException e) {
-                    throw new LoginException(e);
-                } catch (final OXException e) {
-                    throw new LoginException(e);
-                }
             }
             /*
              * Add default mail folders: Drafts, Sent, Spam and Trash
              */
             final MailAccess<?, ?> mailAccess;
-            try {
+            {
                 mailAccess = MailAccess.getInstance(session);
                 mailAccess.connect(true);
-            } catch (final OXException e) {
-                throw new LoginException(e);
             }
             try {
                 insertDefaultMailFolder(mailAccess.getFolderStorage().getDraftsFolder(), mailAccess, s);
                 insertDefaultMailFolder(mailAccess.getFolderStorage().getSentFolder(), mailAccess, s);
                 insertDefaultMailFolder(mailAccess.getFolderStorage().getSpamFolder(), mailAccess, s);
                 insertDefaultMailFolder(mailAccess.getFolderStorage().getTrashFolder(), mailAccess, s);
-            } catch (final OXException e) {
-                throw new LoginException(e);
             } finally {
                 mailAccess.close(true);
             }
 
             setMigrationPerformed(session, con);
-        } catch (final OXException e) {
-            throw new LoginException(e);
-        } catch (final OXException e) {
-            throw new LoginException(e);
-        }
     }
 
     private static void insertDefaultMailFolder(final String fullname, final MailAccess<?, ?> mailAccess, final Session s) throws OXException, OXException {
@@ -218,7 +191,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
         Insert.insertFolder(s.getContextId(), 1, s.getUserId(), mailFolder);
     }
 
-    public void handleLogout(final LoginResult logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws OXException {
         // Nothing to do
     }
 

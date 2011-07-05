@@ -62,9 +62,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
@@ -74,8 +72,8 @@ import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.update.PerformParameters;
@@ -143,12 +141,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
     }
 
     private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws UpdateException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
-        }
+        final Connection writeCon = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -187,7 +180,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
         {
             final int mailAdmin = getMailAdmin(contextId);
             if (-1 == mailAdmin) {
-                throw new UpdateException(ContextExceptionCodes.NO_MAILADMIN.create());
+                throw ContextExceptionCodes.NO_MAILADMIN.create();
             }
             final ContextImpl ctxi = new ContextImpl(contextId);
             ctxi.setMailadmin(mailAdmin);

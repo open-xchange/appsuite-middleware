@@ -53,10 +53,9 @@ import static com.openexchange.folderstorage.outlook.sql.Utility.debugSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -90,8 +89,6 @@ public final class Update {
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -137,8 +134,6 @@ public final class Update {
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }

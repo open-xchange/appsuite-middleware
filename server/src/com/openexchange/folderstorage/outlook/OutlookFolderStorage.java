@@ -120,6 +120,7 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.messaging.MailMessagingService;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -1939,8 +1940,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                 try {
                     con = databaseService.getWritable(contextId);
                     con.setAutoCommit(false); // BEGIN
-                } catch (final DBPoolingException e) {
-                    throw new OXException(e);
                 } catch (final SQLException e) {
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
                 }
@@ -2049,23 +2048,25 @@ public final class OutlookFolderStorage implements FolderStorage {
                     final Throwable cause = e.getCause();
                     if (cause instanceof OXException) {
                         final OXException me = (OXException) cause;
-                        final int number = me.getDetailNumber();
-                        if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == number) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(e.getMessage(), e);
+                        if (me.isPrefix("MSG")) {
+                            final int number = me.getCode();
+                            if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == number) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug(e.getMessage(), e);
+                                }
+                                /*
+                                 * Return empty map
+                                 */
+                                return new TreeMap<String, List<String>>(comparator);
+                            } else if (MIMEMailExceptionCode.INVALID_CREDENTIALS.getNumber() == number) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug(e.getMessage(), e);
+                                }
+                                /*
+                                 * Return empty map
+                                 */
+                                return new TreeMap<String, List<String>>(comparator);
                             }
-                            /*
-                             * Return empty map
-                             */
-                            return new TreeMap<String, List<String>>(comparator);
-                        } else if (OXException.Code.INVALID_CREDENTIALS.getNumber() == number) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(e.getMessage(), e);
-                            }
-                            /*
-                             * Return empty map
-                             */
-                            return new TreeMap<String, List<String>>(comparator);
                         }
                     }
                     throw e;
