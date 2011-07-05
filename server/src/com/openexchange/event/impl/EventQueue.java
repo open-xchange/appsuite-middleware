@@ -58,6 +58,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.EventException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
@@ -260,7 +261,7 @@ public final class EventQueue {
         shuttingDown.set(false);
     }
 
-    public static void add(final EventObject eventObj) throws EventException {
+    public static void add(final EventObject eventObj) throws OXException {
         if (shuttingDown.get()) {
             LOG.info("Shutting down event system, so no events are accepted. Throwing Invalid State Exception");
             throw new EventException("Event system is being shut down and therefore does not accept new events.");

@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.TargetService;
@@ -77,13 +76,13 @@ public final class CalendarReminderDelete implements TargetService {
 	}
 
 	public void updateTargetObject(final Context ctx, final Connection con, final int targetId)
-			throws AbstractOXException {
+			throws OXException {
 		updateAppointmentReminder(con, -1, targetId, ctx.getContextId());
 		//updateAppointmentLastModified(con, targetId, ctx.getContextId());
 	}
 
 	public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId)
-			throws AbstractOXException {
+			throws OXException {
 		updateAppointmentReminder(con, userId, targetId, ctx.getContextId());
 		//updateAppointmentLastModified(con, targetId, ctx.getContextId());
 	}

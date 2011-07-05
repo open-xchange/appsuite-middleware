@@ -50,6 +50,7 @@
 package com.openexchange.exception;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
@@ -116,6 +117,11 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private final int code;
 
+    /**
+     * List of problematic attributes.
+     */
+    private final List<ProblematicAttribute> problematics;
+
     private String displayMessage;
 
     private String logMessage;
@@ -136,6 +142,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
+        problematics = new ArrayList<ProblematicAttribute>(2);
     }
 
     /**
@@ -152,6 +159,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
+        problematics = new ArrayList<ProblematicAttribute>(2);
     }
 
     /**
@@ -170,6 +178,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
+        problematics = new ArrayList<ProblematicAttribute>(2);
     }
 
     /**
@@ -185,6 +194,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.code = code;
         this.displayMessage = OXExceptionStrings.MESSAGE;
         this.displayArgs = MESSAGE_ARGS_EMPTY;
+        problematics = new ArrayList<ProblematicAttribute>(2);
     }
 
     /**
@@ -202,6 +212,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
+        problematics = new ArrayList<ProblematicAttribute>(2);
     }
 
     /**
@@ -220,6 +231,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
+        problematics = new ArrayList<ProblematicAttribute>(2);
     }
 
     /**
@@ -529,6 +541,91 @@ public class OXException extends Exception implements OXExceptionConstants {
     @Override
     public String toString() {
         return getLogMessage();
+    }
+
+    /*-
+     * ----------------------------- ProblematicAttribute stuff -----------------------------
+     */
+
+    /**
+     * Generic interface for a problematic attribute.
+     */
+    public static interface ProblematicAttribute {
+        // Different implementations will have different methods.
+    }
+
+    /**
+     * Interface for a truncated attribute.
+     */
+    public static interface Truncated extends ProblematicAttribute {
+
+        /**
+         * @return the column identifier of the truncated attribute.
+         */
+        int getId();
+
+        /**
+         * @return the maximum allowed size in bytes for the truncated attribute.
+         */
+        int getMaxSize();
+
+        /**
+         * @return the actual length of the value of the truncated attribute.
+         */
+        int getLength();
+    }
+
+    /**
+     * Interface for an attribute which could not be parsed orderly.
+     */
+    public static interface Parsing extends ProblematicAttribute {
+
+        /**
+         * @return the JSON attribute name that can not be parsed.
+         */
+        String getAttribute();
+    }
+
+    /**
+     * Adds an attribute identifier that has been truncated.
+     * 
+     * @param truncatedId identifier of the truncated attribute.
+     * @deprecated use {@link #addProblematic(com.openexchange.groupware.AbstractOXException.Truncated)}
+     */
+    @Deprecated
+    public void addTruncatedId(final int truncatedId) {
+        problematics.add(new Truncated() {
+
+            public int getId() {
+                return truncatedId;
+            }
+
+            public int getLength() {
+                return -1;
+            }
+
+            public int getMaxSize() {
+                return -1;
+            }
+        });
+    }
+
+    /**
+     * Adds a problematic attribute.
+     */
+    public void addProblematic(final ProblematicAttribute problematic) {
+        problematics.add(problematic);
+    }
+
+    private static final ProblematicAttribute[] EMPTY_PROBLEMATICS = new ProblematicAttribute[0];
+
+    /**
+     * Gets the problematic attributes.
+     * 
+     * @return The problematic attributes
+     */
+    public final ProblematicAttribute[] getProblematics() {
+        return problematics.isEmpty() ? EMPTY_PROBLEMATICS : problematics.toArray(new ProblematicAttribute[problematics.size()]);
     }
 
     /*-

@@ -81,7 +81,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.OXException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -116,7 +115,7 @@ public class EventClient {
         contextId = session.getContextId();
     }
 
-    public void create(final Appointment appointment) throws EventException, OXException, OXException {
+    public void create(final Appointment appointment) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -126,8 +125,8 @@ public class EventClient {
         }
     }
 
-    public void create(final Appointment appointment, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { appointment }, new FolderObject[] { folder });
+    public void create(final Appointment appointment, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { appointment }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.APPOINTMENT, appointment, null, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -150,8 +149,8 @@ public class EventClient {
         }
     }
 
-    public void modify(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folderObj) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folderObj });
+    public void modify(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folderObj) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folderObj });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.APPOINTMENT, newAppointment, oldAppointment, folderObj, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -174,8 +173,8 @@ public class EventClient {
         }
     }
 
-    public void accepted(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folder });
+    public void accepted(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.CONFIRM_ACCEPTED, Types.APPOINTMENT, newAppointment, oldAppointment, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -198,8 +197,8 @@ public class EventClient {
         }
     }
 
-    public void declined(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folder });
+    public void declined(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.CONFIRM_DECLINED, Types.APPOINTMENT, newAppointment, oldAppointment, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -222,8 +221,8 @@ public class EventClient {
         }
     }
 
-    public void tentative(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folder });
+    public void tentative(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.CONFIRM_TENTATIVE, Types.APPOINTMENT, newAppointment, oldAppointment, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -246,8 +245,8 @@ public class EventClient {
         }
     }
 
-    public void delete(final Appointment appointment, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { appointment }, new FolderObject[] { folder });
+    public void delete(final Appointment appointment, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { appointment }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.APPOINTMENT, appointment, null, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -260,8 +259,8 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void move(final Appointment appointment, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { appointment }, new FolderObject[] { sourceFolder, destinationFolder });
+    public void move(final Appointment appointment, final FolderObject sourceFolder, final FolderObject destinationFolder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { appointment }, new FolderObject[] { sourceFolder, destinationFolder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.MOVE, Types.APPOINTMENT, appointment, null, sourceFolder, destinationFolder, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -274,8 +273,8 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void create(final Task task, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { task }, new FolderObject[] { folder });
+    public void create(final Task task, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { task }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.TASK, task, null, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -288,8 +287,8 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void modify(final Task oldTask, final Task newTask, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldTask, newTask }, new FolderObject[] { folder });
+    public void modify(final Task oldTask, final Task newTask, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldTask, newTask }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.TASK, newTask, oldTask, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -302,7 +301,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void accept(Task oldTask, Task newTask) throws EventException, OXException, OXException {
+    public void accept(final Task oldTask, final Task newTask) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = newTask.getParentFolderID();
@@ -312,8 +311,8 @@ public class EventClient {
         }
     }
 
-    public void accept(final Task oldTask, final Task newTask, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldTask, newTask }, new FolderObject[] { folder });
+    public void accept(final Task oldTask, final Task newTask, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldTask, newTask }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.CONFIRM_ACCEPTED, Types.TASK, newTask, oldTask, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -326,7 +325,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void declined(Task oldTask, Task newTask) throws EventException, OXException, OXException {
+    public void declined(final Task oldTask, final Task newTask) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = newTask.getParentFolderID();
@@ -336,8 +335,8 @@ public class EventClient {
         }
     }
 
-    public void declined(final Task oldTask, final Task newTask, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldTask, newTask }, new FolderObject[] { folder });
+    public void declined(final Task oldTask, final Task newTask, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldTask, newTask }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.CONFIRM_DECLINED, Types.TASK, newTask, oldTask, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -350,7 +349,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void tentative(Task oldTask, Task newTask) throws EventException, OXException, OXException {
+    public void tentative(final Task oldTask, final Task newTask) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = newTask.getParentFolderID();
@@ -360,8 +359,8 @@ public class EventClient {
         }
     }
 
-    public void tentative(final Task oldTask, final Task newTask, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldTask, newTask }, new FolderObject[] { folder });
+    public void tentative(final Task oldTask, final Task newTask, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldTask, newTask }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.CONFIRM_TENTATIVE, Types.TASK, newTask, oldTask, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -385,8 +384,8 @@ public class EventClient {
         }
     }
 
-    public void delete(final Task task, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { task }, new FolderObject[] { folder });
+    public void delete(final Task task, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { task }, new FolderObject[] { folder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.TASK, task, null, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -399,8 +398,8 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void move(final Task task, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { task }, new FolderObject[] { sourceFolder, destinationFolder });
+    public void move(final Task task, final FolderObject sourceFolder, final FolderObject destinationFolder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { task }, new FolderObject[] { sourceFolder, destinationFolder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.MOVE, Types.TASK, task, null, sourceFolder, destinationFolder, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -423,8 +422,8 @@ public class EventClient {
         }
     }
 
-    public void create(final Contact contact, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, contact.getParentFolderID());
+    public void create(final Contact contact, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, contact.getParentFolderID());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.CONTACT, contact, null, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -437,8 +436,8 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void modify(final Contact oldContact, final Contact newContact, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, oldContact.getParentFolderID(), newContact.getParentFolderID());
+    public void modify(final Contact oldContact, final Contact newContact, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, oldContact.getParentFolderID(), newContact.getParentFolderID());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.CONTACT, newContact, oldContact, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -461,8 +460,8 @@ public class EventClient {
         }
     }
 
-    public void delete(final Contact contact, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, contact.getParentFolderID());
+    public void delete(final Contact contact, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, contact.getParentFolderID());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.CONTACT, contact, null, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -475,8 +474,8 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void move(final Contact contact, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { sourceFolder, destinationFolder }, contact.getParentFolderID());
+    public void move(final Contact contact, final FolderObject sourceFolder, final FolderObject destinationFolder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { sourceFolder, destinationFolder }, contact.getParentFolderID());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.MOVE, Types.CONTACT, contact, null, sourceFolder, destinationFolder, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -499,8 +498,8 @@ public class EventClient {
         }
     }
 
-    public void create(final FolderObject folder, final FolderObject parentFolder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder, parentFolder });
+    public void create(final FolderObject folder, final FolderObject parentFolder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder, parentFolder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.FOLDER, folder, null, parentFolder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -513,8 +512,8 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void modify(final FolderObject oldFolder, final FolderObject newFolder, final FolderObject parentFolder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { oldFolder, newFolder, parentFolder }, oldFolder.getParentFolderID(), newFolder.getParentFolderID());
+    public void modify(final FolderObject oldFolder, final FolderObject newFolder, final FolderObject parentFolder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { oldFolder, newFolder, parentFolder }, oldFolder.getParentFolderID(), newFolder.getParentFolderID());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.FOLDER, newFolder, oldFolder, parentFolder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -542,8 +541,8 @@ public class EventClient {
         }
     }
 
-    public void delete(final FolderObject folder, final FolderObject parentFolder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder, parentFolder });
+    public void delete(final FolderObject folder, final FolderObject parentFolder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder, parentFolder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.FOLDER, folder, null, parentFolder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -566,8 +565,8 @@ public class EventClient {
         }
     }
 
-    public void create(final DocumentMetadata document, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
+    public void create(final DocumentMetadata document, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.INFOSTORE, document, null, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -590,7 +589,7 @@ public class EventClient {
         }
     }
 
-    public void modify(final DocumentMetadata oldDocument, final DocumentMetadata newDocument, final FolderObject folder) throws EventException {
+    public void modify(final DocumentMetadata oldDocument, final DocumentMetadata newDocument, final FolderObject folder) throws OXException {
         final Map<Integer, Set<Integer>> affectedUsers;
         if (null == oldDocument) {
             affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) newDocument.getFolderId());
@@ -620,8 +619,8 @@ public class EventClient {
         }
     }
 
-    public void delete(final DocumentMetadata document, final FolderObject folder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
+    public void delete(final DocumentMetadata document, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.INFOSTORE, document, null, folder, null, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -634,8 +633,8 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void move(final DocumentMetadata document, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
-        Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { sourceFolder, destinationFolder }, (int) document.getFolderId());
+    public void move(final DocumentMetadata document, final FolderObject sourceFolder, final FolderObject destinationFolder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { sourceFolder, destinationFolder }, (int) document.getFolderId());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.MOVE, Types.INFOSTORE, document, null, sourceFolder, destinationFolder, session);
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -648,7 +647,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    protected void triggerEvent(final Event event) throws EventException {
+    protected void triggerEvent(final Event event) throws OXException {
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
         if (eventAdmin == null) {
             throw new EventException("event service not available");
@@ -660,63 +659,63 @@ public class EventClient {
         return new OXFolderAccess(ctx).getFolderObject(folderId);
     }
 
-    private Map<Integer, Set<Integer>> getAffectedUsers(FolderObject[] folders, int... folderIds) throws EventException {
-        Map<Integer, Set<Integer>> retval = getAffectedUsers(folders);
-        for (int folderId : folderIds) {
+    private Map<Integer, Set<Integer>> getAffectedUsers(final FolderObject[] folders, final int... folderIds) throws OXException {
+        final Map<Integer, Set<Integer>> retval = getAffectedUsers(folders);
+        for (final int folderId : folderIds) {
             getFolderSet(retval, userId).add(I(folderId));
         }
         return retval;
     }
 
-    private Map<Integer, Set<Integer>> getAffectedUsers(FolderObject[] folders) throws EventException {
-        Map<Integer, Set<Integer>> retval = new HashMap<Integer, Set<Integer>>();
+    private Map<Integer, Set<Integer>> getAffectedUsers(final FolderObject[] folders) throws OXException {
+        final Map<Integer, Set<Integer>> retval = new HashMap<Integer, Set<Integer>>();
         retval.put(I(userId), new HashSet<Integer>());
-        for (FolderObject folder : folders) {
+        for (final FolderObject folder : folders) {
             try {
                 addFolderToAffectedMap(retval, folder);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 throw new EventException(e);
-            } catch (GroupException e) {
+            } catch (final GroupException e) {
                 throw new EventException(e);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 throw new EventException(e);
             }
         }
         return retval;
     }
 
-    private Map<Integer, Set<Integer>> getAffectedUsers(CalendarObject[] objects, FolderObject[] folders) throws EventException {
-        Map<Integer, Set<Integer>> retval = getAffectedUsers(folders);
-        for (CalendarObject object : objects) {
+    private Map<Integer, Set<Integer>> getAffectedUsers(final CalendarObject[] objects, final FolderObject[] folders) throws OXException {
+        final Map<Integer, Set<Integer>> retval = getAffectedUsers(folders);
+        for (final CalendarObject object : objects) {
             if (null == object) {
                 continue;
             }
             getFolderSet(retval, userId).add(I(object.getParentFolderID()));
-            UserParticipant[] participants = object.getUsers();
+            final UserParticipant[] participants = object.getUsers();
             if (null == participants) {
                 continue;
             }
-            for (UserParticipant participant : object.getUsers()) {
+            for (final UserParticipant participant : object.getUsers()) {
                 final int participantId = participant.getIdentifier();
                 if (UserParticipant.NO_ID == participantId) {
                     continue;
                 }
                 getFolderSet(retval, participantId);
-                int folderId = participant.getPersonalFolderId();
+                final int folderId = participant.getPersonalFolderId();
                 if (UserParticipant.NO_PFID == folderId || 0 == folderId) {
                     continue;
                 }
                 try {
-                    FolderService folderService = ServerServiceRegistry.getInstance().getService(FolderService.class, true);
-                    FolderObject folder = folderService.getFolderObject(folderId, contextId);
+                    final FolderService folderService = ServerServiceRegistry.getInstance().getService(FolderService.class, true);
+                    final FolderObject folder = folderService.getFolderObject(folderId, contextId);
                     addFolderToAffectedMap(retval, folder);
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     throw new EventException(e);
-                } catch (FolderException e) {
+                } catch (final FolderException e) {
                     throw new EventException(e);
-                } catch (GroupException e) {
+                } catch (final GroupException e) {
                     throw new EventException(e);
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     throw new EventException(e);
                 }
             }
@@ -724,13 +723,13 @@ public class EventClient {
         return retval;
     }
 
-    private void addFolderToAffectedMap(Map<Integer, Set<Integer>> retval, FolderObject folder) throws OXException, GroupException, OXException {
-        for (OCLPermission permission : folder.getPermissions()) {
+    private void addFolderToAffectedMap(final Map<Integer, Set<Integer>> retval, final FolderObject folder) throws OXException, GroupException, OXException {
+        for (final OCLPermission permission : folder.getPermissions()) {
             if (permission.isFolderVisible()) {
                 if (permission.isGroupPermission()) {
-                    GroupService groupService = ServerServiceRegistry.getInstance().getService(GroupService.class, true);
-                    Group group = groupService.getGroup(getContext(contextId), permission.getEntity());
-                    for (int groupMember : group.getMember()) {
+                    final GroupService groupService = ServerServiceRegistry.getInstance().getService(GroupService.class, true);
+                    final Group group = groupService.getGroup(getContext(contextId), permission.getEntity());
+                    for (final int groupMember : group.getMember()) {
                         getFolderSet(retval, groupMember).add(I(folder.getObjectID()));
                     }
                 } else {
@@ -740,7 +739,7 @@ public class EventClient {
         }
     }
 
-    private static Set<Integer> getFolderSet(Map<Integer, Set<Integer>> map, int userId) {
+    private static Set<Integer> getFolderSet(final Map<Integer, Set<Integer>> map, final int userId) {
         Set<Integer> retval = map.get(I(userId));
         if (null == retval) {
             retval = new HashSet<Integer>();
@@ -749,13 +748,13 @@ public class EventClient {
         return retval;
     }
 
-    private static Context getContext(int contextId) throws OXException, OXException {
-        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
+    private static Context getContext(final int contextId) throws OXException, OXException {
+        final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
         return contextService.getContext(contextId);
     }
 
-    private static Map<Integer, Set<Integer>> unmodifyable(Map<Integer, Set<Integer>> map) {
-        for (Entry<Integer, Set<Integer>> entry : map.entrySet()) {
+    private static Map<Integer, Set<Integer>> unmodifyable(final Map<Integer, Set<Integer>> map) {
+        for (final Entry<Integer, Set<Integer>> entry : map.entrySet()) {
             entry.setValue(Collections.unmodifiableSet(entry.getValue()));
         }
         return Collections.unmodifiableMap(map);

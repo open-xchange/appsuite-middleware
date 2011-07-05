@@ -50,7 +50,7 @@
 package com.openexchange.groupware.reminder;
 
 import java.sql.Connection;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -61,11 +61,11 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class EmptyReminderDeleteImpl implements TargetService {
 	
-	public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws AbstractOXException {
+	public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws OXException {
 		
 	}
 
-	public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws AbstractOXException {
+	public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws OXException {
 		
 	}
 }

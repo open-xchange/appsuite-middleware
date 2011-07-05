@@ -52,7 +52,7 @@ package com.openexchange.groupware.tasks;
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import java.sql.Connection;
 import java.util.Date;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.TargetService;
 
@@ -70,7 +70,7 @@ public final class ModifyThroughDependant implements TargetService {
         super();
     }
 
-    public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws AbstractOXException {
+    public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws OXException {
         final Task task;
         try {
             task = stor.selectTask(ctx, con, targetId, ACTIVE);
@@ -85,7 +85,7 @@ public final class ModifyThroughDependant implements TargetService {
         stor.updateTask(ctx, con, task, lastModified, new int[] { Task.LAST_MODIFIED }, ACTIVE);
     }
 
-    public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws AbstractOXException {
+    public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws OXException {
         final Task task;
         try {
             task = stor.selectTask(ctx, con, targetId, ACTIVE);

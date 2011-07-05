@@ -50,7 +50,7 @@
 package com.openexchange.groupware.reminder;
 
 import java.sql.Connection;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -64,10 +64,10 @@ public interface TargetService {
     String MODULE_PROPERTY = "MODULE";
 
     TargetService EMPTY = new TargetService() {
-        public void updateTargetObject(Context ctx, Connection con, int targetId, int userId) {
+        public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws OXException {
             // Nothing to do.
         }
-        public void updateTargetObject(Context ctx, Connection con, int targetId) {
+        public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws OXException {
             // Nothing to do.
         }
     };
@@ -77,9 +77,9 @@ public interface TargetService {
      * @param ctx Context.
      * @param con writable database connection.
      * @param targetId identifier of the object to actualize.
-     * @throws AbstractOXException if some problem occurs actualizing the object.
+     * @throws OXException If some problem occurs actualizing the object
      */
-    void updateTargetObject(Context ctx, Connection con, int targetId) throws AbstractOXException;
+    void updateTargetObject(Context ctx, Connection con, int targetId) throws OXException;
 
     /**
      * The reminder information for a specific participant must be removed.
@@ -87,9 +87,9 @@ public interface TargetService {
      * @param con writeable database connection.
      * @param targetId identifier of the object to actualize.
      * @param userId identifier of the user that deleted his reminder.
-     * @throws AbstractOXException if some problem occurs actualizing the object.
+     * @throws OXException If some problem occurs actualizing the object
      */
-    void updateTargetObject(Context ctx, Connection con, int targetId, int userId) throws AbstractOXException;
+    void updateTargetObject(Context ctx, Connection con, int targetId, int userId) throws OXException;
 
 }
 

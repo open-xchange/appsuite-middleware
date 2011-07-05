@@ -1721,7 +1721,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     }
                 }
             }
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             LOG.error("ERROR getting read permissions", e);
             return false;
         }
@@ -2235,42 +2235,42 @@ public final class CalendarCollection implements CalendarCollectionService {
             case CalendarOperation.INSERT:
                 try {
                     eventclient.create(appointmentobject); // TODO
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(16));
                 }
                 break;
             case CalendarOperation.UPDATE:
                 try {
                     eventclient.modify(appointmentobject); // TODO
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(17));
                 }
                 break;
             case CalendarOperation.DELETE:
                 try {
                     eventclient.delete(appointmentobject); // TODO
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(18));
                 }
                 break;
             case CalendarOperation.CONFIRM_ACCEPTED:
                 try {
                     eventclient.accepted(appointmentobject); // TODO
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(18));
                 }
                 break;
             case CalendarOperation.CONFIRM_DELINED:
                 try {
                     eventclient.declined(appointmentobject); // TODO
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(18));
                 }
                 break;
             case CalendarOperation.CONFIRM_TENTATIVELY_ACCEPTED:
                 try {
                     eventclient.tentative(appointmentobject); // TODO
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(18));
                 }
                 break;

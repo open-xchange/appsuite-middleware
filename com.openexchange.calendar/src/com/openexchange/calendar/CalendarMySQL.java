@@ -2420,7 +2420,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 cdao.setLastModified(clone.getLastModified());
             } catch (final SQLException sqle) {
                 throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-            } catch (final Exception ex) {
+            } catch (final RuntimeException ex) {
                 throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, Integer.valueOf(2));
             }
         }
@@ -4339,7 +4339,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             insertAppointment0(edao, writecon, so, false);
                         } catch (final LdapException le) {
                             throw new OXException(le);
-                        } catch (final Exception e) {
+                        } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(8));
                         }
                         final CalendarDataObject update = new CalendarDataObject();
@@ -4356,7 +4356,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             throw new OXException(le);
                         } catch (final OXException e) {
                             throw e;
-                        } catch (final Exception e) {
+                        } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(9));
                         }
                     }
@@ -4384,7 +4384,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             // OBJECT
                         } catch (final LdapException le) {
                             throw new OXException(le);
-                        } catch (final Exception e) {
+                        } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(11));
                         }
                     } else {
@@ -4415,7 +4415,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             // OBJECT
                         } catch (final LdapException le) {
                             throw new OXException(le);
-                        } catch (final Exception e) {
+                        } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(10));
                         }
                     }
@@ -4483,7 +4483,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             }
                         } catch (final LdapException le) {
                             throw new OXException(le);
-                        } catch (final Exception e) {
+                        } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(11));
                         }
                     } else {
@@ -4514,7 +4514,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             // OBJECT
                         } catch (final LdapException le) {
                             throw new OXException(le);
-                        } catch (final Exception e) {
+                        } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(10));
                         }
                     }

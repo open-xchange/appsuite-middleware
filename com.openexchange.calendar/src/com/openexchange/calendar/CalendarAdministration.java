@@ -68,7 +68,6 @@ import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -270,10 +269,6 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 deleteFromParticipants.executeUpdate();
                 deleteFromView.executeUpdate();
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             LOG.error(e);
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
