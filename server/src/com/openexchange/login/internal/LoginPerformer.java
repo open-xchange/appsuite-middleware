@@ -51,6 +51,7 @@ package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -116,7 +117,7 @@ public final class LoginPerformer {
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request) throws LoginException {
-        return doLogin(request, Collections.<String, Object> emptyMap());
+        return doLogin(request, new HashMap<String, Object>());
     }
 
     /**
@@ -130,6 +131,9 @@ public final class LoginPerformer {
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
+            if (request.getHeaders() != null) {
+                properties.put("headers", request.getHeaders());
+            }
             final Authenticated authed = Authentication.login(request.getLogin(), request.getPassword(), properties);
             final Context ctx = findContext(authed.getContextInfo());
             retval.setContext(ctx);
