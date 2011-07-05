@@ -260,11 +260,9 @@ public final class LoginPerformer {
         }
         // Get user
         final User u;
-        try {
+        {
             final UserStorage us = UserStorage.getInstance();
             u = us.getUser(session.getUserId(), context);
-        } catch (final LdapException e) {
-            throw new LoginException(e);
         }
         final LoginResultImpl logout = new LoginResultImpl(session, context, u);
         // Remove session
@@ -281,7 +279,7 @@ public final class LoginPerformer {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 try {
                     it.next().handleLogin(login);
-                } catch (final LoginException e) {
+                } catch (final OXException e) {
                     logError(e);
                 }
             }
@@ -330,14 +328,8 @@ public final class LoginPerformer {
         }
     }
 
-    static void logError(final LoginException e) {
-        switch (e.getCategory()) {
-        case USER_INPUT:
-            LOG.debug(e.getMessage(), e);
-            break;
-        default:
-            LOG.error(e.getMessage(), e);
-        }
+    static void logError(final OXException e) {
+        e.log(LOG);
     }
 
     private static void logLoginRequest(final LoginRequest request, final LoginResult result) {

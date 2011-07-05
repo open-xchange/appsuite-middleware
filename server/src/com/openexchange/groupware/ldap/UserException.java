@@ -248,30 +248,30 @@ public class UserException extends OXException {
         }
         
         /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * Creates a new {@link UserException} instance pre-filled with this code's attributes.
          * 
-         * @return The newly created {@link OXException} instance
+         * @return The newly created {@link UserException} instance
          */
         public UserException create() {
             return create(new Object[0]);
         }
 
         /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * Creates a new {@link UserException} instance pre-filled with this code's attributes.
          * 
          * @param args The message arguments in case of printf-style message
-         * @return The newly created {@link OXException} instance
+         * @return The newly created {@link UserException} instance
          */
         public UserException create(final Object... args) {
             return create((Throwable) null, args);
         }
 
         /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * Creates a new {@link UserException} instance pre-filled with this code's attributes.
          * 
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
-         * @return The newly created {@link OXException} instance
+         * @return The newly created {@link UserException} instance
          */
         public UserException create(final Throwable cause, final Object... args) {
             final UserException ret;

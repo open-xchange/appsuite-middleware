@@ -51,14 +51,17 @@
 
 package com.openexchange.groupware.ldap;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * This exception is used if problems occur in the ldap DAOs.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LdapException extends AbstractOXException {
+public class LdapException extends OXException {
 
     /**
      * For serialization.
@@ -85,49 +88,9 @@ public class LdapException extends AbstractOXException {
      */
     private final Detail detail;
 
-    /**
-     * Initializes a new {@link LdapException}
-     * 
-     * @param cause The cause
-     */
-    public LdapException(final AbstractOXException cause) {
-    	super(cause);
-    	detail = Detail.ERROR;
-    }
-
-    /**
-     * Initializes a new exception using the information provides by the code.
-     * @param component the component.
-     * @param code code for the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public LdapException(final EnumComponent component, final Code code,
-        final Object... messageArgs) {
-        this(component, code, null, messageArgs);
-    }
-
-    /**
-     * Initializes a new exception using the information provides by the code.
-     * @param component the component.
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public LdapException(final EnumComponent component, final Code code,
-        final Throwable cause, final Object... messageArgs) {
-        super(component, code.category, code.detailNumber, code.message, cause);
-        this.detail = code.detail;
-        setMessageArgs(messageArgs);
-    }
-
-    /**
-     * Initialize e new exception using the information from the nested abstract
-     * OX exception.
-     * @param cause the cause.
-     */
-    public LdapException(final UserException cause) {
-        super(cause);
-        detail = Detail.ERROR;
+    protected LdapException(final int code, final String displayMessage, final Throwable cause, final Detail detail, final Object... displayArgs) {
+        super(code, displayMessage, cause, displayArgs);
+        this.detail = detail;
     }
 
     /**
@@ -141,95 +104,95 @@ public class LdapException extends AbstractOXException {
      * Error codes for the ldap exception.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    public enum Code {
+    public static enum Code implements OXExceptionCode {
         /**
          * A property from the ldap.properties file is missing.
          */
-        PROPERTY_MISSING("Cannot find property %s.", Category.SETUP_ERROR,
+        PROPERTY_MISSING("Cannot find property %s.", Category.CATEGORY_CONFIGURATION,
             Detail.ERROR, 1),
         /**
          * A problem with distinguished names occurred.
          */
         DN_PROBLEM("Cannot build distinguished name from %s.",
-            Category.CODE_ERROR, Detail.ERROR, 2),
+            Category.CATEGORY_ERROR, Detail.ERROR, 2),
         /**
          * Class can not be found.
          */
-        CLASS_NOT_FOUND("Class %s can not be loaded.", Category.SETUP_ERROR,
+        CLASS_NOT_FOUND("Class %s can not be loaded.", Category.CATEGORY_CONFIGURATION,
             Detail.ERROR, 3),
         /**
          * An implementation can not be instantiated.
          */
         INSTANTIATION_PROBLEM("Cannot instantiate class %s.",
-            Category.SETUP_ERROR, Detail.ERROR, 4),
+            Category.CATEGORY_CONFIGURATION, Detail.ERROR, 4),
         /**
          * A database connection Cannot be obtained.
          */
         NO_CONNECTION("Cannot get database connection.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.ERROR, 5),
+            Category.CATEGORY_SERVICE_DOWN, Detail.ERROR, 5),
         /**
          * SQL Problem: "%s".
          */
-        SQL_ERROR("SQL Problem: \"%s\"", Category.CODE_ERROR,
+        SQL_ERROR("SQL Problem: \"%s\"", Category.CATEGORY_ERROR,
             Detail.ERROR, 6),
         /**
          * Problem putting an object into the cache.
          */
         CACHE_PROBLEM("Problem putting/removing an object into/from the cache.",
-            Category.CODE_ERROR, Detail.ERROR, 7),
+            Category.CATEGORY_ERROR, Detail.ERROR, 7),
         /**
          * Hash algorithm %s isn't found.
          */
         HASH_ALGORITHM("Hash algorithm %s isn't found.",
-            Category.CODE_ERROR, Detail.ERROR, 8),
+            Category.CATEGORY_ERROR, Detail.ERROR, 8),
         /**
          * Encoding %s cannot be used.
          */
         UNSUPPORTED_ENCODING("Encoding %s cannot be used.",
-            Category.CODE_ERROR, Detail.ERROR, 9),
+            Category.CATEGORY_ERROR, Detail.ERROR, 9),
         /**
          * Cannot find resource group with identifier %d.
          */
         RESOURCEGROUP_NOT_FOUND(
             "Cannot find resource group with identifier %d.",
-            Category.CODE_ERROR, Detail.ERROR, 10),
+            Category.CATEGORY_ERROR, Detail.ERROR, 10),
         /**
          * Found resource groups with same identifier %d.
          */
         RESOURCEGROUP_CONFLICT("Found resource groups with same identifier %d.",
-            Category.CODE_ERROR, Detail.ERROR, 11),
+            Category.CATEGORY_ERROR, Detail.ERROR, 11),
         /**
          * Cannot find resource with identifier %d.
          */
         RESOURCE_NOT_FOUND("Cannot find resource with identifier %d.",
-            Category.CODE_ERROR, Detail.ERROR, 12),
+            Category.CATEGORY_ERROR, Detail.ERROR, 12),
         /**
          * Found resources with same identifier %d.
          */
         RESOURCE_CONFLICT("Found resources with same identifier %d.",
-            Category.CODE_ERROR, Detail.ERROR, 13),
+            Category.CATEGORY_ERROR, Detail.ERROR, 13),
         /**
          * Cannot find user with email %s.
          */
         NO_USER_BY_MAIL("Cannot find user with email %s.",
-            Category.CODE_ERROR, Detail.ERROR, 14),
+            Category.CATEGORY_ERROR, Detail.ERROR, 14),
         /**
          * Cannot find user with identifier %1$s in context %2$d.
          */
         USER_NOT_FOUND("Cannot find user with identifier %1$s in context %2$d.",
-            Category.CODE_ERROR, Detail.NOT_FOUND, 15),
+            Category.CATEGORY_ERROR, Detail.NOT_FOUND, 15),
         /**
          * Cannot find group with identifier %1$s in context %2$d.
          */
         GROUP_NOT_FOUND(
             "Cannot find group with identifier %1$s in context %2$d.",
-            Category.CODE_ERROR, Detail.ERROR, 17),
+            Category.CATEGORY_ERROR, Detail.ERROR, 17),
         /**    
          * Unexpected error: %1$s
          */
         UNEXPECTED_ERROR(
             "Unexpected error: %1$s",
-            Category.CODE_ERROR, Detail.ERROR, 18);
+            Category.CATEGORY_ERROR, Detail.ERROR, 18);
 
         /**
          * Message of the exception.
@@ -250,6 +213,8 @@ public class LdapException extends AbstractOXException {
          * Detail information for the exception.
          */
         private final Detail detail;
+        
+        private final boolean display;
 
         /**
          * Default constructor.
@@ -264,6 +229,11 @@ public class LdapException extends AbstractOXException {
             this.category = category;
             this.detailNumber = detailNumber;
             this.detail = detail;
+            display = category.getLogLevel().implies(LogLevel.DEBUG);
+        }
+
+        public String getPrefix() {
+            return null;
         }
 
 		public Category getCategory() {
@@ -274,12 +244,55 @@ public class LdapException extends AbstractOXException {
 			return detail;
 		}
 
-		public int getDetailNumber() {
+		public int getNumber() {
 			return detailNumber;
 		}
 
 		public String getMessage() {
 			return message;
 		}
+		
+		/**
+         * Creates a new {@link LdapException} instance pre-filled with this code's attributes.
+         * 
+         * @param prefix The prefix to use
+         * @return The newly created {@link LdapException} instance
+         */
+        public LdapException create(final String prefix) {
+            return create(prefix, new Object[0]);
+        }
+
+        /**
+         * Creates a new {@link LdapException} instance pre-filled with this code's attributes.
+         * 
+         * @param prefix The prefix to use
+         * @param args The message arguments in case of printf-style message
+         * @return The newly created {@link LdapException} instance
+         */
+        public LdapException create(final String prefix, final Object... args) {
+            return create(prefix, (Throwable) null, args);
+        }
+
+        /**
+         * Creates a new {@link LdapException} instance pre-filled with this code's attributes.
+         * 
+         * @param prefix The prefix to use
+         * @param cause The optional initial cause
+         * @param args The message arguments in case of printf-style message
+         * @return The newly created {@link LdapException} instance
+         */
+        public LdapException create(final String prefix, final Throwable cause, final Object... args) {
+            final LdapException ret;
+            if (display) {
+                ret = new LdapException(detailNumber, message, cause, detail, args);
+            } else {
+                final String msg = Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
+                ret = new LdapException(detailNumber, msg, null, detail, new Object[0]);
+                ret.setLogMessage(message, args);
+            }
+            ret.addCategory(category);
+            ret.setPrefix(prefix);
+            return ret;
+        }
     }
 }
