@@ -14,10 +14,9 @@ import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.hostname.ldap.configuration.ConfigurationException;
 import com.openexchange.hostname.ldap.configuration.LDAPHostnameProperties;
 import com.openexchange.hostname.ldap.configuration.Property;
 import com.openexchange.hostname.ldap.configuration.SearchScope;
@@ -32,12 +31,12 @@ public class LDAPHostnameService implements HostnameService {
 
     final LDAPHostnameCache instance;
 
-    public LDAPHostnameService() throws OXCachingException {
+    public LDAPHostnameService() throws OXException {
         super();
         instance = LDAPHostnameCache.getInstance();
     }
 
-    private static String fetchFromLdap(int contextId) throws ConfigurationException, NamingException {
+    private static String fetchFromLdap(final int contextId) throws OXException, NamingException {
         LdapContext context = null;
         try {
             final ConfigurationService service = HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
@@ -166,7 +165,7 @@ public class LDAPHostnameService implements HostnameService {
         return searchControls;
     }
     
-    public String getHostname(int userId, int contextId) {
+    public String getHostname(final int userId, final int contextId) {
         try {
             final String hostnameFromCache = instance.getHostnameFromCache(contextId);
             if (null == hostnameFromCache) {
@@ -178,21 +177,18 @@ public class LDAPHostnameService implements HostnameService {
                     instance.addHostnameToCache(contextId, hostname);
                 }
                 return hostname;
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Using hostname for context " + contextId + " from cache");
-                }
-                return hostnameFromCache;
             }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Using hostname for context " + contextId + " from cache");
+            }
+            return hostnameFromCache;
         } catch (final InvalidNameException e) {
             LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
         } catch (final AuthenticationException e) {
             LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
         } catch (final NamingException e) {
             LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
-        } catch (final ConfigurationException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
-        } catch (final OXCachingException e) {
+        } catch (final OXException e) {
             LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
         } catch (final RuntimeException e) {
             LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);

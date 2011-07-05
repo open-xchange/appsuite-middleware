@@ -54,10 +54,10 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hostname.ldap.LDAPHostnameCache;
 import com.openexchange.hostname.ldap.LDAPHostnameService;
-import com.openexchange.hostname.ldap.configuration.ConfigurationException;
 import com.openexchange.hostname.ldap.configuration.LDAPHostnameProperties;
 import com.openexchange.hostname.ldap.configuration.Property;
 import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
@@ -85,7 +85,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
@@ -94,7 +94,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
@@ -153,16 +153,12 @@ public class Activator extends DeferredActivator {
         }
     }
 
-    private void activateCaching() throws ConfigurationException {
+    private void activateCaching() throws OXException {
         final String cacheConfigFile = LDAPHostnameProperties.getProperty(HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), Property.cache_config_file);
-        try {
-            HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
-        } catch (final CacheException e) {
-            throw new ConfigurationException(e);
-        }
+        HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
     }
 
-    private void checkConfiguration() throws ConfigurationException {
+    private void checkConfiguration() throws OXException {
         LDAPHostnameProperties.check(HostnameLDAPServiceRegistry.getServiceRegistry(), Property.values(), LDAPHostnameCache.REGION_NAME);
     }
 
@@ -172,7 +168,7 @@ public class Activator extends DeferredActivator {
         if (null != cacheService) {
             try {
                 cacheService.freeCache(LDAPHostnameCache.REGION_NAME);
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
