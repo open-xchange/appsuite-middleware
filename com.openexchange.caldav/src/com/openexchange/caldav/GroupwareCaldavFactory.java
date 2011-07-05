@@ -62,11 +62,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -102,25 +102,25 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
 
     public static final WebdavPath ROOT_URL = new WebdavPath();
 
-    private SessionHolder sessionHolder;
+    private final SessionHolder sessionHolder;
 
-    private AppointmentSqlFactoryService appointments;
+    private final AppointmentSqlFactoryService appointments;
 
-    private FolderService folders;
+    private final FolderService folders;
 
-    private ICalEmitter icalEmitter;
+    private final ICalEmitter icalEmitter;
 
-    private ICalParser icalParser;
+    private final ICalParser icalParser;
 
-    private ThreadLocal<State> stateHolder = new ThreadLocal<State>();
+    private final ThreadLocal<State> stateHolder = new ThreadLocal<State>();
 
-    private UserService users;
+    private final UserService users;
 
-    private CalendarCollectionService calendarUtils;
+    private final CalendarCollectionService calendarUtils;
 
-    private ConfigViewFactory configs;
+    private final ConfigViewFactory configs;
 
-    public GroupwareCaldavFactory(SessionHolder sessionHolder, AppointmentSqlFactoryService appointments, FolderService folders, ICalEmitter icalEmitter, ICalParser icalParser, UserService users, CalendarCollectionService calendarUtils, ConfigViewFactory configs) {
+    public GroupwareCaldavFactory(final SessionHolder sessionHolder, final AppointmentSqlFactoryService appointments, final FolderService folders, final ICalEmitter icalEmitter, final ICalParser icalParser, final UserService users, final CalendarCollectionService calendarUtils, final ConfigViewFactory configs) {
         this.sessionHolder = sessionHolder;
         this.appointments = appointments;
         this.folders = folders;
@@ -138,7 +138,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     }
 
     @Override
-    public void endRequest(int status) {
+    public void endRequest(final int status) {
         stateHolder.set(null);
         super.endRequest(status);
     }
@@ -147,7 +147,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return PROTOCOL;
     }
 
-    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
+    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavProtocolException {
         if (url.size() > 1) {
             throw new WebdavProtocolException(url, 404);
         }
@@ -157,8 +157,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return resolveChild(resolveCollection(url.parent()), url);
     }
 
-    public WebdavCollection resolveChild(WebdavCollection collection, WebdavPath url) throws WebdavProtocolException {
-        for (WebdavResource resource : collection) {
+    public WebdavCollection resolveChild(final WebdavCollection collection, final WebdavPath url) throws WebdavProtocolException {
+        for (final WebdavResource resource : collection) {
             if (resource.getUrl().equals(url)) {
                 return mixin((AbstractCollection) resource);
             }
@@ -168,11 +168,11 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
 
     // TODO: i18n
 
-    public boolean isRoot(WebdavPath url) {
+    public boolean isRoot(final WebdavPath url) {
         return url.size() == 0;
     }
 
-    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
+    public WebdavResource resolveResource(final WebdavPath url) throws WebdavProtocolException {
         if (url.size() == 2) {
             return mixin(((CaldavCollection) resolveCollection(url.parent())).getChild(url.name()));
         }
@@ -215,15 +215,15 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return calendarUtils;
     }
     
-    public String getConfigValue(String key, String defaultValue) throws WebdavProtocolException {
+    public String getConfigValue(final String key, final String defaultValue) throws WebdavProtocolException {
         try {
-            ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
-            ComposedConfigProperty<String> property = view.property(key, String.class);
+            final ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
+            final ComposedConfigProperty<String> property = view.property(key, String.class);
             if (!property.isDefined()) {
                 return defaultValue;
             }
             return property.get();
-        } catch (ConfigCascadeException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(new WebdavPath(), 500);
         }
@@ -233,10 +233,10 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return stateHolder.get();
     }
     
-    public boolean isInRange(Appointment appointment) throws WebdavProtocolException {
-        Date start = start();
-        Date end = end();
-        for(Date d : Arrays.asList(appointment.getStartDate(), appointment.getEndDate())) {
+    public boolean isInRange(final Appointment appointment) throws WebdavProtocolException {
+        final Date start = start();
+        final Date end = end();
+        for(final Date d : Arrays.asList(appointment.getStartDate(), appointment.getEndDate())) {
             if (!d.after(start) || !d.before(end)) {
                 return false;
             }
@@ -245,12 +245,12 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     }
     
     public Date end() throws WebdavProtocolException {
-        String value = getConfigValue("com.openexchange.caldav.interval.end", "one_year");
+        final String value = getConfigValue("com.openexchange.caldav.interval.end", "one_year");
         int addYears = 2;
         if (value.equals("two_years")) {
             addYears = 3;
         }
-        Calendar instance = Calendar.getInstance();
+        final Calendar instance = Calendar.getInstance();
         instance.add(Calendar.YEAR, addYears);
         instance.set(Calendar.DAY_OF_YEAR, 0);
         instance.set(Calendar.HOUR_OF_DAY, 0);
@@ -262,10 +262,10 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     }
 
     public Date start() throws WebdavProtocolException {
-        String value = getConfigValue("com.openexchange.caldav.interval.start", "one_month");
+        final String value = getConfigValue("com.openexchange.caldav.interval.start", "one_month");
 
         if (value.equals("one_year")) {
-            Calendar instance = Calendar.getInstance();
+            final Calendar instance = Calendar.getInstance();
             instance.add(Calendar.YEAR, -1);
             instance.set(Calendar.DAY_OF_YEAR, 0);
             instance.set(Calendar.HOUR_OF_DAY, 0);
@@ -276,7 +276,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             return instance.getTime();
         }
 
-        Calendar instance = Calendar.getInstance();
+        final Calendar instance = Calendar.getInstance();
         
         if (value.equals("six_months")) {
             instance.add(Calendar.MONTH, -6);
@@ -293,10 +293,10 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     }
 
 
-    public User resolveUser(int uid) throws WebdavProtocolException {
+    public User resolveUser(final int uid) throws WebdavProtocolException {
         try {
             return users.getUser(uid, getContext());
-        } catch (UserException e) {
+        } catch (final UserException e) {
             LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(new WebdavPath(), 500);
         }
@@ -316,37 +316,37 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.UID,
             Appointment.SEQUENCE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS };
 
-        private GroupwareCaldavFactory factory;
+        private final GroupwareCaldavFactory factory;
 
-        public State(GroupwareCaldavFactory factory) {
+        public State(final GroupwareCaldavFactory factory) {
             this.factory = factory;
         }
 
-        private Map<String, Appointment> appointmentCache = new HashMap<String, Appointment>();
+        private final Map<String, Appointment> appointmentCache = new HashMap<String, Appointment>();
 
-        private Map<String, List<Appointment>> changeExceptionCache = new HashMap<String, List<Appointment>>();
+        private final Map<String, List<Appointment>> changeExceptionCache = new HashMap<String, List<Appointment>>();
 
-        private Map<Integer, List<Appointment>> folderCache = new HashMap<Integer, List<Appointment>>();
+        private final Map<Integer, List<Appointment>> folderCache = new HashMap<Integer, List<Appointment>>();
         
         
-        public void cacheFolder(int folderId) {
+        public void cacheFolder(final int folderId) {
             cacheFolderFast(folderId); // Switch this to the other method, once it loads participants
         }
         
-        public void cacheFolderSlow(int folderId) {
+        public void cacheFolderSlow(final int folderId) {
             if (folderCache.containsKey(folderId)) {
                 return;
             }
-            AppointmentSQLInterface calendar = factory.getAppointmentInterface();
+            final AppointmentSQLInterface calendar = factory.getAppointmentInterface();
             try {
-                SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(
+                final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(
                     folderId,
                     FIELDS_FOR_ALL_REQUEST,
                     factory.start(),
                     factory.end(),
                     -1,
                     null);
-                List<Appointment> children = new LinkedList<Appointment>();
+                final List<Appointment> children = new LinkedList<Appointment>();
                 while (iterator.hasNext()) {
                     Appointment appointment = iterator.next();
                     if (appointment.getUid() == null) {
@@ -366,27 +366,27 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                     children.add(appointment);
                 }
                 folderCache.put(folderId, children);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }
         
-        public void cacheFolderFast(int folderId) {
+        public void cacheFolderFast(final int folderId) {
             if (folderCache.containsKey(folderId)) {
                 return;
             }
-            AppointmentSQLInterface calendar = factory.getAppointmentInterface();
+            final AppointmentSQLInterface calendar = factory.getAppointmentInterface();
             try {
-                SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(
+                final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(
                     folderId,
                     APPOINTMENT_FIELDS,
                     factory.start(),
                     factory.end(),
                     -1,
                     null);
-                List<Appointment> children = new LinkedList<Appointment>();
+                final List<Appointment> children = new LinkedList<Appointment>();
                 while (iterator.hasNext()) {
-                    Appointment appointment = iterator.next();
+                    final Appointment appointment = iterator.next();
                     if (appointment.getUid() == null) {
                         continue; // skip
                     }
@@ -403,13 +403,13 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                     children.add(appointment);
                 }
                 folderCache.put(folderId, children);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
                 
             }
         }
 
-        public Appointment get(String uid, int folderId) {
+        public Appointment get(final String uid, final int folderId) {
             cacheFolder(folderId);
             Appointment appointment = appointmentCache.get(uid);
             if (appointment == null) {
@@ -421,9 +421,9 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             return appointment;
         }
 
-        public List<Appointment> getChangeExceptions(String uid, int folderId) {
+        public List<Appointment> getChangeExceptions(final String uid, final int folderId) {
             cacheFolder(folderId);
-            List<Appointment> exceptions = changeExceptionCache.get(uid);
+            final List<Appointment> exceptions = changeExceptionCache.get(uid);
             if (exceptions == null) {
                 return Collections.emptyList();
             }
@@ -432,9 +432,9 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
 
         
 
-        public List<Appointment> getFolder(int id) {
+        public List<Appointment> getFolder(final int id) {
             cacheFolder(id);
-            List<Appointment> appointments = folderCache.get(id);
+            final List<Appointment> appointments = folderCache.get(id);
             if (appointments == null) {
                 return Collections.emptyList();
             }
