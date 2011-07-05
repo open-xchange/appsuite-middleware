@@ -50,11 +50,11 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.user.UserService;
 

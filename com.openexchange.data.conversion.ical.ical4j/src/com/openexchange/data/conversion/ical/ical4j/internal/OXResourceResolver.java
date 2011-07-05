@@ -51,11 +51,11 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**

@@ -79,6 +79,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAt
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -90,11 +91,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
-import com.openexchange.server.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

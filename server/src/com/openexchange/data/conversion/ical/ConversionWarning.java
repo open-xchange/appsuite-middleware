@@ -49,13 +49,15 @@
 
 package com.openexchange.data.conversion.ical;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ConversionWarning extends AbstractOXException {
+public class ConversionWarning extends OXException {
 
     /**
      * For serialization.

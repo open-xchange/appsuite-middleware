@@ -60,14 +60,13 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.server.OXException;
 
 /**
  * Test implementation to write the organizer.
