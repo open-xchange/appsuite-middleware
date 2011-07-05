@@ -57,6 +57,11 @@
         <exclude name="CVS"/>
     </fileset>
 
+	<fileset dir="${basedir}" id="sources">
+	    	<include name="source/**"/>
+	        <exclude name="CVS"/>
+	</fileset>
+	
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -97,6 +102,7 @@
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         	<fileset refid="3rdpartyjars"/>
+        	<fileset refid="sources"/>
         </jar>
     </target>
 
