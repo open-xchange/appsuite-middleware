@@ -112,12 +112,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     public static final FolderObjectIterator EMPTY_FOLDER_ITERATOR = new FolderObjectIterator() {
 
         @Override
-        public boolean hasNext() {
+        public boolean hasNext() throws com.openexchange.exception.OXException {
             return false;
         }
 
         @Override
-        public FolderObject next() {
+        public FolderObject next() throws com.openexchange.exception.OXException {
             return null;
         }
 
@@ -576,14 +576,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws com.openexchange.exception.OXException {
         if (isClosed) {
             return false;
         }
         return next != null;
     }
 
-    public FolderObject next() throws SearchIteratorException {
+    public FolderObject next() throws SearchIteratorException, com.openexchange.exception.OXException {
         if (isClosed) {
             throw new SearchIteratorException(Code.CLOSED, EnumComponent.FOLDER);
         }

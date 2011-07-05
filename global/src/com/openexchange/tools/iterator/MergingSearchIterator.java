@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -117,7 +118,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         return exceptions.toArray(new AbstractOXException[exceptions.size()]);
     }
 
-    public boolean hasNext() throws AbstractOXException {
+    public boolean hasNext() throws OXException {
         return hasNext;
     }
 
@@ -130,7 +131,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         return false;
     }
 
-    public T next() throws AbstractOXException {
+    public T next() throws OXException {
         if(!hasNext) {
             return null;
         }

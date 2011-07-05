@@ -1359,14 +1359,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
 
-        public boolean hasNext() {
+        public boolean hasNext() throws OXException {
             if (!first) {
                 nexto = pre;
             }
             return nexto != null;
         }
 
-        public Contact next() throws SearchIteratorException {
+        public Contact next() throws SearchIteratorException, OXException {
             try {
                 if (rs.next()) {
                     try {

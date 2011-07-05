@@ -79,11 +79,11 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             super();
         }
 
-        public boolean hasNext() {
+        public boolean hasNext() throws OXException {
             return false;
         }
 
-        public T next() {
+        public T next() throws OXException {
             return null;
         }
 
@@ -145,11 +145,11 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         b_size = true;
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws OXException {
         return delegate.hasNext();
     }
 
-    public T next() {
+    public T next() throws OXException {
         return delegate.next();
     }
 

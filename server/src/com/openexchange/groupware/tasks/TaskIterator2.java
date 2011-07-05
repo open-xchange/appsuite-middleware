@@ -62,6 +62,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -168,7 +169,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         }
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws OXException {
         return !ready.isEmpty() || preread.hasNext() || null != exc;
     }
 
@@ -176,7 +177,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         return false;
     }
 
-    public Task next() throws SearchIteratorException {
+    public Task next() throws SearchIteratorException, OXException {
         if (ready.isEmpty() && !preread.hasNext()) {
             throw new SearchIteratorException(exc);
         }

@@ -51,6 +51,7 @@ package com.openexchange.tools.iterator;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -77,11 +78,11 @@ public class ArrayIterator<T> implements SearchIterator<T> {
         this.array = Arrays.clone(array);
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws OXException {
         return index < array.length;
     }
 
-    public T next() {
+    public T next() throws OXException {
         return array[index++];
     }
 

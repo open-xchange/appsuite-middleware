@@ -53,8 +53,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.TargetService;
@@ -93,7 +93,7 @@ public final class CalendarReminderDelete implements TargetService {
 	private static final String SQL_DEL_SINGLE_REMINDER = "UPDATE prg_dates_members SET reminder = ? WHERE cid = ? AND object_id = ? AND member_uid = ?";
 
 	private static void updateAppointmentReminder(final Connection con, final int userId, final int objectId,
-			final int cid) throws OXCalendarException {
+			final int cid) throws OXException {
 		final PreparedStatement stmt;
 		try {
 			stmt = con.prepareStatement(userId == -1 ? SQL_DEL_ALL_REMINDER : SQL_DEL_SINGLE_REMINDER);
@@ -119,7 +119,7 @@ public final class CalendarReminderDelete implements TargetService {
 	//private static final String SQL_UP_LAST_MODIFIED = "UPDATE prg_dates SET changing_date = ? WHERE cid = ? AND intfield01 = ?";
 
 //	private static void updateAppointmentLastModified(final Connection con, final int objectId, final int cid)
-//			throws OXCalendarException {
+//			throws OXException {
 //		final PreparedStatement stmt;
 //		try {
 //			stmt = con.prepareStatement(SQL_UP_LAST_MODIFIED);
@@ -139,7 +139,7 @@ public final class CalendarReminderDelete implements TargetService {
 //		}
 //	}
 
-	private static OXCalendarException handleSQLException(final SQLException e) {
+	private static OXException handleSQLException(final SQLException e) {
 		return OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
 	}
 }

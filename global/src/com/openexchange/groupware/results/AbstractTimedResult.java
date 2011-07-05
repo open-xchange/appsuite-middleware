@@ -51,6 +51,7 @@ package com.openexchange.groupware.results;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -105,7 +106,7 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             return results.getWarnings();
         }
 
-        public boolean hasNext() throws AbstractOXException {
+        public boolean hasNext() throws OXException {
             return results.hasNext();
         }
 
@@ -117,7 +118,7 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             return results.hasWarnings();
         }
 
-        public T next() throws AbstractOXException {
+        public T next() throws OXException {
 
             if (this.oxexception != null) {
                 throw this.oxexception;

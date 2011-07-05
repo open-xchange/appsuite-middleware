@@ -1696,7 +1696,7 @@ public class DatabaseImpl extends DBService {
             this.d = d;
         }
 
-        public boolean hasNext() {
+        public boolean hasNext() throws OXException {
             return next != null;
         }
 
@@ -1708,7 +1708,7 @@ public class DatabaseImpl extends DBService {
             return false;
         }
 
-        public DocumentMetadata next() throws SearchIteratorException {
+        public DocumentMetadata next() throws SearchIteratorException, OXException {
             try {
                 DocumentMetadata retval = null;
                 retval = next;

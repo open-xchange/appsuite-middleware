@@ -177,7 +177,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         }
     }
 
-    private CalendarDataObject loadAppointment(final Connection con, final Context ctx, final int id) throws OXObjectNotFoundException, OXCalendarException {
+    private CalendarDataObject loadAppointment(final Connection con, final Context ctx, final int id) throws OXObjectNotFoundException, OXException {
         final String sql = "SELECT cid,timestampfield01,timestampfield02,timezone,intfield01,intfield02,intfield04,intfield05,field06 FROM prg_dates WHERE cid=? AND intfield01=?";
         PreparedStatement stmt = null;
         ResultSet result = null;

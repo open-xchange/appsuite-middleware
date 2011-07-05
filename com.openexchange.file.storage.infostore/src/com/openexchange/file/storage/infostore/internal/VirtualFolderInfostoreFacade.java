@@ -228,7 +228,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                     return new AbstractOXException[0];
                 }
 
-                public boolean hasNext() {
+                public boolean hasNext() throws OXException {
                     return false;
                 }
 
@@ -240,7 +240,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                     return false;
                 }
 
-                public DocumentMetadata next() {
+                public DocumentMetadata next() throws OXException {
                     return null;
                 }
 

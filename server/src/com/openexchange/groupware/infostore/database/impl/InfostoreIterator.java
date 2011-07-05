@@ -62,6 +62,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -194,7 +195,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         }
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws OXException {
         if(!queried) {
             query();
         }
@@ -266,7 +267,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return false;
     }
 
-    public DocumentMetadata next() throws SearchIteratorException {
+    public DocumentMetadata next() throws SearchIteratorException, OXException {
         hasNext();
         if(exception != null) {
             throw new SearchIteratorException(exception);

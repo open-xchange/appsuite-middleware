@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -107,11 +108,11 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         this(collection.iterator(), collection.size());
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws OXException {
         return delegate.hasNext();
     }
 
-    public T next() {
+    public T next() throws OXException {
         return delegate.next();
     }
 

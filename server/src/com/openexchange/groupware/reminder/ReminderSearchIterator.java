@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
@@ -93,11 +94,11 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         }
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws OXException {
         return next != null;
     }
 
-    public ReminderObject next() throws SearchIteratorException {
+    public ReminderObject next() throws SearchIteratorException, OXException {
         final ReminderObject reminderObj = next;
         try {
             next = ReminderHandler.result2Object(ctx, rs, preparedStatement, false);

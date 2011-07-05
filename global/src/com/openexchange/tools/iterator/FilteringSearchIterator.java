@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.iterator;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 
@@ -88,7 +89,7 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
         return delegate.getWarnings();
     }
 
-    public boolean hasNext() throws AbstractOXException {
+    public boolean hasNext() throws OXException {
         return next != null;
     }
 
@@ -96,7 +97,7 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
         return delegate.hasWarnings();
     }
 
-    public T next() throws AbstractOXException {
+    public T next() throws OXException {
         T current = next;
         initNext();
         return current;

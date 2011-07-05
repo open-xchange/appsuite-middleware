@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.iterator;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 
@@ -76,13 +77,13 @@ public class CustomizableSearchIterator<T> implements SearchIterator<T>{
     public AbstractOXException[] getWarnings() {
         return searchIterator.getWarnings();
     }
-    public boolean hasNext() throws AbstractOXException {
+    public boolean hasNext() throws OXException {
         return searchIterator.hasNext();
     }
     public boolean hasWarnings() {
         return searchIterator.hasWarnings();
     }
-    public T next() throws AbstractOXException {
+    public T next() throws OXException {
         return customizer.customize(searchIterator.next());
     }
     public int size() {

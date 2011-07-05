@@ -59,11 +59,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -74,7 +72,6 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -110,7 +107,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 
     private CalendarFolderObject visibleFolders;
 
-    public CachedCalendarIterator(CalendarFolderObject visibleFolders, final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws AbstractOXException {
+    public CachedCalendarIterator(final CalendarFolderObject visibleFolders, final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws AbstractOXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	list = new ArrayList<CalendarDataObject>(16);
     	this.visibleFolders = visibleFolders;
@@ -147,7 +144,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
     }
 
-    public boolean hasNext() throws AbstractOXException {
+    public boolean hasNext() throws OXException {
         if (!cache) {
             return non_cached_iterator.hasNext();
         }
@@ -161,7 +158,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         return false;
     }
 
-    public CalendarDataObject next() throws AbstractOXException {
+    public CalendarDataObject next() throws OXException {
         if (!oxonfe) {
             if (!cache) {
                 if (oids != null) {
@@ -185,7 +182,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         return null;
     }
 
-    public final void close() throws AbstractOXException {
+    public final void close() throws OXException {
         if (closed) {
             return;
         }
@@ -209,7 +206,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 		return !warnings.isEmpty();
 	}
 
-    private final void fillCachedResultSet() throws AbstractOXException {
+    private final void fillCachedResultSet() throws OXException {
         try {
             while (non_cached_iterator.hasNext()) {
                 list.add(non_cached_iterator.next());
@@ -219,18 +216,14 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
     }
 
-    private final CalendarDataObject getPreFilledResult() throws AbstractOXException {
+    private final CalendarDataObject getPreFilledResult() throws OXException {
         Connection readcon = null;
         CalendarDataObject cdao;
         try {
             cdao = list.get(counter++);
             if (CACHED_ITERATOR_FAST_FETCH && pre_fetch < counter) {
 			    if ((cdao.fillParticipants() || cdao.fillUserParticipants() || cdao.fillFolderID() || cdao.fillConfirmations())) {
-			        try {
-			            readcon = DBPool.pickup(c);
-			        } catch (final DBPoolingException ex) {
-			            throw new OXException(ex);
-			        }
+			        readcon = DBPool.pickup(c);
 			    }
 			
 			    int mn = MAX_PRE_FETCH;
@@ -240,7 +233,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			    final int arr[] = new int[mn];
 			
 			    for (int a = 0; a < mn; a++) {
-			        CalendarDataObject temp = list.get(pre_fetch++);
+			        final CalendarDataObject temp = list.get(pre_fetch++);
 			        arr[a] = temp.getObjectID();
 			    }
 			
@@ -283,7 +276,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             		}
             	}
             	if (!found) {
-            		throw new OXPermissionException(OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_.create(5, I(cdao.getObjectID())));
+            		throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(5, I(cdao.getObjectID()));
             	}
             }
 
@@ -296,17 +289,17 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         return cdao;
     }
 
-    private static void setAttachmentLastModified(Context ctx, Connection readcon, List<CalendarDataObject> list, int[] arr) {
-        AttachmentBase attachmentBase = Attachments.getInstance(new SimpleDBProvider(readcon, null));
+    private static void setAttachmentLastModified(final Context ctx, final Connection readcon, final List<CalendarDataObject> list, final int[] arr) {
+        final AttachmentBase attachmentBase = Attachments.getInstance(new SimpleDBProvider(readcon, null));
         final Map<Integer, Date> dates;
         try {
             dates = attachmentBase.getNewestCreationDates(ctx, Types.APPOINTMENT, arr);
-        } catch (AttachmentException e) {
+        } catch (final AttachmentException e) {
             LOG.error(e.getMessage(), e);
             return;
         }
-        for (CalendarDataObject cdao : list) {
-            Date date = dates.get(I(cdao.getObjectID()));
+        for (final CalendarDataObject cdao : list) {
+            final Date date = dates.get(I(cdao.getObjectID()));
             if (null != date) {
                 cdao.setLastModifiedOfNewestAttachment(date);
             }

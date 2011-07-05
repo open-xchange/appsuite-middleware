@@ -132,7 +132,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
         return null;
     }
 
-    public boolean hasNext() {
+    public boolean hasNext() throws OXException {
         return next != null;
     }
 
@@ -140,7 +140,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
         return false;
     }
 
-    public Contact next() throws AbstractOXException {
+    public Contact next() throws OXException {
         throwExceptions();
         Contact nextContact = next;
         grabNext();

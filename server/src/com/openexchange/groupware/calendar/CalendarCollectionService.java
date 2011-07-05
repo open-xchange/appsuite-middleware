@@ -841,7 +841,7 @@ public interface CalendarCollectionService {
      * @param cdao The calendar object to check
      * @param ignoreUntilAndOccurrence <code>true</code> to ignore whether until or occurrence is contained in specified calendar object;
      *            otherwise <code>false</code>
-     * @throws OXCalendarException If check fails
+     * @throws OXException If check fails
      */
     public void checkRecurringCompleteness(final CalendarObject cdao, final boolean ignoreUntilAndOccurrence) throws OXException;
 
@@ -916,7 +916,7 @@ public interface CalendarCollectionService {
      * @param objectId The object ID
      * @param ctx The context
      * @return The appointment's title or <code>null</code>
-     * @throws OXCalendarException If determining appointment's title fails
+     * @throws OXException If determining appointment's title fails
      */
     public String getAppointmentTitle(final int objectId, final Context ctx) throws OXException;
     

@@ -61,12 +61,10 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -188,7 +186,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
     }
     
-    public final CalendarDataObject next() {
+    public final CalendarDataObject next() throws OXException {
         return al.get(counter++);
     }
     
@@ -322,7 +320,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
     }
     
-    public boolean hasNext() {
+    public boolean hasNext() throws OXException {
         if (!al.isEmpty() && counter < al.size()) {
             return true;
         }

@@ -63,7 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -80,7 +80,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     }
 
     @Override
-    public void insertParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXCalendarException {
+    public void insertParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXException {
         if (null == participants || 0 == participants.length) {
             return;
         }
@@ -120,7 +120,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     }
 
     @Override
-    public Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointmentIds) throws OXCalendarException {
+    public Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointmentIds) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final Map<Integer, List<ExternalUserParticipant>> retval = new HashMap<Integer, List<ExternalUserParticipant>>(appointmentIds.length, 1);
@@ -159,7 +159,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     }
 
     @Override
-    public void deleteParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXCalendarException {
+    public void deleteParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL.DELETE_EXTERNAL);

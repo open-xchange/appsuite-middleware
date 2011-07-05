@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
@@ -70,7 +71,7 @@ public class AnonymizingIterator extends CachedCalendarIterator {
     }
 
     @Override
-    public CalendarDataObject next() throws AbstractOXException {
+    public CalendarDataObject next() throws OXException {
         CalendarDataObject app = super.next();
         if (null == app) {
             return null;

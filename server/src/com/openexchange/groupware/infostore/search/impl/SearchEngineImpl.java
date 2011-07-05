@@ -446,11 +446,11 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
-        public boolean hasNext() {
+        public boolean hasNext() throws OXException {
             return next != null;
         }
 
-        public DocumentMetadata next() throws SearchIteratorException {
+        public DocumentMetadata next() throws SearchIteratorException, OXException {
             try {
                 DocumentMetadata retval = null;
                 retval = next;

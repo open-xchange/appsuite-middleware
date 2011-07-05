@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.infostore;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -84,7 +85,7 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
         return delegate.getWarnings();
     }
 
-    public boolean hasNext() throws AbstractOXException {
+    public boolean hasNext() throws OXException {
         return delegate.hasNext();
     }
 
@@ -96,7 +97,7 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
         return delegate.size();
     }
 
-    public File next() throws AbstractOXException {
+    public File next() throws OXException {
         DocumentMetadata next = delegate.next();
         if(next == null) {
             return null;

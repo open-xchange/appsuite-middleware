@@ -2190,7 +2190,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         try {
             return getCalendarTools().getAppointmentTitle(recurrenceId, ctx);
-        } catch (final OXCalendarException e) {
+        } catch (final OXException e) {
             return null;
         }
     }

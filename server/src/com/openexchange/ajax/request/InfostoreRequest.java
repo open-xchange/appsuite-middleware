@@ -691,7 +691,7 @@ public class InfostoreRequest extends CommonRequest {
                 return iter.getWarnings();
             }
 
-            public boolean hasNext() throws AbstractOXException{
+            public boolean hasNext() throws OXException{
                 try {
                     scrollToNext();
                 } catch (final SearchIteratorException e) {
@@ -707,7 +707,7 @@ public class InfostoreRequest extends CommonRequest {
                 return iter.hasWarnings();
             }
 
-            public DocumentMetadata next() throws AbstractOXException {
+            public DocumentMetadata next() throws OXException {
                 if(se != null) {
                     throw se;
                 }

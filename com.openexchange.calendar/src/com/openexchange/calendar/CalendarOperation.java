@@ -80,7 +80,6 @@ import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -556,7 +555,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         try {
             fillUserParticipants(cdao);
         } catch (final LdapException e) {
-            throw new OXCalendarException(e);
+            throw new OXException(e);
         }
         recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
         return isInsert;
@@ -566,12 +565,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      * @param cdao
      * @param edao
      * @param isInsert
-     * @throws OXCalendarException 
+     * @throws OXException 
      */
-    private void handleSequence(CalendarDataObject cdao, CalendarDataObject edao, boolean isInsert) throws OXCalendarException {
+    private void handleSequence(CalendarDataObject cdao, CalendarDataObject edao, boolean isInsert) throws OXException {
         if (isInsert) {
 //            if (cdao.containsSequence() && cdao.getSequence() != 0)
-//                throw new OXCalendarException(OXCalendarException.Code.INVALID_SEQUENCE, cdao.getSequence());
+//                throw new OXException(OXException.Code.INVALID_SEQUENCE, cdao.getSequence());
 //            
 //            cdao.setSequence(0);
         } else {
@@ -583,7 +582,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             
             else if (cdao.containsSequence() && edao.containsSequence() && cdao.getSequence() <= edao.getSequence())
                 cdao.setSequence(edao.getSequence() + 1);
-                //TODO: throw new OXCalendarException(OXCalendarException.Code.INVALID_SEQUENCE, cdao.getSequence());
+                //TODO: throw new OXException(OXException.Code.INVALID_SEQUENCE, cdao.getSequence());
             
             else if (cdao.containsSequence() && edao.containsSequence() && cdao.getSequence() > edao.getSequence())
                 ;
@@ -709,7 +708,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         cdao.setEndDate(recColl.calculateRecurringDate(endDate, endTime, startTimeZoneOffset - startDateZoneOffset));
     }
 
-    public final boolean hasNext() {
+    public final boolean hasNext() throws OXException {
         if (co_rs != null && result_counter != MAX_RESULT_LIMIT) {
             final boolean ret = has_next;
             if (from == 0 && to == 0) {
@@ -1612,7 +1611,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (!cdao.containsTitle()) {
             // Adapt to MS Outlook behavior and set empty title
             cdao.setTitle("");
-            //throw new OXCalendarException(OXCalendarException.Code.MANDATORY_FIELD_TITLE);
+            //throw new OXException(OXException.Code.MANDATORY_FIELD_TITLE);
         }
         if (!cdao.containsShownAs()) {
             cdao.setShownAs(CalendarDataObject.RESERVED); // auto correction

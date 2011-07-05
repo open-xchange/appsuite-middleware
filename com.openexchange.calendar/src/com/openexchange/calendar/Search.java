@@ -52,7 +52,7 @@ package com.openexchange.calendar;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.tools.sql.SearchStrings;
@@ -69,15 +69,15 @@ public class Search {
         super();
     }
 
-    private static int getMinimumSearchCharacters() throws OXCalendarException {
+    private static int getMinimumSearchCharacters() throws OXException {
         try {
             return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         } catch (ConfigurationException e) {
-            throw new OXCalendarException(e);
+            throw new OXException(e);
         }
     }
 
-    public static void checkPatternLength(AppointmentSearchObject searchData) throws OXCalendarException {
+    public static void checkPatternLength(AppointmentSearchObject searchData) throws OXException {
         final int minimumSearchCharacters = getMinimumSearchCharacters();
         if (0 == minimumSearchCharacters) {
             return;
@@ -87,7 +87,7 @@ public class Search {
         }
     }
 
-    private static void checkPatternLength(int minimumSearchCharacters, String pattern) throws OXCalendarException {
+    private static void checkPatternLength(int minimumSearchCharacters, String pattern) throws OXException {
         if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
             throw OXCalendarExceptionCodes.PATTERN_TOO_SHORT.create(I(minimumSearchCharacters));
         }

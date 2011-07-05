@@ -52,6 +52,7 @@ package com.openexchange.tools.iterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.iterator.SearchIteratorException.Code;
@@ -83,7 +84,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
 
     private boolean next = false;
 
-    public boolean hasNext() throws AbstractOXException{
+    public boolean hasNext() throws OXException{
         if (iterators.length == 0) {
             return false;
         }
@@ -98,7 +99,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
         return next;
     }
 
-    public T next() throws AbstractOXException {
+    public T next() throws OXException {
         if (iterators.length == 0 || !next) {
             throw new SearchIteratorException(Code.NO_SUCH_ELEMENT, EnumComponent.NONE);
         }

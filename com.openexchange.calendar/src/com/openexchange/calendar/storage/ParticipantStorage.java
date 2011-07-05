@@ -55,8 +55,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.calendar.ParticipantLogic;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
@@ -78,7 +78,7 @@ public abstract class ParticipantStorage {
         return SINGLETON;
     }
 
-    public final void selectExternal(Context ctx, Connection con, List<CalendarDataObject> cdaos, int[] appointmentIds) throws OXCalendarException {
+    public final void selectExternal(Context ctx, Connection con, List<CalendarDataObject> cdaos, int[] appointmentIds) throws OXException {
         Map<Integer, ExternalUserParticipant[]> externals = selectExternal(ctx, con, appointmentIds);
         for (CalendarDataObject cdao : cdaos) {
             ExternalUserParticipant[] external = externals.get(I(cdao.getObjectID()));
@@ -107,15 +107,15 @@ public abstract class ParticipantStorage {
      * @param con writable database connection. It should already be inside a transaction.
      * @param appointmentId unique identifier of the corresponding appointment.
      * @param participants participants.
-     * @throws OXCalendarException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    public abstract void insertParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXCalendarException;
+    public abstract void insertParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXException;
 
-    public final ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXCalendarException {
+    public final ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXException {
         return selectExternal(ctx, con, new int[] { appointmentId }).get(I(appointmentId));
     }
 
-    public abstract Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointments) throws OXCalendarException;
+    public abstract Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointments) throws OXException;
 
-    public abstract void deleteParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXCalendarException;
+    public abstract void deleteParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXException;
 }

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Queue;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -99,14 +100,14 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
-    public boolean hasNext() throws AbstractOXException{
+    public boolean hasNext() throws OXException{
         return impl.hasNext();
     }
 
     /**
      * {@inheritDoc}
      */
-    public T next() throws AbstractOXException {
+    public T next() throws OXException {
         return impl.next();
     }
 
@@ -209,7 +210,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public boolean hasNext() {
+        public boolean hasNext() throws OXException {
             return !data.isEmpty() || (null != oxExc);
         }
 
@@ -223,7 +224,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public T next() throws AbstractOXException {
+        public T next() throws OXException {
             if (data.isEmpty()) {
                 if (null != oxExc) {
                     throw oxExc;
@@ -294,14 +295,14 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public boolean hasNext() throws AbstractOXException {
+        public boolean hasNext() throws OXException {
             return delegate.hasNext();
         }
 
         /**
          * {@inheritDoc}
          */
-        public T next() throws AbstractOXException {
+        public T next() throws OXException {
             return delegate.next();
         }
 

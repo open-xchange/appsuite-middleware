@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.iterator;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -64,18 +65,18 @@ public interface SearchIterator<T> {
      * return an element.)
      * 
      * @return <code>true</code> if the iterator has more elements; otherwise <code>false</code>
-     * @throws AbstractOXException If check for a further element fails
+     * @throws OXException If check for further elements fails
      */
-    boolean hasNext() throws AbstractOXException;
+    boolean hasNext() throws OXException;
 
     /**
      * Returns the next element in the iteration. Calling this method repeatedly until the {@link #hasNext()} method returns
      * <code>false</code> will return each element in the underlying collection exactly once.
      * 
      * @return The next element in the iteration.
-     * @throws AbstractOXException If next element cannot be returned
+     * @throws OXException If next element cannot be returned
      */
-    T next() throws AbstractOXException;
+    T next() throws OXException;
 
     /**
      * Closes the search iterator

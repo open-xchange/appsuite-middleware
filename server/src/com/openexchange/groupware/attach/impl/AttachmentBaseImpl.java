@@ -1009,7 +1009,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             this.mode = mode;
         }
 
-        public boolean hasNext() {
+        public boolean hasNext() throws OXException {
             if (delegate != null) {
                 return delegate.hasNext();
             }
@@ -1033,7 +1033,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         }
 
-        public AttachmentMetadata next() throws SearchIteratorException {
+        public AttachmentMetadata next() throws SearchIteratorException, OXException {
             if (delegate != null) {
                 return delegate.next();
             }
