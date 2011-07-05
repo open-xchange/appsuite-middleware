@@ -58,8 +58,9 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
@@ -87,7 +88,7 @@ public final class Response {
     /**
      * Exception of request.
      */
-    private AbstractOXException exception;
+    private OXException exception;
 
     /**
      * Whether to communicate exception as a warning to front-end or as an error
@@ -294,9 +295,9 @@ public final class Response {
      *            The exception to set
      * @see #setWarning(AbstractOXException)
      */
-    public void setException(final AbstractOXException exception) {
+    public void setException(final OXException exception) {
         this.exception = exception;
-        isWarning = Category.WARNING.equals(exception.getCategory());
+        isWarning = exception.getCategories().get(0).getType().equals(Category.EnumType.WARNING);
     }
 
     /**
@@ -309,7 +310,7 @@ public final class Response {
      * @param warning
      *            The warning to set
      */
-    public void setWarning(final AbstractOXException warning) {
+    public void setWarning(final OXException warning) {
         this.exception = warning;
         isWarning = true;
     }
@@ -319,7 +320,7 @@ public final class Response {
      *
      * @return the exception or <code>null</code>
      */
-    public AbstractOXException getException() {
+    public OXException getException() {
         return exception;
     }
 
@@ -328,7 +329,7 @@ public final class Response {
      *
      * @return the warning or <code>null</code>
      */
-    public AbstractOXException getWarning() {
+    public OXException getWarning() {
         return isWarning ? exception : null;
     }
 }

@@ -64,8 +64,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -105,8 +103,8 @@ public final class ConversionServlet extends SessionServlet {
          */
         Tools.disableCaching(resp);
         try {
-            throw new ConversionServletException(ConversionServletException.Code.UNSUPPORTED_METHOD, "GET");
-        } catch (final AbstractOXException e) {
+            throw ConversionServletExceptionCode.UNSUPPORTED_METHOD.create("GET");
+        } catch (final OXException e) {
             LOG.error("doGet", e);
             final Response response = new Response();
             response.setException(e);
@@ -132,7 +130,7 @@ public final class ConversionServlet extends SessionServlet {
         try {
             final Response response = doAction(req);
             ResponseWriter.write(response, resp.getWriter());
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
             response.setException(e);
@@ -148,7 +146,7 @@ public final class ConversionServlet extends SessionServlet {
         } catch (final JSONException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
-            response.setException(new ConversionServletException(ConversionServletException.Code.JSON_ERROR, e, e.getMessage()));
+            response.setException(ConversionServletExceptionCode.JSON_ERROR.create(e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 ResponseWriter.write(response, writer);
@@ -171,7 +169,7 @@ public final class ConversionServlet extends SessionServlet {
         try {
             final Response response = doAction(req);
             ResponseWriter.write(response, resp.getWriter());
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
             response.setException(e);
@@ -187,7 +185,7 @@ public final class ConversionServlet extends SessionServlet {
         } catch (final JSONException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
-            response.setException(new ConversionServletException(ConversionServletException.Code.JSON_ERROR, e, e.getMessage()));
+            response.setException(ConversionServletExceptionCode.JSON_ERROR.create(e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 ResponseWriter.write(response, writer);
@@ -200,20 +198,20 @@ public final class ConversionServlet extends SessionServlet {
         }
     }
 
-    private Response doAction(final HttpServletRequest req) throws ConversionServletException, JSONException, IOException, OXException {
+    private Response doAction(final HttpServletRequest req) throws  JSONException, IOException, OXException {
         final String actionStr = checkStringParam(req, PARAMETER_ACTION);
         if (actionStr.equalsIgnoreCase(ACTION_CONVERT)) {
             return actionConvert(new JSONObject(getBody(req)), getSessionObject(req));
         }
-        throw new ConversionServletException(ConversionServletException.Code.UNSUPPORTED_PARAM, PARAMETER_ACTION, actionStr);
+        throw ConversionServletExceptionCode.UNSUPPORTED_PARAM.create(PARAMETER_ACTION, actionStr);
     }
 
-    private Response actionConvert(final JSONObject jsonBody, final Session session) throws ConversionServletException, JSONException, OXException {
+    private Response actionConvert(final JSONObject jsonBody, final Session session) throws  JSONException, OXException {
         /*
          * Check for data source in JSON body
          */
         if (!jsonBody.has(JSON_DATASOURCE) || jsonBody.isNull(JSON_DATASOURCE)) {
-            throw new ConversionServletException(ConversionServletException.Code.MISSING_PARAM, JSON_DATASOURCE);
+            throw ConversionServletExceptionCode.MISSING_PARAM.create(JSON_DATASOURCE);
         }
         final JSONObject jsonDataSource = jsonBody.getJSONObject(JSON_DATASOURCE);
         checkDataSourceOrHandler(jsonDataSource);
@@ -221,19 +219,14 @@ public final class ConversionServlet extends SessionServlet {
          * Check for data handler in JSON body
          */
         if (!jsonBody.has(JSON_DATAHANDLER) || jsonBody.isNull(JSON_DATAHANDLER)) {
-            throw new ConversionServletException(ConversionServletException.Code.MISSING_PARAM, JSON_DATAHANDLER);
+            throw ConversionServletExceptionCode.MISSING_PARAM.create(JSON_DATAHANDLER);
         }
         final JSONObject jsonDataHandler = jsonBody.getJSONObject(JSON_DATAHANDLER);
         checkDataSourceOrHandler(jsonDataHandler);
         /*
          * Convert with conversion service
          */
-        final ConversionService conversionService;
-        try {
-            conversionService = ConversionServletServiceRegistry.getServiceRegistry().getService(ConversionService.class, true);
-        } catch (final OXException e) {
-            throw new ConversionServletException(e);
-        }
+        final ConversionService conversionService = ConversionServletServiceRegistry.getServiceRegistry().getService(ConversionService.class, true);
         final Object result = conversionService.convert(
             jsonDataSource.getString(JSON_IDENTIFIER),
             parseDataSourceOrHandlerArguments(jsonDataSource),
@@ -249,17 +242,17 @@ public final class ConversionServlet extends SessionServlet {
         return response;
     }
 
-    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws ConversionServletException {
+    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {
         final String paramVal = req.getParameter(paramName);
         if ((paramVal == null) || (paramVal.length() == 0) || "null".equals(paramVal)) {
-            throw new ConversionServletException(ConversionServletException.Code.MISSING_PARAM, paramName);
+            throw ConversionServletExceptionCode.MISSING_PARAM.create(paramName);
         }
         return paramVal;
     }
 
-    private static void checkDataSourceOrHandler(final JSONObject json) throws ConversionServletException {
+    private static void checkDataSourceOrHandler(final JSONObject json) throws OXException {
         if (!json.has(JSON_IDENTIFIER) || json.isNull(JSON_IDENTIFIER)) {
-            throw new ConversionServletException(ConversionServletException.Code.MISSING_PARAM, JSON_IDENTIFIER);
+            throw ConversionServletExceptionCode.MISSING_PARAM.create(JSON_IDENTIFIER);
         }
     }
 
