@@ -49,41 +49,15 @@
 
 package com.openexchange.contact.aggregator.osgi;
 
-import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ContactFolderContactSource}
+ * {@link ContactSourceFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContactFolderContactSource implements ContactSource {
-
-    private FolderObject folder;
-    private ContactSQLInterface contacts;
-
-    public ContactFolderContactSource(FolderObject folder, ContactSQLInterface contacts) {
-        this.folder = folder;
-        this.contacts = contacts;
-    }
-
-    public List<Contact> getContacts(ServerSession session) throws Exception {
-        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folder.getObjectID(), 0, 0, 0, null, null, Contact.CONTENT_COLUMNS);
-        List<Contact> c = new ArrayList<Contact>();
-        while(contactsInFolder.hasNext()) {
-            c.add(contactsInFolder.next());
-        }
-        return c;
-    }
-
-    public Type getType() {
-        return Type.CONFIRMED;
-    }
-
+public interface ContactSourceFactory {
+    List<ContactSource> getSources(ServerSession session) throws Exception;
 }

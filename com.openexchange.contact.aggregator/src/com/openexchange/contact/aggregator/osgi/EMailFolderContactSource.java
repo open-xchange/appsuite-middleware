@@ -66,4 +66,8 @@ public class EMailFolderContactSource implements ContactSource {
         return null;
     }
 
+    public Type getType() {
+        return Type.CONTRIBUTOR;
+    }
+
 }

@@ -51,39 +51,56 @@ package com.openexchange.contact.aggregator.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ContactFolderContactSource}
+ * {@link ContactFolderContactSourceFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContactFolderContactSource implements ContactSource {
+public class ContactFolderContactSourceFactory implements ContactSourceFactory {
 
-    private FolderObject folder;
     private ContactSQLInterface contacts;
 
-    public ContactFolderContactSource(FolderObject folder, ContactSQLInterface contacts) {
-        this.folder = folder;
+    public ContactFolderContactSourceFactory(ContactSQLInterface contacts) {
+        super();
         this.contacts = contacts;
     }
 
-    public List<Contact> getContacts(ServerSession session) throws Exception {
-        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folder.getObjectID(), 0, 0, 0, null, null, Contact.CONTENT_COLUMNS);
-        List<Contact> c = new ArrayList<Contact>();
-        while(contactsInFolder.hasNext()) {
-            c.add(contactsInFolder.next());
+    public List<ContactSource> getSources(ServerSession session) throws Exception {
+        final User user = session.getUser();
+        final UserConfiguration userConfig = session.getUserConfiguration();
+
+
+        final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+            session.getUserId(),
+            user.getGroups(),
+            userConfig.getAccessibleModules(),
+            FolderObject.INFOSTORE,
+            session.getContext())).asQueue();
+        
+        List<ContactSource> sources = new ArrayList<ContactSource>(queue.size());
+        final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance();
+
+        final Integer folderId = serverUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
+        
+        for (FolderObject folder : queue) {
+            if (folderId == null || folder.getObjectID() != folderId) {
+                sources.add(new ContactFolderContactSource(folder, contacts));
+            }
         }
-        return c;
+        
+        return sources;
     }
 
-    public Type getType() {
-        return Type.CONFIRMED;
-    }
 
 }

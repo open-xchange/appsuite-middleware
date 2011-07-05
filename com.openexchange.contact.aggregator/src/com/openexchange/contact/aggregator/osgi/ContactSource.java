@@ -60,5 +60,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ContactSource {
-    public List<Contact> getContacts(ServerSession session);
+    public enum Type {CONFIRMED, CONTRIBUTOR};
+    
+    public List<Contact> getContacts(ServerSession session) throws Exception;
+    public Type getType();
 }

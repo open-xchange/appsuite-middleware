@@ -6,9 +6,18 @@ Bundle-Version: 6.20.0.0
 Bundle-Activator: com.openexchange.contact.aggregator.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.groupware.contact,
+Import-Package: com.openexchange.api2,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contact,
  com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.tools.iterator,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
+ com.openexchange.preferences,
+ com.openexchange.session,
  com.openexchange.tools.arrays,
+ com.openexchange.tools.iterator,
+ com.openexchange.tools.oxfolder,
  com.openexchange.tools.session,
  org.osgi.framework;version="1.3.0"

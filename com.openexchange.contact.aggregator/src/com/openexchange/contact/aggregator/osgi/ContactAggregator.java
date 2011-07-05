@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.contact.aggregator.osgi.ContactSource.Type;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.session.ServerSession;
@@ -65,12 +66,22 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContactAggregator {
+    private List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
     private List<ContactSource> sources;
     
-    public List<Contact> aggregate(ServerSession session) {
+    public List<Contact> aggregate(ServerSession session) throws Exception {
         List<Contact> currentContacts = new ArrayList<Contact>();
+        List<ContactSource> allSources = new ArrayList<ContactSource>();
+        allSources.addAll(sources);
+        for(ContactSourceFactory factory: factories) {
+            allSources.addAll(factory.getSources(session));
+        }
         
-        for (ContactSource source : sources) {
+        List<ContactSource> confirmed = new ArrayList<ContactSource>();
+        List<ContactSource> contribs = new ArrayList<ContactSource>();
+        partition(allSources, confirmed, contribs);
+        
+        for (ContactSource source : confirmed) {
             List<Contact> fromSource = source.getContacts(session);
             for (Contact newContact : fromSource) {
                 for(Contact knownContact : new ArrayList<Contact>(currentContacts)) {
@@ -83,9 +94,32 @@ public class ContactAggregator {
             }
         }
         
+        for (ContactSource source : contribs) {
+            List<Contact> fromSource = source.getContacts(session);
+            for (Contact newContact : fromSource) {
+                for(Contact knownContact : new ArrayList<Contact>(currentContacts)) {
+                    if (calculateSimilarityScore(newContact, knownContact, session) > 9) {
+                        update(knownContact, newContact);
+                    }
+                }
+            }
+        }
+
+        
         return currentContacts;
     }
     
+    private void partition(List<ContactSource> allSources, List<ContactSource> confirmed, List<ContactSource> contribs) {
+        for (ContactSource contactSource : allSources) {
+            if (Type.CONFIRMED == contactSource.getType()) {
+                confirmed.add(contactSource); 
+            } else {
+                contribs.add(contactSource);
+            }
+            
+        }
+    }
+
     private void update(Contact aggregated, Contact addition) {
         int[] columns = Contact.CONTENT_COLUMNS;
         for (int field : columns){
