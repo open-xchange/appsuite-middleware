@@ -51,8 +51,8 @@ package com.openexchange.push.malpoll;
 
 import java.sql.Connection;
 import java.util.Map;
-import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
  * {@link MALPollMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for MAL Poll bundle.

@@ -49,7 +49,7 @@
 
 package com.openexchange.push.malpoll;
 
-import com.openexchange.push.OXException;
+import com.openexchange.exception.OXException;
 
 /**
  * Simple {@link Runnable} to trigger a listener's {@link MALPollPushListener#checkNewMail()} method.

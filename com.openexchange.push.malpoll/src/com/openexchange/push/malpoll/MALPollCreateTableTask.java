@@ -56,8 +56,8 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -142,13 +142,8 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         }
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
-        }
+    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException, OXException {
+        final Connection writeCon = Database.get(contextId, true);
         PreparedStatement stmt = null;
         try {
             if (Tools.tableExists(writeCon, tablename)) {

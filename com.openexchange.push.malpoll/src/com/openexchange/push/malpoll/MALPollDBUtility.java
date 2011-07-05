@@ -60,12 +60,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.push.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
-import com.openexchange.server.OXException;
 
 /**
  * {@link MALPollDBUtility} - DB utilities for MAL poll bundle.
@@ -224,12 +222,7 @@ public final class MALPollDBUtility {
      */
     public static void dropMailIDs(final int cid, final int user) throws OXException {
         final DatabaseService databaseService = getDBService();
-        final Connection con;
-        try {
-            con = databaseService.getForUpdateTask(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getForUpdateTask(cid);
         try {
             con.setAutoCommit(false);
             final List<UUID> uuids = getUserUUIDs(cid, con, user);
@@ -467,19 +460,13 @@ public final class MALPollDBUtility {
             final Connection writableConnection = databaseService.getWritable(cid);
             writableConnection.setAutoCommit(false); // BEGIN
             return writableConnection;
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     private static Connection getReadOnlyConnection(final int cid, final DatabaseService databaseService) throws OXException {
-        try {
-            return databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        return databaseService.getReadOnly(cid);
     }
 
     /**
