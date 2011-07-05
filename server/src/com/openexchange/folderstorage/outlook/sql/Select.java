@@ -62,7 +62,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -140,12 +139,7 @@ public final class Select {
     public static String getByName(final int cid, final int tree, final int user, final String parentId, final String name, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -181,12 +175,7 @@ public final class Select {
     public static boolean containsParent(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return containsParent(cid, tree, user, parentId, storageType, con);
         } finally {
@@ -245,12 +234,7 @@ public final class Select {
     public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return containsFolder(cid, tree, user, folderId, storageType, con);
         } finally {
@@ -308,12 +292,7 @@ public final class Select {
     public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return getFolderName(cid, tree, user, folderId, storageType, con);
         } finally {
@@ -370,12 +349,7 @@ public final class Select {
     public static boolean[] containsFolders(final int cid, final int tree, final int user, final String[] folderIds, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return containsFolders(cid, tree, user, folderIds, storageType, con);
         } finally {
@@ -440,12 +414,7 @@ public final class Select {
     public static boolean[] containsFolders(final int cid, final int tree, final int user, final SortableId[] folderIds, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return containsFolders(cid, tree, user, folderIds, storageType, con);
         } finally {
@@ -511,12 +480,7 @@ public final class Select {
     public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return fillFolder(cid, tree, user, locale, outlookFolder, storageType, con);
         } catch (final Exception e) {
@@ -726,12 +690,7 @@ public final class Select {
     public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final List<String[]> realSubfolderIds, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return getSubfolderIds(cid, tree, user, locale, parentId, realSubfolderIds, storageType, con);
         } finally {
@@ -836,12 +795,7 @@ public final class Select {
     public static List<String> getFolders(final int cid, final int tree, final int user) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return getFolders(cid, tree, user, con);
         } finally {
@@ -892,12 +846,7 @@ public final class Select {
     public static List<String[]> getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         try {
             return getSubfolderIds(cid, tree, user, parentId, storageType, con);
         } finally {

@@ -56,13 +56,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -105,12 +103,7 @@ public final class Insert {
             throw new OXException(e);
         }
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getWritable(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getWritable(cid);
         try {
             con.setAutoCommit(false); // BEGIN
             insertFolder(cid, tree, user, folder, con);

@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -277,12 +276,7 @@ public final class MemoryTable {
     private void initialize(final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getWritable(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getWritable(contextId);
         try {
             initialize(userId, contextId, con);
         } finally {
@@ -373,12 +367,7 @@ public final class MemoryTable {
     public MemoryTree initializeTree(final int treeId, final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getWritable(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getWritable(contextId);
         try {
             return initializeTree(treeId, userId, contextId, con);
         } finally {
@@ -473,12 +462,7 @@ public final class MemoryTable {
     public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getWritable(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getWritable(contextId);
         try {
             return initializeFolder(folderId, treeId, userId, contextId, con);
         } finally {

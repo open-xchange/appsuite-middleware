@@ -54,7 +54,6 @@ import static com.openexchange.folderstorage.outlook.sql.Utility.getDatabaseServ
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -120,12 +119,7 @@ public final class Delete {
     public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean global, final boolean backup) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getWritable(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getWritable(cid);
         try {
             con.setAutoCommit(false); // BEGIN
             final boolean ret = deleteFolder(cid, tree, user, folderId, global, backup, con);
