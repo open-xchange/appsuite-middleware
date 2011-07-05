@@ -54,15 +54,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.folderstorage.ContentType;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -84,7 +83,7 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
     protected GroupwareCaldavFactory factory;
     
     
-    public AbstractStandardCaldavCollection(GroupwareCaldavFactory factory) {
+    public AbstractStandardCaldavCollection(final GroupwareCaldavFactory factory) {
         this.factory = factory;
 
     }
@@ -105,22 +104,22 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+    protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
+    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    protected boolean isset(Property p) {
+    protected boolean isset(final Property p) {
         if (p.getId() == Protocol.GETCONTENTLANGUAGE || p.getId() == Protocol.GETCONTENTLENGTH || p.getId() == Protocol.GETETAG) {
             return false;
         }
@@ -128,7 +127,7 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
     }
 
     @Override
-    public void setCreationDate(Date date) throws WebdavProtocolException {
+    public void setCreationDate(final Date date) throws WebdavProtocolException {
 
     }
 
@@ -148,7 +147,7 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
         return new Date(0);
     }
 
-    public WebdavLock getLock(String token) throws WebdavProtocolException {
+    public WebdavLock getLock(final String token) throws WebdavProtocolException {
         return null;
     }
 
@@ -156,7 +155,7 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
         return Collections.emptyList();
     }
 
-    public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+    public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
         return null;
     }
 
@@ -168,7 +167,7 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
         return null;
     }
 
-    public void lock(WebdavLock lock) throws WebdavProtocolException {
+    public void lock(final WebdavLock lock) throws WebdavProtocolException {
         // IGNORE
     }
 
@@ -176,30 +175,30 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
         // IGNORE
     }
 
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
+    public void setDisplayName(final String displayName) throws WebdavProtocolException {
         // IGNORE
     }
 
-    public void unlock(String token) throws WebdavProtocolException {
+    public void unlock(final String token) throws WebdavProtocolException {
         // IGNORE
     }
     
-    public WebdavProtocolException internalError(AbstractOXException x) {
+    public WebdavProtocolException internalError(final OXException x) {
         return new WebdavProtocolException(getUrl(), 500);
     }
     
-    protected List<WebdavResource> getVisibleCalendarFoldersOfType(Type type) throws WebdavProtocolException {
+    protected List<WebdavResource> getVisibleCalendarFoldersOfType(final Type type) throws WebdavProtocolException {
         try {
-            FolderResponse<UserizedFolder[]> visibleFolders = factory.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, CALENDAR_CTYPE, type, true, factory.getSession(), null);
-            UserizedFolder[] response = visibleFolders.getResponse();
-            List<WebdavResource> children = new ArrayList<WebdavResource>(response.length);
-            for (UserizedFolder folder : response) {
+            final FolderResponse<UserizedFolder[]> visibleFolders = factory.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, CALENDAR_CTYPE, type, true, factory.getSession(), null);
+            final UserizedFolder[] response = visibleFolders.getResponse();
+            final List<WebdavResource> children = new ArrayList<WebdavResource>(response.length);
+            for (final UserizedFolder folder : response) {
                 if (folder.getOwnPermission().getReadPermission() > Permission.READ_OWN_OBJECTS) {
                     children.add(new CaldavCollection(this, folder, factory));
                 }
             }
             return children;
-        } catch (FolderException e) {
+        } catch (final OXException e) {
             throw internalError(e);
         }
     }
