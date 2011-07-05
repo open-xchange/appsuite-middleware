@@ -93,7 +93,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
     public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, Activator activator, boolean enableJavascript) {
         FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
-
+        addExtraFields(FORM);
         SOURCE.setDisplayName(displayName);
         SOURCE.setId(id);
         SOURCE.setFormDescription(FORM);
@@ -104,6 +104,10 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         this.activator = activator;
         this.enableJavascript = enableJavascript;
         this.module = module;
+    }
+
+    protected void addExtraFields(DynamicFormDescription form) {
+        // May be overridden to include extra fields
     }
 
     public SubscriptionSource getSubscriptionSource() {
