@@ -60,7 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
@@ -100,7 +100,7 @@ public final class ContactDataSource implements DataSource {
         super();
     }
 
-    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws DataException {
+    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type) && !byte[].class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
         }
@@ -148,9 +148,9 @@ public final class ContactDataSource implements DataSource {
                 contacts[i] = contactInterface.getObjectById(objectIds[i], folderId);
             }
         } catch (final OXException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         } catch (final ServiceException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         }
         /*
          * Create necessary objects
@@ -177,7 +177,7 @@ public final class ContactDataSource implements DataSource {
             properties);
     }
 
-    private static void writeVCard2Stream(final Contact contact, final ByteArrayOutputStream byteArrayOutputStream, final VersitDefinition contactDef, final Session session) throws DataException {
+    private static void writeVCard2Stream(final Contact contact, final ByteArrayOutputStream byteArrayOutputStream, final VersitDefinition contactDef, final Session session) throws OXException {
         final VersitDefinition.Writer versitWriter;
         try {
             versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");

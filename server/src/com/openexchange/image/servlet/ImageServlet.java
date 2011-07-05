@@ -62,7 +62,7 @@ import com.openexchange.ajax.helper.CombinedInputStream;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.conversion.Data;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
@@ -157,7 +157,7 @@ public final class ImageServlet extends HttpServlet {
             }
         } catch (final SessiondException e) {
             sendErrorAndLog(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, null, e.getMessage(), e);
-        } catch (final DataException e) {
+        } catch (final OXException e) {
             sendErrorAndLog(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, e.getMessage(), e);
         } catch (final ServiceException e) {
             sendErrorAndLog(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, null, e.getMessage(), e);
@@ -178,7 +178,7 @@ public final class ImageServlet extends HttpServlet {
         }        
     }
 
-    private static void outputImageData(final ImageData imageData, final Session session, final HttpServletResponse resp) throws DataException, IOException {
+    private static void outputImageData(final ImageData imageData, final Session session, final HttpServletResponse resp) throws OXException, IOException {
         final Data<InputStream> data = imageData.getImageData(session);
         final String ct;
         final String fileName;

@@ -58,7 +58,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -71,7 +70,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -106,7 +104,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
     }
 
     public Object processData(final Data<? extends Object> data, final DataArguments dataArguments,
-            final Session session) throws DataException {
+            final Session session) throws OXException {
         final int calendarFolder;
         try {
             calendarFolder = Integer.parseInt(dataArguments.get(ARGS[0]));
@@ -120,18 +118,17 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
         }
         
-        Confirm confirm = parseConfirmation(dataArguments);
+        final Confirm confirm = parseConfirmation(dataArguments);
         
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session);
         } catch (final OXException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         }
         final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
         if (iCalParser == null) {
-            throw new DataException(new ServiceException(ServiceExceptionCode.SERVICE_UNAVAILABLE, ICalParser.class
-                    .getName()));
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName());
         }
         final List<CalendarDataObject> appointments;
         final List<Task> tasks;
@@ -172,7 +169,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                         defaultZone);
             }
         } catch (final ConversionError e) {
-            throw new DataException(e);
+            throw new OXException(e);
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -189,9 +186,9 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             try {
                 insertAppointments(session, calendarFolder, ctx, appointments, confirm, folderAndIdArray);
             } catch (final OXException e) {
-                throw new DataException(e);
+                throw new OXException(e);
             } catch (final JSONException e) {
-                throw new DataException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+                throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
             }
         }
         if (!tasks.isEmpty()) {
@@ -201,9 +198,9 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             try {
                 insertTasks(session, taskFolder, tasks, folderAndIdArray);
             } catch (final OXException e) {
-                throw new DataException(e);
+                throw new OXException(e);
             } catch (final JSONException e) {
-                throw new DataException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+                throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
             }
         }
         return folderAndIdArray;

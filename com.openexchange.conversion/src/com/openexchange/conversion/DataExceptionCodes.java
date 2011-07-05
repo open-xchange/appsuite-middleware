@@ -66,7 +66,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * Enumeration about all {@link DataException}s.
+ * Enumeration about all {@link OXException}s.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */

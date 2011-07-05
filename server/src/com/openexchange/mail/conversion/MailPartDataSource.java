@@ -50,7 +50,7 @@
 package com.openexchange.mail.conversion;
 
 import java.io.InputStream;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -83,20 +83,20 @@ public abstract class MailPartDataSource implements DataSource {
         super();
     }
 
-    protected final MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session) throws DataException {
+    protected final MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session) throws OXException {
         final MailAccess<?, ?> mailAccess;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
         } catch (final MailException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         }
         try {
             final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
             mailPart.loadContent();
             return mailPart;
         } catch (final MailException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         } finally {
             mailAccess.close(true);
         }

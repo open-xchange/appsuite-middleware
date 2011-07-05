@@ -52,7 +52,7 @@ package com.openexchange.conversion;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * Exception messages for {@link DataException} that must be translated.
+ * Exception messages for {@link OXException} that must be translated.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */

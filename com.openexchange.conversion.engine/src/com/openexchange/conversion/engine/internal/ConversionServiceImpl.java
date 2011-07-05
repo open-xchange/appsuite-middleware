@@ -57,7 +57,7 @@ import java.util.Set;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
@@ -86,7 +86,7 @@ public final class ConversionServiceImpl implements ConversionService {
         return getInstance().getDataSource(identifier);
     }
 
-    public Object convert(final String dataSourceIdentifier, final DataArguments dataSourceArguments, final String dataHandlerIdentifier, final DataArguments dataHandlerArguments, final Session session) throws DataException {
+    public Object convert(final String dataSourceIdentifier, final DataArguments dataSourceArguments, final String dataHandlerIdentifier, final DataArguments dataHandlerArguments, final Session session) throws OXException {
         final DataSource dataSource = lookUpAndCheckDataSource(dataSourceIdentifier, dataSourceArguments);
         final DataHandler dataHandler = lookUpAndCheckDataHandler(dataHandlerIdentifier, dataHandlerArguments);
         /*
@@ -106,7 +106,7 @@ public final class ConversionServiceImpl implements ConversionService {
         return dataHandler.processData(data, dataHandlerArguments, session);
     }
 
-    public Object convert(final InputStream inputStream, final String dataHandlerIdentifier, final DataArguments dataHandlerArguments, final Session session) throws DataException {
+    public Object convert(final InputStream inputStream, final String dataHandlerIdentifier, final DataArguments dataHandlerArguments, final Session session) throws OXException {
         final DataHandler dataHandler = lookUpAndCheckDataHandler(dataHandlerIdentifier, dataHandlerArguments);
         /*
          * Check for input stream support
@@ -120,7 +120,7 @@ public final class ConversionServiceImpl implements ConversionService {
         return dataHandler.processData(new SimpleData<InputStream>(inputStream), dataHandlerArguments, session);
     }
 
-    private static DataSource lookUpAndCheckDataSource(final String dataSourceID, final DataArguments dataSourceArguments) throws DataException {
+    private static DataSource lookUpAndCheckDataSource(final String dataSourceID, final DataArguments dataSourceArguments) throws OXException {
         final DataSource dataSource = getInstance().getDataSource(dataSourceID);
         if (dataSource == null) {
             throw DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceID);
@@ -134,7 +134,7 @@ public final class ConversionServiceImpl implements ConversionService {
         return dataSource;
     }
 
-    private static DataHandler lookUpAndCheckDataHandler(final String dataHandlerID, final DataArguments dataHandlerArguments) throws DataException {
+    private static DataHandler lookUpAndCheckDataHandler(final String dataHandlerID, final DataArguments dataHandlerArguments) throws OXException {
         final DataHandler dataHandler = getInstance().getDataHandler(dataHandlerID);
         if (dataHandler == null) {
             throw DataExceptionCodes.UNKNOWN_DATA_HANDLER.create(dataHandlerID);

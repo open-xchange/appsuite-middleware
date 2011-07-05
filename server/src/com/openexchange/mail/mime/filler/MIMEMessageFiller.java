@@ -82,7 +82,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.conversion.Data;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -1498,7 +1498,7 @@ public class MIMEMessageFiller {
             super();
             try {
                 this.data = imageData.getImageData(session);
-            } catch (final DataException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             }
             final DataProperties dataProperties = data.getDataProperties();

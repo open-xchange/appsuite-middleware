@@ -60,7 +60,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
@@ -113,7 +113,7 @@ public final class ContactInsertDataHandler implements DataHandler {
         return TYPES;
     }
 
-    public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws DataException {
+    public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws OXException {
         final int folder;
         try {
             folder = Integer.parseInt(dataArguments.get(ARGS[0]));
@@ -124,7 +124,7 @@ public final class ContactInsertDataHandler implements DataHandler {
         try {
             ctx = ContextStorage.getStorageContext(session);
         } catch (final OXException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         }
         /*
          * Parse input stream
@@ -196,7 +196,7 @@ public final class ContactInsertDataHandler implements DataHandler {
         }
     }
 
-    private static DataException handleDataTruncation(final AbstractOXException e) {
+    private static OXException handleDataTruncation(final AbstractOXException e) {
         if (e.getCategory() == Category.TRUNCATED) {
             final String separator = ", ";
             final StringBuilder bob = new StringBuilder();
@@ -211,7 +211,7 @@ public final class ContactInsertDataHandler implements DataHandler {
             bob.setLength(bob.length() - separator.length());
             return DataExceptionCodes.TRUNCATED.create(bob.toString());
         }
-        return new DataException(e);
+        return new OXException(e);
     }
 
     private static String getNameForFieldInTruncationError(final int id) {

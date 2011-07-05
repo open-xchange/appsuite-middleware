@@ -63,7 +63,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -200,7 +200,7 @@ public final class ConversionServlet extends SessionServlet {
         }
     }
 
-    private Response doAction(final HttpServletRequest req) throws ConversionServletException, JSONException, IOException, DataException {
+    private Response doAction(final HttpServletRequest req) throws ConversionServletException, JSONException, IOException, OXException {
         final String actionStr = checkStringParam(req, PARAMETER_ACTION);
         if (actionStr.equalsIgnoreCase(ACTION_CONVERT)) {
             return actionConvert(new JSONObject(getBody(req)), getSessionObject(req));
@@ -208,7 +208,7 @@ public final class ConversionServlet extends SessionServlet {
         throw new ConversionServletException(ConversionServletException.Code.UNSUPPORTED_PARAM, PARAMETER_ACTION, actionStr);
     }
 
-    private Response actionConvert(final JSONObject jsonBody, final Session session) throws ConversionServletException, JSONException, DataException {
+    private Response actionConvert(final JSONObject jsonBody, final Session session) throws ConversionServletException, JSONException, OXException {
         /*
          * Check for data source in JSON body
          */

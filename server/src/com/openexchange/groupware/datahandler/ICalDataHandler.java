@@ -70,7 +70,6 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -112,7 +111,7 @@ public abstract class ICalDataHandler implements DataHandler {
         }
     }
 
-    protected void insertAppointments(final Session session, final int calendarFolder, final Context ctx, final List<CalendarDataObject> appointments, Confirm confirm, final JSONArray folderAndIdArray) throws OXException, JSONException, DataException {
+    protected void insertAppointments(final Session session, final int calendarFolder, final Context ctx, final List<CalendarDataObject> appointments, final Confirm confirm, final JSONArray folderAndIdArray) throws OXException, JSONException, OXException {
         final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(
             session);
         for (final CalendarDataObject appointment : appointments) {
@@ -122,14 +121,15 @@ public abstract class ICalDataHandler implements DataHandler {
             }
             String uid;
             int objectId = 0;
-            if (appointment.containsUid() && (uid = appointment.getUid()) != null)
+            if (appointment.containsUid() && (uid = appointment.getUid()) != null) {
                 objectId = appointmentSql.resolveUid(uid);
+            }
                 
             if (objectId != 0) {
                 if (confirm != null) {
                     try {
                         updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
-                    } catch (OXPermissionException e) {
+                    } catch (final OXPermissionException e) {
                         handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
                     }
                 }
@@ -148,27 +148,27 @@ public abstract class ICalDataHandler implements DataHandler {
         }
     }
     
-    private void updateAppointment(CalendarDataObject appointment, int calendarFolder, AppointmentSQLInterface appointmentSql) throws OXException {
+    private void updateAppointment(final CalendarDataObject appointment, final int calendarFolder, final AppointmentSQLInterface appointmentSql) throws OXException {
         try {
-            CalendarDataObject loadAppointment = appointmentSql.getObjectById(appointment.getObjectID(), calendarFolder);
+            final CalendarDataObject loadAppointment = appointmentSql.getObjectById(appointment.getObjectID(), calendarFolder);
             if (loadAppointment.getSequence() >= appointment.getSequence()) {
                 return;
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         }
         
         appointmentSql.updateAppointmentObject(appointment, calendarFolder, new Date());
     }
 
-    private void handleWithoutPermission(Session session, CalendarDataObject appointment, int calendarFolder, Confirm confirm, AppointmentSQLInterface appointmentSql) throws OXException {
+    private void handleWithoutPermission(final Session session, final CalendarDataObject appointment, final int calendarFolder, final Confirm confirm, final AppointmentSQLInterface appointmentSql) throws OXException {
         appointment.removeUid();
         appointment.removeObjectID();
         appointment.removeUsers();
         appointment.removeParticipants();
         appointment.setParentFolderID(calendarFolder);
 
-        UserParticipant self = new UserParticipant(session.getUserId());
+        final UserParticipant self = new UserParticipant(session.getUserId());
         self.setConfirm(confirm.getConfirm());
         self.setConfirmMessage(confirm.getConfirmMessage());
         appointment.setUsers(new UserParticipant[] { self });
@@ -176,13 +176,13 @@ public abstract class ICalDataHandler implements DataHandler {
         appointmentSql.insertAppointmentObject(appointment);
     }
 
-    private void updateOwnParticipantStatus(Session session, Context ctx, int objectId, Confirm confirm, AppointmentSQLInterface appSql) throws OXException, DataException {
-        FolderObject calendarFolder = new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CALENDAR);
+    private void updateOwnParticipantStatus(final Session session, final Context ctx, final int objectId, final Confirm confirm, final AppointmentSQLInterface appSql) throws OXException, OXException {
+        final FolderObject calendarFolder = new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CALENDAR);
         try {
-            CalendarDataObject loadedObject = appSql.getObjectById(objectId, calendarFolder.getObjectID());
-            UserParticipant[] users = loadedObject.getUsers();
+            final CalendarDataObject loadedObject = appSql.getObjectById(objectId, calendarFolder.getObjectID());
+            final UserParticipant[] users = loadedObject.getUsers();
             boolean found = false;
-            for (UserParticipant user : users) {
+            for (final UserParticipant user : users) {
                 if (user.getIdentifier() == session.getUserId()) {
                     found = true;
                     break;
@@ -192,14 +192,14 @@ public abstract class ICalDataHandler implements DataHandler {
             if (found) {
                 try {
                     appSql.setUserConfirmation(objectId, calendarFolder.getObjectID(), session.getUserId(), confirm.getConfirm(), confirm.getConfirmMessage());
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create("Error during confirmation update.");
                 }
             } else {
                 throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create("Object already exists, but user is not participant.");
             }
             
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
@@ -208,10 +208,10 @@ public abstract class ICalDataHandler implements DataHandler {
      * @param appointment
      * @param confirm
      */
-    private void setConfirmation(Session session, CalendarDataObject appointment, Confirm confirm) {
-        for (Participant participant : appointment.getParticipants()) {
+    private void setConfirmation(final Session session, final CalendarDataObject appointment, final Confirm confirm) {
+        for (final Participant participant : appointment.getParticipants()) {
             if (participant.getType() == Participant.USER) {
-                UserParticipant user = (UserParticipant) participant;
+                final UserParticipant user = (UserParticipant) participant;
                 if (user.getIdentifier() == session.getUserId()) {
                     user.setConfirm(confirm.getConfirm());
                     if (confirm.getConfirmMessage() != null) {
@@ -248,7 +248,7 @@ public abstract class ICalDataHandler implements DataHandler {
         }
     }
 
-    protected static InputStreamCopy copyStream(final InputStream orig, final long size) throws DataException {
+    protected static InputStreamCopy copyStream(final InputStream orig, final long size) throws OXException {
         try {
             return new InputStreamCopy(orig, (size <= 0 || size > LIMIT));
         } catch (final IOException e) {
@@ -349,11 +349,11 @@ public abstract class ICalDataHandler implements DataHandler {
      */
     protected class Confirm {
 
-        private int confirm;
+        private final int confirm;
 
-        private String confirmMessage;
+        private final String confirmMessage;
 
-        public Confirm(int confirm, String confirmMessage) {
+        public Confirm(final int confirm, final String confirmMessage) {
             this.confirm = confirm;
             this.confirmMessage = confirmMessage;
         }

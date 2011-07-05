@@ -54,7 +54,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.ImageDataSource;
@@ -195,9 +195,9 @@ public final class ImageData {
      * 
      * @param session The session needed to obtain image's data
      * @return The image data
-     * @throws DataException
+     * @throws OXException
      */
-    public Data<InputStream> getImageData(final Session session) throws DataException {
+    public Data<InputStream> getImageData(final Session session) throws OXException {
         return imageSource.getData(InputStream.class, imageArguments, session);
     }
 

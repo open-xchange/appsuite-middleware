@@ -74,7 +74,7 @@ import org.json.JSONObject;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
@@ -265,13 +265,13 @@ public final class MessageParser {
                         if (types.contains(InputStream.class)) {
                             try {
                                 data = dataSource.getData(InputStream.class, parseDataSourceArguments(dataSourceObject), session);
-                            } catch (final DataException e) {
+                            } catch (final OXException e) {
                                 throw new MailException(e);
                             }
                         } else if (types.contains(byte[].class)) {
                             try {
                                 data = dataSource.getData(byte[].class, parseDataSourceArguments(dataSourceObject), session);
-                            } catch (final DataException e) {
+                            } catch (final OXException e) {
                                 throw new MailException(e);
                             }
                         } else {

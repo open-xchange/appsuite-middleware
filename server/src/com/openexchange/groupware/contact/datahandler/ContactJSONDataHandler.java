@@ -60,7 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
@@ -106,12 +106,12 @@ public final class ContactJSONDataHandler implements DataHandler {
         return TYPES;
     }
 
-    public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws DataException {
+    public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session);
         } catch (final OXException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         }
         /*
          * Parse input stream

@@ -52,7 +52,7 @@ package com.openexchange.groupware.contact.datasource;
 import java.io.InputStream;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
@@ -83,7 +83,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         super();
     }
 
-    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws DataException {
+    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
         }
@@ -124,7 +124,7 @@ public final class ContactImageDataSource implements ImageDataSource {
                 session);
             contact = contactInterface.getObjectById(objectId, folder);
         } catch (final OXException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         }
         /*
          * Return contact image

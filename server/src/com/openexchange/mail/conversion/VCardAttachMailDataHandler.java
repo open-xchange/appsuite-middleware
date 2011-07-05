@@ -62,7 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
@@ -120,14 +120,14 @@ public final class VCardAttachMailDataHandler implements DataHandler {
         return TYPES;
     }
 
-    public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws DataException {
+    public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx;
         final UserSettingMail usm;
         try {
             ctx = ContextStorage.getStorageContext(session);
             usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
         } catch (final OXException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         }
         try {
             /*
@@ -214,7 +214,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             addFileInformation(mailObject, managedFile.getID());
             return mailObject;
         } catch (final MailException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         } catch (final MessagingException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -226,7 +226,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void addFileInformation(final JSONObject mailObject, final String fileId) throws JSONException, DataException {
+    private static void addFileInformation(final JSONObject mailObject, final String fileId) throws JSONException, OXException {
         if (!mailObject.has(MailJSONField.ATTACHMENTS.getKey()) || mailObject.isNull(MailJSONField.ATTACHMENTS.getKey())) {
             throw DataExceptionCodes.ERROR.create(new StringBuilder(64).append("Parsed JSON mail object does not contain field '").append(
                 MailJSONField.ATTACHMENTS.getKey()).append('\'').toString());
@@ -243,7 +243,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             new StringBuilder(FILE_PREFIX.length() + fileId.length()).append(FILE_PREFIX).append(fileId).toString());
     }
 
-    private static ManagedFile getBytesFromVCard(final Object vcard) throws DataException {
+    private static ManagedFile getBytesFromVCard(final Object vcard) throws OXException {
         try {
             final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             if (null == management) {
@@ -259,7 +259,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final ManagedFileException e) {
-            throw new DataException(e);
+            throw new OXException(e);
         }
     }
 

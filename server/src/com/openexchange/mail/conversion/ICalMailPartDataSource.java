@@ -53,7 +53,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.io.InputStream;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
+import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
@@ -79,7 +79,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
         super();
     }
 
-    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws DataException {
+    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
         }
@@ -110,7 +110,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             try {
                 return new SimpleData<D>((D) mailPart.getInputStream(), properties);
             } catch (final MailException e) {
-                throw new DataException(e);
+                throw new OXException(e);
             }
         }
     }
