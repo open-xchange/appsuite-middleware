@@ -67,9 +67,9 @@ public interface OAuthAccountDeleteListener {
      * @param user The user ID
      * @param cid The context ID
      * @param con The used connection <i>in transactional state</i>
-     * @throws OAuthException If a critical error occurs which should abort OAuth account deletion
+     * @throws OXException If a critical error occurs which should abort OAuth account deletion
      */
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OAuthException;
+    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException;
 
     /**
      * Handles the event <i>after</i> the denoted OAuth account is deleted.
@@ -79,8 +79,8 @@ public interface OAuthAccountDeleteListener {
      * @param user The user ID
      * @param cid The context ID
      * @param con The used connection <i>in transactional state</i>
-     * @throws OAuthException If a critical error occurs which should abort OAuth account deletion
+     * @throws OXException If a critical error occurs which should abort OAuth account deletion
      */
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OAuthException;
+    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException;
 
 }

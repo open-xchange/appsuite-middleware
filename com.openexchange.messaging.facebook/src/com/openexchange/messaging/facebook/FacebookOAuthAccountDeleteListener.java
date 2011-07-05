@@ -59,7 +59,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -81,7 +81,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         // Nope
     }
 
-    public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OAuthException {
+    public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         final List<int[]> dataList = listFacebookMessagingAccounts(user, cid, con);
         for (final int[] data : dataList) {
             if (checkData(id, data, con)) {
@@ -90,7 +90,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         }
     }
 
-    private static List<int[]> listFacebookMessagingAccounts(final int userId, final int contextId, final Connection writeCon) throws OAuthException {
+    private static List<int[]> listFacebookMessagingAccounts(final int userId, final int contextId, final Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -119,7 +119,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         }
     }
 
-    private static boolean checkData(final int accountId, final int[] data, final Connection writeCon) throws OAuthException {
+    private static boolean checkData(final int accountId, final int[] data, final Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -139,7 +139,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         }
     }
 
-    private static void dropAccountByData(final int[] data, final Connection writeCon) throws OAuthException {
+    private static void dropAccountByData(final int[] data, final Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         try {
             /*
@@ -166,7 +166,7 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         }
     }
 
-    private static OAuthException createSQLError(final SQLException e) {
+    private static OXException createSQLError(final SQLException e) {
         return OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
     }
 }

@@ -68,7 +68,7 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
 
@@ -102,7 +102,7 @@ public class YahooServiceImpl implements YahooService {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             try {
                 account = oAuthService.getAccount(accountId, password, user, contextId);
-            } catch (OAuthException e) {
+            } catch (OXException e) {
                 LOG.error(e);
             }
             Token accessToken = new Token(account.getToken(), account.getSecret());
@@ -321,7 +321,7 @@ public class YahooServiceImpl implements YahooService {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
             displayName = account.getDisplayName();
-        } catch (OAuthException e) {
+        } catch (OXException e) {
             LOG.error(e);
         }
         return displayName;

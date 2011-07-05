@@ -64,7 +64,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.exceptions.OAuthException;
+import org.scribe.exceptions.OXException;
 import org.w3c.dom.Element;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
@@ -626,7 +626,7 @@ public final class FacebookMessagingUtility {
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
                     final String message = error.optString("message");
-                    if ("OAuthException".equals(type)) {
+                    if ("OXException".equals(type)) {
                         throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                     }
                     throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
@@ -649,7 +649,7 @@ public final class FacebookMessagingUtility {
             throw FacebookMessagingExceptionCodes.INVALID_RESPONSE_BODY.create(body);
         } catch (final JSONException e) {
             throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final OAuthException e) {
+        } catch (final OXException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

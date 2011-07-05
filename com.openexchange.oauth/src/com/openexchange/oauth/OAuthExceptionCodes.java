@@ -49,71 +49,80 @@
 
 package com.openexchange.oauth;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.oauth.exception.OAuthExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link OAuthExceptionCodes} - Enumeration of all {@link OAuthException}s.
+ * {@link OAuthExceptionCodes} - Enumeration of all {@link OXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public enum OAuthExceptionCodes implements OXErrorMessage {
+public enum OAuthExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(OAuthExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(OAuthExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(OAuthExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 2),
+    IO_ERROR(OAuthExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * An I/O error occurred: %1$s
      */
-    JSON_ERROR(OAuthExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 3),
+    JSON_ERROR(OAuthExceptionMessages.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * Unknown OAuth service meta data: %1$s
      */
-    UNKNOWN_OAUTH_SERVICE_META_DATA(OAuthExceptionMessages.UNKNOWN_OAUTH_SERVICE_META_DATA_MSG, Category.CODE_ERROR, 4),
+    UNKNOWN_OAUTH_SERVICE_META_DATA(OAuthExceptionMessages.UNKNOWN_OAUTH_SERVICE_META_DATA_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(OAuthExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 5),
+    SQL_ERROR(OAuthExceptionMessages.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * Account not found with identifier %1$s for user %2$s in context %3$s.
      */
-    ACCOUNT_NOT_FOUND(OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 6),
+    ACCOUNT_NOT_FOUND(OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Unsupported OAuth service: %1$s
      */
-    UNSUPPORTED_SERVICE(OAuthExceptionMessages.UNSUPPORTED_SERVICE_MSG, Category.CODE_ERROR, 7),
+    UNSUPPORTED_SERVICE(OAuthExceptionMessages.UNSUPPORTED_SERVICE_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * Missing argument: %1$s
      */
-    MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, Category.CODE_ERROR, 8),
+    MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * Token has expired
      */
-    TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED_MSG, Category.TRY_AGAIN, 9),
+    TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED_MSG, Category.CATEGORY_TRY_AGAIN, 9),
     /**
      * An OAuth error occurred: %1$s
      */
-    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, Category.CODE_ERROR, 10),
+    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, Category.CATEGORY_ERROR, 10),
 
     ;
 
     private final Category category;
 
-    private final int detailNumber;
+    private final int number;
 
     private final String message;
 
+    private final boolean display;
+
     private OAuthExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
-        this.detailNumber = detailNumber;
+        this.number = detailNumber;
         this.category = category;
+        display = category.getLogLevel().implies(LogLevel.DEBUG);
+    }
+
+    public String getPrefix() {
+        return "OAUTH";
     }
 
     public Category getCategory() {
@@ -124,43 +133,51 @@ public enum OAuthExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
-        return detailNumber;
+    public int getNumber() {
+        return number;
     }
 
     public String getHelp() {
         return null;
     }
 
-    private static final Object[] EMPTY = new Object[0];
-
     /**
-     * Creates a new OAuth exception of this error type with no message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @return A new OAuth exception
+     * @return The newly created {@link OXException} instance
      */
-    public OAuthException create() {
-        return OAuthExceptionFactory.getInstance().create(this, EMPTY);
+    public OXException create() {
+        return create(new Object[0]);
     }
 
     /**
-     * Creates a new OAuth exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new OAuth exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public OAuthException create(final Object... messageArgs) {
-        return OAuthExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create(final Object... args) {
+        return create((Throwable) null, args);
     }
 
     /**
-     * Creates a new OAuth exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new OAuth exception
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public OAuthException create(final Throwable cause, final Object... messageArgs) {
-        return OAuthExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Throwable cause, final Object... args) {
+        final OXException ret;
+        if (display) {
+            ret = new OXException(number, message, cause, args);
+        } else {
+            ret =
+                new OXException(
+                    number,
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    new Object[0]);
+        }
+        return ret.addCategory(category).setPrefix(getPrefix());
     }
 }

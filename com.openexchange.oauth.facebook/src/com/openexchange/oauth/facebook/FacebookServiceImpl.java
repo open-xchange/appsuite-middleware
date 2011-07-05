@@ -66,7 +66,7 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -97,7 +97,7 @@ public class FacebookServiceImpl implements FacebookService {
         
         try {
             account = oAuthService.getAccount(accountId, password, user, contextId);
-        } catch (OAuthException e) {
+        } catch (OXException e) {
             LOG.error(e);
         }
         if (null != account) {
@@ -197,7 +197,7 @@ public class FacebookServiceImpl implements FacebookService {
         try {            
             OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
             displayName = account.getDisplayName();
-        } catch (OAuthException e) {
+        } catch (OXException e) {
             LOG.error(e);
         }
         return displayName;

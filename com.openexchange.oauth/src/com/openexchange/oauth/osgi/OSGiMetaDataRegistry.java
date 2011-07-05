@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
@@ -119,7 +119,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         return new ArrayList<OAuthServiceMetaData>(map.values());
     }
 
-    public OAuthServiceMetaData getService(final String id) throws OAuthException {
+    public OAuthServiceMetaData getService(final String id) throws OXException {
         final OAuthServiceMetaData service = map.get(id);
         if (null == service) {
             throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);

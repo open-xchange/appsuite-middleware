@@ -72,7 +72,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 import com.openexchange.tools.versit.converter.ConverterException;
@@ -109,7 +109,7 @@ public class LinkedInServiceImpl implements LinkedInService{
         try {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             account = oAuthService.getAccount(accountId, password, user, contextId);
-        } catch (OAuthException e) {
+        } catch (OXException e) {
             LOG.error(e);
         }
 
@@ -245,7 +245,7 @@ public class LinkedInServiceImpl implements LinkedInService{
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
             displayName = account.getDisplayName();
-        } catch (OAuthException e) {
+        } catch (OXException e) {
             LOG.error(e);
         }
         return displayName;

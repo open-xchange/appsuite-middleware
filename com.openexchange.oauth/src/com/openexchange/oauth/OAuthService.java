@@ -74,10 +74,10 @@ public interface OAuthService {
      * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
-     * @throws OAuthException If accounts cannot be returned
+     * @throws OXException If accounts cannot be returned
      * @return The accounts
      */
-    List<OAuthAccount> getAccounts(String password, int user, int contextId) throws OAuthException;
+    List<OAuthAccount> getAccounts(String password, int user, int contextId) throws OXException;
 
     /**
      * Gets all accounts belonging to specified user with given service identifier.
@@ -86,20 +86,20 @@ public interface OAuthService {
      * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
-     * @throws OAuthException If accounts cannot be returned
+     * @throws OXException If accounts cannot be returned
      * @return The accounts
      */
-    List<OAuthAccount> getAccounts(String serviceMetaData, String password, int user, int contextId) throws OAuthException;
+    List<OAuthAccount> getAccounts(String serviceMetaData, String password, int user, int contextId) throws OXException;
 
     /**
      * Initializes a new OAuth account.
      * 
      * @param serviceMetaData The identifier of service meta data
      * @param callbackUrl The optional call-back URL
-     * @throws OAuthException If initialization fails
+     * @throws OXException If initialization fails
      * @return The OAuth interaction providing needed steps
      */
-    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl) throws OAuthException;
+    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl) throws OXException;
 
     /**
      * Creates a new OAuth account completely from specified arguments.
@@ -109,9 +109,9 @@ public interface OAuthService {
      * @param user The user identifier
      * @param contextId The context identifier
      * @return The newly created account
-     * @throws OAuthException If creation fails
+     * @throws OXException If creation fails
      */
-    OAuthAccount createAccount(String serviceMetaData, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
+    OAuthAccount createAccount(String serviceMetaData, Map<String, Object> arguments, int user, int contextId) throws OXException;
 
     /**
      * Create a new OAuth account from specified arguments.
@@ -129,10 +129,10 @@ public interface OAuthService {
      * @param arguments The arguments appropriate for interaction type
      * @param user The user identifier
      * @param contextId The context identifier
-     * @throws OAuthException If creation fails
+     * @throws OXException If creation fails
      * @return The newly created account
      */
-    OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
+    OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException;
 
     /**
      * Deletes the specified account.
@@ -140,9 +140,9 @@ public interface OAuthService {
      * @param accountId The account identifier
      * @param user The user identifier
      * @param contextId The context identifier
-     * @throws OAuthException If deletion fails
+     * @throws OXException If deletion fails
      */
-    void deleteAccount(int accountId, int user, int contextId) throws OAuthException;
+    void deleteAccount(int accountId, int user, int contextId) throws OXException;
 
     /**
      * Update the specified account.
@@ -158,11 +158,11 @@ public interface OAuthService {
      * @param arguments The arguments to update
      * @param user The user identifier
      * @param contextId The context identifier
-     * @throws OAuthException If deletion fails
+     * @throws OXException If deletion fails
      */
-    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
+    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OXException;
     
-    OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException;
+    OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException;
 
     /**
      * Gets the specified account.
@@ -171,9 +171,9 @@ public interface OAuthService {
      * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
-     * @throws OAuthException If account cannot be returned
+     * @throws OXException If account cannot be returned
      * @return The account
      */
-    OAuthAccount getAccount(int accountId, String password, int user, int contextId) throws OAuthException;
+    OAuthAccount getAccount(int accountId, String password, int user, int contextId) throws OXException;
 
 }

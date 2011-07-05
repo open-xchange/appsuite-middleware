@@ -61,7 +61,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.exception.OAuthExceptionFactory;
@@ -145,7 +145,7 @@ public final class OAuthActivator extends DeferredActivator {
              */
             componentRegistration = new ComponentRegistration(
                 context,
-                OAuthException.COMPONENT,
+                OXException.COMPONENT,
                 "com.openexchange.oauth",
                 OAuthExceptionFactory.getInstance());
             /*

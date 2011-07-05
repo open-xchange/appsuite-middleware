@@ -125,9 +125,9 @@ public interface OAuthServiceMetaData {
      * 
      * @param arguments The OAuth arguments
      * @return The OAuth token or <code>null</code>
-     * @throws OAuthException If an error occurs returning the token
+     * @throws OXException If an error occurs returning the token
      */
-    OAuthToken getOAuthToken(Map<String, Object> arguments) throws OAuthException;
+    OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException;
 
     /**
      * Initiates contact and returns the initial oauth interaction. This is an optional method, just return null when you
@@ -135,7 +135,7 @@ public interface OAuthServiceMetaData {
      * @param callbackUrl
      * @return
      */
-    OAuthInteraction initOAuth(String callbackUrl) throws OAuthException;
+    OAuthInteraction initOAuth(String callbackUrl) throws OXException;
 
     /**
      * Gives the strategy the opportunity to modify a callback URL.

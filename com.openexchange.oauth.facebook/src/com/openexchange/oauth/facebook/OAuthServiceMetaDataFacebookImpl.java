@@ -64,7 +64,7 @@ import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthToken;
 
@@ -144,7 +144,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     private static final int BUFSIZE = 8192;
 
     @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
         final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
         final String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
 

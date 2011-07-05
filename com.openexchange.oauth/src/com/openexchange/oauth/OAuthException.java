@@ -54,11 +54,11 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 /**
- * {@link OAuthException} - An OAuth exception.
+ * {@link OXException} - An OAuth exception.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthException extends AbstractOXException {
+public class OXException extends AbstractOXException {
 
     private static final long serialVersionUID = 959078050587154533L;
 
@@ -77,71 +77,71 @@ public class OAuthException extends AbstractOXException {
     };
 
     /**
-     * Initializes a new {@link OAuthException}.
+     * Initializes a new {@link OXException}.
      * 
      * @param cause The cause
      */
-    public OAuthException(final AbstractOXException cause) {
+    public OXException(final AbstractOXException cause) {
         super(cause);
     }
 
     /**
-     * Initializes a new {@link OAuthException}.
+     * Initializes a new {@link OXException}.
      * 
      * @param message The message
      * @param cause The cause
      */
-    public OAuthException(final String message, final AbstractOXException cause) {
+    public OXException(final String message, final AbstractOXException cause) {
         super(COMPONENT, message, cause);
     }
 
     /**
-     * Initializes a new {@link OAuthException}.
+     * Initializes a new {@link OXException}.
      * 
      * @param category The category
      * @param detailNumber The detail number
      * @param message The message
      * @param cause The cause
      */
-    public OAuthException(final Category category, final int detailNumber, final String message, final Throwable cause) {
+    public OXException(final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(COMPONENT, category, detailNumber, message, cause);
     }
 
     /**
-     * Initializes a new {@link OAuthException}.
+     * Initializes a new {@link OXException}.
      * 
      * @param message The message
      * @param cause The cause
      */
-    public OAuthException(final ErrorMessage message, final Throwable cause) {
+    public OXException(final ErrorMessage message, final Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Initializes a new {@link OAuthException}.
+     * Initializes a new {@link OXException}.
      * 
      * @param message The message
      * @param cause The cause
      * @param messageArguments The message arguments
      */
-    public OAuthException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
+    public OXException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
         super(message, cause);
         setMessageArgs(messageArguments);
     }
 
     /**
-     * Initializes a new {@link OAuthException}.
+     * Initializes a new {@link OXException}.
      * 
      * @param component The component
      * @param message The message
      * @param cause The cause
      */
-    protected OAuthException(final Component component, final String message, final AbstractOXException cause) {
+    protected OXException(final Component component, final String message, final AbstractOXException cause) {
         super(component, message, cause);
     }
 
     /**
-     * Initializes a new {@link OAuthException}.
+     * Initializes a new {@link OXException}.
      * 
      * @param component The component
      * @param category The category
@@ -149,7 +149,7 @@ public class OAuthException extends AbstractOXException {
      * @param message The message
      * @param cause The cause
      */
-    protected OAuthException(final Component component, final Category category, final int detailNumber, final String message, final Throwable cause) {
+    protected OXException(final Component component, final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(component, category, detailNumber, message, cause);
     }
 

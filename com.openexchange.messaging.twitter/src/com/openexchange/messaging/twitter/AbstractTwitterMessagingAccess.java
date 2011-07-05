@@ -58,7 +58,7 @@ import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegist
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceException;
@@ -167,7 +167,7 @@ public abstract class AbstractTwitterMessagingAccess {
                 throw new MessagingException(e);
             } catch (final ServiceException e) {
                 throw new MessagingException(e);
-            } catch (final OAuthException e) {
+            } catch (final OXException e) {
                 throw new MessagingException(e);
             }
         }

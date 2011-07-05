@@ -61,7 +61,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.scribe.exceptions.OAuthException;
+import org.scribe.exceptions.OXException;
 import org.scribe.model.Token;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.impl.OXException;
@@ -182,7 +182,7 @@ public abstract class AbstractFacebookAccess {
                 final JSONObject error = result.getJSONObject("error");
                 final String type = error.optString("type");
                 final String message = error.optString("message");
-                if ("OAuthException".equals(type)) {
+                if ("OXException".equals(type)) {
                     throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                 }
                 throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == message ? "" : message);
@@ -190,7 +190,7 @@ public abstract class AbstractFacebookAccess {
             return result;
         } catch (final JSONException e) {
             throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final OAuthException e) {
+        } catch (final OXException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -216,7 +216,7 @@ public abstract class AbstractFacebookAccess {
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
                     final String message = error.optString("message");
-                    if ("OAuthException".equals(type)) {
+                    if ("OXException".equals(type)) {
                         throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                     }
                     throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
@@ -232,7 +232,7 @@ public abstract class AbstractFacebookAccess {
             throw new IllegalArgumentException("Unsupported return type: " + clazz.getName());
         } catch (final JSONException e) {
             throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final OAuthException e) {
+        } catch (final OXException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

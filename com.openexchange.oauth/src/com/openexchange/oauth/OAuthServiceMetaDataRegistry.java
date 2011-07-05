@@ -70,9 +70,9 @@ public interface OAuthServiceMetaDataRegistry {
      * 
      * @param id The service identifier
      * @return The service
-     * @throws OAuthException If service look-up fails
+     * @throws OXException If service look-up fails
      */
-    OAuthServiceMetaData getService(String id) throws OAuthException;
+    OAuthServiceMetaData getService(String id) throws OXException;
 
     /**
      * Checks for existence of specified service

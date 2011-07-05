@@ -52,7 +52,7 @@ package com.openexchange.oauth.json.osgi;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
@@ -73,35 +73,35 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         super(OAuthService.class);
     }
 
-    private OAuthService getService0() throws OAuthException {
+    private OAuthService getService0() throws OXException {
         try {
             return super.getService();
         } catch (final ServiceException e) {
-            throw new OAuthException(e);
+            throw new OXException(e);
         }
     }
 
-    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         return getService0().createAccount(serviceMetaData, arguments, user, contextId);
     }
 
-    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         return getService0().createAccount(serviceMetaData, type, arguments, user, contextId);
     }
 
-    public void deleteAccount(final int accountId, final int user, final int contextId) throws OAuthException {
+    public void deleteAccount(final int accountId, final int user, final int contextId) throws OXException {
         getService0().deleteAccount(accountId, user, contextId);
     }
 
-    public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) throws OXException {
         return getService0().getAccount(accountId, password, user, contextId);
     }
 
-    public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) throws OAuthException {
+    public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) throws OXException {
         return getService0().getAccounts(password, user, contextId);
     }
 
-    public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) throws OAuthException {
+    public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) throws OXException {
         return getService0().getAccounts(serviceMetaData, password, user, contextId);
     }
 
@@ -113,15 +113,15 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         return delegatee.getMetaDataRegistry();
     }
 
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OAuthException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OXException {
         return getService0().initOAuth(serviceMetaData, callbackUrl);
     }
 
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         getService0().updateAccount(accountId, arguments, user, contextId);
     }
 
-    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException {
         return getService0().updateAccount(accountId, serviceMetaData, type, arguments, user, contextId);
     }
 

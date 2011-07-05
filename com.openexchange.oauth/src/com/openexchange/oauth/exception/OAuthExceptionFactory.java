@@ -51,15 +51,15 @@ package com.openexchange.oauth.exception;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 
 /**
- * {@link OAuthExceptionFactory} - Factory for creating {@link OAuthException}.
+ * {@link OAuthExceptionFactory} - Factory for creating {@link OXException}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthExceptionFactory extends Exceptions<OAuthException> {
+public final class OAuthExceptionFactory extends Exceptions<OXException> {
 
     private static final OAuthExceptionFactory SINGLETON = new OAuthExceptionFactory();
 
@@ -81,8 +81,8 @@ public final class OAuthExceptionFactory extends Exceptions<OAuthException> {
      * {@inheritDoc}
      */
     @Override
-    protected OAuthException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
-        return new OAuthException(message, cause, args);
+    protected OXException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        return new OXException(message, cause, args);
     }
 
     /**

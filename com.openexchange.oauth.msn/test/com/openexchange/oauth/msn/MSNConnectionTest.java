@@ -63,7 +63,7 @@ import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
 
 /**
@@ -110,7 +110,7 @@ public class MSNConnectionTest extends TestCase{
         arguments.put(OAuthConstants.ARGUMENT_CALLBACK, callbackURL);
         try {
             metadata.getOAuthToken(arguments);
-        } catch (OAuthException e) {
+        } catch (OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

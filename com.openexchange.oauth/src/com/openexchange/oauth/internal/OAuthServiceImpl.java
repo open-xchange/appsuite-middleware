@@ -93,7 +93,7 @@ import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthEventConstants;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -149,7 +149,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return registry;
     }
 
-    public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) throws OAuthException {
+    public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -181,7 +181,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) throws OAuthException {
+    public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -214,7 +214,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl) throws OAuthException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl) throws OXException {
         try {
             final OAuthServiceMetaData metaData = registry.getService(serviceMetaData);
             /*
@@ -256,7 +256,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
                 scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
                 authURL,
                 callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
-        } catch (final org.scribe.exceptions.OAuthException e) {
+        } catch (final org.scribe.exceptions.OXException e) {
             throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -271,7 +271,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         try {
             /*
              * Create appropriate OAuth account instance
@@ -315,14 +315,14 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
              * Return newly created account
              */
             return account;
-        } catch (final OAuthException x) {
+        } catch (final OXException x) {
             throw x;
         } catch (final AbstractOXException x) {
-            throw new OAuthException(x);
+            throw new OXException(x);
         }
     }
 
-    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         try {
             /*
              * Create appropriate OAuth account instance
@@ -365,14 +365,14 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
              * Return newly created account
              */
             return account;
-        } catch (final OAuthException x) {
+        } catch (final OXException x) {
             throw x;
         } catch (final AbstractOXException x) {
-            throw new OAuthException(x);
+            throw new OXException(x);
         }
     }
 
-    private void executeUpdate(final int contextId, final Command command, final List<Object> values) throws OAuthException {
+    private void executeUpdate(final int contextId, final Command command, final List<Object> values) throws OXException {
         final Context ctx = getContext(contextId);
         final Connection writeCon = getConnection(false, ctx);
         try {
@@ -387,7 +387,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    public void deleteAccount(final int accountId, final int user, final int contextId) throws OAuthException {
+    public void deleteAccount(final int accountId, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
         try {
@@ -414,7 +414,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         } catch (final SQLException e) {
             rollback(con);
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OAuthException e) {
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } catch (final Exception e) {
@@ -463,7 +463,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return sessions.isEmpty() ? null : sessions.iterator().next();
     }
 
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         final List<Setter> list = setterFrom(arguments);
         if (list.isEmpty()) {
             /*
@@ -505,7 +505,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -537,7 +537,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException {
         try {
             /*
              * Create appropriate OAuth account instance
@@ -580,16 +580,16 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
              * Return the account
              */
             return account;
-        } catch (final OAuthException x) {
+        } catch (final OXException x) {
             throw x;
         } catch (final AbstractOXException x) {
-            throw new OAuthException(x);
+            throw new OXException(x);
         }
     }
 
     // OAuth
 
-    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
+    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OXException {
         switch (type) {
         case OUT_OF_BAND:
             obtainTokenByOutOfBand(arguments, account);
@@ -602,7 +602,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         }
     }
 
-    protected void obtainTokenByOutOfBand(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
+    protected void obtainTokenByOutOfBand(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OXException {
         try {
             final OAuthServiceMetaData metaData = account.getMetaData();
             final OAuthToken oAuthToken = metaData.getOAuthToken(arguments);
@@ -630,20 +630,20 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
                 account.setToken(oAuthToken.getToken());
                 account.setSecret(oAuthToken.getSecret());
             }
-        } catch (final org.scribe.exceptions.OAuthException e) {
+        } catch (final org.scribe.exceptions.OXException e) {
             throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    protected void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OAuthException {
+    protected void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OXException {
         obtainTokenByOutOfBand(arguments, account);
     }
 
     // Helper Methods
 
-    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OAuthException {
+    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OXException {
         final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
         final Class<? extends Api> apiClass;
         if (serviceId.indexOf("twitter") >= 0) {
@@ -673,19 +673,19 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return serviceBuilder.build();
     }
 
-    private Connection getConnection(final boolean readOnly, final Context context) throws OAuthException {
+    private Connection getConnection(final boolean readOnly, final Context context) throws OXException {
         try {
             return readOnly ? provider.getReadConnection(context) : provider.getWriteConnection(context);
         } catch (final DBPoolingException e) {
-            throw new OAuthException(e);
+            throw new OXException(e);
         }
     }
 
-    private Context getContext(final int contextId) throws OAuthException {
+    private Context getContext(final int contextId) throws OXException {
         try {
             return contexts.getContext(contextId);
         } catch (final OXException e) {
-            throw new OAuthException(e);
+            throw new OXException(e);
         }
     }
 
@@ -696,7 +696,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         int set(int pos, PreparedStatement stmt) throws SQLException;
     }
 
-    private static List<Setter> setterFrom(final Map<String, Object> arguments) throws OAuthException {
+    private static List<Setter> setterFrom(final Map<String, Object> arguments) throws OXException {
         final List<Setter> ret = new ArrayList<Setter>(4);
         /*
          * Check for display name
@@ -748,7 +748,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return ret;
     }
 
-    private static String encrypt(final String toEncrypt, final String password) throws OAuthException {
+    private static String encrypt(final String toEncrypt, final String password) throws OXException {
         if (isEmpty(toEncrypt)) {
             return toEncrypt;
         }
@@ -756,13 +756,13 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
             return cryptoService.encrypt(toEncrypt, password);
         } catch (final ServiceException e) {
-            throw new OAuthException(e);
+            throw new OXException(e);
         } catch (final CryptoException e) {
-            throw new OAuthException(e);
+            throw new OXException(e);
         }
     }
 
-    private static String decrypt(final String toDecrypt, final String password) throws OAuthException {
+    private static String decrypt(final String toDecrypt, final String password) throws OXException {
         if (isEmpty(toDecrypt)) {
             return toDecrypt;
         }
@@ -770,7 +770,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
             return cryptoService.decrypt(toDecrypt, password);
         } catch (final ServiceException e) {
-            throw new OAuthException(e);
+            throw new OXException(e);
         } catch (final CryptoException e) {
             LOG.error(e.getMessage(), e);
             return null;
@@ -789,7 +789,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return isWhitespace;
     }
 
-    public String checkSecretCanDecryptStrings(ServerSession session, String secret) throws OAuthException {
+    public String checkSecretCanDecryptStrings(ServerSession session, String secret) throws OXException {
         final Context context = session.getContext();
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -803,12 +803,12 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
                 int id = rs.getInt(1);
                 try {
                     decrypt(rs.getString(2), secret);
-                } catch (OAuthException x) {
+                } catch (OXException x) {
                     return "oauthAccount: " + id + " accessToken";
                 }
                 try {
                     decrypt(rs.getString(3), secret);
-                } catch (OAuthException x) {
+                } catch (OXException x) {
                     return "oauthAccount: " + id + " accessSecret";
                 }
             }
@@ -821,7 +821,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         return null;
     }
 
-    public void migrate(String oldSecret, String newSecret, ServerSession session) throws OAuthException {
+    public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
         final Context context = session.getContext();
         final Connection con = getConnection(false, context);
         PreparedStatement stmt = null;
@@ -839,7 +839,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
                     String accessSecret = rs.getString(3);
                     try {
                         decrypt(accessToken, newSecret);
-                    } catch (OAuthException x) {
+                    } catch (OXException x) {
                         String newToken = encrypt(decrypt(accessToken, oldSecret), newSecret);
                         update = con.prepareStatement("UPDATE oauthAccounts SET accessToken=? WHERE cid=? AND id=?");
                         update.setString(1, newToken);
@@ -849,7 +849,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
                     }
                     try {
                         decrypt(accessSecret, newSecret);
-                    } catch (OAuthException x) {
+                    } catch (OXException x) {
                         String newToken = encrypt(decrypt(accessSecret, oldSecret), newSecret);
                         if (update != null) {
                             update.close();

@@ -72,7 +72,7 @@ public class SimOAuthServiceMetaDataRegistry implements OAuthServiceMetaDataRegi
         return new ArrayList<OAuthServiceMetaData>(map.values());
     }
 
-    public OAuthServiceMetaData getService(String id) throws OAuthException {
+    public OAuthServiceMetaData getService(String id) throws OXException {
         if (!containsService(id)) {
             throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
         }

@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DeleteListenerRegistry} - Registry for OAuth account delete listeners.
@@ -124,7 +124,7 @@ public final class DeleteListenerRegistry {
     /**
      * Triggers the {@link OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion()} event for registered listeners.
      */
-    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OAuthException {
+    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
         for (final OAuthAccountDeleteListener listener : registry.values()) {
             listener.onBeforeOAuthAccountDeletion(id, properties, user, cid, con);
         }
@@ -133,7 +133,7 @@ public final class DeleteListenerRegistry {
     /**
      * Triggers the {@link OAuthAccountDeleteListener#onAfterOAuthAccountDeletion()} event for registered listeners.
      */
-    public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OAuthException {
+    public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
         for (final OAuthAccountDeleteListener listener : registry.values()) {
             listener.onAfterOAuthAccountDeletion(id, properties, user, cid, con);
         }

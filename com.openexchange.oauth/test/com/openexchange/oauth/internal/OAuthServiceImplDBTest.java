@@ -61,7 +61,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.SimOAuthServiceMetaDataRegistry;
@@ -137,7 +137,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     
     // Success Cases
     
-    public void testCreateAccount() throws OAuthException, DBPoolingException, SQLException {
+    public void testCreateAccount() throws OXException, DBPoolingException, SQLException {
         final OAuthAccount authAccount = createTestAccount();
         
         assertNotNull(authAccount);
@@ -152,7 +152,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         
     }
 
-    private OAuthAccount createTestAccount() throws OAuthException {
+    private OAuthAccount createTestAccount() throws OXException {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
@@ -172,7 +172,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         return authAccount;
     }
     
-    public void testDefaultDisplayName() throws OAuthException {
+    public void testDefaultDisplayName() throws OXException {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
         arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
@@ -289,7 +289,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.createAccount("com.openexchange.fantasy", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1);
             fail("Should have died");
-        } catch (final OAuthException e) {
+        } catch (final OXException e) {
             // Hooray;
         }
     }
@@ -298,7 +298,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.getAccount(12, "password", 1, 23);
             fail("Should have died");
-        } catch (final OAuthException x) {
+        } catch (final OXException x) {
             // Hooray!
         }
     }
@@ -310,7 +310,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             update.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
             oauth.updateAccount(12, update, 23, 1);
             fail("Should have died");
-        } catch (final OAuthException x) {
+        } catch (final OXException x) {
             // Hooray!
         }
     }
@@ -319,7 +319,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.deleteAccount(12, 1, 23);
             // Don't die here, just gracefully do nothing
-        } catch (final OAuthException x) {
+        } catch (final OXException x) {
             fail(x.getMessage());
         }
     }

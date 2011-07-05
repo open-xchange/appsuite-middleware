@@ -129,11 +129,11 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         // no-op
     }
 
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OAuthException {
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
         return null;
     }
 
-    public OAuthInteraction initOAuth(String callbackUrl) throws OAuthException {
+    public OAuthInteraction initOAuth(String callbackUrl) throws OXException {
         return null;
     }
     

@@ -64,7 +64,7 @@ import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -95,7 +95,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
     }
 
     @Override
-    public OAuthInteraction initOAuth(String callbackUrl) throws OAuthException {
+    public OAuthInteraction initOAuth(String callbackUrl) throws OXException {
         try {
             if (deferrer != null) {
                 callbackUrl = deferrer.getDeferredURL(callbackUrl);
@@ -138,7 +138,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
     }
 
     @Override
-    public OAuthToken getOAuthToken(Map<String, Object> arguments) throws OAuthException {
+    public OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException {
         OutputStreamWriter writer = null;
         BufferedReader reader = null;
         try {

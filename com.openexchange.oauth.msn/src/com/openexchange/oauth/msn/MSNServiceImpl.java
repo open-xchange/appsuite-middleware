@@ -69,7 +69,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -101,7 +101,7 @@ public class MSNServiceImpl implements MSNService {
             JSONObject response = useAccessTokenToAccessData(wrap_access_token);
             contacts = parseIntoContacts(wrap_access_token, response);
 
-        } catch (OAuthException e) {
+        } catch (OXException e) {
             LOG.error(e);
         }
 
@@ -260,7 +260,7 @@ public class MSNServiceImpl implements MSNService {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
             displayName = account.getDisplayName();
-        } catch (OAuthException e) {
+        } catch (OXException e) {
             LOG.error(e);
         }
         return displayName;

@@ -55,7 +55,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.linkedin.LinkedInSubscribeService;
 
@@ -76,25 +76,25 @@ public class LinkedInSubscriptionsOAuthAccountDeleteListener implements OAuthAcc
         this.contexts = contexts;
     }
 
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OAuthException {
+    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         try {
             liService.deleteAllUsingOAuthAccount(getContext(cid), id);
         } catch (SubscriptionException e) {
-            throw new OAuthException(e);
+            throw new OXException(e);
         }
     }
     
-    private Context getContext(int cid) throws OAuthException {
+    private Context getContext(int cid) throws OXException {
         try {
             return contexts.getContext(cid);
         } catch (OXException e) {
-            throw new OAuthException(e);
+            throw new OXException(e);
         }
     }
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OAuthException {
+    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         // TODO Auto-generated method stub
 
     }

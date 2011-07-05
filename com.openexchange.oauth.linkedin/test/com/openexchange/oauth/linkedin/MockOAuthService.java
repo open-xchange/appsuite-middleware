@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
@@ -138,7 +138,7 @@ public class MockOAuthService implements OAuthService {
 
     }
 
-    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OAuthException {
+    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -146,7 +146,7 @@ public class MockOAuthService implements OAuthService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
-    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OAuthException {
+    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

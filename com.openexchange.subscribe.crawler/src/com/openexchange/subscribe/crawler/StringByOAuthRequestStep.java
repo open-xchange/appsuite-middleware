@@ -62,7 +62,7 @@ import java.util.regex.Pattern;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
-import net.oauth.OAuthException;
+import net.oauth.OXException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.client.OAuthClient;
@@ -140,7 +140,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 LOG.info("Successfully requested OAuth token");
             } catch (IOException e) {
                 LOG.error(e);
-            } catch (OAuthException e) {
+            } catch (OXException e) {
                 LOG.error(e);
             } catch (URISyntaxException e) {
                 LOG.error(e);
@@ -182,7 +182,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 LOG.error(e);
             } catch (URISyntaxException e) {
                 LOG.error(e);
-            } catch (OAuthException e) {
+            } catch (OXException e) {
                 LOG.error(e);
             }
 
@@ -201,7 +201,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 LOG.error(e);
             } catch (URISyntaxException e) {
                 LOG.error(e);
-            } catch (OAuthException e) {
+            } catch (OXException e) {
                 LOG.error(e);
             }
             
@@ -220,7 +220,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 LOG.error(e);
             } catch (URISyntaxException e) {
                 LOG.error(e);
-            } catch (OAuthException e) {
+            } catch (OXException e) {
                 LOG.error(e);
             }
             
@@ -260,7 +260,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return new OAuthAccessor(consumer);
     }
 
-    private OAuthMessage sendRequest(Map map, String url) throws IOException, URISyntaxException, OAuthException {
+    private OAuthMessage sendRequest(Map map, String url) throws IOException, URISyntaxException, OXException {
         List<Map.Entry> params = new ArrayList<Map.Entry>();
         Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
