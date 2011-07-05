@@ -61,12 +61,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.authentication.exception.LoginExceptionFactory;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDException;
 import com.openexchange.id.exception.IDExceptionFactory;
@@ -86,8 +84,6 @@ public final class GlobalActivator implements BundleActivator {
     private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
 
     private ServiceRegistration componentRegistryRegistration;
-
-    private ComponentRegistration loginComponent;
 
     private Initialization initialization;
 
@@ -115,11 +111,6 @@ public final class GlobalActivator implements BundleActivator {
             initialization.start();
             ServiceHolderInit.getInstance().start();
             componentRegistryRegistration = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
-            loginComponent = new ComponentRegistration(
-                context,
-                EnumComponent.LOGIN,
-                "com.openexchange.authentication",
-                LoginExceptionFactory.getInstance());
             idRegistration = new ComponentRegistration(context, IDException.COMPONENT, "com.openexchange.id", IDExceptionFactory.getInstance());
             initStringParsers(context);
 
@@ -192,8 +183,6 @@ public final class GlobalActivator implements BundleActivator {
             }
             idRegistration.unregister();
             idRegistration = null;
-            loginComponent.unregister();
-            loginComponent = null;
             componentRegistryRegistration.unregister();
             ServiceHolderInit.getInstance().stop();
             initialization.stop();

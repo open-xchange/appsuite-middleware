@@ -67,8 +67,7 @@ public interface AuthenticationService {
      * @param loginInfo the complete login information from the login screen.
      * @return a string array with two elements in which the first contains the login info for the context and the second contains the login
      *         info for the user.
-     * @throws OXException TODO
-     * @throws OXException if something with the login info is wrong.
+     * @throws OXException If something with the login info is wrong.
      */
     Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException;
 
