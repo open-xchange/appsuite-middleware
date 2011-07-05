@@ -51,9 +51,6 @@ package com.openexchange.groupware.contact.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.contact.internal.ContactExceptionFactory;
 
 /**
  * {@link ContactActivator}
@@ -62,17 +59,15 @@ import com.openexchange.groupware.contact.internal.ContactExceptionFactory;
  */
 public final class ContactActivator implements BundleActivator {
 
-    private ComponentRegistration registration;
-
     public ContactActivator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.CONTACT, "com.openexchange.groupware.contact", ContactExceptionFactory.getInstance());
+    public void start(final BundleContext context) throws Exception {
+        // Nope
     }
 
-    public void stop(BundleContext context) throws Exception {
-        registration.unregister();
+    public void stop(final BundleContext context) throws Exception {
+        // Nope
     }
 }

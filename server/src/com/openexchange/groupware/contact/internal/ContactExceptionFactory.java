@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact.internal;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
 import com.openexchange.groupware.contact.ContactException;
@@ -59,7 +60,7 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ContactExceptionFactory extends Exceptions<ContactException> {
+public class ContactExceptionFactory extends Exceptions<OXException> {
 
     private static final ContactExceptionFactory SINGLETON = new ContactExceptionFactory();
 
@@ -77,7 +78,7 @@ public class ContactExceptionFactory extends Exceptions<ContactException> {
     }
 
     @Override
-    protected ContactException createException(ErrorMessage message, Throwable cause, Object... args) {
+    protected OXException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
         return new ContactException(message, cause, args);
     }
 }

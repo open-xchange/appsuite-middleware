@@ -60,7 +60,6 @@ import com.openexchange.groupware.contact.ContactInterfaceProviderRegistration;
 import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -166,7 +165,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         }
     }
     
-    public List<ContactInterfaceProviderRegistration> getRegistrations(int contextId) {
+    public List<ContactInterfaceProviderRegistration> getRegistrations(final int contextId) {
         return ContactInterfaceProviderRegistry.getInstance().getRegistrations(contextId);
     }
 
