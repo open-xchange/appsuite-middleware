@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.contexts.impl;
 
-import com.openexchange.authentication.LoginException;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.exception.OXException;
@@ -81,7 +80,7 @@ public final class ContextInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void start() throws LoginException, OXException {
+    public void start() throws OXException {
         ContextStorage.start();
         ServerServiceRegistry.getInstance().addService(ContextService.class, new ContextServiceImpl());
     }
