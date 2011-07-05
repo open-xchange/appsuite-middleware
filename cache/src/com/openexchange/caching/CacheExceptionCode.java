@@ -89,6 +89,10 @@ public enum CacheExceptionCode implements OXExceptionCode {
         return category;
     }
 
+    public String getMessage() {
+        return message;
+    }
+    
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
