@@ -51,8 +51,8 @@ package com.openexchange.mail.usersetting;
 
 import java.sql.Connection;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 
@@ -118,7 +118,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     public final UserSettingMail getUserSettingMail(final int user, final int cid) throws UserConfigurationException {
         try {
             return getUserSettingMail(user, ContextStorage.getStorageContext(cid), null);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new UserConfigurationException(e);
         }
     }

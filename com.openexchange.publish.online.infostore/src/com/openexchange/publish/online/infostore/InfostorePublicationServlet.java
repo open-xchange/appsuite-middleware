@@ -66,7 +66,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
@@ -267,7 +267,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         return path[path.length-1];
     }
 
-    private Context getContext(final String[] path) throws ContextException {
+    private Context getContext(final String[] path) throws OXException {
         int cid = -1;
         for(int i = 0; i < path.length; i++) {
             if(path[i].equals("documents") && path.length > i+1) {

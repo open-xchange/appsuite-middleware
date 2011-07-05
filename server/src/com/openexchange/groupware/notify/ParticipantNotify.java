@@ -102,7 +102,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -313,7 +312,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         int folderOwner = session.getUserId();
         try {
             folderOwner = getFolderOwner(appointmentObj, new ServerSessionAdapter(session));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LL.log(e);
         }
         sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
@@ -447,7 +446,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         final ServerSession serverSession;
         try {
             serverSession = new ServerSessionAdapter(session);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return;
         }

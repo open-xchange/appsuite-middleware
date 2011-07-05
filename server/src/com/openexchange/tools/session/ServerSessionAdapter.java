@@ -50,8 +50,8 @@
 
 package com.openexchange.tools.session;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -77,9 +77,9 @@ public class ServerSessionAdapter implements ServerSession {
      * 
      * @param session The session
      * @return The appropriate server session
-     * @throws ContextException If context cannot be resolved
+     * @throws OXException If context cannot be resolved
      */
-    public static ServerSession valueOf(final Session session) throws ContextException {
+    public static ServerSession valueOf(final Session session) throws OXException {
         if (ServerSession.class.isInstance(session)) {
             return (ServerSession) session;
         }
@@ -102,9 +102,9 @@ public class ServerSessionAdapter implements ServerSession {
      * Initializes a new {@link ServerSessionAdapter}.
      *
      * @param session The delegate session
-     * @throws ContextException If context look-up fails
+     * @throws OXException If context look-up fails
      */
-    public ServerSessionAdapter(final Session session) throws ContextException {
+    public ServerSessionAdapter(final Session session) throws OXException {
         super();
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;

@@ -61,9 +61,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -140,7 +140,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         }
     }
 
-    private void dropTopLevelInfostoreFolderPermissionFromAdmin(Connection con, final int contextId) throws UpdateException, ContextException {
+    private void dropTopLevelInfostoreFolderPermissionFromAdmin(Connection con, final int contextId) throws UpdateException, OXException {
         /*
          * Get context's admin
          */
@@ -165,7 +165,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         }
     }
 
-    private ContextException missingAdminError(final int contextId) {
+    private OXException missingAdminError(final int contextId) {
         return ContextExceptionCodes.NO_MAILADMIN.create(I(contextId));
     }
 

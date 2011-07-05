@@ -89,7 +89,7 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     @Override
-    public int getContextId(final String loginInfo) throws ContextException {
+    public int getContextId(final String loginInfo) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
             return persistantImpl.getContextId(loginInfo);
@@ -106,7 +106,7 @@ public class CachingContextStorage extends ContextStorage {
                     try {
                         cache.put(loginInfo, contextId);
                     } catch (final CacheException e) {
-                        throw new ContextException(e);
+                        throw new OXException(e);
                     }
                 }
             } else if (LOG.isTraceEnabled()) {
@@ -114,12 +114,12 @@ public class CachingContextStorage extends ContextStorage {
             }
             return contextId.intValue();
         } catch (final CacheException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 
     @Override
-    public ContextExtended loadContext(final int contextId) throws ContextException {
+    public ContextExtended loadContext(final int contextId) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         final OXObjectFactory<ContextExtended> factory = new OXObjectFactory<ContextExtended>() {
             public Serializable getKey() {
@@ -154,20 +154,20 @@ public class CachingContextStorage extends ContextStorage {
             }
             return new ContextReloader(factory, REGION_NAME);
         } catch (final AbstractOXException e) {
-            if (e instanceof ContextException) {
-                throw (ContextException) e;
+            if (e instanceof OXException) {
+                throw (OXException) e;
             }
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 
     @Override
-    public List<Integer> getAllContextIds() throws ContextException {
+    public List<Integer> getAllContextIds() throws OXException {
         return persistantImpl.getAllContextIds();
     }
 
     @Override
-    protected void startUp() throws ContextException {
+    protected void startUp() throws OXException {
         if (started) {
             LOG.error("Duplicate initialization of CachingContextStorage.");
             return;
@@ -177,7 +177,7 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     @Override
-    protected void shutDown() throws ContextException {
+    protected void shutDown() throws OXException {
         if (!started) {
             LOG.error("Duplicate shutdown of CachingContextStorage.");
             return;
@@ -195,7 +195,7 @@ public class CachingContextStorage extends ContextStorage {
     }
     
     @Override
-    public void invalidateContext(final int contextId) throws ContextException {
+    public void invalidateContext(final int contextId) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             // Cache not initialized.
@@ -212,12 +212,12 @@ public class CachingContextStorage extends ContextStorage {
                 cacheLock.unlock();
             }
         } catch (final CacheException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 
     @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
+    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
             // Cache not initialized.
@@ -234,7 +234,7 @@ public class CachingContextStorage extends ContextStorage {
                 cacheLock.unlock();
             }
         } catch (final CacheException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 

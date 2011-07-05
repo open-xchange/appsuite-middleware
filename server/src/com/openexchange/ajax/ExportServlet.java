@@ -56,7 +56,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
@@ -118,7 +118,7 @@ public class ExportServlet extends ImportExport {
             }        
         } catch (OXMandatoryFieldException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (final ImportExportException e) {
             LOG.error(e.getMessage(), e);

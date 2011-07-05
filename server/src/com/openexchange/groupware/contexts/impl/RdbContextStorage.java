@@ -57,7 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.update.Tools;
@@ -102,13 +102,8 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     @Override
-    public int getContextId(String loginInfo) throws ContextException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup();
-        } catch (final DBPoolingException e) {
-            throw ContextExceptionCodes.NO_CONNECTION.create(e);
-        }
+    public int getContextId(final String loginInfo) throws OXException {
+        final Connection con = DBPool.pickup();
         int contextId = NOT_FOUND;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -128,13 +123,8 @@ public class RdbContextStorage extends ContextStorage {
         return contextId;
     }
 
-    private int getAdmin(final Context ctx) throws ContextException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw ContextExceptionCodes.NO_CONNECTION.create(e);
-        }
+    private int getAdmin(final Context ctx) throws OXException {
+        final Connection con = DBPool.pickup(ctx);
         int identifier = -1;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -157,13 +147,8 @@ public class RdbContextStorage extends ContextStorage {
         return identifier;
     }
 
-    private String[] getLoginInfos(final Context ctx) throws ContextException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup();
-        } catch (final DBPoolingException e) {
-            throw ContextExceptionCodes.NO_CONNECTION.create(e);
-        }
+    private String[] getLoginInfos(final Context ctx) throws OXException {
+        final Connection con = DBPool.pickup();
         PreparedStatement stmt = null;
         ResultSet result = null;
         final List<String> loginInfo = new ArrayList<String>();
@@ -184,15 +169,15 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     @Override
-    public ContextExtended loadContext(int contextId) throws ContextException {
-        ContextImpl context = loadContextData(contextId);
+    public ContextExtended loadContext(final int contextId) throws OXException {
+        final ContextImpl context = loadContextData(contextId);
         context.setLoginInfo(getLoginInfos(context));
         context.setMailadmin(getAdmin(context));
         loadAttributes(context);
         return context;
     }
 
-    private void loadAttributes(ContextImpl ctx) throws ContextException {
+    private void loadAttributes(final ContextImpl ctx) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -203,8 +188,8 @@ public class RdbContextStorage extends ContextStorage {
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
             while(result.next()) {
-                String name = result.getString(1);
-                String value = result.getString(2);
+                final String name = result.getString(1);
+                final String value = result.getString(2);
                 ctx.addAttribute(name, value);
             }
         } catch (final SQLException e) {
@@ -214,25 +199,18 @@ public class RdbContextStorage extends ContextStorage {
                     // happen once for every schema.
                     return;
                 }
-            } catch (SQLException e1) {
+            } catch (final SQLException e1) {
                 // IGNORE
             }
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (DBPoolingException e) {
-            throw ContextExceptionCodes.NO_CONNECTION.create(e);
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
     }
 
-    public ContextImpl loadContextData(int contextId) throws ContextException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup();
-        } catch (DBPoolingException e) {
-            throw ContextExceptionCodes.NO_CONNECTION.create(e);
-        }
+    public ContextImpl loadContextData(final int contextId) throws OXException {
+        final Connection con = DBPool.pickup();
         try {
             return loadContextData(con, contextId);
         } finally {
@@ -240,7 +218,7 @@ public class RdbContextStorage extends ContextStorage {
         }
     }
 
-    public ContextImpl loadContextData(Connection con, int contextId) throws ContextException {
+    public ContextImpl loadContextData(final Connection con, final int contextId) throws OXException {
         ContextImpl context = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -263,7 +241,7 @@ public class RdbContextStorage extends ContextStorage {
             } else {
                 throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -275,14 +253,9 @@ public class RdbContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-    public List<Integer> getAllContextIds() throws ContextException {
+    public List<Integer> getAllContextIds() throws OXException {
         final List<Integer> retval = new ArrayList<Integer>();
-        Connection con = null;
-        try {
-            con = DBPool.pickup();
-        } catch (final DBPoolingException e) {
-            throw ContextExceptionCodes.NO_CONNECTION.create(e);
-        }
+        final Connection con = DBPool.pickup();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {

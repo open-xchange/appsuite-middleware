@@ -62,8 +62,8 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
@@ -408,7 +408,7 @@ public final class MessageWriter {
                     }
                 } catch (final JSONException e) {
                     throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
-                } catch (final ContextException e) {
+                } catch (final OXException e) {
                     throw new MailException(e);
                 }
             }
@@ -436,7 +436,7 @@ public final class MessageWriter {
                     }
                 } catch (final JSONException e) {
                     throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
-                } catch (final ContextException e) {
+                } catch (final OXException e) {
                     throw new MailException(e);
                 }
             }

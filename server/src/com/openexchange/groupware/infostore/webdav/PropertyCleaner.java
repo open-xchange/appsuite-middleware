@@ -56,7 +56,6 @@ import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
@@ -94,7 +93,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 				LOG.debug("I assume the user was deleted, so these properties are cleaned elsewhere.");
 			}
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (final ContextException e) {
+		} catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
 			try {
@@ -128,7 +127,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 				LOG.debug("I assume the user was deleted, so these properties are cleaned elsewhere.");
 			}
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (final ContextException e) {
+		} catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
 			try {

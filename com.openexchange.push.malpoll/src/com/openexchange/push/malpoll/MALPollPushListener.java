@@ -56,7 +56,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -258,7 +258,7 @@ public final class MALPollPushListener implements PushListener {
             }
         } catch (final ServiceException e) {
             throw new PushException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         }
         try {

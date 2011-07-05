@@ -74,7 +74,6 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -124,7 +123,7 @@ public final class ContactInsertDataHandler implements DataHandler {
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new DataException(e);
         }
         /*

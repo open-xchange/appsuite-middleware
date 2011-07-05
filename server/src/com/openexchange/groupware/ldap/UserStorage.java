@@ -53,9 +53,9 @@ import java.sql.Connection;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
@@ -253,7 +253,7 @@ public abstract class UserStorage {
 
     /**
      * Initialization.
-     * @throws ContextException if initialization of contexts fails.
+     * @throws OXException if initialization of contexts fails.
      */
     public static void start() throws UserException {
         if (null != instance) {
@@ -315,7 +315,7 @@ public abstract class UserStorage {
         } catch (final LdapException e) {
             LOG.error(e.getMessage(), e);
             return null;
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
         }

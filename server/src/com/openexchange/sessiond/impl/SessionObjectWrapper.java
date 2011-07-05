@@ -49,8 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
@@ -76,12 +76,12 @@ public final class SessionObjectWrapper {
 	 * @param sessionobjectidentifier
 	 *            The session identifier
 	 * @return a dummy instance of {@link SessionObject}
-	 * @throws ContextException
+	 * @throws OXException
 	 *             If corresponding {@link Context} object could not be loaded
 	 *             from given <code>context_id</code>
 	 */
 	public static SessionObject createSessionObject(final int user_id, final int context_id,
-			final String sessionobjectidentifier) throws ContextException {
+			final String sessionobjectidentifier) throws OXException {
 		final Context context = ContextStorage.getInstance().getContext(context_id);
 		return createSessionObject(user_id, context, sessionobjectidentifier);
 	}

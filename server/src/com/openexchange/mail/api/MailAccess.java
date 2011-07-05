@@ -61,8 +61,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
@@ -934,7 +934,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             final Context ctx;
             try {
                 ctx = ContextStorage.getStorageContext(session.getContextId());
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             }
             if (session.getUserId() == ctx.getMailadmin()) {

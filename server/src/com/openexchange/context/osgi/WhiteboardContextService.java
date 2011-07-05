@@ -55,8 +55,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 
 
 /**
@@ -95,27 +95,27 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
         delegate = null;
     }
 
-    public List<Integer> getAllContextIds() throws ContextException {
+    public List<Integer> getAllContextIds() throws OXException {
         return getDelegate().getAllContextIds();
     }
 
-    public Context getContext(int contextId) throws ContextException {
+    public Context getContext(int contextId) throws OXException {
         return getDelegate().getContext(contextId);
     }
 
-    public Context loadContext(int contextId) throws ContextException {
+    public Context loadContext(int contextId) throws OXException {
         return getDelegate().loadContext(contextId);
     }
 
-    public int getContextId(String loginContextInfo) throws ContextException {
+    public int getContextId(String loginContextInfo) throws OXException {
         return getDelegate().getContextId(loginContextInfo);
     }
 
-    public void invalidateContext(int contextId) throws ContextException {
+    public void invalidateContext(int contextId) throws OXException {
         getDelegate().invalidateContext(contextId);
     }
 
-    public void invalidateLoginInfo(String loginContextInfo) throws ContextException {
+    public void invalidateLoginInfo(String loginContextInfo) throws OXException {
         getDelegate().invalidateLoginInfo(loginContextInfo);
     }
 

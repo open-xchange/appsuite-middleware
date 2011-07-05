@@ -70,7 +70,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
@@ -596,7 +595,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
     public ServerSession getSession() throws OXException {
         try {
             return new ServerSessionAdapter(sessionHolder.getSessionObject());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new InfostoreException(e);
         }
     }

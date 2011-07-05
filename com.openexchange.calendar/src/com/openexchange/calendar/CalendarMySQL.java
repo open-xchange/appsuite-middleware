@@ -109,7 +109,7 @@ import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
@@ -3763,7 +3763,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         EventClient eventclient = new EventClient(session);
         try {
             eventclient.modify(edao);
-        } catch (ContextException e) {
+        } catch (OXException e) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);
         } catch (EventException e) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);

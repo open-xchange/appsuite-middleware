@@ -68,7 +68,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -527,7 +527,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
         try {
             return getService(ContextService.class).getContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

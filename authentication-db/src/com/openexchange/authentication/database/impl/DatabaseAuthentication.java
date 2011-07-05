@@ -56,7 +56,7 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -108,7 +108,7 @@ public class DatabaseAuthentication implements AuthenticationService {
             if (!userService.authenticate(user, password)) {
                 throw INVALID_CREDENTIALS.create();
             }
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         } catch (final UserException e) {
             throw new LoginException(e);

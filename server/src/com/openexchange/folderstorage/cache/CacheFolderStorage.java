@@ -68,6 +68,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.concurrent.CallerRunsCompletionService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -91,7 +92,6 @@ import com.openexchange.folderstorage.internal.performers.SessionStorageParamete
 import com.openexchange.folderstorage.internal.performers.StorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -293,7 +293,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         try {
             return new PathPerformer(new ServerSessionAdapter(session), null, registry);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -317,7 +317,7 @@ public final class CacheFolderStorage implements FolderStorage {
         } else {
             try {
                 folderId = new CreatePerformer(new ServerSessionAdapter(session), registry).doCreate(folder);
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
         }
@@ -379,7 +379,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     new ServerSessionAdapter(session),
                     null,
                     registry));
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
         }
@@ -491,7 +491,7 @@ public final class CacheFolderStorage implements FolderStorage {
         } else {
             try {
                 new ClearPerformer(new ServerSessionAdapter(session), registry).doClear(treeId, folderId);
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
         }
@@ -560,7 +560,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     treeId,
                     folderId,
                     storageParameters.getTimeStamp());
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
         }
@@ -1004,7 +1004,7 @@ public final class CacheFolderStorage implements FolderStorage {
         } else {
             try {
                 new UpdatePerformer(new ServerSessionAdapter(session), registry).doUpdate(folder, storageParameters.getTimeStamp());
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
         }
@@ -1075,7 +1075,7 @@ public final class CacheFolderStorage implements FolderStorage {
                         timeStamp,
                         ignoreDelete,
                         includeContentTypes)[index];
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new FolderException(e);
             }
         }

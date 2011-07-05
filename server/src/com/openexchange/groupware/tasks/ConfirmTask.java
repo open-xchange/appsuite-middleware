@@ -62,7 +62,6 @@ import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
@@ -168,7 +167,7 @@ public final class ConfirmTask {
             throw new TaskException(Code.EVENT, e);
         } catch (final OXException e) {
             throw new TaskException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
     }

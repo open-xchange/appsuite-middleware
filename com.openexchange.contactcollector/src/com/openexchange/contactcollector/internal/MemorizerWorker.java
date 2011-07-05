@@ -77,7 +77,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.settings.SettingException;
@@ -350,7 +350,7 @@ public final class MemorizerWorker {
                 return;
             }
             userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         } catch (final UserConfigurationException e) {
@@ -466,7 +466,7 @@ public final class MemorizerWorker {
             enabledRight = new ServerSessionAdapter(session).getUserConfiguration().isCollectEmailAddresses();
         } catch (final SettingException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         return enabledRight && enabled != null && enabled.booleanValue();

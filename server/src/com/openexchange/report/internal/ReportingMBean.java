@@ -82,9 +82,9 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -161,7 +161,7 @@ public class ReportingMBean implements DynamicMBean {
                 total.put(value);
             } catch (OpenDataException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (ContextException e) {
+            } catch (OXException e) {
                 LOG.error(e.getMessage(), e);
             } catch (UserException e) {
                 LOG.error(e.getMessage(), e);
@@ -197,7 +197,7 @@ public class ReportingMBean implements DynamicMBean {
                     contextId, getAdminPermission(contextAdmin, configs), I(configs.length), calcAge(created), created, sb.toString(), moduleAccessCombinations });
                 detail.put(value);
             }
-        } catch (ContextException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (OpenDataException e) {
             LOG.error(e.getMessage(), e);

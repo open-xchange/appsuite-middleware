@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.util.Map;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthException;
 import com.openexchange.subscribe.SubscriptionException;
@@ -87,7 +87,7 @@ public class LinkedInSubscriptionsOAuthAccountDeleteListener implements OAuthAcc
     private Context getContext(int cid) throws OAuthException {
         try {
             return contexts.getContext(cid);
-        } catch (ContextException e) {
+        } catch (OXException e) {
             throw new OAuthException(e);
         }
     }

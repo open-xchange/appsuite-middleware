@@ -54,7 +54,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -201,7 +201,7 @@ public final class MailNotifyPushListenerRegistry {
                 ret[i] = user.getLoginInfo().toLowerCase();
             }
             return ret;
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         } catch (final LdapException e) {
             throw new PushException(e);

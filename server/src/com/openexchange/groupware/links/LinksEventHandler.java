@@ -60,11 +60,11 @@ import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.event.impl.NoDelayEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
@@ -148,7 +148,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         Context ct = null;
         try {
             ct = ContextStorage.getStorageContext(so.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
                     + fid, e);
             return;
@@ -205,7 +205,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         Context ct = null;
         try {
             ct = ContextStorage.getStorageContext(so.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
                     + type + " fid=" + fid + ')', e);
             return;

@@ -87,7 +87,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
@@ -684,7 +684,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
     private Context getContext(final int contextId) throws OAuthException {
         try {
             return contexts.getContext(contextId);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OAuthException(e);
         }
     }

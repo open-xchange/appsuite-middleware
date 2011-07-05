@@ -62,11 +62,11 @@ import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationException;
 import com.openexchange.authorization.AuthorizationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -160,7 +160,7 @@ public final class LoginPerformer {
         } catch (final LoginException e) {
             logLoginRequest(request, retval);
             throw e;
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             logLoginRequest(request, retval);
             throw new LoginException(e);
         } catch (final UserException e) {
@@ -200,7 +200,7 @@ public final class LoginPerformer {
         }
     }
 
-    private Context findContext(final String contextInfo) throws ContextException {
+    private Context findContext(final String contextInfo) throws OXException {
         final ContextStorage contextStor = ContextStorage.getInstance();
         final int contextId = contextStor.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
@@ -257,7 +257,7 @@ public final class LoginPerformer {
         final Context context;
         try {
             context = contextStor.getContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         }
         if (null == context) {

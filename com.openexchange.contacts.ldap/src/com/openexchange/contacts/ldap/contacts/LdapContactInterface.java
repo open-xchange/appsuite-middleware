@@ -77,7 +77,7 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -645,7 +645,7 @@ public class LdapContactInterface implements ContactInterface {
         final User user;
         try {
             user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new LdapException(Code.ERROR_GETTING_USER_Object, e);
         }
         return user;

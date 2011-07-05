@@ -92,7 +92,6 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -400,7 +399,7 @@ public final class Contacts {
                     insert_values.append("?,");
                 }
             }
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final DBPoolingException d) {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(d);
@@ -1161,7 +1160,7 @@ public final class Contacts {
         return retval;
     }
 
-    public static Contact getContactById(final int objectId, final Session session) throws ContactException, ContextException, DBPoolingException, OXObjectNotFoundException {
+    public static Contact getContactById(final int objectId, final Session session) throws ContactException, OXException, DBPoolingException, OXObjectNotFoundException {
         final Context ctx = ContextStorage.getStorageContext(session);
         final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         final Connection readCon = DBPool.pickup(ctx);
@@ -1271,7 +1270,7 @@ public final class Contacts {
             } else {
                 cs.iFdeleteContact(id, cid, del);
             }
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1404,7 +1403,7 @@ public final class Contacts {
 
                 ps.execute();
             }
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1555,7 +1554,7 @@ public final class Contacts {
                     ps.execute();
 
                 }
-            } catch (final ContextException d) {
+            } catch (final OXException d) {
                 throw new ContactException(d);
             } catch (final SQLException e) {
                 throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1578,7 +1577,7 @@ public final class Contacts {
                 LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)));
             }
             ps.execute();
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1690,7 +1689,7 @@ public final class Contacts {
                 }
                 ps.execute();
             }
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1769,7 +1768,7 @@ public final class Contacts {
                     }
                     ps.execute();
                 }
-            } catch (final ContextException d) {
+            } catch (final OXException d) {
                 throw new ContactException(d);
             } catch (final SQLException e) {
                 throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1790,7 +1789,7 @@ public final class Contacts {
             if (rs.next()) {
                 last_mod = new Date(rs.getLong(1));
             }
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
@@ -1812,7 +1811,7 @@ public final class Contacts {
                 return rs.getString(1);
             }
             return null;
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } finally {
             closeSQLStuff(rs, stmt);
@@ -1837,7 +1836,7 @@ public final class Contacts {
                     co.setImageContentType(rs.getString(3));
                 }
             }
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1862,7 +1861,7 @@ public final class Contacts {
                 LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)));
             }
             ps.execute();
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1889,7 +1888,7 @@ public final class Contacts {
                 LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)));
             }
             ps.execute();
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -2152,7 +2151,7 @@ public final class Contacts {
             ct = ContextStorage.getStorageContext(so.getContextId());
             readCon = DBPool.pickup(ct);
             return containsForeignObjectInFolder(fid, uid, so, readCon);
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } finally {
             DBPool.closeReaderSilent(ct, readCon);
@@ -2170,7 +2169,7 @@ public final class Contacts {
                 return true;
             }
             return false;
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -2189,7 +2188,7 @@ public final class Contacts {
             final ContactSql cs = new ContactMySql(null);
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
             return (rs.next());
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final DBPoolingException se) {
             LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
@@ -2210,7 +2209,7 @@ public final class Contacts {
             final ContactSql cs = new ContactMySql(null);
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
             return (rs.next());
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException se) {
             LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
@@ -2246,7 +2245,7 @@ public final class Contacts {
                 if (contactFolder.getType() == FolderObject.PRIVATE) {
                     deleteIt = true;
                 }
-            } catch (final ContextException d) {
+            } catch (final OXException d) {
                 throw new ContactException(d);
             } catch (final OXException e) {
                 throw new ContactException(e);
@@ -2298,7 +2297,7 @@ public final class Contacts {
                 LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
             }
             del.execute(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final EventException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(so.getContextId()), I(fid));
@@ -2321,7 +2320,7 @@ public final class Contacts {
         try {
             final ContactSql cs = new ContactMySql(null);
             cs.iFtrashDistributionList(delete, id, cid, stmt);
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
@@ -2339,7 +2338,7 @@ public final class Contacts {
         try {
             final ContactSql cs = new ContactMySql(null);
             cs.iFtrashLinks(delete, stmt, id, cid);
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
@@ -2357,7 +2356,7 @@ public final class Contacts {
         try {
             final ContactSql cs = new ContactMySql(null);
             cs.iFtrashImage(delete, stmt, id, cid);
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
@@ -2467,7 +2466,7 @@ public final class Contacts {
             } else {
                 cs.iFtrashAllUserContactsDeletedEntries(del, so.getContextId(), uid, ct);
             }
-        } catch (final ContextException d) {
+        } catch (final OXException d) {
             throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);

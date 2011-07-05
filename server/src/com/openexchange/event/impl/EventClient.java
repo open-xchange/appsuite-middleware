@@ -78,7 +78,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
@@ -117,7 +116,7 @@ public class EventClient {
         contextId = session.getContextId();
     }
 
-    public void create(final Appointment appointment) throws EventException, OXException, ContextException {
+    public void create(final Appointment appointment) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -141,7 +140,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void modify(final Appointment appointment) throws EventException, OXException, ContextException {
+    public void modify(final Appointment appointment) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -165,7 +164,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void accepted(final Appointment appointment) throws EventException, OXException, ContextException {
+    public void accepted(final Appointment appointment) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -189,7 +188,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void declined(final Appointment appointment) throws EventException, OXException, ContextException {
+    public void declined(final Appointment appointment) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -213,7 +212,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void tentative(final Appointment appointment) throws EventException, OXException, ContextException {
+    public void tentative(final Appointment appointment) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -237,7 +236,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final Appointment appointment) throws EventException, OXException, ContextException {
+    public void delete(final Appointment appointment) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -303,7 +302,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void accept(Task oldTask, Task newTask) throws EventException, OXException, ContextException {
+    public void accept(Task oldTask, Task newTask) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = newTask.getParentFolderID();
@@ -327,7 +326,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void declined(Task oldTask, Task newTask) throws EventException, OXException, ContextException {
+    public void declined(Task oldTask, Task newTask) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = newTask.getParentFolderID();
@@ -351,7 +350,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void tentative(Task oldTask, Task newTask) throws EventException, OXException, ContextException {
+    public void tentative(Task oldTask, Task newTask) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = newTask.getParentFolderID();
@@ -375,7 +374,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final Task task) throws EventException, OXException, ContextException {
+    public void delete(final Task task) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
 
@@ -414,7 +413,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void create(final Contact contact) throws EventException, OXException, ContextException {
+    public void create(final Contact contact) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = contact.getParentFolderID();
@@ -452,7 +451,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final Contact contact) throws EventException, OXException, ContextException {
+    public void delete(final Contact contact) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = contact.getParentFolderID();
@@ -490,7 +489,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void create(final FolderObject folder) throws EventException, OXException, ContextException {
+    public void create(final FolderObject folder) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = folder.getParentFolderID();
@@ -528,7 +527,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final FolderObject folder) throws EventException, OXException, ContextException {
+    public void delete(final FolderObject folder) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = folder.getParentFolderID();
@@ -557,7 +556,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void create(final DocumentMetadata document) throws EventException, OXException, ContextException {
+    public void create(final DocumentMetadata document) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final long folderId = document.getFolderId();
@@ -581,7 +580,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void modify(final DocumentMetadata document) throws EventException, OXException, ContextException {
+    public void modify(final DocumentMetadata document) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final long folderId = document.getFolderId();
@@ -610,7 +609,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final DocumentMetadata document) throws EventException, OXException, ContextException {
+    public void delete(final DocumentMetadata document) throws EventException, OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
         //FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 
@@ -679,7 +678,7 @@ public class EventClient {
                 throw new EventException(e);
             } catch (GroupException e) {
                 throw new EventException(e);
-            } catch (ContextException e) {
+            } catch (OXException e) {
                 throw new EventException(e);
             }
         }
@@ -717,7 +716,7 @@ public class EventClient {
                     throw new EventException(e);
                 } catch (GroupException e) {
                     throw new EventException(e);
-                } catch (ContextException e) {
+                } catch (OXException e) {
                     throw new EventException(e);
                 }
             }
@@ -725,7 +724,7 @@ public class EventClient {
         return retval;
     }
 
-    private void addFolderToAffectedMap(Map<Integer, Set<Integer>> retval, FolderObject folder) throws ServiceException, GroupException, ContextException {
+    private void addFolderToAffectedMap(Map<Integer, Set<Integer>> retval, FolderObject folder) throws ServiceException, GroupException, OXException {
         for (OCLPermission permission : folder.getPermissions()) {
             if (permission.isFolderVisible()) {
                 if (permission.isGroupPermission()) {
@@ -750,7 +749,7 @@ public class EventClient {
         return retval;
     }
 
-    private static Context getContext(int contextId) throws ServiceException, ContextException {
+    private static Context getContext(int contextId) throws ServiceException, OXException {
         ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
         return contextService.getContext(contextId);
     }

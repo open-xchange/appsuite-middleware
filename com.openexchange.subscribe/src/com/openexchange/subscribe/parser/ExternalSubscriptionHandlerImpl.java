@@ -57,7 +57,7 @@ package com.openexchange.subscribe.parser;
 //import org.xml.sax.SAXException;
 //import com.openexchange.api2.OXException;
 //import com.openexchange.groupware.container.Contact;
-//import com.openexchange.groupware.contexts.impl.ContextException;
+//import com.openexchange.groupware.contexts.impl.OXException;
 //import com.openexchange.session.Session;
 
 /**
@@ -75,7 +75,7 @@ public class ExternalSubscriptionHandlerImpl extends ContactHandler {
 //            ContactObject[] contactsForUser = null; //getContacts(subscription);
 //            List<ContactObject> contacts = Arrays.asList(contactsForUser);
 //            storeContacts(new XingSubscriptionSession(subscription), subscription.getTargetFolder(), contacts);
-//        } catch (ContextException e) {
+//        } catch (OXException e) {
 //            LOG.error(e.getMessage(), e);
 //        } catch (OXException e) {
 //            LOG.error(e.getMessage(), e);

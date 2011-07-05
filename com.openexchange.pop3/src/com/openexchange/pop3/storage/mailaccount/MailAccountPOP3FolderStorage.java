@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSessionCache;
@@ -139,7 +139,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                 return POP3ServiceRegistry.getServiceRegistry().getService(ContextService.class, true).getContext(session.getContextId());
             } catch (final ServiceException e) {
                 throw new MailException(e);
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new MailException(e);
             }
         }

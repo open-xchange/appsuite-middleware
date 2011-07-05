@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -84,7 +85,6 @@ import com.openexchange.folderstorage.messaging.contentType.SpamContentType;
 import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MessagingType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -767,7 +767,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             return list.toArray(new SortableId[list.size()]);
         } catch (final MessagingException e) {
             throw new FolderException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final ServiceException e) {
             throw new FolderException(e);

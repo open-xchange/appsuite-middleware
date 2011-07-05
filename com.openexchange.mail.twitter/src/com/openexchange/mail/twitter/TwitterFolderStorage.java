@@ -50,7 +50,7 @@
 package com.openexchange.mail.twitter;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -90,7 +90,7 @@ public final class TwitterFolderStorage extends MailFolderStorage {
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }

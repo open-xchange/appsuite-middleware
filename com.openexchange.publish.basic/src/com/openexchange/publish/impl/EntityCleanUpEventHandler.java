@@ -56,7 +56,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.publish.PublicationException;
 
 /**
@@ -91,7 +91,7 @@ public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
         Context context;
         try {
             context = contexts.getContext(commonEvent.getContextId());
-        } catch (ContextException e) {
+        } catch (OXException e) {
             LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
             return;
         }

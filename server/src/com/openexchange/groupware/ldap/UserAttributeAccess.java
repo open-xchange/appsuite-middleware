@@ -54,8 +54,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -187,7 +187,7 @@ public final class UserAttributeAccess {
         Context context = null;
         try {
             context = ContextStorage.getStorageContext(contextId);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             // Occurs if a context's admin is created
             context = new ContextImpl(contextId);
         }

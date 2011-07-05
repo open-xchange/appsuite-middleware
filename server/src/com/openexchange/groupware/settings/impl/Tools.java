@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.settings.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -77,7 +77,7 @@ public final class Tools {
         throws SettingException {
         try {
             return ContextStorage.getInstance().getContext(contextId);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new SettingException(e);
         }
     }

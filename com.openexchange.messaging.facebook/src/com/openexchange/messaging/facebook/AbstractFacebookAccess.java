@@ -64,7 +64,7 @@ import org.json.JSONValue;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
@@ -141,7 +141,7 @@ public abstract class AbstractFacebookAccess {
                 throw new MessagingException(e);
             } catch (final UserException e) {
                 throw new MessagingException(e);
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new MessagingException(e);
             }
         }

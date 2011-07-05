@@ -72,7 +72,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
@@ -544,7 +543,7 @@ public final class Tools {
 
     private static final String TABLE = "TABLE";
 
-    public static void removeFile(final int cid, final String fileStoreLocation) throws OXException, FilestoreException, ContextException {
+    public static void removeFile(final int cid, final String fileStoreLocation) throws OXException, FilestoreException, OXException {
         final Context ctx = ContextStorage.getInstance().loadContext(cid);
         final URI fileStorageURI = FilestoreStorage.createURI(ctx);
         final File file = new File(fileStorageURI);

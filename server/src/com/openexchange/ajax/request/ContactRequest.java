@@ -97,7 +97,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
@@ -879,7 +878,7 @@ public class ContactRequest {
         final LinkObject[] links;
         try {
             links = Links.getAllLinksFromObject(origObjectId, Types.CONTACT, origFolderId, user.getId(), user.getGroups(), session, readCon);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (LinkException e) {
             throw new ContactException(e);
@@ -926,7 +925,7 @@ public class ContactRequest {
                 }
                 Links.performLinkStorage(copy, user.getId(), user.getGroups(), session, writeCon);
             }
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (LinkException e) {
             throw new ContactException(e);

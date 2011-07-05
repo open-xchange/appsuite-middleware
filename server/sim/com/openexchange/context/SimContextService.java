@@ -51,7 +51,7 @@ package com.openexchange.context;
 
 import java.util.List;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 
 
 /**
@@ -63,7 +63,7 @@ public class SimContextService implements ContextService{
     /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#getAllContextIds()
      */
-    public List<Integer> getAllContextIds() throws ContextException {
+    public List<Integer> getAllContextIds() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -71,12 +71,12 @@ public class SimContextService implements ContextService{
     /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#getContext(int)
      */
-    public Context getContext(int contextId) throws ContextException {
+    public Context getContext(int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public Context loadContext(int contextId) throws ContextException {
+    public Context loadContext(int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -84,7 +84,7 @@ public class SimContextService implements ContextService{
     /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#getContextId(java.lang.String)
      */
-    public int getContextId(String loginContextInfo) throws ContextException {
+    public int getContextId(String loginContextInfo) throws OXException {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -92,7 +92,7 @@ public class SimContextService implements ContextService{
     /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#invalidateContext(int)
      */
-    public void invalidateContext(int contextId) throws ContextException {
+    public void invalidateContext(int contextId) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -100,7 +100,7 @@ public class SimContextService implements ContextService{
     /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#invalidateLoginInfo(java.lang.String)
      */
-    public void invalidateLoginInfo(String loginContextInfo) throws ContextException {
+    public void invalidateLoginInfo(String loginContextInfo) throws OXException {
         // TODO Auto-generated method stub
         
     }

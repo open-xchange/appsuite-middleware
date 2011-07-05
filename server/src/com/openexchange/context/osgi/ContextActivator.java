@@ -51,7 +51,7 @@ package com.openexchange.context.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import com.openexchange.context.internal.ContextExceptionFactory;
+import com.openexchange.context.internal.OXExceptionFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
@@ -86,7 +86,7 @@ public class ContextActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.CONTEXT, "com.openexchange.context", ContextExceptionFactory.getInstance());
+        registration = new ComponentRegistration(context, EnumComponent.CONTEXT, "com.openexchange.context", OXExceptionFactory.getInstance());
         
         DatabaseService dbase = getService(DatabaseService.class);
         

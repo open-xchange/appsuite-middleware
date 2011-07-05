@@ -51,8 +51,8 @@ package com.openexchange.context.internal;
 
 import java.util.List;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
@@ -70,27 +70,27 @@ public final class ContextServiceImpl implements ContextService {
         super();
     }
 
-    public List<Integer> getAllContextIds() throws ContextException {
+    public List<Integer> getAllContextIds() throws OXException {
         return ContextStorage.getInstance().getAllContextIds();
     }
 
-    public Context getContext(final int contextId) throws ContextException {
+    public Context getContext(final int contextId) throws OXException {
         return ContextStorage.getInstance().getContext(contextId);
     }
 
-    public Context loadContext(int contextId) throws ContextException {
+    public Context loadContext(int contextId) throws OXException {
         return ContextStorage.getInstance().loadContext(contextId);
     }
 
-    public int getContextId(final String loginContextInfo) throws ContextException {
+    public int getContextId(final String loginContextInfo) throws OXException {
         return ContextStorage.getInstance().getContextId(loginContextInfo);
     }
 
-    public void invalidateContext(final int contextId) throws ContextException {
+    public void invalidateContext(final int contextId) throws OXException {
         ContextStorage.getInstance().invalidateContext(contextId);
     }
 
-    public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
+    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
         ContextStorage.getInstance().invalidateLoginInfo(loginContextInfo);
     }
 

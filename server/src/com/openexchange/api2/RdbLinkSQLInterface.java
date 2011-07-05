@@ -57,7 +57,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
@@ -81,7 +80,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
             ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
             readcon = DBPool.pickup(ctx);
             lo = Links.getAllLinksFromObject(objectId,type,folder,user,group,sessionobject,readcon);
-        } catch (final ContextException ct){
+        } catch (final OXException ct){
             throw new ContactException(ct);
         } catch (final DBPoolingException e){
             LOG.error("AN ERROR OCCURRED DURING saveLink", e);
@@ -103,7 +102,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
             ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
             readcon = DBPool.pickup(ctx);
             lo = Links.getAllLinksByObjectID(objectId,type,user,group,sessionobject,readcon);
-        } catch (final ContextException ct){
+        } catch (final OXException ct){
             throw new ContactException(ct);
         } catch (final DBPoolingException e){
             LOG.error("AN ERROR OCCURRED DURING saveLink", e);
@@ -124,7 +123,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
             ctx = ContextStorage.getStorageContext(so.getContextId());
             writecon = DBPool.pickupWriteable(ctx);
             Links.performLinkStorage(l, user, group, so, writecon);
-        } catch (final ContextException ct){
+        } catch (final OXException ct){
             throw new ContactException(ct);
         } catch (final DBPoolingException e){
             LOG.error("AN ERROR OCCURRED DURING saveLink", e);
@@ -148,7 +147,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
             readcon = DBPool.pickup(ctx);
             writecon = DBPool.pickupWriteable(ctx);
             resp = Links.deleteLinkFromObject(id,type,folder,data,user,group,sessionobject,readcon,writecon);
-        } catch (final ContextException ct){
+        } catch (final OXException ct){
             throw new ContactException(ct);
         } catch (final DBPoolingException e){
             LOG.error("AN ERROR OCCURRED DURING saveLink", e);

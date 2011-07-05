@@ -71,7 +71,7 @@ import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.FolderCache;
@@ -163,7 +163,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new IMAPException(e);
         }
         imapConfig = imapAccess.getIMAPConfig();

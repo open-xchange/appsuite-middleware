@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
@@ -80,7 +79,7 @@ public class OsgiOXConsistency extends Consistency {
     private DatabaseImpl database;
 
     @Override
-    protected Context getContext(final int contextId) throws ContextException {
+    protected Context getContext(final int contextId) throws OXException {
         final ContextStorage ctxstor = ContextStorage.getInstance();
         return ctxstor.getContext(contextId);
     }
@@ -104,7 +103,7 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected List<Context> getContextsForFilestore(final int filestoreId) throws ContextException {
+    protected List<Context> getContextsForFilestore(final int filestoreId) throws OXException {
         // Dear Santa.
         // For next christmas I would like to have blocks and closures
         // for Java.
@@ -119,7 +118,7 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected List<Context> getContextsForDatabase(int databaseId) throws ContextException, DBPoolingException, ServiceException {
+    protected List<Context> getContextsForDatabase(int databaseId) throws OXException, DBPoolingException, ServiceException {
         DatabaseService configDB = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         int[] contextIds = configDB.listContexts(databaseId);
         List<Integer> ctxIds = new ArrayList<Integer>(contextIds.length);
@@ -140,14 +139,14 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected List<Context> getAllContexts() throws ContextException {
+    protected List<Context> getAllContexts() throws OXException {
         final ContextStorage ctxstor = ContextStorage.getInstance();
         final List<Integer> list = ctxstor.getAllContextIds();
 
         return loadContexts(list);
     }
 
-    private List<Context> loadContexts(final List<Integer> list) throws ContextException {
+    private List<Context> loadContexts(final List<Integer> list) throws OXException {
         final ContextStorage ctxstor = ContextStorage.getInstance();
         final List<Context> contexts = new ArrayList<Context>(list.size());
         for(final int id : list) {

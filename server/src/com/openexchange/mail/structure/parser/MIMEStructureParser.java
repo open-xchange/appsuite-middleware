@@ -68,8 +68,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -219,7 +219,7 @@ public final class MIMEStructureParser {
              */
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             return new ComposedMailWrapper(parseStructure(jsonStructure), session, ctx);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
     }

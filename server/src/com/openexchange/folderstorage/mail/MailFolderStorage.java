@@ -67,6 +67,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.cache.OXCachingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -88,7 +89,6 @@ import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
@@ -243,7 +243,7 @@ public final class MailFolderStorage implements FolderStorage {
             throw new FolderException(e);
         } catch (final MailAccountException e) {
             throw new FolderException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -663,7 +663,7 @@ public final class MailFolderStorage implements FolderStorage {
             return retval;
         } catch (final MailException e) {
             throw new FolderException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final ServiceException e) {
             throw new FolderException(e);
@@ -674,7 +674,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    private static ServerSession getServerSession(final StorageParameters storageParameters) throws FolderException, ContextException {
+    private static ServerSession getServerSession(final StorageParameters storageParameters) throws FolderException, OXException {
         final Session s = storageParameters.getSession();
         if (null == s) {
             throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -895,7 +895,7 @@ public final class MailFolderStorage implements FolderStorage {
             return list.toArray(new SortableId[list.size()]);
         } catch (final MailException e) {
             throw new FolderException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final ServiceException e) {
             throw new FolderException(e);

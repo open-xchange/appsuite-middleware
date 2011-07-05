@@ -66,11 +66,11 @@ import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -126,7 +126,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
         try {
             ctx = ContextStorage.getStorageContext(session);
             usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new DataException(e);
         }
         try {

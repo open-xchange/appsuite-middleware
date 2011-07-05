@@ -55,7 +55,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -77,7 +77,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         try {
             this.session = new ServerSessionAdapter(session);
             this.service = service;
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

@@ -95,7 +95,6 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
@@ -244,7 +243,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     throw new MailException(e);
                 }
             }
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         }
         this.session = session;

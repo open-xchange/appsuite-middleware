@@ -52,6 +52,7 @@ package com.openexchange.groupware.contexts.impl;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -94,11 +95,11 @@ public abstract class ContextStorage {
      * 
      * @param loginContextInfo the login info for the context.
      * @return the unique identifier of the context or <code>-1</code> if no matching context exists.
-     * @throws ContextException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public abstract int getContextId(String loginContextInfo) throws ContextException;
+    public abstract int getContextId(String loginContextInfo) throws OXException;
 
-    public final Context getContext(final Session session) throws ContextException {
+    public final Context getContext(final Session session) throws OXException {
         return getContext(session.getContextId());
     }
 
@@ -107,9 +108,9 @@ public abstract class ContextStorage {
      * 
      * @param contextId unique identifier of the context.
      * @return an implementation of the context or <code>null</code> if the context with the given identifier can't be found.
-     * @throws ContextException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public Context getContext(final int contextId) throws ContextException {
+    public Context getContext(final int contextId) throws OXException {
         final Context retval = loadContext(contextId);
         if (retval.isUpdating()) {
             throw ContextExceptionCodes.UPDATE.create();
@@ -122,17 +123,17 @@ public abstract class ContextStorage {
      * 
      * @param contextId unique identifier of the context to load.
      * @return the context object.
-     * @throws ContextException if loading the context fails.
+     * @throws OXException if loading the context fails.
      */
-    public abstract ContextExtended loadContext(int contextId) throws ContextException;
+    public abstract ContextExtended loadContext(int contextId) throws OXException;
 
     /**
      * Invalidates the context object in cache(s).
      * 
      * @param contextId unique identifier of the context to invalidate
-     * @throws ContextException if invalidating the context fails
+     * @throws OXException if invalidating the context fails
      */
-    public void invalidateContext(final int contextId) throws ContextException {
+    public void invalidateContext(final int contextId) throws OXException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("invalidateContext not implemented in " + this.getClass().getCanonicalName());
         }
@@ -142,9 +143,9 @@ public abstract class ContextStorage {
      * Invalidates a login information in the cache.
      * 
      * @param loginContextInfo login information to invalidate.
-     * @throws ContextException if invalidating the login information fails.
+     * @throws OXException if invalidating the login information fails.
      */
-    public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
+    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("invalidateLoginInfo not implemented in " + this.getClass().getCanonicalName());
         }
@@ -154,30 +155,30 @@ public abstract class ContextStorage {
      * Gives a list of all context ids which are stored in the config database.
      * 
      * @return the list of context ids
-     * @throws ContextException if reading the contexts fails.
+     * @throws OXException if reading the contexts fails.
      */
-    public abstract List<Integer> getAllContextIds() throws ContextException;
+    public abstract List<Integer> getAllContextIds() throws OXException;
 
     /**
      * Internal start-up routine invoked in {@link #start()}
      * 
-     * @throws ContextException If an error occurs
+     * @throws OXException If an error occurs
      */
-    protected abstract void startUp() throws ContextException;
+    protected abstract void startUp() throws OXException;
 
     /**
      * Internal shut-down routine invoked in {@link #stop()}
      * 
-     * @throws ContextException If an error occurs
+     * @throws OXException If an error occurs
      */
-    protected abstract void shutDown() throws ContextException;
+    protected abstract void shutDown() throws OXException;
 
     /**
      * Initialization.
      * 
-     * @throws ContextException if initialization of contexts fails.
+     * @throws OXException if initialization of contexts fails.
      */
-    public static void start() throws ContextException {
+    public static void start() throws OXException {
         if (null != impl) {
             LOG.error("Duplicate initialization of ContextStorage.");
             return;
@@ -189,7 +190,7 @@ public abstract class ContextStorage {
     /**
      * Shutdown.
      */
-    public static void stop() throws ContextException {
+    public static void stop() throws OXException {
         if (null == impl) {
             LOG.error("Duplicate shutdown of ContextStorage.");
             return;
@@ -203,9 +204,9 @@ public abstract class ContextStorage {
      * 
      * @param session The session providing the context ID
      * @return the context data object or null if the context with the given identifier can't be found.
-     * @throws ContextException if getting the context fails.
+     * @throws OXException if getting the context fails.
      */
-    public static Context getStorageContext(final Session session) throws ContextException {
+    public static Context getStorageContext(final Session session) throws OXException {
         return getStorageContext(session.getContextId());
     }
 
@@ -214,9 +215,9 @@ public abstract class ContextStorage {
      * 
      * @param contextId unique identifier of the context.
      * @return the context data object or null if the context with the given identifier can't be found.
-     * @throws ContextException if getting the context fails.
+     * @throws OXException if getting the context fails.
      */
-    public static Context getStorageContext(final int contextId) throws ContextException {
+    public static Context getStorageContext(final int contextId) throws OXException {
         return getInstance().getContext(contextId);
     }
 }

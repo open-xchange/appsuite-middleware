@@ -50,8 +50,8 @@
 package com.openexchange.context;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 
 /**
  * {@link ContextService} - Offers access method to context module.
@@ -69,57 +69,57 @@ public interface ContextService {
      *            the login info for the context.
      * @return the unique identifier of the context or <code>-1</code> if no
      *         matching context exists.
-     * @throws ContextException
+     * @throws OXException
      *             if an error occurs.
      */
-    public abstract int getContextId(String loginContextInfo) throws ContextException;
+    public abstract int getContextId(String loginContextInfo) throws OXException;
 
     /**
      * Gets the context for the given context unique identifier.
      * 
      * @param contextId The unique identifier of the context.
      * @return The context
-     * @throws ContextException If the specified context cannot be found or the update is running/started.
+     * @throws OXException If the specified context cannot be found or the update is running/started.
      */
-    public Context getContext(int contextId) throws ContextException;
+    public Context getContext(int contextId) throws OXException;
 
     /**
-     * This method works like {@link #getContext(int)} but it does not give a {@link ContextException} if an update is running or must is
+     * This method works like {@link #getContext(int)} but it does not give a {@link OXException} if an update is running or must is
      * started.
      * @param contextId unique identifier of the context.
      * @return an implementation of the context or <code>null</code> if the context with the given identifier can't be found.
-     * @throws ContextException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public Context loadContext(int contextId) throws ContextException;
+    public Context loadContext(int contextId) throws OXException;
 
     /**
      * Invalidates the context object in cache(s).
      * 
      * @param contextId
      *            unique identifier of the context to invalidate
-     * @throws ContextException
-     * @throws ContextException
+     * @throws OXException
+     * @throws OXException
      *             if invalidating the context fails
      */
-    public void invalidateContext(int contextId) throws ContextException;
+    public void invalidateContext(int contextId) throws OXException;
 
     /**
      * Invalidates a login information in the cache.
      * 
      * @param loginContextInfo
      *            login information to invalidate.
-     * @throws ContextException
-     * @throws ContextException
+     * @throws OXException
+     * @throws OXException
      *             if invalidating the login information fails.
      */
-    public void invalidateLoginInfo(String loginContextInfo) throws ContextException;
+    public void invalidateLoginInfo(String loginContextInfo) throws OXException;
 
     /**
      * Gives a list of all context ids which are stored in the config database.
      * 
      * @return the list of context ids
-     * @throws ContextException
+     * @throws OXException
      *             if reading the contexts fails.
      */
-    public abstract List<Integer> getAllContextIds() throws ContextException;
+    public abstract List<Integer> getAllContextIds() throws OXException;
 }

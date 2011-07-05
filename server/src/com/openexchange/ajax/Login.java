@@ -86,9 +86,9 @@ import com.openexchange.config.ConfigTools;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -275,7 +275,7 @@ public class Login extends AJAXServlet {
                 } catch (final UndeclaredThrowableException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final ContextException e) {
+                } catch (final OXException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final LdapException e) {
@@ -340,7 +340,7 @@ public class Login extends AJAXServlet {
                 } catch (final UndeclaredThrowableException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final ContextException e) {
+                } catch (final OXException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final LdapException e) {
@@ -469,7 +469,7 @@ public class Login extends AJAXServlet {
                     final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
                     LOG.error(oje.getMessage(), oje);
                     response.setException(oje);
-                } catch (final ContextException e) {
+                } catch (final OXException e) {
                     LOG.debug(e.getMessage(), e);
                     response.setException(e);
                 } catch (final LdapException e) {

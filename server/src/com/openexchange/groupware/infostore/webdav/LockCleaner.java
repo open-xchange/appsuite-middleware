@@ -54,7 +54,6 @@ import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -82,7 +81,7 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
             folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (final OXException e) {
 			LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
-		} catch (final ContextException e) {
+		} catch (final OXException e) {
             LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
 		}
     }
@@ -94,7 +93,7 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
             infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (final OXException e) {
 			LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+session.getContextId()+". Run the consistency tool.");
-		} catch (final ContextException e) {
+		} catch (final OXException e) {
             LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+session.getContextId()+". Run the consistency tool.");
         }
     }

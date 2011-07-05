@@ -83,7 +83,6 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
@@ -856,7 +855,7 @@ public final class TaskLogic {
             new EventClient(session).delete(task);
         } catch (final EventException e) {
             throw new TaskException(Code.EVENT, e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new TaskException(Code.EVENT, e);
         } catch (final OXException e) {
             throw new TaskException(Code.EVENT, e);

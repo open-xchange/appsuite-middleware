@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
@@ -116,7 +116,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
         try {
             final ContextService contextService = TwitterServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
             ctx = contextService.getContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new MailException(e);
         } catch (final ServiceException e) {
             throw new MailException(e);

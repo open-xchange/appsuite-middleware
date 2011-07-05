@@ -50,8 +50,8 @@
 package com.openexchange.groupware.delete;
 
 import java.util.EventObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -106,9 +106,9 @@ public class DeleteEvent extends EventObject {
      * @param type the object's type; either <code>{@link #TYPE_USER}</code>, <code>{@link #TYPE_GROUP}</code>,
      *            <code>{@link #TYPE_RESOURCE}</code>, <code>{@value #TYPE_RESOURCE_GROUP}</code>, or <code>{@value #TYPE_CONTEXT}</code>
      * @param cid the context ID
-     * @throws ContextException if context object could not be fetched from <code>{@link ContextStorage}</code>
+     * @throws OXException if context object could not be fetched from <code>{@link ContextStorage}</code>
      */
-    public DeleteEvent(final Object source, final int id, final int type, final int cid) throws ContextException {
+    public DeleteEvent(final Object source, final int id, final int type, final int cid) throws OXException {
         super(source);
         this.id = id;
         this.type = type;

@@ -70,7 +70,6 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -1540,7 +1539,7 @@ public class OXFolderTools {
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException e1) {
+        } catch (final OXException e1) {
             throw new OXException(e1);
         }
         final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);

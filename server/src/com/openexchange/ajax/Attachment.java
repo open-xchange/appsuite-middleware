@@ -86,7 +86,6 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
@@ -155,7 +154,7 @@ public class Attachment extends PermissionServlet {
         final ServerSession session;
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             handle(res, e, action);
             return;
         }
@@ -241,7 +240,7 @@ public class Attachment extends PermissionServlet {
         final ServerSession session;
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             handle(res, e, action);
             return;
         }
@@ -280,7 +279,7 @@ public class Attachment extends PermissionServlet {
         final ServerSession session;
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             handle(res, e, action);
             return;
         }

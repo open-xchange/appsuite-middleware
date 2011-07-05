@@ -95,7 +95,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -207,7 +206,7 @@ public class OXContainerConverter {
         super();
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new ConverterException(e);
         }
         timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());

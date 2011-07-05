@@ -68,7 +68,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 
@@ -101,7 +101,7 @@ public class PushHandler implements EventHandler {
         try {
             final ContextService contextService = PushServiceRegistry.getServiceRegistry().getService(ContextService.class);
             ctx = contextService.getContext(contextId);
-        } catch (final ContextException exc) {
+        } catch (final OXException exc) {
             LOG.error("cannot resolve context id: " + contextId, exc);
             return;
         }

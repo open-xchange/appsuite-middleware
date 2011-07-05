@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal;
 
 import java.util.Date;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -72,7 +73,6 @@ import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.internal.performers.VisibleFoldersPerformer;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -98,7 +98,7 @@ public final class FolderServiceImpl implements FolderService {
     public void checkConsistency(final String treeId, final Session session) throws FolderException {
         try {
             new ConsistencyPerformer(new ServerSessionAdapter(session)).doConsistencyCheck(treeId);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -110,7 +110,7 @@ public final class FolderServiceImpl implements FolderService {
     public void clearFolder(final String treeId, final String folderId, final Session session) throws FolderException {
         try {
             new ClearPerformer(new ServerSessionAdapter(session)).doClear(treeId, folderId);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -124,7 +124,7 @@ public final class FolderServiceImpl implements FolderService {
         try {
             final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session));
             return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -137,7 +137,7 @@ public final class FolderServiceImpl implements FolderService {
     public void deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session) throws FolderException {
         try {
             new DeletePerformer(new ServerSessionAdapter(session)).doDelete(treeId, folderId, timeStamp);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -159,7 +159,7 @@ public final class FolderServiceImpl implements FolderService {
     public UserizedFolder getFolder(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws FolderException {
         try {
             return new GetPerformer(new ServerSessionAdapter(session), decorator).doGet(treeId, folderId);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -173,7 +173,7 @@ public final class FolderServiceImpl implements FolderService {
         try {
             final AllVisibleFoldersPerformer performer = new AllVisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(performer.doAllVisibleFolders(treeId, filter), performer.getWarnings());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -187,7 +187,7 @@ public final class FolderServiceImpl implements FolderService {
         try {
             final PathPerformer performer = new PathPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(performer.doPath(treeId, folderId, true), performer.getWarnings());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -201,7 +201,7 @@ public final class FolderServiceImpl implements FolderService {
         try {
             final VisibleFoldersPerformer performer = new VisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(treeId, contentType, type, all), performer.getWarnings());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -215,7 +215,7 @@ public final class FolderServiceImpl implements FolderService {
         try {
             final ListPerformer listPerformer = new ListPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(listPerformer.doList(treeId, parentId, all), listPerformer.getWarnings());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -233,7 +233,7 @@ public final class FolderServiceImpl implements FolderService {
             return FolderResponseImpl.newFolderResponse(
                 performer.doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes),
                 performer.getWarnings());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }
@@ -265,7 +265,7 @@ public final class FolderServiceImpl implements FolderService {
     public void updateFolder(final Folder folder, final Date timeStamp, final Session session) throws FolderException {
         try {
             new UpdatePerformer(new ServerSessionAdapter(session)).doUpdate(folder, timeStamp);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
     }

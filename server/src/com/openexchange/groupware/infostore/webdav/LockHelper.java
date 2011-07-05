@@ -58,7 +58,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -210,7 +209,7 @@ public abstract class LockHelper {
     private ServerSession getSession() throws OXException {
         try {
             return new ServerSessionAdapter(sessionHolder.getSessionObject());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new InfostoreException(e);
         }
     }

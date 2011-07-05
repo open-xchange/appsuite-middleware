@@ -55,8 +55,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -209,7 +209,7 @@ public final class UpdateExecutor {
             }
         } catch (DBPoolingException e) {
             throw new UpdateException(e);
-        } catch (ContextException e) {
+        } catch (OXException e) {
             throw new UpdateException(e);
         }
     }

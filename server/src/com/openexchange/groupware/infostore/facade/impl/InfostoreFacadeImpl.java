@@ -79,7 +79,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -613,7 +612,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     } catch (final OXException e) {
                         throw new InfostoreException(e);
-                    } catch (final ContextException e) {
+                    } catch (final OXException e) {
                         throw new InfostoreException(e);
                     } catch (final OXException x) {
                         throw x;
@@ -892,7 +891,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     } catch (final OXException e) {
                         throw new InfostoreException(e);
-                    } catch (final ContextException e) {
+                    } catch (final OXException e) {
                         throw new InfostoreException(e);
                     } catch (final OXException x) {
                         throw x;

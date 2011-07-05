@@ -72,7 +72,6 @@ import com.openexchange.groupware.contact.sqlinjectors.TimestampSQLInjector;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -144,9 +143,9 @@ public class ContactMySql implements ContactSql {
      * Initializes a new {@link ContactMySql}
      * 
      * @param so The session
-     * @throws ContextException If context cannot be resolved
+     * @throws OXException If context cannot be resolved
      */
-    public ContactMySql(final Session so) throws ContextException {
+    public ContactMySql(final Session so) throws OXException {
         if (so != null) {
             this.ctx = ContextStorage.getStorageContext(so.getContextId());
             this.user = so.getUserId();

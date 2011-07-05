@@ -57,7 +57,7 @@ import com.openexchange.authorization.AuthorizationExceptionCodes;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.context.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.ldap.User;
 
 
@@ -95,7 +95,7 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
     public void authorizeUser(final Context ctx, final User user) throws AuthorizationException {
         try {
             if (!ctx.isEnabled()) {
-                final ContextException e = ContextExceptionCodes.CONTEXT_DISABLED.create();
+                final OXException e = ContextExceptionCodes.CONTEXT_DISABLED.create();
                 LOG.debug(e.getMessage(), e);
                 throw AuthorizationExceptionCodes.USER_DISABLED.create(e);
             }

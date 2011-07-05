@@ -85,7 +85,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -207,7 +206,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXFolderException(e);
         }
         userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
@@ -491,7 +490,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     new EventClient(session).create(folderObj);
                 } catch (final EventException e) {
                     LOG.warn("Create event could not be enqueued", e);
-                } catch (final ContextException e) {
+                } catch (final OXException e) {
                     LOG.warn("Create event could not be enqueued", e);
                 }
                 return folderObj;
@@ -1721,7 +1720,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     new EventClient(session).delete(fo);
                 } catch (final EventException e) {
                     LOG.warn("Delete event could not be enqueued", e);
-                } catch (final ContextException e) {
+                } catch (final OXException e) {
                     LOG.warn("Delete event could not be enqueued", e);
                 }
             }

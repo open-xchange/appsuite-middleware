@@ -65,7 +65,6 @@ import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.update.Schema;
@@ -155,7 +154,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
                         LOG.info("Removing private contact " + id + " in context " + cid + " because its folder does not exist anymore.");
                         delete = true;
                     }
-                } catch (final ContextException ce) {
+                } catch (final OXException ce) {
                     LOG.info("Removing contact " + id + " in context " + cid + " because context does not exist anymore.");
                     delete = true;
                 }
@@ -303,7 +302,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         LOG.info("Deleting orphaned attachment " + id + " in context " + cid + ".");
         try {
             Tools.removeFile(cid, filename);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.info("Context is already removed. Assuming its files are removed, too.");
         } catch (final FilestoreException e) {
             LOG.warn("Unable to delete file '" + filename + "' in context " + cid + ". Problem with FilestoreStorage.", e);

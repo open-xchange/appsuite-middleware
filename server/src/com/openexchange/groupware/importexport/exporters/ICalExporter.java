@@ -76,7 +76,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
@@ -216,7 +215,7 @@ public class ICalExporter implements Exporter {
         try {
             ctx = ContextStorage.getInstance().getContext(sessObj.getContextId());
             user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new ImportExportException(e);
         } catch (final LdapException e) {
             throw new ImportExportException(e);

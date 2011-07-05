@@ -59,7 +59,6 @@ import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.ContactInterfaceProviderRegistration;
 import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -132,7 +131,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         if (provider == null) {
             try {
                 return rdbProviderCache.getProvider(ContextStorage.getStorageContext(contextId));
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }
@@ -162,7 +161,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         }
         try {
             return rdbProviderCache.getProvider(ContextStorage.getStorageContext(contextId)).newContactInterface(session);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

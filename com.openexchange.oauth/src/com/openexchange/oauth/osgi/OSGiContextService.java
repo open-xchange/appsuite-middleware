@@ -52,7 +52,7 @@ package com.openexchange.oauth.osgi;
 import java.util.List;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -69,51 +69,51 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
         super(ContextService.class);
     }
 
-    public List<Integer> getAllContextIds() throws ContextException {
+    public List<Integer> getAllContextIds() throws OXException {
         try {
             return getService().getAllContextIds();
         } catch (final ServiceException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 
-    public Context getContext(final int contextId) throws ContextException {
+    public Context getContext(final int contextId) throws OXException {
         try {
             return getService().getContext(contextId);
         } catch (final ServiceException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 
-    public int getContextId(final String loginContextInfo) throws ContextException {
+    public int getContextId(final String loginContextInfo) throws OXException {
         try {
             return getService().getContextId(loginContextInfo);
         } catch (final ServiceException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 
-    public void invalidateContext(final int contextId) throws ContextException {
+    public void invalidateContext(final int contextId) throws OXException {
         try {
             getService().invalidateContext(contextId);
         } catch (final ServiceException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 
-    public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
+    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
         try {
             getService().invalidateLoginInfo(loginContextInfo);
         } catch (final ServiceException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 
-    public Context loadContext(final int contextId) throws ContextException {
+    public Context loadContext(final int contextId) throws OXException {
         try {
             return getService().loadContext(contextId);
         } catch (final ServiceException e) {
-            throw new ContextException(e);
+            throw new OXException(e);
         }
     }
 

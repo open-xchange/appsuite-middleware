@@ -59,7 +59,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -586,7 +586,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             return service.getContext(contextId);
         } catch (final ServiceException e) {
             throw new MailMessagingException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new MailMessagingException(e);
         }
     }

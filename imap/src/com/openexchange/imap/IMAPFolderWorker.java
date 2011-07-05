@@ -55,7 +55,7 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -132,7 +132,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new IMAPException(e);
         }
         usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);

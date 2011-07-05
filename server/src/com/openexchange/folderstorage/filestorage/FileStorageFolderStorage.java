@@ -91,7 +91,6 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -628,7 +627,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             return list.toArray(new SortableId[list.size()]);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final ServiceException e) {
             throw new FolderException(e);

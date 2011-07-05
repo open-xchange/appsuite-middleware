@@ -56,7 +56,7 @@ import com.openexchange.config.cascade.ConfigCascadeException;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 
 /**
  * {@link AbstractContextBasedConfigProvider}
@@ -77,7 +77,7 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         }
         try {
             return get(property, contexts.getContext(context), user);
-        } catch (ContextException e) {
+        } catch (OXException e) {
             throw new ConfigCascadeException(e);
         }
     }
@@ -88,7 +88,7 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         }
         try {
             return getAllPropertyNames(contexts.getContext(context));
-        } catch (ContextException e) {
+        } catch (OXException e) {
             throw new ConfigCascadeException(e);
         }
     }

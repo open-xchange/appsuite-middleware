@@ -109,7 +109,6 @@ import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -149,7 +148,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RdbContactSQLImpl.class));
 
-    public RdbContactSQLImpl(final Session session) throws ContextException {
+    public RdbContactSQLImpl(final Session session) throws OXException {
         super();
         this.ctx = ContextStorage.getStorageContext(session);
         this.userId = session.getUserId();
@@ -182,7 +181,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             ec.create(co);
         } catch (final EventException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new ContactException(e);
         } catch (final OXConflictException ce) {
             LOG.debug("Unable to insert contact", ce);
@@ -204,7 +203,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw ise;
         } catch (final EventException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
         } catch (final OXConcurrentModificationException cme) {
             throw cme;
@@ -229,7 +228,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             ec.modify(storageVersion, contact, new OXFolderAccess(ctx).getFolderObject(contact.getParentFolderID()));
         } catch (final EventException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(contact.getParentFolderID()));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(contact.getParentFolderID()));
         } catch (final DBPoolingException e) {
             throw new ContactException(e);
@@ -1087,7 +1086,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             ec.delete(co);
         } catch (final EventException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(fuid));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new ContactException(e);
         } catch (final DBPoolingException e) {
             throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);

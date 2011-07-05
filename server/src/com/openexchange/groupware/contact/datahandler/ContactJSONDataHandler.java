@@ -64,9 +64,9 @@ import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
@@ -110,7 +110,7 @@ public final class ContactJSONDataHandler implements DataHandler {
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new DataException(e);
         }
         /*

@@ -53,7 +53,6 @@ import java.net.URI;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;
 
 public abstract class FilestoreStorage {
@@ -87,14 +86,10 @@ public abstract class FilestoreStorage {
     }
 
     public static URI createURI(final Connection con, final int contextId) throws OXException {
-        try {
-            final RdbContextStorage ctxStorage = new RdbContextStorage();
-            final Context ctx = ctxStorage.loadContextData(con, contextId);
-            final FilestoreStorage storage = getInstance();
-            final Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
-            return FilestoreTools.createLocation(store, ctx);
-        } catch (final ContextException e) {
-            throw new FilestoreException(e);
-        }
+        final RdbContextStorage ctxStorage = new RdbContextStorage();
+        final Context ctx = ctxStorage.loadContextData(con, contextId);
+        final FilestoreStorage storage = getInstance();
+        final Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
+        return FilestoreTools.createLocation(store, ctx);
     }
 }

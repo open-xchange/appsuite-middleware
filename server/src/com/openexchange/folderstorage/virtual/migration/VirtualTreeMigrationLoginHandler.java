@@ -64,11 +64,11 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.virtual.sql.Insert;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.MailException;
@@ -201,7 +201,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
             setMigrationPerformed(session, con);
         } catch (final FolderException e) {
             throw new LoginException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         }
     }

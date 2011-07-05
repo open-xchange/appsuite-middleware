@@ -101,7 +101,6 @@ import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -254,7 +253,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             } while (null != nonExistingParents && nonExistingParents.length > 0);
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             provider.close();
@@ -1241,7 +1240,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
             throw new FolderException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             provider.close();

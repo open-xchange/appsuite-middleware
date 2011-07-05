@@ -68,7 +68,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.oxfolder.GABRestorerMBean;
 import com.openexchange.tools.oxfolder.GABRestorerMBeanImpl;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -195,7 +195,7 @@ public class GABRestorerCLT {
             if (null == t) {
                 message = e.getMessage();
             } else {
-                if (t instanceof ContextException) {
+                if (t instanceof OXException) {
                     message = "Cannot find context " + contextId;
                 } else {
                     message = t.getMessage();

@@ -74,7 +74,7 @@ import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -533,7 +533,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         }
         try {
             return getService(ContextService.class).getContext(session.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

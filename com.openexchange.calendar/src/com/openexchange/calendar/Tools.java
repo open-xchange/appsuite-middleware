@@ -69,7 +69,7 @@ import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -123,7 +123,7 @@ public final class Tools {
     public static Context getContext(final Session so) throws OXException {
         try {
             return ContextStorage.getInstance().getContext(so.getContextId());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

@@ -62,7 +62,7 @@ import java.util.Random;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
@@ -181,7 +181,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
             }
             ServerSessionAdapter serverSession = new ServerSessionAdapter(new PublicationSession(publication));
             return templateService.loadTemplate(templateName, defaultTemplateName, serverSession);
-        } catch (ContextException e) {
+        } catch (OXException e) {
             throw new PublicationException(e);
         } catch (TemplateException e) {
             throw new PublicationException(e);

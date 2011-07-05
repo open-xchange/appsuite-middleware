@@ -66,7 +66,6 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
@@ -299,13 +298,13 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
-    protected abstract Context getContext(int contextId) throws ContextException;
+    protected abstract Context getContext(int contextId) throws OXException;
     protected abstract DatabaseImpl getDatabase();
     protected abstract AttachmentBase getAttachments();
     protected abstract FileStorage getFileStorage(Context ctx) throws OXException, FilestoreException;
-    protected abstract List<Context> getContextsForFilestore(int filestoreId) throws ContextException;
-    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws ContextException, DBPoolingException, ServiceException;
-    protected abstract List<Context> getAllContexts() throws ContextException;
+    protected abstract List<Context> getContextsForFilestore(int filestoreId) throws OXException;
+    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException, DBPoolingException, ServiceException;
+    protected abstract List<Context> getAllContexts() throws OXException;
     protected abstract User getAdmin(Context ctx) throws LdapException;
 
 

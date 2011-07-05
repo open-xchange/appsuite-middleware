@@ -60,7 +60,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
@@ -143,7 +142,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
         
         } catch (final OXException e) {
             rollback(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LL.log(e);
         } catch (final AbstractOXException e) {
             rollback(e);

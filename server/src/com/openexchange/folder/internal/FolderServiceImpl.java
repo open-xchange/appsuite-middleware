@@ -54,7 +54,6 @@ import com.openexchange.folder.FolderException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -77,7 +76,7 @@ public final class FolderServiceImpl implements FolderService {
     public FolderObject getFolderObject(final int folderId, final int contextId) throws FolderException {
         try {
             return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -91,7 +90,7 @@ public final class FolderServiceImpl implements FolderService {
                 folderId,
                 userId,
                 UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx));
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);

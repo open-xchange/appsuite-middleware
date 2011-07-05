@@ -62,7 +62,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionHandler;
@@ -126,7 +126,7 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
         } catch (OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (ContextException e) {
+        } catch (OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

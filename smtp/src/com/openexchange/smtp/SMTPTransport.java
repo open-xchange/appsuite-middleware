@@ -74,7 +74,7 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -175,7 +175,7 @@ public final class SMTPTransport extends MailTransport {
         } else {
             try {
                 ctx = ContextStorage.getStorageContext(session.getContextId());
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 throw new SMTPException(e);
             }
             usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);

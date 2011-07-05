@@ -73,7 +73,6 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
@@ -106,9 +105,9 @@ public class Links {
          * @param so The session
          * @return <code>true</code> if denoted item is readable by specified
          *         user in given folder; otherwise <code>false</code>
-         * @throws ContextException If specified context ID cannot be resolved
+         * @throws OXException If specified context ID cannot be resolved
          */
-        boolean isReadable(int oid, int folder, int user, int[] group, Session so) throws ContextException;
+        boolean isReadable(int oid, int folder, int user, int[] group, Session so) throws OXException;
 
         /**
          * Checks if denoted item is readable by specified user.
@@ -119,11 +118,11 @@ public class Links {
          * @param so The session
          * @return <code>true</code> if denoted item is readable by specified
          *         user; otherwise <code>false</code>
-         * @throws ContextException If specified context ID cannot be resolved
+         * @throws OXException If specified context ID cannot be resolved
          * @throws UnsupportedOperationException If method is not supported
          * @see #supportsAccessByID()
          */
-        boolean isReadableByID(int oid, int user, int[] group, Session so) throws ContextException,
+        boolean isReadableByID(int oid, int user, int[] group, Session so) throws OXException,
                 UnsupportedOperationException;
 
         /**
@@ -142,9 +141,9 @@ public class Links {
          * @param so The session
          * @return <code>true</code> if specified user has appropriate module
          *         access; otherwise <code>false</code>
-         * @throws ContextException If session's context ID cannot be resolved
+         * @throws OXException If session's context ID cannot be resolved
          */
-        boolean hasModuleRights(Session so) throws ContextException;
+        boolean hasModuleRights(Session so) throws OXException;
     }
 
     private static final Map<Integer, ModuleAccess> modules;
@@ -161,7 +160,7 @@ public class Links {
             }
 
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
-                    throws ContextException {
+                    throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()) {
                     return false;
@@ -174,7 +173,7 @@ public class Links {
                 }
             }
 
-            public boolean hasModuleRights(final Session so) throws ContextException {
+            public boolean hasModuleRights(final Session so) throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()) {
                     return false;
@@ -183,7 +182,7 @@ public class Links {
             }
 
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so)
-                    throws ContextException {
+                    throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()) {
                     return false;
@@ -212,7 +211,7 @@ public class Links {
             }
 
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
-                    throws ContextException {
+                    throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
                 final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
                 if (!userConfig.hasTask()) {
@@ -221,7 +220,7 @@ public class Links {
                 return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userConfig, oid, fid);
             }
 
-            public boolean hasModuleRights(final Session so) throws ContextException {
+            public boolean hasModuleRights(final Session so) throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()) {
                     return false;
@@ -229,7 +228,7 @@ public class Links {
                 return true;
             }
 
-            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) throws ContextException {
+            public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
                 final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
                 if (!userConfig.hasTask()) {
@@ -244,7 +243,7 @@ public class Links {
             }
 
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
-                    throws ContextException {
+                    throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
 
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasContact()) {
@@ -260,7 +259,7 @@ public class Links {
                 }
             }
 
-            public boolean hasModuleRights(final Session so) throws ContextException {
+            public boolean hasModuleRights(final Session so) throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasContact()) {
                     return false;
@@ -278,7 +277,7 @@ public class Links {
             }
 
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
-                    throws ContextException {
+                    throws OXException {
                 final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 try {
@@ -291,7 +290,7 @@ public class Links {
                 }
             }
 
-            public boolean hasModuleRights(final Session so) throws ContextException {
+            public boolean hasModuleRights(final Session so) throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasInfostore()) {
                     return false;
@@ -310,7 +309,7 @@ public class Links {
     }
 
     public static void performLinkStorage(final LinkObject l, final int user, final int[] group, final Session so,
-            final Connection writecon) throws LinkException, ContextException {
+            final Connection writecon) throws LinkException, OXException {
 
         final Context ct = ContextStorage.getStorageContext(so.getContextId());
 
@@ -370,7 +369,7 @@ public class Links {
         }
     }
 
-    public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folderId, final int user, final int[] group, final Session so, final Connection readcon) throws LinkException, ContextException {
+    public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folderId, final int user, final int[] group, final Session so, final Connection readcon) throws LinkException, OXException {
         final List<LinkObject> tmp = new ArrayList<LinkObject>();
         Statement stmt = null;
         ResultSet rs = null;
@@ -398,7 +397,7 @@ public class Links {
 
     public static int[][] deleteLinkFromObject(final int id, final int type, final int folder, final int[][] data,
             final int user, final int[] group, final Session so, final Connection readcon, final Connection writecon)
-            throws ContextException, LinkException {
+            throws OXException, LinkException {
         Statement stmt = null;
         Statement del = null;
         ResultSet rs = null;
@@ -519,7 +518,7 @@ public class Links {
         }
     }
 
-    public static LinkObject[] getAllLinksByObjectID(final int id, final int type, final int user, final int[] group, final Session so, final Connection readcon) throws LinkException, ContextException {
+    public static LinkObject[] getAllLinksByObjectID(final int id, final int type, final int user, final int[] group, final Session so, final Connection readcon) throws LinkException, OXException {
         final List<LinkObject> tmp = new ArrayList<LinkObject>();
         Statement stmt = null;
         ResultSet rs = null;

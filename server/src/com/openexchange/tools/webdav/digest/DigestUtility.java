@@ -63,8 +63,8 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -322,7 +322,7 @@ public final class DigestUtility {
             final CryptoService cryptoService = serviceRegistry.getService(CryptoService.class, true);
             final String key = serviceRegistry.getService(ConfigurationService.class).getProperty("com.openexchange.passcrypt.key");
             return cryptoService.decrypt(passCrypt, key);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new WebdavException(e);
         } catch (final LdapException e) {
             throw new WebdavException(e);

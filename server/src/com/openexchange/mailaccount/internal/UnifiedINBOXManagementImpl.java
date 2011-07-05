@@ -59,8 +59,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mailaccount.MailAccount;
@@ -149,7 +149,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             throw new MailAccountException(e);
         } catch (final MailAccountException e) {
             throw new MailAccountException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new MailAccountException(e);
         }
 

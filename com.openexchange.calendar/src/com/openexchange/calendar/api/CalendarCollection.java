@@ -111,7 +111,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.LdapException;
@@ -2305,7 +2305,7 @@ public final class CalendarCollection implements CalendarCollectionService {
 
     }
 
-    private FolderObject getFolder(final Session session, final int fid) throws OXException, ContextException {
+    private FolderObject getFolder(final Session session, final int fid) throws OXException, OXException {
         final Context ctx = ContextStorage.getStorageContext(session);
 
         if (FolderCacheManager.isEnabled()) {
@@ -3056,7 +3056,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final AbstractOXException e) {
             throw new OXException(e);
@@ -3128,7 +3128,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final AbstractOXException e) {
             throw new OXException(e);
@@ -3206,7 +3206,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final AbstractOXException e) {
             throw new OXException(e);
@@ -3282,7 +3282,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle, new Object[0]);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final AbstractOXException e) {
             throw new OXException(e);

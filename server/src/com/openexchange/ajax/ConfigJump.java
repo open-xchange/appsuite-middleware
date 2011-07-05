@@ -62,8 +62,8 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ICookie;
 import com.openexchange.configjump.Replacements;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
@@ -141,7 +141,7 @@ public class ConfigJump extends SessionServlet {
         } catch (final ConfigJumpException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }

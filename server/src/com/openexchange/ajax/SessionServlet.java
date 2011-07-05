@@ -76,9 +76,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -372,7 +372,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
+    public ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, LdapException, UserException {
         return getSession(hashSource, req, sessionId, sessiondService);
     }
 
@@ -385,7 +385,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public static ServerSession getSession(final CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
+    public static ServerSession getSession(final CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, LdapException, UserException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);

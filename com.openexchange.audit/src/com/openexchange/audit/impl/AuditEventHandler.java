@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -264,7 +264,7 @@ public class AuditEventHandler implements EventHandler {
 			for (int i = 0; i < size; i++) {
 			    retval = iter.next().getFolderName() + "/" + retval;
 			}
-		} catch (final ContextException e) {
+		} catch (final OXException e) {
 			e.printStackTrace();
 		} catch (final SearchIteratorException e) {
 			e.printStackTrace();

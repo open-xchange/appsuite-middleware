@@ -54,9 +54,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -118,7 +118,7 @@ public class CalendarCallbacks implements CalendarListener {
         createdChangeExceptionInRecurringAppointment(master, changeException, inFolder, serverSession);
     }
 
-    private ServerSession getServerSession(Session session) throws ContextException {
+    private ServerSession getServerSession(Session session) throws OXException {
         if(ServerSession.class.isAssignableFrom(session.getClass())) {
             return (ServerSession) session;
         }

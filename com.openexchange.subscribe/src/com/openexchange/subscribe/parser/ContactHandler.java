@@ -56,7 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -75,7 +75,7 @@ public class ContactHandler {
     /**
      * Update or insert contacts from a subscription
      * @param subscription
-     * @throws ContextException
+     * @throws OXException
      * @throws OXException
      */
     protected void storeContacts(Session session, int folderId, Collection<Contact> updatedContacts) throws AbstractOXException{

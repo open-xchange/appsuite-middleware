@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLock;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.infostore.InfostoreException;
@@ -102,7 +101,7 @@ public class FolderLockHelper extends LockHelper {
                     session.getContext(),
                     UserStorage.getStorageUser(session.getUserId(), session.getContext()),
                     UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (final ContextException x) {
+        } catch (final OXException x) {
             throw new InfostoreException(x);
         }
 	}
@@ -125,7 +124,7 @@ public class FolderLockHelper extends LockHelper {
 		return l;
 	}
 
-    private ServerSession getSession() throws ContextException {
+    private ServerSession getSession() throws OXException {
         return new ServerSessionAdapter(sessionHolder.getSessionObject());
     }
 

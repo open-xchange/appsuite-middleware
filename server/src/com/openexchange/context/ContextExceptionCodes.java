@@ -49,11 +49,11 @@
 
 package com.openexchange.context;
 
-import static com.openexchange.context.ContextExceptionMessages.CONTEXT_DISABLED_MSG;
-import com.openexchange.context.internal.ContextExceptionFactory;
+import static com.openexchange.context.OXExceptionMessages.CONTEXT_DISABLED_MSG;
+import com.openexchange.context.internal.OXExceptionFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contexts.impl.ContextException;
 
 /**
  * {@link ContextExceptionCodes}
@@ -91,11 +91,11 @@ public enum ContextExceptionCodes implements OXErrorMessage {
         return category;
     }
 
-    public ContextException create(Object... args) {
-        return ContextExceptionFactory.getInstance().create(this, args);
+    public OXException create(Object... args) {
+        return OXExceptionFactory.getInstance().create(this, args);
     }
 
-    public ContextException create(Throwable cause, Object... args) {
-        return ContextExceptionFactory.getInstance().create(this, cause, args);
+    public OXException create(Throwable cause, Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

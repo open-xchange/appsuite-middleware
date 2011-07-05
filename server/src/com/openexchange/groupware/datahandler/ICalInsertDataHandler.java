@@ -68,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -126,7 +125,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             throw new DataException(e);
         }
         final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);

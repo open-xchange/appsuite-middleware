@@ -50,24 +50,24 @@
 package com.openexchange.context.internal;
 
 import com.openexchange.context.ContextExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.groupware.contexts.impl.ContextException;
 
 /**
- * {@link ContextExceptionFactory}
+ * {@link OXExceptionFactory}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ContextExceptionFactory extends Exceptions<ContextException> {
+public class OXExceptionFactory extends Exceptions<OXException> {
 
-    private static final ContextExceptionFactory SINGLETON = new ContextExceptionFactory();
+    private static final OXExceptionFactory SINGLETON = new OXExceptionFactory();
 
-    private ContextExceptionFactory() {
+    private OXExceptionFactory() {
         super();
     }
 
-    public static final ContextExceptionFactory getInstance() {
+    public static final OXExceptionFactory getInstance() {
         return SINGLETON;
     }
 
@@ -77,7 +77,7 @@ public class ContextExceptionFactory extends Exceptions<ContextException> {
     }
 
     @Override
-    protected ContextException createException(ErrorMessage message, Throwable cause, Object... args) {
-        return new ContextException(message, cause, args);
+    protected OXException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new OXException(message, cause, args);
     }
 }
