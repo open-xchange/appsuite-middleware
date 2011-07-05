@@ -315,12 +315,8 @@ public final class DatabaseFolderConverter {
                 }
             }
             return retval;
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

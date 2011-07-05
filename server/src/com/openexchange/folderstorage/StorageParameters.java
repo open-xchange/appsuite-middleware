@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 import java.util.Date;
 import java.util.Set;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -70,7 +70,7 @@ public interface StorageParameters {
      * 
      * @param warning The warning to add
      */
-    void addWarning(AbstractOXException warning);
+    void addWarning(OXException warning);
 
     /**
      * Checks if this storage parameters contain warnings.
@@ -84,7 +84,7 @@ public interface StorageParameters {
      * 
      * @return The warnings as an unmodifiable set
      */
-    Set<AbstractOXException> getWarnings();
+    Set<OXException> getWarnings();
 
     /**
      * Gets the context.

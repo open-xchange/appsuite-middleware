@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StorageParameters;
@@ -141,7 +142,7 @@ public final class StorageParametersImpl implements StorageParameters {
         return m;
     }
 
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         warning.setCategory(Category.WARNING);
         warnings.put(warning, PRESENT);
     }
@@ -150,7 +151,7 @@ public final class StorageParametersImpl implements StorageParameters {
         return !warnings.isEmpty();
     }
 
-    public Set<AbstractOXException> getWarnings() {
+    public Set<OXException> getWarnings() {
         return Collections.unmodifiableSet(warnings.keySet());
     }
 

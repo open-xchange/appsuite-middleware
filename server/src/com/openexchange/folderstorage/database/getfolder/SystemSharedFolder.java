@@ -65,7 +65,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -78,7 +77,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -126,12 +124,6 @@ public final class SystemSharedFolder {
                     userConfiguration,
                     null,
                     con);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -142,12 +134,10 @@ public final class SystemSharedFolder {
             final boolean hasNext = searchIterator.hasNext();
             retval.setSubfolderIDs(hasNext ? null : new String[0]);
             retval.setSubscribedSubfolders(hasNext);
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } finally {
             try {
                 searchIterator.close();
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error("Failed closing search iterator.", e);
             }
         }
@@ -181,12 +171,6 @@ public final class SystemSharedFolder {
                         userConfiguration,
                         null,
                         con)).asQueue();
-            } catch (final SearchIteratorException e) {
-                throw new OXException(e);
-            } catch (final DBPoolingException e) {
-                throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             }

@@ -96,7 +96,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.folderstorage.type.SystemType;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -108,7 +107,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -248,10 +246,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
                 nonExistingParents = tmp.toArray();
             } while (null != nonExistingParents && nonExistingParents.length > 0);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -323,10 +317,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             OXFolderSQL.restore(folderId, context, null);
         } catch (final NumberFormatException e) {
             throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderIdentifier);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -408,8 +398,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 throw OXFolderExceptionCode.CREATE_FAILED.create(new Object[0]);
             }
             folder.setID(String.valueOf(fuid));
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -452,10 +440,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.clearFolder(fo, true, System.currentTimeMillis());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -485,10 +469,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
              * 
              */
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -516,8 +496,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 return null;
             }
             return String.valueOf(folderId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -539,16 +517,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
             return SystemType.getInstance();
         } else {
-            try {
-                final FolderObject p = getFolderAccess(storageParameters).getFolderObject(pid);
-                final int parentType = p.getType();
-                if (FolderObject.PRIVATE == parentType) {
-                    return p.getCreatedBy() == user.getId() ? PrivateType.getInstance() : SharedType.getInstance();
-                } else if (FolderObject.PUBLIC == parentType) {
-                    return PublicType.getInstance();
-                }
-            } catch (final OXException e) {
-                throw new OXException(e);
+            final FolderObject p = getFolderAccess(storageParameters).getFolderObject(pid);
+            final int parentType = p.getType();
+            if (FolderObject.PRIVATE == parentType) {
+                return p.getCreatedBy() == user.getId() ? PrivateType.getInstance() : SharedType.getInstance();
+            } else if (FolderObject.PUBLIC == parentType) {
+                return PublicType.getInstance();
             }
         }
         return SystemType.getInstance();
@@ -600,8 +574,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
                 return folderAccess.containsForeignObjects(getFolderObject(folderId, ctx, con), storageParameters.getSession(), ctx);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -653,8 +625,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
                 return folderAccess.isEmpty(getFolderObject(folderId, ctx, con), storageParameters.getSession(), ctx);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -670,12 +640,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
             }
             OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -753,10 +719,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             // TODO: Subscribed?
 
             return retval;
-        } catch (final OXException e) {
-            throw e;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -893,8 +855,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             return ret;
         } catch (final OXException e) {
             throw e;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -951,10 +911,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
                     }
-                } catch (final DBPoolingException e) {
-                    throw new OXException(e);
                 } catch (final SQLException e) {
-                    throw new OXException(OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage()));
+                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                 }
             }
             /*
@@ -1008,10 +966,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 ret[i] = new DatabaseId(id, i, folderObject.getFolderName());
             }
             return ret;
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -1231,14 +1185,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 list.add(new DatabaseId(folderObject.getObjectID(), i, folderObject.getFolderName()));
             }
             return list.toArray(new SortableId[size]);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -1299,10 +1247,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
             return true;
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -1322,9 +1266,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(id)) {
                 final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
-                throw new OXException(OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(
                     session.getUserId(),
-                    context), UserStorage.getStorageUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId())));
+                    context), UserStorage.getStorageUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId()));
             }
 
             final int folderId = Integer.parseInt(id);
@@ -1400,8 +1344,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.updateFolder(updateMe, true, millis.getTime());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -1498,10 +1440,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
             return retval;
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -1528,10 +1466,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
 
             return ret;
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -1569,10 +1503,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
 
             return ret;
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             provider.close();
         }
@@ -1663,22 +1593,16 @@ public final class DatabaseFolderStorage implements FolderStorage {
         if (null != connection) {
             return new NonClosingConnectionProvider(connection);
         }
-        try {
-            final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-            final Context context = storageParameters.getContext();
-            connection = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
-            return new ClosingConnectionProvider(connection, modify, databaseService, context.getContextId());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        final Context context = storageParameters.getContext();
+        connection = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
+        return new ClosingConnectionProvider(connection, modify, databaseService, context.getContextId());
     }
 
     private static <T> T getParameter(final Class<T> clazz, final String name, final StorageParameters parameters) throws OXException {
         final T parameter = optParameter(clazz, name, parameters);
         if (null == parameter) {
-            throw new OXException(OXFolderExceptionCode.MISSING_PARAMETER.create(name));
+            throw OXFolderExceptionCode.MISSING_PARAMETER.create(name);
         }
         return parameter;
     }
@@ -1691,7 +1615,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             return clazz.cast(obj);
         } catch (final ClassCastException e) {
-            throw new OXException(OXFolderExceptionCode.MISSING_PARAMETER.create(e, name));
+            throw OXFolderExceptionCode.MISSING_PARAMETER.create(e, name);
         }
     }
 

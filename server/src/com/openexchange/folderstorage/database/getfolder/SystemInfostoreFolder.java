@@ -68,7 +68,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -165,12 +164,6 @@ public final class SystemInfostoreFolder {
                 subfolderIds.add(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
             }
             return subfolderIds.toNativeArray();
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -246,12 +239,6 @@ public final class SystemInfostoreFolder {
                 subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME)));
             }
             return subfolderIds;
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }

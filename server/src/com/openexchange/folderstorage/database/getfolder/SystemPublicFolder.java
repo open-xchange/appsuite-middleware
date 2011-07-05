@@ -66,7 +66,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -176,12 +175,6 @@ public final class SystemPublicFolder {
                 }
             }
             return subfolderIds.toNativeArray();
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -263,12 +256,6 @@ public final class SystemPublicFolder {
                 }
             }
             return subfolderIds;
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -276,7 +263,7 @@ public final class SystemPublicFolder {
 
     private static String[] toArray(final String... values) {
         final int length = values.length;
-        String[] ret = new String[length];
+        final String[] ret = new String[length];
         System.arraycopy(values, 0, ret, 0, length);
         return values;
     }
