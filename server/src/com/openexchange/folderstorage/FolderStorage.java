@@ -51,6 +51,7 @@ package com.openexchange.folderstorage;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -132,9 +133,9 @@ public interface FolderStorage {
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
      * @return <code>true</code> if denoted folder is empty; otherwise <code>false</code>
-     * @throws FolderException If checking folder content fails
+     * @throws OXException If checking folder content fails
      */
-    boolean isEmpty(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+    boolean isEmpty(String treeId, String folderId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Checks if denoted folder contains user-foreign objects.
@@ -144,9 +145,9 @@ public interface FolderStorage {
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
      * @return <code>true</code> if folder contains user-foreign objects; otherwise <code>false</code>
-     * @throws FolderException
+     * @throws OXException
      */
-    boolean containsForeignObjects(User user, String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+    boolean containsForeignObjects(User user, String treeId, String folderId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Checks if the folder denoted by specified folder ID exists in this folder storage.
@@ -155,9 +156,9 @@ public interface FolderStorage {
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
      * @return <code>true</code> if the folder denoted by specified folder ID exists in this folder storage; otherwise <code>false</code>
-     * @throws FolderException If the folder existence cannot be checked
+     * @throws OXException If the folder existence cannot be checked
      */
-    boolean containsFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+    boolean containsFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Checks if the folder denoted by specified folder ID exists in this folder storage.
@@ -167,18 +168,18 @@ public interface FolderStorage {
      * @param storageType The storage type from which to get the folder
      * @param storageParameters The storage parameters
      * @return <code>true</code> if the folder denoted by specified folder ID exists in this folder storage; otherwise <code>false</code>
-     * @throws FolderException If the folder existence cannot be checked
+     * @throws OXException If the folder existence cannot be checked
      */
-    boolean containsFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws FolderException;
+    boolean containsFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws OXException;
 
     /**
      * Checks consistency of the tree.
      * 
      * @param treeId The tree identifier
      * @param storageParameters The storage parameters
-     * @throws FolderException If consistency check fails
+     * @throws OXException If consistency check fails
      */
-    void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException;
+    void checkConsistency(String treeId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Restores the folder with given folder identifier
@@ -186,9 +187,9 @@ public interface FolderStorage {
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
-     * @throws FolderException If restore fails
+     * @throws OXException If restore fails
      */
-    void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+    void restore(String treeId, String folderId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Prepares specified folder with user-sensitive informations if needed.
@@ -197,9 +198,9 @@ public interface FolderStorage {
      * @param folder The folder identifier
      * @param storageParameters The storage parameters
      * @return The prepared or unchanged folder
-     * @throws FolderException If preparation fails
+     * @throws OXException If preparation fails
      */
-    Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters ) throws FolderException;
+    Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters ) throws OXException;
 
     /**
      * Gets the folder denoted by specified folder ID.
@@ -208,9 +209,9 @@ public interface FolderStorage {
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
      * @return The folder
-     * @throws FolderException If the folder cannot be returned
+     * @throws OXException If the folder cannot be returned
      */
-    Folder getFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+    Folder getFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets the folders denoted by specified folder IDs.
@@ -219,9 +220,9 @@ public interface FolderStorage {
      * @param folderIds The folder identifiers
      * @param storageParameters The storage parameters
      * @return The folder
-     * @throws FolderException If the folder cannot be returned
+     * @throws OXException If the folder cannot be returned
      */
-    List<Folder> getFolders(String treeId, List<String> folderIds, StorageParameters storageParameters) throws FolderException;
+    List<Folder> getFolders(String treeId, List<String> folderIds, StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets the folder denoted by specified folder ID.
@@ -231,9 +232,9 @@ public interface FolderStorage {
      * @param storageType The storage type from which to get the folder
      * @param storageParameters The storage parameters
      * @return The folder
-     * @throws FolderException If the folder cannot be returned
+     * @throws OXException If the folder cannot be returned
      */
-    Folder getFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws FolderException;
+    Folder getFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets the folders denoted by specified folder IDs.
@@ -243,9 +244,9 @@ public interface FolderStorage {
      * @param storageType The storage type from which to get the folder
      * @param storageParameters The storage parameters
      * @return The folder
-     * @throws FolderException If the folder cannot be returned
+     * @throws OXException If the folder cannot be returned
      */
-    List<Folder> getFolders(String treeId, List<String> folderIds, StorageType storageType, StorageParameters storageParameters) throws FolderException;
+    List<Folder> getFolders(String treeId, List<String> folderIds, StorageType storageType, StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets this storage's default folder identifier for specified user for given content type.
@@ -256,9 +257,9 @@ public interface FolderStorage {
      * @param type The folder type
      * @param storageParameters The storage parameters
      * @return The default folder identifier for specified user for given content type
-     * @throws FolderException If the default folder cannot be returned
+     * @throws OXException If the default folder cannot be returned
      */
-    String getDefaultFolderID(User user, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws FolderException;
+    String getDefaultFolderID(User user, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets the type as indicated by specified parent.
@@ -268,21 +269,21 @@ public interface FolderStorage {
      * @param parentId The parent identifier
      * @param storageParameters The storage parameters
      * @return The type as indicated by specified parent
-     * @throws FolderException Id determining the type fails
+     * @throws OXException Id determining the type fails
      */
-    Type getTypeByParent(User user, String treeId, String parentId, StorageParameters storageParameters) throws FolderException;
+    Type getTypeByParent(User user, String treeId, String parentId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Deletes the folder denoted by specified folder ID.
      * <p>
-     * A {@link FolderException} is thrown if denoted folder contains subfolders.
+     * A {@link OXException} is thrown if denoted folder contains subfolders.
      * 
      * @param treeId The tree identifier
      * @param folderId The folder ID
      * @param storageParameters The storage parameters
-     * @throws FolderException If deletion fails
+     * @throws OXException If deletion fails
      */
-    void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+    void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Clears the content of the folder denoted by specified folder ID.
@@ -290,18 +291,18 @@ public interface FolderStorage {
      * @param treeId The tree identifier
      * @param folderId The folder ID
      * @param storageParameters The storage parameters
-     * @throws FolderException If deletion fails
+     * @throws OXException If deletion fails
      */
-    void clearFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+    void clearFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Updates the data of the given folder on the storage.
      * 
      * @param folder object containing new folder data.
      * @param storageParameters The storage parameters
-     * @throws FolderException If changing the folder data fails.
+     * @throws OXException If changing the folder data fails.
      */
-    void updateFolder(Folder folder, StorageParameters storageParameters) throws FolderException;
+    void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException;
 
     /**
      * Updates the last-modified time stamp of the given folder in the storage.
@@ -310,9 +311,9 @@ public interface FolderStorage {
      * @param treeId The tree identifier
      * @param folderId The folder ID
      * @param storageParameters The storage parameters
-     * @throws FolderException If updating last-modified time stamp fails
+     * @throws OXException If updating last-modified time stamp fails
      */
-    void updateLastModified(long lastModified, String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+    void updateLastModified(long lastModified, String treeId, String folderId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Creates the given folder on the storage.
@@ -321,9 +322,9 @@ public interface FolderStorage {
      * 
      * @param folder The object containing the new folder data.
      * @param storageParameters The storage parameters
-     * @throws FolderException If creating the folder fails.
+     * @throws OXException If creating the folder fails.
      */
-    void createFolder(Folder folder, StorageParameters storageParameters) throws FolderException;
+    void createFolder(Folder folder, StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets the folder identifiers for specified content type and type.
@@ -333,9 +334,9 @@ public interface FolderStorage {
      * @param type The type
      * @param storageParameters The storage parameters
      * @return The folder identifiers for specified content type and type
-     * @throws FolderException If returning the folder identifiers fails
+     * @throws OXException If returning the folder identifiers fails
      */
-    SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException;
+    SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets the subfolder identifiers for specified parent which are visible to storage parameter's entity.
@@ -344,9 +345,9 @@ public interface FolderStorage {
      * @param parentId The parent identifier
      * @param storageParameters The storage parameters
      * @return The subfolder identifiers for specified parent or an empty array if parent identifier cannot be served
-     * @throws FolderException If returning the subfolder identifiers fails
+     * @throws OXException If returning the subfolder identifiers fails
      */
-    SortableId[] getSubfolders(String treeId, String parentId, StorageParameters storageParameters) throws FolderException;
+    SortableId[] getSubfolders(String treeId, String parentId, StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets the identifiers of all new and modified folders from this storage since given time stamp.
@@ -358,9 +359,9 @@ public interface FolderStorage {
      * @param includeContentTypes The content types to include
      * @param storageParameters The storage parameters
      * @return The identifiers of all new and modified folders from this storage since given time stamp
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    String[] getModifiedFolderIDs(String treeId, Date timeStamp, ContentType[] includeContentTypes, StorageParameters storageParameters) throws FolderException;
+    String[] getModifiedFolderIDs(String treeId, Date timeStamp, ContentType[] includeContentTypes, StorageParameters storageParameters) throws OXException;
 
     /**
      * Gets the identifiers of all deleted folders from this storage since given time stamp.
@@ -371,9 +372,9 @@ public interface FolderStorage {
      * @param timeStamp The time stamp
      * @param storageParameters The storage parameters
      * @return The identifiers of all deleted folders from this storage since given time stamp
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    String[] getDeletedFolderIDs(String treeId, Date timeStamp, StorageParameters storageParameters) throws FolderException;
+    String[] getDeletedFolderIDs(String treeId, Date timeStamp, StorageParameters storageParameters) throws OXException;
 
     /**
      * Starts a transaction on folder storage.
@@ -382,17 +383,17 @@ public interface FolderStorage {
      * @param modify <code>true</code> if started transaction is supposed to modify storage's content; otherwise <code>false</code>
      * @return <code>true</code> if call started the transaction; otherwise <code>false</code> if transaction has already been started
      *         before
-     * @throws FolderException If storage parameters cannot be returned
+     * @throws OXException If storage parameters cannot be returned
      */
-    boolean startTransaction(StorageParameters parameters, boolean modify) throws FolderException;
+    boolean startTransaction(StorageParameters parameters, boolean modify) throws OXException;
 
     /**
      * Publishes made changes on the storage.
      * 
      * @param params The storage parameters
-     * @throws FolderException If committing the made changes fails.
+     * @throws OXException If committing the made changes fails.
      */
-    void commitTransaction(StorageParameters params) throws FolderException;
+    void commitTransaction(StorageParameters params) throws OXException;
 
     /**
      * Discards made changes on the storage. This method does not throw an exception because a rollback should only be used if already some

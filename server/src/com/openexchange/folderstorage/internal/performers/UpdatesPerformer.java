@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -147,9 +147,9 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
      *            include them
      * @param includeContentTypes The content types to include
      * @return All updated/deleted folders since given time stamp.
-     * @throws FolderException If updates request fails
+     * @throws OXException If updates request fails
      */
-    public UserizedFolder[][] doUpdates(final String treeId, final Date since, final boolean ignoreDeleted, final ContentType[] includeContentTypes) throws FolderException {
+    public UserizedFolder[][] doUpdates(final String treeId, final Date since, final boolean ignoreDeleted, final ContentType[] includeContentTypes) throws OXException {
         final List<FolderStorage> realFolderStorages =
             new ArrayList<FolderStorage>(Arrays.asList(folderStorageDiscoverer.getTreeFolderStorages(FolderStorage.REAL_TREE_ID)));
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(realFolderStorages.size() + 1);
@@ -207,7 +207,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                     for (final String modifiedFolderID : modifiedFolderIDs) {
                         try {
                             modifiedFolders.add(folderStorage.getFolder(FolderStorage.REAL_TREE_ID, modifiedFolderID, storageParameters));
-                        } catch (final FolderException e) {
+                        } catch (final OXException e) {
                             LOG.error(
                                 new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
                                     "\" could not be fetched from storage \"").append(folderStorage.getClass().getName()).append("\":\n").append(
@@ -229,7 +229,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                         FolderStorage.REAL_TREE_ID,
                                         modifiedFolderID,
                                         storageParameters));
-                                } catch (final FolderException e) {
+                                } catch (final OXException e) {
                                     LOG.error(
                                         new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
                                             "\" could not be fetched from storage \"").append(storage.getClass().getName()).append("\":\n").append(
@@ -240,7 +240,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                             if (started) {
                                 storage.commitTransaction(storageParameters);
                             }
-                        } catch (final FolderException e) {
+                        } catch (final OXException e) {
                             if (started) {
                                 storage.rollback(storageParameters);
                             }
@@ -435,7 +435,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
              * Return result
              */
             return new UserizedFolder[][] { modified, deleted };
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.rollback(storageParameters);
             }
@@ -450,12 +450,12 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     private static interface TreeChecker {
 
-        boolean containsVirtualFolder(String folderId, String treeId, StorageType storageType) throws FolderException;
+        boolean containsVirtualFolder(String folderId, String treeId, StorageType storageType) throws OXException;
     }
 
     private static final TreeChecker TRUST_ALL_CHECKER = new TreeChecker() {
 
-        public boolean containsVirtualFolder(final String folderId, final String treeId, final StorageType storageType) throws FolderException {
+        public boolean containsVirtualFolder(final String folderId, final String treeId, final StorageType storageType) throws OXException {
             return true;
         }
     };
@@ -472,7 +472,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
             this.storageParameters = storageParameters;
         }
 
-        public boolean containsVirtualFolder(final String folderId, final String treeId, final StorageType storageType) throws FolderException {
+        public boolean containsVirtualFolder(final String folderId, final String treeId, final StorageType storageType) throws OXException {
             /*
              * Check if folders are contained in given tree ID
              */
@@ -481,14 +481,14 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     }
 
-    private Permission getEffectivePermission(final Folder folder) throws FolderException {
+    private Permission getEffectivePermission(final Folder folder) throws OXException {
         if (null == getSession()) {
             return CalculatePermission.calculate(folder, getUser(), getContext(), getAllowedContentTypes());
         }
         return CalculatePermission.calculate(folder, getSession(), getAllowedContentTypes());
     }
 
-    private Folder getFolder(final String treeId, final String folderId, final Collection<FolderStorage> storages) throws FolderException {
+    private Folder getFolder(final String treeId, final String folderId, final Collection<FolderStorage> storages) throws OXException {
         for (final FolderStorage storage : storages) {
             if (storage.getFolderType().servesFolderId(folderId)) {
                 return storage.getFolder(treeId, folderId, storageParameters);
@@ -497,7 +497,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
         throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
     }
 
-    private Set<String> getPublicSubfolderIDs(final String treeId, final Collection<FolderStorage> storages) throws FolderException {
+    private Set<String> getPublicSubfolderIDs(final String treeId, final Collection<FolderStorage> storages) throws OXException {
         final String folderId = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         for (final FolderStorage storage : storages) {
             if (storage.getFolderType().servesFolderId(folderId)) {

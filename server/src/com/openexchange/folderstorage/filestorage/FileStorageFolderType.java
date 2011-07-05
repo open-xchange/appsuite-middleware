@@ -49,8 +49,8 @@
 
 package com.openexchange.folderstorage.filestorage;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.groupware.container.FolderObject;
@@ -107,7 +107,7 @@ public final class FileStorageFolderType implements FolderType {
         final FileStorageFolderIdentifier pfi;
         try {
             pfi = new FileStorageFolderIdentifier(folderId);
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             // org.apache.commons.logging.LogFactory.getLog(FileStorageFolderType.class).warn(e.getMessage(), e);
             return false;
         }

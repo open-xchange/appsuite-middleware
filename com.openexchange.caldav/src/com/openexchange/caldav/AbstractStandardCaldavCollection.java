@@ -55,7 +55,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;

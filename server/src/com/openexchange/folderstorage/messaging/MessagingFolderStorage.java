@@ -68,7 +68,6 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
@@ -106,7 +105,6 @@ import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -193,23 +191,23 @@ public final class MessagingFolderStorage implements FolderStorage {
         super();
     }
 
-    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // TODO:
     }
 
-    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
         return folder;
     }
 
-    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         // Nothing to do
     }
 
-    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
     }
 
-    private MessagingAccountAccess getMessagingAccessForAccount(final String serviceId, final int accountId, final Session session, final ConcurrentMap<Key, MessagingAccountAccess> accesses) throws FolderException {
+    private MessagingAccountAccess getMessagingAccessForAccount(final String serviceId, final int accountId, final Session session, final ConcurrentMap<Key, MessagingAccountAccess> accesses) throws OXException {
         final Key key = Key.newInstance(accountId, serviceId);
         MessagingAccountAccess accountAccess = accesses.get(key);
         if (null == accountAccess) {
@@ -219,9 +217,9 @@ public final class MessagingFolderStorage implements FolderStorage {
                         accountId,
                         session);
             } catch (final MessagingException e) {
-                throw new FolderException(e);
+                throw new OXException(e);
             } catch (final OXException e) {
-                throw new FolderException(e);
+                throw new OXException(e);
             }
             final MessagingAccountAccess prev = accesses.putIfAbsent(key, accountAccess);
             if (null != prev) {
@@ -251,7 +249,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         return MessagingContentType.getInstance();
     }
 
-    public void commitTransaction(final StorageParameters params) throws FolderException {
+    public void commitTransaction(final StorageParameters params) throws OXException {
         @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
             (ConcurrentMap<Key, MessagingAccountAccess>) params.getParameter(
                 MessagingFolderType.getInstance(),
@@ -268,7 +266,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         }
     }
 
-    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         try {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
@@ -318,11 +316,11 @@ public final class MessagingFolderStorage implements FolderStorage {
             final String fullname = accountAccess.getFolderAccess().createFolder(dmf);
             folder.setID(new MessagingFolderIdentifier(serviceId, accountId, fullname).toString());
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         try {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
@@ -345,11 +343,11 @@ public final class MessagingFolderStorage implements FolderStorage {
             final String trashFolder = folderAccess.getTrashFolder();
             folderAccess.clearFolder(fullname, (null != trashFolder && fullname.startsWith(trashFolder)));
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         try {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
@@ -372,11 +370,11 @@ public final class MessagingFolderStorage implements FolderStorage {
             final String trashFolder = folderAccess.getTrashFolder();
             folderAccess.deleteFolder(fullname, (null != trashFolder && fullname.startsWith(trashFolder)));
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         if (!(contentType instanceof MessagingContentType)) {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         }
@@ -416,15 +414,15 @@ public final class MessagingFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         return MessagingType.getInstance();
     }
 
-    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         try {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
@@ -455,11 +453,11 @@ public final class MessagingFolderStorage implements FolderStorage {
             }
             return false;
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         try {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
@@ -486,19 +484,19 @@ public final class MessagingFolderStorage implements FolderStorage {
             openMessagingAccess(accountAccess);
             return 0 == accountAccess.getFolderAccess().getFolder(fullname).getMessageCount();
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // Nothing to do
     }
 
-    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws FolderException {
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws OXException {
         return getFolders(treeId, folderIds, StorageType.WORKING, storageParameters);
     }
 
-    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
         for (final String folderId : folderIds) {
             ret.add(getFolder(treeId, folderId, storageType, storageParameters));
@@ -506,11 +504,11 @@ public final class MessagingFolderStorage implements FolderStorage {
         return ret;
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
@@ -603,9 +601,9 @@ public final class MessagingFolderStorage implements FolderStorage {
 
             return retval;
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
@@ -630,7 +628,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         return MessagingFolderType.getInstance();
     }
 
-    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         try {
             final ServerSession session;
             {
@@ -766,11 +764,11 @@ public final class MessagingFolderStorage implements FolderStorage {
             }
             return list.toArray(new SortableId[list.size()]);
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
@@ -791,7 +789,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         }
     }
 
-    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
         /*
          * Ensure session is present
          */
@@ -811,11 +809,11 @@ public final class MessagingFolderStorage implements FolderStorage {
         return StoragePriority.NORMAL;
     }
 
-    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         if (StorageType.BACKUP.equals(storageType)) {
             return false;
         }
@@ -837,15 +835,15 @@ public final class MessagingFolderStorage implements FolderStorage {
 
             return accountAccess.getFolderAccess().exists(mfi.getFullname());
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws OXException {
         return new String[0];
     }
 
-    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
         if (null == includeContentTypes || includeContentTypes.length == 0) {
             return new String[0];
         }
@@ -862,7 +860,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         return ret.toArray(new String[ret.size()]);
     }
 
-    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         try {
             @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
                 (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
@@ -1021,7 +1019,7 @@ public final class MessagingFolderStorage implements FolderStorage {
              */
             accountAccess.getFolderAccess().updateFolder(id, dmf);
         } catch (final MessagingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 

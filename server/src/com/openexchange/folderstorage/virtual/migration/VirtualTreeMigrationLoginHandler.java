@@ -65,7 +65,7 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.virtual.sql.Insert;
@@ -199,14 +199,14 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
             }
 
             setMigrationPerformed(session, con);
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         } catch (final OXException e) {
             throw new LoginException(e);
         }
     }
 
-    private static void insertDefaultMailFolder(final String fullname, final MailAccess<?, ?> mailAccess, final Session s) throws OXException, FolderException {
+    private static void insertDefaultMailFolder(final String fullname, final MailAccess<?, ?> mailAccess, final Session s) throws OXException, OXException {
         final MailFolder folder = mailAccess.getFolderStorage().getFolder(fullname);
         final String id = MailFolderUtility.prepareFullname(0, fullname);
         final DummyFolder mailFolder = new DummyFolder();
@@ -226,7 +226,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
 
     private static final String SQL_SELECT = "SELECT value FROM user_attribute WHERE cid = ? AND id = ? AND name = ?";
 
-    private static boolean performMigration(final Session session, final Connection con) throws FolderException {
+    private static boolean performMigration(final Session session, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -248,7 +248,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
 
     private static final String SQL_UPDATE = "UPDATE user_attribute SET value = ? WHERE cid = ? AND id = ? AND name = ?";
 
-    private static void setMigrationPerformed(final Session session, final Connection con) throws FolderException {
+    private static void setMigrationPerformed(final Session session, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_UPDATE);

@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -112,9 +112,9 @@ public final class ConsistencyPerformer extends AbstractPerformer {
      * Performs the consistency check.
      * 
      * @param treeId The tree identifier
-     * @throws FolderException If an error occurs during deletion
+     * @throws OXException If an error occurs during deletion
      */
-    public void doConsistencyCheck(final String treeId) throws FolderException {
+    public void doConsistencyCheck(final String treeId) throws OXException {
         final FolderStorage[] folderStorages = folderStorageDiscoverer.getFolderStoragesForTreeID(treeId);
         final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         for (final FolderStorage folderStorage : folderStorages) {
@@ -124,7 +124,7 @@ public final class ConsistencyPerformer extends AbstractPerformer {
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }

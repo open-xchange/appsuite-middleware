@@ -63,7 +63,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.FolderEventConstants;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.push.PushEventConstants;
@@ -111,7 +111,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         if (CacheService.class.equals(clazz)) {
             try {
                 initCacheFolderStorage();
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 unregisterCacheFolderStorage();
             }
@@ -126,7 +126,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         if (CacheService.class.equals(clazz)) {
             try {
                 disposeCacheFolderStorage();
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 unregisterCacheFolderStorage();
             }
@@ -186,7 +186,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         }
     }
 
-    private void disposeCacheFolderStorage() throws FolderException {
+    private void disposeCacheFolderStorage() throws OXException {
         // Unregister folder storage
         unregisterCacheFolderStorage();
         // Shut-down folder storage
@@ -196,7 +196,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         }
     }
 
-    private void initCacheFolderStorage() throws FolderException {
+    private void initCacheFolderStorage() throws OXException {
         // Start-up folder storage
         cacheFolderStorage = new CacheFolderStorage();
         cacheFolderStorage.onCacheAvailable();
@@ -215,7 +215,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
                     try {
                         tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
-                    } catch (final FolderException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
@@ -239,7 +239,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                         } else {
                             tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                         }
-                    } catch (final FolderException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }

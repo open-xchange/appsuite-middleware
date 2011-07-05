@@ -56,7 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -115,16 +115,16 @@ public final class Delete {
      * @param folderId The folder identifier
      * @param global <code>true</code> for global folder; otherwise <code>false</code>
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
-     * @throws FolderException If delete fails
+     * @throws OXException If delete fails
      */
-    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean global, final boolean backup) throws FolderException {
+    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean global, final boolean backup) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getWritable(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             con.setAutoCommit(false); // BEGIN
@@ -134,7 +134,7 @@ public final class Delete {
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
@@ -157,9 +157,9 @@ public final class Delete {
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
      * @param con The connection to use
      * @return <code>true</code> if a folder denoted by given identifier was deleted; otherwise <code>false</code>
-     * @throws FolderException If delete fails
+     * @throws OXException If delete fails
      */
-    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean global, final boolean backup, final Connection con) throws FolderException {
+    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean global, final boolean backup, final Connection con) throws OXException {
         if (null == con) {
             return deleteFolder(cid, tree, user, folderId, global, backup);
         }

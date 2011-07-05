@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -121,9 +121,9 @@ public final class UpdatePerformer extends AbstractPerformer {
      * 
      * @param folder The object which denotes the folder to update and provides the changes to perform
      * @param timeStamp The requestor's last-modified time stamp
-     * @throws FolderException If update fails
+     * @throws OXException If update fails
      */
-    public void doUpdate(final Folder folder, final Date timeStamp) throws FolderException {
+    public void doUpdate(final Folder folder, final Date timeStamp) throws OXException {
         final String folderId = folder.getID();
         if (null == folderId) {
             throw FolderExceptionErrorMessage.MISSING_FOLDER_ID.create(new Object[0]);
@@ -234,7 +234,7 @@ public final class UpdatePerformer extends AbstractPerformer {
                         if (started2) {
                             newRealParentStorage.commitTransaction(storageParameters);
                         }
-                    } catch (final FolderException e) {
+                    } catch (final OXException e) {
                         if (started2) {
                             newRealParentStorage.rollback(storageParameters);
                         }
@@ -322,7 +322,7 @@ public final class UpdatePerformer extends AbstractPerformer {
                 LOG.debug(new StringBuilder().append("UpdatePerformer.doUpdate() took ").append(duration).append("msec for folder: ").append(
                     folderId).toString());
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
@@ -343,11 +343,11 @@ public final class UpdatePerformer extends AbstractPerformer {
         return new MovePerformer(session, folderStorageDiscoverer);
     }
 
-    private void doRenameReal(final Folder folder, final FolderStorage realStorage) throws FolderException {
+    private void doRenameReal(final Folder folder, final FolderStorage realStorage) throws OXException {
         realStorage.updateFolder(folder, storageParameters);
     }
 
-    private void doRenameVirtual(final Folder folder, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
+    private void doRenameVirtual(final Folder folder, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws OXException {
         // Update name in real tree
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
         if (null == realStorage) {
@@ -369,7 +369,7 @@ public final class UpdatePerformer extends AbstractPerformer {
         }
     }
 
-    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws FolderException {
+    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage openedStorage : openedStorages) {
             if (openedStorage.equals(storage)) {
                 return;
@@ -380,7 +380,7 @@ public final class UpdatePerformer extends AbstractPerformer {
         }
     }
 
-    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
+    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
         final ListPerformer listPerformer;
         if (null == session) {
             listPerformer = new ListPerformer(user, context, null);
@@ -397,7 +397,7 @@ public final class UpdatePerformer extends AbstractPerformer {
         return false;
     }
 
-    private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
+    private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
         final ListPerformer listPerformer;
         if (null == session) {
             listPerformer = new ListPerformer(user, context, null);

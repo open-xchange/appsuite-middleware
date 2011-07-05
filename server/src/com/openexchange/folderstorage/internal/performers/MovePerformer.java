@@ -60,7 +60,7 @@ import java.util.Map.Entry;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -177,14 +177,14 @@ final class MovePerformer extends AbstractPerformer {
         super(user, context, folderStorageDiscoverer);
     }
 
-    void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage) throws FolderException {
+    void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage) throws OXException {
         // if (folderStorage.equals(realParentStorage) && newRealParentStorage.equals(realParentStorage)) {
         // throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
         // }
         folderStorage.updateFolder(folder, storageParameters);
     }
 
-    void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final List<FolderStorage> openedStorages) throws FolderException {
+    void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final List<FolderStorage> openedStorages) throws OXException {
         /*
          * Check permission on folder
          */
@@ -245,7 +245,7 @@ final class MovePerformer extends AbstractPerformer {
                     if (started) {
                         realStorage.commitTransaction(storageParameters);
                     }
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     if (started) {
                         realStorage.rollback(storageParameters);
                     }
@@ -422,7 +422,7 @@ final class MovePerformer extends AbstractPerformer {
         }
     }
 
-    private void gatherSubfolders(final String treeId, final FolderInfo folder, final StorageParameters params, final FolderStorage storage, final boolean check) throws FolderException {
+    private void gatherSubfolders(final String treeId, final FolderInfo folder, final StorageParameters params, final FolderStorage storage, final boolean check) throws OXException {
         final SortableId[] subfolders = storage.getSubfolders(treeId, folder.id, params);
         if (0 == subfolders.length) {
             return;
@@ -451,7 +451,7 @@ final class MovePerformer extends AbstractPerformer {
         }
     }
 
-    private Permission effectivePermission(final Folder f) throws FolderException {
+    private Permission effectivePermission(final Folder f) throws OXException {
         final Permission permission;
         if (null == session) {
             permission = CalculatePermission.calculate(f, getUser(), getContext(), ALL_ALLOWED);
@@ -493,7 +493,7 @@ final class MovePerformer extends AbstractPerformer {
         }
     }
 
-    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws FolderException {
+    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage openedStorage : openedStorages) {
             if (openedStorage.equals(storage)) {
                 return;
@@ -504,7 +504,7 @@ final class MovePerformer extends AbstractPerformer {
         }
     }
 
-    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
+    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
         final ListPerformer listPerformer;
         if (null == session) {
             listPerformer = new ListPerformer(user, context, null);
@@ -521,7 +521,7 @@ final class MovePerformer extends AbstractPerformer {
         return false;
     }
 
-    private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
+    private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
         final ListPerformer listPerformer;
         if (null == session) {
             listPerformer = new ListPerformer(user, context, null);

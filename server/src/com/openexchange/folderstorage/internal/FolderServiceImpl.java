@@ -54,7 +54,6 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderFilter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -91,182 +90,182 @@ public final class FolderServiceImpl implements FolderService {
         super();
     }
 
-    public void checkConsistency(final String treeId, final User user, final Context context) throws FolderException {
+    public void checkConsistency(final String treeId, final User user, final Context context) throws OXException {
         new ConsistencyPerformer(user, context).doConsistencyCheck(treeId);
     }
     
-    public void checkConsistency(final String treeId, final Session session) throws FolderException {
+    public void checkConsistency(final String treeId, final Session session) throws OXException {
         try {
             new ConsistencyPerformer(new ServerSessionAdapter(session)).doConsistencyCheck(treeId);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public void clearFolder(final String treeId, final String folderId, final User user, final Context contex) throws FolderException {
+    public void clearFolder(final String treeId, final String folderId, final User user, final Context contex) throws OXException {
         new ClearPerformer(user, contex).doClear(treeId, folderId);
     }
 
-    public void clearFolder(final String treeId, final String folderId, final Session session) throws FolderException {
+    public void clearFolder(final String treeId, final String folderId, final Session session) throws OXException {
         try {
             new ClearPerformer(new ServerSessionAdapter(session)).doClear(treeId, folderId);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public FolderResponse<String> createFolder(final Folder folder, final User user, final Context context) throws FolderException {
+    public FolderResponse<String> createFolder(final Folder folder, final User user, final Context context) throws OXException {
         final CreatePerformer createPerformer = new CreatePerformer(user, context);
         return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
     }
 
-    public FolderResponse<String> createFolder(final Folder folder, final Session session) throws FolderException {
+    public FolderResponse<String> createFolder(final Folder folder, final Session session) throws OXException {
         try {
             final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session));
             return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final Date timeStamp, final User user, final Context context) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final Date timeStamp, final User user, final Context context) throws OXException {
         new DeletePerformer(user, context).doDelete(treeId, folderId, timeStamp);
 
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session) throws OXException {
         try {
             new DeletePerformer(new ServerSessionAdapter(session)).doDelete(treeId, folderId, timeStamp);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final User ruser, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final User ruser, final Context context, final FolderServiceDecorator decorator) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public UserizedFolder getFolder(final String treeId, final String folderId, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+    public UserizedFolder getFolder(final String treeId, final String folderId, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
         return new GetPerformer(user, context, decorator).doGet(treeId, folderId);
     }
 
-    public UserizedFolder getFolder(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public UserizedFolder getFolder(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws OXException {
         try {
             return new GetPerformer(new ServerSessionAdapter(session), decorator).doGet(treeId, folderId);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public FolderResponse<UserizedFolder[]> getAllVisibleFolders(final String treeId, final FolderFilter filter, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getAllVisibleFolders(final String treeId, final FolderFilter filter, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
         final AllVisibleFoldersPerformer performer = new AllVisibleFoldersPerformer(user, context, decorator);
         return FolderResponseImpl.newFolderResponse(performer.doAllVisibleFolders(treeId, filter), performer.getWarnings());
     }
 
-    public FolderResponse<UserizedFolder[]> getAllVisibleFolders(final String treeId, final FolderFilter filter, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getAllVisibleFolders(final String treeId, final FolderFilter filter, final Session session, final FolderServiceDecorator decorator) throws OXException {
         try {
             final AllVisibleFoldersPerformer performer = new AllVisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(performer.doAllVisibleFolders(treeId, filter), performer.getWarnings());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public FolderResponse<UserizedFolder[]> getPath(final String treeId, final String folderId, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getPath(final String treeId, final String folderId, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
         final PathPerformer performer = new PathPerformer(user, context, decorator);
         return FolderResponseImpl.newFolderResponse(performer.doPath(treeId, folderId, true), performer.getWarnings());
     }
 
-    public FolderResponse<UserizedFolder[]> getPath(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getPath(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws OXException {
         try {
             final PathPerformer performer = new PathPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(performer.doPath(treeId, folderId, true), performer.getWarnings());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
         final VisibleFoldersPerformer performer = new VisibleFoldersPerformer(user, context, decorator);
         return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(treeId, contentType, type, all), performer.getWarnings());
     }
 
-    public FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException {
         try {
             final VisibleFoldersPerformer performer = new VisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(treeId, contentType, type, all), performer.getWarnings());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public FolderResponse<UserizedFolder[]> getSubfolders(final String treeId, final String parentId, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getSubfolders(final String treeId, final String parentId, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
         final ListPerformer listPerformer = new ListPerformer(user, context, decorator);
         return FolderResponseImpl.newFolderResponse(listPerformer.doList(treeId, parentId, all), listPerformer.getWarnings());
     }
 
-    public FolderResponse<UserizedFolder[]> getSubfolders(final String treeId, final String parentId, final boolean all, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getSubfolders(final String treeId, final String parentId, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException {
         try {
             final ListPerformer listPerformer = new ListPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(listPerformer.doList(treeId, parentId, all), listPerformer.getWarnings());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public FolderResponse<UserizedFolder[][]> getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[][]> getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
         final UpdatesPerformer performer = new UpdatesPerformer(user, context, decorator);
         return FolderResponseImpl.newFolderResponse(
             performer.doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes),
             performer.getWarnings());
     }
 
-    public FolderResponse<UserizedFolder[][]> getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[][]> getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final Session session, final FolderServiceDecorator decorator) throws OXException {
         try {
             final UpdatesPerformer performer = new UpdatesPerformer(new ServerSessionAdapter(session), decorator);
             return FolderResponseImpl.newFolderResponse(
                 performer.doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes),
                 performer.getWarnings());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
-    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final User user, final Context context) throws FolderException {
+    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final User user, final Context context) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final Session session) throws FolderException {
+    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final Session session) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    public void unsubscribeFolder(final String treeId, final String folderId, final User user, final Context context) throws FolderException {
+    public void unsubscribeFolder(final String treeId, final String folderId, final User user, final Context context) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    public void unsubscribeFolder(final String treeId, final String folderId, final Session session) throws FolderException {
+    public void unsubscribeFolder(final String treeId, final String folderId, final Session session) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    public void updateFolder(final Folder folder, final Date timeStamp, final User user, final Context context) throws FolderException {
+    public void updateFolder(final Folder folder, final Date timeStamp, final User user, final Context context) throws OXException {
         new UpdatePerformer(user, context).doUpdate(folder, timeStamp);
     }
 
-    public void updateFolder(final Folder folder, final Date timeStamp, final Session session) throws FolderException {
+    public void updateFolder(final Folder folder, final Date timeStamp, final Session session) throws OXException {
         try {
             new UpdatePerformer(new ServerSessionAdapter(session)).doUpdate(folder, timeStamp);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 

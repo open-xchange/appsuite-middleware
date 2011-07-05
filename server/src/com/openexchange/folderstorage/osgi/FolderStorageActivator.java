@@ -64,7 +64,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.FolderExceptionFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;

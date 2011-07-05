@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.messaging;
 
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.groupware.container.FolderObject;
@@ -99,7 +99,7 @@ public final class MessagingFolderType implements FolderType {
         final MessagingFolderIdentifier pfi;
         try {
             pfi = new MessagingFolderIdentifier(folderId);
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             // org.apache.commons.logging.LogFactory.getLog(MessagingFolderType.class).warn(e.getMessage(), e);
             return false;
         }

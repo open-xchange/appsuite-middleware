@@ -51,7 +51,7 @@ package com.openexchange.folderstorage.outlook.sql;
 
 import java.sql.PreparedStatement;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
 import com.openexchange.server.OXException;
 
@@ -73,14 +73,14 @@ public final class Utility {
      * Gets the {@link DatabaseService} from service registry.
      * 
      * @return The {@link DatabaseService} from service registry
-     * @throws FolderException If {@link DatabaseService} is not contained in service registry
+     * @throws OXException If {@link DatabaseService} is not contained in service registry
      */
-    public static DatabaseService getDatabaseService() throws FolderException {
+    public static DatabaseService getDatabaseService() throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = OutlookServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         return databaseService;
     }

@@ -66,7 +66,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -151,9 +151,9 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
      *            subscribed ones
      * @return The user-sensitive subfolders
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    public List<UserizedFolder[]> doVisibleFolders(final String treeId, final ContentType contentType, final boolean all, final Type type, final Type... otherTypes) throws FolderException {
+    public List<UserizedFolder[]> doVisibleFolders(final String treeId, final ContentType contentType, final boolean all, final Type type, final Type... otherTypes) throws OXException {
         if (null == otherTypes || 0 == otherTypes.length) {
             return Collections.<UserizedFolder[]> singletonList(doVisibleFolders(treeId, contentType, type, all));
         }
@@ -173,9 +173,9 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
      *            subscribed ones
      * @return The user-sensitive subfolders
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    public UserizedFolder[] doVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all) throws FolderException {
+    public UserizedFolder[] doVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all) throws OXException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
@@ -224,7 +224,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 try {
                     completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
                 } catch (final OXException e) {
-                    throw new FolderException(e);
+                    throw new OXException(e);
                 }
                 paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
             }
@@ -256,7 +256,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                 if (!warnings.isEmpty()) {
                                     addWarning(warnings.iterator().next());
                                 }
-                            } catch (final FolderException e) {
+                            } catch (final OXException e) {
                                 /*
                                  * Batch-load failed...
                                  */
@@ -277,7 +277,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     final Folder subfolder;
                                     try {
                                         subfolder = tmp.getFolder(treeId, id, newParameters);
-                                    } catch (final FolderException e) {
+                                    } catch (final OXException e) {
                                         log.warn(
                                             new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
                                                 "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
@@ -337,7 +337,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                 fs.commitTransaction(newParameters);
                             }
                             return null;
-                        } catch (final FolderException e) {
+                        } catch (final OXException e) {
                             for (final FolderStorage fs : openedStorages) {
                                 fs.rollback(newParameters);
                             }
@@ -346,7 +346,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                             for (final FolderStorage fs : openedStorages) {
                                 fs.rollback(newParameters);
                             }
-                            throw FolderException.newUnexpectedException(e);
+                            throw OXException.newUnexpectedException(e);
                         }
                         
                     }
@@ -385,7 +385,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                     "msec").toString());
             }
             return ret;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -398,15 +398,15 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
         }
     }
 
-    private static final ThreadPools.ExpectedExceptionFactory<FolderException> FACTORY =
-        new ThreadPools.ExpectedExceptionFactory<FolderException>() {
+    private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
+        new ThreadPools.ExpectedExceptionFactory<OXException>() {
 
-            public Class<FolderException> getType() {
-                return FolderException.class;
+            public Class<OXException> getType() {
+                return OXException.class;
             }
 
-            public FolderException newUnexpectedError(final Throwable t) {
-                return FolderException.newUnexpectedException(t);
+            public OXException newUnexpectedError(final Throwable t) {
+                return OXException.newUnexpectedException(t);
             }
         };
 

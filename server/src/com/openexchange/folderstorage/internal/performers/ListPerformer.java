@@ -65,7 +65,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -148,9 +148,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
      *            subscribed ones
      * @return The user-sensitive subfolders
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    public UserizedFolder[] doList(final String treeId, final String parentId, final boolean all) throws FolderException {
+    public UserizedFolder[] doList(final String treeId, final String parentId, final boolean all) throws OXException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
@@ -174,7 +174,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     parentId).toString());
             }
             return ret;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
@@ -196,9 +196,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
      *            subscribed ones
      * @param startTransaction <code>true</code> to start own transaction; otherwise <code>false</code> if invoked from another action class
      * @return The user-sensitive subfolders
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    UserizedFolder[] doList(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+    UserizedFolder[] doList(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         final FolderStorage folderStorage = getOpenedStorage(parentId, treeId, storageParameters, openedStorages);
         final UserizedFolder[] ret;
         try {
@@ -264,7 +264,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     try {
                         completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
                     } catch (final OXException e) {
-                        throw new FolderException(e);
+                        throw new OXException(e);
                     }
                     paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
                 }
@@ -296,7 +296,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     if (!warnings.isEmpty()) {
                                         addWarning(warnings.iterator().next());
                                     }
-                                } catch (final FolderException e) {
+                                } catch (final OXException e) {
                                     /*
                                      * Batch-load failed...
                                      */
@@ -317,7 +317,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         final Folder subfolder;
                                         try {
                                             subfolder = tmp.getFolder(treeId, id, newParameters);
-                                        } catch (final FolderException e) {
+                                        } catch (final OXException e) {
                                             log.warn(
                                                 new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
                                                     "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
@@ -377,7 +377,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     fs.commitTransaction(newParameters);
                                 }
                                 return null;
-                            } catch (final FolderException e) {
+                            } catch (final OXException e) {
                                 for (final FolderStorage fs : openedStorages) {
                                     fs.rollback(newParameters);
                                 }
@@ -386,7 +386,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 for (final FolderStorage fs : openedStorages) {
                                     fs.rollback(newParameters);
                                 }
-                                throw FolderException.newUnexpectedException(e);
+                                throw OXException.newUnexpectedException(e);
                             }
                         }
                     });
@@ -398,7 +398,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
                 ret = trimArray(subfolders);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -406,7 +406,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         return ret;
     }
 
-    private UserizedFolder[] getSubfoldersFromStorages(final String treeId, final String parentId, final boolean all) throws FolderException {
+    private UserizedFolder[] getSubfoldersFromStorages(final String treeId, final String parentId, final boolean all) throws OXException {
         /*
          * Determine needed storages for given parent
          */
@@ -423,7 +423,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 if (started) {
                     neededStorage.commitTransaction(storageParameters);
                 }
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 if (started) {
                     neededStorage.rollback(storageParameters);
                 }
@@ -441,7 +441,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 completionService =
                     new ThreadPoolCompletionService<List<SortableId>>(getInstance().getService(ThreadPoolService.class, true));
             } catch (final OXException e) {
-                throw new FolderException(e);
+                throw new OXException(e);
             }
             /*
              * Get all visible subfolders from each storage
@@ -449,7 +449,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             for (final FolderStorage neededStorage : neededStorages) {
                 completionService.submit(new Callable<List<SortableId>>() {
 
-                    public List<SortableId> call() throws FolderException {
+                    public List<SortableId> call() throws OXException {
                         final StorageParameters newParameters = newStorageParameters();
                         final boolean started = neededStorage.startTransaction(newParameters, false);
                         try {
@@ -458,7 +458,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 neededStorage.commitTransaction(newParameters);
                             }
                             return l;
-                        } catch (final FolderException e) {
+                        } catch (final OXException e) {
                             if (started) {
                                 neededStorage.rollback(newParameters);
                             }
@@ -468,8 +468,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             if (started) {
                                 neededStorage.rollback(newParameters);
                             }
-                            final FolderException folderException = FolderException.newUnexpectedException(e);
-                            addWarning(folderException);
+                            final OXException OXException = OXException.newUnexpectedException(e);
+                            addWarning(OXException);
                             return Collections.<SortableId> emptyList();
                         }
                     }
@@ -492,10 +492,10 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                  */
                 final AbstractOXException e = getWarnings().iterator().next();
                 e.setCategory(Category.CODE_ERROR);
-                if (!(e instanceof FolderException)) {
-                    throw new FolderException(e);
+                if (!(e instanceof OXException)) {
+                    throw new OXException(e);
                 }
-                throw ((FolderException) e);
+                throw ((OXException) e);
             }
         }
         /*
@@ -537,7 +537,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             try {
                 completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
             } catch (final OXException e) {
-                throw new FolderException(e);
+                throw new OXException(e);
             }
             paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
         }
@@ -569,7 +569,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             if (!warnings.isEmpty()) {
                                 addWarning(warnings.iterator().next());
                             }
-                        } catch (final FolderException e) {
+                        } catch (final OXException e) {
                             /*
                              * Batch-load failed...
                              */
@@ -587,7 +587,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 final Folder subfolder;
                                 try {
                                     subfolder = tmp.getFolder(treeId, id, newParameters);
-                                } catch (final FolderException e) {
+                                } catch (final OXException e) {
                                     log.warn(
                                         new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
                                             "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
@@ -657,7 +657,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             fs.commitTransaction(newParameters);
                         }
                         return null;
-                    } catch (final FolderException e) {
+                    } catch (final OXException e) {
                         for (final FolderStorage fs : openedStorages) {
                             fs.rollback(newParameters);
                         }
@@ -666,7 +666,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         for (final FolderStorage fs : openedStorages) {
                             fs.rollback(newParameters);
                         }
-                        throw FolderException.newUnexpectedException(e);
+                        throw OXException.newUnexpectedException(e);
                     }
                     
                 }
@@ -680,15 +680,15 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         return trimArray(subfolders);
     }
 
-    private static final ThreadPools.ExpectedExceptionFactory<FolderException> FACTORY =
-        new ThreadPools.ExpectedExceptionFactory<FolderException>() {
+    private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
+        new ThreadPools.ExpectedExceptionFactory<OXException>() {
 
-            public Class<FolderException> getType() {
-                return FolderException.class;
+            public Class<OXException> getType() {
+                return OXException.class;
             }
 
-            public FolderException newUnexpectedError(final Throwable t) {
-                return FolderException.newUnexpectedException(t);
+            public OXException newUnexpectedError(final Throwable t) {
+                return OXException.newUnexpectedException(t);
             }
         };
 

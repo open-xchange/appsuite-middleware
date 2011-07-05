@@ -54,7 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
 import com.openexchange.server.OXException;
@@ -98,21 +98,21 @@ public final class Delete {
      * @param user The user identifier
      * @param folderId The folder identifier
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
-     * @throws FolderException If delete fails
+     * @throws OXException If delete fails
      */
-    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup) throws FolderException {
+    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup) throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getWritable(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             con.setAutoCommit(false); // BEGIN
@@ -121,7 +121,7 @@ public final class Delete {
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
@@ -142,9 +142,9 @@ public final class Delete {
      * @param folderId The folder identifier
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
      * @param con The connection to use
-     * @throws FolderException If delete fails
+     * @throws OXException If delete fails
      */
-    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Connection con) throws FolderException {
+    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Connection con) throws OXException {
         PreparedStatement stmt = null;
 
         if (backup) {

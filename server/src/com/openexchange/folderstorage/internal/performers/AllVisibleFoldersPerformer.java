@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderFilter;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -123,9 +123,9 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
      * @param treeId The tree identifier
      * @param filter The (optional) folder filter; set to <code>null</code> to filter none
      * @return All visible folders
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    public UserizedFolder[] doAllVisibleFolders(final String treeId, final FolderFilter filter) throws FolderException {
+    public UserizedFolder[] doAllVisibleFolders(final String treeId, final FolderFilter filter) throws OXException {
         final FolderStorage rootStorage = folderStorageDiscoverer.getFolderStorage(treeId, FolderStorage.ROOT_ID);
         if (null == rootStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, FolderStorage.ROOT_ID);
@@ -154,7 +154,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
             }
 
             return ret;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
@@ -167,7 +167,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
         }
     }
 
-    private void fillSubfolders(final String treeId, final String parentId, final FolderFilter filter, final List<UserizedFolder> visibleFolders, final ListPerformer listAction, final Collection<FolderStorage> openedStorages) throws FolderException {
+    private void fillSubfolders(final String treeId, final String parentId, final FolderFilter filter, final List<UserizedFolder> visibleFolders, final ListPerformer listAction, final Collection<FolderStorage> openedStorages) throws OXException {
         final UserizedFolder[] subfolders = getSubfolders(treeId, parentId, listAction, openedStorages);
         if (subfolders.length > 0) {
             if (null == filter) {
@@ -199,7 +199,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
         }
     }
 
-    private UserizedFolder[] getSubfolders(final String treeId, final String parentId, final ListPerformer listAction, final Collection<FolderStorage> openedStorages) throws FolderException {
+    private UserizedFolder[] getSubfolders(final String treeId, final String parentId, final ListPerformer listAction, final Collection<FolderStorage> openedStorages) throws OXException {
         return listAction.doList(treeId, parentId, true, openedStorages);
     }
 

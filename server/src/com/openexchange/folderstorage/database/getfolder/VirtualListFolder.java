@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
 import com.openexchange.groupware.container.FolderObject;
@@ -91,9 +90,9 @@ public final class VirtualListFolder {
      * @param ctx The context
      * @param con The connection
      * @return <code>true</code> if specified virtual folder identifier exists; otherwise <code>false</code>
-     * @throws FolderException If checking existence fails
+     * @throws OXException If checking existence fails
      */
-    public static boolean existsVirtualListFolder(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static boolean existsVirtualListFolder(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         final int module;
         if (FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID == folderId) {
             // Task
@@ -112,7 +111,7 @@ public final class VirtualListFolder {
         try {
             return OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(module, user.getId(), user.getGroups(), userConfiguration, ctx, con);
         } catch (OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
@@ -184,9 +183,9 @@ public final class VirtualListFolder {
      * @param ctx The context
      * @param con The connection to use
      * @return The subfolder identifiers of database folder representing given virtual folder
-     * @throws FolderException If returning database folder fails
+     * @throws OXException If returning database folder fails
      */
-    public static int[] getVirtualListFolderSubfoldersAsInt(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getVirtualListFolderSubfoldersAsInt(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         /*
          * Get subfolders
          */
@@ -215,9 +214,9 @@ public final class VirtualListFolder {
                     ctx,
                     con)).asQueue();
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         final int[] subfolderIds = new int[q.size()];
         int i = 0;
@@ -236,9 +235,9 @@ public final class VirtualListFolder {
      * @param ctx The context
      * @param con The connection to use
      * @return The subfolder identifiers of database folder representing given virtual folder
-     * @throws FolderException If returning database folder fails
+     * @throws OXException If returning database folder fails
      */
-    public static List<String[]> getVirtualListFolderSubfolders(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<String[]> getVirtualListFolderSubfolders(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         /*
          * Get subfolders
          */
@@ -267,9 +266,9 @@ public final class VirtualListFolder {
                     ctx,
                     con)).asQueue();
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         final List<String[]> ret = new ArrayList<String[]>(q.size());
         for (final FolderObject folderObject : q) {

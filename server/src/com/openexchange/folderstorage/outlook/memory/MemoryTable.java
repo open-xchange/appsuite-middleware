@@ -60,7 +60,7 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.outlook.memory.impl.MemoryFolderImpl;
@@ -83,9 +83,9 @@ public final class MemoryTable {
      * 
      * @param session The session
      * @return The memory table for specified session
-     * @throws FolderException If creation of memory table fails
+     * @throws OXException If creation of memory table fails
      */
-    public static MemoryTable getMemoryTableFor(final Session session) throws FolderException {
+    public static MemoryTable getMemoryTableFor(final Session session) throws OXException {
         return getMemoryTableFor(session, true);
     }
 
@@ -98,7 +98,7 @@ public final class MemoryTable {
     public static MemoryTable optMemoryTableFor(final Session session) {
         try {
             return getMemoryTableFor(session, false);
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             // Cannot occur
             return null;
         }
@@ -112,9 +112,9 @@ public final class MemoryTable {
      *            there is no memory table
      * @return The memory table for specified session or <code>null</code> if there is no memory table and <code>createIfAbsent</code> is
      *         <code>false</code>
-     * @throws FolderException If creation of memory table fails
+     * @throws OXException If creation of memory table fails
      */
-    private static MemoryTable getMemoryTableFor(final Session session, final boolean createIfAbsent) throws FolderException {
+    private static MemoryTable getMemoryTableFor(final Session session, final boolean createIfAbsent) throws OXException {
         final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null != lock) {
             lock.lock();
@@ -132,7 +132,7 @@ public final class MemoryTable {
         }
     }
 
-    private static MemoryTable getMemoryTable0(final Session session, final boolean createIfAbsent) throws FolderException {
+    private static MemoryTable getMemoryTable0(final Session session, final boolean createIfAbsent) throws OXException {
         MemoryTable memoryTable = (MemoryTable) session.getParameter(PARAM_MEMORY_TABLE);
         if (null != memoryTable) {
             return memoryTable;
@@ -204,9 +204,9 @@ public final class MemoryTable {
      * @param treeId The memory tree identifier
      * @param session The session providing user data
      * @return The memory tree
-     * @throws FolderException If creating memory tree fail
+     * @throws OXException If creating memory tree fail
      */
-    public MemoryTree getTree(final int treeId, final Session session) throws FolderException {
+    public MemoryTree getTree(final int treeId, final Session session) throws OXException {
         return getTree(treeId, session.getUserId(), session.getContextId());
     }
 
@@ -217,9 +217,9 @@ public final class MemoryTable {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The memory tree
-     * @throws FolderException If creating memory tree fail
+     * @throws OXException If creating memory tree fail
      */
-    public MemoryTree getTree(final int treeId, final int userId, final int contextId) throws FolderException {
+    public MemoryTree getTree(final int treeId, final int userId, final int contextId) throws OXException {
         MemoryTree memoryTree = treeMap.get(treeId);
         if (null == memoryTree) {
             synchronized (treeMap) {
@@ -274,14 +274,14 @@ public final class MemoryTable {
      * ------------------------------- INIT STUFF -------------------------------
      */
 
-    private void initialize(final int userId, final int contextId) throws FolderException {
+    private void initialize(final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getWritable(contextId);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             initialize(userId, contextId, con);
@@ -290,7 +290,7 @@ public final class MemoryTable {
         }
     }
 
-    private void initialize(final int userId, final int contextId, final Connection con) throws FolderException {
+    private void initialize(final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -368,16 +368,16 @@ public final class MemoryTable {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The (re-)initialized tree
-     * @throws FolderException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MemoryTree initializeTree(final int treeId, final int userId, final int contextId) throws FolderException {
+    public MemoryTree initializeTree(final int treeId, final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getWritable(contextId);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return initializeTree(treeId, userId, contextId, con);
@@ -394,9 +394,9 @@ public final class MemoryTable {
      * @param contextId The context identifier
      * @param con A connection
      * @return The (re-)initialized tree
-     * @throws FolderException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MemoryTree initializeTree(final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
+    public MemoryTree initializeTree(final int treeId, final int userId, final int contextId, final Connection con) throws OXException {
         if (null == con) {
             return initializeTree(treeId, userId, contextId);
         }
@@ -468,16 +468,16 @@ public final class MemoryTable {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The (re-)initialized folder
-     * @throws FolderException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws FolderException {
+    public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getWritable(contextId);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return initializeFolder(folderId, treeId, userId, contextId, con);
@@ -495,9 +495,9 @@ public final class MemoryTable {
      * @param contextId The context identifier
      * @param con A connection
      * @return The (re-)initialized folder
-     * @throws FolderException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
+    public MemoryFolder initializeFolder(final String folderId, final int treeId, final int userId, final int contextId, final Connection con) throws OXException {
         if (null == con) {
             return initializeFolder(folderId, treeId, userId, contextId);
         }
@@ -557,7 +557,7 @@ public final class MemoryTable {
         }
     }
 
-    private static void addPermissions(final MemoryFolderImpl memoryFolder, final int treeId, final int userId, final int contextId, final Connection con) throws FolderException {
+    private static void addPermissions(final MemoryFolderImpl memoryFolder, final int treeId, final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {

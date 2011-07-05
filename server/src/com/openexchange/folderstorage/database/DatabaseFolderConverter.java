@@ -56,9 +56,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
@@ -84,7 +82,7 @@ public final class DatabaseFolderConverter {
 
     private static interface FolderConverter {
 
-        DatabaseFolder convert(FolderObject fo) throws FolderException;
+        DatabaseFolder convert(FolderObject fo) throws OXException;
     }
 
     private static final TIntObjectHashMap<FolderConverter> SYSTEM_CONVERTERS;
@@ -95,19 +93,19 @@ public final class DatabaseFolderConverter {
         TIntObjectHashMap<FolderConverter> m = new TIntObjectHashMap<FolderConverter>(4);
         m.put(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, new FolderConverter() {
 
-            public DatabaseFolder convert(final FolderObject fo) throws FolderException {
+            public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 return SystemPublicFolder.getSystemPublicFolder(fo);
             }
         });
         m.put(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
-            public DatabaseFolder convert(final FolderObject fo) throws FolderException {
+            public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 return SystemInfostoreFolder.getSystemInfostoreFolder(fo);
             }
         });
         m.put(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, new FolderConverter() {
 
-            public DatabaseFolder convert(final FolderObject fo) throws FolderException {
+            public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 return SystemPrivateFolder.getSystemPrivateFolder(fo);
             }
         });
@@ -116,7 +114,7 @@ public final class DatabaseFolderConverter {
         m = new TIntObjectHashMap<FolderConverter>(4);
         m.put(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
-            public DatabaseFolder convert(final FolderObject fo) throws FolderException {
+            public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
                 return retval;
@@ -124,7 +122,7 @@ public final class DatabaseFolderConverter {
         });
         m.put(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
-            public DatabaseFolder convert(final FolderObject fo) throws FolderException {
+            public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
                 return retval;
@@ -132,7 +130,7 @@ public final class DatabaseFolderConverter {
         });
         m.put(FolderObject.SYSTEM_LDAP_FOLDER_ID, new FolderConverter() {
 
-            public DatabaseFolder convert(final FolderObject fo) throws FolderException {
+            public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
                 retval.setParentID(FolderStorage.PUBLIC_ID);
@@ -141,7 +139,7 @@ public final class DatabaseFolderConverter {
         });
         m.put(FolderObject.SYSTEM_GLOBAL_FOLDER_ID, new FolderConverter() {
 
-            public DatabaseFolder convert(final FolderObject fo) throws FolderException {
+            public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
                 retval.setParentID(FolderStorage.PUBLIC_ID);
@@ -167,9 +165,9 @@ public final class DatabaseFolderConverter {
      * @param ctx The context
      * @param con The connection
      * @return The converted {@link DatabaseFolder} instance
-     * @throws FolderException If conversion fails
+     * @throws OXException If conversion fails
      */
-    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             final int folderId = fo.getObjectID();
             if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
@@ -318,11 +316,11 @@ public final class DatabaseFolderConverter {
             }
             return retval;
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 

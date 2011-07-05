@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -122,7 +122,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
     private static interface PermissionProvider {
 
-        Permission getOwnPermission(Folder folder) throws FolderException;
+        Permission getOwnPermission(Folder folder) throws OXException;
     }
 
     private static final class SessionPermissionProvider implements PermissionProvider {
@@ -158,7 +158,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             this.allowedContentTypes = allowedContentTypes;
         }
 
-        public Permission getOwnPermission(final Folder folder) throws FolderException {
+        public Permission getOwnPermission(final Folder folder) throws OXException {
             return CalculatePermission.calculate(folder, user, ctx, allowedContentTypes);
         }
 
@@ -172,9 +172,9 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
      *            subscribed ones
      * @return The user-sensitive folders describing the path to root folder
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    public UserizedFolder[] doPath(final String treeId, final String folderId, final boolean all) throws FolderException {
+    public UserizedFolder[] doPath(final String treeId, final String folderId, final boolean all) throws OXException {
         if (FolderStorage.ROOT_ID.equals(folderId)) {
             return new UserizedFolder[0];
         }
@@ -229,7 +229,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
@@ -256,9 +256,9 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
      *            subscribed ones
      * @return The user-sensitive folders describing the path to root folder
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    public String[] doForcePath(final String treeId, final String folderId, final boolean all) throws FolderException {
+    public String[] doForcePath(final String treeId, final String folderId, final boolean all) throws OXException {
         if (FolderStorage.ROOT_ID.equals(folderId)) {
             return new String[0];
         }
@@ -287,7 +287,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }

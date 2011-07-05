@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -122,9 +122,9 @@ public final class DeletePerformer extends AbstractPerformer {
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param timeStamp The requestor's last-modified time stamp
-     * @throws FolderException If an error occurs during deletion
+     * @throws OXException If an error occurs during deletion
      */
-    public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws FolderException {
+    public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws OXException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
@@ -172,7 +172,7 @@ public final class DeletePerformer extends AbstractPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
@@ -185,7 +185,7 @@ public final class DeletePerformer extends AbstractPerformer {
         }
     }
 
-    private void deleteVirtualFolder(final String folderId, final String treeId, final FolderStorage folderStorage, final List<FolderStorage> openedStorages) throws FolderException {
+    private void deleteVirtualFolder(final String folderId, final String treeId, final FolderStorage folderStorage, final List<FolderStorage> openedStorages) throws OXException {
         final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
         storageParameters.putParameter(FolderType.GLOBAL, "global", Boolean.valueOf(folder.isGlobalID()));
         {
@@ -250,7 +250,7 @@ public final class DeletePerformer extends AbstractPerformer {
         folderStorage.deleteFolder(treeId, folderId, storageParameters);
     }
 
-    private boolean canDeleteAllObjects(final Permission permission, final String folderId, final String treeId, final FolderStorage folderStorage) throws FolderException {
+    private boolean canDeleteAllObjects(final Permission permission, final String folderId, final String treeId, final FolderStorage folderStorage) throws OXException {
         final int deletePermission = permission.getDeletePermission();
         if (deletePermission >= Permission.DELETE_ALL_OBJECTS) {
             /*
@@ -270,7 +270,7 @@ public final class DeletePerformer extends AbstractPerformer {
         return folderStorage.isEmpty(treeId, folderId, storageParameters);
     }
 
-    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws FolderException {
+    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage openedStorage : openedStorages) {
             if (openedStorage.equals(storage)) {
                 return;

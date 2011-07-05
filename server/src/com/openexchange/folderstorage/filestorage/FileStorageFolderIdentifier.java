@@ -50,7 +50,7 @@
 package com.openexchange.folderstorage.filestorage;
 
 import java.util.List;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.tools.id.IDMangler;
@@ -132,7 +132,7 @@ public final class FileStorageFolderIdentifier {
     public static FileStorageFolderIdentifier parseFQN(final String identifier) {
         try {
             return new FileStorageFolderIdentifier(identifier);
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             return null;
         }
     }
@@ -152,9 +152,9 @@ public final class FileStorageFolderIdentifier {
      * 
      * @param identifier The identifier according to pattern:<br>
      *            <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
-     * @throws FolderException If identifier is <code>null</code> or invalid
+     * @throws OXException If identifier is <code>null</code> or invalid
      */
-    public FileStorageFolderIdentifier(final String identifier) throws FolderException {
+    public FileStorageFolderIdentifier(final String identifier) throws OXException {
         super();
         if (null == identifier) {
             throw FolderExceptionErrorMessage.MISSING_FOLDER_ID.create();

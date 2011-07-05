@@ -61,9 +61,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
@@ -108,9 +106,9 @@ public final class SystemSharedFolder {
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system shared folder for given user
-     * @throws FolderException
+     * @throws OXException
      */
-    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         /*
          * The system shared folder
          */
@@ -129,11 +127,11 @@ public final class SystemSharedFolder {
                     null,
                     con);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -145,7 +143,7 @@ public final class SystemSharedFolder {
             retval.setSubfolderIDs(hasNext ? null : new String[0]);
             retval.setSubscribedSubfolders(hasNext);
         } catch (final AbstractOXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             try {
                 searchIterator.close();
@@ -164,9 +162,9 @@ public final class SystemSharedFolder {
      * @param ctx The context
      * @param con The connection
      * @return The subfolder identifiers of database folder representing system shared folder for given user
-     * @throws FolderException If the database folder cannot be returned
+     * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemSharedFolderSubfolder(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<String[]> getSystemSharedFolderSubfolder(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         /*
          * The system shared folder
          */
@@ -184,11 +182,11 @@ public final class SystemSharedFolder {
                         null,
                         con)).asQueue();
             } catch (final SearchIteratorException e) {
-                throw new FolderException(e);
+                throw new OXException(e);
             } catch (final DBPoolingException e) {
-                throw new FolderException(e);
+                throw new OXException(e);
             } catch (final OXException e) {
-                throw new FolderException(e);
+                throw new OXException(e);
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             }
@@ -207,7 +205,7 @@ public final class SystemSharedFolder {
                     creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
                 } catch (final LdapException e) {
                     if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
-                        throw new FolderException(e);
+                        throw new OXException(e);
                     }
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }

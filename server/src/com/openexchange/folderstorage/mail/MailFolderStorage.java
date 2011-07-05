@@ -70,7 +70,6 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -94,7 +93,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
@@ -114,15 +112,12 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
-import com.openexchange.server.OXException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -146,7 +141,7 @@ public final class MailFolderStorage implements FolderStorage {
         super();
     }
 
-    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         // Nothing to do
     }
 
@@ -160,13 +155,13 @@ public final class MailFolderStorage implements FolderStorage {
         return MailContentType.getInstance();
     }
 
-    public void commitTransaction(final StorageParameters params) throws FolderException {
+    public void commitTransaction(final StorageParameters params) throws OXException {
         /*
          * Nothing to do
          */
     }
 
-    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         if (!MailType.getInstance().equals(type) && !PrivateType.getInstance().equals(type)) {
             return new SortableId[0];
         }
@@ -239,13 +234,13 @@ public final class MailFolderStorage implements FolderStorage {
              */
             return list.toArray(new SortableId[list.size()]);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -259,11 +254,11 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
         return folder;
     }
 
-    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             final FullnameArgument argument = prepareMailFolderParam(folderId);
@@ -286,13 +281,13 @@ public final class MailFolderStorage implements FolderStorage {
             }
             addWarnings(mailAccess, storageParameters);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             final FullnameArgument arg = prepareMailFolderParam(folder.getParentID());
@@ -337,13 +332,13 @@ public final class MailFolderStorage implements FolderStorage {
             folder.setID(prepareFullname(accountId, fullname));
             postEvent(accountId, mfd.getParentFullname(), false, storageParameters);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             final FullnameArgument arg = prepareMailFolderParam(folderId);
@@ -389,13 +384,13 @@ public final class MailFolderStorage implements FolderStorage {
                 postEvent(accountId, trashFullname, false, storageParameters);
             }
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             final FullnameArgument arg = prepareMailFolderParam(folderId);
@@ -434,13 +429,13 @@ public final class MailFolderStorage implements FolderStorage {
             final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
             postEvent4Subfolders(accountId, subfolders, storageParameters);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         if (!(contentType instanceof MailContentType)) {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         }
@@ -473,17 +468,17 @@ public final class MailFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         return MailType.getInstance();
     }
 
-    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             final FullnameArgument argument = prepareMailFolderParam(folderId);
@@ -501,13 +496,13 @@ public final class MailFolderStorage implements FolderStorage {
             addWarnings(mailAccess, storageParameters);
             return false;
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             final FullnameArgument argument = prepareMailFolderParam(folderId);
@@ -537,21 +532,21 @@ public final class MailFolderStorage implements FolderStorage {
                 null,
                 new MailField[] { MailField.ID }).length;
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // Nothing to do
     }
 
-    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws FolderException {
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws OXException {
         return getFolders(treeId, folderIds, StorageType.WORKING, storageParameters);
     }
 
-    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
         for (final String folderId : folderIds) {
             ret.add(getFolder(treeId, folderId, storageType, storageParameters));
@@ -559,11 +554,11 @@ public final class MailFolderStorage implements FolderStorage {
         return ret;
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
@@ -663,19 +658,19 @@ public final class MailFolderStorage implements FolderStorage {
 
             return retval;
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    private static ServerSession getServerSession(final StorageParameters storageParameters) throws FolderException, OXException {
+    private static ServerSession getServerSession(final StorageParameters storageParameters) throws OXException, OXException {
         final Session s = storageParameters.getSession();
         if (null == s) {
             throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -762,7 +757,7 @@ public final class MailFolderStorage implements FolderStorage {
         return MailFolderType.getInstance();
     }
 
-    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             final ServerSession session = getServerSession(storageParameters);
@@ -895,13 +890,13 @@ public final class MailFolderStorage implements FolderStorage {
             }
             return list.toArray(new SortableId[list.size()]);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -913,7 +908,7 @@ public final class MailFolderStorage implements FolderStorage {
          */
     }
 
-    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
         /*
          * Nothing to do
          */
@@ -924,11 +919,11 @@ public final class MailFolderStorage implements FolderStorage {
         return StoragePriority.NORMAL;
     }
 
-    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         if (StorageType.BACKUP.equals(storageType)) {
             return false;
         }
@@ -952,17 +947,17 @@ public final class MailFolderStorage implements FolderStorage {
             addWarnings(mailAccess, storageParameters);
             return exists;
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws OXException {
         return new String[0];
     }
 
-    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
         if (null == includeContentTypes || includeContentTypes.length == 0) {
             return new String[0];
         }
@@ -979,7 +974,7 @@ public final class MailFolderStorage implements FolderStorage {
         return ret.toArray(new String[ret.size()]);
     }
 
-    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             final int accountId;
@@ -1134,7 +1129,7 @@ public final class MailFolderStorage implements FolderStorage {
             addWarnings(mailAccess, storageParameters);
             postEvent(accountId, fullname, false, storageParameters);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }

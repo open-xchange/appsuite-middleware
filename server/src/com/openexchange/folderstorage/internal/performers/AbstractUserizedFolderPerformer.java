@@ -55,7 +55,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -227,9 +227,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param storageParameters The storage parameters to use
      * @param openedStorages The list of opened storages
      * @return The user-sensitive folder for given folder
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+    protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         Folder f = folder;
         final UserizedFolder userizedFolder;
         /*-
@@ -321,7 +321,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         return userizedFolder;
     }
 
-    private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+    private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         /*
          * Subfolders
          */

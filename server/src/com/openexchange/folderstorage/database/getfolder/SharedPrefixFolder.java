@@ -59,7 +59,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.FolderIdNamePair;
@@ -137,9 +136,9 @@ public final class SharedPrefixFolder {
      * @param ctx The context
      * @param con The connection
      * @return <code>true</code> if specified folder identifier starting with shared prefix exists; otherwise <code>false</code>
-     * @throws FolderException If checking existence fails
+     * @throws OXException If checking existence fails
      */
-    public static boolean existsSharedPrefixFolder(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static boolean existsSharedPrefixFolder(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -156,7 +155,7 @@ public final class SharedPrefixFolder {
                 null,
                 con);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
@@ -167,9 +166,9 @@ public final class SharedPrefixFolder {
      * @param user The user
      * @param ctx The context
      * @return The corresponding database folder with subfolders set
-     * @throws FolderException If returning corresponding database folder fails
+     * @throws OXException If returning corresponding database folder fails
      */
-    public static DatabaseFolder getSharedPrefixFolder(final String folderIdentifier, final User user, final Context ctx) throws FolderException {
+    public static DatabaseFolder getSharedPrefixFolder(final String folderIdentifier, final User user, final Context ctx) throws OXException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -181,7 +180,7 @@ public final class SharedPrefixFolder {
             creatorDisplayName = UserStorage.getInstance().getUser(sharedOwner, ctx).getDisplayName();
         } catch (final LdapException e) {
             if (sharedOwner != OCLPermission.ALL_GROUPS_AND_USERS) {
-                throw new FolderException(e);
+                throw new OXException(e);
             }
             creatorDisplayName = new StringHelper(user.getLocale()).getString(Groups.ALL_USERS);
         }
@@ -207,9 +206,9 @@ public final class SharedPrefixFolder {
      * @param ctx The context
      * @param con The connection
      * @return The corresponding database folder with subfolders set
-     * @throws FolderException If returning corresponding database folder fails
+     * @throws OXException If returning corresponding database folder fails
      */
-    public static int[] getSharedPrefixFolderSubfoldersAsInt(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getSharedPrefixFolderSubfoldersAsInt(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -228,9 +227,9 @@ public final class SharedPrefixFolder {
                     null,
                     con)).asQueue();
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         if (q.isEmpty()) {
             return new int[0];
@@ -262,9 +261,9 @@ public final class SharedPrefixFolder {
      * @param ctx The context
      * @param con The connection
      * @return The corresponding database folder with subfolders set
-     * @throws FolderException If returning corresponding database folder fails
+     * @throws OXException If returning corresponding database folder fails
      */
-    public static List<FolderIdNamePair> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<FolderIdNamePair> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -283,9 +282,9 @@ public final class SharedPrefixFolder {
                     null,
                     con)).asQueue();
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         if (q.isEmpty()) {
             return Collections.<FolderIdNamePair> emptyList();

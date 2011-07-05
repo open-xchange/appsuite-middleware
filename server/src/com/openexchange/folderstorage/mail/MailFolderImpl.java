@@ -50,9 +50,9 @@
 package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
@@ -71,7 +71,6 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -84,7 +83,6 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.impl.OCLPermission;
@@ -168,9 +166,9 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param user The user
      * @param context The context
      * @param fullnameProvider The (optional) fullname provider
-     * @throws FolderException If creation fails
+     * @throws OXException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
         this(mailFolder, accountId, mailConfig, params.getUser(), params.getContext(), fullnameProvider);
     }
 
@@ -185,9 +183,9 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param user The user
      * @param context The context
      * @param fullnameProvider The (optional) fullname provider
-     * @throws FolderException If creation fails
+     * @throws OXException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
         super();
         this.accountId = accountId;
         userId = user.getId();
@@ -324,18 +322,18 @@ public final class MailFolderImpl extends AbstractFolder {
         cacheable = cache;
     }
 
-    private boolean isUnifiedMail() throws FolderException {
+    private boolean isUnifiedMail() throws OXException {
         try {
             return UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(MailServiceRegistry.getServiceRegistry().getService(
                 MailAccountStorageService.class).getMailAccount(accountId, userId, contextId).getMailProtocol());
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
     }
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
-    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws FolderException {
+    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws OXException {
         final int[] perms = new int[5];
         perms[0] = fp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
         perms[1] = orp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
@@ -350,7 +348,7 @@ public final class MailFolderImpl extends AbstractFolder {
      */
     private static final int MAX_PERMISSION = 64;
 
-    private static int createPermissionBits(final int[] permission) throws FolderException {
+    private static int createPermissionBits(final int[] permission) throws OXException {
         int retval = 0;
         boolean first = true;
         for (int i = permission.length - 1; i >= 0; i--) {

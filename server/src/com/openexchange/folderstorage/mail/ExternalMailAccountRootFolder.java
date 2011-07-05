@@ -49,9 +49,9 @@
 
 package com.openexchange.folderstorage.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
@@ -86,9 +86,9 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
      * @param mailAccount The underlying mail account
      * @param mailConfig The mail configuration
      * @param session The session
-     * @throws FolderException If creation fails
+     * @throws OXException If creation fails
      */
-    public ExternalMailAccountRootFolder(final MailAccount mailAccount, final MailConfig mailConfig, final ServerSession session) throws FolderException {
+    public ExternalMailAccountRootFolder(final MailAccount mailAccount, final MailConfig mailConfig, final ServerSession session) throws OXException {
         super();
         final String fullname = MailFolder.DEFAULT_FOLDER_ID;
         id = MailFolderUtility.prepareFullname(mailAccount.getId(), fullname);
@@ -127,7 +127,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
-    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws FolderException {
+    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws OXException {
         final int[] perms = new int[5];
         perms[0] = fp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
         perms[1] = orp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
@@ -142,7 +142,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
      */
     private static final int MAX_PERMISSION = 64;
 
-    private static int createPermissionBits(final int[] permission) throws FolderException {
+    private static int createPermissionBits(final int[] permission) throws OXException {
         int retval = 0;
         boolean first = true;
         for (int i = permission.length - 1; i >= 0; i--) {

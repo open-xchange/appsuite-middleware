@@ -56,9 +56,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -68,7 +68,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.session.ServerSession;
 
@@ -166,14 +165,14 @@ public final class CalculatePermission {
      * @param context The context
      * @param allowedContentTypes The allowed content types; an empty list indicates all are allowed
      * @return The effective permission for given user in given folder
-     * @throws FolderException If calculating the effective permission fails
+     * @throws OXException If calculating the effective permission fails
      */
-    public static Permission calculate(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws FolderException {
+    public static Permission calculate(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
         final UserConfiguration userConfiguration;
         try {
             userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         final Permission underlyingPermission;
         {
@@ -207,12 +206,12 @@ public final class CalculatePermission {
             allowedContentTypes);
     }
 
-    public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws FolderException {
+    public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
         final UserConfiguration userConfiguration;
         try {
             userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         final Permission underlyingPermission;
         final Type type = folder.getType();

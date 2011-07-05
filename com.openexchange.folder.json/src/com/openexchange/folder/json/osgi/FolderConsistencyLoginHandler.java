@@ -51,7 +51,7 @@ package com.openexchange.folder.json.osgi;
 
 import com.openexchange.authentication.LoginException;
 import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;

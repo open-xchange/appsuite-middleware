@@ -51,7 +51,7 @@ package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -118,7 +118,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
         super(user, context, decorator, folderStorageDiscoverer);
     }
 
-    public UserizedFolder doGet(final String treeId, final String folderId) throws FolderException {
+    public UserizedFolder doGet(final String treeId, final String folderId) throws OXException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
@@ -161,7 +161,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
             }
 
             return userizedFolder;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }

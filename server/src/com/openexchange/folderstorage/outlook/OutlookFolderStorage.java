@@ -72,7 +72,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -82,7 +81,6 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
@@ -117,17 +115,13 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.messaging.MailMessagingService;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.MessagingAccount;
@@ -135,7 +129,6 @@ import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -166,14 +159,14 @@ public final class OutlookFolderStorage implements FolderStorage {
      */
     static final String PREPARED_FULLNAME_DEFAULT = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
 
-    private static final ThreadPools.ExpectedExceptionFactory<FolderException> FACTORY =
-        new ThreadPools.ExpectedExceptionFactory<FolderException>() {
+    private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
+        new ThreadPools.ExpectedExceptionFactory<OXException>() {
 
-            public Class<FolderException> getType() {
-                return FolderException.class;
+            public Class<OXException> getType() {
+                return OXException.class;
             }
 
-            public FolderException newUnexpectedError(final Throwable t) {
+            public OXException newUnexpectedError(final Throwable t) {
                 return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
         };
@@ -334,7 +327,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return publicMailFolderPath;
     }
 
-    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         /*
          * Initialize memory tree
          */
@@ -351,7 +344,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -365,7 +358,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final FolderStorage folderStorage = folderStorageRegistry.getFolderStorageByContentType(realTreeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, contentType);
@@ -377,7 +370,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.commitTransaction(storageParameters);
             }
             return ret;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -390,11 +383,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // Nothing to restore, not a real storage
     }
 
-    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
         /*
          * Delegate to real storage
          */
@@ -413,7 +406,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 TCM.clear();
             }
             return preparedFolder;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -426,7 +419,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         /*
          * Delegate clear invocation to real storage
          */
@@ -441,7 +434,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -458,11 +451,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         // Nothing to do
     }
 
-    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         /*
          * No primary mail account root folder in this tree
          */
@@ -485,7 +478,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return true;
     }
 
-    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         TCM.clear();
         /*
          * Create only if folder could not be stored in real storage
@@ -503,7 +496,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -540,7 +533,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         TCM.clear();
         final boolean global;
         {
@@ -598,7 +591,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return null;
     }
 
-    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         // Public type and public mail folder path set?
         if (PublicType.getInstance().equals(type) && null != publicMailFolderPath) {
             if (MailContentType.getInstance().toString().equals(contentType.toString())) {
@@ -623,7 +616,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 byContentType.commitTransaction(storageParameters);
             }
             return defaultFolderID;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 byContentType.rollback(storageParameters);
             }
@@ -636,7 +629,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         /*
          * Usual detection
          */
@@ -661,7 +654,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.commitTransaction(storageParameters);
             }
             return retval;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -678,7 +671,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return new String[0];
     }
 
-    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         /*
          * Get real folder storage
          */
@@ -693,7 +686,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.commitTransaction(storageParameters);
             }
             return containsForeignObjects;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -706,7 +699,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         /*
          * Get real folder storage
          */
@@ -721,7 +714,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.commitTransaction(storageParameters);
             }
             return isEmpty;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -734,7 +727,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
@@ -768,7 +761,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -781,11 +774,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws FolderException {
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws OXException {
         return getFolders(treeId, folderIds, StorageType.WORKING, storageParameters);
     }
 
-    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final Folder[] ret = new Folder[folderIds.size()];
         final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(folderIds.size());
         for (int i = 0; i < ret.length; i++) {
@@ -827,7 +820,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -869,11 +862,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         return l;
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         /*
          * Primary account's root folder does not exist in this folder tree
          */
@@ -898,7 +891,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -935,7 +928,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     // Get folder
                     privateFolder = folderStorage.getFolder(realTreeId, folderId, storageParameters);
                     folderStorage.commitTransaction(storageParameters);
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     folderStorage.rollback(storageParameters);
                     throw e;
                 } catch (final Exception e) {
@@ -976,7 +969,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -1030,7 +1023,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return outlookFolder;
     }
 
-    private void setSubfolders(final String treeId, final String folderId, final StorageParameters storageParameters, final User user, final int tree, final int contextId, final OutlookFolder outlookFolder, final Folder realFolder) throws FolderException {
+    private void setSubfolders(final String treeId, final String folderId, final StorageParameters storageParameters, final User user, final int tree, final int contextId, final OutlookFolder outlookFolder, final Folder realFolder) throws OXException {
         /*
          * Set subfolders
          */
@@ -1130,7 +1123,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return folderType;
     }
 
-    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
         if (null == includeContentTypes || includeContentTypes.length == 0) {
             return new String[0];
         }
@@ -1157,7 +1150,7 @@ public final class OutlookFolderStorage implements FolderStorage {
              */
             maps.add(new Callable<TreeMap<String, List<String>>>() {
 
-                public TreeMap<String, List<String>> call() throws FolderException {
+                public TreeMap<String, List<String>> call() throws OXException {
                     /*
                      * Get the ones from virtual table
                      */
@@ -1222,7 +1215,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return StoragePriority.NORMAL;
     }
 
-    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         /*
          * Root folder
          */
@@ -1288,7 +1281,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -1310,7 +1303,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return ret;
     }
 
-    SortableId[] getSubfolders(final String id, final String treeId, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
+    SortableId[] getSubfolders(final String id, final String treeId, final FolderStorage folderStorage, final StorageParameters storageParameters) throws OXException {
         final Key key = new Key(id, Integer.parseInt(treeId), storageParameters.getUserId(), storageParameters.getContextId());
         Future<List<SortableId>> f = TCM.get(key);
         if (null == f) {
@@ -1333,20 +1326,20 @@ public final class OutlookFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            if (cause instanceof FolderException) {
-                throw (FolderException) cause;
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
     }
 
-    private SortableId[] getINBOXSubfolders(final String treeId, final StorageParameters storageParameters, final User user, final Locale locale, final int contextId, final int tree) throws FolderException {
+    private SortableId[] getINBOXSubfolders(final String treeId, final StorageParameters storageParameters, final User user, final Locale locale, final int contextId, final int tree) throws OXException {
         final Key key = new Key(PREPARED_FULLNAME_INBOX, tree, user.getId(), contextId);
         Future<List<SortableId>> f = TCM.get(key);
         if (null == f) {
             final FutureTask<List<SortableId>> ft = new FutureTask<List<SortableId>>(new Callable<List<SortableId>>() {
 
-                public List<SortableId> call() throws FolderException {
+                public List<SortableId> call() throws OXException {
                     /*
                      * Get real folder storage for primary mail folder
                      */
@@ -1443,7 +1436,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                             }
                         }
                         return sortedIDs;
-                    } catch (final FolderException e) {
+                    } catch (final OXException e) {
                         if (started) {
                             folderStorage.rollback(storageParameters);
                         }
@@ -1469,14 +1462,14 @@ public final class OutlookFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            if (cause instanceof FolderException) {
-                throw (FolderException) cause;
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
     }
 
-    private SortableId[] getRootFolderSubfolders(final String parentId, final StorageParameters storageParameters) throws FolderException {
+    private SortableId[] getRootFolderSubfolders(final String parentId, final StorageParameters storageParameters) throws OXException {
         final SortableId[] ids;
         {
             /*
@@ -1511,7 +1504,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -1533,7 +1526,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return ret;
     }
 
-    private SortableId[] getPrivateFolderSubfolders(final String parentId, final int tree, final StorageParameters parameters, final User user, final Locale locale, final int contextId) throws FolderException {
+    private SortableId[] getPrivateFolderSubfolders(final String parentId, final int tree, final StorageParameters parameters, final User user, final Locale locale, final int contextId) throws OXException {
         final CompletionService<TreeMap<String, List<String>>> completionService;
         try {
             completionService =
@@ -1541,7 +1534,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     ThreadPoolService.class,
                     true));
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         int taskCount = 0;
         final FolderNameComparator comparator = new FolderNameComparator(locale);
@@ -1550,7 +1543,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         completionService.submit(new Callable<TreeMap<String, List<String>>>() {
 
-            public TreeMap<String, List<String>> call() throws FolderException {
+            public TreeMap<String, List<String>> call() throws OXException {
                 /*
                  * Get real folder storage
                  */
@@ -1579,7 +1572,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         folderStorage.commitTransaction(storageParameters);
                     }
                     return treeMap;
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -1603,7 +1596,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         completionService.submit(new Callable<TreeMap<String, List<String>>>() {
 
-            public TreeMap<String, List<String>> call() throws FolderException {
+            public TreeMap<String, List<String>> call() throws OXException {
                 /*
                  * Get the ones from virtual table
                  */
@@ -1622,7 +1615,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         completionService.submit(new Callable<TreeMap<String, List<String>>>() {
 
-            public TreeMap<String, List<String>> call() throws FolderException {
+            public TreeMap<String, List<String>> call() throws OXException {
                 // Get other top-level folders: shared + public
                 final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
                 if (null == folderStorage) {
@@ -1667,7 +1660,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         folderStorage.commitTransaction(storageParameters);
                     }
                     return treeMap;
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -1693,7 +1686,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 try {
                     userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), parameters.getContext());
                 } catch (final OXException e) {
-                    throw new FolderException(e);
+                    throw new OXException(e);
                 }
             }
         }
@@ -1716,7 +1709,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     accounts = Arrays.asList(mass.getUserMailAccounts(user.getId(), contextId));
                     Collections.sort(accounts, new MailAccountComparator(locale));
                 } catch (final OXException e) {
-                    throw new FolderException(e);
+                    throw new OXException(e);
                 }
                 if (accounts.isEmpty()) {
                     accountSubfolderIDs = Collections.emptyList();
@@ -1925,7 +1918,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return false;
     }
 
-    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         TCM.clear();
         /*
          * Update only if folder is contained
@@ -1947,7 +1940,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     con = databaseService.getWritable(contextId);
                     con.setAutoCommit(false); // BEGIN
                 } catch (final DBPoolingException e) {
-                    throw new FolderException(e);
+                    throw new OXException(e);
                 } catch (final SQLException e) {
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
                 }
@@ -1973,7 +1966,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 } catch (final SQLException e) {
                     DBUtils.rollback(con); // ROLLBACK
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     DBUtils.rollback(con); // ROLLBACK
                     throw e;
                 } catch (final Exception e) {
@@ -2002,7 +1995,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     if (null != memoryTable) {
                         memoryTable.initializeTree(tree, userId, contextId, wcon);
                     }
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     throw e;
                 } catch (final Exception e) {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -2034,7 +2027,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             this.parameters = parameters;
         }
 
-        public TreeMap<String, List<String>> call() throws FolderException {
+        public TreeMap<String, List<String>> call() throws OXException {
             /*
              * Get real folder storage for primary mail folder
              */
@@ -2052,7 +2045,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final SortableId[] mailIDs;
                 try {
                     mailIDs = getSubfolders(fullname, realTreeId, folderStorage, storageParameters);
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     final Throwable cause = e.getCause();
                     if (cause instanceof OXException) {
                         final OXException me = (OXException) cause;
@@ -2130,7 +2123,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     folderStorage.commitTransaction(storageParameters);
                 }
                 return treeMap;
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -2233,7 +2226,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return l;
     }
 
-    private static SortableId[] getSubfolderIDs(final Folder realFolder, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
+    private static SortableId[] getSubfolderIDs(final Folder realFolder, final FolderStorage folderStorage, final StorageParameters storageParameters) throws OXException {
         /*-
          * 
         final String[] ids = realFolder.getSubfolderIDs();
@@ -2244,7 +2237,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return folderStorage.getSubfolders(realFolder.getTreeID(), realFolder.getID(), storageParameters);
     }
 
-    String getLocalizedName(final String id, final int tree, final Locale locale, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
+    String getLocalizedName(final String id, final int tree, final Locale locale, final FolderStorage folderStorage, final StorageParameters storageParameters) throws OXException {
         final Session session = storageParameters.getSession();
         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session);
         final MemoryTree memoryTree = memoryTable.getTree(tree, session);

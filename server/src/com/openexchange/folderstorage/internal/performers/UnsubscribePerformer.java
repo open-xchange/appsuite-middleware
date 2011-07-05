@@ -51,7 +51,7 @@ package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -114,9 +114,9 @@ public final class UnsubscribePerformer extends AbstractPerformer {
      * 
      * @param treeId The virtual tree identifier
      * @param folderId The folder identifier
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    public void doUnsubscribe(final String treeId, final String folderId) throws FolderException {
+    public void doUnsubscribe(final String treeId, final String folderId) throws OXException {
         if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
             throw FolderExceptionErrorMessage.NO_REAL_UNSUBSCRIBE.create(treeId);
         }
@@ -169,7 +169,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }

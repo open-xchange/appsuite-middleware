@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.virtual.VirtualPermission;
@@ -239,7 +239,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
             folder.setParentID("");
             folder.setSubscribed(true);
             Insert.insertFolder(ctx.getContextId(), 1, user, folder);
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             throw new UpdateException(e);
         }
     }
@@ -276,7 +276,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
 
         } catch (final OXException e) {
             throw new UpdateException(e);
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             throw new UpdateException(e);
         }
     }
@@ -340,7 +340,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
                 systemFolder.setName(FolderObject.SYSTEM_SHARED_FOLDER_NAME); // TODO: Empty string?
                 systemFolder.setPermissions(/* new Permission[] { systemPermission } */null); // TODO: Ignore?
                 Insert.insertFolder(ctx.getContextId(), treeId, user, systemFolder, con);
-            } catch (final FolderException e) {
+            } catch (final OXException e) {
                 throw new UpdateException(e);
             } finally {
                 Database.back(ctx, true, con);

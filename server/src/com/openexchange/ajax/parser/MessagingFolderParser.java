@@ -59,7 +59,7 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;

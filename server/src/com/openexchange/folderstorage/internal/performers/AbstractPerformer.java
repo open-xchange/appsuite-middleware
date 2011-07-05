@@ -56,7 +56,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -248,9 +248,9 @@ public abstract class AbstractPerformer {
      * @param storageParameters The storage parameters to use
      * @param openedStorages The collection of opened storages
      * @return An opened storage for given tree-folder-pair
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    protected FolderStorage getOpenedStorage(final String id, final String treeId, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+    protected FolderStorage getOpenedStorage(final String id, final String treeId, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage ps : openedStorages) {
             if (ps.getFolderType().servesFolderId(id)) {
                 // Found an already opened storage which is capable to server given folderId-treeId-pair
@@ -276,9 +276,9 @@ public abstract class AbstractPerformer {
      * @param checkMe The folder storage to check
      * @param modify <code>true</code> if the storage is supposed to be opened for a modifying operation; otherwise <code>false</code>
      * @param openedStorages The collection of already opened storages
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    protected void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+    protected void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage ps : openedStorages) {
             if (checkMe.equals(ps)) {
                 // Passed storage is already opened

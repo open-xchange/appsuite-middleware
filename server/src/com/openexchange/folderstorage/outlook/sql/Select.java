@@ -64,7 +64,7 @@ import java.util.Locale;
 import java.util.TreeMap;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
@@ -137,14 +137,14 @@ public final class Select {
     private static final String SQL_SELECT2_SUBF_BCK =
         "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
-    public static String getByName(final int cid, final int tree, final int user, final String parentId, final String name, final StorageType storageType) throws FolderException {
+    public static String getByName(final int cid, final int tree, final int user, final String parentId, final String name, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -176,16 +176,16 @@ public final class Select {
      * @param storageType The storage type to use
      * @return <code>true</code> if the specified virtual tree contains a parent denoted by given parent identifier; otherwise
      *         <code>false</code>
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean containsParent(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws FolderException {
+    public static boolean containsParent(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return containsParent(cid, tree, user, parentId, storageType, con);
@@ -204,9 +204,9 @@ public final class Select {
      * @param storageType The storage type to use
      * @return <code>true</code> if the specified virtual tree contains a parent denoted by given parent identifier; otherwise
      *         <code>false</code>
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean containsParent(final int cid, final int tree, final int user, final String parentId, final StorageType storageType, final Connection con) throws FolderException {
+    public static boolean containsParent(final int cid, final int tree, final int user, final String parentId, final StorageType storageType, final Connection con) throws OXException {
         if (null == con) {
             return containsParent(cid, tree, user, parentId, storageType);
         }
@@ -240,16 +240,16 @@ public final class Select {
      * @param storageType The storage type to use
      * @return <code>true</code> if the specified virtual tree contains a folder denoted by given folder identifier; otherwise
      *         <code>false</code>
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws FolderException {
+    public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return containsFolder(cid, tree, user, folderId, storageType, con);
@@ -268,9 +268,9 @@ public final class Select {
      * @param storageType The storage type to use
      * @return <code>true</code> if the specified virtual tree contains a folder denoted by given folder identifier; otherwise
      *         <code>false</code>
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType, final Connection con) throws FolderException {
+    public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType, final Connection con) throws OXException {
         if (null == con) {
             return containsFolder(cid, tree, user, folderId, storageType);
         }
@@ -303,16 +303,16 @@ public final class Select {
      * @param folderId The folder identifier
      * @param storageType The storage type to use
      * @return The name of the folder or <code>null</code> if virtual tree does not hold denoted folder
-     * @throws FolderException If returning folder's name fails
+     * @throws OXException If returning folder's name fails
      */
-    public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws FolderException {
+    public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return getFolderName(cid, tree, user, folderId, storageType, con);
@@ -330,9 +330,9 @@ public final class Select {
      * @param folderId The folder identifier
      * @param storageType The storage type to use
      * @return The name of the folder or <code>null</code> if virtual tree does not hold denoted folder
-     * @throws FolderException If returning folder's name fails
+     * @throws OXException If returning folder's name fails
      */
-    public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType, final Connection con) throws FolderException {
+    public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType, final Connection con) throws OXException {
         if (null == con) {
             return getFolderName(cid, tree, user, folderId, storageType);
         }
@@ -365,16 +365,16 @@ public final class Select {
      * @param folderIds The folder identifiers
      * @param storageType The storage type to use
      * @return A <code>boolean</code> array containing the flag, whether the folder is contained or not
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean[] containsFolders(final int cid, final int tree, final int user, final String[] folderIds, final StorageType storageType) throws FolderException {
+    public static boolean[] containsFolders(final int cid, final int tree, final int user, final String[] folderIds, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return containsFolders(cid, tree, user, folderIds, storageType, con);
@@ -392,9 +392,9 @@ public final class Select {
      * @param folderIds The folder identifiers
      * @param storageType The storage type to use
      * @return A <code>boolean</code> array containing the flag, whether the folder is contained or not
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean[] containsFolders(final int cid, final int tree, final int user, final String[] folderIds, final StorageType storageType, final Connection con) throws FolderException {
+    public static boolean[] containsFolders(final int cid, final int tree, final int user, final String[] folderIds, final StorageType storageType, final Connection con) throws OXException {
         if (null == con) {
             return containsFolders(cid, tree, user, folderIds, storageType);
         }
@@ -435,16 +435,16 @@ public final class Select {
      * @param folderIds The folder identifiers
      * @param storageType The storage type to use
      * @return A <code>boolean</code> array containing the flag, whether the folder is contained or not
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean[] containsFolders(final int cid, final int tree, final int user, final SortableId[] folderIds, final StorageType storageType) throws FolderException {
+    public static boolean[] containsFolders(final int cid, final int tree, final int user, final SortableId[] folderIds, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return containsFolders(cid, tree, user, folderIds, storageType, con);
@@ -462,9 +462,9 @@ public final class Select {
      * @param folderIds The folder identifiers
      * @param storageType The storage type to use
      * @return A <code>boolean</code> array containing the flag, whether the folder is contained or not
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean[] containsFolders(final int cid, final int tree, final int user, final SortableId[] folderIds, final StorageType storageType, final Connection con) throws FolderException {
+    public static boolean[] containsFolders(final int cid, final int tree, final int user, final SortableId[] folderIds, final StorageType storageType, final Connection con) throws OXException {
         if (null == con) {
             return containsFolders(cid, tree, user, folderIds, storageType);
         }
@@ -506,16 +506,16 @@ public final class Select {
      * @param outlookFolder The folder to fill
      * @param storageType The storage type to use
      * @return <code>true</code> if folder was present in tables; otherwise <code>false</code>
-     * @throws FolderException If filling the folder fails
+     * @throws OXException If filling the folder fails
      */
-    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final StorageType storageType) throws FolderException {
+    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return fillFolder(cid, tree, user, locale, outlookFolder, storageType, con);
@@ -538,9 +538,9 @@ public final class Select {
      * @param outlookFolder The folder to fill
      * @param storageType The storage type to use
      * @return <code>true</code> if folder was present in tables; otherwise <code>false</code>
-     * @throws FolderException If filling the folder fails
+     * @throws OXException If filling the folder fails
      */
-    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final StorageType storageType, final Connection con) throws FolderException {
+    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final StorageType storageType, final Connection con) throws OXException {
         if (null == con) {
             return fillFolder(cid, tree, user, locale, outlookFolder, storageType);
         }
@@ -721,16 +721,16 @@ public final class Select {
      * @param realSubfolderIds The real subfolder IDs to merge with
      * @param storageType The storage type
      * @return The sorted identifiers of the subfolders located below specified parent
-     * @throws FolderException If subfolders cannot be detected
+     * @throws OXException If subfolders cannot be detected
      */
-    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final List<String[]> realSubfolderIds, final StorageType storageType) throws FolderException {
+    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final List<String[]> realSubfolderIds, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return getSubfolderIds(cid, tree, user, locale, parentId, realSubfolderIds, storageType, con);
@@ -751,9 +751,9 @@ public final class Select {
      * @param storageType The storage type
      * @param con The connection to use
      * @return The sorted identifiers of the subfolders located below specified parent
-     * @throws FolderException If subfolders cannot be detected
+     * @throws OXException If subfolders cannot be detected
      */
-    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final List<String[]> realSubfolderIds, final StorageType storageType, final Connection con) throws FolderException {
+    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final List<String[]> realSubfolderIds, final StorageType storageType, final Connection con) throws OXException {
         if (null == con) {
             return getSubfolderIds(cid, tree, user, locale, parentId, realSubfolderIds, storageType);
         }
@@ -833,14 +833,14 @@ public final class Select {
         }
     }
 
-    public static List<String> getFolders(final int cid, final int tree, final int user) throws FolderException {
+    public static List<String> getFolders(final int cid, final int tree, final int user) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return getFolders(cid, tree, user, con);
@@ -851,7 +851,7 @@ public final class Select {
 
     private static final String SQL_SELECT_ALL = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ?";
 
-    public static List<String> getFolders(final int cid, final int tree, final int user, final Connection con) throws FolderException {
+    public static List<String> getFolders(final int cid, final int tree, final int user, final Connection con) throws OXException {
         if (null == con) {
             return getFolders(cid, tree, user);
         }
@@ -889,14 +889,14 @@ public final class Select {
         }
     }
 
-    public static List<String[]> getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws FolderException {
+    public static List<String[]> getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return getSubfolderIds(cid, tree, user, parentId, storageType, con);
@@ -905,7 +905,7 @@ public final class Select {
         }
     }
 
-    public static List<String[]> getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType, final Connection con) throws FolderException {
+    public static List<String[]> getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType, final Connection con) throws OXException {
         if (null == con) {
             return getSubfolderIds(cid, tree, user, parentId, storageType);
         }

@@ -51,6 +51,7 @@ package com.openexchange.folderstorage;
 
 import java.util.Date;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -75,18 +76,18 @@ public interface FolderService {
      * @param treeId The tree identifier
      * @param user The user
      * @param context The context
-     * @throws FolderException If check fails
+     * @throws OXException If check fails
      */
-    void checkConsistency(String treeId, User user, Context context) throws FolderException;
+    void checkConsistency(String treeId, User user, Context context) throws OXException;
 
     /**
      * Checks the consistency of given tree.
      * 
      * @param treeId The tree identifier
      * @param session The session
-     * @throws FolderException If check fails
+     * @throws OXException If check fails
      */
-    void checkConsistency(String treeId, Session session) throws FolderException;
+    void checkConsistency(String treeId, Session session) throws OXException;
 
     /**
      * Gets the folder identified by given folder identifier and tree identifier.
@@ -97,9 +98,9 @@ public interface FolderService {
      * @param context The context
      * @param decorator The optional folder service decorator
      * @return The folder
-     * @throws FolderException If folder cannot be returned
+     * @throws OXException If folder cannot be returned
      */
-    UserizedFolder getFolder(String treeId, String folderId, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    UserizedFolder getFolder(String treeId, String folderId, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets the folder identified by given folder identifier and tree identifier.
@@ -109,9 +110,9 @@ public interface FolderService {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @return The folder
-     * @throws FolderException If folder cannot be returned
+     * @throws OXException If folder cannot be returned
      */
-    UserizedFolder getFolder(String treeId, String folderId, Session session, FolderServiceDecorator decorator) throws FolderException;
+    UserizedFolder getFolder(String treeId, String folderId, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets all visible folders located in given tree for given user.
@@ -122,9 +123,9 @@ public interface FolderService {
      * @param context The context
      * @param decorator The optional folder service decorator
      * @return All visible folders
-     * @throws FolderException If folders cannot be returned
+     * @throws OXException If folders cannot be returned
      */
-    FolderResponse<UserizedFolder[]> getAllVisibleFolders(String treeId, FolderFilter filter, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getAllVisibleFolders(String treeId, FolderFilter filter, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets all visible folders located in given tree for given session's user.
@@ -134,9 +135,9 @@ public interface FolderService {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @return All visible folders
-     * @throws FolderException If folders cannot be returned
+     * @throws OXException If folders cannot be returned
      */
-    FolderResponse<UserizedFolder[]> getAllVisibleFolders(String treeId, FolderFilter filter, Session session, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getAllVisibleFolders(String treeId, FolderFilter filter, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets this storage's default folder for specified user.
@@ -148,9 +149,9 @@ public interface FolderService {
      * @param context The context
      * @param decorator The optional folder service decorator
      * @return The default folder for specified user
-     * @throws FolderException If the default folder cannot be returned
+     * @throws OXException If the default folder cannot be returned
      */
-    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, User ruser, Context context, FolderServiceDecorator decorator) throws FolderException;
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, User ruser, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets this storage's default folder for specified user.
@@ -161,9 +162,9 @@ public interface FolderService {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @return The default folder for specified user
-     * @throws FolderException If the default folder cannot be returned
+     * @throws OXException If the default folder cannot be returned
      */
-    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Session session, FolderServiceDecorator decorator) throws FolderException;
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
@@ -177,9 +178,9 @@ public interface FolderService {
      * @param user The user
      * @param context The context
      * @param session The session
-     * @throws FolderException If folder cannot be added
+     * @throws OXException If folder cannot be added
      */
-    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId, User user, Context context) throws FolderException;
+    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId, User user, Context context) throws OXException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
@@ -191,9 +192,9 @@ public interface FolderService {
      * @param targetTreeId The target tree identifier
      * @param targetParentId The target parent identifier
      * @param session The session
-     * @throws FolderException If folder cannot be added
+     * @throws OXException If folder cannot be added
      */
-    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId, Session session) throws FolderException;
+    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId, Session session) throws OXException;
 
     /**
      * Unsubscribes the specified folder in given (virtual) tree only.
@@ -204,9 +205,9 @@ public interface FolderService {
      * @param folderId The folder identifier
      * @param user The user
      * @param context The context
-     * @throws FolderException If folder cannot be deleted
+     * @throws OXException If folder cannot be deleted
      */
-    void unsubscribeFolder(String treeId, String folderId, User user, Context context) throws FolderException;
+    void unsubscribeFolder(String treeId, String folderId, User user, Context context) throws OXException;
 
     /**
      * Unsubscribes the specified folder in given (virtual) tree only.
@@ -216,9 +217,9 @@ public interface FolderService {
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param session The session
-     * @throws FolderException If folder cannot be deleted
+     * @throws OXException If folder cannot be deleted
      */
-    void unsubscribeFolder(String treeId, String folderId, Session session) throws FolderException;
+    void unsubscribeFolder(String treeId, String folderId, Session session) throws OXException;
 
     /**
      * Gets all visible folders of specified content type and folder type.
@@ -232,9 +233,9 @@ public interface FolderService {
      * @param context The context
      * @param decorator The optional folder service decorator
      * @return All visible folders of specified content type and folder type.
-     * @throws FolderException If operation fails
+     * @throws OXException If operation fails
      */
-    FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets all visible folders of specified content type and folder type.
@@ -247,9 +248,9 @@ public interface FolderService {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @return All visible folders of specified content type and folder type.
-     * @throws FolderException If operation fails
+     * @throws OXException If operation fails
      */
-    FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets the subfolders of specified parent in given tree.
@@ -262,9 +263,9 @@ public interface FolderService {
      * @param context The context
      * @param decorator The optional folder service decorator
      * @return The subfolders
-     * @throws FolderException If subfolders cannot be returned
+     * @throws OXException If subfolders cannot be returned
      */
-    FolderResponse<UserizedFolder[]> getSubfolders(String treeId, String parentId, boolean all, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getSubfolders(String treeId, String parentId, boolean all, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets the subfolders of specified parent in given tree.
@@ -276,9 +277,9 @@ public interface FolderService {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @return The subfolders
-     * @throws FolderException If subfolders cannot be returned
+     * @throws OXException If subfolders cannot be returned
      */
-    FolderResponse<UserizedFolder[]> getSubfolders(String treeId, String parentId, boolean all, Session session, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getSubfolders(String treeId, String parentId, boolean all, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets the path from given folder to specified tree's root folder.
@@ -289,9 +290,9 @@ public interface FolderService {
      * @param context The context
      * @param decorator The optional folder service decorator
      * @return The path from given folder to specified tree's root folder
-     * @throws FolderException If path cannot be returned
+     * @throws OXException If path cannot be returned
      */
-    FolderResponse<UserizedFolder[]> getPath(String treeId, String folderId, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getPath(String treeId, String folderId, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets the path from given folder to specified tree's root folder.
@@ -301,9 +302,9 @@ public interface FolderService {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @return The path from given folder to specified tree's root folder
-     * @throws FolderException If path cannot be returned
+     * @throws OXException If path cannot be returned
      */
-    FolderResponse<UserizedFolder[]> getPath(String treeId, String folderId, Session session, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getPath(String treeId, String folderId, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets all new, modified and deleted folders since given time stamp.
@@ -316,9 +317,9 @@ public interface FolderService {
      * @param context The context
      * @param decorator The optional folder service decorator
      * @return All new, modified and deleted folders since given time stamp
-     * @throws FolderException If path cannot be returned
+     * @throws OXException If path cannot be returned
      */
-    FolderResponse<UserizedFolder[][]> getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[][]> getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets all new, modified and deleted folders since given time stamp.
@@ -330,9 +331,9 @@ public interface FolderService {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @return All new, modified and deleted folders since given time stamp
-     * @throws FolderException If path cannot be returned
+     * @throws OXException If path cannot be returned
      */
-    FolderResponse<UserizedFolder[][]> getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, Session session, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[][]> getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Deletes the specified folder in given tree.
@@ -344,9 +345,9 @@ public interface FolderService {
      * @param timeStamp The requestor's last-modified time stamp
      * @param user The user
      * @param context The context
-     * @throws FolderException If folder cannot be deleted
+     * @throws OXException If folder cannot be deleted
      */
-    void deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context) throws FolderException;
+    void deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context) throws OXException;
 
     /**
      * Deletes the specified folder in given tree.
@@ -357,9 +358,9 @@ public interface FolderService {
      * @param folderId The folder identifier
      * @param timeStamp The requestor's last-modified time stamp
      * @param session The session
-     * @throws FolderException If folder cannot be deleted
+     * @throws OXException If folder cannot be deleted
      */
-    void deleteFolder(String treeId, String folderId, Date timeStamp, Session session) throws FolderException;
+    void deleteFolder(String treeId, String folderId, Date timeStamp, Session session) throws OXException;
 
     /**
      * Clears the content of specified folder in given tree.
@@ -368,9 +369,9 @@ public interface FolderService {
      * @param folderId The folder identifier
      * @param user The user
      * @param context The context
-     * @throws FolderException If folder cannot be cleared
+     * @throws OXException If folder cannot be cleared
      */
-    void clearFolder(String treeId, String folderId, User user, Context context) throws FolderException;
+    void clearFolder(String treeId, String folderId, User user, Context context) throws OXException;
 
     /**
      * Clears the content of specified folder in given tree.
@@ -378,9 +379,9 @@ public interface FolderService {
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param session The session
-     * @throws FolderException If folder cannot be cleared
+     * @throws OXException If folder cannot be cleared
      */
-    void clearFolder(String treeId, String folderId, Session session) throws FolderException;
+    void clearFolder(String treeId, String folderId, Session session) throws OXException;
 
     /**
      * Updates a folder identified through given folder object.
@@ -389,9 +390,9 @@ public interface FolderService {
      * @param timeStamp The requestor's last-modified time stamp
      * @param user The user
      * @param context The context
-     * @throws FolderException If update fails
+     * @throws OXException If update fails
      */
-    void updateFolder(Folder folder, Date timeStamp, User user, Context context) throws FolderException;
+    void updateFolder(Folder folder, Date timeStamp, User user, Context context) throws OXException;
 
     /**
      * Updates a folder identified through given folder object.
@@ -399,9 +400,9 @@ public interface FolderService {
      * @param folder The folder object containing tree identifier, folder identifier and modified data.
      * @param timeStamp The requestor's last-modified time stamp
      * @param session The session
-     * @throws FolderException If update fails
+     * @throws OXException If update fails
      */
-    void updateFolder(Folder folder, Date timeStamp, Session session) throws FolderException;
+    void updateFolder(Folder folder, Date timeStamp, Session session) throws OXException;
 
     /**
      * Creates a new folder described by given folder object.
@@ -410,9 +411,9 @@ public interface FolderService {
      * @param user The user
      * @param context The context
      * @return The identifier of the newly created folder
-     * @throws FolderException If creation fails
+     * @throws OXException If creation fails
      */
-    FolderResponse<String> createFolder(Folder folder, User user, Context context) throws FolderException;
+    FolderResponse<String> createFolder(Folder folder, User user, Context context) throws OXException;
 
     /**
      * Creates a new folder described by given folder object.
@@ -420,9 +421,9 @@ public interface FolderService {
      * @param folder The folder object containing tree identifier, parent identifier and data.
      * @param session The session
      * @return The identifier of the newly created folder
-     * @throws FolderException If creation fails
+     * @throws OXException If creation fails
      */
-    FolderResponse<String> createFolder(Folder folder, Session session) throws FolderException;
+    FolderResponse<String> createFolder(Folder folder, Session session) throws OXException;
 
     // TODO: default folder? all visible folders
 

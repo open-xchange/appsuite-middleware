@@ -54,7 +54,7 @@ import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
 import com.openexchange.server.OXException;
@@ -81,21 +81,21 @@ public final class Update {
      * @param tree The tree identifier
      * @param user The user identifier
      * @param folder The folder
-     * @throws FolderException If update fails
+     * @throws OXException If update fails
      */
-    public static void updateFolder(final int cid, final int tree, final int user, final Folder folder) throws FolderException {
+    public static void updateFolder(final int cid, final int tree, final int user, final Folder folder) throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getWritable(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             con.setAutoCommit(false); // BEGIN
@@ -105,7 +105,7 @@ public final class Update {
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {

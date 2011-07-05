@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -126,9 +126,9 @@ public final class CreatePerformer extends AbstractPerformer {
      * Performs the <code>CREATE</code> request.
      * 
      * @param toCreate The object describing the folder to create
-     * @throws FolderException If creation fails
+     * @throws OXException If creation fails
      */
-    public String doCreate(final Folder toCreate) throws FolderException {
+    public String doCreate(final Folder toCreate) throws OXException {
         final String parentId = toCreate.getParentID();
         if (null == parentId) {
             throw FolderExceptionErrorMessage.MISSING_PARENT_ID.create(new Object[0]);
@@ -182,7 +182,7 @@ public final class CreatePerformer extends AbstractPerformer {
                 LOG.debug(new StringBuilder().append("Create.doCreate() took ").append(duration).append("msec for folder: ").append(newId).toString());
             }
             return newId;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.rollback(storageParameters);
             }
@@ -195,7 +195,7 @@ public final class CreatePerformer extends AbstractPerformer {
         }
     }
 
-    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage) throws FolderException {
+    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage) throws OXException {
         final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();
         boolean supported = false;
         final ContentType folderContentType = toCreate.getContentType();
@@ -228,7 +228,7 @@ public final class CreatePerformer extends AbstractPerformer {
         return toCreate.getID();
     }
 
-    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
+    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws OXException {
         final ContentType folderContentType = toCreate.getContentType();
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
         if (realStorage.equals(virtualStorage)) {
@@ -311,7 +311,7 @@ public final class CreatePerformer extends AbstractPerformer {
                             if (started) {
                                 realStorage.commitTransaction(storageParameters);
                             }
-                        } catch (final FolderException e) {
+                        } catch (final OXException e) {
                             if (started) {
                                 realStorage.rollback(storageParameters);
                             }
@@ -386,7 +386,7 @@ public final class CreatePerformer extends AbstractPerformer {
                     if (started) {
                         realStorage.commitTransaction(storageParameters);
                     }
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     if (started) {
                         realStorage.rollback(storageParameters);
                     }
@@ -403,7 +403,7 @@ public final class CreatePerformer extends AbstractPerformer {
         // TODO: Check for storage capabilities! Does storage support permissions? Etc.
     }
 
-    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws FolderException {
+    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage openedStorage : openedStorages) {
             if (openedStorage.equals(storage)) {
                 return;

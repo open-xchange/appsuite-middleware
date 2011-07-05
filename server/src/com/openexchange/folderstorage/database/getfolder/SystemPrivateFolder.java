@@ -56,9 +56,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
@@ -112,9 +110,9 @@ public final class SystemPrivateFolder {
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system private folder
-     * @throws FolderException If the database folder cannot be returned
+     * @throws OXException If the database folder cannot be returned
      */
-    public static int[] getSystemPrivateFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getSystemPrivateFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system private folder
@@ -163,11 +161,11 @@ public final class SystemPrivateFolder {
             }
             return ret;
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -181,9 +179,9 @@ public final class SystemPrivateFolder {
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system private folder
-     * @throws FolderException If the database folder cannot be returned
+     * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemPrivateFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<String[]> getSystemPrivateFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system private folder
@@ -231,11 +229,11 @@ public final class SystemPrivateFolder {
             }
             return ret;
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }

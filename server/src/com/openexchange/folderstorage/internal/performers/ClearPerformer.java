@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -111,9 +111,9 @@ public final class ClearPerformer extends AbstractPerformer {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
-     * @throws FolderException If an error occurs during deletion
+     * @throws OXException If an error occurs during deletion
      */
-    public void doClear(final String treeId, final String folderId) throws FolderException {
+    public void doClear(final String treeId, final String folderId) throws OXException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
@@ -129,7 +129,7 @@ public final class ClearPerformer extends AbstractPerformer {
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }

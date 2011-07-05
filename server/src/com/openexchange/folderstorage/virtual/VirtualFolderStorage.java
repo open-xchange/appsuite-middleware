@@ -53,9 +53,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
@@ -87,15 +87,15 @@ public final class VirtualFolderStorage implements FolderStorage {
         folderType = new VirtualFolderType();
     }
 
-    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
         return folder;
     }
 
-    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         // TODO: Implement it
     }
 
-    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // No real storage
     }
 
@@ -103,23 +103,23 @@ public final class VirtualFolderStorage implements FolderStorage {
         return null;
     }
 
-    public void commitTransaction(final StorageParameters params) throws FolderException {
+    public void commitTransaction(final StorageParameters params) throws OXException {
 
     }
 
-    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         Insert.insertFolder(storageParameters.getContextId(), Integer.parseInt(folder.getTreeID()), storageParameters.getUserId(), folder);
     }
 
-    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // Nothing to do
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         Delete.deleteFolder(storageParameters.getContextId(), Integer.parseInt(treeId), storageParameters.getUserId(), folderId, true);
     }
 
-    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         // Get default folder
         final FolderStorage byContentType = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
         if (null == byContentType) {
@@ -132,7 +132,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                 byContentType.commitTransaction(storageParameters);
             }
             return defaultFolderID;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 byContentType.rollback(storageParameters);
             }
@@ -145,11 +145,11 @@ public final class VirtualFolderStorage implements FolderStorage {
         }
     }
 
-    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         return null;
     }
 
-    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         /*
          * Get real folder storage
          */
@@ -165,7 +165,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                 realFolderStorage.commitTransaction(storageParameters);
             }
             return containsForeignObjects;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 realFolderStorage.rollback(storageParameters);
             }
@@ -178,7 +178,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         }
     }
 
-    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         /*
          * Get real folder storage
          */
@@ -194,7 +194,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                 realFolderStorage.commitTransaction(storageParameters);
             }
             return isEmpty;
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 realFolderStorage.rollback(storageParameters);
             }
@@ -207,7 +207,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         }
     }
 
-    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         /*
          * Get real folder storage
          */
@@ -223,7 +223,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -236,11 +236,11 @@ public final class VirtualFolderStorage implements FolderStorage {
         }
     }
 
-    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws FolderException {
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws OXException {
         return getFolders(treeId, folderIds, StorageType.WORKING, storageParameters);
     }
 
-    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
         for (final String folderId : folderIds) {
             ret.add(getFolder(treeId, folderId, storageType, storageParameters));
@@ -248,11 +248,11 @@ public final class VirtualFolderStorage implements FolderStorage {
         return ret;
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final VirtualFolder virtualFolder;
         {
             final Folder realFolder;
@@ -271,7 +271,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                     if (started) {
                         realFolderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     if (started) {
                         realFolderStorage.rollback(storageParameters);
                     }
@@ -306,7 +306,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         return StoragePriority.NORMAL;
     }
 
-    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         final User user = storageParameters.getUser();
         final Locale locale = user.getLocale();
         final String[] ids =
@@ -328,11 +328,11 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     }
 
-    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
         return true;
     }
 
-    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         final Folder storageFolder = getFolder(folder.getTreeID(), folder.getID(), storageParameters);
         /*
          * Ensure all field set
@@ -358,11 +358,11 @@ public final class VirtualFolderStorage implements FolderStorage {
         return new ContentType[0];
     }
 
-    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         return Select.containsFolder(
             storageParameters.getContextId(),
             Integer.parseInt(treeId),
@@ -371,15 +371,15 @@ public final class VirtualFolderStorage implements FolderStorage {
             storageType);
     }
 
-    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws OXException {
         return new String[0];
     }
 
-    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
         return new String[0];
     }
 
-    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
     }
 

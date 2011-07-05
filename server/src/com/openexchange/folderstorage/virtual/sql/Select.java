@@ -65,7 +65,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
@@ -136,21 +136,21 @@ public final class Select {
      * @param storageType The storage type to use
      * @return <code>true</code> if the specified virtual tree contains a folder denoted by given folder identifier; otherwise
      *         <code>false</code>
-     * @throws FolderException If checking folder's presence fails
+     * @throws OXException If checking folder's presence fails
      */
-    public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws FolderException {
+    public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             PreparedStatement stmt = null;
@@ -183,21 +183,21 @@ public final class Select {
      * @param locale The user's locale (needed for proper sorting of possible subfolders)
      * @param virtualFolder The folder to fill
      * @param storageType The storage type to use
-     * @throws FolderException If filling the folder fails
+     * @throws OXException If filling the folder fails
      */
-    public static void fillFolder(final int cid, final int tree, final int user, final Locale locale, final VirtualFolder virtualFolder, final StorageType storageType) throws FolderException {
+    public static void fillFolder(final int cid, final int tree, final int user, final Locale locale, final VirtualFolder virtualFolder, final StorageType storageType) throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         final String folderId = virtualFolder.getID();
         try {
@@ -335,21 +335,21 @@ public final class Select {
      * @param parentId The parent identifier
      * @param storageType The storage type
      * @return The sorted identifiers of the subfolders located below specified parent
-     * @throws FolderException If subfolders cannot be detected
+     * @throws OXException If subfolders cannot be detected
      */
-    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final StorageType storageType) throws FolderException {
+    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final StorageType storageType) throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         // Get a connection
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         }
         try {
             return getSubfolderIds(cid, tree, user, locale, parentId, storageType, con);
@@ -369,9 +369,9 @@ public final class Select {
      * @param storageType The storage type
      * @param con The connection to use
      * @return The sorted identifiers of the subfolders located below specified parent
-     * @throws FolderException If subfolders cannot be detected
+     * @throws OXException If subfolders cannot be detected
      */
-    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final StorageType storageType, final Connection con) throws FolderException {
+    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final StorageType storageType, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {

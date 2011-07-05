@@ -56,9 +56,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
@@ -114,9 +112,9 @@ public final class SystemInfostoreFolder {
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system infostore folder
-     * @throws FolderException If the database folder cannot be returned
+     * @throws OXException If the database folder cannot be returned
      */
-    public static int[] getSystemInfostoreFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getSystemInfostoreFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system infostore folder
@@ -168,11 +166,11 @@ public final class SystemInfostoreFolder {
             }
             return subfolderIds.toNativeArray();
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -186,9 +184,9 @@ public final class SystemInfostoreFolder {
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system infostore folder
-     * @throws FolderException If the database folder cannot be returned
+     * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system infostore folder
@@ -249,11 +247,11 @@ public final class SystemInfostoreFolder {
             }
             return subfolderIds;
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -261,7 +259,7 @@ public final class SystemInfostoreFolder {
 
     private static String[] toArray(final String... values) {
         final int length = values.length;
-        String[] ret = new String[length];
+        final String[] ret = new String[length];
         System.arraycopy(values, 0, ret, 0, length);
         return values;
     }

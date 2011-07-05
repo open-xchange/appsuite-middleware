@@ -52,7 +52,7 @@ package com.openexchange.folderstorage.internal.performers;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -117,9 +117,9 @@ public final class SubscribePerformer extends AbstractPerformer {
      * @param folderId The folder identifier
      * @param targetTreeId The target tree identifier
      * @param targetParentId The target parent identifier
-     * @throws FolderException If a folder error occurs
+     * @throws OXException If a folder error occurs
      */
-    public void doSubscribe(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId) throws FolderException {
+    public void doSubscribe(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId) throws OXException {
         if (FolderStorage.REAL_TREE_ID.equals(targetTreeId)) {
             throw FolderExceptionErrorMessage.NO_REAL_SUBSCRIBE.create(targetTreeId);
         }
@@ -176,7 +176,7 @@ public final class SubscribePerformer extends AbstractPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }

@@ -55,9 +55,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
@@ -111,9 +109,9 @@ public final class SystemPublicFolder {
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system public folder
-     * @throws FolderException If the database folder cannot be returned
+     * @throws OXException If the database folder cannot be returned
      */
-    public static int[] getSystemPublicFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static int[] getSystemPublicFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system public folder
@@ -179,11 +177,11 @@ public final class SystemPublicFolder {
             }
             return subfolderIds.toNativeArray();
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
@@ -197,9 +195,9 @@ public final class SystemPublicFolder {
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system public folder
-     * @throws FolderException If the database folder cannot be returned
+     * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+    public static List<String[]> getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system public folder
@@ -266,11 +264,11 @@ public final class SystemPublicFolder {
             }
             return subfolderIds;
         } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final DBPoolingException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new FolderException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }

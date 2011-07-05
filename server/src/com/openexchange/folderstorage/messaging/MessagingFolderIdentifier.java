@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.messaging;
 
-import com.openexchange.folderstorage.FolderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.messaging.MessagingFolder;
 
@@ -116,7 +116,7 @@ public final class MessagingFolderIdentifier {
     public static MessagingFolderIdentifier parseFQN(final String identifier) {
         try {
             return new MessagingFolderIdentifier(identifier);
-        } catch (final FolderException e) {
+        } catch (final OXException e) {
             return null;
         }
     }
@@ -136,9 +136,9 @@ public final class MessagingFolderIdentifier {
      * 
      * @param identifier The identifier according to pattern:<br>
      *            <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
-     * @throws FolderException If identifier is <code>null</code> or invalid
+     * @throws OXException If identifier is <code>null</code> or invalid
      */
-    public MessagingFolderIdentifier(final String identifier) throws FolderException {
+    public MessagingFolderIdentifier(final String identifier) throws OXException {
         super();
         if (null == identifier) {
             throw FolderExceptionErrorMessage.MISSING_FOLDER_ID.create();
