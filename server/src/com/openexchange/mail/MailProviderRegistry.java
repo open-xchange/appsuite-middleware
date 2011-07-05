@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AllMailProvider;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -91,9 +92,9 @@ public final class MailProviderRegistry {
      * @param session The session
      * @param accountId The account ID
      * @return The appropriate mail provider
-     * @throws MailException If no supporting mail provider can be found
+     * @throws OXException If no supporting mail provider can be found
      */
-    public static MailProvider getMailProviderBySession(final Session session, final int accountId) throws MailException {
+    public static MailProvider getMailProviderBySession(final Session session, final int accountId) throws OXException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         final String key = MailSessionParameterNames.getParamMailProvider();
         MailProvider provider;
@@ -122,7 +123,7 @@ public final class MailProviderRegistry {
         }
         provider = getMailProvider(protocol);
         if (null == provider || !provider.supportsProtocol(protocol)) {
-            throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, mailServerURL);
+            throw MailExceptionCode.UNKNOWN_PROTOCOL.create(mailServerURL);
         }
         mailSessionCache.putParameter(accountId, key, provider);
         return provider;
@@ -190,9 +191,9 @@ public final class MailProviderRegistry {
      * @param provider The mail provider to register
      * @return <code>true</code> if mail provider has been successfully registered and no other mail provider supports the same protocol;
      *         otherwise <code>false</code>
-     * @throws MailException If provider's start-up fails
+     * @throws OXException If provider's start-up fails
      */
-    public static boolean registerMailProvider(final String protocol, final MailProvider provider) throws MailException {
+    public static boolean registerMailProvider(final String protocol, final MailProvider provider) throws OXException {
         try {
             final Protocol p = Protocol.parseProtocol(protocol);
             if (Protocol.PROTOCOL_ALL.equals(p)) {
@@ -221,7 +222,7 @@ public final class MailProviderRegistry {
             provider.startUp();
             provider.setDeprecated(false);
             return true;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
             LOG.error(t.getMessage(), t);
@@ -241,7 +242,7 @@ public final class MailProviderRegistry {
             try {
                 provider.setDeprecated(true);
                 provider.shutDown();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error("Mail connection implementation could not be shut down", e);
             } catch (final RuntimeException t) {
                 LOG.error("Mail connection implementation could not be shut down", t);
@@ -260,7 +261,7 @@ public final class MailProviderRegistry {
                 all.setDeprecated(true);
                 all.shutDown();
                 allProvider.set(null);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error("Mail connection implementation could not be shut down", e);
             } catch (final RuntimeException t) {
                 LOG.error("Mail connection implementation could not be shut down", t);
@@ -273,9 +274,9 @@ public final class MailProviderRegistry {
      * 
      * @param provider The mail provider to unregister
      * @return The unregistered mail provider, or <code>null</code>
-     * @throws MailException If provider's shut-down fails
+     * @throws OXException If provider's shut-down fails
      */
-    public static MailProvider unregisterMailProvider(final MailProvider provider) throws MailException {
+    public static MailProvider unregisterMailProvider(final MailProvider provider) throws OXException {
         final Protocol protocol = provider.getProtocol();
         if (Protocol.PROTOCOL_ALL.equals(protocol)) {
             final MailProvider all = allProvider.get();
@@ -288,7 +289,7 @@ public final class MailProviderRegistry {
                     all.setDeprecated(true);
                     all.shutDown();
                     allProvider.set(null);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     throw e;
                 } catch (final RuntimeException t) {
                     LOG.error(t.getMessage(), t);
@@ -311,7 +312,7 @@ public final class MailProviderRegistry {
             removed.setDeprecated(true);
             removed.shutDown();
             return removed;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
             LOG.error(t.getMessage(), t);
@@ -325,9 +326,9 @@ public final class MailProviderRegistry {
      * @param protocol The protocol
      * @return The unregistered instance of {@link MailProvider}, or <code>null</code> if there was no provider supporting specified
      *         protocol
-     * @throws MailException If provider's shut-down fails
+     * @throws OXException If provider's shut-down fails
      */
-    public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws MailException {
+    public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws OXException {
         if (Protocol.ALL.equals(protocol)) {
             final MailProvider all = allProvider.get();
             if (null != all) {

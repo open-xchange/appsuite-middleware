@@ -56,7 +56,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.Message;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -97,18 +97,18 @@ public abstract class SearchTerm<T> implements Serializable {
      * 
      * @param msg The message to check
      * @return <code>true</code> if message matches this search term; otherwise <code>false</code>
-     * @throws MailException If check fails
+     * @throws OXException If check fails
      */
-    public abstract boolean matches(Message msg) throws MailException;
+    public abstract boolean matches(Message msg) throws OXException;
 
     /**
      * Checks if specified mail message matches this search term
      * 
      * @param mailMessage The mail message to check
      * @return <code>true</code> if specified mail message matches this search term; otherwise <code>false</code>
-     * @throws MailException If checking mail message against search term fails
+     * @throws OXException If checking mail message against search term fails
      */
-    public abstract boolean matches(final MailMessage mailMessage) throws MailException;
+    public abstract boolean matches(final MailMessage mailMessage) throws OXException;
 
     /**
      * Generates the corresponding <i><a href="http://java.sun.com/products/javamail/">JavaMail</a></i> instance of

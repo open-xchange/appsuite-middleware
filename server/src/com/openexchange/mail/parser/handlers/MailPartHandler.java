@@ -62,7 +62,8 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -108,43 +109,43 @@ public final class MailPartHandler implements MailMessageHandler {
             setContentType(contentType);
         }
 
-        private DataSource getDataSource() throws MailException {
+        private DataSource getDataSource() throws OXException {
             if (null == dataSource) {
                 try {
                     dataSource = new MessageDataSource(text, getContentType());
                 } catch (final UnsupportedEncodingException e) {
-                    throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
             }
             return dataSource;
         }
 
         @Override
-        public Object getContent() throws MailException {
+        public Object getContent() throws OXException {
             return text;
         }
 
         @Override
-        public DataHandler getDataHandler() throws MailException {
+        public DataHandler getDataHandler() throws OXException {
             return new DataHandler(getDataSource());
         }
 
         @Override
-        public int getEnclosedCount() throws MailException {
+        public int getEnclosedCount() throws OXException {
             return NO_ENCLOSED_PARTS;
         }
 
         @Override
-        public MailPart getEnclosedMailPart(final int index) throws MailException {
+        public MailPart getEnclosedMailPart(final int index) throws OXException {
             return null;
         }
 
         @Override
-        public InputStream getInputStream() throws MailException {
+        public InputStream getInputStream() throws OXException {
             try {
                 return getDataSource().getInputStream();
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -189,7 +190,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @see com.openexchange.mail.parser.MailMessageHandler#handleAttachment(com. openexchange.mail.dataobjects.MailContent, boolean,
      * java.lang.String, java.lang.String, java.lang.String)
      */
-    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
+    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         if (this.id.equals(id)) {
             mailPart = part;
             if (!isInline) {
@@ -204,7 +205,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleBccRecipient(javax .mail.internet.InternetAddress[])
      */
-    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
@@ -212,7 +213,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleCcRecipient(javax .mail.internet.InternetAddress[])
      */
-    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
@@ -220,7 +221,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleColorLabel(int)
      */
-    public boolean handleColorLabel(final int colorLabel) throws MailException {
+    public boolean handleColorLabel(final int colorLabel) throws OXException {
         return true;
     }
 
@@ -228,7 +229,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleContentId(java. lang.String)
      */
-    public boolean handleContentId(final String contentId) throws MailException {
+    public boolean handleContentId(final String contentId) throws OXException {
         return true;
     }
 
@@ -236,7 +237,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleFrom(javax.mail .internet.InternetAddress[])
      */
-    public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
+    public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         return true;
     }
 
@@ -244,7 +245,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleHeaders(int, java.util.Iterator)
      */
-    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
+    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
         return true;
     }
 
@@ -253,7 +254,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @seecom.openexchange.mail.parser.MailMessageHandler#handleImagePart(com. openexchange.mail.dataobjects.MailContent, java.lang.String,
      * java.lang.String, java.lang.String)
      */
-    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws MailException {
+    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         if (this.id.equals(id)) {
             mailPart = part;
             checkFilename(mailPart, id, baseContentType);
@@ -267,7 +268,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @see com.openexchange.mail.parser.MailMessageHandler#handleInlineHtml(java .lang.String, java.lang.String, int, java.lang.String,
      * java.lang.String)
      */
-    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         if (this.id.equals(id)) {
             mailPart = new TextMailPart(htmlContent, contentType);
             mailPart.setContentType(contentType);
@@ -284,7 +285,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @see com.openexchange.mail.parser.MailMessageHandler#handleInlinePlainText (java.lang.String, java.lang.String, int,
      * java.lang.String, java.lang.String)
      */
-    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         if (this.id.equals(id)) {
             mailPart = new TextMailPart(plainTextContent, contentType);
             mailPart.setContentType(contentType);
@@ -301,7 +302,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @seecom.openexchange.mail.parser.MailMessageHandler# handleInlineUUEncodedAttachment (com.openexchange.tools.mail.UUEncodedPart,
      * java.lang.String)
      */
-    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
+    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         if (this.id.equals(id)) {
             mailPart = new UUEncodedAttachmentMailPart(part);
             String ct = MIMEType2ExtMap.getContentType(part.getFileName());
@@ -322,7 +323,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @seecom.openexchange.mail.parser.MailMessageHandler# handleInlineUUEncodedPlainText(java.lang.String, java.lang.String, int,
      * java.lang.String, java.lang.String)
      */
-    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         return handleInlinePlainText(decodedTextContent, contentType, size, fileName, id);
     }
 
@@ -330,7 +331,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleMessageEnd(com. openexchange.mail.dataobjects.MailMessage)
      */
-    public void handleMessageEnd(final MailMessage msg) throws MailException {
+    public void handleMessageEnd(final MailMessage msg) throws OXException {
         // Nothing to do
     }
 
@@ -339,7 +340,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @seecom.openexchange.mail.parser.MailMessageHandler#handleMultipart(com. openexchange.mail.dataobjects.MailContent, int,
      * java.lang.String)
      */
-    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
+    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
         return true;
     }
 
@@ -348,7 +349,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @see com.openexchange.mail.parser.MailMessageHandler#handleNestedMessage(com .openexchange.mail.dataobjects.MailMessage,
      * java.lang.String)
      */
-    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         if (this.id.equals(id)) {
             this.mailPart = mailPart;
             return false;
@@ -382,7 +383,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handlePriority(int)
      */
-    public boolean handlePriority(final int priority) throws MailException {
+    public boolean handlePriority(final int priority) throws OXException {
         return true;
     }
 
@@ -390,7 +391,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleMsgRef(java.lang .String)
      */
-    public boolean handleMsgRef(final String msgRef) throws MailException {
+    public boolean handleMsgRef(final String msgRef) throws OXException {
         return true;
     }
 
@@ -398,7 +399,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleDispositionNotification (javax.mail.internet.InternetAddress)
      */
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws MailException {
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
         return true;
     }
 
@@ -406,7 +407,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleReceivedDate(java .util.Date)
      */
-    public boolean handleReceivedDate(final Date receivedDate) throws MailException {
+    public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         return true;
     }
 
@@ -414,7 +415,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleSentDate(java.util .Date)
      */
-    public boolean handleSentDate(final Date sentDate) throws MailException {
+    public boolean handleSentDate(final Date sentDate) throws OXException {
         return true;
     }
 
@@ -423,7 +424,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * @see com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com .openexchange.mail.dataobjects.MailContent,
      * java.lang.String, java.lang.String)
      */
-    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
+    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         return handleAttachment(
             part,
             (!Part.ATTACHMENT.equalsIgnoreCase(part.getContentDisposition().getDisposition()) && part.getFileName() == null),
@@ -436,7 +437,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleSubject(java.lang .String)
      */
-    public boolean handleSubject(final String subject) throws MailException {
+    public boolean handleSubject(final String subject) throws OXException {
         return true;
     }
 
@@ -444,7 +445,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleSystemFlags(int)
      */
-    public boolean handleSystemFlags(final int flags) throws MailException {
+    public boolean handleSystemFlags(final int flags) throws OXException {
         return true;
     }
 
@@ -452,7 +453,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleToRecipient(javax .mail.internet.InternetAddress[])
      */
-    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
@@ -460,7 +461,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * (non-Javadoc)
      * @see com.openexchange.mail.parser.MailMessageHandler#handleUserFlags(java. lang.String[])
      */
-    public boolean handleUserFlags(final String[] userFlags) throws MailException {
+    public boolean handleUserFlags(final String[] userFlags) throws OXException {
         return true;
     }
 

@@ -50,7 +50,7 @@
 package com.openexchange.spamhandler.defaultspamhandler;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.session.Session;
@@ -94,7 +94,7 @@ public final class DefaultSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         /*
          * Copy to confirmed ham
          */

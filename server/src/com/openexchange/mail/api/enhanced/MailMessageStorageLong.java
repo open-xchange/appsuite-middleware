@@ -50,7 +50,8 @@
 package com.openexchange.mail.api.enhanced;
 
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
@@ -85,7 +86,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
 
     @Override
-    public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws MailException {
+    public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         return longs2uids(appendMessagesLong(destFolder, msgs));
     }
 
@@ -95,12 +96,12 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param destFolder The destination folder
      * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
      * @return The corresponding mail IDs in destination folder
-     * @throws MailException If messages cannot be appended.
+     * @throws OXException If messages cannot be appended.
      */
-    public abstract long[] appendMessagesLong(String destFolder, MailMessage[] msgs) throws MailException;
+    public abstract long[] appendMessagesLong(String destFolder, MailMessage[] msgs) throws OXException;
 
     @Override
-    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         return longs2uids(copyMessagesLong(sourceFolder, destFolder, uids2longs(mailIds), fast));
     }
 
@@ -118,12 +119,12 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param fast <code>true</code> to perform a fast copy operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of long is returned; otherwise <code>false</code>
      * @return The corresponding mail IDs if copied messages in destination folder
-     * @throws MailException If messages cannot be copied.
+     * @throws OXException If messages cannot be copied.
      */
-    public abstract long[] copyMessagesLong(String sourceFolder, String destFolder, long[] mailIds, boolean fast) throws MailException;
+    public abstract long[] copyMessagesLong(String sourceFolder, String destFolder, long[] mailIds, boolean fast) throws OXException;
 
     @Override
-    public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws MailException {
+    public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
         deleteMessagesLong(folder, uids2longs(mailIds), hardDelete);
     }
 
@@ -136,9 +137,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param mailIds The mail IDs
      * @param hardDelete <code>true</code> to hard delete the messages, meaning not to create a backup copy of each message in default trash
      *            folder; otherwise <code>false</code>
-     * @throws MailException If messages cannot be deleted.
+     * @throws OXException If messages cannot be deleted.
      */
-    public abstract void deleteMessagesLong(String folder, long[] mailIds, boolean hardDelete) throws MailException;
+    public abstract void deleteMessagesLong(String folder, long[] mailIds, boolean hardDelete) throws OXException;
 
     /**
      * A convenience method that delivers all messages contained in given folder through invoking
@@ -157,15 +158,15 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param order Whether ascending or descending sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The desired, pre-filled instances of {@link MailMessage}
-     * @throws MailException
+     * @throws OXException
      */
     @Override
-    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
+    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
     @Override
-    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
+    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         try {
             return getAttachmentLong(folder, Long.parseLong(mailId), sequenceId);
         } catch (final NumberFormatException e) {
@@ -183,19 +184,19 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param mailId The mail ID
      * @param sequenceId The attachment sequence ID
      * @return The attachment wrapped by a {@link MailPart} instance
-     * @throws MailException If no attachment can be found whose sequence ID matches given <code>sequenceId</code>.
+     * @throws OXException If no attachment can be found whose sequence ID matches given <code>sequenceId</code>.
      */
-    public MailPart getAttachmentLong(final String folder, final long mailId, final String sequenceId) throws MailException {
+    public MailPart getAttachmentLong(final String folder, final long mailId, final String sequenceId) throws OXException {
         final MailPartHandler handler = new MailPartHandler(sequenceId);
         new MailMessageParser().parseMailMessage(getMessageLong(folder, mailId, false), handler);
         if (handler.getMailPart() == null) {
-            throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, sequenceId, Long.valueOf(mailId), folder);
+            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(mailId), folder);
         }
         return handler.getMailPart();
     }
 
     @Override
-    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException {
+    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         try {
             return getImageAttachmentLong(folder, Long.parseLong(mailId), contentId);
         } catch (final NumberFormatException e) {
@@ -214,24 +215,24 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param mailId The mail ID
      * @param contentId The value of header <code>Content-Id</code>
      * @return The image attachment wrapped by an {@link MailPart} instance
-     * @throws MailException If no image can be found whose <code>Content-Id</code> header matches given <code>contentId</code>.
+     * @throws OXException If no image can be found whose <code>Content-Id</code> header matches given <code>contentId</code>.
      */
-    public MailPart getImageAttachmentLong(final String folder, final long mailId, final String contentId) throws MailException {
+    public MailPart getImageAttachmentLong(final String folder, final long mailId, final String contentId) throws OXException {
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
         final MailMessage mail = getMessageLong(folder, mailId, false);
         if (null == mail) {
-            throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(mailId), folder);
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(mailId), folder);
         }
         new MailMessageParser().parseMailMessage(mail, handler);
         final MailPart imagePart = handler.getImagePart();
         if (null == imagePart) {
-            throw new MailException(MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND, contentId, Long.valueOf(mailId), folder);
+            throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(mailId), folder);
         }
         return imagePart;
     }
 
     @Override
-    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
+    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         try {
             return getMessageLong(folder, Long.parseLong(mailId), markSeen);
         } catch (final NumberFormatException e) {
@@ -255,9 +256,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
      *            <code>false</code> to leave as-is
      * @return Corresponding message
-     * @throws MailException If message could not be returned
+     * @throws OXException If message could not be returned
      */
-    public MailMessage getMessageLong(final String folder, final long mailId, final boolean markSeen) throws MailException {
+    public MailMessage getMessageLong(final String folder, final long mailId, final boolean markSeen) throws OXException {
         final MailMessage[] mails = getMessagesLong(folder, new long[] { mailId }, FIELDS_FULL);
         if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
             return null;
@@ -273,7 +274,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
-    public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws MailException {
+    public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         return getMessagesLong(folder, uids2longs(mailIds), fields);
     }
 
@@ -289,9 +290,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param mailIds The mail IDs
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return Corresponding mails as an array
-     * @throws MailException If message could not be returned
+     * @throws OXException If message could not be returned
      */
-    public abstract MailMessage[] getMessagesLong(String folder, long[] mailIds, MailField[] fields) throws MailException;
+    public abstract MailMessage[] getMessagesLong(String folder, long[] mailIds, MailField[] fields) throws OXException;
 
     /**
      * An <b>optional</b> convenience method that gets the messages located in given folder sorted by message thread reference. By default
@@ -310,10 +311,10 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param searchTerm The search term
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
-     * @throws MailException If messages cannot be returned
+     * @throws OXException If messages cannot be returned
      */
     @Override
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         return null;
     }
 
@@ -329,10 +330,10 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @param limit The max. number of returned unread messages or <code>-1</code> to request all unread messages in folder
      * @return Unread messages contained in an array of {@link MailMessage}
-     * @throws MailException If unread messages cannot be returned.
+     * @throws OXException If unread messages cannot be returned.
      */
     @Override
-    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
+    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         if (limit == 0) {
             return EMPTY_RETVAL;
         }
@@ -340,7 +341,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
-    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         return longs2uids(moveMessagesLong(sourceFolder, destFolder, uids2longs(mailIds), fast));
     }
 
@@ -357,9 +358,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param fast <code>true</code> to perform a fast move operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of String is returned; otherwise <code>false</code>
      * @return The corresponding mail IDs if copied messages in destination folder
-     * @throws MailException If messages cannot be copied.
+     * @throws OXException If messages cannot be copied.
      */
-    public long[] moveMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
+    public long[] moveMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws OXException {
         final long[] ids = copyMessagesLong(sourceFolder, destFolder, mailIds, fast);
         deleteMessagesLong(sourceFolder, mailIds, true);
         return ids;
@@ -368,10 +369,10 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     /**
      * Releases all resources used by this message storage when closing superior {@link MailAccess}
      * 
-     * @throws MailException If resources cannot be released
+     * @throws OXException If resources cannot be released
      */
     @Override
-    public abstract void releaseResources() throws MailException;
+    public abstract void releaseResources() throws OXException;
 
     /**
      * A convenience method that saves given draft mail to default drafts folder and supports deletion of old draft's version (draft-edit
@@ -380,10 +381,10 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param draftFullname The fullname of default drafts folder
      * @param draftMail The draft mail as a composed mail
      * @return The stored draft mail
-     * @throws MailException If saving specified draft message fails
+     * @throws OXException If saving specified draft message fails
      */
     @Override
-    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException {
+    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         final String uid;
         try {
             final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
@@ -427,10 +428,10 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The desired, pre-filled instances of {@link MailMessage}
-     * @throws MailException If mails cannot be returned
+     * @throws OXException If mails cannot be returned
      */
     @Override
-    public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
+    public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
     /**
      * An <b>optional</b> method that updates the color label of the messages specified by given mail IDs located in given folder.
@@ -446,10 +447,10 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param folder The folder fullname
      * @param mailIds The mail IDs
      * @param colorLabel The color label to apply
-     * @throws MailException If color label cannot be updated
+     * @throws OXException If color label cannot be updated
      */
     @Override
-    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws MailException {
+    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         updateMessageColorLabelLong(folder, uids2longs(mailIds), colorLabel);
     }
 
@@ -467,14 +468,14 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param folder The folder fullname
      * @param mailIds The mail IDs
      * @param colorLabel The color label to apply
-     * @throws MailException If color label cannot be updated
+     * @throws OXException If color label cannot be updated
      */
-    public void updateMessageColorLabelLong(final String folder, final long[] mailIds, final int colorLabel) throws MailException {
+    public void updateMessageColorLabelLong(final String folder, final long[] mailIds, final int colorLabel) throws OXException {
         // Empty body here
     }
 
     @Override
-    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws MailException {
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         updateMessageFlagsLong(folder, uids2longs(mailIds), flags, set);
     }
 
@@ -509,9 +510,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @param mailIds The mail IDs
      * @param flags The bit pattern for the flags to alter
      * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
-     * @throws MailException If system flags cannot be updated
+     * @throws OXException If system flags cannot be updated
      */
-    public abstract void updateMessageFlagsLong(String folder, long[] mailIds, int flags, boolean set) throws MailException;
+    public abstract void updateMessageFlagsLong(String folder, long[] mailIds, int flags, boolean set) throws OXException;
 
     /**
      * Converts specified UID strings to an array of <code>long</code>.

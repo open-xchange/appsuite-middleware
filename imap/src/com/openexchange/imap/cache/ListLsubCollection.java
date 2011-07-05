@@ -70,7 +70,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.cache.ListLsubEntry.ChangeState;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -121,9 +121,9 @@ final class ListLsubCollection {
      * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws OXException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
@@ -141,9 +141,9 @@ final class ListLsubCollection {
      * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    protected ListLsubCollection(final IMAPStore imapStore, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    protected ListLsubCollection(final IMAPStore imapStore, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws OXException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
@@ -243,9 +243,9 @@ final class ListLsubCollection {
      * @param imapStore The IMAP store
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws MailException If re-initialization fails
+     * @throws OXException If re-initialization fails
      */
-    public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
         clear();
         init(imapStore, doStatus, doGetAcl);
     }
@@ -256,14 +256,14 @@ final class ListLsubCollection {
      * @param imapFolder The IMAP folder
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws MailException If re-initialization fails
+     * @throws OXException If re-initialization fails
      */
-    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws OXException {
         clear();
         init(imapFolder, doStatus, doGetAcl);
     }
 
-    private void init(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    private void init(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
         try {
             init((IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
         } catch (final MessagingException e) {
@@ -271,7 +271,7 @@ final class ListLsubCollection {
         }
     }
 
-    private void init(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    private void init(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws OXException {
         try {
             // listMap.clear();
             // lsubMap.clear();
@@ -411,9 +411,9 @@ final class ListLsubCollection {
      * @param imapStore The connected IMAP store
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws MailException If update fails
+     * @throws OXException If update fails
      */
-    public void update(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    public void update(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
         try {
             update(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
         } catch (final MessagingException e) {
@@ -428,9 +428,9 @@ final class ListLsubCollection {
      * @param imapFolder An IMAP folder providing connected protocol
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws MailException If update fails
+     * @throws OXException If update fails
      */
-    public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws OXException {
         if (deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
             init(imapFolder, doStatus, doGetAcl);
             return;
@@ -980,9 +980,9 @@ final class ListLsubCollection {
      * @param imapStore The IMAP store
      * @param doStatus Whether to perform STATUS command
      * @param doGetAcl Whether to perform GETACL command
-     * @throws MailException If operation fails
+     * @throws OXException If operation fails
      */
-    public void addSingle(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    public void addSingle(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
         try {
             addSingle(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
         } catch (final MessagingException e) {
@@ -997,9 +997,9 @@ final class ListLsubCollection {
      * @param imapFolder The IMAP folder
      * @param doStatus Whether to perform STATUS command
      * @param doGetAcl Whether to perform GETACL command
-     * @throws MailException If operation fails
+     * @throws OXException If operation fails
      */
-    public void addSingle(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    public void addSingle(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws OXException {
         try {
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -1111,7 +1111,7 @@ final class ListLsubCollection {
         return null;
     }
 
-    private void doOther(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MailException {
+    private void doOther(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws OXException {
         try {
             final ListLsubEntryImpl listEntry = listMap.get(fullName);
             if (null == listEntry) {

@@ -50,7 +50,7 @@
 package com.openexchange.mail.mime.dataobjects;
 
 import java.io.InputStream;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MIMERawSource} - Provides access to raw data with any Content-Transfer-Encoding intact.
@@ -65,8 +65,8 @@ public interface MIMERawSource {
      * the raw data itself.
      * 
      * @return The raw input stream
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    InputStream getRawInputStream() throws MailException;
+    InputStream getRawInputStream() throws OXException;
 
 }

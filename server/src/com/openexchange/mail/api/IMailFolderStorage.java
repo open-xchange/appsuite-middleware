@@ -50,7 +50,7 @@
 
 package com.openexchange.mail.api;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -72,18 +72,18 @@ public interface IMailFolderStorage {
      * 
      * @param fullname The fullname
      * @return <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
-     * @throws MailException If existence cannot be checked
+     * @throws OXException If existence cannot be checked
      */
-    public boolean exists(final String fullname) throws MailException;
+    public boolean exists(final String fullname) throws OXException;
 
     /**
      * Gets the folder identified through given fullname
      * 
      * @param fullname The fullname
      * @return The corresponding instance of {@link MailFolder}
-     * @throws MailException If either folder does not exist or could not be fetched
+     * @throws OXException If either folder does not exist or could not be fetched
      */
-    public MailFolder getFolder(final String fullname) throws MailException;
+    public MailFolder getFolder(final String fullname) throws OXException;
 
     /**
      * Gets the first level subfolders located below the folder whose fullname matches given parameter <code>parentFullname</code>.
@@ -94,25 +94,25 @@ public interface IMailFolderStorage {
      * @param all Whether all or only subscribed subfolders shall be returned. If underlying mailing system does not support folder
      *            subscription, this argument should always be treated as <code>true</code>.
      * @return An array of {@link MailFolder} representing the subfolders
-     * @throws MailException If either parent folder does not exist or its subfolders cannot be delivered
+     * @throws OXException If either parent folder does not exist or its subfolders cannot be delivered
      */
-    public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
+    public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException;
 
     /**
      * Gets the mailbox's root folder.
      * 
      * @return The mailbox's root folder
-     * @throws MailException If mailbox's default folder cannot be delivered
+     * @throws OXException If mailbox's default folder cannot be delivered
      */
-    public MailFolder getRootFolder() throws MailException;
+    public MailFolder getRootFolder() throws OXException;
 
     /**
      * Gets the prefix (incl. separator character) for default folders.
      * 
      * @return The prefix
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public String getDefaultFolderPrefix() throws MailException;
+    public String getDefaultFolderPrefix() throws OXException;
 
     /**
      * Checks user's default folder as defined in user's mail settings and creates them if any is missing.
@@ -121,18 +121,18 @@ public interface IMailFolderStorage {
      * {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedHam() createConfirmedHam()}, and
      * {@link com.openexchange.spamhandler.SpamHandler#isUnsubscribeSpamFolders() unsubscribeSpamFolders()}.
      * 
-     * @throws MailException If user's default folder could not be checked
+     * @throws OXException If user's default folder could not be checked
      */
-    public void checkDefaultFolders() throws MailException;
+    public void checkDefaultFolders() throws OXException;
 
     /**
      * Creates a new mail folder with attributes taken from given mail folder description
      * 
      * @param toCreate The mail folder to create
      * @return The fullname of the created mail folder
-     * @throws MailException If creation fails
+     * @throws OXException If creation fails
      */
-    public String createFolder(MailFolderDescription toCreate) throws MailException;
+    public String createFolder(MailFolderDescription toCreate) throws OXException;
 
     /**
      * Updates an existing mail folder identified through given fullname. All attributes set in given mail folder description are applied.
@@ -154,9 +154,9 @@ public interface IMailFolderStorage {
      * @param fullname The fullname of the mail folder to update
      * @param toUpdate The mail folder to update containing only the modified fields
      * @return The fullname of the updated mail folder
-     * @throws MailException If either folder does not exist or cannot be updated
+     * @throws OXException If either folder does not exist or cannot be updated
      */
-    public String updateFolder(String fullname, MailFolderDescription toUpdate) throws MailException;
+    public String updateFolder(String fullname, MailFolderDescription toUpdate) throws OXException;
 
     /**
      * Moves the folder identified through given fullname to the path specified through argument <code>newFullname</code>. Thus a rename can
@@ -171,9 +171,9 @@ public interface IMailFolderStorage {
      * @param fullname The folder fullname
      * @param newFullname The new fullname to move to
      * @return The new fullname where the folder has been moved
-     * @throws MailException If either folder does not exist or cannot be moved
+     * @throws OXException If either folder does not exist or cannot be moved
      */
-    public String moveFolder(String fullname, String newFullname) throws MailException;
+    public String moveFolder(String fullname, String newFullname) throws OXException;
 
     /**
      * Renames the folder identified through given fullname to the specified new name.
@@ -187,9 +187,9 @@ public interface IMailFolderStorage {
      * @param fullname The folder fullname
      * @param newName The new name
      * @return The new fullname
-     * @throws MailException If either folder does not exist or cannot be renamed
+     * @throws OXException If either folder does not exist or cannot be renamed
      */
-    public String renameFolder(final String fullname, final String newName) throws MailException;
+    public String renameFolder(final String fullname, final String newName) throws OXException;
 
     /**
      * Deletes an existing mail folder identified through given fullname.
@@ -199,9 +199,9 @@ public interface IMailFolderStorage {
      * 
      * @param fullname The fullname of the mail folder to delete
      * @return The fullname of the deleted mail folder
-     * @throws MailException If either folder does not exist or cannot be deleted
+     * @throws OXException If either folder does not exist or cannot be deleted
      */
-    public String deleteFolder(final String fullname) throws MailException;
+    public String deleteFolder(final String fullname) throws OXException;
 
     /**
      * Deletes an existing mail folder identified through given fullname.
@@ -219,26 +219,26 @@ public interface IMailFolderStorage {
      * @param fullname The fullname of the mail folder to delete
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @return The fullname of the deleted mail folder
-     * @throws MailException If either folder does not exist or cannot be deleted
+     * @throws OXException If either folder does not exist or cannot be deleted
      */
-    public String deleteFolder(String fullname, boolean hardDelete) throws MailException;
+    public String deleteFolder(String fullname, boolean hardDelete) throws OXException;
 
     /**
      * Deletes the content of the folder identified through given fullname.
      * 
      * @param fullname The fullname of the mail folder whose content should be cleared
-     * @throws MailException If either folder does not exist or its content cannot be cleared
+     * @throws OXException If either folder does not exist or its content cannot be cleared
      */
-    public void clearFolder(final String fullname) throws MailException;
+    public void clearFolder(final String fullname) throws OXException;
 
     /**
      * Deletes the content of the folder identified through given fullname.
      * 
      * @param fullname The fullname of the mail folder whose content should be cleared
      * @param hardDelete Whether to delete permanently or to backup into trash folder
-     * @throws MailException If either folder does not exist or its content cannot be cleared
+     * @throws OXException If either folder does not exist or its content cannot be cleared
      */
-    public void clearFolder(String fullname, boolean hardDelete) throws MailException;
+    public void clearFolder(String fullname, boolean hardDelete) throws OXException;
 
     /**
      * Gets the reverse path from the folder identified through given fullname to parental default folder. All occurring folders on that
@@ -246,9 +246,9 @@ public interface IMailFolderStorage {
      * 
      * @param fullname The folder fullname
      * @return All occurring folders in reverse order as an array of {@link MailFolder} instances.
-     * @throws MailException If either folder does not exist or path cannot be determined
+     * @throws OXException If either folder does not exist or path cannot be determined
      */
-    public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException;
+    public MailFolder[] getPath2DefaultFolder(final String fullname) throws OXException;
 
     /**
      * Detects both quota limit and quota usage of STORAGE resource on given mailbox folder's quota-root. If the folder denoted by passed
@@ -259,9 +259,9 @@ public interface IMailFolderStorage {
      * 
      * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of STORAGE resource
-     * @throws MailException If either folder does not exist or quota limit and/or quote usage cannot be determined
+     * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota getStorageQuota(final String folder) throws MailException;
+    public Quota getStorageQuota(final String folder) throws OXException;
 
     /**
      * Detects both quota limit and quota usage of MESSAGE resource on given mailbox folder's quota-root. If the folder denoted by passed
@@ -270,9 +270,9 @@ public interface IMailFolderStorage {
      * 
      * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of MESSAGE resource
-     * @throws MailException If either folder does not exist or quota limit and/or quote usage cannot be determined
+     * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota getMessageQuota(final String folder) throws MailException;
+    public Quota getMessageQuota(final String folder) throws OXException;
 
     /**
      * Detects both quotas' limit and usage on given mailbox folder's quota-root for specified resource types. If the folder denoted by
@@ -287,63 +287,63 @@ public interface IMailFolderStorage {
      * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
      * @param types The desired quota resource types
      * @return The quotas for specified resource types
-     * @throws MailException If either folder does not exist or quota limit and/or quote usage cannot be determined
+     * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota[] getQuotas(String folder, Quota.Type[] types) throws MailException;
+    public Quota[] getQuotas(String folder, Quota.Type[] types) throws OXException;
 
     /**
      * Gets the fullname of default confirmed ham folder
      * 
      * @return The fullname of default confirmed ham folder
-     * @throws MailException If confirmed ham folder's fullname cannot be returned
+     * @throws OXException If confirmed ham folder's fullname cannot be returned
      */
-    public String getConfirmedHamFolder() throws MailException;
+    public String getConfirmedHamFolder() throws OXException;
 
     /**
      * Gets the fullname of default confirmed spam folder
      * 
      * @return The fullname of default confirmed spam folder
-     * @throws MailException If confirmed spam folder's fullname cannot be returned
+     * @throws OXException If confirmed spam folder's fullname cannot be returned
      */
-    public String getConfirmedSpamFolder() throws MailException;
+    public String getConfirmedSpamFolder() throws OXException;
 
     /**
      * Gets the fullname of default drafts folder
      * 
      * @return The fullname of default drafts folder
-     * @throws MailException If draft folder's fullname cannot be returned
+     * @throws OXException If draft folder's fullname cannot be returned
      */
-    public String getDraftsFolder() throws MailException;
+    public String getDraftsFolder() throws OXException;
 
     /**
      * Gets the fullname of default spam folder
      * 
      * @return The fullname of default spam folder
-     * @throws MailException If spam folder's fullname cannot be returned
+     * @throws OXException If spam folder's fullname cannot be returned
      */
-    public String getSpamFolder() throws MailException;
+    public String getSpamFolder() throws OXException;
 
     /**
      * Gets the fullname of default sent folder
      * 
      * @return The fullname of default sent folder
-     * @throws MailException If sent folder's fullname cannot be returned
+     * @throws OXException If sent folder's fullname cannot be returned
      */
-    public String getSentFolder() throws MailException;
+    public String getSentFolder() throws OXException;
 
     /**
      * Gets the fullname of default trash folder
      * 
      * @return The fullname of default trash folder
-     * @throws MailException If trash folder's fullname cannot be returned
+     * @throws OXException If trash folder's fullname cannot be returned
      */
-    public String getTrashFolder() throws MailException;
+    public String getTrashFolder() throws OXException;
 
     /**
      * Releases all used resources when closing parental {@link MailAccess}
      * 
-     * @throws MailException If resources cannot be released
+     * @throws OXException If resources cannot be released
      */
-    public void releaseResources() throws MailException;
+    public void releaseResources() throws OXException;
 
 }

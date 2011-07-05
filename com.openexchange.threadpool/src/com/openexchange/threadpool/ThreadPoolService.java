@@ -155,7 +155,7 @@ public interface ThreadPoolService {
      * } catch (InterruptedException e) {
      *     // Keep interrupted status
      *     Thread.currentThread().interrupt();
-     *     throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+     *     throw new OXException(OXException.Code.INTERRUPT_ERROR, e);
      * } catch (CancellationException e) {
      *     // Can only occur if task was canceled
      *     /* Do something &#42;/
@@ -188,7 +188,7 @@ public interface ThreadPoolService {
      * } catch (InterruptedException e) {
      *     // Keep interrupted status
      *     Thread.currentThread().interrupt();
-     *     throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+     *     throw new OXException(OXException.Code.INTERRUPT_ERROR, e);
      * } catch (CancellationException e) {
      *     // Can only occur if task was canceled
      *     /* Do something &#42;/
@@ -221,7 +221,7 @@ public interface ThreadPoolService {
      * } catch (InterruptedException e) {
      *     // Keep interrupted status
      *     Thread.currentThread().interrupt();
-     *     throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+     *     throw new OXException(OXException.Code.INTERRUPT_ERROR, e);
      * } catch (CancellationException e) {
      *     // Can only occur if task was canceled
      *     /* Do something &#42;/

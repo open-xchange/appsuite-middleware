@@ -62,7 +62,8 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -109,9 +110,9 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
      * @param data The data (from a data source)
      * @param dataProperties The data properties
      * @param session The session
-     * @throws MailException If data's content is not supported
+     * @throws OXException If data's content is not supported
      */
-    protected DataMailPart(final Object data, final Map<String, String> dataProperties, final Session session) throws MailException {
+    protected DataMailPart(final Object data, final Map<String, String> dataProperties, final Session session) throws OXException {
         super();
         setHeaders(dataProperties);
         if (data instanceof InputStream) {
@@ -131,27 +132,27 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             bytes = (byte[]) data;
             setSize(bytes.length);
         } else {
-            throw new MailException(MailException.Code.UNSUPPORTED_DATASOURCE);
+            throw MailExceptionCode.UNSUPPORTED_DATASOURCE.create();
         }
     }
 
-    private void applyByteContent(final String charset) throws MailException {
+    private void applyByteContent(final String charset) throws OXException {
         try {
             cachedContent = new String(bytes, charset);
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void applyFileContent(final String charset) throws MailException {
+    private void applyFileContent(final String charset) throws OXException {
         InputStream fis = null;
         try {
             fis = file.getInputStream();
             cachedContent = readStream(fis, charset);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final ManagedFileException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } finally {
             if (fis != null) {
                 try {
@@ -202,7 +203,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         if (cachedContent != null) {
             return cachedContent;
         }
@@ -228,13 +229,13 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return new DataHandler(getDataSource());
     }
 
     private static final String TEXT = "text/";
 
-    private DataSource getDataSource() throws MailException {
+    private DataSource getDataSource() throws OXException {
         /*
          * Lazy creation
          */
@@ -277,7 +278,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                     };
                     return (dataSource = new StreamDataSource(isp, contentType.toString()));
                 }
-                throw new MailException(MailException.Code.NO_CONTENT);
+                throw MailExceptionCode.NO_CONTENT.create();
             } catch (final MailConfigException e) {
                 LOG.error(e.getMessage(), e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
@@ -287,17 +288,17 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return null;
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         try {
             if (bytes != null) {
                 return new UnsynchronizedByteArrayInputStream(bytes);
@@ -305,9 +306,9 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             if (file != null) {
                 return file.getInputStream();
             }
-            throw new MailException(MailException.Code.NO_CONTENT);
+            throw MailExceptionCode.NO_CONTENT.create();
         } catch (final ManagedFileException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -315,7 +316,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         return ComposedPartType.DATA;
     }
 
-    private void handleInputStream(final InputStream inputStream, final long size) throws MailException {
+    private void handleInputStream(final InputStream inputStream, final long size) throws OXException {
         try {
             if (size > 0 && size <= TransportProperties.getInstance().getReferencedPartLimit()) {
                 copy2ByteArr(inputStream);
@@ -323,7 +324,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             }
             copy2File(inputStream);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("Data mail part exeeds ").append(
@@ -333,7 +334,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("DataSourceMailPart.loadContent()");
         }
@@ -355,7 +356,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         return fileId;
     }
 
-    private void setHeaders(final Map<String, String> dataProperties) throws MailException {
+    private void setHeaders(final Map<String, String> dataProperties) throws OXException {
         String cts = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
         if (null != cts) {
             setContentType(cts);

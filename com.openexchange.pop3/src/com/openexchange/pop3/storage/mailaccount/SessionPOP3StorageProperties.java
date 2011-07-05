@@ -54,7 +54,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3StorageProperties;
@@ -140,13 +141,13 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         cmr.setTimerTask(timerTask);
     }
 
-    private void checkValid() throws MailException {
+    private void checkValid() throws OXException {
         if (invalid[0]) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, "Error mode. Try again.");
+            throw MailExceptionCode.UNEXPECTED_ERROR.create("Error mode. Try again.");
         }
     }
 
-    public void addProperty(final String propertyName, final String propertyValue) throws MailException {
+    public void addProperty(final String propertyName, final String propertyValue) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -158,7 +159,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         }
     }
 
-    public String getProperty(final String propertyName) throws MailException {
+    public String getProperty(final String propertyName) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -176,7 +177,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         }
     }
 
-    public void removeProperty(final String propertyName) throws MailException {
+    public void removeProperty(final String propertyName) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {

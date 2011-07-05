@@ -52,7 +52,7 @@ package com.openexchange.messaging.mail;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
 
@@ -115,7 +115,7 @@ public final class MailContentType implements ContentType {
     public void setBaseType(final String baseType) throws MessagingException {
         try {
             contentType.setBaseType(baseType);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -127,7 +127,7 @@ public final class MailContentType implements ContentType {
     public void setContentType(final String contentType) throws MessagingException {
         try {
             this.contentType.setContentType(contentType);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

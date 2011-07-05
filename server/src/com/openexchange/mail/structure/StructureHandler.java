@@ -52,7 +52,7 @@ package com.openexchange.mail.structure;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -64,25 +64,25 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public interface StructureHandler {
 
-    boolean handleAttachment(final MailPart part, final String id) throws MailException;
+    boolean handleAttachment(final MailPart part, final String id) throws OXException;
 
-    boolean handleHeaders(final Iterator<Entry<String, String>> iter) throws MailException;
+    boolean handleHeaders(final Iterator<Entry<String, String>> iter) throws OXException;
 
-    boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException;
+    boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException;
 
-    boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException;
+    boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException;
 
-    boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws MailException;
+    boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws OXException;
 
-    boolean handleMultipartEnd() throws MailException;
+    boolean handleMultipartEnd() throws OXException;
 
-    boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException;
+    boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException;
 
-    boolean handleReceivedDate(final Date receivedDate) throws MailException;
+    boolean handleReceivedDate(final Date receivedDate) throws OXException;
 
-    boolean handleSystemFlags(final int flags) throws MailException;
+    boolean handleSystemFlags(final int flags) throws OXException;
 
-    boolean handleUserFlags(final String[] userFlags) throws MailException;
+    boolean handleUserFlags(final String[] userFlags) throws OXException;
 
-    boolean handleColorLabel(final int colorLabel) throws MailException;
+    boolean handleColorLabel(final int colorLabel) throws OXException;
 }

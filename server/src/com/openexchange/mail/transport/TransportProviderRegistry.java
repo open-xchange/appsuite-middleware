@@ -53,7 +53,8 @@ import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.Protocol;
@@ -88,9 +89,9 @@ public final class TransportProviderRegistry {
      * @param session The session
      * @param accountId The account ID
      * @return The appropriate transport provider
-     * @throws MailException If no supporting transport provider can be found
+     * @throws OXException If no supporting transport provider can be found
      */
-    public static TransportProvider getTransportProviderBySession(final Session session, final int accountId) throws MailException {
+    public static TransportProvider getTransportProviderBySession(final Session session, final int accountId) throws OXException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         final String key = MailSessionParameterNames.getParamTransportProvider();
         TransportProvider provider;
@@ -119,7 +120,7 @@ public final class TransportProviderRegistry {
         }
         provider = getTransportProvider(protocol);
         if (null == provider || !provider.supportsProtocol(protocol)) {
-            throw new MailException(MailException.Code.UNKNOWN_TRANSPORT_PROTOCOL, transportServerURL);
+            throw MailExceptionCode.UNKNOWN_TRANSPORT_PROTOCOL.create(transportServerURL);
         }
         mailSessionCache.putParameter(accountId, key, provider);
         return provider;
@@ -172,9 +173,9 @@ public final class TransportProviderRegistry {
      * @param provider The transport provider to register
      * @return <code>true</code> if transport provider has been successfully registered and no other transport provider supports the same
      *         protocol; otherwise <code>false</code>
-     * @throws MailException If provider's start-up fails
+     * @throws OXException If provider's start-up fails
      */
-    public static boolean registerTransportProvider(final String protocol, final TransportProvider provider) throws MailException {
+    public static boolean registerTransportProvider(final String protocol, final TransportProvider provider) throws OXException {
         final Protocol p = Protocol.parseProtocol(protocol);
         if (providers.containsKey(p)) {
             return false;
@@ -190,7 +191,7 @@ public final class TransportProviderRegistry {
              */
             providers.put(p, provider);
             return true;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
             LOG.error(t.getMessage(), t);
@@ -210,7 +211,7 @@ public final class TransportProviderRegistry {
             try {
                 provider.setDeprecated(true);
                 provider.shutDown();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error("Mail connection implementation could not be shut down", e);
             } catch (final RuntimeException t) {
                 LOG.error("Mail connection implementation could not be shut down", t);
@@ -227,9 +228,9 @@ public final class TransportProviderRegistry {
      * 
      * @param provider The transport provider to unregister
      * @return The unregistered transport provider, or <code>null</code>
-     * @throws MailException If provider's shut-down fails
+     * @throws OXException If provider's shut-down fails
      */
-    public static TransportProvider unregisterTransportProvider(final TransportProvider provider) throws MailException {
+    public static TransportProvider unregisterTransportProvider(final TransportProvider provider) throws OXException {
         if (!providers.containsKey(provider.getProtocol())) {
             return null;
         }
@@ -247,7 +248,7 @@ public final class TransportProviderRegistry {
             removed.setDeprecated(true);
             removed.shutDown();
             return removed;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
             LOG.error(t.getMessage(), t);
@@ -261,9 +262,9 @@ public final class TransportProviderRegistry {
      * @param protocol The protocol
      * @return The unregistered instance of {@link TransportProvider}, or <code>null</code> if there was no provider supporting specified
      *         protocol
-     * @throws MailException If provider's shut-down fails
+     * @throws OXException If provider's shut-down fails
      */
-    public static TransportProvider unregisterTransportProviderByProtocol(final String protocol) throws MailException {
+    public static TransportProvider unregisterTransportProviderByProtocol(final String protocol) throws OXException {
         for (final Iterator<Map.Entry<Protocol, TransportProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<Protocol, TransportProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocol)) {

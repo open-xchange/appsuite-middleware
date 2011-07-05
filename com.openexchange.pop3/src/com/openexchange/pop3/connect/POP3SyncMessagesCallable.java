@@ -52,7 +52,7 @@ package com.openexchange.pop3.connect;
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.net.InetAddress;
 import java.util.concurrent.Callable;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.config.POP3Config;
@@ -168,7 +168,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                     final Session session = pop3Access.getSession();
                     LOG.debug("\n\tSynchronization successfully performed for POP3 account \"" + server + "\" (user=" + session.getUserId() + ", context=" + session.getContextId() + ")in: " + dur + "msec");
                 }
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 throw e;
                 // LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
             }
@@ -176,12 +176,12 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         return null;
     }
 
-    private boolean isConnectable(final long refreshRateMillis) throws MailException {
+    private boolean isConnectable(final long refreshRateMillis) throws OXException {
         final Long lastAccessed = getLastAccessed();
         return ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= refreshRateMillis));
     }
 
-    private Long getLastAccessed() throws MailException {
+    private Long getLastAccessed() throws OXException {
         final String lastAccessedStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED);
         if (null == lastAccessedStr) {
             return null;
@@ -196,7 +196,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
 
     private static final int FALLBACK_MINUTES = 10;
 
-    private long getRefreshRateMillis() throws MailException {
+    private long getRefreshRateMillis() throws OXException {
         final String frequencyStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE);
         if (null == frequencyStr) {
             // Fallback to 10 minutes
@@ -220,7 +220,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         return minutes * 60L * 1000L;
     }
 
-    private boolean isExpungeOnQuit() throws MailException {
+    private boolean isExpungeOnQuit() throws OXException {
         final String expungeStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_EXPUNGE);
         return (null == expungeStr) ? false : Boolean.parseBoolean(expungeStr);
     }

@@ -53,7 +53,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import javax.activation.DataHandler;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -111,7 +111,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	}
 
 	@Override
-	public Object getContent() throws MailException {
+	public Object getContent() throws OXException {
 		return mailPart.getContent();
 	}
 
@@ -126,22 +126,22 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	}
 
 	@Override
-	public DataHandler getDataHandler() throws MailException {
+	public DataHandler getDataHandler() throws OXException {
 		return mailPart.getDataHandler();
 	}
 
 	@Override
-	public int getEnclosedCount() throws MailException {
+	public int getEnclosedCount() throws OXException {
 		return enclosedParts.size();
 	}
 
 	@Override
-	public MailPart getEnclosedMailPart(final int index) throws MailException {
+	public MailPart getEnclosedMailPart(final int index) throws OXException {
 		return enclosedParts.get(index);
 	}
 
 	@Override
-	public InputStream getInputStream() throws MailException {
+	public InputStream getInputStream() throws OXException {
 		return mailPart.getInputStream();
 	}
 

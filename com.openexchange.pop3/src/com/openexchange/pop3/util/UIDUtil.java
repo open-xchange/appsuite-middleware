@@ -56,7 +56,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.session.Session;
 import com.planetj.math.rabinhash.RabinHashFunction64;
@@ -110,9 +111,9 @@ public final class UIDUtil {
      * @param uid The UID
      * @param session The session
      * @return The UIDL for specified UID value
-     * @throws MailException If UIDL look-up fails
+     * @throws OXException If UIDL look-up fails
      */
-    public static String long2uid(final long uid, final Session session) throws MailException {
+    public static String long2uid(final long uid, final Session session) throws OXException {
         final int cid = session.getContextId();
         final Connection con;
         try {
@@ -129,7 +130,7 @@ public final class UIDUtil {
             stmt.setLong(3, uid);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), "INBOX");
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(uid), "INBOX");
             }
             return rs.getString(1);
         } catch (final SQLException e) {
@@ -146,9 +147,9 @@ public final class UIDUtil {
      * @param uids The UIDs
      * @param session The session
      * @return The UIDLs for specified UID values
-     * @throws MailException If UIDL look-up fails
+     * @throws OXException If UIDL look-up fails
      */
-    public static String[] longs2uids(final long[] uids, final Session session) throws MailException {
+    public static String[] longs2uids(final long[] uids, final Session session) throws OXException {
         if (null == uids) {
             return null;
         }

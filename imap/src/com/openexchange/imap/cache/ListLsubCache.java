@@ -59,7 +59,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import com.openexchange.imap.AccessedIMAPStore;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
@@ -179,9 +180,9 @@ public final class ListLsubCache {
      * @param imapFolder The IMAP folder
      * @param session The session
      * @return {@link Boolean#TRUE} for MBox format, {@link Boolean#FALSE} for no MBOX format or <code>null</code> if undetermined
-     * @throws MailException if a mail error occurs
+     * @throws OXException if a mail error occurs
      */
-    public static Boolean consideredAsMBox(final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    public static Boolean consideredAsMBox(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
             checkTimeStamp(imapFolder, collection);
@@ -215,9 +216,9 @@ public final class ListLsubCache {
      * @param accountId The account ID
      * @param imapFolder The IMAP folder providing connected protocol
      * @param session The session
-     * @throws MailException If entry could not be added
+     * @throws OXException If entry could not be added
      */
-    public static void addSingle(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    public static void addSingle(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
@@ -234,9 +235,9 @@ public final class ListLsubCache {
      * @param imapStore The connected IMAP store instance
      * @param session The session
      * @return The separator
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static char getSeparator(final int accountId, final AccessedIMAPStore imapStore, final Session session) throws MailException {
+    public static char getSeparator(final int accountId, final AccessedIMAPStore imapStore, final Session session) throws OXException {
         try {
             return getSeparator(accountId, (IMAPFolder) imapStore.getFolder(INBOX), session);
         } catch (final MessagingException e) {
@@ -251,9 +252,9 @@ public final class ListLsubCache {
      * @param imapFolder An IMAP folder
      * @param session The session
      * @return The separator
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static char getSeparator(final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    public static char getSeparator(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         return getCachedLISTEntry(INBOX, accountId, imapFolder, session).getSeparator();
     }
 
@@ -265,9 +266,9 @@ public final class ListLsubCache {
      * @param imapFolder The IMAP
      * @param session The session
      * @return The cached LSUB entry
-     * @throws MailException If loading the entry fails
+     * @throws OXException If loading the entry fails
      */
-    public static ListLsubEntry getCachedLSUBEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    public static ListLsubEntry getCachedLSUBEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
@@ -298,9 +299,9 @@ public final class ListLsubCache {
      * @param imapStore The IMAP store
      * @param session The session
      * @return The cached LIST entry
-     * @throws MailException If loading the entry fails
+     * @throws OXException If loading the entry fails
      */
-    public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final AccessedIMAPStore imapStore, final Session session) throws MailException {
+    public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final AccessedIMAPStore imapStore, final Session session) throws OXException {
         try {
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
@@ -336,9 +337,9 @@ public final class ListLsubCache {
      * @param imapFolder The IMAP
      * @param session The session
      * @return The cached LIST entry
-     * @throws MailException If loading the entry fails
+     * @throws OXException If loading the entry fails
      */
-    public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
@@ -361,7 +362,7 @@ public final class ListLsubCache {
         }
     }
 
-    private static boolean checkTimeStamp(final IMAPFolder imapFolder, final ListLsubCollection collection) throws MailException {
+    private static boolean checkTimeStamp(final IMAPFolder imapFolder, final ListLsubCollection collection) throws OXException {
         /*
          * Check collection's stamp
          */
@@ -380,9 +381,9 @@ public final class ListLsubCache {
      * @param imapFolder The IMAP
      * @param session The session
      * @return The cached LIST/LSUB entry
-     * @throws MailException If loading the entry fails
+     * @throws OXException If loading the entry fails
      */
-    public static ListLsubEntry[] getCachedEntries(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    public static ListLsubEntry[] getCachedEntries(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
@@ -408,7 +409,7 @@ public final class ListLsubCache {
         }
     }
 
-    private static ListLsubCollection getCollection(final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    private static ListLsubCollection getCollection(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         /*
          * Initialize appropriate cache entry
          */
@@ -426,7 +427,7 @@ public final class ListLsubCache {
         if (null == f) {
             final FutureTask<ListLsubCollection> ft = new FutureTask<ListLsubCollection>(new Callable<ListLsubCollection>() {
 
-                public ListLsubCollection call() throws MailException {
+                public ListLsubCollection call() throws OXException {
                     final String[] shared;
                     final String[] user;
                     try {
@@ -453,7 +454,7 @@ public final class ListLsubCache {
         }
         try {
             return getFrom(f);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (caller) {
                 MAP.remove(key);
             }
@@ -489,9 +490,9 @@ public final class ListLsubCache {
      * 
      * @param fullName The full name
      * @return <code>true</code> if a subscribed subfolder exists; otherwise <code>false</code>
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static boolean hasAnySubscribedSubfolder(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    public static boolean hasAnySubscribedSubfolder(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
             checkTimeStamp(imapFolder, collection);
@@ -499,7 +500,7 @@ public final class ListLsubCache {
         }
     }
 
-    private static ListLsubCollection getFrom(final Future<ListLsubCollection> future) throws MailException {
+    private static ListLsubCollection getFrom(final Future<ListLsubCollection> future) throws OXException {
         if (null == future) {
             return null;
         }
@@ -510,16 +511,16 @@ public final class ListLsubCache {
             throw new IllegalStateException(e);
         } catch (final ExecutionException e) {
             final Throwable t = e.getCause();
-            if (t instanceof MailException) {
-                throw (MailException) t;
+            if (t instanceof OXException) {
+                throw (OXException) t;
             }
             if (t instanceof RuntimeException) {
-                throw new MailException(MailException.Code.UNEXPECTED_ERROR, t, t.getMessage());
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
             if (t instanceof Error) {
                 throw (Error) t;
             }
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, t, t.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
         }
     }
 

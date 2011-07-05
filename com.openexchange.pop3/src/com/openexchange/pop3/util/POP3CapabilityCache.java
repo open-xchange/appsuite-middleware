@@ -62,7 +62,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
@@ -168,9 +168,9 @@ public final class POP3CapabilityCache {
      * @param pop3Properties The POP3 properties
      * @return The CAPABILITY from POP3 server denoted by specified parameters
      * @throws IOException If an I/O error occurs
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static String getCapability(final InetAddress inetAddress, final int port, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
+    public static String getCapability(final InetAddress inetAddress, final int port, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, OXException {
         return getCapability0(new InetSocketAddress(inetAddress, port), isSecure, pop3Properties, login);
     }
 
@@ -192,9 +192,9 @@ public final class POP3CapabilityCache {
      * @param pop3Properties The POP3 properties
      * @return The CAPABILITY from POP3 server denoted by specified parameters
      * @throws IOException If an I/O error occurs
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static String getCapability(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
+    public static String getCapability(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, OXException {
         return getCapability0(address, isSecure, pop3Properties, login);
     }
 
@@ -210,7 +210,7 @@ public final class POP3CapabilityCache {
         return Math.min(pop3Properties.getPOP3ConnectionTimeout(), MAX_CONNECT_TIMEOUT);
     }
 
-    private static String getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, MailException {
+    private static String getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, OXException {
         boolean caller = false;
         Future<String> f = MAP.get(address);
         if (null == f) {
@@ -243,7 +243,7 @@ public final class POP3CapabilityCache {
         }
     }
 
-    private static String getFrom(final Future<String> f, final InetSocketAddress address, final String login, final boolean caller) throws IOException, MailException {
+    private static String getFrom(final Future<String> f, final InetSocketAddress address, final String login, final boolean caller) throws IOException, OXException {
         try {
             return f.get();
         } catch (final InterruptedException e) {
@@ -263,10 +263,10 @@ public final class POP3CapabilityCache {
         }
     }
 
-    private static String handleExecutionException(final ExecutionException e, final InetSocketAddress address, final String login) throws IOException, MailException {
+    private static String handleExecutionException(final ExecutionException e, final InetSocketAddress address, final String login) throws IOException, OXException {
         final Throwable cause = e.getCause();
-        if (cause instanceof MailException) {
-            throw ((MailException) cause);
+        if (cause instanceof OXException) {
+            throw ((OXException) cause);
         }
         if (cause instanceof java.net.SocketTimeoutException) {
             throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, e, address, login);

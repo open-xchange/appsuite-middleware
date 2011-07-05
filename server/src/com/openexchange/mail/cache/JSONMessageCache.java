@@ -65,7 +65,8 @@ import org.json.JSONObject;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.concurrent.TimeoutListener;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.OXException;
@@ -100,9 +101,9 @@ public final class JSONMessageCache {
      * Initializes the cache instance.
      * 
      * @return The cache instance
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public static void initInstance() throws MailException {
+    public static void initInstance() throws OXException {
         if (!JSONMessageCacheConfiguration.getInstance().isEnabled()) {
             return;
         }
@@ -135,9 +136,9 @@ public final class JSONMessageCache {
     /**
      * Initializes a new {@link JSONMessageCache}.
      * 
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    private JSONMessageCache() throws MailException {
+    private JSONMessageCache() throws OXException {
         super();
         try {
             // Check every N seconds for timed out user maps
@@ -155,7 +156,7 @@ public final class JSONMessageCache {
 
             });
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -168,9 +169,9 @@ public final class JSONMessageCache {
      * @param id The mail ID
      * @param jsonMailObject The JSON mail object
      * @param session The session providing user and context information
-     * @throws MailException If put fails
+     * @throws OXException If put fails
      */
-    public void put(final int accountId, final String fullname, final String id, final FutureTask<JSONObject> jsonMailObject, final Session session) throws MailException {
+    public void put(final int accountId, final String fullname, final String id, final FutureTask<JSONObject> jsonMailObject, final Session session) throws OXException {
         put(accountId, fullname, id, jsonMailObject, session.getUserId(), session.getContextId());
     }
 
@@ -184,9 +185,9 @@ public final class JSONMessageCache {
      * @param jsonMailObject The JSON mail object
      * @param userId The user ID
      * @param cid The context ID
-     * @throws MailException If put fails
+     * @throws OXException If put fails
      */
-    public void put(final int accountId, final String fullname, final String id, final FutureTask<JSONObject> jsonMailObject, final int userId, final int cid) throws MailException {
+    public void put(final int accountId, final String fullname, final String id, final FutureTask<JSONObject> jsonMailObject, final int userId, final int cid) throws OXException {
         final JSONMessageCacheConfiguration cacheConfiguration = JSONMessageCacheConfiguration.getInstance();
         final UserKey userKey = new UserKey(userId, cid);
         TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap = superMap.get(userKey);
@@ -201,7 +202,7 @@ public final class JSONMessageCache {
                     newMap.setDefaultTimeoutListener(new FolderRemovalLogger(LOG, accountId, fullname, userId, cid));
                 }
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             }
             // A user map is valid for one hour
             timeoutConcurrentMap = superMap.putIfAbsent(userKey, newMap, cacheConfiguration.getTTLUserMap());
@@ -314,9 +315,9 @@ public final class JSONMessageCache {
      * @param id The mail ID
      * @param session The session providing user and context information
      * @return The <b>cloned</b> JSON mail object or <code>null</code>
-     * @throws MailException If JSON mail object cannot be returned
+     * @throws OXException If JSON mail object cannot be returned
      */
-    public JSONObject get(final int accountId, final String fullname, final String id, final Session session) throws MailException {
+    public JSONObject get(final int accountId, final String fullname, final String id, final Session session) throws OXException {
         return get(accountId, fullname, id, session.getUserId(), session.getContextId());
     }
 
@@ -329,9 +330,9 @@ public final class JSONMessageCache {
      * @param userId The user ID
      * @param cid The context ID
      * @return The <b>cloned</b> JSON mail object or <code>null</code>
-     * @throws MailException If JSON mail object cannot be returned
+     * @throws OXException If JSON mail object cannot be returned
      */
-    public JSONObject get(final int accountId, final String fullname, final String id, final int userId, final int cid) throws MailException {
+    public JSONObject get(final int accountId, final String fullname, final String id, final int userId, final int cid) throws OXException {
         return getInternal(accountId, fullname, id, false, userId, cid);
     }
 
@@ -345,9 +346,9 @@ public final class JSONMessageCache {
      * @param userId The user ID
      * @param cid The context ID
      * @return The <b>cloned</b> JSON mail object or <code>null</code>
-     * @throws MailException If JSON mail object cannot be returned
+     * @throws OXException If JSON mail object cannot be returned
      */
-    private JSONObject getInternal(final int accountId, final String fullname, final String id, final boolean remove, final int userId, final int cid) throws MailException {
+    private JSONObject getInternal(final int accountId, final String fullname, final String id, final boolean remove, final int userId, final int cid) throws OXException {
         final UserKey userKey = new UserKey(userId, cid);
         final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap = superMap.get(userKey);
         if (null == timeoutConcurrentMap) {
@@ -411,7 +412,7 @@ public final class JSONMessageCache {
                 retval = remove ? getFromFuture(future) : clone(getFromFuture(future));
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         if (remove && objectMap.isEmpty()) {
             timeoutConcurrentMap.remove(key);
@@ -432,9 +433,9 @@ public final class JSONMessageCache {
      * @param seen <code>true</code> to set \Seen flag; otherwise <code>false</code>
      * @param unread The unread count
      * @param session The session providing user and context information
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void switchSeenFlag(final int accountId, final String fullname, final String[] ids, final boolean seen, final int unread, final Session session) throws MailException {
+    public void switchSeenFlag(final int accountId, final String fullname, final String[] ids, final boolean seen, final int unread, final Session session) throws OXException {
         switchSeenFlag(accountId, fullname, ids, seen, unread, session.getUserId(), session.getContextId());
     }
 
@@ -448,9 +449,9 @@ public final class JSONMessageCache {
      * @param unread The unread count for specified folder
      * @param userId The user ID
      * @param cid The context ID
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void switchSeenFlag(final int accountId, final String fullname, final String[] ids, final boolean seen, final int unread, final int userId, final int cid) throws MailException {
+    public void switchSeenFlag(final int accountId, final String fullname, final String[] ids, final boolean seen, final int unread, final int userId, final int cid) throws OXException {
         if (null == ids) {
             switchSeenFlag(accountId, fullname, seen, unread, userId, cid);
             return;
@@ -513,7 +514,7 @@ public final class JSONMessageCache {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -525,9 +526,9 @@ public final class JSONMessageCache {
      * @param seen <code>true</code> to set \Seen flag; otherwise <code>false</code>
      * @param unread The unread count
      * @param session The session providing user and context information
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void switchSeenFlag(final int accountId, final String fullname, final boolean seen, final int unread, final Session session) throws MailException {
+    public void switchSeenFlag(final int accountId, final String fullname, final boolean seen, final int unread, final Session session) throws OXException {
         switchSeenFlag(accountId, fullname, seen, unread, session.getUserId(), session.getContextId());
     }
 
@@ -540,9 +541,9 @@ public final class JSONMessageCache {
      * @param unread The unread count for specified folder
      * @param userId The user ID
      * @param cid The context ID
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void switchSeenFlag(final int accountId, final String fullname, final boolean seen, final int unread, final int userId, final int cid) throws MailException {
+    public void switchSeenFlag(final int accountId, final String fullname, final boolean seen, final int unread, final int userId, final int cid) throws OXException {
         final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
             superMap.get(new UserKey(userId, cid));
         if (null == timeoutConcurrentMap) {
@@ -591,7 +592,7 @@ public final class JSONMessageCache {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -604,9 +605,9 @@ public final class JSONMessageCache {
      * @param flags The flags bit mask
      * @param set <code>true</code> to set; otherwise <code>false</code>
      * @param session The session providing user and context information
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void updateFlags(final int accountId, final String fullname, final String[] ids, final int newFlags, final boolean set, final Session session) throws MailException {
+    public void updateFlags(final int accountId, final String fullname, final String[] ids, final int newFlags, final boolean set, final Session session) throws OXException {
         updateFlags(accountId, fullname, ids, newFlags, set, session.getUserId(), session.getContextId());
     }
 
@@ -620,9 +621,9 @@ public final class JSONMessageCache {
      * @param set <code>true</code> to set; otherwise <code>false</code>
      * @param userId The user ID
      * @param cid The context ID
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void updateFlags(final int accountId, final String fullname, final String[] ids, final int newFlags, final boolean set, final int userId, final int cid) throws MailException {
+    public void updateFlags(final int accountId, final String fullname, final String[] ids, final int newFlags, final boolean set, final int userId, final int cid) throws OXException {
         if (null == ids) {
             updateFlags(accountId, fullname, newFlags, set, userId, cid);
             return;
@@ -669,7 +670,7 @@ public final class JSONMessageCache {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -681,9 +682,9 @@ public final class JSONMessageCache {
      * @param flags The flags bit mask
      * @param set <code>true</code> to set; otherwise <code>false</code>
      * @param session The session providing user and context information
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void updateFlags(final int accountId, final String fullname, final int newFlags, final boolean set, final Session session) throws MailException {
+    public void updateFlags(final int accountId, final String fullname, final int newFlags, final boolean set, final Session session) throws OXException {
         updateFlags(accountId, fullname, newFlags, set, session.getUserId(), session.getContextId());
     }
 
@@ -696,9 +697,9 @@ public final class JSONMessageCache {
      * @param set <code>true</code> to set; otherwise <code>false</code>
      * @param userId The user ID
      * @param cid The context ID
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void updateFlags(final int accountId, final String fullname, final int newFlags, final boolean set, final int userId, final int cid) throws MailException {
+    public void updateFlags(final int accountId, final String fullname, final int newFlags, final boolean set, final int userId, final int cid) throws OXException {
         final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
             superMap.get(new UserKey(userId, cid));
         if (null == timeoutConcurrentMap) {
@@ -734,7 +735,7 @@ public final class JSONMessageCache {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -746,9 +747,9 @@ public final class JSONMessageCache {
      * @param ids The mail IDs
      * @param colorFlag The color flag to set
      * @param session The session providing user and context information
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void updateColorFlag(final int accountId, final String fullname, final String[] ids, final int colorFlag, final Session session) throws MailException {
+    public void updateColorFlag(final int accountId, final String fullname, final String[] ids, final int colorFlag, final Session session) throws OXException {
         updateColorFlag(accountId, fullname, ids, colorFlag, session.getUserId(), session.getContextId());
     }
 
@@ -761,9 +762,9 @@ public final class JSONMessageCache {
      * @param colorFlag The color flag to set
      * @param userId The user ID
      * @param cid The context ID
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void updateColorFlag(final int accountId, final String fullname, final String[] ids, final int colorFlag, final int userId, final int cid) throws MailException {
+    public void updateColorFlag(final int accountId, final String fullname, final String[] ids, final int colorFlag, final int userId, final int cid) throws OXException {
         if (null == ids) {
             updateColorFlag(accountId, fullname, colorFlag, userId, cid);
             return;
@@ -809,7 +810,7 @@ public final class JSONMessageCache {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -820,9 +821,9 @@ public final class JSONMessageCache {
      * @param fullname The fullname
      * @param colorFlag The color flag to set
      * @param session The session providing user and context information
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void updateColorFlag(final int accountId, final String fullname, final int colorFlag, final Session session) throws MailException {
+    public void updateColorFlag(final int accountId, final String fullname, final int colorFlag, final Session session) throws OXException {
         updateColorFlag(accountId, fullname, colorFlag, session.getUserId(), session.getContextId());
     }
 
@@ -834,9 +835,9 @@ public final class JSONMessageCache {
      * @param colorFlag The color flag to set
      * @param userId The user ID
      * @param cid The context ID
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public void updateColorFlag(final int accountId, final String fullname, final int colorFlag, final int userId, final int cid) throws MailException {
+    public void updateColorFlag(final int accountId, final String fullname, final int colorFlag, final int userId, final int cid) throws OXException {
         final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
             superMap.get(new UserKey(userId, cid));
         if (null == timeoutConcurrentMap) {
@@ -868,7 +869,7 @@ public final class JSONMessageCache {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -880,9 +881,9 @@ public final class JSONMessageCache {
      * @param id The mail ID
      * @param session The session providing user and context information
      * @return The removed JSON mail object or <code>null</code>
-     * @throws MailException If JSON mail object cannot be removed
+     * @throws OXException If JSON mail object cannot be removed
      */
-    public JSONObject remove(final int accountId, final String fullname, final String id, final Session session) throws MailException {
+    public JSONObject remove(final int accountId, final String fullname, final String id, final Session session) throws OXException {
         return remove(accountId, fullname, id, session.getUserId(), session.getContextId());
     }
 
@@ -895,9 +896,9 @@ public final class JSONMessageCache {
      * @param userId The user ID
      * @param cid The context ID
      * @return The removed JSON mail object or <code>null</code>
-     * @throws MailException If JSON mail object cannot be removed
+     * @throws OXException If JSON mail object cannot be removed
      */
-    public JSONObject remove(final int accountId, final String fullname, final String id, final int userId, final int cid) throws MailException {
+    public JSONObject remove(final int accountId, final String fullname, final String id, final int userId, final int cid) throws OXException {
         return getInternal(accountId, fullname, id, true, userId, cid);
     }
 
@@ -1010,27 +1011,27 @@ public final class JSONMessageCache {
     }
 
     /**
-     * Invokes {@link Future#get()} in a safe manner. Throwing an appropriate {@link MailException} if invocation fails.
+     * Invokes {@link Future#get()} in a safe manner. Throwing an appropriate {@link OXException} if invocation fails.
      * 
      * @param future The future whose <tt>get()</tt> method is supposed to be invoked
      * @return The result object
-     * @throws MailException If invocation fails
+     * @throws OXException If invocation fails
      */
-    private static <V> V getFromFuture(final FutureTask<V> future) throws MailException {
+    private static <V> V getFromFuture(final FutureTask<V> future) throws OXException {
         try {
             return future.get();
         } catch (final InterruptedException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable t = e.getCause();
-            if (t instanceof MailException) {
-                throw (MailException) t;
+            if (t instanceof OXException) {
+                throw (OXException) t;
             }
             if (t instanceof AbstractOXException) {
-                throw new MailException((AbstractOXException) t);
+                throw new OXException((AbstractOXException) t);
             }
             if (t instanceof Exception) {
-                throw new MailException(MailException.Code.UNEXPECTED_ERROR, t, t.getMessage());
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
             if (t instanceof Error) {
                 throw (Error) t;
@@ -1040,29 +1041,29 @@ public final class JSONMessageCache {
     }
 
     /**
-     * Invokes {@link Future#get()} in a safe manner. Throwing an appropriate {@link MailException} if invocation fails.
+     * Invokes {@link Future#get()} in a safe manner. Throwing an appropriate {@link OXException} if invocation fails.
      * 
      * @param future The future whose <tt>get()</tt> method is supposed to be invoked
      * @param timeout The timeout millis
      * @return The result object
-     * @throws MailException If invocation fails
+     * @throws OXException If invocation fails
      * @throws TimeoutException If wait timed out
      */
-    private static <V> V getFromFuture(final FutureTask<V> future, final long timeout) throws MailException, TimeoutException {
+    private static <V> V getFromFuture(final FutureTask<V> future, final long timeout) throws OXException, TimeoutException {
         try {
             return future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable t = e.getCause();
-            if (t instanceof MailException) {
-                throw (MailException) t;
+            if (t instanceof OXException) {
+                throw (OXException) t;
             }
             if (t instanceof AbstractOXException) {
-                throw new MailException((AbstractOXException) t);
+                throw new OXException((AbstractOXException) t);
             }
             if (t instanceof Exception) {
-                throw new MailException(MailException.Code.UNEXPECTED_ERROR, t, t.getMessage());
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
             if (t instanceof Error) {
                 throw (Error) t;

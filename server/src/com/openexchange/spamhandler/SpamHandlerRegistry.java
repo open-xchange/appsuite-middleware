@@ -51,7 +51,7 @@ package com.openexchange.spamhandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -104,9 +104,9 @@ public final class SpamHandlerRegistry {
      * @param session The session providing user data
      * @param accountId The account ID
      * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
-     * @throws MailException If existence of a spam handler cannot be checked
+     * @throws OXException If existence of a spam handler cannot be checked
      */
-    public static boolean hasSpamHandler(final Session session, final int accountId) throws MailException {
+    public static boolean hasSpamHandler(final Session session, final int accountId) throws OXException {
         return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(getSpamHandlerBySession(session, accountId).getSpamHandlerName());
     }
 
@@ -120,7 +120,7 @@ public final class SpamHandlerRegistry {
         final SpamHandler handler;
         try {
             handler = getSpamHandler0(mailAccount, new URLMailProviderGetter(mailAccount));
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             // Cannot occur
             LOG.error(e.getMessage(), e);
             return false;
@@ -137,9 +137,9 @@ public final class SpamHandlerRegistry {
      * @param session The session which probably caches spam handler
      * @param accountId The account ID
      * @return The appropriate spam handler
-     * @throws MailException If no supporting spam handler can be found
+     * @throws OXException If no supporting spam handler can be found
      */
-    public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId) throws MailException {
+    public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId) throws OXException {
         return getSpamHandlerBySession(session, accountId, null);
     }
 
@@ -154,9 +154,9 @@ public final class SpamHandlerRegistry {
      * @param mailProvider The mail provider whose spam handler is returned if account's one is empty (if <code>null</code> session's
      *            provider is used as fallback)
      * @return The appropriate spam handler
-     * @throws MailException If no supporting spam handler can be found
+     * @throws OXException If no supporting spam handler can be found
      */
-    public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId, final MailProvider mailProvider) throws MailException {
+    public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId, final MailProvider mailProvider) throws OXException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         final String key = MailSessionParameterNames.getParamSpamHandler();
         SpamHandler handler;
@@ -180,9 +180,9 @@ public final class SpamHandlerRegistry {
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         final MailProviderGetter mailProviderGetter;
         if (null == mailProvider) {
@@ -200,7 +200,7 @@ public final class SpamHandlerRegistry {
         return handler;
     }
 
-    private static SpamHandler getSpamHandler0(final MailAccount mailAccount, final MailProviderGetter mailProviderGetter) throws MailException {
+    private static SpamHandler getSpamHandler0(final MailAccount mailAccount, final MailProviderGetter mailProviderGetter) throws OXException {
         /*
          * On first load account's spam handler
          */
@@ -347,7 +347,7 @@ public final class SpamHandlerRegistry {
 
     private static interface MailProviderGetter {
 
-        public MailProvider getMailProvider() throws MailException;
+        public MailProvider getMailProvider() throws OXException;
     }
 
     private static final class SimpleMailProviderGetter implements MailProviderGetter {
@@ -376,7 +376,7 @@ public final class SpamHandlerRegistry {
             this.accountId = accountId;
         }
 
-        public MailProvider getMailProvider() throws MailException {
+        public MailProvider getMailProvider() throws OXException {
             return MailProviderRegistry.getMailProviderBySession(session, accountId);
         }
     }

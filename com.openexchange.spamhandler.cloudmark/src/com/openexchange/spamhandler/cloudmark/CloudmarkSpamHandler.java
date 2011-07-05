@@ -54,7 +54,7 @@ import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -109,7 +109,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
 	 */
 	@Override
-	public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move,	final Session session) throws MailException {
+	public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move,	final Session session) throws OXException {
 		final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
 		final String targetSpamEmailAddress = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress", "").trim();
 			
@@ -154,6 +154,6 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
 	 */
 	@Override
-	public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException { }
+	public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws OXException { }
 
 }

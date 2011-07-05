@@ -83,7 +83,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -139,9 +140,9 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
      * @param transportProvider The transport provider
      * @param protocol The server's protocol
      * @param hostName The server's host name
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public PublishAttachmentHandler(final Session session, final TransportProvider transportProvider, final String protocol, final String hostName) throws MailException {
+    public PublishAttachmentHandler(final Session session, final TransportProvider transportProvider, final String protocol, final String hostName) throws OXException {
         super(session);
         this.protocol = protocol;
         this.hostName = hostName;
@@ -150,7 +151,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         try {
             fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -158,7 +159,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         this.textPart = textPart;
     }
 
-    public void addAttachment(final MailPart attachment) throws MailException {
+    public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction && !exceeded) {
             final long size = attachment.getSize();
             if (size <= 0 && LOG.isDebugEnabled()) {
@@ -167,9 +168,9 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 if (LOG.isDebugEnabled()) {
                     final String fileName = attachment.getFileName();
-                    final MailException e =
-                        new MailException(
-                            MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
+                    final OXException e =
+                        new OXException(
+                            MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
                             Long.valueOf(uploadQuotaPerFile),
                             null == fileName ? "" : fileName,
                             Long.valueOf(size));
@@ -186,7 +187,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 consumed += size;
                 if (uploadQuota > 0 && consumed > uploadQuota) {
                     if (LOG.isDebugEnabled()) {
-                        final MailException e = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, Long.valueOf(uploadQuota));
+                        final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
                         LOG.debug(
                             new StringBuilder(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
                                 ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
@@ -199,7 +200,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         attachments.add(attachment);
     }
 
-    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws MailException {
+    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
         if (!exceeded) {
             /*
              * No quota exceeded, return prepared source
@@ -220,7 +221,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
         if (!session.containsParameter(key)) {
             final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
-            throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN, t, new Object[0]);
+            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create(t, new Object[0]);
         }
         final int folderId = ((Integer) session.getParameter(key)).intValue();
         final Context ctx = getContext();
@@ -238,20 +239,20 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
             if (null == target) {
                 LOG.warn("Missing publication target for ID \"com.openexchange.publish.online.infostore.document\".\nThrowing quota-exceeded exception instead.");
-                throw new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, Long.valueOf(uploadQuota));
+                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
             }
             /*
              * ... and in turn target's publication service
              */
             publisher = target.getPublicationService();
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final PublicationException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         try {
             return generateComposedMails0(source, publications, folderId, target, publisher, ctx);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             /*
              * Rollback of publications
              */
@@ -263,7 +264,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     }
 
-    private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<PublicationAndInfostoreID> publications, final int folderId, final PublicationTarget target, final PublicationService publisher, final Context ctx) throws MailException {
+    private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<PublicationAndInfostoreID> publications, final int folderId, final PublicationTarget target, final PublicationService publisher, final Context ctx) throws OXException {
         final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
         try {
             /*
@@ -283,9 +284,9 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     path).toString()));
             }
         } catch (final PublicationException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         /*
          * Get recipients
@@ -314,7 +315,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                  * Therefore check for this special error code and throw an exception if it is not equal.
                  */
                 if (LdapException.Code.NO_USER_BY_MAIL.getDetailNumber() != e.getDetailNumber()) {
-                    throw new MailException(e);
+                    throw new OXException(e);
                 }
                 /*
                  * Retry
@@ -323,7 +324,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     user = userService.searchUser(QuotedInternetAddress.toIDN(address.getAddress()), ctx);
                 } catch (final UserException inner) {
                     if (LdapException.Code.NO_USER_BY_MAIL.getDetailNumber() != inner.getDetailNumber()) {
-                        throw new MailException(inner);
+                        throw new OXException(inner);
                     }
                 }
             }
@@ -380,31 +381,31 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         return mails.toArray(new ComposedMailMessage[mails.size()]);
     }
 
-    private Context getContext() throws MailException {
+    private Context getContext() throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getContext();
         }
         try {
             return ContextStorage.getStorageContext(session.getContextId());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
-    private User getSessionUser() throws MailException {
+    private User getSessionUser() throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }
         try {
             return UserStorage.getInstance().getUser(session.getUserId(), getContext());
         } catch (final LdapException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
     private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
 
-    private ComposedMailMessage generateInternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment, final Date elapsedDate, final Locale locale) throws MailException {
+    private ComposedMailMessage generateInternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment, final Date elapsedDate, final Locale locale) throws OXException {
         final ComposedMailMessage internalVersion = copyOf(source, ctx);
         final TextBodyMailPart textPart = this.textPart.copy();
         final StringHelper stringHelper = new StringHelper(locale);
@@ -433,7 +434,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         return internalVersion;
     }
 
-    private ComposedMailMessage generateExternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment, final Date elapsedDate) throws MailException {
+    private ComposedMailMessage generateExternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment, final Date elapsedDate) throws OXException {
         final ComposedMailMessage externalVersion = copyOf(source, ctx);
         final TextBodyMailPart textPart = this.textPart.copy();
         if (TransportProperties.getInstance().isSendAttachmentToExternalRecipients()) {
@@ -470,7 +471,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         return externalVersion;
     }
 
-    private ComposedMailMessage copyOf(final ComposedMailMessage source, final Context ctx) throws MailException {
+    private ComposedMailMessage copyOf(final ComposedMailMessage source, final Context ctx) throws OXException {
         final ComposedMailMessage composedMail = transportProvider.getNewComposedMailMessage(session, ctx);
         if (source.containsFlags()) {
             composedMail.setFlags(source.getFlags());
@@ -535,7 +536,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         return composedMail;
     } // End of copyOf()
 
-    private MailPart createLinksAttachment(final String text) throws MailException, MIMEMailException {
+    private MailPart createLinksAttachment(final String text) throws OXException, MIMEMailException {
         try {
             final MimeBodyPart bodyPart = new MimeBodyPart();
             bodyPart.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html");
@@ -553,7 +554,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of createLinksAttachment()
 
-    private String publishAttachmentAndGetPath(final MailPart attachment, final int folderId, final Context ctx, final List<PublicationAndInfostoreID> publications, final PublicationTarget target, final PublicationService publisher) throws MailException, TransactionException, PublicationException {
+    private String publishAttachmentAndGetPath(final MailPart attachment, final int folderId, final Context ctx, final List<PublicationAndInfostoreID> publications, final PublicationTarget target, final PublicationService publisher) throws OXException, TransactionException, PublicationException {
         /*
          * Create document meta data for current attachment
          */
@@ -591,7 +592,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 } catch (final OXException x) {
                     fileAccess.rollback();
                     if (441 != x.getDetailNumber()) {
-                        throw new MailException(x);
+                        throw new OXException(x);
                     }
                     /*
                      * Duplicate document name, thus retry with a new name
@@ -612,7 +613,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     throw e;
                 } catch (final Exception e) {
                     fileAccess.rollback();
-                    throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
                     fileAccess.finish();
                 }

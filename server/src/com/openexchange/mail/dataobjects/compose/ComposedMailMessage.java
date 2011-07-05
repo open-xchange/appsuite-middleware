@@ -62,7 +62,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
@@ -237,7 +237,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                     }
                 }
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -266,7 +266,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * @return The number of enclosed mail parts or {@link #NO_ENCLOSED_PARTS} if not applicable
      */
     @Override
-    public abstract int getEnclosedCount() throws MailException;
+    public abstract int getEnclosedCount() throws OXException;
 
     /**
      * Gets this composed mail's part located at given index.
@@ -277,7 +277,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * @return The mail part
      */
     @Override
-    public abstract MailPart getEnclosedMailPart(final int index) throws MailException;
+    public abstract MailPart getEnclosedMailPart(final int index) throws OXException;
 
     /**
      * Sets this composed message's body part.

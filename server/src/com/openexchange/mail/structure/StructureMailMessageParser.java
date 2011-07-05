@@ -75,7 +75,8 @@ import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -233,9 +234,9 @@ public final class StructureMailMessageParser {
      * 
      * @param mail The mail to parse
      * @param handler The call-back handler
-     * @throws MailException If parsing specified mail fails
+     * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(final MailMessage mail, final StructureHandler handler) throws MailException {
+    public void parseMailMessage(final MailMessage mail, final StructureHandler handler) throws OXException {
         parseMailMessage(mail, handler, null);
     }
 
@@ -246,14 +247,14 @@ public final class StructureMailMessageParser {
      * @param mail The mail to parse
      * @param handler The call-back handler
      * @param prefix The initial prefix for mail part identifiers; e.g. <code>&quot;1.1&quot;</code>
-     * @throws MailException If parsing specified mail fails
+     * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(final MailMessage mail, final StructureHandler handler, final String prefix) throws MailException {
+    public void parseMailMessage(final MailMessage mail, final StructureHandler handler, final String prefix) throws OXException {
         if (null == mail) {
-            throw new MailException(MailException.Code.MISSING_PARAMETER, "mail");
+            throw MailExceptionCode.MISSING_PARAMETER.create("mail");
         }
         if (null == handler) {
-            throw new MailException(MailException.Code.MISSING_PARAMETER, "handler");
+            throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
         try {
             /*
@@ -265,11 +266,11 @@ public final class StructureMailMessageParser {
              */
             parseMailContent(mail, handler, prefix, 1);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.UNREADBALE_PART_CONTENT, e, Long.valueOf(mail.getMailId()), mail.getFolder());
+            throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, Long.valueOf(mail.getMailId()), mail.getFolder());
         }
     }
 
-    private void parseMailContent(final MailPart mailPartArg, final StructureHandler handler, final String prefix, final int partCountArg) throws MailException, IOException {
+    private void parseMailContent(final MailPart mailPartArg, final StructureHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
         if (stop) {
             return;
         }
@@ -379,7 +380,7 @@ public final class StructureMailMessageParser {
         } else if (isMultipart(lcct)) {
             final int count = mailPart.getEnclosedCount();
             if (count == -1) {
-                throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
+                throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
             }
             final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
             if (!mailPart.containsSequenceId()) {
@@ -649,7 +650,7 @@ public final class StructureMailMessageParser {
         }
     }
 
-    private void parseEnvelope(final MailMessage mail, final StructureHandler handler) throws MailException {
+    private void parseEnvelope(final MailMessage mail, final StructureHandler handler) throws OXException {
         /*
          * RECEIVED DATE
          */
@@ -738,7 +739,7 @@ public final class StructureMailMessageParser {
         return getFileName(null, sequenceId, baseMimeType);
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws MailException, IOException {
+    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
         final String charset = getCharset(mailPart, contentType);
         try {
             return MessageUtility.readMailPart(mailPart, charset);
@@ -753,7 +754,7 @@ public final class StructureMailMessageParser {
         }
     }
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
+    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();

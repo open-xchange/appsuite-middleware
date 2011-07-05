@@ -63,7 +63,8 @@ import javax.mail.Part;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -120,14 +121,14 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * 
      * @param referencedPart The referenced part
      * @param session The session used to store a possible temporary disc file
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
+    protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws OXException {
         isMail = referencedPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822) && !referencedPart.getContentDisposition().isAttachment();
         try {
             handleReferencedPart(referencedPart, session);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -140,14 +141,14 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * 
      * @param referencedMail The referenced mail
      * @param session The session used to store a possible temporary disc file
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    protected ReferencedMailPart(final MailMessage referencedMail, final Session session) throws MailException {
+    protected ReferencedMailPart(final MailMessage referencedMail, final Session session) throws OXException {
         isMail = true;
         try {
             handleReferencedPart(referencedMail, session);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -158,10 +159,10 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * @param referencedPart The referenced mail part
      * @param session The session to manage a possible temporary disc file
      * @return A file ID if content is written to disc; otherwise <code>null</code> to indicate content is held inside.
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    private void handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException, IOException {
+    private void handleReferencedPart(final MailPart referencedPart, final Session session) throws OXException, IOException {
         final long size = referencedPart.getSize();
         if (size > 0 && size <= TransportProperties.getInstance().getReferencedPartLimit()) {
             if (isMail) {
@@ -257,7 +258,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     private static final String TEXT = "text/";
 
-    private DataSource getDataSource() throws MailException {
+    private DataSource getDataSource() throws OXException {
         /*
          * Lazy creation
          */
@@ -299,7 +300,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                     };
                     return (dataSource = new StreamDataSource(isp, getContentType().toString()));
                 }
-                throw new MailException(MailException.Code.NO_CONTENT);
+                throw MailExceptionCode.NO_CONTENT.create();
             } catch (final MailConfigException e) {
                 LOG.error(e.getMessage(), e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
@@ -309,7 +310,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         if (cachedContent != null) {
             return cachedContent;
         }
@@ -334,15 +335,15 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         return null;
     }
 
-    private void applyFileContent(final String charset) throws MailException {
+    private void applyFileContent(final String charset) throws OXException {
         InputStream fis = null;
         try {
             fis = file.getInputStream();
             cachedContent = readStream(fis, charset);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final ManagedFileException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } finally {
             if (fis != null) {
                 try {
@@ -354,31 +355,31 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         }
     }
 
-    private void applyByteContent(final String charset) throws MailException {
+    private void applyByteContent(final String charset) throws OXException {
         try {
             cachedContent = new String(data, charset);
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return new DataHandler(getDataSource());
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return null;
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         try {
             if (data != null) {
                 return new UnsynchronizedByteArrayInputStream(data);
@@ -386,9 +387,9 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             if (file != null) {
                 return file.getInputStream();
             }
-            throw new MailException(MailException.Code.NO_CONTENT);
+            throw MailExceptionCode.NO_CONTENT.create();
         } catch (final ManagedFileException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 

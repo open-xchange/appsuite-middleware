@@ -64,7 +64,7 @@ import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.internet.InternetHeaders;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -493,11 +493,11 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             /*
              * Discard corrupt message
              */
-            final MailException imapExc = MIMEMailException.handleMessagingException(e);
+            final OXException imapExc = MIMEMailException.handleMessagingException(e);
             LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
                 imapExc.getMessage()).toString(), imapExc);
             error = true;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
@@ -635,9 +635,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
          * @param msg The message to apply to
          * @param logger The logger
          * @throws MessagingException If a messaging error occurs
-         * @throws MailException If a mail error occurs
+         * @throws OXException If a mail error occurs
          */
-        public abstract void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException;
+        public abstract void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException;
     }
 
     private static final class HeaderFetchItemHandler implements FetchItemHandler {
@@ -646,7 +646,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             super();
         }
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             final InternetHeaders h;
             {
                 final InputStream headerStream;
@@ -738,7 +738,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MailException {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             msg.setBodystructure(bs);
             final StringBuilder sb = new StringBuilder();
@@ -748,7 +748,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             }
             try {
                 msg.setContentType(new ContentType(sb.toString()));
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(e.getMessage(), e);
                 }
@@ -767,7 +767,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     private static final FetchItemHandler BODY_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
+        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             final InputStream msgStream;
             if (item instanceof RFC822DATA) {
                 /*

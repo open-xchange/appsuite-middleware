@@ -50,7 +50,8 @@
 package com.openexchange.mail.permission;
 
 import java.lang.reflect.InvocationTargetException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -96,26 +97,26 @@ public abstract class MailPermission extends OCLPermission {
      * @param <P> The permission sub-type
      * @param clazz The permission class
      * @return A new mail permission instance
-     * @throws MailException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    public static <P extends MailPermission> P newInstance(final Class<? extends P> clazz) throws MailException {
+    public static <P extends MailPermission> P newInstance(final Class<? extends P> clazz) throws OXException {
         /*
          * Create a new mail permission
          */
         try {
             return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance();
         } catch (final SecurityException e) {
-            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+            throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
         } catch (final NoSuchMethodException e) {
-            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+            throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
         } catch (final IllegalArgumentException e) {
-            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+            throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
         } catch (final InstantiationException e) {
-            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+            throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
         } catch (final IllegalAccessException e) {
-            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+            throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
         } catch (final InvocationTargetException e) {
-            throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+            throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
         }
     }
 }

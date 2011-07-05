@@ -49,7 +49,7 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
@@ -72,10 +72,10 @@ public final class SMTPReferencedPart extends ReferencedMailPart {
 	 *            The referenced {@link MailPart part}
 	 * @param session
 	 *            The {@link Session session} providing needed user data
-	 * @throws MailException
+	 * @throws OXException
 	 *             If instantiation fails
 	 */
-	public SMTPReferencedPart(final MailPart referencedPart, final Session session) throws MailException {
+	public SMTPReferencedPart(final MailPart referencedPart, final Session session) throws OXException {
 		super(referencedPart, session);
 	}
 
@@ -86,10 +86,10 @@ public final class SMTPReferencedPart extends ReferencedMailPart {
 	 *            The referenced {@link MailMessage mail}
 	 * @param session
 	 *            The {@link Session session} providing needed user data
-	 * @throws MailException
+	 * @throws OXException
 	 *             If instantiation fails
 	 */
-	public SMTPReferencedPart(final MailMessage referencedMail, final Session session) throws MailException {
+	public SMTPReferencedPart(final MailMessage referencedMail, final Session session) throws OXException {
 		super(referencedMail, session);
 	}
 

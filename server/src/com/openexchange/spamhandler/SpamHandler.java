@@ -49,7 +49,7 @@
 
 package com.openexchange.spamhandler;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 
@@ -158,9 +158,9 @@ public abstract class SpamHandler {
      * @param move If <code>true</code> the mails identified by specified mail IDs are moved to spam folder; otherwise the mails remain in
      *            the source folder.
      * @param session The session providing needed user data
-     * @throws MailException If handling spam fails
+     * @throws OXException If handling spam fails
      */
-    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         /*
          * Copy to confirmed spam folder
          */
@@ -203,8 +203,8 @@ public abstract class SpamHandler {
      * @param move If <code>true</code> the mails identified by specified mail IDs are moved to INBOX folder; otherwise the mails remain in
      *            spam folder
      * @param session The session providing needed user data
-     * @throws MailException If handling ham fails
+     * @throws OXException If handling ham fails
      */
-    public abstract void handleHam(int accountId, String spamFullname, String[] mailIDs, boolean move, Session session) throws MailException;
+    public abstract void handleHam(int accountId, String spamFullname, String[] mailIDs, boolean move, Session session) throws OXException;
 
 }

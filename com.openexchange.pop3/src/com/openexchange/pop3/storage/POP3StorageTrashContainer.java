@@ -51,7 +51,7 @@ package com.openexchange.pop3.storage;
 
 import java.util.Collection;
 import java.util.Set;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link POP3StorageTrashContainer} - Container for permanently deleted POP3 messages.
@@ -64,39 +64,39 @@ public interface POP3StorageTrashContainer {
      * Adds specified UIDL to this trash container.
      * 
      * @param uidl The UIDL of the permanently deleted POP3 message
-     * @throws MailException If adding UIDL fails
+     * @throws OXException If adding UIDL fails
      */
-    public void addUIDL(String uidl) throws MailException;
+    public void addUIDL(String uidl) throws OXException;
 
     /**
      * Adds all specified UIDLs to this trash container.
      * 
      * @param uidl The UIDLs of the permanently deleted POP3 messages
-     * @throws MailException If adding UIDLs fails
+     * @throws OXException If adding UIDLs fails
      */
-    public void addAllUIDL(Collection<? extends String> uidls) throws MailException;
+    public void addAllUIDL(Collection<? extends String> uidls) throws OXException;
 
     /**
      * Removes specified UIDL from this trash container.
      * 
      * @param uidl The UIDL to remove
-     * @throws MailException If removing UIDL fails
+     * @throws OXException If removing UIDL fails
      */
-    public void removeUIDL(String uidl) throws MailException;
+    public void removeUIDL(String uidl) throws OXException;
 
     /**
      * Gets all UIDLs kept in this container.
      * 
      * @return All UIDLs kept in this container
-     * @throws MailException If retrieving UIDLs fails
+     * @throws OXException If retrieving UIDLs fails
      */
-    public Set<String> getUIDLs() throws MailException;
+    public Set<String> getUIDLs() throws OXException;
 
     /**
      * Clears this container.
      * 
-     * @throws MailException If clearing fails
+     * @throws OXException If clearing fails
      */
-    public void clear() throws MailException;
+    public void clear() throws OXException;
 
 }

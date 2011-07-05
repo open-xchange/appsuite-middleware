@@ -57,7 +57,8 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import com.openexchange.html.HTMLService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -97,7 +98,7 @@ public final class BodyTerm extends SearchTerm<String> {
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) throws MailException {
+    public boolean matches(final MailMessage mailMessage) throws OXException {
         final String text = getTextContent(mailMessage);
         if (text == null) {
             if (null == pattern) {
@@ -115,7 +116,7 @@ public final class BodyTerm extends SearchTerm<String> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws MailException {
+    public boolean matches(final Message msg) throws OXException {
         final String text = getTextContent(msg);
         if (text == null) {
             if (null == pattern) {
@@ -157,9 +158,9 @@ public final class BodyTerm extends SearchTerm<String> {
      * 
      * @param part The message whose textual content shall be extracted
      * @return The textual content or <code>null</code> if none found
-     * @throws MailException If text extraction fails
+     * @throws OXException If text extraction fails
      */
-    private static String getTextContent(final Part part) throws MailException {
+    private static String getTextContent(final Part part) throws OXException {
         try {
             if (ContentType.isMimeType(part.getContentType(), "multipart/*")) {
                 final Multipart multipart = (Multipart) part.getContent();
@@ -173,7 +174,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return getPartTextContent(part);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -184,9 +185,9 @@ public final class BodyTerm extends SearchTerm<String> {
      * 
      * @param mailPart The mail message whose textual content shall be extracted
      * @return The textual content or <code>null</code> if none found
-     * @throws MailException If text extraction fails
+     * @throws OXException If text extraction fails
      */
-    private static String getTextContent(final MailPart mailPart) throws MailException {
+    private static String getTextContent(final MailPart mailPart) throws OXException {
         final int count = mailPart.getEnclosedCount();
         if (count != MailPart.NO_ENCLOSED_PARTS) {
             /*
@@ -220,7 +221,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -229,9 +230,9 @@ public final class BodyTerm extends SearchTerm<String> {
      * 
      * @param part The part
      * @return The textual content or <code>null</code> if none found
-     * @throws MailException If text extraction fails
+     * @throws OXException If text extraction fails
      */
-    private static String getPartTextContent(final Part part) throws MailException {
+    private static String getPartTextContent(final Part part) throws OXException {
         try {
             final ContentType ct = new ContentType(part.getContentType());
             if (!ct.startsWith("text/")) {
@@ -250,7 +251,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return MessageUtility.readMimePart(part, charset);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }

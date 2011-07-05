@@ -50,7 +50,7 @@
 package com.openexchange.messaging.mail;
 
 import java.io.InputStream;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingException;
@@ -81,7 +81,7 @@ public class MailBinaryContent implements BinaryContent {
     public InputStream getData() throws MessagingException {
         try {
             return part.getInputStream();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

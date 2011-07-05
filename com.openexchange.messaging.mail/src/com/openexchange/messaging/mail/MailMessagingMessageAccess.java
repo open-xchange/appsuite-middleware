@@ -55,7 +55,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -122,7 +122,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
                 mails[i] = MIMEMessageConverter.convertMessage(out.toByteArray());
             }
             messageStorage.appendMessages(folder, mails);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -143,7 +143,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         try {
             final String[] ids = messageStorage.copyMessages(sourceFolder, destFolder, messageIds, fast);
             return fast ? Collections.<String> emptyList() : Arrays.asList(ids);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -151,7 +151,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
     public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws MessagingException {
         try {
             messageStorage.deleteMessages(folder, messageIds, hardDelete);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -165,7 +165,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
                 list.add(from(mail));
             }
             return list;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -173,7 +173,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
         try {
             return from(messageStorage.getMessage(folder, id, !peek));
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -186,7 +186,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
                 list.add(from(mail));
             }
             return list;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -195,7 +195,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         try {
             final String[] ids = messageStorage.moveMessages(sourceFolder, destFolder, messageIds, fast);
             return fast ? Collections.<String> emptyList() : Arrays.asList(ids);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -215,7 +215,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             } else {
                 throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -243,7 +243,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
                 list.add(from(mail));
             }
             return list;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -257,7 +257,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             if (set.contains(MessagingField.FLAGS)) {
                 messageStorage.updateMessageFlags(message.getFolder(), new String[] { message.getId() }, message.getFlags(), true);
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -265,7 +265,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
         try {
             return new MailBinaryContent(messageStorage.getAttachment(folder, id, referenceId));
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

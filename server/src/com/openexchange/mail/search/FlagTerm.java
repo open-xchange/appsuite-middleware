@@ -53,7 +53,7 @@ import java.util.Collection;
 import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -105,7 +105,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws MailException {
+    public boolean matches(final Message msg) throws OXException {
         final Flags flagsObj = MIMEMessageConverter.convertMailFlags(flags);
         final Flags msgFlags;
         try {

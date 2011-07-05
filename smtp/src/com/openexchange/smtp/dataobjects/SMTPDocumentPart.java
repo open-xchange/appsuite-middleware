@@ -49,7 +49,7 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.session.Session;
 
@@ -70,10 +70,10 @@ public final class SMTPDocumentPart extends InfostoreDocumentMailPart {
 	 *            The document's unique ID
 	 * @param session
 	 *            The session providing needed user data
-	 * @throws MailException
+	 * @throws OXException
 	 *             If infostore document cannot be read
 	 */
-	public SMTPDocumentPart(final String documentId, final Session session) throws MailException {
+	public SMTPDocumentPart(final String documentId, final Session session) throws OXException {
 		super(documentId, session);
 	}
 

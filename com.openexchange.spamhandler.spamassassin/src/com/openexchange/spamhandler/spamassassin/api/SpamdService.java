@@ -49,7 +49,7 @@
 
 package com.openexchange.spamhandler.spamassassin.api;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -65,8 +65,8 @@ public interface SpamdService {
      * 
      * @param session A {@link Session} object
      * @return A {@link SpamdProvider} object with the information needed for spamd can't be null. If the provider
-     * cannot be fetched a {@link MailException} has to be raised
-     * @throws MailException if something went wrong during getProvider operation
+     * cannot be fetched a {@link OXException} has to be raised
+     * @throws OXException if something went wrong during getProvider operation
      */
-    public SpamdProvider getProvider(final Session session) throws MailException;
+    public SpamdProvider getProvider(final Session session) throws OXException;
 }

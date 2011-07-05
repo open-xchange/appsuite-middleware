@@ -72,7 +72,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -147,17 +148,17 @@ public class MailObject {
         this.type = type;
     }
 
-    private final void validateMailObject() throws MailException {
+    private final void validateMailObject() throws OXException {
         if (fromAddr == null || fromAddr.length() == 0) {
-            throw new MailException(MailException.Code.MISSING_FIELD, "From");
+            throw MailExceptionCode.MISSING_FIELD.create("From");
         } else if (toAddrs == null || toAddrs.length == 0) {
-            throw new MailException(MailException.Code.MISSING_FIELD, "To");
+            throw MailExceptionCode.MISSING_FIELD.create("To");
         } else if (contentType == null || contentType.length() == 0) {
-            throw new MailException(MailException.Code.MISSING_FIELD, "Content-Type");
+            throw MailExceptionCode.MISSING_FIELD.create("Content-Type");
         } else if (subject == null) {
-            throw new MailException(MailException.Code.MISSING_FIELD, "Subject");
+            throw MailExceptionCode.MISSING_FIELD.create("Subject");
         } else if (text == null) {
-            throw new MailException(MailException.Code.MISSING_FIELD, "Text");
+            throw MailExceptionCode.MISSING_FIELD.create("Text");
         }
     }
 
@@ -166,9 +167,9 @@ public class MailObject {
      * 
      * @param contentType The content type (incl. charset parameter)
      * @param file The file to attach
-     * @throws MailException If file attachment cannot be added
+     * @throws OXException If file attachment cannot be added
      */
-    public void addFileAttachment(final ContentType contentType, final File file) throws MailException {
+    public void addFileAttachment(final ContentType contentType, final File file) throws OXException {
         /*
          * Determine proper content type
          */
@@ -241,9 +242,9 @@ public class MailObject {
      * @param contentType The content type (incl. charset parameter)
      * @param fileName The attachment's file name
      * @param inputStream The attachment's data as an input stream
-     * @throws MailException If file attachment cannot be added
+     * @throws OXException If file attachment cannot be added
      */
-    public void addFileAttachment(final ContentType contentType, final String fileName, final InputStream inputStream) throws MailException {
+    public void addFileAttachment(final ContentType contentType, final String fileName, final InputStream inputStream) throws OXException {
         /*
          * Determine proper content type
          */
@@ -305,7 +306,7 @@ public class MailObject {
             }
             multipart.addBodyPart(bodyPart);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -329,7 +330,7 @@ public class MailObject {
 
     private final static String HEADER_X_OX_OBJECT = "X-Open-Xchange-Object";
 
-    public final void send() throws MailException {
+    public final void send() throws OXException {
         try {
             validateMailObject();
             final MimeMessage msg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
@@ -378,7 +379,7 @@ public class MailObject {
              * Examine message's content type
              */
             if (!"text".equalsIgnoreCase(ct.getPrimaryType())) {
-                //throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
+                //throw new OXException(OXException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
             }
             /*
              * Set content and its type
@@ -396,7 +397,7 @@ public class MailObject {
                 } else if (ct.startsWith("multipart/")) {
                     msg.setContent((Multipart) text);
                 } else {
-                    throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
+                    throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(ct.toString());
                 }
             } else {
                 final MimeBodyPart textPart = new MimeBodyPart();
@@ -411,7 +412,7 @@ public class MailObject {
                 } else if (ct.startsWith("multipart/")) {
                     textPart.setContent((Multipart) text);
                 } else {
-                    throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
+                    throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(ct.toString());
                 }
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
@@ -490,7 +491,7 @@ public class MailObject {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

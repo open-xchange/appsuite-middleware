@@ -60,7 +60,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -178,9 +179,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
      * 
      * @param session The session providing needed user data
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public static POP3Access newInstance(final Session session) throws MailException {
+    public static POP3Access newInstance(final Session session) throws OXException {
         final POP3Access pop3Access = new POP3Access(session);
         applyPOP3Storage(pop3Access);
         return pop3Access;
@@ -191,9 +192,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * 
      * @param session The session providing needed user data
      * @param accountId The account ID
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public static POP3Access newInstance(final Session session, final int accountId) throws MailException {
+    public static POP3Access newInstance(final Session session, final int accountId) throws OXException {
         final POP3Access pop3Access = new POP3Access(session, accountId);
         applyPOP3Storage(pop3Access);
         return pop3Access;
@@ -203,9 +204,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      * Applies the POP3 storage to given POP3 access.
      * 
      * @param pop3Access The POP3 access
-     * @throws MailException If POP3 storage initialization fails
+     * @throws OXException If POP3 storage initialization fails
      */
-    private static void applyPOP3Storage(final POP3Access pop3Access) throws MailException {
+    private static void applyPOP3Storage(final POP3Access pop3Access) throws OXException {
         final Session session = pop3Access.session;
         if (null != session) {
             final int user = session.getUserId();
@@ -309,7 +310,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (folderStorage != null) {
             try {
                 folderStorage.releaseResources();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(new StringBuilder("Error while closing POP3 folder storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 folderStorage = null;
@@ -318,7 +319,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (messageStorage != null) {
             try {
                 messageStorage.releaseResources();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(new StringBuilder("Error while closing POP3 message storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 messageStorage = null;
@@ -339,7 +340,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             if (pop3Storage != null) {
                 try {
                     pop3Storage.close();
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error("Error while closing POP3 storage.", e);
                 }
             }
@@ -364,7 +365,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     public POP3Config getPOP3Config() {
         try {
             return (POP3Config) getMailConfig();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             /*
              * Cannot occur since already initialized
              */
@@ -373,19 +374,19 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
-    public MailFolder getRootFolder() throws MailException {
+    public MailFolder getRootFolder() throws OXException {
         pop3Storage.connect();
         addWarnings(pop3Storage.getWarnings());
         return pop3Storage.getFolderStorage().getRootFolder();
     }
 
     @Override
-    public int getUnreadMessagesCount(final String fullname) throws MailException {
+    public int getUnreadMessagesCount(final String fullname) throws OXException {
         return pop3Storage.getUnreadMessagesCount(fullname);
     }
 
     @Override
-    public boolean ping() throws MailException {
+    public boolean ping() throws OXException {
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
         try {
@@ -400,14 +401,14 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             }
         } catch (final POP3Exception e) {
             throw e;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             return false;
         }
         return true;
     }
 
     @Override
-    protected void connectInternal() throws MailException {
+    protected void connectInternal() throws OXException {
         // Connect the storage
         pop3Storage.connect();
         addWarnings(pop3Storage.getWarnings());
@@ -450,16 +451,16 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final CancellationException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            if (cause instanceof MailException) {
-                throw ((MailException) cause);
+            if (cause instanceof OXException) {
+                throw ((OXException) cause);
             }
             if (cause instanceof RuntimeException) {
-                throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
             if (cause instanceof Error) {
                 throw (Error) cause;
@@ -476,7 +477,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
-    public POP3FolderStorage getFolderStorage() throws MailException {
+    public POP3FolderStorage getFolderStorage() throws OXException {
         if (!connected) {
             throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
         }
@@ -487,7 +488,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
-    public POP3MessageStorage getMessageStorage() throws MailException {
+    public POP3MessageStorage getMessageStorage() throws OXException {
         if (!connected) {
             throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
         }
@@ -498,7 +499,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
-    public MailLogicTools getLogicTools() throws MailException {
+    public MailLogicTools getLogicTools() throws OXException {
         if (!connected) {
             throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
         }
@@ -519,13 +520,13 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
-    protected void startup() throws MailException {
+    protected void startup() throws OXException {
         POP3CapabilityCache.init();
         POP3StoreConnector.startUp();
     }
 
     @Override
-    protected void shutdown() throws MailException {
+    protected void shutdown() throws OXException {
         POP3StoreConnector.shutDown();
         POP3SessionProperties.resetDefaultSessionProperties();
         POP3CapabilityCache.tearDown();
@@ -537,7 +538,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
-    protected IMailProperties createNewMailProperties() throws MailException {
+    protected IMailProperties createNewMailProperties() throws OXException {
         try {
             final MailAccountStorageService storageService =
                 POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);

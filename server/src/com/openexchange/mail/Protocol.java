@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Component;
 
 /**
@@ -95,15 +96,15 @@ public class Protocol implements Component, Serializable {
      * 
      * @param protocol The protocol string to parse
      * @return Corresponding instance of {@link Protocol}
-     * @throws MailException If parsing the specified protocol string fails
+     * @throws OXException If parsing the specified protocol string fails
      */
-    public static Protocol parseProtocol(final String protocol) throws MailException {
+    public static Protocol parseProtocol(final String protocol) throws OXException {
         if (ALL.equals(protocol)) {
             return PROTOCOL_ALL;
         }
         final Matcher m = PAT_PROT.matcher(protocol);
         if (!m.matches()) {
-            throw new MailException(MailException.Code.PROTOCOL_PARSE_ERROR, protocol);
+            throw MailExceptionCode.PROTOCOL_PARSE_ERROR.create(protocol);
         }
         final String[] aliases;
         {
@@ -194,9 +195,9 @@ public class Protocol implements Component, Serializable {
      * 
      * @param host The mail system's host name
      * @return The max count or a value equal to or less than zero for no restrictions
-     * @throws MailException If max-count setting could not be returned for specified host name
+     * @throws OXException If max-count setting could not be returned for specified host name
      */
-    public int getMaxCount(final String host) throws MailException {
+    public int getMaxCount(final String host) throws OXException {
         return -1;
     }
 

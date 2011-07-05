@@ -56,7 +56,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.mail.Address;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.messaging.MessagingAccountTransport;
@@ -88,7 +88,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         super();
         try {
             mailTransport = MailTransport.getInstance(session, accountId);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -106,7 +106,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
             mailTransport.sendRawMessage(out.toByteArray(), addrs.toArray(new Address[0]));
         } catch (final UnsupportedEncodingException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -120,7 +120,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
     public void close() {
         try {
             mailTransport.close();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             getLog(MailMessagingAccountTransport.class).error(e.getMessage(), e);
         }
     }
@@ -137,7 +137,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         try {
             mailTransport.ping();
             return true;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             getLog(MailMessagingAccountTransport.class).error(e.getMessage(), e);
             return false;
         }

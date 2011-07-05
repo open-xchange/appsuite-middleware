@@ -65,7 +65,8 @@ import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -145,9 +146,9 @@ public final class IMAPDefaultFolderChecker {
      * 
      * @param folderFullName The fullname to check
      * @return <code>true</code> if given fullname denotes a default folder; otherwise <code>false</code>
-     * @throws MailException If check for default folder fails
+     * @throws OXException If check for default folder fails
      */
-    public boolean isDefaultFolder(final String folderFullName) throws MailException {
+    public boolean isDefaultFolder(final String folderFullName) throws OXException {
         boolean isDefaultFolder = false;
         isDefaultFolder = (folderFullName.equalsIgnoreCase(INBOX));
         for (int index = 0; (index < 6) && !isDefaultFolder; index++) {
@@ -163,9 +164,9 @@ public final class IMAPDefaultFolderChecker {
      * 
      * @param index The default folder index taken from class <code>StorageUtility</code>
      * @return The default folder for specified index
-     * @throws MailException If default folder retrieval fails
+     * @throws OXException If default folder retrieval fails
      */
-    public String getDefaultFolder(final int index) throws MailException {
+    public String getDefaultFolder(final int index) throws OXException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         final String key = MailSessionParameterNames.getParamDefaultFolderChecked();
         if (!isDefaultFoldersChecked(key, mailSessionCache)) {
@@ -191,9 +192,9 @@ public final class IMAPDefaultFolderChecker {
     /**
      * Checks default folders.
      * 
-     * @throws MailException If default folder check fails
+     * @throws OXException If default folder check fails
      */
-    public void checkDefaultFolders() throws MailException {
+    public void checkDefaultFolders() throws OXException {
         checkDefaultFolders(MailSessionParameterNames.getParamDefaultFolderChecked(), MailSessionCache.getInstance(session));
     }
 
@@ -202,7 +203,7 @@ public final class IMAPDefaultFolderChecker {
         return null == lock ? session : lock;
     }
 
-    private void checkDefaultFolders(final String key, final MailSessionCache mailSessionCache) throws MailException {
+    private void checkDefaultFolders(final String key, final MailSessionCache mailSessionCache) throws OXException {
         if (!isDefaultFoldersChecked(key, mailSessionCache)) {
             synchronized (getLockObject()) {
                 if (isDefaultFoldersChecked(key, mailSessionCache)) {
@@ -286,9 +287,9 @@ public final class IMAPDefaultFolderChecker {
                         final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
                         isSpamOptionEnabled = usm.isSpamOptionEnabled();
                     } catch (final OXException e) {
-                        throw new MailException(e);
+                        throw new OXException(e);
                     } catch (final OXException e) {
-                        throw new MailException(e);
+                        throw new OXException(e);
                     }
                     /*
                      * Check default folders
@@ -369,8 +370,8 @@ public final class IMAPDefaultFolderChecker {
                             final Future<Object> f = completionFuture.take();
                             if (null == f) {
                                 // Waiting time elapsed
-                                throw new MailException(
-                                    MailException.Code.DEFAULT_FOLDER_CHECK_FAILED,
+                                throw new OXException(
+                                    MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED,
                                     imapConfig.getServer(),
                                     imapConfig.getLogin(),
                                     Integer.valueOf(session.getUserId()),
@@ -384,9 +385,9 @@ public final class IMAPDefaultFolderChecker {
                                     /*
                                      * Mandatory for primary mail account
                                      */
-                                    throw ThreadPools.launderThrowable(e, MailException.class);
+                                    throw ThreadPools.launderThrowable(e, OXException.class);
                                 }
-                                final MailException me = ThreadPools.launderThrowable(e, MailException.class);
+                                final OXException me = ThreadPools.launderThrowable(e, OXException.class);
                                 LOG.warn(new StringBuilder(128).append("A default folder could not be created on IMAP server ").append(
                                     imapConfig.getServer()).append(" for login ").append(imapConfig.getLogin()).append(" (user=").append(
                                     session.getUserId()).append(", context=").append(session.getContextId()).append("): ").append(
@@ -395,7 +396,7 @@ public final class IMAPDefaultFolderChecker {
                         }
                     } catch (final InterruptedException e) {
                         // Keep interrupted status
-                        throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                        throw MailExceptionCode.INTERRUPT_ERROR.create(e);
                     }
                     if (DEBUG) {
                         LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
@@ -412,7 +413,7 @@ public final class IMAPDefaultFolderChecker {
     private void submitFolderCheckTask(final List<Task<Object>> tasks, final int index, final String prefix, final String fullname, final String defaultFolderName, final char sep, final int type, final int subscribe, final MailSessionCache mailSessionCache) {
         tasks.add(new AbstractCallable(imapConfig, session) {
 
-            public Object call() throws MailException {
+            public Object call() throws OXException {
                 try {
                     if (null == fullname || 0 == fullname.length()) {
                         setDefaultMailFolder(
@@ -543,7 +544,7 @@ public final class IMAPDefaultFolderChecker {
     /**
      * Internally used by {@link IMAPDefaultFolderChecker}.
      */
-    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname) throws MessagingException, MailException {
+    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname) throws MessagingException, OXException {
         /*
          * Check default folder
          */

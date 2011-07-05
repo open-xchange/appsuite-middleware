@@ -49,7 +49,7 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
@@ -74,7 +74,7 @@ public final class SMTPBodyPart extends TextBodyMailPart {
     }
 
     @Override
-    public TextBodyMailPart copy() throws MailException {
+    public TextBodyMailPart copy() throws OXException {
         final SMTPBodyPart copy = new SMTPBodyPart("");
         fillInstance(copy);
         return copy;

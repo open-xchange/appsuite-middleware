@@ -55,7 +55,7 @@ import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -247,7 +247,7 @@ public final class ImapIdlePushListener implements PushListener {
             }
         } catch (final OXException e) {
             throw new PushException(e);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         }
         imapIdleFuture = threadPoolService.submit(ThreadPools.task(new ImapIdlePushListenerTask(this)));
@@ -324,7 +324,7 @@ public final class ImapIdlePushListener implements PushListener {
             } finally {
                 inbox.close(false);
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             // throw new PushException(e);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
             if (DEBUG_ENABLED) {

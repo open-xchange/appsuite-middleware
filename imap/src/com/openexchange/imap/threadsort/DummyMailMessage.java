@@ -51,7 +51,7 @@ package com.openexchange.imap.threadsort;
 
 import java.io.InputStream;
 import javax.activation.DataHandler;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 
@@ -97,32 +97,32 @@ final class DummyMailMessage extends MailMessage {
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         throw new UnsupportedOperationException("DummyMailMessage.getContent()");
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         throw new UnsupportedOperationException("DummyMailMessage.getDataHandler()");
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         throw new UnsupportedOperationException("DummyMailMessage.getEnclosedMailPart()");
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         throw new UnsupportedOperationException("DummyMailMessage.getInputStream()");
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         // Nothing to do
     }
 

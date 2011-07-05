@@ -50,7 +50,8 @@
 package com.openexchange.mail.transport;
 
 import javax.mail.Address;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -70,9 +71,9 @@ public abstract class MailTransport {
      * Triggers all implementation-specific startup actions; especially its configuration initialization
      * 
      * @param transport A {@link MailTransport transport}
-     * @throws MailException If implementation start-up fails
+     * @throws OXException If implementation start-up fails
      */
-    static final void startupImpl(final MailTransport transport) throws MailException {
+    static final void startupImpl(final MailTransport transport) throws OXException {
         transport.startup();
     }
 
@@ -80,9 +81,9 @@ public abstract class MailTransport {
      * Triggers all implementation-specific shutdown actions; especially its configuration shut-down
      * 
      * @param transport A {@link MailTransport transport}
-     * @throws MailException If implementation shut-down fails
+     * @throws OXException If implementation shut-down fails
      */
-    static final void shutdownImpl(final MailTransport transport) throws MailException {
+    static final void shutdownImpl(final MailTransport transport) throws OXException {
         transport.shutdown();
     }
 
@@ -102,9 +103,9 @@ public abstract class MailTransport {
      * 
      * @param session The session
      * @return A proper instance of {@link MailTransport}
-     * @throws MailException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    public static final MailTransport getInstance(final Session session) throws MailException {
+    public static final MailTransport getInstance(final Session session) throws OXException {
         return getInstance(session, MailAccount.DEFAULT_ID);
     }
 
@@ -124,14 +125,14 @@ public abstract class MailTransport {
      * 
      * @param session The session
      * @return A proper instance of {@link MailTransport}
-     * @throws MailException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    public static final MailTransport getInstance(final Session session, final int accountId) throws MailException {
+    public static final MailTransport getInstance(final Session session, final int accountId) throws OXException {
         /*
          * Check for proper initialization
          */
         if (!TransportInitialization.getInstance().isInitialized()) {
-            throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
+            throw MailExceptionCode.INITIALIZATION_PROBLEM.create();
         }
         /*
          * Create a new mail transport through user's transport provider
@@ -149,9 +150,9 @@ public abstract class MailTransport {
      * @param transportMail The mail message to send (containing necessary header data and body)
      * @param sendType The send type
      * @return The sent mail message
-     * @throws MailException If transport fails
+     * @throws OXException If transport fails
      */
-    public MailMessage sendMailMessage(final ComposedMailMessage transportMail, final ComposeType sendType) throws MailException {
+    public MailMessage sendMailMessage(final ComposedMailMessage transportMail, final ComposeType sendType) throws OXException {
         return sendMailMessage(transportMail, sendType, null);
     }
 
@@ -163,9 +164,9 @@ public abstract class MailTransport {
      * @param allRecipients An array of {@link Address addresses} to send this message to; may be <code>null</code> to extract recipients
      *            from message headers TO, CC, BCC, and NEWSGROUPS.
      * @return The sent mail message
-     * @throws MailException If transport fails
+     * @throws OXException If transport fails
      */
-    public abstract MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType, Address[] allRecipients) throws MailException;
+    public abstract MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType, Address[] allRecipients) throws OXException;
 
     /**
      * Sends specified message's raw ascii bytes. The given bytes are interpreted dependent on implementation, but in most cases it's
@@ -176,9 +177,9 @@ public abstract class MailTransport {
      * 
      * @param asciiBytes The raw ascii bytes
      * @return The sent mail message
-     * @throws MailException If sending fails
+     * @throws OXException If sending fails
      */
-    public MailMessage sendRawMessage(final byte[] asciiBytes) throws MailException {
+    public MailMessage sendRawMessage(final byte[] asciiBytes) throws OXException {
         return sendRawMessage(asciiBytes, null);
     }
 
@@ -190,9 +191,9 @@ public abstract class MailTransport {
      * @param allRecipients An array of {@link Address addresses} to send this message to; may be <code>null</code> to extract recipients
      *            from message headers TO, CC, BCC, and NEWSGROUPS.
      * @return The sent mail message
-     * @throws MailException If sending fails
+     * @throws OXException If sending fails
      */
-    public abstract MailMessage sendRawMessage(byte[] asciiBytes, Address[] allRecipients) throws MailException;
+    public abstract MailMessage sendRawMessage(byte[] asciiBytes, Address[] allRecipients) throws OXException;
 
     /**
      * Sends a receipt acknowledgment for the specified message.
@@ -200,50 +201,50 @@ public abstract class MailTransport {
      * @param srcMail The source mail
      * @param fromAddr The from address (as unicode string). If set to <code>null</code>, user's default email address is used as value for
      *            header <code>From</code>
-     * @throws MailException If transport fails
+     * @throws OXException If transport fails
      */
-    public abstract void sendReceiptAck(MailMessage srcMail, String fromAddr) throws MailException;
+    public abstract void sendReceiptAck(MailMessage srcMail, String fromAddr) throws OXException;
 
     /**
      * Pings the transport server to check if a connection can be established.
      * 
-     * @throws MailException If the ping fails
+     * @throws OXException If the ping fails
      */
-    public abstract void ping() throws MailException;
+    public abstract void ping() throws OXException;
 
     /**
      * Closes this mail transport
      * 
-     * @throws MailException If closing fails
+     * @throws OXException If closing fails
      */
-    public abstract void close() throws MailException;
+    public abstract void close() throws OXException;
 
     /**
      * Returns the transport configuration appropriate for current user. It provides needed connection and login information.
      * 
      * @return The transport configuration
      */
-    public abstract TransportConfig getTransportConfig() throws MailException;
+    public abstract TransportConfig getTransportConfig() throws OXException;
 
     /**
      * Trigger all necessary startup actions; especially configuration start-up
      * 
-     * @throws MailException If startup actions fail
+     * @throws OXException If startup actions fail
      */
-    protected abstract void startup() throws MailException;
+    protected abstract void startup() throws OXException;
 
     /**
      * Trigger all necessary shutdown actions; especially configuration shut-down
      * 
-     * @throws MailException If shutdown actions fail
+     * @throws OXException If shutdown actions fail
      */
-    protected abstract void shutdown() throws MailException;
+    protected abstract void shutdown() throws OXException;
 
     /**
      * Gets an implementation-specific new instance of {@link ITransportProperties}.
      * 
      * @return An implementation-specific new instance of {@link ITransportProperties}
-     * @throws MailException If creating a new instance of {@link ITransportProperties} fails
+     * @throws OXException If creating a new instance of {@link ITransportProperties} fails
      */
-    protected abstract ITransportProperties createNewMailProperties() throws MailException;
+    protected abstract ITransportProperties createNewMailProperties() throws OXException;
 }

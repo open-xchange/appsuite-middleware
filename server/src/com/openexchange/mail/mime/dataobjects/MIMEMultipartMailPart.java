@@ -62,7 +62,8 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -107,9 +108,9 @@ public final class MIMEMultipartMailPart extends MailPart {
      * Initializes a new {@link MIMEMultipartMailPart}.
      * 
      * @param dataSource The data source
-     * @throws MailException If reading input stream fails
+     * @throws OXException If reading input stream fails
      */
-    public MIMEMultipartMailPart(final DataSource dataSource) throws MailException {
+    public MIMEMultipartMailPart(final DataSource dataSource) throws OXException {
         this(null, dataSource);
     }
 
@@ -118,15 +119,15 @@ public final class MIMEMultipartMailPart extends MailPart {
      * 
      * @param contentType The content type; may be <code>null</code>
      * @param dataSource The data source
-     * @throws MailException If reading input stream fails
+     * @throws OXException If reading input stream fails
      */
-    public MIMEMultipartMailPart(final ContentType contentType, final DataSource dataSource) throws MailException {
+    public MIMEMultipartMailPart(final ContentType contentType, final DataSource dataSource) throws OXException {
         super();
         if (contentType == null) {
             try {
                 setContentType(extractHeader(STR_CONTENT_TYPE, dataSource.getInputStream(), true));
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         } else {
             setContentType(contentType);
@@ -138,9 +139,9 @@ public final class MIMEMultipartMailPart extends MailPart {
      * Initializes a new {@link MIMEMultipartMailPart}.
      * 
      * @param inputData The input data
-     * @throws MailException If reading input stream fails
+     * @throws OXException If reading input stream fails
      */
-    public MIMEMultipartMailPart(final byte[] inputData) throws MailException {
+    public MIMEMultipartMailPart(final byte[] inputData) throws OXException {
         this(null, inputData);
     }
 
@@ -149,15 +150,15 @@ public final class MIMEMultipartMailPart extends MailPart {
      * 
      * @param contentType The content type; may be <code>null</code>
      * @param inputData The input data
-     * @throws MailException If reading input stream fails
+     * @throws OXException If reading input stream fails
      */
-    public MIMEMultipartMailPart(final ContentType contentType, final byte[] inputData) throws MailException {
+    public MIMEMultipartMailPart(final ContentType contentType, final byte[] inputData) throws OXException {
         super();
         if (contentType == null) {
             try {
                 setContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(inputData), false));
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         } else {
             setContentType(contentType);
@@ -166,17 +167,17 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         return null;
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return null;
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         if (count != -1) {
             return count;
         }
@@ -185,7 +186,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         try {
             dataBytes = dataAccess.full();
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
         count = 0;
         positions = new int[5];
@@ -224,7 +225,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 }
             }
         } catch (final ArrayIndexOutOfBoundsException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, new StringBuilder(64).append(
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, new StringBuilder(64).append(
                 "Illegal access to multipart data at index ").append(e.getMessage()).append(", but total length is ").append(
                 dataBytes.length).toString());
         }
@@ -319,7 +320,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         getEnclosedCount();
         if (index < 0 || index >= count) {
             throw new IndexOutOfBoundsException(String.valueOf(index));
@@ -377,11 +378,11 @@ public final class MIMEMultipartMailPart extends MailPart {
                 return MIMEMessageConverter.convertPart(subArr);
             }
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static MailPart createTextPart() throws MailException {
+    private static MailPart createTextPart() throws OXException {
         try {
             final MimeBodyPart mbp = new MimeBodyPart();
             mbp.setText("", "US-ASCII");
@@ -393,7 +394,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
     }
 
-    private static MailPart createTextPart(final byte[] subArr, final String charset) throws UnsupportedEncodingException, MailException {
+    private static MailPart createTextPart(final byte[] subArr, final String charset) throws UnsupportedEncodingException, OXException {
         try {
             final MimeBodyPart mbp = new MimeBodyPart();
             mbp.setText(new String(subArr, charset), charset);
@@ -408,16 +409,16 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         return null;
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         try {
             dataAccess.load();
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -427,11 +428,11 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws MailException {
+    public void writeTo(final OutputStream out) throws OXException {
         try {
             dataAccess.writeTo(out);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -476,7 +477,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
         try {
             loadContent();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             final IOException ioex = new IOException(e.getMessage());
             ioex.initCause(e);
             throw ioex;

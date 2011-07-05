@@ -54,7 +54,7 @@ import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
@@ -112,9 +112,9 @@ public abstract class Entity2ACL {
      * @param imapConfig The user's IMAP configuration
      * @return an instance implementing the {@link Entity2ACL} interface.
      * @throws Entity2ACLException if the instance can't be created.
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static final Entity2ACL getInstance(final IMAPStore imapStore, final IMAPConfig imapConfig) throws Entity2ACLException, MailException {
+    public static final Entity2ACL getInstance(final IMAPStore imapStore, final IMAPConfig imapConfig) throws Entity2ACLException, OXException {
         if (instantiated && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
             /*
              * Auto-detection is turned off, return configured implementation

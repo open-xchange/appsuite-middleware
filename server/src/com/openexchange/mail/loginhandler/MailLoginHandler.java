@@ -59,7 +59,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -99,7 +99,7 @@ public final class MailLoginHandler implements LoginHandlerService {
             }
         } catch (final UserConfigurationException e) {
             throw new LoginException(e);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         } catch (final DataRetentionException e) {
             throw new LoginException(e);
@@ -110,7 +110,7 @@ public final class MailLoginHandler implements LoginHandlerService {
         // Time-out mail access cache
         try {
             MailAccess.getMailAccessCache().clearUserEntries(logout.getSession());
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         }
     }

@@ -71,7 +71,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -278,7 +278,7 @@ public final class MailFolderImpl extends AbstractFolder {
                         } else {
                             mailFolderType = MailFolderType.NONE;
                         }
-                    } catch (final MailException e) {
+                    } catch (final OXException e) {
                         org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class).error(e.getMessage(), e);
                         mailFolderType = MailFolderType.NONE;
                     }
@@ -381,7 +381,7 @@ public final class MailFolderImpl extends AbstractFolder {
         try {
             mailAccess = MailAccess.getInstance(userId, contextId, accountId);
             mailAccess.connect(false);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (DEBUG) {
                 LOG.debug("Obtaining/connecting MauilAccess instance failed. Cannot return up-to-date unread counter.", e);
             }
@@ -393,7 +393,7 @@ public final class MailFolderImpl extends AbstractFolder {
                 return ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(ensureFullName(fullName));
             }
             return mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (DEBUG) {
                 LOG.debug("Cannot return up-to-date unread counter.", e);
             }
@@ -414,7 +414,7 @@ public final class MailFolderImpl extends AbstractFolder {
         try {
             mailAccess = MailAccess.getInstance(userId, contextId, accountId);
             mailAccess.connect(false);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (DEBUG) {
                 LOG.debug("Obtaining/connecting MailAccess instance failed. Cannot return up-to-date total counter.", e);
             }
@@ -426,7 +426,7 @@ public final class MailFolderImpl extends AbstractFolder {
                 return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(ensureFullName(fullName));
             }
             return mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (DEBUG) {
                 LOG.debug("Cannot return up-to-date total counter.", e);
             }

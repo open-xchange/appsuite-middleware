@@ -59,7 +59,8 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
@@ -104,8 +105,8 @@ public class Trash implements PreferencesItemService {
                 try {
                     mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getTrashFolder(MailAccount.DEFAULT_ID));
-                } catch (final MailException e) {
-                    if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                } catch (final OXException e) {
+                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
                         // Admin has no mail access
                         setting.setSingleValue(null);
                     } else {
@@ -115,7 +116,7 @@ public class Trash implements PreferencesItemService {
                     if (mail != null) {
                         try {
                             mail.close(true);
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }

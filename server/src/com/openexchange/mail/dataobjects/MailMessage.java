@@ -60,7 +60,8 @@ import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -235,16 +236,16 @@ public abstract class MailMessage extends MailPart {
      * 
      * @param cl The color label's string representation
      * @return The color label's <code>int</code> value
-     * @throws MailException
+     * @throws OXException
      */
-    public static int getColorLabelIntValue(final String cl) throws MailException {
+    public static int getColorLabelIntValue(final String cl) throws OXException {
         if (!isColorLabel(cl)) {
-            throw new MailException(MailException.Code.UNKNOWN_COLOR_LABEL, cl);
+            throw MailExceptionCode.UNKNOWN_COLOR_LABEL.create(cl);
         }
         try {
             return Integer.parseInt(cl.substring(cl.charAt(0) == '$' ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (final NumberFormatException e) {
-            throw new MailException(MailException.Code.UNKNOWN_COLOR_LABEL, e, cl);
+            throw MailExceptionCode.UNKNOWN_COLOR_LABEL.create(e, cl);
         }
     }
 
@@ -819,11 +820,11 @@ public abstract class MailMessage extends MailPart {
      * 
      * @param flag The system flag to set
      * @param enable <code>true</code> to enable; otherwise <code>false</code>
-     * @throws MailException If an illegal flag argument is specified
+     * @throws OXException If an illegal flag argument is specified
      */
-    public void setFlag(final int flag, final boolean enable) throws MailException {
+    public void setFlag(final int flag, final boolean enable) throws OXException {
         if ((flag == 1) || ((flag % 2) != 0)) {
-            throw new MailException(MailException.Code.ILLEGAL_FLAG_ARGUMENT, Integer.valueOf(flag));
+            throw MailExceptionCode.ILLEGAL_FLAG_ARGUMENT.create(Integer.valueOf(flag));
         }
         flags = enable ? (flags | flag) : (flags & ~flag);
         b_flags = true;

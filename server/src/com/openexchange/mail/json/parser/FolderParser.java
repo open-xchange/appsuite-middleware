@@ -64,7 +64,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -94,9 +95,9 @@ public final class FolderParser {
      * @param mailFolder The mail folder (target), which should be empty
      * @param session The session
      * @param accountId The account ID
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailFolderDescription mailFolder, final Session session, final int accountId) throws MailException {
+    public static void parse(final JSONObject jsonObj, final MailFolderDescription mailFolder, final Session session, final int accountId) throws OXException {
         try {
             if (jsonObj.has(FolderFields.TITLE)) {
                 mailFolder.setName(jsonObj.getString(FolderFields.TITLE));
@@ -108,7 +109,7 @@ public final class FolderParser {
             }
             if (jsonObj.has(FolderFields.MODULE) && !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(AJAXServlet.MODULE_MAIL)) {
 
-                throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.MODULE);
+                throw MailExceptionCode.MISSING_PARAMETER.create(FolderFields.MODULE);
             }
             if (jsonObj.hasAndNotNull(FolderFields.SUBSCRIBED)) {
                 try {
@@ -130,7 +131,7 @@ public final class FolderParser {
                     for (int i = 0; i < len; i++) {
                         final JSONObject elem = jsonArr.getJSONObject(i);
                         if (!elem.has(FolderFields.ENTITY)) {
-                            throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.ENTITY);
+                            throw MailExceptionCode.MISSING_PARAMETER.create(FolderFields.ENTITY);
                         }
                         int entity;
                         try {
@@ -140,18 +141,18 @@ public final class FolderParser {
                             try {
                                 entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
                             } catch (final OXException e1) {
-                                throw new MailException(e1);
+                                throw new OXException(e1);
                             }
                         }
                         final MailPermission mailPerm = provider.createNewMailPermission();
                         mailPerm.setEntity(entity);
                         if (!elem.has(FolderFields.BITS)) {
-                            throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.BITS);
+                            throw MailExceptionCode.MISSING_PARAMETER.create(FolderFields.BITS);
                         }
                         final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
                         if (!mailPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2], permissionBits[3])) {
-                            throw new MailException(
-                                MailException.Code.INVALID_PERMISSION,
+                            throw new OXException(
+                                MailExceptionCode.INVALID_PERMISSION,
                                 Integer.valueOf(permissionBits[0]),
                                 Integer.valueOf(permissionBits[1]),
                                 Integer.valueOf(permissionBits[2]),
@@ -159,7 +160,7 @@ public final class FolderParser {
                         }
                         mailPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
                         if (!elem.has(FolderFields.GROUP)) {
-                            throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.GROUP);
+                            throw MailExceptionCode.MISSING_PARAMETER.create(FolderFields.GROUP);
                         }
                         mailPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
                         mailPerms.add(mailPerm);
@@ -168,9 +169,9 @@ public final class FolderParser {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final LdapException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 

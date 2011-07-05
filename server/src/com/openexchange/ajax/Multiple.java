@@ -71,7 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
@@ -144,7 +144,7 @@ public class Multiple extends SessionServlet {
             if (mi != null) {
                 try {
                     mi.close(true);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }

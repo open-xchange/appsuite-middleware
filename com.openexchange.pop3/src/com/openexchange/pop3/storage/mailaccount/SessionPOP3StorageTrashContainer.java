@@ -57,7 +57,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
@@ -79,9 +80,9 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
      * 
      * @param pop3Access The POP3 access
      * @return The trash container bound to specified POP3 access
-     * @throws MailException If instance cannot be returned
+     * @throws OXException If instance cannot be returned
      */
-    public static SessionPOP3StorageTrashContainer getInstance(final POP3Access pop3Access) throws MailException {
+    public static SessionPOP3StorageTrashContainer getInstance(final POP3Access pop3Access) throws OXException {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getTrashContainer(pop3Access.getAccountId());
         SessionPOP3StorageTrashContainer cached;
@@ -129,7 +130,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
     private final Map<String, Object> set;
 
-    private SessionPOP3StorageTrashContainer(final POP3StorageTrashContainer delegatee, final Session session, final String key) throws MailException {
+    private SessionPOP3StorageTrashContainer(final POP3StorageTrashContainer delegatee, final Session session, final String key) throws OXException {
         super();
         rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
@@ -144,7 +145,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         init();
     }
 
-    private void init() throws MailException {
+    private void init() throws OXException {
         final Set<String> tmp = delegatee.getUIDLs();
         for (final String uidl : tmp) {
             set.put(uidl, PRESENT);
@@ -152,10 +153,10 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         mode[0] = 0;
     }
 
-    private void checkInit(final Lock obtainedReadLock) throws MailException {
+    private void checkInit(final Lock obtainedReadLock) throws OXException {
         final int m = mode[0];
         if (-1 == m) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, "Error mode. Try again.");
+            throw MailExceptionCode.UNEXPECTED_ERROR.create("Error mode. Try again.");
         }
         if (1 == m) {
             /*
@@ -179,7 +180,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
-    public void addUIDL(final String uidl) throws MailException {
+    public void addUIDL(final String uidl) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -191,7 +192,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
-    public void clear() throws MailException {
+    public void clear() throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -203,7 +204,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
-    public Set<String> getUIDLs() throws MailException {
+    public Set<String> getUIDLs() throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -216,7 +217,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
-    public void removeUIDL(final String uidl) throws MailException {
+    public void removeUIDL(final String uidl) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -228,7 +229,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
-    public void addAllUIDL(final Collection<? extends String> uidls) throws MailException {
+    public void addAllUIDL(final Collection<? extends String> uidls) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {

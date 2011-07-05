@@ -72,7 +72,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -530,13 +530,13 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                         retval[pos] = mail;
                     } catch (final MessagingException e) {
                         if (WARN) {
-                            final MailException imapExc = MIMEMailException.handleMessagingException(e);
+                            final OXException imapExc = MIMEMailException.handleMessagingException(e);
                             LOG.warn(
                                 new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(
                                     imapExc.getMessage()).toString(),
                                 imapExc);
                         }
-                    } catch (final MailException e) {
+                    } catch (final OXException e) {
                         if (WARN) {
                             LOG.warn(
                                 new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
@@ -633,13 +633,13 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
              * Discard corrupt message
              */
             if (WARN) {
-                final MailException imapExc = MIMEMailException.handleMessagingException(e);
+                final OXException imapExc = MIMEMailException.handleMessagingException(e);
                 LOG.warn(
                     new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(imapExc.getMessage()).toString(),
                     imapExc);
             }
             error = true;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
@@ -777,11 +777,11 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
          * @param msg The message to apply to
          * @param logger The logger
          * @throws MessagingException If a messaging error occurs
-         * @throws MailException If a mail error occurs
+         * @throws OXException If a mail error occurs
          */
-        void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException;
+        void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException;
 
-        void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException;
+        void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException;
     }
 
     private static final String MULTI_SUBTYPE_MIXED = "MIXED";
@@ -792,7 +792,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private interface HeaderHandler {
 
-        void handle(Header hdr, IDMailMessage mailMessage) throws MailException;
+        void handle(Header hdr, IDMailMessage mailMessage) throws OXException;
 
     }
 
@@ -803,43 +803,43 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             {
                 put(MessageHeaders.HDR_FROM, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         mailMessage.addFrom(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_TO, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         mailMessage.addTo(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_CC, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         mailMessage.addCc(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_BCC, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         mailMessage.addBcc(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_DISP_NOT_TO, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         mailMessage.setDispositionNotification(MIMEMessageConverter.getAddressHeader(hdr.getValue())[0]);
                     }
                 });
                 put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         mailMessage.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(MIMEMessageUtility.checkNonAscii(hdr.getValue())));
                     }
                 });
                 put(MessageHeaders.HDR_DATE, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         final MailDateFormat mdf = MIMEMessageUtility.getDefaultMailDateFormat();
                         synchronized (mdf) {
                             try {
@@ -852,7 +852,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 });
                 put(MessageHeaders.HDR_IMPORTANCE, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         final String value = hdr.getValue();
                         if (null != value) {
                             mailMessage.setPriority(MIMEMessageConverter.parseImportance(value));
@@ -861,7 +861,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 });
                 put(MessageHeaders.HDR_X_PRIORITY, new HeaderHandler() {
 
-                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         if (!mailMessage.containsPriority()) {
                             mailMessage.setPriority(MIMEMessageConverter.parsePriority(hdr.getValue()));
                         }
@@ -870,7 +870,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             }
         };
 
-        public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
+        public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             final InternetHeaders h;
             {
                 final InputStream headerStream;
@@ -923,7 +923,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             }
         }
 
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             for (final Enumeration<?> e = message.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
@@ -994,7 +994,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     if (MailMessage.isColorLabel(userFlag)) {
                         try {
                             colorLabel = MailMessage.getColorLabelIntValue(userFlag);
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             // Cannot occur
                             colorLabel = MailMessage.COLOR_LABEL_NONE;
                         }
@@ -1057,7 +1057,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     if (MailMessage.isColorLabel(userFlag)) {
                         try {
                             colorLabel = MailMessage.getColorLabelIntValue(userFlag);
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             // Cannot occur
                             colorLabel = MailMessage.COLOR_LABEL_NONE;
                         }
@@ -1160,7 +1160,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
 
-        public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MailException {
+        public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             final StringBuilder sb = new StringBuilder();
             sb.append(bs.type).append('/').append(bs.subtype);
@@ -1171,7 +1171,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 final String contentType = sb.toString();
                 msg.setContentType(new ContentType(contentType));
                 msg.addHeader("Content-Type", contentType);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(e.getMessage(), e);
                 }
@@ -1181,7 +1181,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MIMEMessageUtility.hasAttachments(bs)));
         }
 
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             String contentType;
             try {
                 contentType = message.getContentType();

@@ -104,7 +104,8 @@ import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -290,9 +291,9 @@ public class MIMEMessageFiller {
      * @param mail The composed mail
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws MessagingException, MailException {
+    public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws MessagingException, OXException {
         /*
          * Set from/sender
          */
@@ -344,9 +345,9 @@ public class MIMEMessageFiller {
                     aliases.add(new QuotedInternetAddress(alias));
                 }
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             } catch (final UserException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             }
             /*
              * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
@@ -553,9 +554,9 @@ public class MIMEMessageFiller {
      * 
      * @param mail The source mail
      * @param mimeMessage The MIME message
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public void setSendHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws MailException {
+    public void setSendHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws OXException {
         try {
             /*
              * Set the Reply-To header for future replies to this new message
@@ -598,10 +599,10 @@ public class MIMEMessageFiller {
      * @param mimeMessage The MIME message to fill
      * @param type The compose type
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type) throws MessagingException, MailException, IOException {
+    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type) throws MessagingException, OXException, IOException {
         /*
          * Store some flags
          */
@@ -781,7 +782,7 @@ public class MIMEMessageFiller {
                     if (mail.isDraft()) {
                         mimeMessage.setHeader(MessageHeaders.HDR_X_OX_VCARD, "true");
                     }
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error(VCARD_ERROR, e);
                 }
             }
@@ -890,9 +891,9 @@ public class MIMEMessageFiller {
      * 
      * @param charset The charset to use for returned string
      * @return The session user's VCard as a string
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    protected final String getUserVCard(final String charset) throws MailException {
+    protected final String getUserVCard(final String charset) throws OXException {
         final User userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
         Connection readCon = null;
         try {
@@ -910,9 +911,9 @@ public class MIMEMessageFiller {
                             UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx),
                             readCon);
                 } catch (final OXException oxExc) {
-                    throw new MailException(oxExc);
+                    throw new OXException(oxExc);
                 } catch (final Exception e) {
-                    throw new MailException(MailException.Code.VERSIT_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
                 }
                 final VersitObject versitObj = converter.convertContact(contactObj, "2.1");
                 final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream();
@@ -930,11 +931,11 @@ public class MIMEMessageFiller {
                 converter.close();
             }
         } catch (final ConverterException e) {
-            throw new MailException(MailException.Code.VERSIT_ERROR, e, e.getMessage());
+            throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
         } catch (final AbstractOXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -947,10 +948,10 @@ public class MIMEMessageFiller {
      *            is going to be created ); otherwise <code>false</code>.
      * @param textBodyPart The text body part
      * @return An appropriate "multipart/alternative" object.
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
      */
-    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final TextBodyMailPart textBodyPart) throws MailException, MessagingException {
+    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final TextBodyMailPart textBodyPart) throws OXException, MessagingException {
         /*
          * Create an "alternative" multipart
          */
@@ -1004,9 +1005,9 @@ public class MIMEMessageFiller {
      * @param htmlContent An array of {@link String} with length <code>1</code> serving as a container for altered HTML content
      * @return The created "multipart/related" object
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    protected Multipart createMultipartRelated(final ComposedMailMessage mail, final String mailBody, final String[] htmlContent) throws MessagingException, MailException {
+    protected Multipart createMultipartRelated(final ComposedMailMessage mail, final String mailBody, final String[] htmlContent) throws MessagingException, OXException {
         /*
          * Create "related" multipart
          */
@@ -1048,7 +1049,7 @@ public class MIMEMessageFiller {
         return relatedMultipart;
     }
 
-    protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline) throws MessagingException, MailException, IOException {
+    protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline) throws MessagingException, OXException, IOException {
         if (part.getContentType().startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
             // TODO: Works correctly?
             final StringBuilder sb = new StringBuilder(32);
@@ -1113,7 +1114,7 @@ public class MIMEMessageFiller {
         mp.addBodyPart(messageBodyPart);
     }
 
-    protected void addNestedMessage(final MailPart mailPart, final Multipart primaryMultipart, final StringBuilder sb, final ByteArrayOutputStream out, final byte[] bbuf) throws MailException, IOException, MessagingException {
+    protected void addNestedMessage(final MailPart mailPart, final Multipart primaryMultipart, final StringBuilder sb, final ByteArrayOutputStream out, final byte[] bbuf) throws OXException, IOException, MessagingException {
         final byte[] rfcBytes;
         {
             final InputStream in = mailPart.getInputStream();
@@ -1151,7 +1152,7 @@ public class MIMEMessageFiller {
             Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
     }
 
-    private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename, final boolean inline) throws MessagingException, MailException {
+    private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename, final boolean inline) throws MessagingException, OXException {
         /*
          * Create a body part for original message
          */
@@ -1236,9 +1237,9 @@ public class MIMEMessageFiller {
      * @param htmlService The HTML service
      * @return A body part of type <code>text/html</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If an I/O error occurs
+     * @throws OXException If an I/O error occurs
      */
-    protected final static BodyPart createHtmlBodyPart(final String htmlContent, final HTMLService htmlService) throws MessagingException, MailException {
+    protected final static BodyPart createHtmlBodyPart(final String htmlContent, final HTMLService htmlService) throws MessagingException, OXException {
         final ContentType htmlCT =
             new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
         final MimeBodyPart html = new MimeBodyPart();
@@ -1261,9 +1262,9 @@ public class MIMEMessageFiller {
      * @param msgFiller The message filler
      * @return the replaced html content
      * @throws MessagingException If appending as body part fails
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MIMEMessageFiller msgFiller) throws MessagingException, MailException {
+    protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MIMEMessageFiller msgFiller) throws MessagingException, OXException {
         final Matcher m = MIMEMessageUtility.PATTERN_REF_IMG.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length());
@@ -1320,8 +1321,8 @@ public class MIMEMessageFiller {
                     }
                     try {
                         imageProvider = new ImageDataImageProvider(imageData, session);
-                    } catch (final MailException e) {
-                        if (MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                    } catch (final OXException e) {
+                        if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getDetailNumber()) {
                             tmp.setLength(0);
                             mr.appendLiteralReplacement(
                                 sb,
@@ -1366,9 +1367,9 @@ public class MIMEMessageFiller {
      * @param mp The parental instance of {@link Multipart}
      * @return the content id
      * @throws MessagingException If appending as body part fails
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    private final static String processLocalImage(final ImageProvider imageProvider, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, MailException {
+    private final static String processLocalImage(final ImageProvider imageProvider, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, OXException {
         /*
          * Determine filename
          */
@@ -1432,9 +1433,9 @@ public class MIMEMessageFiller {
      * @param cid The <code>Content-Id</code> of the image attachment
      * @param mail The mail containing the image attachment
      * @return The removed image attachment
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    protected final static MailPart getAndRemoveImageAttachment(final String cid, final ComposedMailMessage mail) throws MailException {
+    protected final static MailPart getAndRemoveImageAttachment(final String cid, final ComposedMailMessage mail) throws OXException {
         final int size = mail.getEnclosedCount();
         for (int i = 0; i < size; i++) {
             final MailPart enclosedPart = mail.getEnclosedMailPart(i);
@@ -1445,7 +1446,7 @@ public class MIMEMessageFiller {
         return null;
     }
 
-    private static final boolean hasOnlyReferencedMailAttachments(final ComposedMailMessage mail, final int size) throws MailException {
+    private static final boolean hasOnlyReferencedMailAttachments(final ComposedMailMessage mail, final int size) throws OXException {
         for (int i = 0; i < size; i++) {
             final MailPart part = mail.getEnclosedMailPart(i);
             if (!ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) || !((ReferencedMailPart) part).isMail()) {
@@ -1459,7 +1460,7 @@ public class MIMEMessageFiller {
 
         public String getFileName();
 
-        public DataSource getDataSource() throws MailException;
+        public DataSource getDataSource() throws OXException;
 
         public String getContentType();
     } // End of ImageProvider
@@ -1477,7 +1478,7 @@ public class MIMEMessageFiller {
             return managedFile.getContentType();
         }
 
-        public DataSource getDataSource() throws MailException {
+        public DataSource getDataSource() throws OXException {
             return new FileDataSource(managedFile.getFile());
         }
 
@@ -1494,12 +1495,12 @@ public class MIMEMessageFiller {
 
         private final String fileName;
 
-        public ImageDataImageProvider(final ImageData imageData, final Session session) throws MailException {
+        public ImageDataImageProvider(final ImageData imageData, final Session session) throws OXException {
             super();
             try {
                 this.data = imageData.getImageData(session);
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             }
             final DataProperties dataProperties = data.getDataProperties();
             contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
@@ -1510,11 +1511,11 @@ public class MIMEMessageFiller {
             return contentType;
         }
 
-        public DataSource getDataSource() throws MailException {
+        public DataSource getDataSource() throws OXException {
             try {
                 return new MessageDataSource(data.getData(), contentType);
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }
 

@@ -444,6 +444,16 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Checks if this {@link OXException}'s prefix equals specified expected prefix.
+     * 
+     * @param expected The expected prefix to check against
+     * @return <code>true</code> if prefix equals specified expected prefix; otherwise <code>false</code>
+     */
+    public boolean isPrefix(final String expected) {
+        return (null == prefix ? PREFIX_GENERAL : prefix).equals(expected);
+    }
+
+    /**
      * Sets the prefix for the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
      * 
      * @param prefix The prefix

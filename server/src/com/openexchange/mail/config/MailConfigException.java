@@ -51,14 +51,15 @@ package com.openexchange.mail.config;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link MailConfigException} - Errors related to mail configuration
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailConfigException extends MailException {
+public final class MailConfigException extends OXException {
 
     /**
      * Serial version UID
@@ -80,9 +81,9 @@ public final class MailConfigException extends MailException {
     public MailConfigException(final String message, final Throwable cause) {
         super(
             EnumComponent.MAIL,
-            MailException.Code.CONFIG_ERROR.getCategory(),
-            MailException.Code.CONFIG_ERROR.getNumber(),
-            MailException.Code.CONFIG_ERROR.getMessage(),
+            MailExceptionCode.CONFIG_ERROR.getCategory(),
+            MailExceptionCode.CONFIG_ERROR.getNumber(),
+            MailExceptionCode.CONFIG_ERROR.getMessage(),
             cause);
         super.setMessageArgs(message);
     }
@@ -93,9 +94,9 @@ public final class MailConfigException extends MailException {
     public MailConfigException(final String message) {
         super(
             EnumComponent.MAIL,
-            MailException.Code.CONFIG_ERROR.getCategory(),
-            MailException.Code.CONFIG_ERROR.getNumber(),
-            MailException.Code.CONFIG_ERROR.getMessage(),
+            MailExceptionCode.CONFIG_ERROR.getCategory(),
+            MailExceptionCode.CONFIG_ERROR.getNumber(),
+            MailExceptionCode.CONFIG_ERROR.getMessage(),
             null);
         super.setMessageArgs(message);
     }
@@ -106,9 +107,9 @@ public final class MailConfigException extends MailException {
     public MailConfigException(final Exception e) {
         super(
             EnumComponent.MAIL,
-            MailException.Code.CONFIG_ERROR.getCategory(),
-            MailException.Code.CONFIG_ERROR.getNumber(),
-            MailException.Code.CONFIG_ERROR.getMessage(),
+            MailExceptionCode.CONFIG_ERROR.getCategory(),
+            MailExceptionCode.CONFIG_ERROR.getNumber(),
+            MailExceptionCode.CONFIG_ERROR.getMessage(),
             e);
         super.setMessageArgs(e.getMessage());
     }

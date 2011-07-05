@@ -64,8 +64,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -293,7 +293,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 try {
                     uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
                 } catch (final URISyntaxException e) {
-                    throw new MailException(Code.URI_PARSE_FAILED, e, mailServerURL);
+                    throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
                 }
                 mailConfig.setServer(uri.getHost());
                 mailConfig.setPort(uri.getPort());
@@ -304,7 +304,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 // Unset marker
                 session.setParameter("mail-account.request", null);
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -522,7 +522,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             } finally {
                 access.close(true);
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

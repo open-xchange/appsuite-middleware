@@ -50,7 +50,7 @@
 package com.openexchange.smtp.dataobjects;
 
 import java.util.Map;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.session.Session;
 
@@ -73,10 +73,10 @@ public final class SMTPDataPart extends DataMailPart {
 	 *            The data properties
 	 * @param session
 	 *            The session
-	 * @throws MailException
+	 * @throws OXException
 	 *             If data part cannot be initialized
 	 */
-	public SMTPDataPart(final Object data, final Map<String, String> dataProperties, final Session session) throws MailException {
+	public SMTPDataPart(final Object data, final Map<String, String> dataProperties, final Session session) throws OXException {
 		super(data, dataProperties, session);
 	}
 

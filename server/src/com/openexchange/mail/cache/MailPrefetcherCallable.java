@@ -59,7 +59,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import org.json.JSONObject;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -181,7 +182,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                                         final MailMessage mailMessage =
                                             mailAccess.getMessageStorage().getMessage(fullname, f.mailId, false);
                                         if (null == mailMessage) {
-                                            f.setException(new MailException(MailException.Code.MAIL_NOT_FOUND, f.mailId, fullname));
+                                            f.setException(MailExceptionCode.MAIL_NOT_FOUND.create(f.mailId, fullname));
                                         } else {
                                             q.offer(mailMessage);
                                         }
@@ -255,7 +256,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
                                 System.out.println("Put message " + mailIds[i] + " from folder " + fullname + " from account " + accountId + " into JSON message cache!");
 
-                            } catch (final MailException e) {
+                            } catch (final OXException e) {
                                 LOG.error(e.getMessage(), e);
                                 future.setException(e);
                             }
@@ -301,7 +302,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                 try {
                     final MailMessage mm = mailAccess.getMessageStorage().getMessage(fullname, mailId, false);
                     if (null == mm) {
-                        throw new MailException(MailException.Code.MAIL_NOT_FOUND, mailId, fullname);
+                        throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, fullname);
                     }
                     final boolean unseen = !mm.isSeen();
                     final JSONObject rawMailMessage = MessageWriter.writeRawMailMessage(accountId, mm);

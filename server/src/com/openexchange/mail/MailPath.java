@@ -53,6 +53,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.Serializable;
 import java.util.Comparator;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the account ID followed by the folder fullname followed
@@ -108,9 +109,9 @@ public final class MailPath implements Cloneable, Serializable {
      * 
      * @param mailPaths The comma-separated mail IDs
      * @return The corresponding mail paths
-     * @throws MailException If mail paths cannot be generated
+     * @throws OXException If mail paths cannot be generated
      */
-    public static MailPath[] getMailPaths(final String mailPaths) throws MailException {
+    public static MailPath[] getMailPaths(final String mailPaths) throws OXException {
         return getMailPaths(mailPaths.split(" *, *"));
     }
 
@@ -120,9 +121,9 @@ public final class MailPath implements Cloneable, Serializable {
      * 
      * @param mailPaths The mail IDs
      * @return The corresponding mail paths
-     * @throws MailException If mail paths cannot be generated
+     * @throws OXException If mail paths cannot be generated
      */
-    public static MailPath[] getMailPaths(final String[] mailPaths) throws MailException {
+    public static MailPath[] getMailPaths(final String[] mailPaths) throws OXException {
         final MailPath[] retval = new MailPath[mailPaths.length];
         for (int i = 0; i < mailPaths.length; i++) {
             retval[i] = new MailPath(mailPaths[i]);
@@ -167,9 +168,9 @@ public final class MailPath implements Cloneable, Serializable {
      * Initializes a new {@link MailPath}
      * 
      * @param mailPathStr The mail path's string representation
-     * @throws MailException If mail path's string representation does not match expected pattern
+     * @throws OXException If mail path's string representation does not match expected pattern
      */
-    public MailPath(final String mailPathStr) throws MailException {
+    public MailPath(final String mailPathStr) throws OXException {
         super();
         setMailIdentifierString(mailPathStr);
     }
@@ -294,12 +295,12 @@ public final class MailPath implements Cloneable, Serializable {
      * 
      * @param mailPathStr The mail paths string representation
      * @return The mail path itself
-     * @throws MailException If mail path's string representation does not match expected pattern
+     * @throws OXException If mail path's string representation does not match expected pattern
      */
-    public MailPath setMailIdentifierString(final String mailPathStr) throws MailException {
+    public MailPath setMailIdentifierString(final String mailPathStr) throws OXException {
         final int pos = mailPathStr.lastIndexOf(SEPERATOR);
         if (-1 == pos) {
-            throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
+            throw MailExceptionCode.INVALID_MAIL_IDENTIFIER.create(mailPathStr);
         }
         final FullnameArgument fa = prepareMailFolderParam(mailPathStr.substring(0, pos));
         accountId = fa.getAccountId();

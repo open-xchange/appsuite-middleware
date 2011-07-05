@@ -59,7 +59,7 @@ import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
@@ -100,9 +100,9 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
      * @param user The user ID
      * @param cid The context ID
      * @param con The connection to use
-     * @throws MailException If dropping properties fails
+     * @throws OXException If dropping properties fails
      */
-    public static void dropTrash(final int accountId, final int user, final int cid, final Connection con) throws MailException {
+    public static void dropTrash(final int accountId, final int user, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_DROP_PROPERTIES);
@@ -122,7 +122,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME + " (cid, user, id, uidl) VALUES (?, ?, ?, ?)";
 
-    public void addUIDL(final String uidl) throws MailException {
+    public void addUIDL(final String uidl) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
@@ -155,7 +155,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     private static final String SQL_DELETE_ALL = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
 
-    public void clear() throws MailException {
+    public void clear() throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
@@ -180,7 +180,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     private static final String SQL_SELECT_ALL = "SELECT uidl FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
 
-    public Set<String> getUIDLs() throws MailException {
+    public Set<String> getUIDLs() throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
@@ -209,7 +209,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         }
     }
 
-    public void removeUIDL(final String uidl) throws MailException {
+    public void removeUIDL(final String uidl) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
@@ -233,7 +233,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         }
     }
 
-    public void addAllUIDL(final Collection<? extends String> uidls) throws MailException {
+    public void addAllUIDL(final Collection<? extends String> uidls) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);

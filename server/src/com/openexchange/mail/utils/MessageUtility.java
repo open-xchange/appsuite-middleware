@@ -62,7 +62,7 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -91,9 +91,9 @@ public final class MessageUtility {
      * @param p The part to detect a charset for
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
-     * @throws MailException If part's input stream cannot be obtained
+     * @throws OXException If part's input stream cannot be obtained
      */
-    public static String checkCharset(final MailPart p, final ContentType ct) throws MailException {
+    public static String checkCharset(final MailPart p, final ContentType ct) throws OXException {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
             StringBuilder sb = null;
@@ -250,9 +250,9 @@ public final class MessageUtility {
      * @param charset The charset encoding used to generate a {@link String} object from raw bytes
      * @return the <code>String</code> read from mail part's stream
      * @throws IOException
-     * @throws MailException
+     * @throws OXException
      */
-    public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, MailException {
+    public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, OXException {
         return readStream(mailPart.getInputStream(), charset);
     }
 

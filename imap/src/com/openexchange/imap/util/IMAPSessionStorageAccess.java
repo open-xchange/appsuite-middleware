@@ -50,7 +50,7 @@
 package com.openexchange.imap.util;
 
 import java.util.Set;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -95,9 +95,9 @@ public final class IMAPSessionStorageAccess {
      * @param accountId The account ID
      * @param imapFolder The IMAP folder
      * @param session The session providing user data
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static void fillSessionStorage(final int accountId, final IMAPFolder imapFolder, final Session session) throws MailException {
+    public static void fillSessionStorage(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
         if (!ENABLED) {
             return;
         }
@@ -113,9 +113,9 @@ public final class IMAPSessionStorageAccess {
      * @param mode The mode; either <code>1</code> for new-and-modified only, <code>2</code> for deleted only, or <code>3</code> for
      *            new-and-modified and deleted
      * @return The IMAP messages of which flags have been changed since specified time stamp
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final Session session, final int mode) throws MailException {
+    public static long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final Session session, final int mode) throws OXException {
         if (!ENABLED) {
             return new long[][] { new long[] {}, new long[] {} };
         }
@@ -129,7 +129,7 @@ public final class IMAPSessionStorageAccess {
      * @param accountId The account ID
      * @param session The session
      * @param fullName The IMAP folder's full name
-     * @throws MailException If an error occurs while deleting UIDs
+     * @throws OXException If an error occurs while deleting UIDs
      */
     public static void removeDeletedSessionData(final long[] deletedUIDs, final int accountId, final Session session, final String fullName) {
         if (!ENABLED) {
@@ -145,7 +145,7 @@ public final class IMAPSessionStorageAccess {
      * @param accountId The account ID
      * @param session The session
      * @param fullName The IMAP folder's full name
-     * @throws MailException If an error occurs while deleting UIDs
+     * @throws OXException If an error occurs while deleting UIDs
      */
     public static void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final Session session, final String fullName) {
         if (!ENABLED) {
@@ -160,7 +160,7 @@ public final class IMAPSessionStorageAccess {
      * @param accountId The account ID
      * @param session The session
      * @param fullName The IMAP folder's full name
-     * @throws MailException If an error occurs while deleting UIDs
+     * @throws OXException If an error occurs while deleting UIDs
      */
     public static void removeDeletedFolder(final int accountId, final Session session, final String fullName) {
         if (!ENABLED) {

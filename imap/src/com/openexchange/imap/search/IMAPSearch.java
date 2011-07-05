@@ -61,7 +61,7 @@ import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.config.MailProperties;
@@ -93,9 +93,9 @@ public final class IMAPSearch {
      * @param searchTerm The search term
      * @return Filtered messages' sequence numbers according to search term
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If a searching fails
+     * @throws OXException If a searching fails
      */
-    public static int[] searchMessages(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm, final IMAPConfig imapConfig) throws MessagingException, MailException {
+    public static int[] searchMessages(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm, final IMAPConfig imapConfig) throws MessagingException, OXException {
         final int msgCount = imapFolder.getMessageCount();
         final MailFields mailFields = new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm));
         final boolean hasSearchCapability;
@@ -155,7 +155,7 @@ public final class IMAPSearch {
         return list.toNativeArray();
     }
 
-    private static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws MailException, FolderClosedException, StoreClosedException {
+    private static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException, FolderClosedException, StoreClosedException {
         try {
             final int[] matchSeqNums;
             if (searchTerm.containsWildcard()) {
@@ -257,11 +257,11 @@ public final class IMAPSearch {
      * @param msgs
      *            The messages
      * @return Matching messages
-     * @throws MailException
+     * @throws OXException
      *             If searching fails
      */
     private static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm,
-            final Message[] msgs) throws MailException {
+            final Message[] msgs) throws OXException {
         final SmartIntArray sia = new SmartIntArray(msgs.length);
         for (int i = 0; i < msgs.length; i++) {
             if (searchTerm.matches(msgs[i])) {

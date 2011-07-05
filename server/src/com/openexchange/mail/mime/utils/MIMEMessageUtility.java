@@ -83,7 +83,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -175,9 +176,9 @@ public final class MIMEMessageUtility {
      * 
      * @param session The user session
      * @return The {@link MailDateFormat} for specified session
-     * @throws MailException If {@link MailDateFormat} cannot be returned
+     * @throws OXException If {@link MailDateFormat} cannot be returned
      */
-    public static MailDateFormat getMailDateFormat(final Session session) throws MailException {
+    public static MailDateFormat getMailDateFormat(final Session session) throws OXException {
         final User user;
         if (session instanceof ServerSession) {
             user = ((ServerSession) session).getUser();
@@ -204,9 +205,9 @@ public final class MIMEMessageUtility {
      * 
      * @param timeZoneId The time zone identifier
      * @return The {@link MailDateFormat} for specified time zone identifier
-     * @throws MailException If {@link MailDateFormat} cannot be returned
+     * @throws OXException If {@link MailDateFormat} cannot be returned
      */
-    public static MailDateFormat getMailDateFormat(final String timeZoneId) throws MailException {
+    public static MailDateFormat getMailDateFormat(final String timeZoneId) throws OXException {
         Future<MailDateFormat> future = MDF_MAP.get(timeZoneId);
         if (null == future) {
             final FutureTask<MailDateFormat> ft = new FutureTask<MailDateFormat>(new Callable<MailDateFormat>() {
@@ -227,10 +228,10 @@ public final class MIMEMessageUtility {
             return future.get();
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, cause, cause.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
     }
 
@@ -399,7 +400,7 @@ public final class MIMEMessageUtility {
                 return getContentTypeFilename(part);
             }
             return retval;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             return getContentTypeFilename(part);
         }
     }
@@ -416,7 +417,7 @@ public final class MIMEMessageUtility {
         }
         try {
             return new ContentType(hdr).getParameter(PARAM_NAME);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
         }
@@ -438,10 +439,10 @@ public final class MIMEMessageUtility {
      * @param subtype The multipart's subtype
      * @return <code>true</code> if given multipart contains (file) attachments; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException, MailException, IOException {
+    public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException, OXException, IOException {
         if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
             if (mp.getCount() > 2) {
                 return true;
@@ -458,7 +459,7 @@ public final class MIMEMessageUtility {
         return hasAttachments0(mp);
     }
 
-    private static boolean hasAttachments0(final Multipart mp) throws MessagingException, MailException, IOException {
+    private static boolean hasAttachments0(final Multipart mp) throws MessagingException, OXException, IOException {
         boolean found = false;
         final int count = mp.getCount();
         final ContentType ct = new ContentType();

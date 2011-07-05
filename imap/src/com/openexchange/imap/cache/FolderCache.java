@@ -59,7 +59,7 @@ import com.openexchange.imap.cache.util.FolderMap;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -126,9 +126,9 @@ public final class FolderCache {
      * 
      * @param fullName The full name
      * @param folderStorage The folder storage
-     * @throws MailException If loading the folder fails
+     * @throws OXException If loading the folder fails
      */
-    public static void updateCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) throws MailException {
+    public static void updateCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) throws OXException {
         updateCachedFolder(fullName, folderStorage, null);
     }
 
@@ -138,9 +138,9 @@ public final class FolderCache {
      * @param fullName The full name
      * @param folderStorage The folder storage
      * @param imapFolder The optional IMAP folder
-     * @throws MailException If loading the folder fails
+     * @throws OXException If loading the folder fails
      */
-    public static void updateCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
+    public static void updateCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws OXException {
         if (!ENABLED) {
             return;
         }
@@ -167,9 +167,9 @@ public final class FolderCache {
      * @param fullName The IMAP folder full name
      * @param folderStorage The connected IMAP folder storage
      * @return The cached IMAP folder
-     * @throws MailException If loading the folder fails
+     * @throws OXException If loading the folder fails
      */
-    public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) throws MailException {
+    public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) throws OXException {
         return getCachedFolder(fullName, folderStorage, null);
     }
 
@@ -180,9 +180,9 @@ public final class FolderCache {
      * @param folderStorage The connected IMAP folder storage
      * @param The possibly loaded IMAP folder; may be <code>null</code>
      * @return The cached IMAP folder
-     * @throws MailException If loading the folder fails
+     * @throws OXException If loading the folder fails
      */
-    public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
+    public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws OXException {
         if (!ENABLED) {
             return loadFolder(fullName, folderStorage, imapFolder);
         }
@@ -255,7 +255,7 @@ public final class FolderCache {
         return NamespaceFoldersCache.startsWithAnyOfSharedNamespaces(fullName, imapStore, true, session, accountId) || NamespaceFoldersCache.startsWithAnyOfUserNamespaces(fullName, imapStore, true, session, accountId);
     }
 
-    private static final MailFolder loadFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws MailException {
+    private static final MailFolder loadFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws OXException {
         if (null != imapFolder) {
             return IMAPFolderConverter.convertFolder(imapFolder, folderStorage.getSession(), folderStorage.getImapAccess(), folderStorage.getContext());
         }

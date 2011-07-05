@@ -73,7 +73,7 @@ import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.replacement.LocationReplacement;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -224,7 +224,7 @@ public class AppointmentState extends LinkableState {
 
             mail.addFileAttachment(ct, filename, icalFile);
 
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             LOGGER.error("Can't add attachment", e);
         } catch (final ConversionError conversionError) {
             LOGGER.error("Can't add attachment", conversionError);

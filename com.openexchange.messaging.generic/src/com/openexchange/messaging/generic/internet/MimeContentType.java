@@ -52,7 +52,7 @@ package com.openexchange.messaging.generic.internet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.generic.internal.ParameterizedHeader;
@@ -116,7 +116,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     private static com.openexchange.mail.mime.ContentType toContentType(final String contentType) throws MessagingException {
         try {
             return new com.openexchange.mail.mime.ContentType(contentType);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -253,7 +253,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     public void setBaseType(final String baseType) throws MessagingException {
         try {
             cto.setBaseType(baseType);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -308,7 +308,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     public void setContentType(final String contentType) throws MessagingException {
         try {
             cto.setContentType(contentType);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -343,7 +343,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     public static String prepareContentTypeString(final String contentType) throws MessagingException {
         try {
             return com.openexchange.mail.mime.ContentType.prepareContentTypeString(contentType);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -360,7 +360,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     public static String prepareContentTypeString(final String contentType, final String name) throws MessagingException {
         try {
             return com.openexchange.mail.mime.ContentType.prepareContentTypeString(contentType, name);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -376,7 +376,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     public static boolean isMimeType(final String mimeType, final String pattern) throws MessagingException {
         try {
             return com.openexchange.mail.mime.ContentType.isMimeType(mimeType, pattern);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -391,7 +391,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     public static String getBaseType(final String mimeType) throws MessagingException {
         try {
             return com.openexchange.mail.mime.ContentType.getBaseType(mimeType);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

@@ -52,7 +52,7 @@ package com.openexchange.smtp;
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -105,42 +105,42 @@ public final class SMTPProvider extends TransportProvider {
     }
 
     @Override
-    public MailTransport createNewMailTransport(final Session session) throws MailException {
+    public MailTransport createNewMailTransport(final Session session) throws OXException {
         return new SMTPTransport(session);
     }
 
     @Override
-    public MailTransport createNewMailTransport(final Session session, final int accountId) throws MailException {
+    public MailTransport createNewMailTransport(final Session session, final int accountId) throws OXException {
         return new SMTPTransport(session, accountId);
     }
 
     @Override
-    public ComposedMailMessage getNewComposedMailMessage(final Session session, final Context ctx) throws MailException {
+    public ComposedMailMessage getNewComposedMailMessage(final Session session, final Context ctx) throws OXException {
         return new SMTPMailMessage(session, ctx);
     }
 
     @Override
-    public InfostoreDocumentMailPart getNewDocumentPart(final String documentId, final Session session) throws MailException {
+    public InfostoreDocumentMailPart getNewDocumentPart(final String documentId, final Session session) throws OXException {
         return new SMTPDocumentPart(documentId, session);
     }
 
     @Override
-    public UploadFileMailPart getNewFilePart(final UploadFile uploadFile) throws MailException {
+    public UploadFileMailPart getNewFilePart(final UploadFile uploadFile) throws OXException {
         return new SMTPFilePart(uploadFile);
     }
 
     @Override
-    public ReferencedMailPart getNewReferencedPart(final MailPart referencedPart, final Session session) throws MailException {
+    public ReferencedMailPart getNewReferencedPart(final MailPart referencedPart, final Session session) throws OXException {
         return new SMTPReferencedPart(referencedPart, session);
     }
 
     @Override
-    public ReferencedMailPart getNewReferencedMail(final MailMessage referencedMail, final Session session) throws MailException {
+    public ReferencedMailPart getNewReferencedMail(final MailMessage referencedMail, final Session session) throws OXException {
         return new SMTPReferencedPart(referencedMail, session);
     }
 
     @Override
-    public TextBodyMailPart getNewTextBodyPart(final String textBody) throws MailException {
+    public TextBodyMailPart getNewTextBodyPart(final String textBody) throws OXException {
         return new SMTPBodyPart(textBody);
     }
 
@@ -155,7 +155,7 @@ public final class SMTPProvider extends TransportProvider {
     }
 
     @Override
-    public DataMailPart getNewDataPart(final Object data, final Map<String, String> dataProperties, final Session session) throws MailException {
+    public DataMailPart getNewDataPart(final Object data, final Map<String, String> dataProperties, final Session session) throws OXException {
         return new SMTPDataPart(data, dataProperties, session);
     }
 

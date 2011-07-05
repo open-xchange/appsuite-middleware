@@ -50,7 +50,7 @@
 package com.openexchange.mail.headercache;
 
 import java.util.Properties;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
@@ -113,17 +113,17 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    public IMailFolderStorage getFolderStorage() throws MailException {
+    public IMailFolderStorage getFolderStorage() throws OXException {
         return mailAccess.getFolderStorage();
     }
 
     @Override
-    public MailLogicTools getLogicTools() throws MailException {
+    public MailLogicTools getLogicTools() throws OXException {
         return mailAccess.getLogicTools();
     }
 
     @Override
-    public HeaderCacheMessageStorage getMessageStorage() throws MailException {
+    public HeaderCacheMessageStorage getMessageStorage() throws OXException {
         if (null == messageStorage) {
             messageStorage = new HeaderCacheMessageStorage(session, mailAccess);
         }
@@ -131,7 +131,7 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    public MailConfig getMailConfig() throws MailException {
+    public MailConfig getMailConfig() throws OXException {
         return mailAccess.getMailConfig();
     }
 
@@ -146,12 +146,12 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    public MailFolder getRootFolder() throws MailException {
+    public MailFolder getRootFolder() throws OXException {
         return mailAccess.getRootFolder();
     }
 
     @Override
-    public int getUnreadMessagesCount(final String fullname) throws MailException {
+    public int getUnreadMessagesCount(final String fullname) throws OXException {
         return mailAccess.getUnreadMessagesCount(fullname);
     }
 
@@ -176,7 +176,7 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    public boolean ping() throws MailException {
+    public boolean ping() throws OXException {
         return mailAccess.ping();
     }
 
@@ -201,7 +201,7 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    public void delegateConnectInternal() throws MailException {
+    public void delegateConnectInternal() throws OXException {
         mailAccess.delegateConnectInternal();
     }
 
@@ -211,7 +211,7 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    public IMailProperties delegateCreateNewMailProperties() throws MailException {
+    public IMailProperties delegateCreateNewMailProperties() throws OXException {
         return mailAccess.delegateCreateNewMailProperties();
     }
 
@@ -231,7 +231,7 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    protected void connectInternal() throws MailException {
+    protected void connectInternal() throws OXException {
         throw new UnsupportedOperationException("connectInternal()");
     }
 
@@ -241,7 +241,7 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    protected IMailProperties createNewMailProperties() throws MailException {
+    protected IMailProperties createNewMailProperties() throws OXException {
         throw new UnsupportedOperationException("createNewMailProperties()");
     }
 
@@ -251,12 +251,12 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    protected void shutdown() throws MailException {
+    protected void shutdown() throws OXException {
         throw new UnsupportedOperationException("shutdown()");
     }
 
     @Override
-    protected void startup() throws MailException {
+    protected void startup() throws OXException {
         throw new UnsupportedOperationException("startup()");
     }
 

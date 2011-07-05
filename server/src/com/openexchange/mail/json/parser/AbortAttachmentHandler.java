@@ -50,14 +50,15 @@
 
 package com.openexchange.mail.json.parser;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.session.Session;
 
 /**
- * {@link AbortAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that throws a {@link MailException} on exceeded quota
+ * {@link AbortAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that throws a {@link OXException} on exceeded quota
  * (either overall or per-file quota).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -74,13 +75,13 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
      * Initializes a new {@link AbortAttachmentHandler}.
      * 
      * @param session The session providing needed user information
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public AbortAttachmentHandler(final Session session) throws MailException {
+    public AbortAttachmentHandler(final Session session) throws OXException {
         super(session);
     }
 
-    public void addAttachment(final MailPart attachment) throws MailException {
+    public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction) {
             final long size = attachment.getSize();
             if (size <= 0 && LOG.isDebugEnabled()) {
@@ -88,8 +89,8 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 final String fileName = attachment.getFileName();
-                throw new MailException(
-                    MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
+                throw new OXException(
+                    MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
                     Long.valueOf(uploadQuotaPerFile),
                     null == fileName ? "" : fileName,
                     Long.valueOf(size));
@@ -99,13 +100,13 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
              */
             consumed += size;
             if (uploadQuota > 0 && consumed > uploadQuota) {
-                throw new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, Long.valueOf(uploadQuota));
+                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
             }
         }
         attachments.add(attachment);
     }
 
-    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws MailException {
+    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
         source.setBodyPart(textPart);
         for (final MailPart attachment : attachments) {
             source.addEnclosedPart(attachment);

@@ -52,7 +52,7 @@ package com.openexchange.pop3.storage.mailaccount;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.storage.CASPOP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StorageProperties;
@@ -104,13 +104,13 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
         map = new ConcurrentHashMap<String, AtomicReference<String>>();
     }
 
-    public void addProperty(final String propertyName, final String propertyValue) throws MailException {
+    public void addProperty(final String propertyName, final String propertyValue) throws OXException {
         final AtomicReference<String> ref = putIfAbsent(propertyName);
         ref.set(propertyValue);
         delegatee.addProperty(propertyName, propertyValue);
     }
 
-    public boolean compareAndSetProperty(final String propertyName, final String expectedPropertyValue, final String newPropertyValue) throws MailException {
+    public boolean compareAndSetProperty(final String propertyName, final String expectedPropertyValue, final String newPropertyValue) throws OXException {
         final AtomicReference<String> ref = putIfAbsent(propertyName);
         final boolean success = ref.compareAndSet(expectedPropertyValue, newPropertyValue);
         if (success) {
@@ -131,7 +131,7 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
         return ref;
     }
 
-    public String getProperty(final String propertyName) throws MailException {
+    public String getProperty(final String propertyName) throws OXException {
         if (map.containsKey(propertyName)) {
             return map.get(propertyName).get();
         }
@@ -143,7 +143,7 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
         return value;
     }
 
-    public void removeProperty(final String propertyName) throws MailException {
+    public void removeProperty(final String propertyName) throws OXException {
         map.remove(propertyName);
         delegatee.removeProperty(propertyName);
     }

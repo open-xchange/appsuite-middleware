@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.headercache.properties;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link HeaderCacheProperties} - Properties for an account's header cache.
@@ -73,25 +73,25 @@ public interface HeaderCacheProperties {
      * 
      * @param propertyName The property name
      * @return The property value associated with specified property name or <code>null</code>
-     * @throws MailException If property retrieval fails
+     * @throws OXException If property retrieval fails
      */
-    public String getProperty(String propertyName) throws MailException;
+    public String getProperty(String propertyName) throws OXException;
 
     /**
      * Maps given property name to given property value.
      * 
      * @param propertyName The property name
      * @param propertyValue The property value
-     * @throws MailException If property mapping cannot be added
+     * @throws OXException If property mapping cannot be added
      */
-    public void addProperty(String propertyName, String propertyValue) throws MailException;
+    public void addProperty(String propertyName, String propertyValue) throws OXException;
 
     /**
      * Removes the property value associated with specified property name.
      * 
      * @param propertyName The property name
-     * @throws MailException If property removal fails
+     * @throws OXException If property removal fails
      */
-    public void removeProperty(String propertyName) throws MailException;
+    public void removeProperty(String propertyName) throws OXException;
 
 }

@@ -56,7 +56,8 @@ import java.io.UnsupportedEncodingException;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.json.JSONString;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -73,13 +74,13 @@ public final class Base64JSONString implements JSONString {
     /**
      * Initializes a new {@link Base64JSONString}.
      * 
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public Base64JSONString(final InputStream in) throws MailException {
+    public Base64JSONString(final InputStream in) throws OXException {
         super();
         if (null == in) {
             final NullPointerException e = new NullPointerException("Input stream is null.");
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         /*
          * Suck input stream
@@ -93,7 +94,7 @@ public final class Base64JSONString implements JSONString {
                 out.write(buf, 0, read);
             }
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             try {
                 in.close();
@@ -105,7 +106,7 @@ public final class Base64JSONString implements JSONString {
             value = JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), "US-ASCII"));
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 

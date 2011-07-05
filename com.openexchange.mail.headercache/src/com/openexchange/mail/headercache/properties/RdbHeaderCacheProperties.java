@@ -55,7 +55,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
@@ -98,9 +99,9 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
      * @param user The user ID
      * @param cid The context ID
      * @param con The connection to use
-     * @throws MailException If dropping properties fails
+     * @throws OXException If dropping properties fails
      */
-    public static void dropProperties(final int accountId, final int user, final int cid, final Connection con) throws MailException {
+    public static void dropProperties(final int accountId, final int user, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_DROP_PROPERTIES);
@@ -110,7 +111,7 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -120,16 +121,16 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
 
     private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
 
-    public void addProperty(final String propertyName, final String propertyValue) throws MailException {
+    public void addProperty(final String propertyName, final String propertyValue) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection con;
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN;
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
         try {
@@ -155,10 +156,10 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
             con.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             DBUtils.rollback(con); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
             DBUtils.autocommit(con);
@@ -168,13 +169,13 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
 
     private static final String SQL_SELECT = "SELECT value FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
 
-    public String getProperty(final String propertyName) throws MailException {
+    public String getProperty(final String propertyName) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection con;
         try {
             con = databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -191,23 +192,23 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
             }
             return null;
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
             databaseService.backReadOnly(cid, con);
         }
     }
 
-    public void removeProperty(final String propertyName) throws MailException {
+    public void removeProperty(final String propertyName) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection con;
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN;
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
         try {
@@ -223,10 +224,10 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
             con.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             DBUtils.rollback(con); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
             DBUtils.autocommit(con);
@@ -234,12 +235,12 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
         }
     }
 
-    private static DatabaseService getDBService() throws MailException {
+    private static DatabaseService getDBService() throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = HeaderCacheServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         return databaseService;
     }

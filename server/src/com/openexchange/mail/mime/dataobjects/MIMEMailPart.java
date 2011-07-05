@@ -64,7 +64,8 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
@@ -206,7 +207,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                     this.setContentType(MIMETypes.MIME_DEFAULT);
                 }
                 tmp = getContentType().startsWith(MULTIPART);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             } catch (final MessagingException e) {
                 LOG.error(e.getMessage(), e);
@@ -225,7 +226,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -244,16 +245,16 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -267,7 +268,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         }
     }
 
-    public InputStream getRawInputStream() throws MailException {
+    public InputStream getRawInputStream() throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -280,14 +281,14 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
             } else if (part instanceof MimeMessage) {
                 return ((MimeMessage) part).getRawInputStream();
             }
-            throw new MailException(MailException.Code.NO_CONTENT);
+            throw MailExceptionCode.NO_CONTENT.create();
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -315,7 +316,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                     me.setNextException(e);
                     throw me;
                 }
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final MessagingException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(
@@ -342,7 +343,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -353,7 +354,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -362,7 +363,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                 final MultipartWrapper wrapper = getMultipartWrapper();
                 try {
                     return wrapper.getCount();
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     return handleMissingStartBoundary(e);
                 }
             }
@@ -374,7 +375,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         return NO_ENCLOSED_PARTS;
     }
 
-    private int handleMissingStartBoundary(final MailException e) throws MailException {
+    private int handleMissingStartBoundary(final OXException e) throws OXException {
         final Throwable cause = e.getCause();
         if (!(cause instanceof MessagingException) || !"Missing start boundary".equals(((MessagingException) cause).getMessage())) {
             throw e;
@@ -403,7 +404,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws MailException {
+    public void writeTo(final OutputStream out) throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -412,12 +413,12 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             if ("No content".equals(e.getMessage())) {
-                throw new MailException(MailException.Code.NO_CONTENT, e, new Object[0]);
+                throw MailExceptionCode.NO_CONTENT.create(e, new Object[0]);
             }
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -435,7 +436,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -482,9 +483,9 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -539,7 +540,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
              * Write common fields
              */
             out.defaultWriteObject();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             final IOException ioe = new IOException(e.getMessage());
             ioe.initCause(e);
             throw ioe;
@@ -727,7 +728,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         return data;
     }
 
-    private MultipartWrapper getMultipartWrapper() throws MailException {
+    private MultipartWrapper getMultipartWrapper() throws OXException {
         if (null == multipart) {
             try {
                 final int size = part.getSize();
@@ -764,13 +765,13 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                     }
                 }
             } catch (final MessagingException e) {
-                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+                throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             } catch (final UnsupportedEncodingException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-                throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+                throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }
         return multipart;
@@ -778,9 +779,9 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     private static interface MultipartWrapper {
 
-        public int getCount() throws MailException;
+        public int getCount() throws OXException;
 
-        public MailPart getMailPart(int index) throws MailException;
+        public MailPart getMailPart(int index) throws OXException;
     }
 
     private static class MIMEMultipartWrapper implements MultipartWrapper {
@@ -792,11 +793,11 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
             this.multipartMailPart = multipartMailPart;
         }
 
-        public int getCount() throws MailException {
+        public int getCount() throws OXException {
             return multipartMailPart.getEnclosedCount();
         }
 
-        public MailPart getMailPart(final int index) throws MailException {
+        public MailPart getMailPart(final int index) throws OXException {
             return multipartMailPart.getEnclosedMailPart(index);
         }
 
@@ -811,19 +812,19 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
             this.jmMultipart = multipart;
         }
 
-        public int getCount() throws MailException {
+        public int getCount() throws OXException {
             try {
                 return jmMultipart.getCount();
             } catch (final MessagingException e) {
-                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+                throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
 
-        public MailPart getMailPart(final int index) throws MailException {
+        public MailPart getMailPart(final int index) throws OXException {
             try {
                 return MIMEMessageConverter.convertPart(jmMultipart.getBodyPart(index), false);
             } catch (final MessagingException e) {
-                throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
+                throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
 

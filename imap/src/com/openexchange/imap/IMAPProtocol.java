@@ -53,7 +53,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 
 /**
@@ -113,16 +114,16 @@ public final class IMAPProtocol extends Protocol {
      * @param host The mail system's host name
      * @param maxCount The max-count
      * @return <code>true</code> for successful insertion; otherwise <code>false</code>
-     * @throws MailException If insert fails
+     * @throws OXException If insert fails
      */
-    public boolean putIfAbsent(final String host, final int maxCount) throws MailException {
+    public boolean putIfAbsent(final String host, final int maxCount) throws OXException {
         if (null == map) {
             return false;
         }
         try {
             return (null == map.putIfAbsent(InetAddress.getByName(host), Integer.valueOf(maxCount)));
         } catch (final UnknownHostException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -143,7 +144,7 @@ public final class IMAPProtocol extends Protocol {
     }
 
     @Override
-    public int getMaxCount(final String host) throws MailException {
+    public int getMaxCount(final String host) throws OXException {
         if (null != overallMaxCount) {
             return overallMaxCount.intValue();
         }
@@ -154,7 +155,7 @@ public final class IMAPProtocol extends Protocol {
             final Integer mc = map.get(InetAddress.getByName(host));
             return mc == null ? -1 : mc.intValue();
         } catch (final UnknownHostException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

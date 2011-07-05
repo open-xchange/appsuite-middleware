@@ -81,7 +81,7 @@ import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -243,7 +243,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (folderStorage != null) {
             try {
                 folderStorage.releaseResources();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(new StringBuilder("Error while closing IMAP folder storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 folderStorage = null;
@@ -252,7 +252,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (messageStorage != null) {
             try {
                 messageStorage.releaseResources();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(new StringBuilder("Error while closing IMAP message storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 messageStorage = null;
@@ -271,14 +271,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (folderStorage != null) {
                 try {
                     folderStorage.releaseResources();
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error("Error while closing IMAP folder storage,", e);
                 }
             }
             if (null != messageStorage) {
                 try {
                     messageStorage.releaseResources();
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error("Error while closing IMAP message storage.", e);
                 }
             }
@@ -308,7 +308,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     public IMAPConfig getIMAPConfig() {
         try {
             return (IMAPConfig) getMailConfig();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             /*
              * Cannot occur since already initialized
              */
@@ -317,7 +317,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    public int getUnreadMessagesCount(final String fullname) throws MailException {
+    public int getUnreadMessagesCount(final String fullname) throws OXException {
         if (!isConnected()) {
             connect(false);
         }
@@ -371,7 +371,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    public boolean ping() throws MailException {
+    public boolean ping() throws OXException {
         final IMAPConfig config = getIMAPConfig();
         checkFieldsBeforeConnect(config);
         try {
@@ -429,7 +429,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             }
             return true;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString());
             }
@@ -438,7 +438,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    protected void connectInternal() throws MailException {
+    protected void connectInternal() throws OXException {
         if (connected) {
             return;
         }
@@ -583,7 +583,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private boolean isPropagateAccount(final IIMAPProperties imapConfProps) throws MailException {
+    private boolean isPropagateAccount(final IIMAPProperties imapConfProps) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId) {
             return true;
         }
@@ -597,7 +597,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
             return Arrays.binarySearch(ids, accountId) >= 0;
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -646,7 +646,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws MailException, IMAPException {
+    private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {
         final MailConfig mailConfig = getMailConfig();
         final HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
         final Map<HostAndPort, Long> map = timedOutServers;
@@ -666,7 +666,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    public IMAPFolderStorage getFolderStorage() throws MailException {
+    public IMAPFolderStorage getFolderStorage() throws OXException {
         // connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
@@ -678,7 +678,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    public IMAPMessageStorage getMessageStorage() throws MailException {
+    public IMAPMessageStorage getMessageStorage() throws OXException {
         // connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
@@ -690,7 +690,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    public MailLogicTools getLogicTools() throws MailException {
+    public MailLogicTools getLogicTools() throws OXException {
         // connected = ((imapStore != null) && imapStore.isConnected());
         if (!connected) {
             throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
@@ -728,25 +728,25 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    protected void startup() throws MailException {
+    protected void startup() throws OXException {
         initMaps();
         IMAPCapabilityAndGreetingCache.init();
         MBoxEnabledCache.init();
         try {
             ACLExtensionInit.getInstance().start();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final AbstractOXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         try {
             Entity2ACLInit.getInstance().start();
         } catch (final Entity2ACLException e) {
-            throw new MailException(e);
-        } catch (final MailException e) {
+            throw new OXException(e);
+        } catch (final OXException e) {
             throw e;
         } catch (final AbstractOXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -794,22 +794,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    protected void shutdown() throws MailException {
+    protected void shutdown() throws OXException {
         try {
             Entity2ACLInit.getInstance().stop();
         } catch (final Entity2ACLException e) {
-            throw new MailException(e);
-        } catch (final MailException e) {
+            throw new OXException(e);
+        } catch (final OXException e) {
             throw e;
         } catch (final AbstractOXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         try {
             ACLExtensionInit.getInstance().stop();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final AbstractOXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         IMAPCapabilityAndGreetingCache.tearDown();
         MBoxEnabledCache.tearDown();
@@ -978,7 +978,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    protected IMailProperties createNewMailProperties() throws MailException {
+    protected IMailProperties createNewMailProperties() throws OXException {
         try {
             final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
             return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));

@@ -60,7 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
@@ -323,7 +323,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             IMAPProtocol.getInstance().setOverallMaxCount(-1);
                             logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                                 "\". Setting to fallback: No restrictions").append('\n');
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             IMAPProtocol.getInstance().setOverallMaxCount(-1);
                             logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                                 "\". Setting to fallback: No restrictions").append('\n');

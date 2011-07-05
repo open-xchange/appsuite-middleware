@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.service.impl;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.MailTransport;
@@ -69,11 +69,11 @@ public final class MailServiceImpl implements MailService {
         super();
     }
 
-    public MailAccess<?, ?> getMailAccess(final Session session, final int accountId) throws MailException {
+    public MailAccess<?, ?> getMailAccess(final Session session, final int accountId) throws OXException {
         return MailAccess.getInstance(session, accountId);
     }
 
-    public MailTransport getMailTransport(final Session session, final int accountId) throws MailException {
+    public MailTransport getMailTransport(final Session session, final int accountId) throws OXException {
         return MailTransport.getInstance(session, accountId);
     }
 

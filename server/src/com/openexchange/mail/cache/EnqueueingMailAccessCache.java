@@ -55,7 +55,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -104,9 +104,9 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * 
      * @queueCapacity The max. queue capacity
      * @return The singleton instance
-     * @throws MailException If instance initialization fails
+     * @throws OXException If instance initialization fails
      */
-    public static EnqueueingMailAccessCache getInstance(final int queueCapacity) throws MailException {
+    public static EnqueueingMailAccessCache getInstance(final int queueCapacity) throws OXException {
         if (null == singleton) {
             synchronized (EnqueueingMailAccessCache.class) {
                 if (null == singleton) {
@@ -150,9 +150,9 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * Prevent instantiation.
      * @queueCapacity The max. queue capacity
      * 
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    private EnqueueingMailAccessCache(final int queueCapacity) throws MailException {
+    private EnqueueingMailAccessCache(final int queueCapacity) throws OXException {
         super();
         this.queueCapacity = queueCapacity;
         try {
@@ -167,7 +167,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             final int shrinkerMillis = (configuredShrinkerSeconds <= 0 ? 3 : configuredShrinkerSeconds) * 1000;
             timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), shrinkerMillis, shrinkerMillis);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -308,9 +308,9 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * Clears the cache entries kept for specified user.
      * 
      * @param session The session
-     * @throws MailException If clearing user entries fails
+     * @throws OXException If clearing user entries fails
      */
-    public void clearUserEntries(final Session session) throws MailException {
+    public void clearUserEntries(final Session session) throws OXException {
         try {
             /*
              * Check if last...
@@ -327,9 +327,9 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                 }
             }
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 

@@ -104,7 +104,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.mail.MailException.Code;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
@@ -143,11 +142,9 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.push.PushEventConstants;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
@@ -210,18 +207,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private User user;
 
-    private final Collection<MailException> warnings;
+    private final Collection<OXException> warnings;
     
     private final ArrayList<MailImportResult> mailImportResults;
 
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
      * 
-     * @throws MailException If user has no mail access or properties cannot be successfully loaded
+     * @throws OXException If user has no mail access or properties cannot be successfully loaded
      */
-    MailServletInterfaceImpl(final Session session) throws MailException {
+    MailServletInterfaceImpl(final Session session) throws OXException {
         super();
-        warnings = new ArrayList<MailException>(2);
+        warnings = new ArrayList<OXException>(2);
         mailImportResults = new ArrayList<MailImportResult>();
         try {
             if (session instanceof ServerSession) {
@@ -229,7 +226,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 ctx = serverSession.getContext();
                 usm = serverSession.getUserSettingMail();
                 if (!serverSession.getUserConfiguration().hasWebMail()) {
-                    throw new MailException(MailException.Code.NO_MAIL_ACCESS);
+                    throw MailExceptionCode.NO_MAIL_ACCESS.create();
                 }
                 user = serverSession.getUser();
             } else {
@@ -237,14 +234,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
                 try {
                     if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
-                        throw new MailException(MailException.Code.NO_MAIL_ACCESS);
+                        throw MailExceptionCode.NO_MAIL_ACCESS.create();
                     }
                 } catch (final UserConfigurationException e) {
-                    throw new MailException(e);
+                    throw new OXException(e);
                 }
             }
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         this.session = session;
         contextId = session.getContextId();
@@ -274,12 +271,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public Collection<MailException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         return Collections.unmodifiableCollection(warnings);
     }
 
     @Override
-    public boolean clearFolder(final String folder) throws MailException {
+    public boolean clearFolder(final String folder) throws OXException {
         final FullnameArgument fullnameArgument = prepareMailFolderParam(folder);
         final int accountId = fullnameArgument.getAccountId();
         initConnection(fullnameArgument.getAccountId());
@@ -324,7 +321,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public void close(final boolean putIntoCache) throws MailException {
+    public void close(final boolean putIntoCache) throws OXException {
         try {
             if (mailAccess != null) {
                 mailAccess.close(putIntoCache);
@@ -342,7 +339,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final int SPAM_SPAM = 1;
 
     @Override
-    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] msgUIDs, final boolean move) throws MailException {
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] msgUIDs, final boolean move) throws OXException {
         final FullnameArgument source = prepareMailFolderParam(sourceFolder);
         final FullnameArgument dest = prepareMailFolderParam(destFolder);
         final String sourceFullname = source.getFullname();
@@ -496,7 +493,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String deleteFolder(final String folder) throws MailException {
+    public String deleteFolder(final String folder) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -549,13 +546,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private Map<String, Map<?, ?>> subfolders(final String fullname) throws MailException {
+    private Map<String, Map<?, ?>> subfolders(final String fullname) throws OXException {
         final Map<String, Map<?, ?>> m = new HashMap<String, Map<?, ?>>();
         subfoldersRecursively(fullname, m);
         return m;
     }
 
-    private void subfoldersRecursively(final String parent, final Map<String, Map<?, ?>> m) throws MailException {
+    private void subfoldersRecursively(final String parent, final Map<String, Map<?, ?>> m) throws OXException {
         final MailFolder[] mailFolders = mailAccess.getFolderStorage().getSubfolders(parent, true);
         if (null == mailFolders || 0 == mailFolders.length) {
             final Map<String, Map<?, ?>> emptyMap = Collections.emptyMap();
@@ -572,7 +569,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public boolean deleteMessages(final String folder, final String[] msgUIDs, final boolean hardDelete) throws MailException {
+    public boolean deleteMessages(final String folder, final String[] msgUIDs, final boolean hardDelete) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -609,7 +606,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public int[] getAllMessageCount(final String folder) throws MailException {
+    public int[] getAllMessageCount(final String folder) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         initConnection(argument.getAccountId());
         final String fullname = argument.getFullname();
@@ -618,17 +615,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailMessage> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws MailException {
+    public SearchIterator<MailMessage> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws OXException {
         return getMessages(folder, fromToIndices, sortCol, order, null, null, false, fields);
     }
 
     @Override
-    public SearchIterator<MailMessage> getAllThreadedMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws MailException {
+    public SearchIterator<MailMessage> getAllThreadedMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws OXException {
         return getThreadedMessages(folder, fromToIndices, sortCol, order, null, null, false, fields);
     }
 
     @Override
-    public SearchIterator<MailFolder> getChildFolders(final String parentFolder, final boolean all) throws MailException {
+    public SearchIterator<MailFolder> getChildFolders(final String parentFolder, final boolean all) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(parentFolder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -703,7 +700,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String getConfirmedHamFolder(final int accountId) throws MailException {
+    public String getConfirmedHamFolder(final int accountId) throws OXException {
         if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_HAM, accountId));
         }
@@ -712,7 +709,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String getConfirmedSpamFolder(final int accountId) throws MailException {
+    public String getConfirmedSpamFolder(final int accountId) throws OXException {
         if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_SPAM, accountId));
         }
@@ -738,7 +735,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public int getDeletedMessageCount(final String folder) throws MailException {
+    public int getDeletedMessageCount(final String folder) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         initConnection(argument.getAccountId());
         final String fullname = argument.getFullname();
@@ -746,7 +743,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String getDraftsFolder(final int accountId) throws MailException {
+    public String getDraftsFolder(final int accountId) throws OXException {
         if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_DRAFTS, accountId));
         }
@@ -755,7 +752,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailFolder getFolder(final String folder, final boolean checkFolder) throws MailException {
+    public MailFolder getFolder(final String folder, final boolean checkFolder) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         initConnection(argument.getAccountId());
         final String fullname = argument.getFullname();
@@ -763,7 +760,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getForwardMessageForDisplay(final String[] folders, final String[] fowardMsgUIDs, final UserSettingMail usm) throws MailException {
+    public MailMessage getForwardMessageForDisplay(final String[] folders, final String[] fowardMsgUIDs, final UserSettingMail usm) throws OXException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
@@ -782,7 +779,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             for (int i = 0; i < arguments.length; i++) {
                 final MailMessage origMail = mailAccess.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
                 if (null == origMail) {
-                    throw new MailException(MailException.Code.MAIL_NOT_FOUND, fowardMsgUIDs[i], arguments[i].getFullname());
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
                 }
                 originalMails[i] = origMail;
             }
@@ -794,7 +791,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             try {
                 final MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
                 if (null == origMail) {
-                    throw new MailException(MailException.Code.MAIL_NOT_FOUND, fowardMsgUIDs[i], arguments[i].getFullname());
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
                 }
                 originalMails[i] = origMail;
                 origMail.loadContent();
@@ -810,7 +807,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String getInboxFolder(final int accountId) throws MailException {
+    public String getInboxFolder(final int accountId) throws OXException {
         if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, INBOX_ID);
         }
@@ -819,7 +816,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailConfig getMailConfig() throws MailException {
+    public MailConfig getMailConfig() throws OXException {
         return mailConfig;
     }
 
@@ -835,12 +832,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final transient Object[] ARGS_FLAG_SEEN_UNSET = new Object[] { Integer.valueOf(-1 * MailMessage.FLAG_SEEN) };
 
     @Override
-    public MailMessage getMessage(final String folder, final String msgUID) throws MailException {
+    public MailMessage getMessage(final String folder, final String msgUID) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         if (MailFolder.DEFAULT_FOLDER_ID.equals(folder)) {
-            throw new MailException(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolder.DEFAULT_FOLDER_ID);
+            throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(MailFolder.DEFAULT_FOLDER_ID);
         }
         final String fullname = argument.getFullname();
         final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
@@ -877,7 +874,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailPart getMessageAttachment(final String folder, final String msgUID, final String attachmentPosition, final boolean displayVersion) throws MailException {
+    public MailPart getMessageAttachment(final String folder, final String msgUID, final String attachmentPosition, final boolean displayVersion) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -886,7 +883,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public ManagedFile getMessageAttachments(final String folder, final String msgUID, final String[] attachmentPositions) throws MailException {
+    public ManagedFile getMessageAttachments(final String folder, final String msgUID, final String[] attachmentPositions) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -905,7 +902,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         try {
             mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         final ManagedFile[] files = new ManagedFile[parts.length];
         try {
@@ -967,10 +964,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 return mfm.createManagedFile(tempFile);
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         } catch (final ManagedFileException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } finally {
             for (int i = 0; i < files.length; i++) {
                 final ManagedFile file = files[i];
@@ -982,7 +979,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public int getMessageCount(final String folder) throws MailException {
+    public int getMessageCount(final String folder) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -991,7 +988,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailPart getMessageImage(final String folder, final String msgUID, final String cid) throws MailException {
+    public MailPart getMessageImage(final String folder, final String msgUID, final String cid) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1000,7 +997,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage[] getMessageList(final String folder, final String[] uids, final int[] fields, final String[] headerFields) throws MailException {
+    public MailMessage[] getMessageList(final String folder, final String[] uids, final int[] fields, final String[] headerFields) throws OXException {
         /*
          * Although message cache is only used within mail implementation, we have to examine if cache already holds desired messages. If
          * the cache holds the desired messages no connection has to be fetched/established. This avoids a lot of overhead.
@@ -1148,12 +1145,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final com.openexchange.search.SearchTerm<?> searchTerm, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
+    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final com.openexchange.search.SearchTerm<?> searchTerm, final boolean linkSearchTermsWithOR, final int[] fields) throws OXException {
         return getMessagesInternal(prepareMailFolderParam(folder), SearchTermMapper.map(searchTerm), fromToIndices, sortCol, order, fields);
     }
 
     @Override
-    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
+    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws OXException {
         checkPatternLength(searchPatterns);
         final SearchTerm<?> searchTerm =
             (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(
@@ -1163,7 +1160,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields);
     }
 
-    private SearchIterator<MailMessage> getMessagesInternal(final FullnameArgument argument, final SearchTerm<?> searchTerm, final int[] fromToIndices, final int sortCol, final int order, final int[] fields) throws MailException {
+    private SearchIterator<MailMessage> getMessagesInternal(final FullnameArgument argument, final SearchTerm<?> searchTerm, final int[] fromToIndices, final int sortCol, final int order, final int[] fields) throws OXException {
         /*
          * Identify and sort messages according to search term and sort criteria while only fetching their IDs
          */
@@ -1266,16 +1263,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
     
     @Override
-    public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws MailException {
+    public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws OXException {
         return appendMessages(destFolder, mails, force, false);
     }
 
     @Override
-    public String[] importMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws MailException {
+    public String[] importMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws OXException {
         return appendMessages(destFolder, mails, force, true);
     }
     
-    public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force, final boolean isImport) throws MailException {
+    public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force, final boolean isImport) throws OXException {
         if ((mails == null) || (mails.length == 0)) {
             return new String[0];
         }
@@ -1298,8 +1295,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     final InternetAddress[] from = mail.getFrom();
                     final List<InternetAddress> froms = Arrays.asList(from);
                     if (!validAddrs.containsAll(froms)) {
-                        throw new MailException(
-                            MailException.Code.INVALID_SENDER,
+                        throw 
+                            MailExceptionCode.INVALID_SENDER.create(
                             froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(from));
                     }
                 }
@@ -1334,7 +1331,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 final String[] idStr = messageStorage.appendMessages(fullname, tmp);
                 mir.setId(idStr[0]);
                 idList.add(idStr[0]);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 mir.setException(e);                
             }
             mailImportResults.add(mir);
@@ -1349,7 +1346,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public int getNewMessageCount(final String folder) throws MailException {
+    public int getNewMessageCount(final String folder) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1358,7 +1355,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailMessage> getNewMessages(final String folder, final int sortCol, final int order, final int[] fields, final int limit) throws MailException {
+    public SearchIterator<MailMessage> getNewMessages(final String folder, final int sortCol, final int order, final int[] fields, final int limit) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1372,7 +1369,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws MailException {
+    public SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1381,7 +1378,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public long[][] getQuotas(final int[] types) throws MailException {
+    public long[][] getQuotas(final int[] types) throws OXException {
         initConnection(MailAccount.DEFAULT_ID);
         final com.openexchange.mail.Quota.Type[] qtypes = new com.openexchange.mail.Quota.Type[types.length];
         for (int i = 0; i < qtypes.length; i++) {
@@ -1396,7 +1393,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public long getQuotaLimit(final int type) throws MailException {
+    public long getQuotaLimit(final int type) throws OXException {
         initConnection(MailAccount.DEFAULT_ID);
         if (QUOTA_RESOURCE_STORAGE == type) {
             return mailAccess.getFolderStorage().getStorageQuota(INBOX_ID).getLimit();
@@ -1407,7 +1404,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public long getQuotaUsage(final int type) throws MailException {
+    public long getQuotaUsage(final int type) throws OXException {
         initConnection(MailAccount.DEFAULT_ID);
         if (QUOTA_RESOURCE_STORAGE == type) {
             return mailAccess.getFolderStorage().getStorageQuota(INBOX_ID).getUsage();
@@ -1427,26 +1424,26 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getReplyMessageForDisplay(final String folder, final String replyMsgUID, final boolean replyToAll, final UserSettingMail usm) throws MailException {
+    public MailMessage getReplyMessageForDisplay(final String folder, final String replyMsgUID, final boolean replyToAll, final UserSettingMail usm) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();
         final MailMessage originalMail = mailAccess.getMessageStorage().getMessage(fullname, replyMsgUID, false);
         if (null == originalMail) {
-            throw new MailException(MailException.Code.MAIL_NOT_FOUND, replyMsgUID, fullname);
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(replyMsgUID, fullname);
         }
         return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm);
     }
 
     @Override
-    public SearchIterator<MailFolder> getRootFolders() throws MailException {
+    public SearchIterator<MailFolder> getRootFolders() throws OXException {
         initConnection(MailAccount.DEFAULT_ID);
         return SearchIteratorAdapter.createArrayIterator(new MailFolder[] { mailAccess.getFolderStorage().getRootFolder() });
     }
 
     @Override
-    public String getSentFolder(final int accountId) throws MailException {
+    public String getSentFolder(final int accountId) throws OXException {
         if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_SENT, accountId));
         }
@@ -1455,7 +1452,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String getSpamFolder(final int accountId) throws MailException {
+    public String getSpamFolder(final int accountId) throws OXException {
         if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_SPAM, accountId));
         }
@@ -1464,7 +1461,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailMessage> getThreadedMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
+    public SearchIterator<MailMessage> getThreadedMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws OXException {
         checkPatternLength(searchPatterns);
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
@@ -1545,25 +1542,25 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return SearchIteratorAdapter.createArrayIterator(mails);
     }
 
-    private void checkPatternLength(final String[] patterns) throws MailException {
+    private void checkPatternLength(final String[] patterns) throws OXException {
         final int minimumSearchCharacters;
         try {
             minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         } catch (final ConfigurationException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         if (0 == minimumSearchCharacters || null == patterns) {
             return;
         }
         for (final String pattern : patterns) {
             if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
-                throw new MailException(Code.PATTERN_TOO_SHORT, I(minimumSearchCharacters));
+                throw MailExceptionCode.PATTERN_TOO_SHORT.create(I(minimumSearchCharacters));
             }
         }
     }
 
     @Override
-    public String getTrashFolder(final int accountId) throws MailException {
+    public String getTrashFolder(final int accountId) throws OXException {
         if (isDefaultFoldersChecked(accountId)) {
             return prepareFullname(accountId, getDefaultMailFolder(StorageUtility.INDEX_TRASH, accountId));
         }
@@ -1572,7 +1569,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public int getUnreadMessageCount(final String folder) throws MailException {
+    public int getUnreadMessageCount(final String folder) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         final String fullname = argument.getFullname();
@@ -1598,7 +1595,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return retval;
     }
 
-    private void initConnection(final int accountId) throws MailException {
+    private void initConnection(final int accountId) throws OXException {
         if (!init) {
             mailAccess = initMailAccess(accountId);
             mailConfig = mailAccess.getMailConfig();
@@ -1612,7 +1609,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private MailAccess<?, ?> initMailAccess(final int accountId) throws MailException {
+    private MailAccess<?, ?> initMailAccess(final int accountId) throws OXException {
         /*
          * Fetch a mail access (either from cache or a new instance)
          */
@@ -1627,7 +1624,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 warnings.addAll(mailAccess.getWarnings());
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 final int number = e.getDetailNumber();
                 if (number == MIMEMailException.Code.LOGIN_FAILED.getNumber() || number == MIMEMailException.Code.INVALID_CREDENTIALS.getNumber()) {
                     MailServletInterface.mailInterfaceMonitor.changeNumFailedLogins(true);
@@ -1645,7 +1642,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String saveDraft(final ComposedMailMessage draftMail, final boolean autosave, final int accountId) throws MailException {
+    public String saveDraft(final ComposedMailMessage draftMail, final boolean autosave, final int accountId) throws OXException {
         if (autosave) {
             return autosaveDraft(draftMail, accountId);
         }
@@ -1656,7 +1653,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return retval;
     }
 
-    private String autosaveDraft(final ComposedMailMessage draftMail, final int accountId) throws MailException {
+    private String autosaveDraft(final ComposedMailMessage draftMail, final int accountId) throws OXException {
         initConnection(accountId);
         final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         /*
@@ -1724,7 +1721,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             final MailMessage m = mailAccess.getMessageStorage().getMessage(draftFullname, uid, true);
             if (null == m) {
-                throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), draftFullname);
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(uid), draftFullname);
             }
             postEvent(accountId, draftFullname, true);
             return m.getMailPath().toString();
@@ -1736,9 +1733,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String saveFolder(final MailFolderDescription mailFolder) throws MailException {
+    public String saveFolder(final MailFolderDescription mailFolder) throws OXException {
         if (!mailFolder.containsExists() && !mailFolder.containsFullname()) {
-            throw new MailException(MailException.Code.INSUFFICIENT_FOLDER_ATTR);
+            throw MailExceptionCode.INSUFFICIENT_FOLDER_ATTR.create();
         }
         if ((mailFolder.containsExists() && mailFolder.exists()) || ((mailFolder.getFullname() != null) && mailAccess.getFolderStorage().exists(
             mailFolder.getFullname()))) {
@@ -1792,14 +1789,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         // Check permission on new parent
                         final MailPermission ownPermission = p.getOwnPermission();
                         if (!ownPermission.canCreateSubfolders()) {
-                            throw new MailException(MailException.Code.NO_CREATE_ACCESS, newParent);
+                            throw MailExceptionCode.NO_CREATE_ACCESS.create(newParent);
                         }
                         // Check for duplicate
                         final MailFolder[] tmp = otherAccess.getFolderStorage().getSubfolders(newParent, true);
                         final String lookFor = mailFolder.containsName() ? mailFolder.getName() : oldName;
                         for (final MailFolder sub : tmp) {
                             if (sub.getName().equals(lookFor)) {
-                                throw new MailException(MailException.Code.DUPLICATE_FOLDER, lookFor);
+                                throw MailExceptionCode.DUPLICATE_FOLDER.create(lookFor);
                             }
                         }
                         // Copy
@@ -1853,7 +1850,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return prepareFullname;
     }
 
-    private static String fullCopy(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> srcAccess, final String srcFullname, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess, final String destParent, final char destSeparator, final int user, final boolean hasPermissions) throws MailException {
+    private static String fullCopy(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> srcAccess, final String srcFullname, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess, final String destParent, final char destSeparator, final int user, final boolean hasPermissions) throws OXException {
         // Create folder
         final MailFolder source = srcAccess.getFolderStorage().getFolder(srcFullname);
         final MailFolderDescription mfd = new MailFolderDescription();
@@ -1869,7 +1866,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     mfd.addPermission((MailPermission) perms[i].clone());
                 }
             } catch (final CloneNotSupportedException e) {
-                throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         final String destFullname = destAccess.getFolderStorage().createFolder(mfd);
@@ -1906,7 +1903,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public void sendFormMail(final ComposedMailMessage composedMail, final int groupId, final int accountId) throws MailException {
+    public void sendFormMail(final ComposedMailMessage composedMail, final int groupId, final int accountId) throws OXException {
         /*
          * Initialize
          */
@@ -1978,9 +1975,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
         } catch (final LdapException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } finally {
@@ -1989,7 +1986,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
     
     @Override
-    public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId) throws MailException {
+    public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId) throws OXException {
         /*
          * Initialize
          */
@@ -2083,7 +2080,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      * Finally store it
                      */
                     retentionService.storeOnTransport(retentionData);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     l.error(e.getMessage(), e);
                 } catch (final DataRetentionException e) {
                     l.error(e.getMessage(), e);
@@ -2103,7 +2100,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private MailPath append2SentFolder(final MailMessage sentMail) throws MailException {
+    private MailPath append2SentFolder(final MailMessage sentMail) throws OXException {
         /*
          * Append to Sent folder
          */
@@ -2128,11 +2125,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (e.getMessage().indexOf("quota") != -1) {
-                throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA, e, new Object[0]);
+                throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
             }
-            throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
+            throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED.create(e, new Object[0]);
         }
         if ((uidArr != null) && (uidArr[0] != null)) {
             /*
@@ -2148,7 +2145,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return retval;
     }
 
-    private void setFlagForward(final MailPath path) throws MailException {
+    private void setFlagForward(final MailPath path) throws OXException {
         /*
          * Mark referenced mail as forwarded
          */
@@ -2218,7 +2215,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private void setFlagMultipleForward(final List<MailPath> paths) throws MailException {
+    private void setFlagMultipleForward(final List<MailPath> paths) throws OXException {
         final String[] ids = new String[1];
         for (final MailPath path : paths) {
             /*
@@ -2290,7 +2287,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private void setFlagReply(final MailPath path) throws MailException {
+    private void setFlagReply(final MailPath path) throws OXException {
         if (null == path) {
             LOG.warn("Missing msgref on reply. Corresponding mail cannot be marked as answered.", new Throwable());
             return;
@@ -2386,13 +2383,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private void rateLimitChecks(final MailMessage composedMail, final int rateLimit, final int maxToCcBcc) throws MailException {
+    private void rateLimitChecks(final MailMessage composedMail, final int rateLimit, final int maxToCcBcc) throws OXException {
         if (rateLimit > 0) {
             synchronized (getLockObject()) {
                 final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
                 if (null != parameter && (parameter.longValue() + rateLimit) >= System.currentTimeMillis()) {
                     final NumberFormat numberInstance = DecimalFormat.getNumberInstance(UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale());
-                    throw new MailException(MailException.Code.SENT_QUOTA_EXCEEDED, numberInstance.format(((double) rateLimit) / 1000));
+                    throw MailExceptionCode.SENT_QUOTA_EXCEEDED.create(numberInstance.format(((double) rateLimit) / 1000));
                 }
             }
         }
@@ -2403,7 +2400,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 count += (composedMail.getBcc() == null ? 0 : composedMail.getBcc().length);
 
                 if (count > maxToCcBcc) {
-                    throw new MailException(MailException.Code.RECIPIENTS_EXCEEDED, Integer.valueOf(maxToCcBcc));
+                    throw MailExceptionCode.RECIPIENTS_EXCEEDED.create(Integer.valueOf(maxToCcBcc));
                 }
             }
         }
@@ -2411,7 +2408,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public void sendReceiptAck(final String folder, final String msgUID, final String fromAddr) throws MailException {
+    public void sendReceiptAck(final String folder, final String msgUID, final String fromAddr) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int acc = argument.getAccountId();
         try {
@@ -2433,22 +2430,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
                     if (!validAddrs.contains(new QuotedInternetAddress(fromAddr))) {
-                        throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
+                        throw MailExceptionCode.INVALID_SENDER.create(fromAddr);
                     }
                 } catch (final AddressException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }
             } else {
                 if (!new QuotedInternetAddress(ma.getPrimaryAddress()).equals(new QuotedInternetAddress(fromAddr))) {
-                    throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
+                    throw MailExceptionCode.INVALID_SENDER.create(fromAddr);
                 }
             }
         } catch (final AddressException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         /*
          * Initialize
@@ -2467,7 +2464,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailListField[] FIELDS_COLOR_LABEL = new MailListField[] { MailListField.COLOR_LABEL };
 
     @Override
-    public void updateMessageColorLabel(final String folder, final String[] mailIDs, final int newColorLabel) throws MailException {
+    public void updateMessageColorLabel(final String folder, final String[] mailIDs, final int newColorLabel) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2537,7 +2534,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String getMailIDByMessageID(final String folder, final String messageID) throws MailException {
+    public String getMailIDByMessageID(final String folder, final String messageID) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2551,13 +2548,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 new HeaderTerm("Message-Id", messageID),
                 FIELDS_ID_INFO);
         if (null == messages || 1 != messages.length) {
-            throw new MailException(MailException.Code.MAIL_NOT_FOUN_BY_MESSAGE_ID, fullname, messageID);
+            throw MailExceptionCode.MAIL_NOT_FOUN_BY_MESSAGE_ID.create(fullname, messageID);
         }
         return messages[0].getMailId();
     }
 
     @Override
-    public void updateMessageFlags(final String folder, final String[] mailIDs, final int flagBits, final boolean flagVal) throws MailException {
+    public void updateMessageFlags(final String folder, final String[] mailIDs, final int flagBits, final boolean flagVal) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2662,7 +2659,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage[] getUpdatedMessages(final String folder, final int[] fields) throws MailException {
+    public MailMessage[] getUpdatedMessages(final String folder, final int[] fields) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2671,7 +2668,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage[] getDeletedMessages(final String folder, final int[] fields) throws MailException {
+    public MailMessage[] getDeletedMessages(final String folder, final int[] fields) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2808,7 +2805,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return mars;
     }
 
-    private String[] getAllMessageIDs(final FullnameArgument argument) throws MailException {
+    private String[] getAllMessageIDs(final FullnameArgument argument) throws OXException {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();

@@ -51,7 +51,7 @@ package com.openexchange.mail.dataobjects;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 
@@ -128,9 +128,9 @@ public final class MailStructure {
      * 
      * @param mail The mail message
      * @return The corresponding mail structure
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static MailStructure getMailStructure(final MailMessage mail) throws MailException {
+    public static MailStructure getMailStructure(final MailMessage mail) throws OXException {
         return getMailStructure0(mail);
     }
 
@@ -149,7 +149,7 @@ public final class MailStructure {
         return sb.toString();
     }
 
-    private static MailStructure getMailStructure0(final MailPart part) throws MailException {
+    private static MailStructure getMailStructure0(final MailPart part) throws OXException {
         final MailStructure retval;
         final ContentType ct = part.getContentType();
         if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {

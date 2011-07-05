@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.twitter.config;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
@@ -96,7 +96,7 @@ public final class TwitterConfig extends MailConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) throws MailException {
+    protected void parseServerURL(final String serverURL) throws OXException {
         // Nothing to do
     }
 

@@ -71,7 +71,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
@@ -131,9 +132,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
      * 
      * @param accountId The account ID
      * @param mailPath The unique mail path
-     * @throws MailException If JSON message handler cannot be initialized
+     * @throws OXException If JSON message handler cannot be initialized
      */
-    public RawJSONMessageHandler(final int accountId, final String mailPath) throws MailException {
+    public RawJSONMessageHandler(final int accountId, final String mailPath) throws OXException {
         super();
         this.accountId = accountId;
         this.mailPath = new MailPath(mailPath);
@@ -146,9 +147,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
-     * @throws MailException If JSON message handler cannot be initialized
+     * @throws OXException If JSON message handler cannot be initialized
      */
-    public RawJSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail) throws MailException {
+    public RawJSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail) throws OXException {
         super();
         this.accountId = accountId;
         this.mailPath = mailPath;
@@ -171,7 +172,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -211,7 +212,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return nestedMsgsArr;
     }
 
-    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
+    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             /*
@@ -280,51 +281,51 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             getAttachmentsArr().put(jsonObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_BCC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
     }
 
-    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_CC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
     }
 
-    public boolean handleColorLabel(final int colorLabel) throws MailException {
+    public boolean handleColorLabel(final int colorLabel) throws OXException {
         try {
             jsonObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
     }
 
-    public boolean handleContentId(final String contentId) throws MailException {
+    public boolean handleContentId(final String contentId) throws OXException {
         try {
             jsonObject.put(MailJSONField.CID.getKey(), contentId);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
     }
 
-    public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
+    public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.FROM.getKey(), MessageWriter.getAddressesAsArray(fromAddrs));
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
     }
@@ -338,7 +339,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             MessageHeaders.CC, MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY,
             MessageHeaders.SUBJECT, MessageHeaders.TO }));
 
-    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
+    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
         if (size == 0) {
             return true;
         }
@@ -400,15 +401,15 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.HEADERS.getKey(), hdrObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws MailException {
+    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         return handleAttachment(part, isInline, baseContentType, fileName, id);
     }
 
-    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         /*
          * Append HTML content as-is
          */
@@ -443,7 +444,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+    public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         /*
          * Append plain-text content as-is
          */
@@ -504,7 +505,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
+    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
@@ -548,15 +549,15 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             getAttachmentsArr().put(jsonObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         return handleInlinePlainText(decodedTextContent, contentType, size, fileName, id);
     }
 
-    public void handleMessageEnd(final MailMessage mail) throws MailException {
+    public void handleMessageEnd(final MailMessage mail) throws OXException {
         /*
          * Since we obviously touched message's content, mark its corresponding message object as seen
          */
@@ -574,7 +575,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
-    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
+    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
         /*
          * Determine if message is of MIME type multipart/alternative
          */
@@ -590,7 +591,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         try {
             final Object content = mailPart.getContent();
             final MailMessage nestedMail;
@@ -635,60 +636,60 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             getNestedMsgsArr().put(nestedObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handlePriority(final int priority) throws MailException {
+    public boolean handlePriority(final int priority) throws OXException {
         try {
             jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleMsgRef(final String msgRef) throws MailException {
+    public boolean handleMsgRef(final String msgRef) throws OXException {
         try {
             jsonObject.put(MailJSONField.MSGREF.getKey(), msgRef);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws MailException {
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
         try {
             if (!seen) {
                 jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), dispositionNotificationTo.toUnicodeString());
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleReceivedDate(final Date receivedDate) throws MailException {
+    public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         try {
             jsonObject.put(
                 MailJSONField.RECEIVED_DATE.getKey(),
                 receivedDate == null ? JSONObject.NULL : Long.valueOf(receivedDate.getTime()));
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleSentDate(final Date sentDate) throws MailException {
+    public boolean handleSentDate(final Date sentDate) throws OXException {
         try {
             jsonObject.put(MailJSONField.SENT_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long.valueOf(sentDate.getTime()));
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
+    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         /*-
          * 
         if (false && !textAppended && part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
@@ -704,7 +705,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     fileName,
                     id);
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw new OXException(OXException.Code.IO_ERROR, e, e.getMessage());
             }
         }
          */
@@ -715,16 +716,16 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return handleAttachment(part, false, baseContentType, fileName, id);
     }
 
-    public boolean handleSubject(final String subject) throws MailException {
+    public boolean handleSubject(final String subject) throws OXException {
         try {
             jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject.trim());
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleSystemFlags(final int flags) throws MailException {
+    public boolean handleSystemFlags(final int flags) throws OXException {
         try {
             if (jsonObject.hasAndNotNull(MailJSONField.FLAGS.getKey())) {
                 final int prevFlags = jsonObject.getInt(MailJSONField.FLAGS.getKey());
@@ -734,20 +735,20 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_TO.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleUserFlags(final String[] userFlags) throws MailException {
+    public boolean handleUserFlags(final String[] userFlags) throws OXException {
         if (userFlags == null) {
             return true;
         }
@@ -777,7 +778,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.USER.getKey(), userFlagsArr);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -799,7 +800,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return mailPath;
     }
 
-    private boolean containsContent(final String baseContentType) throws MailException {
+    private boolean containsContent(final String baseContentType) throws OXException {
         try {
             final JSONArray bodyArr = getBodyArr();
             final int len = bodyArr.length();
@@ -811,7 +812,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
             return false;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -827,7 +828,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return toLowerCase(s).startsWith(toLowerCase(prefix), 0);
     }
 
-    private void asRawContent(final String id, final String baseContentType, final String content, final String filename) throws MailException {
+    private void asRawContent(final String id, final String baseContentType, final String content, final String filename) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
@@ -838,11 +839,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), filename);
             getBodyArr().put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void asAttachment(final String id, final String baseContentType, final long size, final String fileName, final String optContent) throws MailException {
+    private void asAttachment(final String id, final String baseContentType, final long size, final String fileName, final String optContent) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             /*
@@ -879,11 +880,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void replaceEmptyContent(final String id, final String baseContentType, final String content) throws MailException {
+    private void replaceEmptyContent(final String id, final String baseContentType, final String content) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
@@ -901,7 +902,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
             bodyArr.put(i, jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

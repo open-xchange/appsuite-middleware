@@ -58,7 +58,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.Attribute;
@@ -173,7 +173,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
                     } finally {
                         mailAccess.close(true);
                     }
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.warn(e.getMessage(), e);
                 }
             }

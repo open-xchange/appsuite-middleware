@@ -51,7 +51,7 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -80,9 +80,9 @@ public interface IMailMessageStorage {
      * @param destFolder The destination folder
      * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
      * @return The corresponding mail IDs in destination folder
-     * @throws MailException If messages cannot be appended.
+     * @throws OXException If messages cannot be appended.
      */
-    public String[] appendMessages(String destFolder, MailMessage[] msgs) throws MailException;
+    public String[] appendMessages(String destFolder, MailMessage[] msgs) throws OXException;
 
     /**
      * Copies the mails identified through given mail IDs from source folder to destination folder.
@@ -98,9 +98,9 @@ public interface IMailMessageStorage {
      * @param fast <code>true</code> to perform a fast copy operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of String is returned; otherwise <code>false</code>
      * @return The corresponding mail IDs if copied messages in destination folder
-     * @throws MailException If messages cannot be copied.
+     * @throws OXException If messages cannot be copied.
      */
-    public String[] copyMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws MailException;
+    public String[] copyMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws OXException;
 
     /**
      * Deletes the messages located in given folder identified through given mail IDs.
@@ -111,9 +111,9 @@ public interface IMailMessageStorage {
      * @param mailIds The mail IDs
      * @param hardDelete <code>true</code> to hard delete the messages, meaning not to create a backup copy of each message in default trash
      *            folder; otherwise <code>false</code>
-     * @throws MailException If messages cannot be deleted.
+     * @throws OXException If messages cannot be deleted.
      */
-    public void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws MailException;
+    public void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws OXException;
 
     /**
      * A convenience method that delivers all messages contained in given folder through invoking
@@ -130,9 +130,9 @@ public interface IMailMessageStorage {
      * @param order Whether ascending or descending sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The desired, pre-filled instances of {@link MailMessage}
-     * @throws MailException
+     * @throws OXException
      */
-    public MailMessage[] getAllMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, MailField[] fields) throws MailException;
+    public MailMessage[] getAllMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException;
 
     /**
      * A convenience method that fetches the mail message's attachment identified through given <code>sequenceId</code>.
@@ -143,9 +143,9 @@ public interface IMailMessageStorage {
      * @param mailId The mail ID
      * @param sequenceId The attachment sequence ID
      * @return The attachment wrapped by a {@link MailPart} instance
-     * @throws MailException If no attachment can be found whose sequence ID matches given <code>sequenceId</code>.
+     * @throws OXException If no attachment can be found whose sequence ID matches given <code>sequenceId</code>.
      */
-    public MailPart getAttachment(String folder, String mailId, String sequenceId) throws MailException;
+    public MailPart getAttachment(String folder, String mailId, String sequenceId) throws OXException;
 
     /**
      * A convenience method that fetches the mail message's image attachment identified by its <code>Content-Id</code> header given through
@@ -157,9 +157,9 @@ public interface IMailMessageStorage {
      * @param mailId The mail ID
      * @param contentId The value of header <code>Content-Id</code>
      * @return The image attachment wrapped by an {@link MailPart} instance
-     * @throws MailException If no image can be found whose <code>Content-Id</code> header matches given <code>contentId</code>.
+     * @throws OXException If no image can be found whose <code>Content-Id</code> header matches given <code>contentId</code>.
      */
-    public MailPart getImageAttachment(String folder, String mailId, String contentId) throws MailException;
+    public MailPart getImageAttachment(String folder, String mailId, String contentId) throws OXException;
 
     /**
      * Gets the mail located in given folder whose mail ID matches specified ID.
@@ -174,9 +174,9 @@ public interface IMailMessageStorage {
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
      *            <code>false</code> to leave as-is
      * @return Corresponding message
-     * @throws MailException If message could not be returned
+     * @throws OXException If message could not be returned
      */
-    public MailMessage getMessage(String folder, String mailId, boolean markSeen) throws MailException;
+    public MailMessage getMessage(String folder, String mailId, boolean markSeen) throws OXException;
 
     /**
      * Gets the mails located in given folder whose mail ID matches specified ID. The constant {@link #EMPTY_RETVAL} may be returned, if
@@ -190,9 +190,9 @@ public interface IMailMessageStorage {
      * @param mailIds The mail IDs
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return Corresponding mails as an array
-     * @throws MailException If message could not be returned
+     * @throws OXException If message could not be returned
      */
-    public MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws MailException;
+    public MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws OXException;
 
     /**
      * An <b>optional</b> convenience method that gets the messages located in given folder sorted by message thread reference. By default
@@ -211,9 +211,9 @@ public interface IMailMessageStorage {
      * @param searchTerm The search term
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
-     * @throws MailException If messages cannot be returned
+     * @throws OXException If messages cannot be returned
      */
-    public MailMessage[] getThreadSortedMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
+    public MailMessage[] getThreadSortedMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
     /**
      * Gets all unread messages located in given folder; meaning messages that do not have the \Seen flag set. The constant
@@ -225,9 +225,9 @@ public interface IMailMessageStorage {
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @param limit The max. number of returned unread messages or <code>-1</code> to request all unread messages in folder
      * @return Unread messages contained in an array of {@link MailMessage}
-     * @throws MailException If unread messages cannot be returned.
+     * @throws OXException If unread messages cannot be returned.
      */
-    public MailMessage[] getUnreadMessages(String folder, MailSortField sortField, OrderDirection order, MailField[] fields, int limit) throws MailException;
+    public MailMessage[] getUnreadMessages(String folder, MailSortField sortField, OrderDirection order, MailField[] fields, int limit) throws OXException;
 
     /**
      * Moves the mails identified through given mail IDs from source folder to destination folder.
@@ -240,16 +240,16 @@ public interface IMailMessageStorage {
      * @param fast <code>true</code> to perform a fast move operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of String is returned; otherwise <code>false</code>
      * @return The corresponding mail IDs if copied messages in destination folder
-     * @throws MailException If messages cannot be copied.
+     * @throws OXException If messages cannot be copied.
      */
-    public String[] moveMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws MailException;
+    public String[] moveMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws OXException;
 
     /**
      * Releases all resources used by this message storage when closing superior {@link MailAccess}
      * 
-     * @throws MailException If resources cannot be released
+     * @throws OXException If resources cannot be released
      */
-    public void releaseResources() throws MailException;
+    public void releaseResources() throws OXException;
 
     /**
      * A convenience method that saves given draft mail to default drafts folder and supports deletion of old draft's version (draft-edit
@@ -258,9 +258,9 @@ public interface IMailMessageStorage {
      * @param draftFullname The fullname of default drafts folder
      * @param draftMail The draft mail as a composed mail
      * @return The stored draft mail
-     * @throws MailException If saving specified draft message fails
+     * @throws OXException If saving specified draft message fails
      */
-    public MailMessage saveDraft(String draftFullname, ComposedMailMessage draftMail) throws MailException;
+    public MailMessage saveDraft(String draftFullname, ComposedMailMessage draftMail) throws OXException;
 
     /**
      * Searches mails located in given folder. If the search yields no results, the constant {@link #EMPTY_RETVAL} may be returned. This
@@ -280,9 +280,9 @@ public interface IMailMessageStorage {
      * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The desired, pre-filled instances of {@link MailMessage}
-     * @throws MailException If mails cannot be returned
+     * @throws OXException If mails cannot be returned
      */
-    public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
+    public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
     /**
      * An <b>optional</b> method that updates the color label of the messages specified by given mail IDs located in given folder.
@@ -298,9 +298,9 @@ public interface IMailMessageStorage {
      * @param folder The folder fullname
      * @param mailIds The mail IDs
      * @param colorLabel The color label to apply
-     * @throws MailException If color label cannot be updated
+     * @throws OXException If color label cannot be updated
      */
-    public void updateMessageColorLabel(String folder, String[] mailIds, int colorLabel) throws MailException;
+    public void updateMessageColorLabel(String folder, String[] mailIds, int colorLabel) throws OXException;
 
     /**
      * Updates the flags of the messages specified by given mail IDs located in given folder. If parameter <code>set</code> is
@@ -333,9 +333,9 @@ public interface IMailMessageStorage {
      * @param mailIds The mail IDs
      * @param flags The bit pattern for the flags to alter
      * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
-     * @throws MailException If system flags cannot be updated
+     * @throws OXException If system flags cannot be updated
      */
-    public void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws MailException;
+    public void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException;
 
     /**
      * Gets all new and modified messages in specified folder.
@@ -343,9 +343,9 @@ public interface IMailMessageStorage {
      * @param folder The folder fullname
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All new and modified messages in specified folder
-     * @throws MailException If mails cannot be returned
+     * @throws OXException If mails cannot be returned
      */
-    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws MailException;
+    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException;
 
     /**
      * Gets all deleted messages in specified folder.
@@ -353,7 +353,7 @@ public interface IMailMessageStorage {
      * @param folder The folder fullname
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All deleted messages in specified folder
-     * @throws MailException If mails cannot be returned
+     * @throws OXException If mails cannot be returned
      */
-    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws MailException;
+    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException;
 }

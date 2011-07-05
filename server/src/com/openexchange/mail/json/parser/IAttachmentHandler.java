@@ -50,7 +50,7 @@
 
 package com.openexchange.mail.json.parser;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -73,16 +73,16 @@ public interface IAttachmentHandler {
      * Adds specified attachment.
      * 
      * @param attachment The attachment to add
-     * @throws MailException Depending on implementation it may indicate an exceeded quota, but other errors as well
+     * @throws OXException Depending on implementation it may indicate an exceeded quota, but other errors as well
      */
-    public void addAttachment(MailPart attachment) throws MailException;
+    public void addAttachment(MailPart attachment) throws OXException;
 
     /**
      * Generates composed mails.
      * 
      * @param source The source composed mail
      * @return The resulting composed mails
-     * @throws MailException If an error occurs while filling mail
+     * @throws OXException If an error occurs while filling mail
      */
-    public ComposedMailMessage[] generateComposedMails(ComposedMailMessage source) throws MailException;
+    public ComposedMailMessage[] generateComposedMails(ComposedMailMessage source) throws OXException;
 }

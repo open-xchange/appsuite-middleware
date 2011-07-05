@@ -94,7 +94,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
@@ -237,7 +238,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Return
              */
             return list.toArray(new SortableId[list.size()]);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -250,7 +251,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    private static void addSubfolders(final String fullname, final List<MailFolder> folders, final IMailFolderStorage folderStorage) throws MailException {
+    private static void addSubfolders(final String fullname, final List<MailFolder> folders, final IMailFolderStorage folderStorage) throws OXException {
         final MailFolder[] subfolders = folderStorage.getSubfolders(fullname, false);
         for (final MailFolder subfolder : subfolders) {
             folders.add(subfolder);
@@ -284,7 +285,7 @@ public final class MailFolderStorage implements FolderStorage {
                 recreateMailFolder(accountId, fullname, session, mailAccess);
             }
             addWarnings(mailAccess, storageParameters);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -335,7 +336,7 @@ public final class MailFolderStorage implements FolderStorage {
             addWarnings(mailAccess, storageParameters);
             folder.setID(prepareFullname(accountId, fullname));
             postEvent(accountId, mfd.getParentFullname(), false, storageParameters);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -387,7 +388,7 @@ public final class MailFolderStorage implements FolderStorage {
                 }
                 postEvent(accountId, trashFullname, false, storageParameters);
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -432,7 +433,7 @@ public final class MailFolderStorage implements FolderStorage {
             }
             final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
             postEvent4Subfolders(accountId, subfolders, storageParameters);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -471,7 +472,7 @@ public final class MailFolderStorage implements FolderStorage {
                 return prepareFullname(MailAccount.DEFAULT_ID, mailAccess.getFolderStorage().getTrashFolder());
             }
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -495,11 +496,11 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect(false);
             if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !mailAccess.getFolderStorage().exists(fullname)) {
-                throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
+                throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
             }
             addWarnings(mailAccess, storageParameters);
             return false;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -535,7 +536,7 @@ public final class MailFolderStorage implements FolderStorage {
                 OrderDirection.DESC,
                 null,
                 new MailField[] { MailField.ID }).length;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -661,7 +662,7 @@ public final class MailFolderStorage implements FolderStorage {
             retval.setTreeID(treeId);
 
             return retval;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -685,10 +686,10 @@ public final class MailFolderStorage implements FolderStorage {
         return new ServerSessionAdapter(s);
     }
 
-    private static MailFolder getMailFolder(final String treeId, final int accountId, final String fullname, final boolean createIfAbsent, final Session session, final MailAccess<?, ?> mailAccess) throws MailException {
+    private static MailFolder getMailFolder(final String treeId, final int accountId, final String fullname, final boolean createIfAbsent, final Session session, final MailAccess<?, ?> mailAccess) throws OXException {
         try {
             return mailAccess.getFolderStorage().getFolder(fullname);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (!createIfAbsent) {
                 throw e;
             }
@@ -699,7 +700,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    private static MailFolder recreateMailFolder(final int accountId, final String fullname, final Session session, final MailAccess<?, ?> mailAccess) throws MailException {
+    private static MailFolder recreateMailFolder(final int accountId, final String fullname, final Session session, final MailAccess<?, ?> mailAccess) throws OXException {
         /*
          * Recreate the mail folder
          */
@@ -893,7 +894,7 @@ public final class MailFolderStorage implements FolderStorage {
                 list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(tmp.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
             throw new FolderException(e);
@@ -950,7 +951,7 @@ public final class MailFolderStorage implements FolderStorage {
             final boolean exists = mailAccess.getFolderStorage().exists(fullname);
             addWarnings(mailAccess, storageParameters);
             return exists;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
@@ -1083,14 +1084,14 @@ public final class MailFolderStorage implements FolderStorage {
                         // Check permission on new parent
                         final MailPermission ownPermission = p.getOwnPermission();
                         if (!ownPermission.canCreateSubfolders()) {
-                            throw new MailException(MailException.Code.NO_CREATE_ACCESS, newParent);
+                            throw MailExceptionCode.NO_CREATE_ACCESS.create(newParent);
                         }
                         // Check for duplicate
                         final MailFolder[] tmp = otherAccess.getFolderStorage().getSubfolders(newParent, true);
                         final String lookFor = mfd.containsName() ? mfd.getName() : oldName;
                         for (final MailFolder sub : tmp) {
                             if (sub.getName().equals(lookFor)) {
-                                throw new MailException(MailException.Code.DUPLICATE_FOLDER, lookFor);
+                                throw MailExceptionCode.DUPLICATE_FOLDER.create(lookFor);
                             }
                         }
                         // Copy
@@ -1132,14 +1133,14 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess.getFolderStorage().updateFolder(fullname, mfd);
             addWarnings(mailAccess, storageParameters);
             postEvent(accountId, fullname, false, storageParameters);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
     }
 
-    private static String fullCopy(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> srcAccess, final String srcFullname, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess, final String destParent, final char destSeparator, final int user, final boolean hasPermissions) throws MailException {
+    private static String fullCopy(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> srcAccess, final String srcFullname, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess, final String destParent, final char destSeparator, final int user, final boolean hasPermissions) throws OXException {
         // Create folder
         final MailFolder source = srcAccess.getFolderStorage().getFolder(srcFullname);
         final MailFolderDescription mfd = new MailFolderDescription();
@@ -1155,7 +1156,7 @@ public final class MailFolderStorage implements FolderStorage {
                     mfd.addPermission((MailPermission) perm.clone());
                 }
             } catch (final CloneNotSupportedException e) {
-                throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         final String destFullname = destAccess.getFolderStorage().createFolder(mfd);
@@ -1297,13 +1298,13 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    private static Map<String, Map<?, ?>> subfolders(final String fullname, final MailAccess<?, ?> mailAccess) throws MailException {
+    private static Map<String, Map<?, ?>> subfolders(final String fullname, final MailAccess<?, ?> mailAccess) throws OXException {
         final Map<String, Map<?, ?>> m = new HashMap<String, Map<?, ?>>();
         subfoldersRecursively(fullname, m, mailAccess);
         return m;
     }
 
-    private static void subfoldersRecursively(final String parent, final Map<String, Map<?, ?>> m, final MailAccess<?, ?> mailAccess) throws MailException {
+    private static void subfoldersRecursively(final String parent, final Map<String, Map<?, ?>> m, final MailAccess<?, ?> mailAccess) throws OXException {
         final MailFolder[] mailFolders = mailAccess.getFolderStorage().getSubfolders(parent, true);
         if (null == mailFolders || 0 == mailFolders.length) {
             final Map<String, Map<?, ?>> emptyMap = Collections.emptyMap();
@@ -1362,10 +1363,10 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     private static void addWarnings(final MailAccess<?, ?> mailAccess, final StorageParameters storageParameters) {
-        final Collection<MailException> warnings = mailAccess.getWarnings();
+        final Collection<OXException> warnings = mailAccess.getWarnings();
         if (!warnings.isEmpty()) {
-            for (final MailException mailException : warnings) {
-                storageParameters.addWarning(mailException);
+            for (final OXException OXException : warnings) {
+                storageParameters.addWarning(OXException);
             }
         }
     }

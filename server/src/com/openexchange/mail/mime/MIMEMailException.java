@@ -63,7 +63,8 @@ import javax.mail.internet.AddressException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.session.Session;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -71,7 +72,7 @@ import com.sun.mail.smtp.SMTPSendFailedException;
 /**
  * {@link MIMEMailException} - For MIME related errors.
  * <p>
- * Taken from {@link MailException}:
+ * Taken from {@link OXException}:
  * <p>
  * The detail number range in subclasses generated in mail bundles is supposed to start with 2000 and may go up to 2999.
  * <p>
@@ -79,7 +80,7 @@ import com.sun.mail.smtp.SMTPSendFailedException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MIMEMailException extends MailException {
+public class MIMEMailException extends OXException {
 
     private static final transient org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMailException.class));
 
@@ -136,7 +137,7 @@ public class MIMEMailException extends MailException {
          * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
          * </p>
          */
-        MESSAGE_REMOVED(String.format(MailException.Code.MAIL_NOT_FOUND.getMessage(), "", ""), MailException.Code.MAIL_NOT_FOUND.getCategory(), MailException.Code.MAIL_NOT_FOUND.getNumber()),
+        MESSAGE_REMOVED(String.format(MailExceptionCode.MAIL_NOT_FOUND.getMessage(), "", ""), MailExceptionCode.MAIL_NOT_FOUND.getCategory(), MailExceptionCode.MAIL_NOT_FOUND.getNumber()),
         /**
          * Method not supported: %1$s
          * <p>
@@ -298,11 +299,11 @@ public class MIMEMailException extends MailException {
         /**
          * An I/O error occurred: %1$s
          */
-        IO_ERROR(MailException.Code.IO_ERROR),
+        IO_ERROR(MailExceptionCode.IO_ERROR),
         /**
          * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
          */
-        IO_ERROR_EXT(MailException.Code.IO_ERROR, "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for login %3$s (user=%4$s, context=%5$s)."),
+        IO_ERROR_EXT(MailExceptionCode.IO_ERROR, "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for login %3$s (user=%4$s, context=%5$s)."),
         /**
          * Error processing mail server response. The administrator has been informed. Error message: %1$s
          */
@@ -325,13 +326,13 @@ public class MIMEMailException extends MailException {
             this.category = category;
         }
 
-        private Code(final MailException.Code code, final String message) {
+        private Code(final MailExceptionCode code, final String message) {
             this.message = message;
             this.detailNumber = code.getNumber();
             this.category = code.getCategory();
         }
 
-        private Code(final MailException.Code code) {
+        private Code(final MailExceptionCode code) {
             this.message = code.getMessage();
             this.detailNumber = code.getNumber();
             this.category = code.getCategory();

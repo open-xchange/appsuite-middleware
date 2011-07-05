@@ -53,7 +53,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -105,7 +105,7 @@ public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountA
         }
     }
 
-    protected static void addSubfolders(final JSONObject parent, final MailFolder[] subfolders, final MailAccess<?, ?> mailAccess, final MailConfig mailConfig, final ServerSession session) throws JSONException, MailException {
+    protected static void addSubfolders(final JSONObject parent, final MailFolder[] subfolders, final MailAccess<?, ?> mailAccess, final MailConfig mailConfig, final ServerSession session) throws JSONException, OXException {
         if (subfolders.length == 0) {
             return;
         }

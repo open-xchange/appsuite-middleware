@@ -54,7 +54,8 @@ import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.MailFolderStorage;
@@ -83,15 +84,15 @@ public final class TwitterFolderStorage extends MailFolderStorage {
      * Initializes a new {@link TwitterFolderStorage}.
      * 
      * @param session The session
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public TwitterFolderStorage(final Session session) throws MailException {
+    public TwitterFolderStorage(final Session session) throws OXException {
         super();
         this.session = session;
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -99,54 +100,54 @@ public final class TwitterFolderStorage extends MailFolderStorage {
      * Gets session user.
      * 
      * @return The session user
-     * @throws MailException If retrieving user fails
+     * @throws OXException If retrieving user fails
      */
-    private User getUser() throws MailException {
+    private User getUser() throws OXException {
         if (null == user) {
             try {
                 final UserService userService = TwitterServiceRegistry.getServiceRegistry().getService(UserService.class, true);
                 user = userService.getUser(session.getUserId(), ctx);
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             } catch (final UserException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             }
         }
         return user;
     }
 
     @Override
-    public void checkDefaultFolders() throws MailException {
+    public void checkDefaultFolders() throws OXException {
         // Nothing to do
     }
 
     @Override
-    public void clearFolder(final String fullname, final boolean hardDelete) throws MailException {
+    public void clearFolder(final String fullname, final boolean hardDelete) throws OXException {
         if ("INBOX".equals(fullname) || MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-            throw new MailException(MailException.Code.NO_DELETE_ACCESS, fullname);
+            throw MailExceptionCode.NO_DELETE_ACCESS.create(fullname);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
     }
 
     @Override
-    public String createFolder(final MailFolderDescription toCreate) throws MailException {
+    public String createFolder(final MailFolderDescription toCreate) throws OXException {
         final String parentFullname = toCreate.getParentFullname();
         if ("INBOX".equals(parentFullname) || MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname)) {
-            throw new MailException(MailException.Code.NO_CREATE_ACCESS, parentFullname);
+            throw MailExceptionCode.NO_CREATE_ACCESS.create(parentFullname);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, parentFullname);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(parentFullname);
     }
 
     @Override
-    public String deleteFolder(final String fullname, final boolean hardDelete) throws MailException {
+    public String deleteFolder(final String fullname, final boolean hardDelete) throws OXException {
         if ("INBOX".equals(fullname) || MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-            throw new MailException(MailException.Code.FOLDER_DELETION_DENIED, fullname);
+            throw MailExceptionCode.FOLDER_DELETION_DENIED.create(fullname);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
     }
 
     @Override
-    public boolean exists(final String fullname) throws MailException {
+    public boolean exists(final String fullname) throws OXException {
         if ("INBOX".equals(fullname)) {
             return true;
         }
@@ -157,32 +158,32 @@ public final class TwitterFolderStorage extends MailFolderStorage {
     }
 
     @Override
-    public String getConfirmedHamFolder() throws MailException {
+    public String getConfirmedHamFolder() throws OXException {
         return null;
     }
 
     @Override
-    public String getConfirmedSpamFolder() throws MailException {
+    public String getConfirmedSpamFolder() throws OXException {
         return null;
     }
 
     @Override
-    public String getDraftsFolder() throws MailException {
+    public String getDraftsFolder() throws OXException {
         return null;
     }
 
     @Override
-    public MailFolder getFolder(final String fullname) throws MailException {
+    public MailFolder getFolder(final String fullname) throws OXException {
         if ("INBOX".equals(fullname)) {
             return TwitterFolderConverter.getINBOXFolder(session);
         } else if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
             return TwitterFolderConverter.getINBOXFolder(session);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
     }
 
     @Override
-    public Quota[] getQuotas(final String folder, final Type[] types) throws MailException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         final Quota[] quotas = new Quota[types.length];
         for (int i = 0; i < quotas.length; i++) {
             quotas[i] = Quota.getUnlimitedQuota(types[i]);
@@ -191,31 +192,31 @@ public final class TwitterFolderStorage extends MailFolderStorage {
     }
 
     @Override
-    public String getSentFolder() throws MailException {
+    public String getSentFolder() throws OXException {
         return null;
     }
 
     @Override
-    public String getSpamFolder() throws MailException {
+    public String getSpamFolder() throws OXException {
         return null;
     }
 
     @Override
-    public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
+    public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException {
         if ("INBOX".equals(parentFullname)) {
             return EMPTY_PATH;
         }
         if (MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname)) {
             return new MailFolder[] { TwitterFolderConverter.getINBOXFolder(session) };
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, parentFullname);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(parentFullname);
     }
 
     @Override
-    public String getTrashFolder() throws MailException {
+    public String getTrashFolder() throws OXException {
         return null;
-        // throw new MailException(
-        // MailException.Code.DEFAULT_FOLDER_CHECK_FAILED,
+        // throw new OXException(
+        // OXException.Code.DEFAULT_FOLDER_CHECK_FAILED,
         // "twitter.com",
         // getUserInfo4Error(),
         // Integer.valueOf(session.getUserId()),
@@ -224,24 +225,24 @@ public final class TwitterFolderStorage extends MailFolderStorage {
     }
 
     @Override
-    public String moveFolder(final String fullname, final String newFullname) throws MailException {
+    public String moveFolder(final String fullname, final String newFullname) throws OXException {
         if ("INBOX".equals(fullname) || MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-            throw new MailException(MailException.Code.FOLDER_MOVE_DENIED, fullname);
+            throw MailExceptionCode.FOLDER_MOVE_DENIED.create(fullname);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
     }
 
     @Override
-    public void releaseResources() throws MailException {
+    public void releaseResources() throws OXException {
         // Nothing to do
     }
 
     @Override
-    public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws MailException {
+    public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws OXException {
         if ("INBOX".equals(fullname) || MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-            throw new MailException(MailException.Code.FOLDER_UPDATE_DENIED, fullname);
+            throw MailExceptionCode.FOLDER_UPDATE_DENIED.create(fullname);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
     }
 
 }

@@ -60,7 +60,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.OXException;
@@ -99,7 +99,7 @@ public final class EventPool implements Runnable {
             try {
                 instance = new EventPool();
                 instance.startup();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -141,9 +141,9 @@ public final class EventPool implements Runnable {
     /**
      * Initializes a new {@link EventPool}.
      * 
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    private EventPool() throws MailException {
+    private EventPool() throws OXException {
         super();
         map = new ConcurrentHashMap<PooledEvent, PooledEvent>(1024);
         queue = new DelayQueue<PooledEvent>();
@@ -151,7 +151,7 @@ public final class EventPool implements Runnable {
         try {
             eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class, true);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 

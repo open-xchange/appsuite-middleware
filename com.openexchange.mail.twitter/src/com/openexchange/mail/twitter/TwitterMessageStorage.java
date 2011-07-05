@@ -59,7 +59,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -106,9 +107,9 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
      * @param twitterAccess The access to twitter API
      * @param session The session
      * @param accountId The account ID
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public TwitterMessageStorage(final TwitterAccess twitterAccess, final Session session, final int accountId) throws MailException {
+    public TwitterMessageStorage(final TwitterAccess twitterAccess, final Session session, final int accountId) throws OXException {
         super();
         this.twitterAccess = twitterAccess;
         this.session = session;
@@ -117,22 +118,22 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             final ContextService contextService = TwitterServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
             ctx = contextService.getContext(session.getContextId());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
-    private MailAccount getMailAccount() throws MailException {
+    private MailAccount getMailAccount() throws OXException {
         if (mailAccount == null) {
             try {
                 final MailAccountStorageService storageService =
                     TwitterServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             }
         }
         return mailAccount;
@@ -142,53 +143,53 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
      * Gets session user's locale
      * 
      * @return The session user's locale
-     * @throws MailException If retrieving user's locale fails
+     * @throws OXException If retrieving user's locale fails
      */
-    private Locale getLocale() throws MailException {
+    private Locale getLocale() throws OXException {
         if (null == locale) {
             try {
                 final UserService userService = TwitterServiceRegistry.getServiceRegistry().getService(UserService.class, true);
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             } catch (final UserException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             }
         }
         return locale;
     }
 
     @Override
-    public long[] appendMessagesLong(final String destFolder, final MailMessage[] msgs) throws MailException {
+    public long[] appendMessagesLong(final String destFolder, final MailMessage[] msgs) throws OXException {
         if ("INBOX".equals(destFolder) || MailFolder.DEFAULT_FOLDER_ID.equals(destFolder)) {
-            throw new MailException(MailException.Code.NO_CREATE_ACCESS, destFolder);
+            throw MailExceptionCode.NO_CREATE_ACCESS.create(destFolder);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, destFolder);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(destFolder);
     }
 
     @Override
-    public long[] copyMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws MailException {
+    public long[] copyMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws OXException {
         if ("INBOX".equals(sourceFolder) || MailFolder.DEFAULT_FOLDER_ID.equals(sourceFolder)) {
-            throw new MailException(MailException.Code.NO_CREATE_ACCESS, sourceFolder);
+            throw MailExceptionCode.NO_CREATE_ACCESS.create(sourceFolder);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, sourceFolder);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(sourceFolder);
     }
 
     @Override
-    public void deleteMessagesLong(final String folder, final long[] mailIds, final boolean hardDelete) throws MailException {
+    public void deleteMessagesLong(final String folder, final long[] mailIds, final boolean hardDelete) throws OXException {
         if ("INBOX".equals(folder) || MailFolder.DEFAULT_FOLDER_ID.equals(folder)) {
-            throw new MailException(MailException.Code.NO_DELETE_ACCESS, folder);
+            throw MailExceptionCode.NO_DELETE_ACCESS.create(folder);
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, folder);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(folder);
     }
 
     @Override
-    public MailMessage[] getMessagesLong(final String folder, final long[] mailIds, final MailField[] fields) throws MailException {
+    public MailMessage[] getMessagesLong(final String folder, final long[] mailIds, final MailField[] fields) throws OXException {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(folder)) {
-            throw new MailException(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, folder);
+            throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(folder);
         }
         if (!"INBOX".equals(folder)) {
-            throw new MailException(MailException.Code.FOLDER_NOT_FOUND, folder);
+            throw MailExceptionCode.FOLDER_NOT_FOUND.create(folder);
         }
         try {
             final List<Status> timeline = twitterAccess.getFriendsTimeline();
@@ -215,22 +216,22 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
 
             return msgs;
         } catch (final TwitterException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public void releaseResources() throws MailException {
+    public void releaseResources() throws OXException {
         // Nothing to do
     }
 
     @Override
-    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(folder)) {
-            throw new MailException(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, folder);
+            throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(folder);
         }
         if (!"INBOX".equals(folder)) {
-            throw new MailException(MailException.Code.FOLDER_NOT_FOUND, folder);
+            throw MailExceptionCode.FOLDER_NOT_FOUND.create(folder);
         }
         List<MailMessage> msgs = null;
         try {
@@ -245,7 +246,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
                 msgs.add(TwitterStatusConverter.convertStatus2Message(timeline.get(i), accountId, accountName));
             }
         } catch (final TwitterException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         if (null != searchTerm) {
             // Filter them
@@ -279,11 +280,11 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
     }
 
     @Override
-    public void updateMessageFlagsLong(final String folder, final long[] mailIds, final int flags, final boolean set) throws MailException {
+    public void updateMessageFlagsLong(final String folder, final long[] mailIds, final int flags, final boolean set) throws OXException {
         if ("INBOX".equals(folder) || MailFolder.DEFAULT_FOLDER_ID.equals(folder)) {
             return;
         }
-        throw new MailException(MailException.Code.FOLDER_NOT_FOUND, folder);
+        throw MailExceptionCode.FOLDER_NOT_FOUND.create(folder);
     }
 
 }

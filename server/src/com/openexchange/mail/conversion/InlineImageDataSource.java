@@ -60,7 +60,7 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -100,14 +100,14 @@ public final class InlineImageDataSource implements ImageDataSource {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
             final MailPart imagePart = mailAccess.getMessageStorage().getImageAttachment(fullname, mailId, cid);
             imagePart.loadContent();
             return imagePart;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             mailAccess.close(true);
@@ -167,7 +167,7 @@ public final class InlineImageDataSource implements ImageDataSource {
                                 throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
                             }
                         }
-                    } catch (final MailException e) {
+                    } catch (final OXException e) {
                         throw new OXException(e);
                     }
                 }
@@ -182,7 +182,7 @@ public final class InlineImageDataSource implements ImageDataSource {
             properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
             try {
                 return new SimpleData<D>((D) mailPart.getInputStream(), properties);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }

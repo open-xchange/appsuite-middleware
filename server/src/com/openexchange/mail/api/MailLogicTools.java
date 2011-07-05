@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.api;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.mime.processing.MimeReply;
@@ -95,9 +95,9 @@ public class MailLogicTools {
      * @param originalMail The original mail
      * @param replyAll <code>true</code> to reply to all recipients; otherwise <code>false</code>
      * @return An instance of {@link MailMessage} representing the reply message
-     * @throws MailException If reply message cannot be generated
+     * @throws OXException If reply message cannot be generated
      */
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws MailException {
+    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws OXException {
         return MimeReply.getReplyMail(originalMail, replyAll, session, accountId);
     }
 
@@ -112,9 +112,9 @@ public class MailLogicTools {
      * @param replyAll <code>true</code> to reply to all recipients; otherwise <code>false</code>
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing the reply message
-     * @throws MailException If reply message cannot be generated
+     * @throws OXException If reply message cannot be generated
      */
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm) throws MailException {
+    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm) throws OXException {
         return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, usm);
     }
 
@@ -128,9 +128,9 @@ public class MailLogicTools {
      * 
      * @param originalMails The original mails
      * @return An instance of {@link MailMessage} representing the forward message
-     * @throws MailException If forward message cannot be generated
+     * @throws OXException If forward message cannot be generated
      */
-    public MailMessage getFowardMessage(final MailMessage[] originalMails) throws MailException {
+    public MailMessage getFowardMessage(final MailMessage[] originalMails) throws OXException {
         return MimeForward.getFowardMail(originalMails, session, accountId);
     }
 
@@ -145,9 +145,9 @@ public class MailLogicTools {
      * @param originalMails The original mails
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing the forward message
-     * @throws MailException If forward message cannot be generated
+     * @throws OXException If forward message cannot be generated
      */
-    public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm) throws MailException {
+    public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm) throws OXException {
         return MimeForward.getFowardMail(originalMails, session, accountId, usm);
     }
 }

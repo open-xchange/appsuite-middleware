@@ -49,7 +49,7 @@
 
 package com.openexchange.pop3;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -79,135 +79,135 @@ public final class POP3FolderStorage extends MailFolderStorage {
      * Initializes a new {@link POP3FolderStorage}
      * 
      * @param pop3Storage The POP3 storage
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public POP3FolderStorage(final POP3Storage pop3Storage) throws MailException {
+    public POP3FolderStorage(final POP3Storage pop3Storage) throws OXException {
         super();
         pop3FolderStorage = pop3Storage.getFolderStorage();
     }
 
     @Override
-    public void checkDefaultFolders() throws MailException {
+    public void checkDefaultFolders() throws OXException {
         pop3FolderStorage.checkDefaultFolders();
     }
 
     @Override
-    public void clearFolder(final String fullname, final boolean hardDelete) throws MailException {
+    public void clearFolder(final String fullname, final boolean hardDelete) throws OXException {
         pop3FolderStorage.clearFolder(fullname, hardDelete);
     }
 
     @Override
-    public void clearFolder(final String fullname) throws MailException {
+    public void clearFolder(final String fullname) throws OXException {
         pop3FolderStorage.clearFolder(fullname);
     }
 
     @Override
-    public String createFolder(final MailFolderDescription toCreate) throws MailException {
+    public String createFolder(final MailFolderDescription toCreate) throws OXException {
         return pop3FolderStorage.createFolder(toCreate);
     }
 
     @Override
-    public String deleteFolder(final String fullname, final boolean hardDelete) throws MailException {
+    public String deleteFolder(final String fullname, final boolean hardDelete) throws OXException {
         return pop3FolderStorage.deleteFolder(fullname, hardDelete);
     }
 
     @Override
-    public String deleteFolder(final String fullname) throws MailException {
+    public String deleteFolder(final String fullname) throws OXException {
         return pop3FolderStorage.deleteFolder(fullname);
     }
 
     @Override
-    public boolean exists(final String fullname) throws MailException {
+    public boolean exists(final String fullname) throws OXException {
         return pop3FolderStorage.exists(fullname);
     }
 
     @Override
-    public String getDefaultFolderPrefix() throws MailException {
+    public String getDefaultFolderPrefix() throws OXException {
         return pop3FolderStorage.getDefaultFolderPrefix();
     }
 
     @Override
-    public String getConfirmedHamFolder() throws MailException {
+    public String getConfirmedHamFolder() throws OXException {
         return pop3FolderStorage.getConfirmedHamFolder();
     }
 
     @Override
-    public String getConfirmedSpamFolder() throws MailException {
+    public String getConfirmedSpamFolder() throws OXException {
         return pop3FolderStorage.getConfirmedSpamFolder();
     }
 
     @Override
-    public String getDraftsFolder() throws MailException {
+    public String getDraftsFolder() throws OXException {
         return pop3FolderStorage.getDraftsFolder();
     }
 
     @Override
-    public MailFolder getFolder(final String fullname) throws MailException {
+    public MailFolder getFolder(final String fullname) throws OXException {
         return pop3FolderStorage.getFolder(fullname);
     }
 
     @Override
-    public Quota getMessageQuota(final String folder) throws MailException {
+    public Quota getMessageQuota(final String folder) throws OXException {
         return pop3FolderStorage.getMessageQuota(folder);
     }
 
     @Override
-    public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
+    public MailFolder[] getPath2DefaultFolder(final String fullname) throws OXException {
         return pop3FolderStorage.getPath2DefaultFolder(fullname);
     }
 
     @Override
-    public Quota[] getQuotas(final String folder, final Type[] types) throws MailException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         return pop3FolderStorage.getQuotas(folder, types);
     }
 
     @Override
-    public MailFolder getRootFolder() throws MailException {
+    public MailFolder getRootFolder() throws OXException {
         return pop3FolderStorage.getRootFolder();
     }
 
     @Override
-    public String getSentFolder() throws MailException {
+    public String getSentFolder() throws OXException {
         return pop3FolderStorage.getSentFolder();
     }
 
     @Override
-    public String getSpamFolder() throws MailException {
+    public String getSpamFolder() throws OXException {
         return pop3FolderStorage.getSpamFolder();
     }
 
     @Override
-    public Quota getStorageQuota(final String folder) throws MailException {
+    public Quota getStorageQuota(final String folder) throws OXException {
         return pop3FolderStorage.getStorageQuota(folder);
     }
 
     @Override
-    public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
+    public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException {
         return pop3FolderStorage.getSubfolders(parentFullname, all);
     }
 
     @Override
-    public String getTrashFolder() throws MailException {
+    public String getTrashFolder() throws OXException {
         return pop3FolderStorage.getTrashFolder();
     }
 
     @Override
-    public String moveFolder(final String fullname, final String newFullname) throws MailException {
+    public String moveFolder(final String fullname, final String newFullname) throws OXException {
         return pop3FolderStorage.moveFolder(fullname, newFullname);
     }
 
     @Override
-    public void releaseResources() throws MailException {
+    public void releaseResources() throws OXException {
         pop3FolderStorage.releaseResources();
     }
 
     @Override
-    public String renameFolder(final String fullname, final String newName) throws MailException {
+    public String renameFolder(final String fullname, final String newName) throws OXException {
         return pop3FolderStorage.renameFolder(fullname, newName);
     }
 
     @Override
-    public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws MailException {
+    public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws OXException {
         return pop3FolderStorage.updateFolder(fullname, toUpdate);
     }
 

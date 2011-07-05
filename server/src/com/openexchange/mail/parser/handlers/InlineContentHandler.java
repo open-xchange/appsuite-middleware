@@ -59,7 +59,7 @@ import java.util.Map.Entry;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -124,7 +124,7 @@ public final class InlineContentHandler implements MailMessageHandler {
 
     private static final String IMAGE = "image/";
 
-    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
+    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         if (part.getContentType().startsWith(IMAGE)) {
             String partCid = part.getContentId();
             if (partCid == null || partCid.length() == 0) {
@@ -151,35 +151,35 @@ public final class InlineContentHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
-    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
-    public boolean handleColorLabel(final int colorLabel) throws MailException {
+    public boolean handleColorLabel(final int colorLabel) throws OXException {
         return true;
     }
 
-    public boolean handleContentId(final String contentId) throws MailException {
+    public boolean handleContentId(final String contentId) throws OXException {
         return true;
     }
 
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws MailException {
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
         return true;
     }
 
-    public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
+    public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         return true;
     }
 
-    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
+    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
         return true;
     }
 
-    public boolean handleImagePart(final MailPart part, final String imageCIDArg, final String baseContentType, final boolean isInline, final String fileName, final String id) throws MailException {
+    public boolean handleImagePart(final MailPart part, final String imageCIDArg, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         String imageCID = imageCIDArg;
         if (imageCID == null) {
             imageCID = "";
@@ -200,35 +200,35 @@ public final class InlineContentHandler implements MailMessageHandler {
         return (inlineContents.size() < size);
     }
 
-    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         return true;
     }
 
-    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         return true;
     }
 
-    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
+    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         return true;
     }
 
-    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         return true;
     }
 
-    public void handleMessageEnd(final MailMessage mail) throws MailException {
+    public void handleMessageEnd(final MailMessage mail) throws OXException {
 
     }
 
-    public boolean handleMsgRef(final String msgRef) throws MailException {
+    public boolean handleMsgRef(final String msgRef) throws OXException {
         return true;
     }
 
-    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
+    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
         return true;
     }
 
-    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         final Object content = mailPart.getContent();
         final MailMessage nestedMail;
         if (content instanceof MailMessage) {
@@ -250,36 +250,36 @@ public final class InlineContentHandler implements MailMessageHandler {
         return (inlineContents.size() < size);
     }
 
-    public boolean handlePriority(final int priority) throws MailException {
+    public boolean handlePriority(final int priority) throws OXException {
         return true;
     }
 
-    public boolean handleReceivedDate(final Date receivedDate) throws MailException {
+    public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         return true;
     }
 
-    public boolean handleSentDate(final Date sentDate) throws MailException {
+    public boolean handleSentDate(final Date sentDate) throws OXException {
 
         return true;
     }
 
-    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
+    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         return true;
     }
 
-    public boolean handleSubject(final String subject) throws MailException {
+    public boolean handleSubject(final String subject) throws OXException {
         return true;
     }
 
-    public boolean handleSystemFlags(final int flags) throws MailException {
+    public boolean handleSystemFlags(final int flags) throws OXException {
         return true;
     }
 
-    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
-    public boolean handleUserFlags(final String[] userFlags) throws MailException {
+    public boolean handleUserFlags(final String[] userFlags) throws OXException {
         return true;
     }
 

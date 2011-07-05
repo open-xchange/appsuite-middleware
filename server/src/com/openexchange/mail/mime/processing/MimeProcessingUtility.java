@@ -59,7 +59,7 @@ import java.util.TimeZone;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.html.HTMLService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -124,9 +124,9 @@ public final class MimeProcessingUtility {
      * @param part The message's part
      * @param contentType The part's Content-Type header
      * @return <code>true</code> if given part is considered to be an inline part; otherwise <code>false</code>
-     * @throws MailException If part's headers cannot be accessed or parsed
+     * @throws OXException If part's headers cannot be accessed or parsed
      */
-    static boolean isInline(final MailPart part, final ContentType contentType) throws MailException {
+    static boolean isInline(final MailPart part, final ContentType contentType) throws OXException {
         final ContentDisposition cd;
         final boolean hasDisposition;
         {
@@ -149,9 +149,9 @@ public final class MimeProcessingUtility {
      * @param part The part whose filename shall be checked
      * @param contentType The part's Content-Type header
      * @return <code>true</code> if part's filename is not absent and ends with given suffix; otherwise <code>false</code>
-     * @throws MailException If part's filename cannot be determined
+     * @throws OXException If part's filename cannot be determined
      */
-    static boolean fileNameEndsWith(final String suffix, final MailPart part, final ContentType contentType) throws MailException {
+    static boolean fileNameEndsWith(final String suffix, final MailPart part, final ContentType contentType) throws OXException {
         final String filename = getFileName(part, contentType);
         return null == filename ? false : filename.toLowerCase(Locale.ENGLISH).endsWith(suffix);
     }
@@ -162,9 +162,9 @@ public final class MimeProcessingUtility {
      * @param part The part whose filename shall be returned
      * @param contentType The part's Content-Type header
      * @return The filename or <code>null</code>
-     * @throws MailException If part's filename cannot be returned
+     * @throws OXException If part's filename cannot be returned
      */
-    private static String getFileName(final MailPart part, final ContentType contentType) throws MailException {
+    private static String getFileName(final MailPart part, final ContentType contentType) throws OXException {
         final ContentDisposition cd;
         {
             final String[] hdr = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
@@ -187,10 +187,10 @@ public final class MimeProcessingUtility {
      * @param textPart The text part
      * @param contentType The text part's content type
      * @return The proper text version
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    static String handleInlineTextPart(final MailPart textPart, final ContentType contentType, final boolean allowHTML) throws IOException, MailException {
+    static String handleInlineTextPart(final MailPart textPart, final ContentType contentType, final boolean allowHTML) throws IOException, OXException {
         final String charset = getCharset(textPart, contentType);
         if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
             if (allowHTML) {
@@ -220,10 +220,10 @@ public final class MimeProcessingUtility {
      * @param mailPart The mail part
      * @param charset The charset to use
      * @return The mail part's content as a string
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    static String readContent(final MailPart mailPart, final String charset) throws MailException, IOException {
+    static String readContent(final MailPart mailPart, final String charset) throws OXException, IOException {
         try {
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final java.io.CharConversionException e) {
@@ -239,7 +239,7 @@ public final class MimeProcessingUtility {
 
     private static final String TEXT = "text/";
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
+    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();

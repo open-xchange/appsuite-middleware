@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.mail;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.MailAccess;
 
@@ -80,38 +80,38 @@ public final class MailAccessFullnameProvider implements DefaultFolderFullnamePr
         this.mailAccess = mailAccess;
     }
 
-    private IMailFolderStorage getFolderStorage() throws MailException {
+    private IMailFolderStorage getFolderStorage() throws OXException {
         if (null == folderStorage) {
             folderStorage = mailAccess.getFolderStorage();
         }
         return folderStorage;
     }
 
-    public String getConfirmedHamFolder() throws MailException {
+    public String getConfirmedHamFolder() throws OXException {
         return getFolderStorage().getConfirmedHamFolder();
     }
 
-    public String getConfirmedSpamFolder() throws MailException {
+    public String getConfirmedSpamFolder() throws OXException {
         return getFolderStorage().getConfirmedSpamFolder();
     }
 
-    public String getDraftsFolder() throws MailException {
+    public String getDraftsFolder() throws OXException {
         return getFolderStorage().getDraftsFolder();
     }
 
-    public String getINBOXFolder() throws MailException {
+    public String getINBOXFolder() throws OXException {
         return "INBOX";
     }
 
-    public String getSentFolder() throws MailException {
+    public String getSentFolder() throws OXException {
         return getFolderStorage().getSentFolder();
     }
 
-    public String getSpamFolder() throws MailException {
+    public String getSpamFolder() throws OXException {
         return getFolderStorage().getSpamFolder();
     }
 
-    public String getTrashFolder() throws MailException {
+    public String getTrashFolder() throws OXException {
         return getFolderStorage().getTrashFolder();
     }
 

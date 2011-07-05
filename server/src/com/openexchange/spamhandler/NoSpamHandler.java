@@ -49,7 +49,7 @@
 
 package com.openexchange.spamhandler;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 
@@ -85,12 +85,12 @@ public final class NoSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         // Nothing to do
     }
 
     @Override
-    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         // Nothing to do
     }
 

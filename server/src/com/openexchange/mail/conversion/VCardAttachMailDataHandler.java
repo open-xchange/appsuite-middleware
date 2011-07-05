@@ -75,7 +75,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.json.writer.MessageWriter;
@@ -213,7 +213,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 null);
             addFileInformation(mailObject, managedFile.getID());
             return mailObject;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final MessagingException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());

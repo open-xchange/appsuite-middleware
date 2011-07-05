@@ -52,7 +52,7 @@ package com.openexchange.messaging.generic.internet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.generic.internal.ParameterizedHeader;
@@ -102,7 +102,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     private static com.openexchange.mail.mime.ContentDisposition toContentDisposition(final String contentDisposition) throws MessagingException {
         try {
             return new com.openexchange.mail.mime.ContentDisposition(contentDisposition);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -206,7 +206,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     public void setContentDisposition(final String contentDisp) throws MessagingException {
         try {
             cdo.setContentDisposition(contentDisp);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

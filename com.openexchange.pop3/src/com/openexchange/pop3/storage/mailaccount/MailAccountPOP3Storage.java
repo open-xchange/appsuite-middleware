@@ -66,7 +66,8 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -127,11 +128,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private char separator;
 
-    private final Collection<MailException> warnings;
+    private final Collection<OXException> warnings;
 
-    MailAccountPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
+    MailAccountPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws OXException {
         super();
-        warnings = new ArrayList<MailException>(2);
+        warnings = new ArrayList<OXException>(2);
         this.pop3Access = pop3Access;
         pop3AccountId = pop3Access.getAccountId();
         final Session session = pop3Access.getSession();
@@ -161,7 +162,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         separator = 0;
     }
 
-    private String composeUniquePath(final int pop3AccountId, final int user, final int cid) throws MailException {
+    private String composeUniquePath(final int pop3AccountId, final int user, final int cid) throws OXException {
         defaultMailAccess.connect(false);
         try {
             final String trashFullname = defaultMailAccess.getFolderStorage().getTrashFolder();
@@ -177,9 +178,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     true);
                 accountName = stripSpecials(storageService.getMailAccount(pop3AccountId, user, cid).getName());
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             }
             String fullname;
             if (pos == -1) {
@@ -227,7 +228,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return sb.toString();
     }
 
-    public Collection<MailException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         return Collections.unmodifiableCollection(warnings);
     }
 
@@ -235,21 +236,21 @@ public class MailAccountPOP3Storage implements POP3Storage {
      * Gets the separator character of underlying mail account.
      * 
      * @return The separator character of underlying mail account
-     * @throws MailException If separator character cannot be returned
+     * @throws OXException If separator character cannot be returned
      */
-    public char getSeparator() throws MailException {
+    public char getSeparator() throws OXException {
         if (0 == separator) {
             separator = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
         }
         return separator;
     }
 
-    public void drop() throws MailException {
+    public void drop() throws OXException {
         if (null != path) {
             if (defaultMailAccess.isConnected()) {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     if (MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
                         // Ignore
                         LOG.trace(e.getMessage(), e);
@@ -261,7 +262,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 defaultMailAccess.connect(false);
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     if (MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
                         // Ignore
                         LOG.trace(e.getMessage(), e);
@@ -288,12 +289,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
         defaultMailAccess.close(true);
     }
 
-    public int getUnreadMessagesCount(final String fullname) throws MailException {
+    public int getUnreadMessagesCount(final String fullname) throws OXException {
         final String realFullname = getRealFullname(fullname);
         return defaultMailAccess.getUnreadMessagesCount(realFullname);
     }
 
-    public void connect() throws MailException {
+    public void connect() throws OXException {
         defaultMailAccess.connect(false);
         try {
             // Check path existence
@@ -371,7 +372,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
                 try {
                     fs.createFolder(toCreate);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     throw new POP3Exception(
                         POP3Exception.Code.ILLEGAL_PATH,
                         e,
@@ -385,7 +386,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                  */
                 getFolderStorage().checkDefaultFolders();
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             /*
              * Close on error
              */
@@ -396,7 +397,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
              * Close on error
              */
             defaultMailAccess.close(true);
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -408,14 +409,14 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }
 
-    public IMailFolderStorage getFolderStorage() throws MailException {
+    public IMailFolderStorage getFolderStorage() throws OXException {
         if (null == folderStorage) {
             folderStorage = new MailAccountPOP3FolderStorage(defaultMailAccess.getFolderStorage(), this, pop3Access);
         }
         return folderStorage;
     }
 
-    public IMailMessageStorage getMessageStorage() throws MailException {
+    public IMailMessageStorage getMessageStorage() throws OXException {
         if (null == messageStorage) {
             messageStorage = new MailAccountPOP3MessageStorage(
                 defaultMailAccess.getMessageStorage(),
@@ -426,19 +427,19 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return messageStorage;
     }
 
-    IMailMessageStorage getInternalMessageStorage() throws MailException {
+    IMailMessageStorage getInternalMessageStorage() throws OXException {
         return defaultMailAccess.getMessageStorage();
     }
 
     public void releaseResources() {
         try {
             getFolderStorage().releaseResources();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             LOG.debug(new StringBuilder("Error while closing POP3 folder storage: ").append(e.getMessage()).toString(), e);
         }
         try {
             getMessageStorage().releaseResources();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             LOG.debug(new StringBuilder("Error while closing POP3 message storage: ").append(e.getMessage()).toString(), e);
         }
         /*-
@@ -459,7 +460,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    public void syncMessages(final boolean expunge) throws MailException {
+    public void syncMessages(final boolean expunge) throws OXException {
         POP3Store pop3Store = null;
         try {
             final POP3StoreResult result = POP3StoreConnector.getPOP3Store(
@@ -575,12 +576,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
             final Exception nested = e.getNextException();
             if (nested instanceof IOException) {
                 LOG.warn("Connect to POP3 account failed: " + nested.getMessage(), nested);
-                warnings.add(new MailException(MailException.Code.IO_ERROR, nested, nested.getMessage()));
+                warnings.add(MailExceptionCode.IO_ERROR.create(nested, nested.getMessage()));
             } else {
                 LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
                 warnings.add(MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession()));
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (MIMEMailException.Code.LOGIN_FAILED.getNumber() == e.getDetailNumber() || MIMEMailException.Code.INVALID_CREDENTIALS.getNumber() == e.getDetailNumber()) {
                 throw e;
             }
@@ -597,12 +598,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     }
 
-    private boolean isDeleteWriteThrough() throws MailException {
+    private boolean isDeleteWriteThrough() throws OXException {
         final String property = properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH);
         return null == property ? false : Boolean.parseBoolean(property.trim());
     }
 
-    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, MailException {
+    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, OXException {
         final int retval; // The number of messages added to storage
         final int end; // The ending sequence number (inclusive)
         {
@@ -673,7 +674,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     };
 
-    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, MailException {
+    private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final TIntObjectHashMap<String> seqnum2uidl) throws MessagingException, OXException {
         /*
          * Fetch ENVELOPE for new messages
          */
@@ -696,7 +697,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         final MailAccountPOP3MessageStorage pop3MessageStorage = (MailAccountPOP3MessageStorage) getMessageStorage();
         try {
             pop3MessageStorage.appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Batch append operation to POP3 storage failed: " + e.getMessage(), e);
             }
@@ -708,7 +709,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 try {
                     arr[0] = mailMessage;
                     pop3MessageStorage.appendPOP3Messages(arr);
-                } catch (final MailException inner) {
+                } catch (final OXException inner) {
                     LOG.warn("POP3 message could not be appended to POP3 storage: " + inner.getMessage(), inner);
                 }
             }
@@ -719,23 +720,23 @@ public class MailAccountPOP3Storage implements POP3Storage {
      * Gets all known UIDLs of the messages kept in this storage.
      * 
      * @return All known UIDLs of the messages kept in this storage
-     * @throws MailException If fetching all UIDLs fails
+     * @throws OXException If fetching all UIDLs fails
      */
-    private Set<String> getStorageIDs() throws MailException {
+    private Set<String> getStorageIDs() throws OXException {
         final Set<String> tmp = new HashSet<String>(getUIDLMap().getAllUIDLs().keySet());
         tmp.addAll(getTrashContainer().getUIDLs());
         return tmp;
     }
 
-    public POP3StorageUIDLMap getUIDLMap() throws MailException {
+    public POP3StorageUIDLMap getUIDLMap() throws OXException {
         return SessionPOP3StorageUIDLMap.getInstance(pop3Access);
     }
 
-    public POP3StorageTrashContainer getTrashContainer() throws MailException {
+    public POP3StorageTrashContainer getTrashContainer() throws OXException {
         return SessionPOP3StorageTrashContainer.getInstance(pop3Access);
     }
 
-    private String getRealFullname(final String fullname) throws MailException {
+    private String getRealFullname(final String fullname) throws OXException {
         return Utility.prependPath2Fullname(path, getSeparator(), fullname);
     }
 
@@ -766,19 +767,19 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     @SuppressWarnings("unchecked")
-    private static Vector<POP3Message> getMessageCache(final POP3Folder inbox) throws MailException {
+    private static Vector<POP3Message> getMessageCache(final POP3Folder inbox) throws OXException {
         try {
             final Field messageCacheField = POP3Folder.class.getDeclaredField("message_cache");
             messageCacheField.setAccessible(true);
             return (Vector<POP3Message>) messageCacheField.get(inbox);
         } catch (final SecurityException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IllegalArgumentException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final NoSuchFieldException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IllegalAccessException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

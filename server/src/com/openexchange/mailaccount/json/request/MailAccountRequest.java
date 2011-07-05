@@ -66,7 +66,7 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
@@ -353,7 +353,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private JSONObject actionValidateTree(final MailAccountDescription accountDescription) throws OXException, MailException, JSONException, OXException {
+    private JSONObject actionValidateTree(final MailAccountDescription accountDescription) throws OXException, OXException, JSONException, OXException {
         if (!actionValidateBoolean(accountDescription).booleanValue()) {
             // TODO: How to indicate error if folder tree requested?
             return null;
@@ -391,7 +391,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private void addSubfolders(final JSONObject parent, final MailFolder[] subfolders, final MailAccess<?, ?> mailAccess, final MailConfig mailConfig) throws JSONException, MailException {
+    private void addSubfolders(final JSONObject parent, final MailFolder[] subfolders, final MailAccess<?, ?> mailAccess, final MailConfig mailConfig) throws JSONException, OXException {
         if (subfolders.length == 0) {
             return;
         }
@@ -430,7 +430,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription) throws MailException, OXException {
+    private MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription) throws OXException, OXException {
         final String mailServerURL = accountDescription.generateMailServerURL();
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
@@ -479,7 +479,7 @@ public final class MailAccountRequest {
         }
     }
 
-    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws MailException, OXException {
+    private boolean checkMailServerURL(final MailAccountDescription accountDescription) throws OXException, OXException {
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription);
         if (null == mailAccess) {
@@ -489,7 +489,7 @@ public final class MailAccountRequest {
         return mailAccess.ping();
     }
 
-    private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws MailException, OXException {
+    private boolean checkTransportServerURL(final MailAccountDescription accountDescription) throws OXException, OXException {
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
@@ -628,7 +628,7 @@ public final class MailAccountRequest {
                     } finally {
                         mailAccess.close(true);
                     }
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.warn(e.getMessage(), e);
                 }
             }

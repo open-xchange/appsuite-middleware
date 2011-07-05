@@ -63,7 +63,7 @@ import javax.mail.internet.AddressException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -268,9 +268,9 @@ public abstract class MailConfig {
      * @param session The session providing needed user data
      * @param accountId The mail account ID
      * @return The user-specific mail configuration
-     * @throws MailException If user-specific mail configuration cannot be determined
+     * @throws OXException If user-specific mail configuration cannot be determined
      */
-    public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final C mailConfig, final Session session, final int accountId) throws MailException {
+    public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final C mailConfig, final Session session, final int accountId) throws OXException {
         /*
          * Fetch mail account
          */
@@ -285,9 +285,9 @@ public abstract class MailConfig {
                 mailAccount = storage.getMailAccount(accountId, userId, contextId);
             }
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         mailConfig.accountId = accountId;
         mailConfig.session = session;
@@ -366,9 +366,9 @@ public abstract class MailConfig {
      * @param session The user session
      * @param accountId The account ID
      * @return The appropriate mail server URL or <code>null</code>
-     * @throws MailException If mail server URL cannot be returned
+     * @throws OXException If mail server URL cannot be returned
      */
-    public static final String getMailServerURL(final Session session, final int accountId) throws MailException {
+    public static final String getMailServerURL(final Session session, final int accountId) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
             return MailProperties.getInstance().getMailServer();
         }
@@ -376,9 +376,9 @@ public abstract class MailConfig {
             final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             return storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL();
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -820,7 +820,7 @@ public abstract class MailConfig {
      * 
      * @param serverURL The server URL of the form:<br>
      *            (&lt;protocol&gt;://)?&lt;host&gt;(:&lt;port&gt;)?
-     * @throws MailException If server URL cannot be parsed
+     * @throws OXException If server URL cannot be parsed
      */
-    protected abstract void parseServerURL(String serverURL) throws MailException;
+    protected abstract void parseServerURL(String serverURL) throws OXException;
 }

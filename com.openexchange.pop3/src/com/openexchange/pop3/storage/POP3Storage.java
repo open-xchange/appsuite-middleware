@@ -50,7 +50,7 @@
 package com.openexchange.pop3.storage;
 
 import java.util.Collection;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 
@@ -64,30 +64,30 @@ public interface POP3Storage {
     /**
      * Connects this POP3 storage.
      * 
-     * @throws MailException If establishing a connection for this storage fails
+     * @throws OXException If establishing a connection for this storage fails
      */
-    public void connect() throws MailException;
+    public void connect() throws OXException;
 
     /**
      * Closes this storage and releases occupied resources.
      * 
-     * @throws MailException If closing the storage fails
+     * @throws OXException If closing the storage fails
      */
-    public void close() throws MailException;
+    public void close() throws OXException;
 
     /**
      * Gets possible warnings.
      * 
      * @return Possible warnings.
      */
-    public Collection<MailException> getWarnings();
+    public Collection<OXException> getWarnings();
 
     /**
      * Convenience method to obtain folder's number of unread messages in a fast way; meaning no default folder check is performed.
      * 
-     * @throws MailException If returning the unread count fails
+     * @throws OXException If returning the unread count fails
      */
-    public int getUnreadMessagesCount(final String fullname) throws MailException;
+    public int getUnreadMessagesCount(final String fullname) throws OXException;
 
     /**
      * Releases all used resources prior to closing this storage.
@@ -102,47 +102,47 @@ public interface POP3Storage {
      * {@link POP3StorageConnectCounter#decrementCounter() decrementCounter()}.
      * 
      * @param expunge Whether to expunge messages from actual POP3 account after their retrieval
-     * @throws MailException If synchronizing messages fails
+     * @throws OXException If synchronizing messages fails
      */
-    public void syncMessages(boolean expunge) throws MailException;
+    public void syncMessages(boolean expunge) throws OXException;
 
     /**
      * Drops resources for associated user.
      * 
-     * @throws MailException If operation fails
+     * @throws OXException If operation fails
      */
-    public void drop() throws MailException;
+    public void drop() throws OXException;
 
     /**
      * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
      * 
      * @return The appropriate {@link IMailFolderStorage} implementation
-     * @throws MailException If connection is not established
+     * @throws OXException If connection is not established
      */
-    public IMailFolderStorage getFolderStorage() throws MailException;
+    public IMailFolderStorage getFolderStorage() throws OXException;
 
     /**
      * Gets the appropriate {@link IMailMessageStorage} implementation that provides necessary message-related operations/methods.
      * 
      * @return The appropriate {@link IMailMessageStorage} implementation
-     * @throws MailException If connection is not established
+     * @throws OXException If connection is not established
      */
-    public IMailMessageStorage getMessageStorage() throws MailException;
+    public IMailMessageStorage getMessageStorage() throws OXException;
 
     /**
      * Gets the UIDL map.
      * 
      * @return The UIDL map
-     * @throws MailException If UIDL map cannot be returned
+     * @throws OXException If UIDL map cannot be returned
      */
-    public POP3StorageUIDLMap getUIDLMap() throws MailException;
+    public POP3StorageUIDLMap getUIDLMap() throws OXException;
 
     /**
      * Gets the trash container (containing UIDLS of permanently deleted POP3 messages)
      * 
      * @return The trash container
-     * @throws MailException If trash container cannot be returned
+     * @throws OXException If trash container cannot be returned
      */
-    public POP3StorageTrashContainer getTrashContainer() throws MailException;
+    public POP3StorageTrashContainer getTrashContainer() throws OXException;
 
 }

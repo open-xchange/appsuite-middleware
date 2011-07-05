@@ -62,7 +62,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
@@ -305,7 +306,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     public void setParameter(final String name, final String value) {
         if ((null == name) || containsSpecial(name)) {
-            final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
+            final OXException me = MailExceptionCode.INVALID_PARAMETER.create(name);
             LOG.error(me.getMessage(), me);
             return;
         }
@@ -320,7 +321,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     public void addParameter(final String name, final String value) {
         if ((null == name) || containsSpecial(name)) {
-            final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
+            final OXException me = MailExceptionCode.INVALID_PARAMETER.create(name);
             LOG.error(me.getMessage(), me);
             return;
         }

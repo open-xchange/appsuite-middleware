@@ -61,7 +61,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -97,9 +98,9 @@ public final class TwitterStatusConverter {
      * @param accountId The account ID
      * @param accountName The account name
      * @return An appropriate mail message
-     * @throws MailException If conversion fails
+     * @throws OXException If conversion fails
      */
-    public static MailMessage convertStatus2Message(final Status status, final int accountId, final String accountName) throws MailException {
+    public static MailMessage convertStatus2Message(final Status status, final int accountId, final String accountName) throws OXException {
         try {
             final byte[] asciiBytes;
             {
@@ -181,9 +182,9 @@ public final class TwitterStatusConverter {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

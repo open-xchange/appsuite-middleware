@@ -58,7 +58,7 @@ import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -109,7 +109,7 @@ public final class VCardMailPartDataSource extends MailPartDataSource {
             properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
             try {
                 return new SimpleData<D>((D) mailPart.getInputStream(), properties);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }

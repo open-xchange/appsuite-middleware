@@ -81,7 +81,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -169,9 +170,9 @@ public final class DatabaseAccess {
          * @return The next position to read
          * @throws IOException If an I/O error occurs
          * @throws SQLException If a SQL error occurs
-         * @throws MailException If a mail error occurs
+         * @throws OXException If a mail error occurs
          */
-        int applyField(MailMessage mail, ResultSet rs, int pos) throws IOException, SQLException, MailException;
+        int applyField(MailMessage mail, ResultSet rs, int pos) throws IOException, SQLException, OXException;
 
     }
 
@@ -192,7 +193,7 @@ public final class DatabaseAccess {
             this.fullname = fullname;
         }
 
-        public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws IOException, SQLException, MailException {
+        public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws IOException, SQLException, OXException {
             mail.setFolder(fullname);
             return pos;
         }
@@ -271,7 +272,7 @@ public final class DatabaseAccess {
                 return "h.headers";
             }
 
-            public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws IOException, SQLException, MailException {
+            public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws IOException, SQLException, OXException {
                 int p = pos;
                 final InputStream binaryStream = rs.getBinaryStream(p++);
                 if (null != binaryStream) {
@@ -359,9 +360,9 @@ public final class DatabaseAccess {
      * 
      * @param mails The instances of {@link MailMessage} to fill
      * @param fields The fields to fill in instances of {@link MailMessage}
-     * @throws MailException If filling the mails fails
+     * @throws OXException If filling the mails fails
      */
-    public void fillMails(final MailMessage[] mails, final List<SetterApplier> setters) throws MailException {
+    public void fillMails(final MailMessage[] mails, final List<SetterApplier> setters) throws OXException {
         if ((null == mails) || (0 == mails.length)) {
             return;
         }
@@ -391,9 +392,9 @@ public final class DatabaseAccess {
      * 
      * @param chunkedMails The instances of {@link MailMessage} to fill
      * @param fields The fields to fill in instances of {@link MailMessage}
-     * @throws MailException If filling the mails fails
+     * @throws OXException If filling the mails fails
      */
-    private void fillMailChunk(final List<MailMessage> chunkedMails, final List<SetterApplier> setters, final StringBuilder sb) throws MailException {
+    private void fillMailChunk(final List<MailMessage> chunkedMails, final List<SetterApplier> setters, final StringBuilder sb) throws OXException {
         if (chunkedMails.isEmpty()) {
             return;
         }
@@ -407,7 +408,7 @@ public final class DatabaseAccess {
         try {
             readConnection = databaseService.getReadOnly(contextId);
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -471,11 +472,11 @@ public final class DatabaseAccess {
                 }
             }
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, readConnection);
@@ -489,29 +490,29 @@ public final class DatabaseAccess {
      * 
      * @param mail The instance of {@link MailMessage} to fill
      * @param fields The fields to fill in instance of {@link MailMessage}
-     * @throws MailException If filling the mail fails
+     * @throws OXException If filling the mail fails
      */
-    public void fillMail(final MailMessage mail, final List<SetterApplier> setters) throws MailException {
+    public void fillMail(final MailMessage mail, final List<SetterApplier> setters) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection readConnection;
         try {
             readConnection = databaseService.getReadOnly(contextId);
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         try {
             fillMailInternal(mail, setters, readConnection);
         } catch (final Exception e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             databaseService.backReadOnly(contextId, readConnection);
         }
     }
 
-    private void fillMailInternal(final MailMessage mail, final List<SetterApplier> setters, final Connection readConnection) throws MailException {
+    private void fillMailInternal(final MailMessage mail, final List<SetterApplier> setters, final Connection readConnection) throws OXException {
         final String id = mail.getMailId();
         if (null == id) {
-            throw new MailException(MailException.Code.MISSING_PARAM, "id");
+            throw MailExceptionCode.MISSING_PARAM.create("id");
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -552,7 +553,7 @@ public final class DatabaseAccess {
                 rs = stmt.executeQuery();
             }
             if (!rs.next()) {
-                throw new MailException(MailException.Code.MAIL_NOT_FOUND, id, fullname);
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullname);
             }
             /*
              * Apply to mail
@@ -562,11 +563,11 @@ public final class DatabaseAccess {
                 pos = setterApplier.applyField(mail, rs, pos);
             }
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
@@ -600,15 +601,15 @@ public final class DatabaseAccess {
      * Loads sync data from database from specified folder in user's account.
      * 
      * @return The sync data from database
-     * @throws MailException If loading sync data fails
+     * @throws OXException If loading sync data fails
      */
-    public Set<SyncData> loadSyncData() throws MailException {
+    public Set<SyncData> loadSyncData() throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection rc;
         try {
             rc = databaseService.getReadOnly(contextId);
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -638,9 +639,9 @@ public final class DatabaseAccess {
             } while (rs.next());
             return retval;
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
@@ -654,9 +655,9 @@ public final class DatabaseAccess {
      * Deletes sync data from database associated with specified mail identifiers in folder denoted by given account's fullname.
      * 
      * @param ids The mail identifiers to delete
-     * @throws MailException If deletion fails
+     * @throws OXException If deletion fails
      */
-    public void deleteSyncData(final Set<String> ids) throws MailException {
+    public void deleteSyncData(final Set<String> ids) throws OXException {
         if (null == ids || ids.isEmpty()) {
             return;
         }
@@ -666,9 +667,9 @@ public final class DatabaseAccess {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN;
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
         try {
@@ -688,10 +689,10 @@ public final class DatabaseAccess {
             wc.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
             DBUtils.autocommit(wc);
@@ -709,9 +710,9 @@ public final class DatabaseAccess {
      * Inserts specified mail collection to sync data.
      * 
      * @param mails The mail collection to insert
-     * @throws MailException If insertion fails
+     * @throws OXException If insertion fails
      */
-    public void insertSyncData(final List<MailMessage> mails) throws MailException {
+    public void insertSyncData(final List<MailMessage> mails) throws OXException {
         if (null == mails || mails.isEmpty()) {
             return;
         }
@@ -720,7 +721,7 @@ public final class DatabaseAccess {
         try {
             wc = databaseService.getWritable(contextId);
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         try {
 
@@ -759,9 +760,9 @@ public final class DatabaseAccess {
      * 
      * @param mails The mail list to insert
      * @param wc A writable connection
-     * @throws MailException If insertion fails
+     * @throws OXException If insertion fails
      */
-    private void insertSyncDataChunk(final List<MailMessage> mails, final boolean batch, final StringBuilder sb, final Connection wc) throws MailException {
+    private void insertSyncDataChunk(final List<MailMessage> mails, final boolean batch, final StringBuilder sb, final Connection wc) throws OXException {
         if (mails.isEmpty()) {
             return;
         }
@@ -771,7 +772,7 @@ public final class DatabaseAccess {
         try {
             wc.setAutoCommit(false); // BEGIN;
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
         try {
@@ -869,10 +870,10 @@ public final class DatabaseAccess {
             wc.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
             DBUtils.autocommit(wc);
@@ -992,9 +993,9 @@ public final class DatabaseAccess {
      * @param accountId The account identifier
      * @param user The user identifier
      * @param contextId The context identifier
-     * @throws MailException If update fails
+     * @throws OXException If update fails
      */
-    public void updateSyncData(final Collection<SyncData> col) throws MailException {
+    public void updateSyncData(final Collection<SyncData> col) throws OXException {
         if (null == col || col.isEmpty()) {
             return;
         }
@@ -1004,9 +1005,9 @@ public final class DatabaseAccess {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN;
         } catch (final DBPoolingException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
         try {
@@ -1028,10 +1029,10 @@ public final class DatabaseAccess {
             wc.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
             DBUtils.autocommit(wc);
@@ -1039,12 +1040,12 @@ public final class DatabaseAccess {
         }
     } // End of updateSyncData() method
 
-    private static DatabaseService getDBService() throws MailException {
+    private static DatabaseService getDBService() throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = HeaderCacheServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         return databaseService;
     }

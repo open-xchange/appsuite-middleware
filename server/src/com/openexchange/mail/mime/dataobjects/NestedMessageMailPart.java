@@ -53,7 +53,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataHandler;
 import javax.mail.Part;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
@@ -73,9 +73,9 @@ public final class NestedMessageMailPart extends MailPart {
      * Initializes a new {@link NestedMessageMailPart}.
      * 
      * @param mailMessage The nested message
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public NestedMessageMailPart(final MailMessage mailMessage) throws MailException {
+    public NestedMessageMailPart(final MailMessage mailMessage) throws OXException {
         super();
         this.mailMessage = mailMessage;
         setContentType(MIMETypes.MIME_MESSAGE_RFC822);
@@ -83,32 +83,32 @@ public final class NestedMessageMailPart extends MailPart {
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         return mailMessage;
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         throw new UnsupportedOperationException("NestedMessageMailPart.getDataHandler()");
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         throw new UnsupportedOperationException("NestedMessageMailPart.getInputStream()");
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return null;
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws MailException {
+    public void writeTo(final OutputStream out) throws OXException {
         throw new UnsupportedOperationException("NestedMessageMailPart.writeTo()");
     }
 
@@ -118,7 +118,7 @@ public final class NestedMessageMailPart extends MailPart {
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         mailMessage.loadContent();
     }
 

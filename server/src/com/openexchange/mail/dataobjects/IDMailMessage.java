@@ -51,7 +51,7 @@ package com.openexchange.mail.dataobjects;
 
 import java.io.InputStream;
 import javax.activation.DataHandler;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link IDMailMessage} - Supports only {@link #getMailId()} and {@link #getFolder()}.
@@ -172,32 +172,32 @@ public final class IDMailMessage extends MailMessage {
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         throw new UnsupportedOperationException("IDMailMessage.getContent() not supported");
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         throw new UnsupportedOperationException("IDMailMessage.getDataHandler() not supported");
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         throw new UnsupportedOperationException("IDMailMessage.getEnclosedCount() not supported");
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         throw new UnsupportedOperationException("IDMailMessage.getEnclosedMailPart() not supported");
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         throw new UnsupportedOperationException("IDMailMessage.getInputStream() not supported");
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         // Nothing to do
     }
 

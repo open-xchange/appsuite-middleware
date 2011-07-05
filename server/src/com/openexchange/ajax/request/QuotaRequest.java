@@ -59,7 +59,8 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -136,8 +137,8 @@ public class QuotaRequest {
                 mi = MailServletInterface.getInstance(this.session);
                 quotaInfo = mi.getQuotas(new int[] {
                     MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
-            } catch (final MailException e) {
-                if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+            } catch (final OXException e) {
+                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(e.getMessage(), e);
                     }
@@ -162,7 +163,7 @@ public class QuotaRequest {
                 if (mi != null) {
                     mi.close(false);
                 }
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(e);
             }
         }

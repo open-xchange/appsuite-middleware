@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.headercache;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.AllMailProvider;
@@ -94,7 +94,7 @@ public final class HeaderCacheProvider extends AllMailProvider {
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session) throws MailException {
+    public MailAccess<?, ?> createNewMailAccess(final Session session) throws OXException {
         if (null == session) {
             // A dummy access for start-up/shut-down purpose
             return null;
@@ -103,7 +103,7 @@ public final class HeaderCacheProvider extends AllMailProvider {
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws MailException {
+    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws OXException {
         if (null == session) {
             // A dummy access for start-up/shut-down purpose
             return null;

@@ -59,7 +59,7 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -109,7 +109,7 @@ public class Module implements PreferencesItemService {
                     mail = MailAccess.getInstance(session);
                     mail.connect();
                     setting.setSingleValue(Boolean.TRUE);
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     setting.setSingleValue(Boolean.FALSE);
                     LOG.error(e.getMessage(), e);
                 } finally {

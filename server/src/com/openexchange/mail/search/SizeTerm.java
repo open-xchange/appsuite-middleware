@@ -52,7 +52,7 @@ package com.openexchange.mail.search;
 import java.util.Collection;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -98,7 +98,7 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws MailException {
+    public boolean matches(final Message msg) throws OXException {
         final int size;
         try {
             size = msg.getSize();

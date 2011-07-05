@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.twitter.converters;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -76,9 +76,9 @@ public final class TwitterFolderConverter {
      * 
      * @param session The user's session
      * @return The twitter INBOX folder
-     * @throws MailException If twitter INBOX folder cannot be returned
+     * @throws OXException If twitter INBOX folder cannot be returned
      */
-    public static TwitterMailFolder getINBOXFolder(final Session session) throws MailException {
+    public static TwitterMailFolder getINBOXFolder(final Session session) throws OXException {
         final TwitterMailFolder mailFolder = new TwitterMailFolder();
         mailFolder.setRootFolder(false);
         mailFolder.setExists(true);

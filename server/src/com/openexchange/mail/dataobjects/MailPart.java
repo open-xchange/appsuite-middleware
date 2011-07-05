@@ -59,7 +59,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.activation.DataHandler;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -193,7 +194,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             if (ct != null) {
                 try {
                     setContentType(new ContentType(ct));
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -217,7 +218,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             if (headers != null) {
                 headers.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=us-ascii");
             }
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             /*
              * Cannot occur
              */
@@ -240,9 +241,9 @@ public abstract class MailPart implements Serializable, Cloneable {
      * Parses and sets the content type
      * 
      * @param contentType the content type to parse
-     * @throws MailException If content type is invalid or could not be parsed
+     * @throws OXException If content type is invalid or could not be parsed
      */
-    public void setContentType(final String contentType) throws MailException {
+    public void setContentType(final String contentType) throws OXException {
         this.contentType = new ContentType(contentType);
         b_contentType = true;
     }
@@ -258,7 +259,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             if (disp != null) {
                 try {
                     setContentDisposition(new ContentDisposition(disp));
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -286,9 +287,9 @@ public abstract class MailPart implements Serializable, Cloneable {
      * Sets the disposition
      * 
      * @param disposition the disposition to set
-     * @throws MailException If content disposition is invalid or could not be parsed
+     * @throws OXException If content disposition is invalid or could not be parsed
      */
-    public void setContentDisposition(final String disposition) throws MailException {
+    public void setContentDisposition(final String disposition) throws OXException {
         contentDisposition = new ContentDisposition(disposition);
         b_disposition = true;
     }
@@ -692,7 +693,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             b_msgref = true;
             try {
                 msgref = new MailPath(xMsgref);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 msgref = null;
             }
@@ -743,7 +744,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         } catch (final CloneNotSupportedException e) {
             LOG.error(e.getMessage(), e);
             throw new InternalError(e.getMessage());
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw new InternalError(e.getMessage());
         }
@@ -753,9 +754,9 @@ public abstract class MailPart implements Serializable, Cloneable {
      * Checks if part's MIME type is <code>multipart/*</code>
      * 
      * @return <code>true</code> if part holds enclosed parts; otherwise <code>false</code>
-     * @throws MailException If check fails
+     * @throws OXException If check fails
      */
-    public boolean hasEnclosedParts() throws MailException {
+    public boolean hasEnclosedParts() throws OXException {
         return getEnclosedCount() != NO_ENCLOSED_PARTS;
     }
 
@@ -764,27 +765,27 @@ public abstract class MailPart implements Serializable, Cloneable {
      * This method is not applicable if part's MIME type is <code>multipart/*</code>
      * 
      * @return The content as a Java object or <code>null</code> if not applicable
-     * @throws MailException If content cannot be returned as a Java object
+     * @throws OXException If content cannot be returned as a Java object
      */
-    public abstract Object getContent() throws MailException;
+    public abstract Object getContent() throws OXException;
 
     /**
      * Returns an appropriate {@link DataHandler} for this mail part. <br>
      * This method is not applicable if part's MIME type is <code>multipart/*</code>
      * 
      * @return an appropriate {@link DataHandler} or <code>null</code> if not applicable
-     * @throws MailException If an appropriate {@link DataHandler} cannot be returned
+     * @throws OXException If an appropriate {@link DataHandler} cannot be returned
      */
-    public abstract DataHandler getDataHandler() throws MailException;
+    public abstract DataHandler getDataHandler() throws OXException;
 
     /**
      * Returns an input stream for this part. <br>
      * This method is not applicable if part's MIME type is <code>multipart/*</code>
      * 
      * @return An input stream for this part or <code>null</code> if not applicable
-     * @throws MailException If no input stream could be returned
+     * @throws OXException If no input stream could be returned
      */
-    public abstract InputStream getInputStream() throws MailException;
+    public abstract InputStream getInputStream() throws OXException;
 
     /**
      * Gets the number of enclosed mail parts. <br>
@@ -793,7 +794,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @see #NO_ENCLOSED_PARTS
      * @return The number of enclosed mail parts or {@link #NO_ENCLOSED_PARTS} if not applicable
      */
-    public abstract int getEnclosedCount() throws MailException;
+    public abstract int getEnclosedCount() throws OXException;
 
     /**
      * Gets the mail part located at given index. <br>
@@ -802,7 +803,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param index The index of desired mail part or <code>null</code> if not applicable
      * @return The mail part
      */
-    public abstract MailPart getEnclosedMailPart(final int index) throws MailException;
+    public abstract MailPart getEnclosedMailPart(final int index) throws OXException;
 
     /**
      * Ensures that the part's content is loaded, thus this part is independent of the original.
@@ -812,20 +813,20 @@ public abstract class MailPart implements Serializable, Cloneable {
      * <p>
      * Moreover the loaded content is no more discarded when {@link #prepareForCaching()} is invoked.
      * 
-     * @throws MailException If loading part's content fails
+     * @throws OXException If loading part's content fails
      */
-    public abstract void loadContent() throws MailException;
+    public abstract void loadContent() throws OXException;
 
     /**
      * Writes complete part's data into given output stream
      * 
      * @param out The output stream to write to
-     * @throws MailException If writing to output stream fails
+     * @throws OXException If writing to output stream fails
      */
-    public void writeTo(final OutputStream out) throws MailException {
+    public void writeTo(final OutputStream out) throws OXException {
         final InputStream in = getInputStream();
         if (null == in) {
-            throw new MailException(MailException.Code.NO_CONTENT);
+            throw MailExceptionCode.NO_CONTENT.create();
         }
         try {
             final byte[] buf = new byte[8192];
@@ -834,7 +835,7 @@ public abstract class MailPart implements Serializable, Cloneable {
                 out.write(buf, 0, count);
             }
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             try {
                 in.close();
@@ -850,16 +851,16 @@ public abstract class MailPart implements Serializable, Cloneable {
      * Gets the mail part's source
      * 
      * @return The mail part's source
-     * @throws MailException If mail part's source cannot be returned
+     * @throws OXException If mail part's source cannot be returned
      */
-    public String getSource() throws MailException {
+    public String getSource() throws OXException {
         try {
             return new String(getSourceBytes(), US_ASCII);
         } catch (final UnsupportedEncodingException e) {
             /*
              * Cannot occur
              */
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, US_ASCII);
+            throw MailExceptionCode.ENCODING_ERROR.create(e, US_ASCII);
         }
     }
 
@@ -867,9 +868,9 @@ public abstract class MailPart implements Serializable, Cloneable {
      * Gets a newly allocated byte array containing the mail part's source bytes
      * 
      * @return The mail part's source bytes
-     * @throws MailException If mail part's source cannot be returned
+     * @throws OXException If mail part's source cannot be returned
      */
-    public byte[] getSourceBytes() throws MailException {
+    public byte[] getSourceBytes() throws OXException {
         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
         writeTo(out);
         return out.toByteArray();

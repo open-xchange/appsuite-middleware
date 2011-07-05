@@ -54,7 +54,7 @@ import java.util.List;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -82,9 +82,9 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
      * Initializes a new {@link AbstractAttachmentHandler}.
      * 
      * @param session The session providing needed user information
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public AbstractAttachmentHandler(final Session session) throws MailException {
+    public AbstractAttachmentHandler(final Session session) throws OXException {
         super();
         attachments = new ArrayList<MailPart>(4);
         try {
@@ -112,7 +112,7 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
             this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
             doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
         } catch (final UserConfigurationException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 }

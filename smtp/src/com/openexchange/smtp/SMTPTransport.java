@@ -79,7 +79,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -148,9 +149,9 @@ public final class SMTPTransport extends MailTransport {
      * Constructor
      * 
      * @param session The session
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public SMTPTransport(final Session session) throws MailException {
+    public SMTPTransport(final Session session) throws OXException {
         this(session, MailAccount.DEFAULT_ID);
     }
 
@@ -159,9 +160,9 @@ public final class SMTPTransport extends MailTransport {
      * 
      * @param session The session
      * @param accountId The account ID
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public SMTPTransport(final Session session, final int accountId) throws MailException {
+    public SMTPTransport(final Session session, final int accountId) throws OXException {
         super();
         pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
         this.session = session;
@@ -212,7 +213,7 @@ public final class SMTPTransport extends MailTransport {
         pendingInvocations.offer(task);
     }
 
-    private javax.mail.Session getSMTPSession() throws MailException {
+    private javax.mail.Session getSMTPSession() throws OXException {
         if (null == smtpSession) {
             synchronized (this) {
                 if (null == smtpSession) {
@@ -296,11 +297,11 @@ public final class SMTPTransport extends MailTransport {
     }
 
     @Override
-    public SMTPConfig getTransportConfig() throws MailException {
+    public SMTPConfig getTransportConfig() throws OXException {
         return getTransportConfig0();
     }
 
-    private SMTPConfig getTransportConfig0() throws MailException {
+    private SMTPConfig getTransportConfig0() throws OXException {
         if (cachedSmtpConfig == null) {
             synchronized (this) {
                 if (cachedSmtpConfig == null) {
@@ -324,7 +325,7 @@ public final class SMTPTransport extends MailTransport {
     private static final String MULTI_SUBTYPE_REPORT = "report; report-type=disposition-notification";
 
     @Override
-    public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws MailException {
+    public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws OXException {
         try {
             final InternetAddress dispNotification = srcMail.getDispositionNotification();
             if (dispNotification == null) {
@@ -452,7 +453,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     @Override
-    public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws MailException {
+    public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
         try {
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), new UnsynchronizedByteArrayInputStream(asciiBytes));
@@ -497,7 +498,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     @Override
-    public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws MailException {
+    public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
         try {
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
@@ -569,7 +570,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private String encodePassword(final String password) throws MailException {
+    private String encodePassword(final String password) throws OXException {
         String tmpPass = password;
         if (password != null) {
             try {
@@ -583,12 +584,12 @@ public final class SMTPTransport extends MailTransport {
     }
 
     @Override
-    protected void shutdown() throws MailException {
+    protected void shutdown() throws OXException {
         SMTPSessionProperties.resetDefaultSessionProperties();
     }
 
     @Override
-    protected void startup() throws MailException {
+    protected void startup() throws OXException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("SMTPTransport.startup()");
         }
@@ -610,7 +611,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     @Override
-    public void ping() throws MailException {
+    public void ping() throws OXException {
         // Connect to SMTP server
         final Transport transport;
         try {
@@ -646,19 +647,19 @@ public final class SMTPTransport extends MailTransport {
     }
 
     @Override
-    protected ITransportProperties createNewMailProperties() throws MailException {
+    protected ITransportProperties createNewMailProperties() throws OXException {
         try {
             final MailAccountStorageService storageService =
                 SMTPServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
-    private static void saveChangesSafe(final SMTPMessage smtpMessage) throws MailException {
+    private static void saveChangesSafe(final SMTPMessage smtpMessage) throws OXException {
         try {
             try {
                 smtpMessage.saveChanges();
@@ -679,7 +680,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws MailException {
+    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {
         final DataHandler dh;
         try {
             dh = part.getDataHandler();
@@ -708,7 +709,7 @@ public final class SMTPTransport extends MailTransport {
                     /*
                      * Still not parseable
                      */
-                    throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, e, type);
+                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, type);
                 }
                 part.setDataHandler(new DataHandlerWrapper(dh, cts));
                 part.setHeader("Content-Type", cts);
@@ -729,7 +730,7 @@ public final class SMTPTransport extends MailTransport {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

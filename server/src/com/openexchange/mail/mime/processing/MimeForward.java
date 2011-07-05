@@ -74,7 +74,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
@@ -129,9 +130,9 @@ public final class MimeForward {
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
-     * @throws MailException If forward mail cannot be composed
+     * @throws OXException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID) throws MailException {
+    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID) throws OXException {
         return getFowardMail(originalMails, session, accountID, null);
     }
 
@@ -145,9 +146,9 @@ public final class MimeForward {
      * @param accountID The account ID of the referenced original mails
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
-     * @throws MailException If forward mail cannot be composed
+     * @throws OXException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID, final UserSettingMail usm) throws MailException {
+    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID, final UserSettingMail usm) throws OXException {
         for (int i = 0; i < originalMails.length; i++) {
             final MailMessage cur = originalMails[i];
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountID) {
@@ -171,9 +172,9 @@ public final class MimeForward {
      * @param accountIDs The account IDs of the referenced original mails
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
-     * @throws MailException If forward mail cannot be composed
+     * @throws OXException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int[] accountIDs, final UserSettingMail usm) throws MailException {
+    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int[] accountIDs, final UserSettingMail usm) throws OXException {
         for (int i = 0; i < originalMails.length; i++) {
             final MailMessage cur = originalMails[i];
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountIDs[i]) {
@@ -195,9 +196,9 @@ public final class MimeForward {
      * @param session The session containing needed user data
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
-     * @throws MailException If forward mail cannot be composed
+     * @throws OXException If forward mail cannot be composed
      */
-    private static MailMessage getFowardMail0(final MailMessage[] originalMsgs, final Session session, final UserSettingMail userSettingMail) throws MailException {
+    private static MailMessage getFowardMail0(final MailMessage[] originalMsgs, final Session session, final UserSettingMail userSettingMail) throws OXException {
         try {
             /*
              * New MIME message with a dummy session
@@ -246,9 +247,9 @@ public final class MimeForward {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -258,7 +259,7 @@ public final class MimeForward {
 
     private static final String TEXT_HTM = "text/htm";
 
-    private static MailMessage asInlineForward(final MailMessage originalMsg, final Session session, final Context ctx, final UserSettingMail usm, final MimeMessage forwardMsg) throws MailException, MessagingException, IOException {
+    private static MailMessage asInlineForward(final MailMessage originalMsg, final Session session, final Context ctx, final UserSettingMail usm, final MimeMessage forwardMsg) throws OXException, MessagingException, IOException {
         /*
          * Check for message reference
          */
@@ -364,7 +365,7 @@ public final class MimeForward {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return originalMsg.getInputStream();
-                            } catch (final MailException e) {
+                            } catch (final OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;
@@ -396,7 +397,7 @@ public final class MimeForward {
         return forwardMail;
     }
 
-    private static MailMessage asAttachmentForward(final MailMessage[] originalMsgs, final MimeMessage forwardMsg) throws MessagingException, MailException {
+    private static MailMessage asAttachmentForward(final MailMessage[] originalMsgs, final MimeMessage forwardMsg) throws MessagingException, OXException {
         final CompositeMailMessage compositeMail;
         {
             final Multipart multipart = new MimeMultipart();
@@ -441,11 +442,11 @@ public final class MimeForward {
      * @param mp The multipart object
      * @param retvalContentType The return value's content type (gets filled during processing and should therefore be empty)
      * @return The first seen text content
-     * @throws MailException
+     * @throws OXException
      * @throws MessagingException
      * @throws IOException
      */
-    private static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm) throws MailException, MessagingException, IOException {
+    private static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm) throws OXException, MessagingException, IOException {
         final ContentType contentType = multipartPart.getContentType();
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
@@ -588,7 +589,7 @@ public final class MimeForward {
 
     /*-
      * 
-    private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail) throws MailException {
+    private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail) throws OXException {
         final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
         final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
         new MailMessageParser().parseMailMessage(originalMail, handler);

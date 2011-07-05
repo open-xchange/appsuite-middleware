@@ -53,7 +53,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.tools.Collections;
 
@@ -169,7 +170,7 @@ public class ContentType extends ParameterizedHeader {
         }
 
         @Override
-        public ContentType setBaseType(final String baseType) throws MailException {
+        public ContentType setBaseType(final String baseType) throws OXException {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setCharsetParameter()");
         }
 
@@ -184,7 +185,7 @@ public class ContentType extends ParameterizedHeader {
         }
 
         @Override
-        public void setContentType(final String contentType) throws MailException {
+        public void setContentType(final String contentType) throws OXException {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setContentType()");
         }
 
@@ -276,9 +277,9 @@ public class ContentType extends ParameterizedHeader {
      * Initializes a new {@link ContentType}
      * 
      * @param contentType The content type
-     * @throws MailException If content type cannot be parsed
+     * @throws OXException If content type cannot be parsed
      */
-    public ContentType(final String contentType) throws MailException {
+    public ContentType(final String contentType) throws OXException {
         super();
         parseContentType(contentType);
     }
@@ -345,11 +346,11 @@ public class ContentType extends ParameterizedHeader {
         return true;
     }
 
-    private void parseContentType(final String contentType) throws MailException {
+    private void parseContentType(final String contentType) throws OXException {
         parseContentType(contentType, true);
     }
 
-    private void parseContentType(final String contentTypeArg, final boolean paramList) throws MailException {
+    private void parseContentType(final String contentTypeArg, final boolean paramList) throws OXException {
         if ((null == contentTypeArg) || (contentTypeArg.length() == 0)) {
             setContentType(DEFAULT_CONTENT_TYPE);
             return;
@@ -359,7 +360,7 @@ public class ContentType extends ParameterizedHeader {
         final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(pos < 0 ? contentType : contentType.substring(0, pos));
         if (ctMatcher.find()) {
             if (ctMatcher.start() != 0) {
-                throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, contentTypeArg);
+                throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentTypeArg);
             }
             primaryType = ctMatcher.group(1);
             subType = ctMatcher.group(2);
@@ -393,7 +394,7 @@ public class ContentType extends ParameterizedHeader {
         }
     }
 
-    private void parseBaseType(final String baseType) throws MailException {
+    private void parseBaseType(final String baseType) throws OXException {
         parseContentType(baseType, false);
         if (parameterList == null) {
             parameterList = new ParameterList();
@@ -468,7 +469,7 @@ public class ContentType extends ParameterizedHeader {
      * 
      * @return This content type with new base type applied
      */
-    public ContentType setBaseType(final String baseType) throws MailException {
+    public ContentType setBaseType(final String baseType) throws OXException {
         parseBaseType(baseType);
         return this;
     }
@@ -527,9 +528,9 @@ public class ContentType extends ParameterizedHeader {
      * Sets the content type to specified content type string; e.g. "text/plain; charset=US-ASCII"
      * 
      * @param contentType The content type string
-     * @throws MailException If specified content type string cannot be parsed
+     * @throws OXException If specified content type string cannot be parsed
      */
-    public void setContentType(final String contentType) throws MailException {
+    public void setContentType(final String contentType) throws OXException {
         parseContentType(contentType);
     }
 
@@ -561,9 +562,9 @@ public class ContentType extends ParameterizedHeader {
      * 
      * @param contentType The content-type string to process
      * @return Prepared content-type string ready for being inserted into a MIME part's headers.
-     * @throws MailException If parsing content-type string fails
+     * @throws OXException If parsing content-type string fails
      */
-    public static String prepareContentTypeString(final String contentType) throws MailException {
+    public static String prepareContentTypeString(final String contentType) throws OXException {
         return MIMEMessageUtility.foldContentType(new ContentType(contentType).toString());
     }
 
@@ -574,9 +575,9 @@ public class ContentType extends ParameterizedHeader {
      * @param name The optional name parameter to set if no <tt>"name"</tt> parameter is present in specified content-type string; pass
      *            <code>null</code> to ignore
      * @return Prepared content-type string ready for being inserted into a MIME part's headers.
-     * @throws MailException If parsing content-type string fails
+     * @throws OXException If parsing content-type string fails
      */
-    public static String prepareContentTypeString(final String contentType, final String name) throws MailException {
+    public static String prepareContentTypeString(final String contentType, final String name) throws OXException {
         final ContentType ct = new ContentType(contentType);
         if (name != null && !ct.containsNameParameter()) {
             ct.setNameParameter(name);
@@ -590,9 +591,9 @@ public class ContentType extends ParameterizedHeader {
      * @param mimeType The MIME type
      * @param pattern The pattern
      * @return <code>true</code> if pattern matches; otherwise <code>false</code>
-     * @throws MailException If an invalid MIME type is detected
+     * @throws OXException If an invalid MIME type is detected
      */
-    public static boolean isMimeType(final String mimeType, final String pattern) throws MailException {
+    public static boolean isMimeType(final String mimeType, final String pattern) throws OXException {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType(mimeType)).matches();
     }
 
@@ -601,9 +602,9 @@ public class ContentType extends ParameterizedHeader {
      * 
      * @param mimeType The MIME type
      * @return the base type
-     * @throws MailException If an invalid MIME type is detected
+     * @throws OXException If an invalid MIME type is detected
      */
-    public static String getBaseType(final String mimeType) throws MailException {
+    public static String getBaseType(final String mimeType) throws OXException {
         final Matcher m = PATTERN_CONTENT_TYPE.matcher(mimeType);
         if (m.find()) {
             String subType = m.group(2);
@@ -612,7 +613,7 @@ public class ContentType extends ParameterizedHeader {
             }
             return new StringBuilder(32).append(m.group(1)).append('/').append(subType).toString();
         }
-        throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, mimeType);
+        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(mimeType);
     }
 
     private static final String toLowerCase(final String str) {

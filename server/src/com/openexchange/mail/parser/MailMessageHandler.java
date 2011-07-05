@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -73,37 +73,37 @@ public interface MailMessageHandler {
     /**
      * Handle the 'From' message header
      */
-    public boolean handleFrom(InternetAddress[] fromAddrs) throws MailException;
+    public boolean handleFrom(InternetAddress[] fromAddrs) throws OXException;
 
     /**
      * Handle the 'To' recipient message header
      */
-    public boolean handleToRecipient(InternetAddress[] recipientAddrs) throws MailException;
+    public boolean handleToRecipient(InternetAddress[] recipientAddrs) throws OXException;
 
     /**
      * Handle the 'Cc' recipient message header
      */
-    public boolean handleCcRecipient(InternetAddress[] recipientAddrs) throws MailException;
+    public boolean handleCcRecipient(InternetAddress[] recipientAddrs) throws OXException;
 
     /**
      * Handle the 'Bcc' recipient message header
      */
-    public boolean handleBccRecipient(InternetAddress[] recipientAddrs) throws MailException;
+    public boolean handleBccRecipient(InternetAddress[] recipientAddrs) throws OXException;
 
     /**
      * Handle message's subject
      */
-    public boolean handleSubject(String subject) throws MailException;
+    public boolean handleSubject(String subject) throws OXException;
 
     /**
      * Handle message's sent date
      */
-    public boolean handleSentDate(Date sentDate) throws MailException;
+    public boolean handleSentDate(Date sentDate) throws OXException;
 
     /**
      * Handle message's received date
      */
-    public boolean handleReceivedDate(Date receivedDate) throws MailException;
+    public boolean handleReceivedDate(Date receivedDate) throws OXException;
 
     /**
      * Handle those message headers which cannot be handled through a <code>handleXXX</code> method
@@ -111,88 +111,88 @@ public interface MailMessageHandler {
      * @param size The iterator's size or <code>-1</code> to use {@link Iterator#hasNext()} instead
      * @param iter The header iterator
      * @return <code>true</code> to continue parsing; otherwise <code>false</code>
-     * @throws MailException
+     * @throws OXException
      */
-    public boolean handleHeaders(int size, Iterator<Map.Entry<String, String>> iter) throws MailException;
+    public boolean handleHeaders(int size, Iterator<Map.Entry<String, String>> iter) throws OXException;
 
     /**
      * Handle message's priority
      */
-    public boolean handlePriority(int priority) throws MailException;
+    public boolean handlePriority(int priority) throws OXException;
 
     /**
      * Handle referenced mail
      */
-    public boolean handleMsgRef(String msgRef) throws MailException;
+    public boolean handleMsgRef(String msgRef) throws OXException;
 
     /**
      * Handle message's disposition notification
      * 
      * @param seen TODO
      */
-    public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean seen) throws MailException;
+    public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean seen) throws OXException;
 
     /**
      * Handle content id
      */
-    public boolean handleContentId(String contentId) throws MailException;
+    public boolean handleContentId(String contentId) throws OXException;
 
     /**
      * Handle message's system flags (//SEEN, //ANSWERED, ...)
      */
-    public boolean handleSystemFlags(int flags) throws MailException;
+    public boolean handleSystemFlags(int flags) throws OXException;
 
     /**
      * Handle message's user flags
      */
-    public boolean handleUserFlags(String[] userFlags) throws MailException;
+    public boolean handleUserFlags(String[] userFlags) throws OXException;
 
     /**
      * Handle message's color label
      */
-    public boolean handleColorLabel(int colorLabel) throws MailException;
+    public boolean handleColorLabel(int colorLabel) throws OXException;
 
     /**
      * Handle a plain text inline part (either <code>text/plain</code> or <code>text/enriched</code>)
      */
-    public boolean handleInlinePlainText(String plainTextContent, ContentType contentType, long size, String fileName, String id) throws MailException;
+    public boolean handleInlinePlainText(String plainTextContent, ContentType contentType, long size, String fileName, String id) throws OXException;
 
     /**
      * Handle a UUEncoded plain text inline part
      */
-    public boolean handleInlineUUEncodedPlainText(String decodedTextContent, ContentType contentType, int size, String fileName, String id) throws MailException;
+    public boolean handleInlineUUEncodedPlainText(String decodedTextContent, ContentType contentType, int size, String fileName, String id) throws OXException;
 
     /**
      * Handle a UUEncoded file attachment inline part
      */
-    public boolean handleInlineUUEncodedAttachment(UUEncodedPart part, String id) throws MailException;
+    public boolean handleInlineUUEncodedAttachment(UUEncodedPart part, String id) throws OXException;
 
     /**
      * Handle a html inline part (<code>text/html</code>)
      */
-    public boolean handleInlineHtml(String htmlContent, ContentType contentType, long size, String fileName, String id) throws MailException;
+    public boolean handleInlineHtml(String htmlContent, ContentType contentType, long size, String fileName, String id) throws OXException;
 
     /**
      * Handle an attachment part (any non-inline parts and file attachments)
      */
-    public boolean handleAttachment(MailPart part, boolean isInline, String baseContentType, String fileName, String id) throws MailException;
+    public boolean handleAttachment(MailPart part, boolean isInline, String baseContentType, String fileName, String id) throws OXException;
 
     /**
      * Handle special parts. A special part is either of MIME type <code>message/delivery-status</code>,
      * <code>message/disposition-notification</code>, <code>text/rfc822-headers</code>, <code>text/x-vcard</code>, <code>text/vcard</code>,
      * <code>text/calendar</code> or <code>text/x-vCalendar</code>
      */
-    public boolean handleSpecialPart(MailPart part, String baseContentType, String fileName, String id) throws MailException;
+    public boolean handleSpecialPart(MailPart part, String baseContentType, String fileName, String id) throws OXException;
 
     /**
      * Handle an image part (<code>image/*</code>)
      */
-    public boolean handleImagePart(MailPart part, String imageCID, String baseContentType, boolean isInline, String fileName, String id) throws MailException;
+    public boolean handleImagePart(MailPart part, String imageCID, String baseContentType, boolean isInline, String fileName, String id) throws OXException;
 
     /**
      * Handle a multipart (<code>multipart/*</code>)
      */
-    public boolean handleMultipart(MailPart mp, int bodyPartCount, String id) throws MailException;
+    public boolean handleMultipart(MailPart mp, int bodyPartCount, String id) throws OXException;
 
     /**
      * Handle a nested message (<code>message/rfc822</code>)
@@ -204,10 +204,10 @@ public interface MailMessageHandler {
      * MailMessage nestedMail = (MailMessage) mailPart.getContent();
      * </pre>
      */
-    public boolean handleNestedMessage(MailPart mailPart, String id) throws MailException;
+    public boolean handleNestedMessage(MailPart mailPart, String id) throws OXException;
 
     /**
      * Perform some optional finishing operations
      */
-    public void handleMessageEnd(MailMessage mail) throws MailException;
+    public void handleMessageEnd(MailMessage mail) throws OXException;
 }

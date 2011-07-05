@@ -51,7 +51,7 @@ package com.openexchange.mail.search;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -69,11 +69,11 @@ public final class Searcher {
      * @param mailMessage The mail message to check
      * @param searchTerm The search term to apply
      * @return <code>true</code> if specified mail message matches given search term; otherwise <code>false</code>
-     * @throws MailException If checking mail message against search term fails
+     * @throws OXException If checking mail message against search term fails
      * @deprecated Invoke {@link SearchTerm#matches(MailMessage)} instead
      */
     @Deprecated
-    public static boolean matches(final MailMessage mailMessage, final SearchTerm<?> searchTerm) throws MailException {
+    public static boolean matches(final MailMessage mailMessage, final SearchTerm<?> searchTerm) throws OXException {
         return searchTerm.matches(mailMessage);
     }
 
@@ -83,9 +83,9 @@ public final class Searcher {
      * @param mailMessages The mail messages to check
      * @param searchTerm The search term to apply
      * @return The matching mail messages in order of appearance
-     * @throws MailException If checking mail messages against search term fails
+     * @throws OXException If checking mail messages against search term fails
      */
-    public static MailMessage[] matches(final MailMessage[] mailMessages, final SearchTerm<?> searchTerm) throws MailException {
+    public static MailMessage[] matches(final MailMessage[] mailMessages, final SearchTerm<?> searchTerm) throws OXException {
         final List<MailMessage> matched = new ArrayList<MailMessage>(mailMessages.length);
         for (final MailMessage mailMessage : mailMessages) {
             if (searchTerm.matches(mailMessage)) {
@@ -101,9 +101,9 @@ public final class Searcher {
      * @param mailMessages The mail messages to check
      * @param searchTerm The search term to apply
      * @return The matching mail messages in order of appearance
-     * @throws MailException If checking mail messages against search term fails
+     * @throws OXException If checking mail messages against search term fails
      */
-    public static List<MailMessage> matches(final List<MailMessage> mailMessages, final SearchTerm<?> searchTerm) throws MailException {
+    public static List<MailMessage> matches(final List<MailMessage> mailMessages, final SearchTerm<?> searchTerm) throws OXException {
         final List<MailMessage> matched = new ArrayList<MailMessage>(mailMessages.size());
         for (final MailMessage mailMessage : mailMessages) {
             if (searchTerm.matches(mailMessage)) {

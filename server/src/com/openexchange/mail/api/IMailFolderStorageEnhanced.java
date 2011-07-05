@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.api;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link IMailFolderStorageEnhanced}
@@ -63,26 +63,26 @@ public interface IMailFolderStorageEnhanced extends IMailFolderStorage {
      * 
      * @param fullName The folder's full name
      * @return The unread counter
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    int getUnreadCounter(String fullName) throws MailException;
+    int getUnreadCounter(String fullName) throws OXException;
 
     /**
      * Gets the number of new mails for specified folder (since last access to folder).
      * 
      * @param fullName The folder's full name
      * @return The new counter
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    int getNewCounter(String fullName) throws MailException;
+    int getNewCounter(String fullName) throws OXException;
 
     /**
      * Gets the total number of mails for specified folder.
      * 
      * @param fullName The folder's full name
      * @return The total counter
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    int getTotalCounter(String fullName) throws MailException;
+    int getTotalCounter(String fullName) throws OXException;
 
 }

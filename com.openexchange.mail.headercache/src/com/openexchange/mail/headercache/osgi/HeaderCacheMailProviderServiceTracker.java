@@ -52,7 +52,7 @@ package com.openexchange.mail.headercache.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.headercache.HeaderCacheMailProviderRegistry;
@@ -103,7 +103,7 @@ public final class HeaderCacheMailProviderServiceTracker implements ServiceTrack
                     context.ungetService(reference);
                     return null;
                 }
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 context.ungetService(reference);
                 return null;

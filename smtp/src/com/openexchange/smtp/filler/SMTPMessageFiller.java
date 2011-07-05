@@ -54,7 +54,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -105,10 +105,10 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
      * @param mail The source mail
      * @param smtpMessage The SMTP message to fill
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage) throws MessagingException, MailException, IOException {
+    public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage) throws MessagingException, OXException, IOException {
         fillMail(mail, smtpMessage, ComposeType.NEW);
     }
 
@@ -119,10 +119,10 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
      * @param smtpMessage The SMTP message to fill
      * @param type The compose type
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMail(final ComposedMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type) throws MessagingException, MailException, IOException {
+    public void fillMail(final ComposedMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type) throws MessagingException, OXException, IOException {
         /*
          * Check for reply
          */

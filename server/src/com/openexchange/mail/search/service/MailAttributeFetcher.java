@@ -55,7 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -117,7 +117,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
             public Object getObject(final MailMessage candidate) {
                 try {
                     return candidate.getContent();
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     return null;
                 }

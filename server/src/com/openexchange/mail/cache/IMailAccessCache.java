@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.cache;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -94,8 +94,8 @@ public interface IMailAccessCache {
      * Clears the cache entries kept for specified user.
      * 
      * @param session The session
-     * @throws MailException If clearing user entries fails
+     * @throws OXException If clearing user entries fails
      */
-    public void clearUserEntries(final Session session) throws MailException;
+    public void clearUserEntries(final Session session) throws OXException;
 
 }

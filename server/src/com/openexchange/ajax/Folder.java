@@ -113,7 +113,8 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -744,7 +745,7 @@ public class Folder extends SessionServlet {
                                                 f.get();
                                             } catch (final ExecutionException e) {
                                                 final Throwable t = e.getCause();
-                                                if (t instanceof MailException) {
+                                                if (t instanceof OXException) {
                                                     if (null == warning) {
                                                         /*
                                                          * TODO: Does UI already accept warnings?
@@ -768,9 +769,9 @@ public class Folder extends SessionServlet {
                                     }
                                 } catch (final InterruptedException e) {
                                     Thread.currentThread().interrupt();
-                                    throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                                    throw MailExceptionCode.INTERRUPT_ERROR.create(e);
                                 } catch (final ExecutionException e) {
-                                    throw ThreadPools.launderThrowable(e, MailException.class);
+                                    throw ThreadPools.launderThrowable(e, OXException.class);
                                 }
                                 /*
                                  * Iterate sorted arrays
@@ -968,7 +969,7 @@ public class Folder extends SessionServlet {
                          * Check for possible warning
                          */
                         {
-                            final Collection<MailException> warnings = mailInterface.getWarnings();
+                            final Collection<OXException> warnings = mailInterface.getWarnings();
                             if (!warnings.isEmpty()) {
                                 warning = warnings.iterator().next();
                             }
@@ -1010,7 +1011,7 @@ public class Folder extends SessionServlet {
                             try {
                                 mailInterface.close(true);
                                 mailInterface = null;
-                            } catch (final MailException e) {
+                            } catch (final OXException e) {
                                 LOG.error(e.getMessage(), e);
                             }
                         }
@@ -1239,7 +1240,7 @@ public class Folder extends SessionServlet {
                             try {
                                 mailInterface.close(true);
                                 mailInterface = null;
-                            } catch (final MailException e) {
+                            } catch (final OXException e) {
                                 LOG.error(e.getMessage(), e);
                             }
                         }
@@ -1639,7 +1640,7 @@ public class Folder extends SessionServlet {
                                 completionFuture.take().get();
                             } catch (final ExecutionException e) {
                                 final Throwable t = e.getCause();
-                                if (t instanceof MailException) {
+                                if (t instanceof OXException) {
                                     if (null == warning) {
                                         /*
                                          * TODO: Does UI already accept warnings?
@@ -1662,9 +1663,9 @@ public class Folder extends SessionServlet {
                         }
                     } catch (final InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                        throw MailExceptionCode.INTERRUPT_ERROR.create(e);
                     } catch (final ExecutionException e) {
-                        throw ThreadPools.launderThrowable(e, MailException.class);
+                        throw ThreadPools.launderThrowable(e, OXException.class);
                     }
                     // Write arrays
                     for (int i = 0; i < arrays.length; i++) {
@@ -1781,7 +1782,7 @@ public class Folder extends SessionServlet {
                             if (mailInterface != null) {
                                 mailInterface.close(true);
                             }
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -1899,7 +1900,7 @@ public class Folder extends SessionServlet {
                     } finally {
                         try {
                             mailInterface.close(true);
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -2036,7 +2037,7 @@ public class Folder extends SessionServlet {
                     } finally {
                         try {
                             mailInterface.close(true);
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -2482,14 +2483,14 @@ public class Folder extends SessionServlet {
             this.index = index;
         }
 
-        public Object call() throws MailException {
+        public Object call() throws OXException {
             final MailAccess<?, ?> mailAccess;
             final int accountId = mailAccount.getId();
             try {
                 mailAccess = MailAccess.getInstance(session, accountId);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 arrays[index] = null;
-                if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
                     if (logger.isDebugEnabled()) {
                         logger.debug(e.getMessage(), e);
                     }
@@ -2518,7 +2519,7 @@ public class Folder extends SessionServlet {
                 }
                 arrays[index] = ja;
                 return null;
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 logger.error(e.getMessage(), e);
                 arrays[index] = null;
                 throw e;

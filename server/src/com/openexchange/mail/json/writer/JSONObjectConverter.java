@@ -60,7 +60,8 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HTMLService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
@@ -109,9 +110,9 @@ public final class JSONObjectConverter {
      * @param session The session providing needed user information
      * @param usm The (possibly request-specific) mail settings
      * @param ctx The context
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public JSONObjectConverter(final JSONObject rawJSONMailObject, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx) throws MailException {
+    public JSONObjectConverter(final JSONObject rawJSONMailObject, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx) throws OXException {
         super();
         this.rawJSONMailObject = rawJSONMailObject;
         // this.accountId = accountId;
@@ -142,9 +143,9 @@ public final class JSONObjectConverter {
      * Converts this converter's raw JSON mail representation into a user-sensitive JSON mail representation.
      * 
      * @return The user-sensitive JSON mail representation
-     * @throws MailException If conversion fails
+     * @throws OXException If conversion fails
      */
-    public JSONObject raw2Json() throws MailException {
+    public JSONObject raw2Json() throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             /*
@@ -162,11 +163,11 @@ public final class JSONObjectConverter {
             raw2JsonMail0(rawJSONMailObject, jsonObject);
             return jsonObject;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void raw2JsonMail0(final JSONObject rawJSONMailObject, final JSONObject jsonObject) throws MailException {
+    private void raw2JsonMail0(final JSONObject rawJSONMailObject, final JSONObject jsonObject) throws OXException {
         try {
             copyValue(DataFields.ID, rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), rawJSONMailObject, jsonObject);
@@ -175,11 +176,11 @@ public final class JSONObjectConverter {
             copyValue(MailJSONField.SIZE.getKey(), rawJSONMailObject, jsonObject);
             raw2Json0(rawJSONMailObject, jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void raw2Json0(final JSONObject rawJSONMailObject, final JSONObject jsonObject) throws MailException {
+    private void raw2Json0(final JSONObject rawJSONMailObject, final JSONObject jsonObject) throws OXException {
         try {
             copyValue(MailJSONField.RECIPIENT_BCC.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.RECIPIENT_CC.getKey(), rawJSONMailObject, jsonObject);
@@ -321,11 +322,11 @@ public final class JSONObjectConverter {
             }
 
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void handleTextPart(final JSONObject textObject, final JSONArray attachmentsArr) throws MailException, JSONException {
+    private void handleTextPart(final JSONObject textObject, final JSONArray attachmentsArr) throws OXException, JSONException {
         // Text part found
         if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
             final String displayVersion =
@@ -346,7 +347,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void handleHTMLPart(final JSONObject htmlObject, final JSONArray attachmentsArr) throws MailException {
+    private void handleHTMLPart(final JSONObject htmlObject, final JSONArray attachmentsArr) throws OXException {
         // HTML part found
         if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
             // Prepare HTML content
@@ -360,7 +361,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void asAttachment(final JSONObject bodyObject, final JSONArray attachmentsArr) throws MailException {
+    private void asAttachment(final JSONObject bodyObject, final JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), bodyObject, jsonObject);
@@ -371,11 +372,11 @@ public final class JSONObjectConverter {
             jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
             attachmentsArr.put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void asPlainText(final JSONObject textObject, final String content, final JSONArray attachmentsArr) throws MailException {
+    private void asPlainText(final JSONObject textObject, final String content, final JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), textObject, jsonObject);
@@ -385,11 +386,11 @@ public final class JSONObjectConverter {
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             attachmentsArr.put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void asDisplayHtml(final JSONObject htmlObject, final JSONArray attachmentsArr) throws MailException {
+    private void asDisplayHtml(final JSONObject htmlObject, final JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), htmlObject, jsonObject);
@@ -408,11 +409,11 @@ public final class JSONObjectConverter {
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             attachmentsArr.put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void asDisplayHtml(final JSONObject htmlObject, final String content, final JSONArray attachmentsArr) throws MailException {
+    private void asDisplayHtml(final JSONObject htmlObject, final String content, final JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), htmlObject, jsonObject);
@@ -422,11 +423,11 @@ public final class JSONObjectConverter {
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             attachmentsArr.put(jsonObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void asDisplayText(final JSONObject htmlObject, final String htmlContent, final boolean addAttachment, final JSONArray attachmentsArr) throws MailException {
+    private void asDisplayText(final JSONObject htmlObject, final String htmlContent, final boolean addAttachment, final JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), htmlObject, jsonObject);
@@ -463,7 +464,7 @@ public final class JSONObjectConverter {
                 attachmentsArr.put(originalVersion);
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

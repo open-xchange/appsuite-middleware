@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.mail;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingException;
@@ -117,7 +117,7 @@ public class MailMultipartContent implements MultipartContent {
              * Return
              */
             return bodyPart;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -125,7 +125,7 @@ public class MailMultipartContent implements MultipartContent {
     public int getCount() throws MessagingException {
         try {
             return mimeMultipart.getEnclosedCount();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

@@ -76,7 +76,8 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -132,9 +133,9 @@ public final class MimeReply {
      * @param session The session containing needed user data
      * @param accountId The account ID
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
-     * @throws MailException If reply mail cannot be composed
+     * @throws OXException If reply mail cannot be composed
      */
-    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId) throws MailException {
+    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId) throws OXException {
         return getReplyMail(originalMail, replyAll, session, accountId, null);
     }
 
@@ -147,9 +148,9 @@ public final class MimeReply {
      * @param accountId The account ID
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
-     * @throws MailException If reply mail cannot be composed
+     * @throws OXException If reply mail cannot be composed
      */
-    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm) throws MailException {
+    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm) throws OXException {
         boolean preferToAsRecipient = false;
         final String originalMailFolder = originalMail.getFolder();
         MailPath msgref = null;
@@ -198,9 +199,9 @@ public final class MimeReply {
      * @param mailSession The mail session
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
-     * @throws MailException If reply mail cannot be composed
+     * @throws OXException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws MailException {
+    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws OXException {
         try {
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final UserSettingMail usm =
@@ -442,14 +443,14 @@ public final class MimeReply {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
 
     }
 
-    private static void appendInlineContent(final MailMessage originalMail, final CompositeMailMessage replyMail, final List<String> cids) throws MailException {
+    private static void appendInlineContent(final MailMessage originalMail, final CompositeMailMessage replyMail, final List<String> cids) throws OXException {
         final InlineContentHandler handler = new InlineContentHandler(cids);
         new MailMessageParser().parseMailMessage(originalMail, handler);
         final Map<String, MailPart> inlineContents = handler.getInlineContents();
@@ -504,11 +505,11 @@ public final class MimeReply {
      * @param retvalContentType The return value's content type
      * @param strHelper The i18n string helper
      * @return <code>true</code> if any text was found; otherwise <code>false</code>
-     * @throws MailException
+     * @throws OXException
      * @throws MessagingException
      * @throws IOException
      */
-    private static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final List<String> replyTexts) throws MailException, MessagingException, IOException {
+    private static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final List<String> replyTexts) throws OXException, MessagingException, IOException {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
@@ -592,11 +593,11 @@ public final class MimeReply {
      * Gathers all text bodies and appends them to given text builder.
      * 
      * @return <code>true</code> if any text was found; otherwise <code>false</code>
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    private static boolean gatherAllTextContents(final MailPart multipartPart, final ContentType mpContentType, final ParameterContainer pc) throws MailException, MessagingException, IOException {
+    private static boolean gatherAllTextContents(final MailPart multipartPart, final ContentType mpContentType, final ParameterContainer pc) throws OXException, MessagingException, IOException {
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
         boolean found = false;
@@ -645,7 +646,7 @@ public final class MimeReply {
         return found;
     }
 
-    private static boolean getTextContent(final boolean preferHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws MailException, MessagingException, IOException {
+    private static boolean getTextContent(final boolean preferHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws OXException, MessagingException, IOException {
         boolean found = false;
         for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);

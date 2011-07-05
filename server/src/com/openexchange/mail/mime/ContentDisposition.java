@@ -53,7 +53,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Part;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link ContentDisposition}
@@ -87,9 +88,9 @@ public final class ContentDisposition extends ParameterizedHeader {
      * Initializes a new {@link ContentDisposition}
      * 
      * @param contentDisp The content disposition
-     * @throws MailException If content disposition cannot be parsed
+     * @throws OXException If content disposition cannot be parsed
      */
-    public ContentDisposition(final String contentDisp) throws MailException {
+    public ContentDisposition(final String contentDisp) throws OXException {
         super();
         parseContentDisp(contentDisp);
     }
@@ -138,11 +139,11 @@ public final class ContentDisposition extends ParameterizedHeader {
         return true;
     }
 
-    private void parseContentDisp(final String contentDisp) throws MailException {
+    private void parseContentDisp(final String contentDisp) throws OXException {
         parseContentDisp(contentDisp, true);
     }
 
-    private void parseContentDisp(final String contentDispArg, final boolean paramList) throws MailException {
+    private void parseContentDisp(final String contentDispArg, final boolean paramList) throws OXException {
         if ((null == contentDispArg) || (contentDispArg.length() == 0)) {
             /*
              * Nothing to parse
@@ -159,7 +160,7 @@ public final class ContentDisposition extends ParameterizedHeader {
             return;
         }
         if (cdMatcher.start() != 0) {
-            throw new MailException(MailException.Code.INVALID_CONTENT_DISPOSITION, contentDispArg);
+            throw MailExceptionCode.INVALID_CONTENT_DISPOSITION.create(contentDispArg);
         }
         disposition = cdMatcher.group().toLowerCase(Locale.US);
         if (paramList) {
@@ -232,7 +233,7 @@ public final class ContentDisposition extends ParameterizedHeader {
     /**
      * Sets Content-Disposition
      */
-    public void setContentDisposition(final String contentDisp) throws MailException {
+    public void setContentDisposition(final String contentDisp) throws OXException {
         parseContentDisp(contentDisp);
     }
 

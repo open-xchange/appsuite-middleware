@@ -50,7 +50,7 @@
 package com.openexchange.smtp.dataobjects;
 
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 
@@ -69,10 +69,10 @@ public final class SMTPFilePart extends UploadFileMailPart {
 	/**
 	 * Constructor
 	 * 
-	 * @throws MailException
+	 * @throws OXException
 	 *             If upload file's content type cannot be parsed
 	 */
-	public SMTPFilePart(final UploadFile uploadFile) throws MailException {
+	public SMTPFilePart(final UploadFile uploadFile) throws OXException {
 		super(uploadFile);
 	}
 

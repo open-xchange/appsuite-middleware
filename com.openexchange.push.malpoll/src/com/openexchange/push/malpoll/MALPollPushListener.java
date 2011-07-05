@@ -57,7 +57,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.OXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -271,14 +272,14 @@ public final class MALPollPushListener implements PushListener {
             }
         } catch (final OXException e) {
             throw new PushException(e);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new PushException(e);
         } finally {
             running.set(false);
         }
     }
 
-    private void firstRun(final MailService mailService) throws PushException, MailException {
+    private void firstRun(final MailService mailService) throws PushException, OXException {
         final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         /*
          * First run
@@ -303,7 +304,7 @@ public final class MALPollPushListener implements PushListener {
         }
     }
 
-    private void subsequentRun(final MailService mailService) throws PushException, MailException {
+    private void subsequentRun(final MailService mailService) throws PushException, OXException {
         final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         /*
          * Subsequent run
@@ -319,15 +320,15 @@ public final class MALPollPushListener implements PushListener {
         }
     }
 
-    private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws MailException, PushException {
+    private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws OXException, PushException {
         final Set<String> newIds;
         final Set<String> delIds;
         {
             final Set<String> fetchedUids;
             try {
                 fetchedUids = gatherUIDs(mailService);
-            } catch (final MailException e) {
-                if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+            } catch (final OXException e) {
+                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(e.getMessage(), e);
                     }
@@ -380,7 +381,7 @@ public final class MALPollPushListener implements PushListener {
         }
     }
 
-    private Set<String> gatherUIDs(final MailService mailService) throws MailException {
+    private Set<String> gatherUIDs(final MailService mailService) throws OXException {
         final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
         mailAccess.connect();
         try {

@@ -120,7 +120,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -2053,10 +2054,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                     mailIDs = getSubfolders(fullname, realTreeId, folderStorage, storageParameters);
                 } catch (final FolderException e) {
                     final Throwable cause = e.getCause();
-                    if (cause instanceof MailException) {
-                        final MailException me = (MailException) cause;
+                    if (cause instanceof OXException) {
+                        final OXException me = (OXException) cause;
                         final int number = me.getDetailNumber();
-                        if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == number) {
+                        if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == number) {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(e.getMessage(), e);
                             }

@@ -53,7 +53,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -120,7 +121,7 @@ public final class SynchronizerCallable implements Callable<Object> {
         this.enforce = enforce;
     }
 
-    public Object call() throws MailException {
+    public Object call() throws OXException {
         try {
             final long s = DEBUG ? System.currentTimeMillis() : ZERO;
             /*
@@ -236,10 +237,10 @@ public final class SynchronizerCallable implements Callable<Object> {
              * Return dummy null
              */
             return null;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     } // End of call() method
 
@@ -248,7 +249,7 @@ public final class SynchronizerCallable implements Callable<Object> {
      */
     private static final MailField[] FIELDS_SYNC = { MailField.ID, MailField.FLAGS };
 
-    private Set<SyncData> loadCurrentData() throws MailException {
+    private Set<SyncData> loadCurrentData() throws OXException {
         /*
          * Get all messages: id + flags
          */

@@ -50,7 +50,7 @@
 package com.openexchange.smtp;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MIMEMailException;
 
 /**
@@ -69,11 +69,11 @@ public final class SMTPException extends MIMEMailException {
         /**
          * An I/O error occurred: %1$s
          */
-        IO_ERROR(MailException.Code.IO_ERROR),
+        IO_ERROR(MailExceptionCode.IO_ERROR),
         /**
          * Unsupported charset-encoding: %1$s
          */
-        ENCODING_ERROR(MailException.Code.ENCODING_ERROR),
+        ENCODING_ERROR(MailExceptionCode.ENCODING_ERROR),
         /**
          * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
          */
@@ -93,7 +93,7 @@ public final class SMTPException extends MIMEMailException {
         /**
          * Message has been successfully sent, but a copy could not be placed in your sent folder
          */
-        COPY_TO_SENT_FOLDER_FAILED(MailException.Code.COPY_TO_SENT_FOLDER_FAILED),
+        COPY_TO_SENT_FOLDER_FAILED(MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED),
         /**
          * Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s
          */
@@ -109,7 +109,7 @@ public final class SMTPException extends MIMEMailException {
         /**
          * Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.
          */
-        COPY_TO_SENT_FOLDER_FAILED_QUOTA(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA),
+        COPY_TO_SENT_FOLDER_FAILED_QUOTA(MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA),
         /**
          * No storage access because mail connection is not connected
          */
@@ -129,7 +129,7 @@ public final class SMTPException extends MIMEMailException {
             this.category = category;
         }
 
-        private Code(final MailException.Code code) {
+        private Code(final MailExceptionCode code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();

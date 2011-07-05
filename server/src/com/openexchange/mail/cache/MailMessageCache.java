@@ -58,7 +58,8 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -183,7 +184,7 @@ public final class MailMessageCache {
          * Check for proper started mail cache configuration
          */
         if (!MailCacheConfiguration.getInstance().isStarted()) {
-            throw new OXCachingException(new MailException(MailException.Code.INITIALIZATION_PROBLEM));
+            throw new OXCachingException(MailExceptionCode.INITIALIZATION_PROBLEM.create());
         }
         if (cache != null) {
             return;

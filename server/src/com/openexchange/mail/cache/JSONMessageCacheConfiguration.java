@@ -50,7 +50,7 @@
 package com.openexchange.mail.cache;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -76,9 +76,9 @@ public final class JSONMessageCacheConfiguration {
      * Initializes the cache instance.
      * 
      * @return The cache instance
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public static void initInstance() throws MailException {
+    public static void initInstance() throws OXException {
         synchronized (JSONMessageCache.class) {
             if (null == instance) {
                 instance = new JSONMessageCacheConfiguration();
@@ -146,14 +146,14 @@ public final class JSONMessageCacheConfiguration {
     /**
      * Loads the JSON message cache properties.
      * 
-     * @throws MailException If loading of properties fails
+     * @throws OXException If loading of properties fails
      */
-    public void loadProperties() throws MailException {
+    public void loadProperties() throws OXException {
         final ConfigurationService configuration;
         try {
             configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class, true);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
 
         final StringBuilder logBuilder = new StringBuilder(512);

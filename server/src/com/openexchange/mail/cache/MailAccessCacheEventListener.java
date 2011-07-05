@@ -60,7 +60,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -87,7 +87,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             IMailAccessCache mac;
             try {
                 mac = MailAccess.getMailAccessCache();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error("Managed mail access cache could not be obtained.", e);
                 return;
             }
@@ -99,7 +99,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                             ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
                             " in context ").append(session.getContextId()).toString());
                     }
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
                 }
             }
@@ -108,7 +108,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             IMailAccessCache mac;
             try {
                 mac = MailAccess.getMailAccessCache();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error("Managed mail access cache could not be obtained.", e);
                 return;
             }
@@ -119,7 +119,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                         ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(" in context ").append(
                         session.getContextId()).toString());
                 }
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
             }
         }

@@ -49,7 +49,7 @@
 
 package com.openexchange.pop3;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.MailAccess;
@@ -88,12 +88,12 @@ public final class POP3Provider extends MailProvider {
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session) throws MailException {
+    public MailAccess<?, ?> createNewMailAccess(final Session session) throws OXException {
         return POP3Access.newInstance(session);
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws MailException {
+    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws OXException {
         return POP3Access.newInstance(session, accountId);
     }
 

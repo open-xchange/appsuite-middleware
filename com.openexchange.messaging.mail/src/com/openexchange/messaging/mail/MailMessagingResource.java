@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.mail;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -85,7 +85,7 @@ public class MailMessagingResource implements MessagingResource {
         this.session = session;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -104,7 +104,7 @@ public class MailMessagingResource implements MessagingResource {
     public void connect() throws MessagingException {
         try {
             mailAccess.connect();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }
@@ -116,7 +116,7 @@ public class MailMessagingResource implements MessagingResource {
     public boolean ping() throws MessagingException {
         try {
             return mailAccess.ping();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

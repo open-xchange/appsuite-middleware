@@ -49,7 +49,8 @@
 
 package com.openexchange.mail.partmodifier;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.parser.MailMessageParser;
 
@@ -67,29 +68,29 @@ public abstract class PartModifier {
      * 
      * @param mailPart The mail part to modify
      * @return The modified mail part
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public abstract MailPart modifyPart(final MailPart mailPart) throws MailException;
+    public abstract MailPart modifyPart(final MailPart mailPart) throws OXException;
 
     /**
      * Initializes part modifier
      * 
      * @param className The class name of part modifier implementation
-     * @throws MailException If part modifier cannot be initialized
+     * @throws OXException If part modifier cannot be initialized
      */
-    public static final void init(final String className) throws MailException {
+    public static final void init(final String className) throws OXException {
         synchronized (PartModifier.class) {
             if (null == instance) {
                 try {
                     instance = (PartModifier) Class.forName(className).newInstance();
                 } catch (final ClassNotFoundException e) {
-                    throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+                    throw MailExceptionCode.PART_MODIFIER_CREATION_FAILED.create(e, className);
                 } catch (final InstantiationException e) {
-                    throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+                    throw MailExceptionCode.PART_MODIFIER_CREATION_FAILED.create(e, className);
                 } catch (final IllegalAccessException e) {
-                    throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+                    throw MailExceptionCode.PART_MODIFIER_CREATION_FAILED.create(e, className);
                 } catch (final Throwable e) {
-                    throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+                    throw MailExceptionCode.PART_MODIFIER_CREATION_FAILED.create(e, className);
                 }
             }
         }

@@ -61,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.sun.mail.imap.IMAPFolder;
@@ -106,9 +106,9 @@ final class IMAPSessionStorage {
      * 
      * @param accountId The account ID
      * @param imapFolder The IMAP folder
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public void fillSessionStorage(final int accountId, final IMAPFolder imapFolder) throws MailException {
+    public void fillSessionStorage(final int accountId, final IMAPFolder imapFolder) throws OXException {
         final Set<IMAPUpdateableData> currentData;
         try {
             currentData = new HashSet<IMAPUpdateableData>(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
@@ -137,9 +137,9 @@ final class IMAPSessionStorage {
      * @param userId The user ID
      * @param contextId The context ID
      * @return The IMAP messages of which flags have been changed since specified time stamp
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final int mode, final int userId, final int contextId) throws MailException {
+    public long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final int mode, final int userId, final int contextId) throws OXException {
         synchronized (lock) {
             try {
                 final String fullName = imapFolder.getFullName();
@@ -259,7 +259,7 @@ final class IMAPSessionStorage {
      * @param deletedUIDs The set of deleted UIDs
      * @param accountId The account ID
      * @param fullName The IMAP folder's full name
-     * @throws MailException If an error occurs while deleting UIDs
+     * @throws OXException If an error occurs while deleting UIDs
      */
     public void removeDeletedSessionData(final long[] deletedUIDs, final int accountId, final String fullName) {
         final Set<Long> s = new HashSet<Long>(deletedUIDs.length);
@@ -275,7 +275,7 @@ final class IMAPSessionStorage {
      * @param deletedUIDs The set of deleted UIDs
      * @param accountId The account ID
      * @param fullName The IMAP folder's full name
-     * @throws MailException If an error occurs while deleting UIDs
+     * @throws OXException If an error occurs while deleting UIDs
      */
     public void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final String fullName) {
         synchronized (lock) {
@@ -299,7 +299,7 @@ final class IMAPSessionStorage {
      * 
      * @param accountId The account ID
      * @param fullName The IMAP folder's full name
-     * @throws MailException If an error occurs while deleting UIDs
+     * @throws OXException If an error occurs while deleting UIDs
      */
     public void removeDeletedFolder(final int accountId, final String fullName) {
         synchronized (lock) {

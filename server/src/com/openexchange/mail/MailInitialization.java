@@ -53,6 +53,7 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.JSONMessageCache;
@@ -95,7 +96,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         return instance;
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.warn("Duplicate initialization of mail module aborted.");
             return;
@@ -109,7 +110,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
             startUp(MailCacheConfiguration.getInstance(), startedStack);
             startUp(new Initialization() {
 
-                public void start() throws AbstractOXException {
+                public void start() throws OXException {
                     MailAccessWatcher.init();
                 }
 
@@ -119,12 +120,12 @@ public final class MailInitialization implements Initialization, CacheAvailabili
             }, startedStack);
             startUp(new Initialization() {
 
-                public void start() throws AbstractOXException {
+                public void start() throws OXException {
                     JSONMessageCacheConfiguration.initInstance();
                     JSONMessageCacheConfiguration.getInstance().loadProperties();
                 }
 
-                public void stop() throws AbstractOXException {
+                public void stop() throws OXException {
                     JSONMessageCacheConfiguration.releaseInstance();
                 }
 
@@ -141,7 +142,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 //            }, startedStack);
             startUp(new Initialization() {
 
-                public void start() throws AbstractOXException {
+                public void start() throws OXException {
                     EventPool.initInstance();
                 }
 
@@ -157,7 +158,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                 reg.registerListener(this);
                 reg.registerListener(UserSettingMailStorage.getInstance());
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             started.set(false);
             // Revoke
             for (final Initialization startedInit : startedStack) {
@@ -171,7 +172,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         }
     }
 
-    private void startUp(final Initialization initialization, final Stack<Initialization> startedStack) throws AbstractOXException {
+    private void startUp(final Initialization initialization, final Stack<Initialization> startedStack) throws OXException {
         initialization.start();
         startedStack.push(initialization);
     }

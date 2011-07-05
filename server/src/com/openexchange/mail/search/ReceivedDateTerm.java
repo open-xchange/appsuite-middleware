@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Date;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -119,7 +119,7 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
     }
 
     @Override
-    public boolean matches(final Message msg) throws MailException {
+    public boolean matches(final Message msg) throws OXException {
         final Date receivedDate;
         try {
             receivedDate = msg.getReceivedDate();

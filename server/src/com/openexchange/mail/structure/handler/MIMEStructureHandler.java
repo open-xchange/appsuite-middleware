@@ -81,7 +81,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.config.MailProperties;
@@ -241,12 +242,12 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final int BUFLEN = 8192;
 
-    public boolean handleAttachment(final MailPart part, final String id) throws MailException {
+    public boolean handleAttachment(final MailPart part, final String id) throws OXException {
         addBodyPart(part, id);
         return true;
     }
 
-    public boolean handleColorLabel(final int colorLabel) throws MailException {
+    public boolean handleColorLabel(final int colorLabel) throws OXException {
         try {
             /*-
              * TODO: Decide whether to add separate "color_label" field or add it to user flags:
@@ -258,16 +259,16 @@ public final class MIMEStructureHandler implements StructureHandler {
             currentMailObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleHeaders(final Iterator<Entry<String, String>> iter) throws MailException {
+    public boolean handleHeaders(final Iterator<Entry<String, String>> iter) throws OXException {
         generateHeadersObject(iter, currentMailObject);
         return true;
     }
 
-    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
+    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         final String filename = part.getFileName();
         String contentType = MIMETypes.MIME_APPL_OCTET;
         try {
@@ -286,7 +287,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             encodeFN = MimeUtility.encodeText(filename, "UTF-8", "Q");
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
         headers.put(CONTENT_TYPE, sb.append(contentType).append("; name=").append(encodeFN).toString());
         sb.setLength(0);
@@ -304,7 +305,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
-    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         /*
          * Dummy headers
          */
@@ -323,7 +324,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
-    public boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws MailException {
+    public boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws OXException {
         try {
             // Increment
             if (++multipartCount > 1) { // Enqueue nested multipart
@@ -358,11 +359,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleMultipartEnd() throws MailException {
+    public boolean handleMultipartEnd() throws OXException {
         // Decrement
         if (--multipartCount > 0) { // Dequeue nested multipart
             // Dequeue
@@ -373,7 +374,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
-    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         try {
             final Object content = mailPart.getContent();
             final MailMessage nestedMail;
@@ -424,11 +425,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             add2BodyJsonObject(bodyObject);
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleReceivedDate(final Date receivedDate) throws MailException {
+    public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         try {
             if (receivedDate == null) {
                 currentMailObject.put(MailJSONField.RECEIVED_DATE.getKey(), JSONObject.NULL);
@@ -442,11 +443,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleSystemFlags(final int flags) throws MailException {
+    public boolean handleSystemFlags(final int flags) throws OXException {
         try {
             final String key = MailJSONField.FLAGS.getKey();
             if (currentMailObject.hasAndNotNull(key)) {
@@ -457,11 +458,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    public boolean handleUserFlags(final String[] userFlags) throws MailException {
+    public boolean handleUserFlags(final String[] userFlags) throws OXException {
         if (null == userFlags || 0 == userFlags.length) {
             return true;
         }
@@ -472,11 +473,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             return true;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void addBodyPart(final MailPart part, final String id) throws MailException {
+    private void addBodyPart(final MailPart part, final String id) throws OXException {
         try {
             final JSONObject bodyObject = new JSONObject();
             if (multipartCount > 0) {
@@ -492,11 +493,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void addBodyPart(final long size, final InputStreamProvider isp, final ContentType contentType, final String id, final Iterator<Entry<String, String>> iter) throws MailException {
+    private void addBodyPart(final long size, final InputStreamProvider isp, final ContentType contentType, final String id, final Iterator<Entry<String, String>> iter) throws OXException {
         try {
             final JSONObject bodyObject = new JSONObject();
             if (multipartCount > 0) {
@@ -512,7 +513,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -522,7 +523,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
-    private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final JSONObject headerObject, final String id) throws MailException {
+    private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final JSONObject headerObject, final String id) throws OXException {
         try {
             bodyObject.put(KEY_ID, id);
             final long size = part.getSize();
@@ -561,13 +562,13 @@ public final class MIMEStructureHandler implements StructureHandler {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final ContentType contentType, final JSONObject headerObject, final String id) throws MailException {
+    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final ContentType contentType, final JSONObject headerObject, final String id) throws OXException {
         try {
             bodyObject.put(KEY_ID, id);
             if (maxSize > 0 && size > maxSize) {
@@ -588,13 +589,13 @@ public final class MIMEStructureHandler implements StructureHandler {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static void fillBase64JSONString(final InputStream inputStream, final JSONObject bodyObject, final boolean streaming) throws MailException {
+    private static void fillBase64JSONString(final InputStream inputStream, final JSONObject bodyObject, final boolean streaming) throws OXException {
         try {
             if (streaming) {
                 bodyObject.put(DATA, new Base64JSONString(inputStream));
@@ -610,7 +611,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                         bytes = out.toByteArray();
                     } catch (final IOException e) {
-                        throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     } finally {
                         if (null != inputStream) {
                             try {
@@ -625,9 +626,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                 bodyObject.put(DATA, new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
             }
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, "US-ASCII");
+            throw MailExceptionCode.ENCODING_ERROR.create(e, "US-ASCII");
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -654,7 +655,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Resent-Sender"),
             HeaderName.valueOf("Disposition-Notification-To")));
 
-    private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws MailException {
+    private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws OXException {
         try {
             final JSONObject hdrObject = new JSONObject();
             while (iter.hasNext()) {
@@ -720,11 +721,11 @@ public final class MIMEStructureHandler implements StructureHandler {
             parent.put(KEY_HEADERS, hdrObject.length() > 0 ? hdrObject : JSONObject.NULL);
             return hdrObject;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private JSONObject generateParameterizedHeader(final String value, final HeaderName headerName) throws MailException, JSONException {
+    private JSONObject generateParameterizedHeader(final String value, final HeaderName headerName) throws OXException, JSONException {
         if (HN_CONTENT_TYPE.equals(headerName)) {
             final ContentType ct = new ContentType(value);
             return generateParameterizedHeader(ct, ct.getBaseType().toLowerCase(Locale.ENGLISH));
@@ -820,7 +821,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return new InternetAddress[] { new PlainTextAddress(addr) };
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws MailException, IOException {
+    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
         final String charset = getCharset(mailPart, contentType);
         try {
             return MessageUtility.readMailPart(mailPart, charset);
@@ -835,7 +836,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
+    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();

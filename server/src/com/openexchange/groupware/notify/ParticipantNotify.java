@@ -136,7 +136,7 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -256,7 +256,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
         try {
             mail.send();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             LL.log(e);
         }
     }

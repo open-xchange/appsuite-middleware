@@ -51,7 +51,7 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import javax.mail.Message;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -134,7 +134,7 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws MailException {
+    public boolean matches(final Message msg) throws OXException {
         return value;
     }
 

@@ -62,7 +62,7 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import com.openexchange.imap.IMAPTracer.TracerState;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -118,9 +118,9 @@ public final class AllFetch {
          * @param msg The message to apply to
          * @param logger The logger
          * @throws MessagingException If a messaging error occurs
-         * @throws MailException If a mail error occurs
+         * @throws OXException If a mail error occurs
          */
-        public abstract void handleItem(final Item item, final MailMessage m, final org.apache.commons.logging.Log logger) throws MailException;
+        public abstract void handleItem(final Item item, final MailMessage m, final org.apache.commons.logging.Log logger) throws OXException;
     }
 
     /**
@@ -150,7 +150,7 @@ public final class AllFetch {
          */
         FLAGS("FLAGS", FLAGS.class, new FetchItemHandler() {
 
-            public void handleItem(final Item item, final MailMessage m, final Log logger) throws MailException {
+            public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
                 MIMEMessageConverter.parseFlags((FLAGS) item, m);
             }
         }),
@@ -159,7 +159,7 @@ public final class AllFetch {
          */
         BODYSTRUCTURE("BODYSTRUCTURE", BODYSTRUCTURE.class, new FetchItemHandler() {
 
-            public void handleItem(final Item item, final MailMessage m, final Log logger) throws MailException {
+            public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
                 final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
                 final StringBuilder sb = new StringBuilder();
                 sb.append(bs.type).append('/').append(bs.subtype);
@@ -168,7 +168,7 @@ public final class AllFetch {
                 }
                 try {
                     m.setContentType(new ContentType(sb.toString()));
-                } catch (final MailException e) {
+                } catch (final OXException e) {
                     if (logger.isWarnEnabled()) {
                         logger.warn(e.getMessage(), e);
                     }
@@ -350,7 +350,7 @@ public final class AllFetch {
                                             getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
                                         try {
                                             lowCostItem.getItemHandler().handleItem(item, m, LOG);
-                                        } catch (final MailException e) {
+                                        } catch (final OXException e) {
                                             LOG.error(e.getMessage(), e);
                                         }
                                     }

@@ -49,7 +49,8 @@
 
 package com.openexchange.mail.twitter;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -112,7 +113,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
     public TwitterConfig getTwitterConfig() {
         try {
             return (TwitterConfig) getMailConfig();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             /*
              * Cannot occur since already initialized
              */
@@ -137,7 +138,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
     }
 
     @Override
-    protected void connectInternal() throws MailException {
+    protected void connectInternal() throws OXException {
         if (null != twitterAccess) {
             // Already connected
             return;
@@ -147,7 +148,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
             final TwitterConfig twitterConfig = getTwitterConfig();
             twitterAccess = twitterService.getTwitterAccess(twitterConfig.getLogin(), twitterConfig.getPassword());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -157,22 +158,22 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
     }
 
     @Override
-    protected IMailProperties createNewMailProperties() throws MailException {
+    protected IMailProperties createNewMailProperties() throws OXException {
         try {
             final MailAccountStorageService storageService =
                 TwitterServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
     @Override
-    public TwitterFolderStorage getFolderStorage() throws MailException {
+    public TwitterFolderStorage getFolderStorage() throws OXException {
         if (null == twitterAccess) {
-            throw new MailException(MailException.Code.NOT_CONNECTED);
+            throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == folderStorage) {
             folderStorage = new TwitterFolderStorage(session);
@@ -181,9 +182,9 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
     }
 
     @Override
-    public MailLogicTools getLogicTools() throws MailException {
+    public MailLogicTools getLogicTools() throws OXException {
         if (null == twitterAccess) {
-            throw new MailException(MailException.Code.NOT_CONNECTED);
+            throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == logicTools) {
             logicTools = new MailLogicTools(session, accountId);
@@ -192,9 +193,9 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
     }
 
     @Override
-    public TwitterMessageStorage getMessageStorage() throws MailException {
+    public TwitterMessageStorage getMessageStorage() throws OXException {
         if (null == twitterAccess) {
-            throw new MailException(MailException.Code.NOT_CONNECTED);
+            throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == messageStorage) {
             messageStorage = new TwitterMessageStorage(twitterAccess, session, accountId);
@@ -217,7 +218,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
         if (folderStorage != null) {
             try {
                 folderStorage.releaseResources();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(new StringBuilder("Error while closing POP3 folder storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 folderStorage = null;
@@ -226,7 +227,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
         if (messageStorage != null) {
             try {
                 messageStorage.releaseResources();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(new StringBuilder("Error while closing POP3 message storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 messageStorage = null;
@@ -239,12 +240,12 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
     }
 
     @Override
-    protected void shutdown() throws MailException {
+    protected void shutdown() throws OXException {
         // Nothing to do
     }
 
     @Override
-    protected void startup() throws MailException {
+    protected void startup() throws OXException {
         // Nothing to do
     }
 

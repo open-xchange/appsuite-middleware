@@ -60,7 +60,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
@@ -491,10 +491,10 @@ public final class MailProperties implements IMailProperties {
             try {
                 PartModifier.init(partModifierStr);
                 logBuilder.append("\tPartModifier Implementation: ").append(PartModifier.getInstance().getClass().getName()).append('\n');
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 try {
                     PartModifier.init(DummyPartModifier.class.getName());
-                } catch (final MailException e1) {
+                } catch (final OXException e1) {
                     /*
                      * Cannot occur
                      */

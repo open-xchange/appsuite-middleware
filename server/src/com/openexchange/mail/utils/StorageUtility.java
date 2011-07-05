@@ -57,7 +57,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -166,9 +167,9 @@ public final class StorageUtility {
      * @param accountId The account ID
      * @param usm The user's mail settings
      * @return The default folder names as an array of {@link String}
-     * @throws MailException If spam enablement/disablement cannot be determined
+     * @throws OXException If spam enablement/disablement cannot be determined
      */
-    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm) throws MailException {
+    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm) throws OXException {
         return getDefaultFolderNames(accountId, usm, usm.isSpamEnabled());
     }
 
@@ -180,9 +181,9 @@ public final class StorageUtility {
      * @param usm The user's mail settings
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
-     * @throws MailException If spam enablement/disablement cannot be determined
+     * @throws OXException If spam enablement/disablement cannot be determined
      */
-    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm, final boolean isSpamEnabled) throws MailException {
+    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm, final boolean isSpamEnabled) throws OXException {
         return new DefaultFolderNamesProvider(accountId, usm.getUserId(), usm.getCid()).getDefaultFolderNames(
             usm.getStdTrashName(),
             usm.getStdSentName(),
@@ -213,7 +214,7 @@ public final class StorageUtility {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_DRAFTS);
+                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_DRAFTS);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_DRAFTS), e);
             }
             names[INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
@@ -222,7 +223,7 @@ public final class StorageUtility {
         }
         if ((sent == null) || (sent.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_SENT);
+                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_SENT);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SENT), e);
             }
             names[INDEX_SENT] = UserSettingMail.STD_SENT;
@@ -231,7 +232,7 @@ public final class StorageUtility {
         }
         if ((spam == null) || (spam.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_SPAM);
+                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_SPAM);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SPAM), e);
             }
             names[INDEX_SPAM] = UserSettingMail.STD_SPAM;
@@ -240,7 +241,7 @@ public final class StorageUtility {
         }
         if ((trash == null) || (trash.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_TRASH);
+                final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_TRASH);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_TRASH), e);
             }
             names[INDEX_TRASH] = UserSettingMail.STD_TRASH;
@@ -250,8 +251,8 @@ public final class StorageUtility {
         if (isSpamEnabled) {
             if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    final MailException e = new MailException(
-                        MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
+                    final OXException e = new OXException(
+                        MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME,
                         UserSettingMail.STD_CONFIRMED_SPAM);
                     LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_SPAM), e);
                 }
@@ -261,8 +262,8 @@ public final class StorageUtility {
             }
             if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    final MailException e = new MailException(
-                        MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
+                    final OXException e = new OXException(
+                        MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME,
                         UserSettingMail.STD_CONFIRMED_HAM);
                     LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_HAM), e);
                 }

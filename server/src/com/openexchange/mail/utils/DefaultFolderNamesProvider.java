@@ -61,7 +61,7 @@ import static com.openexchange.mail.utils.StorageUtility.INDEX_DRAFTS;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SENT;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_TRASH;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.exception.OXException;
@@ -93,9 +93,9 @@ public final class DefaultFolderNamesProvider {
      * @param accountId The account ID
      * @param user The user ID
      * @param cid The context ID
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public DefaultFolderNamesProvider(final int accountId, final int user, final int cid) throws MailException {
+    public DefaultFolderNamesProvider(final int accountId, final int user, final int cid) throws OXException {
         super();
         if (MailAccount.DEFAULT_ID == accountId) {
             fallbackProvider = DEFAULT_PROVIDER;
@@ -105,9 +105,9 @@ public final class DefaultFolderNamesProvider {
                     ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                 fallbackProvider = new DefaultAccountProvider(storageService.getDefaultMailAccount(user, cid));
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             } catch (final OXException e) {
-                throw new MailException(e);
+                throw new OXException(e);
             }
         }
     }
@@ -167,7 +167,7 @@ public final class DefaultFolderNamesProvider {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_DRAFTS);
+                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_DRAFTS);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_DRAFTS));
             }
             names[INDEX_DRAFTS] = fallbackProvider.getDrafts();
@@ -176,7 +176,7 @@ public final class DefaultFolderNamesProvider {
         }
         if ((sent == null) || (sent.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SENT);
+                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SENT);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_SENT));
             }
             names[INDEX_SENT] = fallbackProvider.getSent();
@@ -185,7 +185,7 @@ public final class DefaultFolderNamesProvider {
         }
         if ((spam == null) || (spam.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SPAM);
+                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SPAM);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_SPAM));
             }
             names[INDEX_SPAM] = fallbackProvider.getSpam();
@@ -194,7 +194,7 @@ public final class DefaultFolderNamesProvider {
         }
         if ((trash == null) || (trash.length() == 0)) {
             if (LOG.isWarnEnabled()) {
-                // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_TRASH);
+                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_TRASH);
                 LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_TRASH));
             }
             names[INDEX_TRASH] = fallbackProvider.getTrash();
@@ -204,7 +204,7 @@ public final class DefaultFolderNamesProvider {
         if (isSpamEnabled) {
             if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_SPAM);
+                    // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_SPAM);
                     LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_CONFIRMED_SPAM));
                 }
                 names[INDEX_CONFIRMED_SPAM] = fallbackProvider.getConfirmedSpam();
@@ -213,7 +213,7 @@ public final class DefaultFolderNamesProvider {
             }
             if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    // final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_HAM);
+                    // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_HAM);
                     LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, STD_CONFIRMED_HAM));
                 }
                 names[INDEX_CONFIRMED_HAM] = fallbackProvider.getConfirmeHam();

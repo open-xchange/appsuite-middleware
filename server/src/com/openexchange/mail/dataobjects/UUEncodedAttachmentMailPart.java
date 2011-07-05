@@ -51,7 +51,7 @@ package com.openexchange.mail.dataobjects;
 
 import java.io.InputStream;
 import javax.activation.DataHandler;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
@@ -79,12 +79,12 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         return null;
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         final ContentType contentType;
         if (!containsContentType()) {
             contentType = getContentType();
@@ -99,17 +99,17 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return null;
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         return uuencPart.getInputStream();
     }
 

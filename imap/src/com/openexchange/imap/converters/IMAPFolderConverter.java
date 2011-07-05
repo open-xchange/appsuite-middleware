@@ -76,7 +76,7 @@ import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.IMAPServer;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -165,9 +165,9 @@ public final class IMAPFolderConverter {
      * @param imapFolder The IMAP folder
      * @param imapConfig The IMAP configuration
      * @return An appropriate implementation of {@link Entity2ACLArgs}
-     * @throws MailException If IMAP folder's attributes cannot be accessed
+     * @throws OXException If IMAP folder's attributes cannot be accessed
      */
-    public static Entity2ACLArgs getEntity2AclArgs(final Session session, final IMAPFolder imapFolder, final IMAPConfig imapConfig) throws MailException {
+    public static Entity2ACLArgs getEntity2AclArgs(final Session session, final IMAPFolder imapFolder, final IMAPConfig imapConfig) throws OXException {
         return new Entity2ACLArgsImpl(
             imapConfig.getAccountId(),
             new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()),
@@ -228,9 +228,9 @@ public final class IMAPFolderConverter {
      * @param session The session
      * @param ctx The context
      * @return An instance of <code>{@link IMAPMailFolder}</code> containing the attributes from given IMAP folder
-     * @throws MailException If conversion fails
+     * @throws OXException If conversion fails
      */
-    public static IMAPMailFolder convertFolder(final IMAPFolder imapFolder, final Session session, final IMAPAccess imapAccess, final Context ctx) throws MailException {
+    public static IMAPMailFolder convertFolder(final IMAPFolder imapFolder, final Session session, final IMAPAccess imapAccess, final Context ctx) throws OXException {
         try {
             synchronized (imapFolder) {
                 final String imapFullName = imapFolder.getFullName();
@@ -444,7 +444,7 @@ public final class IMAPFolderConverter {
                     if (selectable && exists && imapConfig.getACLExtension().canGetACL(ownRights)) {
                         try {
                             applyACL2Permissions(imapFolder, listEntry, session, imapConfig, mailFolder, ownRights, ctx);
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn("ACLs could not be parsed", e);
                             }
@@ -493,7 +493,7 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static IMAPMailFolder convertRootFolder(final DefaultFolder rootFolder, final Session session, final IMAPConfig imapConfig) throws MailException {
+    private static IMAPMailFolder convertRootFolder(final DefaultFolder rootFolder, final Session session, final IMAPConfig imapConfig) throws OXException {
         try {
             final IMAPMailFolder mailFolder = new IMAPMailFolder();
             mailFolder.setRootFolder(true);
@@ -580,9 +580,9 @@ public final class IMAPFolderConverter {
      * @param mailFolder The mail folder
      * @param ownRights The rights granted to IMAP folder for session user
      * @param ctx The context
-     * @throws MailException If ACLs cannot be mapped
+     * @throws OXException If ACLs cannot be mapped
      */
-    private static void applyACL2Permissions(final IMAPFolder imapFolder, final ListLsubEntry listEntry, final Session session, final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights, final Context ctx) throws MailException {
+    private static void applyACL2Permissions(final IMAPFolder imapFolder, final ListLsubEntry listEntry, final Session session, final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights, final Context ctx) throws OXException {
         final ACL[] acls;
         try {
             final List<ACL> list = listEntry.getACLs();
@@ -619,7 +619,7 @@ public final class IMAPFolderConverter {
                 mailFolder.addPermission(aclPerm);
             } catch (final AbstractOXException e) {
                 if (!isUnknownEntityError(e)) {
-                    throw new MailException(e);
+                    throw new OXException(e);
                 }
                 if (DEBUG) {
                     debugBuilder.setLength(0);
@@ -667,7 +667,7 @@ public final class IMAPFolderConverter {
         return (EnumComponent.ACL_ERROR.equals(component) && (Entity2ACLException.Code.RESOLVE_USER_FAILED.getNumber() == detailNumber)) || (EnumComponent.USER.equals(component) && (LdapException.Code.USER_NOT_FOUND.getDetailNumber() == detailNumber));
     }
 
-    private static boolean checkForNamespaceFolder(final String fullName, final AccessedIMAPStore imapStore, final Session session, final int accountId) throws MessagingException, MailException {
+    private static boolean checkForNamespaceFolder(final String fullName, final AccessedIMAPStore imapStore, final Session session, final int accountId) throws MessagingException, OXException {
         /*
          * Check for namespace folder
          */
@@ -712,9 +712,9 @@ public final class IMAPFolderConverter {
      * 
      * @param imapFolder The IMAP folder
      * @return The unread count
-     * @throws MailException If returning unread count fails
+     * @throws OXException If returning unread count fails
      */
-    public static int getUnreadCount(final IMAPFolder imapFolder) throws MailException {
+    public static int getUnreadCount(final IMAPFolder imapFolder) throws OXException {
         try {
             final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
             return status[2];

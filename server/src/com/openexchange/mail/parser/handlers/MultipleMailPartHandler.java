@@ -67,7 +67,8 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -113,43 +114,43 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
             setContentType(contentType);
         }
 
-        private DataSource getDataSource() throws MailException {
+        private DataSource getDataSource() throws OXException {
             if (null == dataSource) {
                 try {
                     dataSource = new MessageDataSource(text, getContentType());
                 } catch (final UnsupportedEncodingException e) {
-                    throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
             }
             return dataSource;
         }
 
         @Override
-        public Object getContent() throws MailException {
+        public Object getContent() throws OXException {
             return text;
         }
 
         @Override
-        public DataHandler getDataHandler() throws MailException {
+        public DataHandler getDataHandler() throws OXException {
             return new DataHandler(getDataSource());
         }
 
         @Override
-        public int getEnclosedCount() throws MailException {
+        public int getEnclosedCount() throws OXException {
             return NO_ENCLOSED_PARTS;
         }
 
         @Override
-        public MailPart getEnclosedMailPart(final int index) throws MailException {
+        public MailPart getEnclosedMailPart(final int index) throws OXException {
             return null;
         }
 
         @Override
-        public InputStream getInputStream() throws MailException {
+        public InputStream getInputStream() throws OXException {
             try {
                 return getDataSource().getInputStream();
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -247,7 +248,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
         mailParts.clear();
     }
 
-    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
+    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         if (ids.contains(id)) {
             mailParts.put(id, part);
             if (!isInline) {
@@ -258,31 +259,31 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
-    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
-    public boolean handleColorLabel(final int colorLabel) throws MailException {
+    public boolean handleColorLabel(final int colorLabel) throws OXException {
         return true;
     }
 
-    public boolean handleContentId(final String contentId) throws MailException {
+    public boolean handleContentId(final String contentId) throws OXException {
         return true;
     }
 
-    public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
+    public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         return true;
     }
 
-    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
+    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
         return true;
     }
 
-    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws MailException {
+    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         if (ids.contains(id)) {
             mailParts.put(id, part);
             if (!isInline) {
@@ -293,7 +294,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         if (ids.contains(id)) {
             final MailPart mailPart = new TextMailPart(htmlContent, contentType);
             mailPart.setContentType(contentType);
@@ -306,7 +307,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
+    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         if (ids.contains(id)) {
             final MailPart mailPart = new TextMailPart(plainTextContent, contentType);
             mailPart.setContentType(contentType);
@@ -319,7 +320,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
+    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         if (ids.contains(id)) {
             final MailPart mailPart = new UUEncodedAttachmentMailPart(part);
             String ct = MIMEType2ExtMap.getContentType(part.getFileName());
@@ -336,25 +337,25 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
         return true;
     }
 
-    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException {
+    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         return handleInlinePlainText(decodedTextContent, contentType, size, fileName, id);
     }
 
-    public void handleMessageEnd(final MailMessage msg) throws MailException {
+    public void handleMessageEnd(final MailMessage msg) throws OXException {
         if (errorOnAbsence && ids.size() > mailParts.size()) {
             for (final String id : ids) {
                 if (!mailParts.containsKey(id)) {
-                    throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, id, Long.valueOf(msg.getMailId()), msg.getFolder());
+                    throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(id, Long.valueOf(msg.getMailId()), msg.getFolder());
                 }
             }
         }
     }
 
-    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
+    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
         return true;
     }
 
-    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         if (ids.contains(id)) {
             mailParts.put(id, mailPart);
             return (ids.size() > mailParts.size());
@@ -381,27 +382,27 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
         return (ids.size() > mailParts.size());
     }
 
-    public boolean handlePriority(final int priority) throws MailException {
+    public boolean handlePriority(final int priority) throws OXException {
         return true;
     }
 
-    public boolean handleMsgRef(final String msgRef) throws MailException {
+    public boolean handleMsgRef(final String msgRef) throws OXException {
         return true;
     }
 
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws MailException {
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
         return true;
     }
 
-    public boolean handleReceivedDate(final Date receivedDate) throws MailException {
+    public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         return true;
     }
 
-    public boolean handleSentDate(final Date sentDate) throws MailException {
+    public boolean handleSentDate(final Date sentDate) throws OXException {
         return true;
     }
 
-    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
+    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         return handleAttachment(
             part,
             (!Part.ATTACHMENT.equalsIgnoreCase(part.getContentDisposition().getDisposition()) && part.getFileName() == null),
@@ -410,19 +411,19 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
             id);
     }
 
-    public boolean handleSubject(final String subject) throws MailException {
+    public boolean handleSubject(final String subject) throws OXException {
         return true;
     }
 
-    public boolean handleSystemFlags(final int flags) throws MailException {
+    public boolean handleSystemFlags(final int flags) throws OXException {
         return true;
     }
 
-    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
+    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
-    public boolean handleUserFlags(final String[] userFlags) throws MailException {
+    public boolean handleUserFlags(final String[] userFlags) throws OXException {
         return true;
     }
 

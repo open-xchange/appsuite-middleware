@@ -50,7 +50,7 @@
 package com.openexchange.mail.transport.config;
 
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
@@ -86,9 +86,9 @@ public abstract class TransportConfig extends MailConfig {
      * @param session The session providing needed user data
      * @param accountId The mail account ID
      * @return The user-specific transport configuration
-     * @throws MailException If user-specific transport configuration cannot be determined
+     * @throws OXException If user-specific transport configuration cannot be determined
      */
-    public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz, final C transportConfig, final Session session, final int accountId) throws MailException {
+    public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz, final C transportConfig, final Session session, final int accountId) throws OXException {
         /*
          * Fetch mail account
          */
@@ -101,9 +101,9 @@ public abstract class TransportConfig extends MailConfig {
                 mailAccount = storage.getMailAccount(accountId, session.getUserId(), session.getContextId());
             }
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         transportConfig.accountId = accountId;
         fillLoginAndPassword(
@@ -156,16 +156,16 @@ public abstract class TransportConfig extends MailConfig {
      * @param session The user session
      * @param accountId The account ID
      * @return The appropriate transport server URL or <code>null</code>
-     * @throws MailException If transport server URL cannot be returned
+     * @throws OXException If transport server URL cannot be returned
      */
-    public static String getTransportServerURL(final Session session, final int accountId) throws MailException {
+    public static String getTransportServerURL(final Session session, final int accountId) throws OXException {
         try {
             final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             return getTransportServerURL(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 

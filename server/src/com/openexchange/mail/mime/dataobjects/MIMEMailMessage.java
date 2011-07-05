@@ -53,7 +53,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataHandler;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 
@@ -161,41 +161,41 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         return mailPart.getContent();
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return mailPart.getDataHandler();
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return mailPart.getEnclosedCount();
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return mailPart.getEnclosedMailPart(index);
     }
 
-    public InputStream getRawInputStream() throws MailException {
+    public InputStream getRawInputStream() throws OXException {
         return mailPart.getRawInputStream();
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         return mailPart.getInputStream();
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws MailException {
+    public void writeTo(final OutputStream out) throws OXException {
         mailPart.writeTo(out);
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         mailPart.loadContent();
     }
 

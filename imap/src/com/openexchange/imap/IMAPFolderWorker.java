@@ -64,7 +64,8 @@ import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -141,7 +142,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     @Override
-    public void releaseResources() throws MailException {
+    public void releaseResources() throws OXException {
         closeIMAPFolder();
     }
 
@@ -189,9 +190,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /**
      * Closes remembered IMAP folder (if non-<code>null</code>).
      * 
-     * @throws MailException If closing remembered IMAP folder fails
+     * @throws OXException If closing remembered IMAP folder fails
      */
-    private void closeIMAPFolder() throws MailException {
+    private void closeIMAPFolder() throws OXException {
         try {
             if (null != imapFolder) {
                 imapFolder.close(false);
@@ -223,9 +224,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * 
      * @return <code>true</code> if field {@link #imapFolder} indicates to hold messages
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If a messaging error occurs
+     * @throws OXException If a messaging error occurs
      */
-    protected boolean holdsMessages() throws MailException {
+    protected boolean holdsMessages() throws OXException {
         if (holdsMessages == -1) {
             holdsMessages = ListLsubCache.getCachedLISTEntry(imapFolder.getFullName(), accountId, imapFolder, session).canOpen() ? 1 : 0;
         }
@@ -239,9 +240,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param desiredMode The desired opening mode (either {@link Folder#READ_ONLY} or {@link Folder#READ_WRITE})
      * @return The properly opened IMAP folder
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If user does not hold sufficient rights to open the IMAP folder in desired mode
+     * @throws OXException If user does not hold sufficient rights to open the IMAP folder in desired mode
      */
-    protected final IMAPFolder setAndOpenFolder(final String fullName, final int desiredMode) throws MessagingException, MailException {
+    protected final IMAPFolder setAndOpenFolder(final String fullName, final int desiredMode) throws MessagingException, OXException {
         return setAndOpenFolder(null, fullName, desiredMode);
     }
 
@@ -253,11 +254,11 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param desiredMode The desired opening mode (either {@link Folder#READ_ONLY} or {@link Folder#READ_WRITE})
      * @return The properly opened IMAP folder
      * @throws MessagingException If a messaging error occurs
-     * @throws MailException If user does not hold sufficient rights to open the IMAP folder in desired mode
+     * @throws OXException If user does not hold sufficient rights to open the IMAP folder in desired mode
      */
-    protected final IMAPFolder setAndOpenFolder(final IMAPFolder imapFolder, final String fullName, final int desiredMode) throws MessagingException, MailException {
+    protected final IMAPFolder setAndOpenFolder(final IMAPFolder imapFolder, final String fullName, final int desiredMode) throws MessagingException, OXException {
         if (null == fullName) {
-            throw new MailException(MailException.Code.MISSING_FULLNAME);
+            throw MailExceptionCode.MISSING_FULLNAME.create();
         }
         final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
         final boolean isIdenticalFolder;
@@ -402,14 +403,14 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * Handles specified {@link RuntimeException} instance.
      * 
      * @param e The runtime exception to handle
-     * @return An appropriate {@link MailException}
+     * @return An appropriate {@link OXException}
      */
-    protected MailException handleRuntimeException(final RuntimeException e) {
+    protected OXException handleRuntimeException(final RuntimeException e) {
         if (e instanceof ListLsubRuntimeException) {
             ListLsubCache.clearCache(accountId, session);
-            return new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
+            return MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
-        return new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        return MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
 
 }

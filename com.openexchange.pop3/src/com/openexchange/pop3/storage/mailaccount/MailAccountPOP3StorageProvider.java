@@ -52,7 +52,7 @@ package com.openexchange.pop3.storage.mailaccount;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.storage.POP3Storage;
@@ -84,7 +84,7 @@ public final class MailAccountPOP3StorageProvider implements POP3StorageProvider
         deleteListeners = Collections.unmodifiableList(tmp);
     }
 
-    public POP3Storage getPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
+    public POP3Storage getPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws OXException {
         return new MailAccountPOP3Storage(pop3Access, properties);
     }
 
@@ -92,7 +92,7 @@ public final class MailAccountPOP3StorageProvider implements POP3StorageProvider
         return NAME;
     }
 
-    public POP3StorageProperties getPOP3StorageProperties(final POP3Access pop3Access) throws MailException {
+    public POP3StorageProperties getPOP3StorageProperties(final POP3Access pop3Access) throws OXException {
         return SessionPOP3StorageProperties.getInstance(pop3Access);
     }
 

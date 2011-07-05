@@ -58,7 +58,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.FullnameUIDPair;
@@ -100,9 +100,9 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
      * @param user The user ID
      * @param cid The context ID
      * @param con The connection to use
-     * @throws MailException If dropping properties fails
+     * @throws OXException If dropping properties fails
      */
-    public static void dropIDs(final int accountId, final int user, final int cid, final Connection con) throws MailException {
+    public static void dropIDs(final int accountId, final int user, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_DROP_PROPERTIES);

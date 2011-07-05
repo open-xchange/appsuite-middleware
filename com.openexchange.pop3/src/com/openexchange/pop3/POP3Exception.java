@@ -50,7 +50,7 @@
 package com.openexchange.pop3;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MIMEMailException;
 
 /**
@@ -70,7 +70,7 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Missing parameter in mail connection: %1$s
          */
-        MISSING_CONNECT_PARAM(MailException.Code.MISSING_CONNECT_PARAM),
+        MISSING_CONNECT_PARAM(MailExceptionCode.MISSING_CONNECT_PARAM),
         /**
          * No connection available to access mailbox
          */
@@ -78,15 +78,15 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Missing parameter %1$s
          */
-        MISSING_PARAMETER(MailException.Code.MISSING_PARAMETER),
+        MISSING_PARAMETER(MailExceptionCode.MISSING_PARAMETER),
         /**
          * A JSON error occurred: %1$s
          */
-        JSON_ERROR(MailException.Code.JSON_ERROR),
+        JSON_ERROR(MailExceptionCode.JSON_ERROR),
         /**
          * Invalid permission values: fp=%d orp=%d owp=%d odp=%d
          */
-        INVALID_PERMISSION(MailException.Code.INVALID_PERMISSION),
+        INVALID_PERMISSION(MailExceptionCode.INVALID_PERMISSION),
         /**
          * User %1$s has no mail module access due to user configuration
          */
@@ -114,7 +114,7 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * No create access on mail folder %1$s
          */
-        NO_CREATE_ACCESS(MailException.Code.NO_CREATE_ACCESS),
+        NO_CREATE_ACCESS(MailExceptionCode.NO_CREATE_ACCESS),
         /**
          * No administer access on mail folder %1$s
          */
@@ -134,11 +134,11 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Mail folder cannot be created/rename. Name must not contain character '%1$s'
          */
-        INVALID_FOLDER_NAME(MailException.Code.INVALID_FOLDER_NAME),
+        INVALID_FOLDER_NAME(MailExceptionCode.INVALID_FOLDER_NAME),
         /**
          * A folder named %1$s already exists
          */
-        DUPLICATE_FOLDER(MailException.Code.DUPLICATE_FOLDER),
+        DUPLICATE_FOLDER(MailExceptionCode.DUPLICATE_FOLDER),
         /**
          * POP3 does not support mail folder creation
          */
@@ -183,7 +183,7 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * An I/O error occurred: %1$s
          */
-        IO_ERROR(MailException.Code.IO_ERROR),
+        IO_ERROR(MailExceptionCode.IO_ERROR),
         /**
          * Flag %1$s could not be changed due to following reason: %2$s
          */
@@ -191,7 +191,7 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Folder %1$s does not hold messages and is therefore not selectable
          */
-        FOLDER_DOES_NOT_HOLD_MESSAGES(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES),
+        FOLDER_DOES_NOT_HOLD_MESSAGES(MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES),
         /**
          * Number of search fields (%d) do not match number of search patterns (%d)
          */
@@ -211,7 +211,7 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Message field %1$s cannot be handled
          */
-        INVALID_FIELD(MailException.Code.INVALID_FIELD),
+        INVALID_FIELD(MailExceptionCode.INVALID_FIELD),
         /**
          * Mail folder %1$s must not be moved to subsequent folder %2$s
          */
@@ -255,7 +255,7 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Versit attachment could not be saved due to an unsupported MIME type: %1$s
          */
-        UNSUPPORTED_VERSIT_ATTACHMENT(MailException.Code.UNSUPPORTED_VERSIT_ATTACHMENT),
+        UNSUPPORTED_VERSIT_ATTACHMENT(MailExceptionCode.UNSUPPORTED_VERSIT_ATTACHMENT),
         /**
          * Versit object %1$s could not be saved
          */
@@ -267,7 +267,7 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Unsupported charset-encoding: %1$s
          */
-        ENCODING_ERROR(MailException.Code.ENCODING_ERROR),
+        ENCODING_ERROR(MailExceptionCode.ENCODING_ERROR),
         /**
          * A protocol exception occurred during execution of an POP3 request: %1$s
          */
@@ -396,7 +396,7 @@ public final class POP3Exception extends MIMEMailException {
             this.category = category;
         }
 
-        private Code(final MailException.Code code) {
+        private Code(final MailExceptionCode code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();

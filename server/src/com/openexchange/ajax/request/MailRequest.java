@@ -62,7 +62,8 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.session.Session;
@@ -181,7 +182,7 @@ public final class MailRequest {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CLEAR)) {
             MAIL_SERVLET.actionPutClear(session, writer, jsonObject, mailInterface);
         } else {
-            throw new MailException(MailException.Code.UNKNOWN_ACTION, action);
+            throw MailExceptionCode.UNKNOWN_ACTION.create(action);
         }
     }
 

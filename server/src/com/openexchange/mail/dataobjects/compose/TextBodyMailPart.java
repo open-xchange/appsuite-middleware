@@ -55,7 +55,8 @@ import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import com.openexchange.html.HTMLService;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -91,9 +92,9 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * Gets a copy of this {@link TextBodyMailPart}.
      * 
      * @return A copy of this {@link TextBodyMailPart
-     * @throws MailException If creating a copy fails
+     * @throws OXException If creating a copy fails
      */
-    public abstract TextBodyMailPart copy() throws MailException;
+    public abstract TextBodyMailPart copy() throws OXException;
 
     /**
      * Fills specified instance with this body part's content.
@@ -188,7 +189,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
         }
     }
 
-    private DataSource getDataSource() throws MailException {
+    private DataSource getDataSource() throws OXException {
         /*
          * Lazy creation
          */
@@ -196,7 +197,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
             try {
                 dataSource = new MessageDataSource(getHTMLContent(), getContentType());
             } catch (final UnsupportedEncodingException e) {
-                throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+                throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
             }
         }
         return dataSource;
@@ -207,11 +208,11 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * @see com.openexchange.mail.dataobjects.MailPart#getContent()
      */
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         return getHTMLContent();
     }
 
-    private String getHTMLContent() throws MailException {
+    private String getHTMLContent() throws OXException {
         if (null != mailBody) {
             return mailBody.toString();
         }
@@ -219,7 +220,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
             final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
             return htmlService.htmlFormat(plainText.toString());
         }
-        throw new MailException(MailException.Code.UNEXPECTED_ERROR, "Missing text.");
+        throw MailExceptionCode.UNEXPECTED_ERROR.create("Missing text.");
     }
 
     /*
@@ -227,7 +228,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
      */
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return new DataHandler(getDataSource());
     }
 
@@ -236,7 +237,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
      */
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
@@ -245,7 +246,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
      */
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return null;
     }
 
@@ -254,11 +255,11 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
      */
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         try {
             return getDataSource().getInputStream();
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

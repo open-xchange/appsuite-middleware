@@ -71,7 +71,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -184,7 +184,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
             try {
                 mailAccess = MailAccess.getInstance(session);
                 mailAccess.connect(true);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 throw new LoginException(e);
             }
             try {
@@ -192,7 +192,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
                 insertDefaultMailFolder(mailAccess.getFolderStorage().getSentFolder(), mailAccess, s);
                 insertDefaultMailFolder(mailAccess.getFolderStorage().getSpamFolder(), mailAccess, s);
                 insertDefaultMailFolder(mailAccess.getFolderStorage().getTrashFolder(), mailAccess, s);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 throw new LoginException(e);
             } finally {
                 mailAccess.close(true);
@@ -206,7 +206,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
         }
     }
 
-    private static void insertDefaultMailFolder(final String fullname, final MailAccess<?, ?> mailAccess, final Session s) throws MailException, FolderException {
+    private static void insertDefaultMailFolder(final String fullname, final MailAccess<?, ?> mailAccess, final Session s) throws OXException, FolderException {
         final MailFolder folder = mailAccess.getFolderStorage().getFolder(fullname);
         final String id = MailFolderUtility.prepareFullname(0, fullname);
         final DummyFolder mailFolder = new DummyFolder();

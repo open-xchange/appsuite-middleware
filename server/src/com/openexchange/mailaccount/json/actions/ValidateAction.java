@@ -62,8 +62,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
@@ -220,7 +220,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         try {
             uri = URIParser.parse(transportServerURL, URIDefaults.SMTP);
         } catch (final URISyntaxException e) {
-            throw new MailException(Code.URI_PARSE_FAILED, e, transportServerURL);
+            throw MailExceptionCode.URI_PARSE_FAILED.create(e, transportServerURL);
         }
         transportConfig.setServer(URITools.getHost(uri));
         transportConfig.setPort(uri.getPort());

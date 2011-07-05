@@ -71,7 +71,8 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -165,9 +166,9 @@ public final class MIMEStructureParser {
      * 
      * @param jsonStructure The JSON mail structure
      * @return The RFC822 bytes
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static byte[] parseStructure2MIME(final JSONObject jsonStructure) throws MailException {
+    public static byte[] parseStructure2MIME(final JSONObject jsonStructure) throws OXException {
         try {
             /*
              * Parse JSON to MIME message
@@ -180,7 +181,7 @@ public final class MIMEStructureParser {
             mimeMessage.writeTo(out);
             return out.toByteArray();
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -191,9 +192,9 @@ public final class MIMEStructureParser {
      * 
      * @param jsonStructure The JSON mail structure
      * @return The {@link MailMessage} instance
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static MailMessage parseStructure(final JSONObject jsonStructure) throws MailException {
+    public static MailMessage parseStructure(final JSONObject jsonStructure) throws OXException {
         /*
          * Parse JSON to MIME message
          */
@@ -210,9 +211,9 @@ public final class MIMEStructureParser {
      * @param jsonStructure The JSON mail structure
      * @param session The session
      * @return The transportable {@link ComposedMailMessage} instance
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final Session session) throws MailException {
+    public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final Session session) throws OXException {
         try {
             /*
              * Create appropriate ComposedMailMessage instance
@@ -220,7 +221,7 @@ public final class MIMEStructureParser {
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             return new ComposedMailWrapper(parseStructure(jsonStructure), session, ctx);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -230,27 +231,27 @@ public final class MIMEStructureParser {
      * @param jsonStructure The JSON mail structure
      * @param session The session
      * @return The transportable {@link ComposedMailMessage} instance
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final ServerSession session) throws MailException {
+    public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final ServerSession session) throws OXException {
         /*
          * Create appropriate ComposedMailMessage instance
          */
         return new ComposedMailWrapper(parseStructure(jsonStructure), session, session.getContext());
     }
 
-    private static MimeMessage parseStructure2Message(final JSONObject jsonStructure) throws MailException {
+    private static MimeMessage parseStructure2Message(final JSONObject jsonStructure) throws OXException {
         final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
         parseMessage(jsonStructure, mimeMessage);
         return mimeMessage;
     }
 
-    private static void parseMessage(final JSONObject jsonMessage, final MimeMessage mimeMessage) throws MailException {
+    private static void parseMessage(final JSONObject jsonMessage, final MimeMessage mimeMessage) throws OXException {
         parseFlags(jsonMessage, mimeMessage);
         parsePart(jsonMessage, mimeMessage);
     }
 
-    private static void parseFlags(final JSONObject jsonMessage, final MimeMessage mimeMessage) throws MailException {
+    private static void parseFlags(final JSONObject jsonMessage, final MimeMessage mimeMessage) throws OXException {
         try {
             Flags msgFlags = null;
             /*
@@ -323,13 +324,13 @@ public final class MIMEStructureParser {
                 mimeMessage.setFlags(msgFlags, true);
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
     }
 
-    private static void parsePart(final JSONObject jsonPart, final MimePart mimePart) throws MailException {
+    private static void parsePart(final JSONObject jsonPart, final MimePart mimePart) throws OXException {
         try {
             /*
              * Parse headers
@@ -358,11 +359,11 @@ public final class MIMEStructureParser {
                 parseSimpleBodyBinary(jsonPart.getJSONObject("body"), mimePart, contentType);
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static void parseMessageBody(final JSONObject jsonMessage, final MimePart mimePart) throws MailException {
+    private static void parseMessageBody(final JSONObject jsonMessage, final MimePart mimePart) throws OXException {
         try {
             final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
             parseMessage(jsonMessage, mimeMessage);
@@ -372,7 +373,7 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static void parseMultipartBody(final JSONArray jsonMultiparts, final MimePart mimePart, final String subtype) throws MailException {
+    private static void parseMultipartBody(final JSONArray jsonMultiparts, final MimePart mimePart, final String subtype) throws OXException {
         try {
             final MimeMultipart multipart = new MimeMultipart(subtype);
             final int length = jsonMultiparts.length();
@@ -383,13 +384,13 @@ public final class MIMEStructureParser {
             }
             mimePart.setContent(multipart);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
     }
 
-    private static void parseSimpleBodyText(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws MailException {
+    private static void parseSimpleBodyText(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws OXException {
         try {
             if (isText(contentType.getBaseType())) {
                 mimePart.setText(jsonBody.getString("data"), "UTF-8", contentType.getSubType());
@@ -400,25 +401,25 @@ public final class MIMEStructureParser {
                 mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString(true));
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static void parseSimpleBodyBinary(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws MailException {
+    private static void parseSimpleBodyBinary(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws OXException {
         try {
             mimePart.setDataHandler(new DataHandler(new MessageDataSource(Base64.decodeBase64(jsonBody.getString("data").getBytes(
                 "US-ASCII")), contentType.getBaseType())));
             mimePart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -439,7 +440,7 @@ public final class MIMEStructureParser {
 
     private static final Set<String> HEADERS_DATE = new HashSet<String>(Arrays.asList("date"));
 
-    private static void parseHeaders(final JSONObject jsonHeaders, final MimePart mimePart, final ContentType contentType) throws MailException {
+    private static void parseHeaders(final JSONObject jsonHeaders, final MimePart mimePart, final ContentType contentType) throws OXException {
         try {
             final StringBuilder headerNameBuilder = new StringBuilder(16);
             for (final Entry<String, Object> entry : jsonHeaders.entrySet()) {
@@ -495,11 +496,11 @@ public final class MIMEStructureParser {
             /*
              * Cannot occur
              */
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -62,7 +62,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -92,9 +93,9 @@ public final class CompositeMailMessage extends MailMessage {
      * Constructor
      * 
      * @param delegate The delegate mail
-     * @throws MailException If invocation of {@link MailMessage#getEnclosedCount()} fails
+     * @throws OXException If invocation of {@link MailMessage#getEnclosedCount()} fails
      */
-    public CompositeMailMessage(final MailMessage delegate) throws MailException {
+    public CompositeMailMessage(final MailMessage delegate) throws OXException {
         super();
         if (!delegate.getContentType().startsWith(MULTIPART)) {
             throw new IllegalArgumentException("Specified delegate mail must be of MIME type multipart/*");
@@ -207,7 +208,7 @@ public final class CompositeMailMessage extends MailMessage {
      * @see com.openexchange.mail.dataobjects.MailPart#getContent()
      */
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         return delegate.getContent();
     }
 
@@ -216,7 +217,7 @@ public final class CompositeMailMessage extends MailMessage {
      * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
      */
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return delegate.getDataHandler();
     }
 
@@ -225,7 +226,7 @@ public final class CompositeMailMessage extends MailMessage {
      * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
      */
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return delegateEnclosedCount + additionalParts.size();
     }
 
@@ -234,7 +235,7 @@ public final class CompositeMailMessage extends MailMessage {
      * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
      */
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         if (delegateEnclosedCount > 0) {
             /*
              * Delegate mail holds enclosed parts
@@ -260,7 +261,7 @@ public final class CompositeMailMessage extends MailMessage {
      * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
      */
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         return delegate.getInputStream();
     }
 
@@ -269,7 +270,7 @@ public final class CompositeMailMessage extends MailMessage {
      * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
      */
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         delegate.loadContent();
     }
 
@@ -333,7 +334,7 @@ public final class CompositeMailMessage extends MailMessage {
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws MailException {
+    public void writeTo(final OutputStream out) throws OXException {
         if (additionalParts.isEmpty()) {
             delegate.writeTo(out);
             return;
@@ -362,7 +363,7 @@ public final class CompositeMailMessage extends MailMessage {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
-                            } catch (final MailException e) {
+                            } catch (final OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;
@@ -405,7 +406,7 @@ public final class CompositeMailMessage extends MailMessage {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
-                            } catch (final MailException e) {
+                            } catch (final OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;
@@ -442,7 +443,7 @@ public final class CompositeMailMessage extends MailMessage {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

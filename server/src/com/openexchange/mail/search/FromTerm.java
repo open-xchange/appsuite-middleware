@@ -57,7 +57,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.search.FromStringTerm;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -108,7 +108,7 @@ public final class FromTerm extends SearchTerm<String> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws MailException {
+    public boolean matches(final Message msg) throws OXException {
         try {
             if (containsWildcard()) {
                 return toRegex(addr).matcher(getAllAddresses((InternetAddress[]) msg.getFrom())).find();

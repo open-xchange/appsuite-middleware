@@ -53,7 +53,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.session.Session;
 
@@ -353,7 +353,7 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Missing parameter in mail connection: %1$s
          */
-        MISSING_CONNECT_PARAM(MailException.Code.MISSING_CONNECT_PARAM, null),
+        MISSING_CONNECT_PARAM(MailExceptionCode.MISSING_CONNECT_PARAM, null),
         /**
          * No connection available to access mailbox
          */
@@ -365,15 +365,15 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Missing parameter %1$s
          */
-        MISSING_PARAMETER(MailException.Code.MISSING_PARAMETER, null),
+        MISSING_PARAMETER(MailExceptionCode.MISSING_PARAMETER, null),
         /**
          * A JSON error occurred: %1$s
          */
-        JSON_ERROR(MailException.Code.JSON_ERROR, null),
+        JSON_ERROR(MailExceptionCode.JSON_ERROR, null),
         /**
          * Invalid permission values: fp=%d orp=%d owp=%d odp=%d
          */
-        INVALID_PERMISSION(MailException.Code.INVALID_PERMISSION, null),
+        INVALID_PERMISSION(MailExceptionCode.INVALID_PERMISSION, null),
         /**
          * User %1$s has no mail module access due to user configuration
          */
@@ -421,11 +421,11 @@ public final class IMAPException extends MIMEMailException {
         /**
          * No create access on mail folder %1$s
          */
-        NO_CREATE_ACCESS(MailException.Code.NO_CREATE_ACCESS, null),
+        NO_CREATE_ACCESS(MailExceptionCode.NO_CREATE_ACCESS, null),
         /**
          * No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
-        NO_CREATE_ACCESS_EXT(MailException.Code.NO_CREATE_ACCESS_EXT, NO_CREATE_ACCESS),
+        NO_CREATE_ACCESS_EXT(MailExceptionCode.NO_CREATE_ACCESS_EXT, NO_CREATE_ACCESS),
         /**
          * No administer access on mail folder %1$s
          */
@@ -461,15 +461,15 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Mail folder cannot be created/rename. Name must not contain character '%1$s'
          */
-        INVALID_FOLDER_NAME(MailException.Code.INVALID_FOLDER_NAME, null),
+        INVALID_FOLDER_NAME(MailExceptionCode.INVALID_FOLDER_NAME, null),
         /**
          * A folder named %1$s already exists
          */
-        DUPLICATE_FOLDER(MailException.Code.DUPLICATE_FOLDER, null),
+        DUPLICATE_FOLDER(MailExceptionCode.DUPLICATE_FOLDER, null),
         /**
          * A folder named %1$s already exists on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
-        DUPLICATE_FOLDER_EXT(MailException.Code.DUPLICATE_FOLDER_EXT, DUPLICATE_FOLDER),
+        DUPLICATE_FOLDER_EXT(MailExceptionCode.DUPLICATE_FOLDER_EXT, DUPLICATE_FOLDER),
         /**
          * Mail folder "%1$s" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder
          * name)
@@ -557,7 +557,7 @@ public final class IMAPException extends MIMEMailException {
         /**
          * An I/O error occurred: %1$s
          */
-        IO_ERROR(MailException.Code.IO_ERROR, null),
+        IO_ERROR(MailExceptionCode.IO_ERROR, null),
         /**
          * Flag %1$s could not be changed due to reason "%2$s"
          */
@@ -569,11 +569,11 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Folder %1$s does not hold messages and is therefore not selectable
          */
-        FOLDER_DOES_NOT_HOLD_MESSAGES(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, null),
+        FOLDER_DOES_NOT_HOLD_MESSAGES(MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES, null),
         /**
          * Folder %1$s does not hold messages and is therefore not selectable
          */
-        FOLDER_DOES_NOT_HOLD_MESSAGES_EXT(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES_EXT, FOLDER_DOES_NOT_HOLD_MESSAGES),
+        FOLDER_DOES_NOT_HOLD_MESSAGES_EXT(MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES_EXT, FOLDER_DOES_NOT_HOLD_MESSAGES),
         /**
          * Number of search fields (%d) do not match number of search patterns (%d)
          */
@@ -607,11 +607,11 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Message field %1$s cannot be handled
          */
-        INVALID_FIELD(MailException.Code.INVALID_FIELD, null),
+        INVALID_FIELD(MailExceptionCode.INVALID_FIELD, null),
         /**
          * Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
-        INVALID_FIELD_EXT(MailException.Code.INVALID_FIELD_EXT, INVALID_FIELD),
+        INVALID_FIELD_EXT(MailExceptionCode.INVALID_FIELD_EXT, INVALID_FIELD),
         /**
          * Mail folder %1$s must not be moved to subsequent folder %2$s
          */
@@ -697,7 +697,7 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Versit attachment could not be saved due to an unsupported MIME type: %1$s
          */
-        UNSUPPORTED_VERSIT_ATTACHMENT(MailException.Code.UNSUPPORTED_VERSIT_ATTACHMENT, null),
+        UNSUPPORTED_VERSIT_ATTACHMENT(MailExceptionCode.UNSUPPORTED_VERSIT_ATTACHMENT, null),
         /**
          * Versit object %1$s could not be saved
          */
@@ -713,7 +713,7 @@ public final class IMAPException extends MIMEMailException {
         /**
          * Unsupported charset-encoding: %1$s
          */
-        ENCODING_ERROR(MailException.Code.ENCODING_ERROR, null),
+        ENCODING_ERROR(MailExceptionCode.ENCODING_ERROR, null),
         /**
          * A protocol exception occurred during execution of IMAP request "%1$s".<br>
          * Error message: %2$s
@@ -816,7 +816,7 @@ public final class IMAPException extends MIMEMailException {
             category = extend.category;
         }
 
-        private IMAPCode(final MailException.Code code, final IMAPCode extend) {
+        private IMAPCode(final MailExceptionCode code, final IMAPCode extend) {
             message = code.getMessage();
             this.extend = extend;
             detailNumber = code.getNumber();

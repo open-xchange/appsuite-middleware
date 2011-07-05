@@ -57,7 +57,7 @@ import java.util.Map.Entry;
 import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -121,7 +121,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setContentType(final String contentType) throws MailException {
+    public void setContentType(final String contentType) throws OXException {
         mail.setContentType(contentType);
     }
 
@@ -141,7 +141,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setContentDisposition(final String disposition) throws MailException {
+    public void setContentDisposition(final String disposition) throws OXException {
         mail.setContentDisposition(disposition);
     }
 
@@ -466,7 +466,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public boolean hasEnclosedParts() throws MailException {
+    public boolean hasEnclosedParts() throws OXException {
         return mail.hasEnclosedParts();
     }
 
@@ -476,7 +476,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         return mail.getContent();
     }
 
@@ -496,7 +496,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return mail.getDataHandler();
     }
 
@@ -511,7 +511,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         return mail.getInputStream();
     }
 
@@ -526,17 +526,17 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return mail.getEnclosedCount();
     }
 
     @Override
-    public void setFlag(final int flag, final boolean enable) throws MailException {
+    public void setFlag(final int flag, final boolean enable) throws OXException {
         mail.setFlag(flag, enable);
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return mail.getEnclosedMailPart(index);
     }
 
@@ -546,7 +546,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         mail.loadContent();
     }
 
@@ -566,7 +566,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws MailException {
+    public void writeTo(final OutputStream out) throws OXException {
         mail.writeTo(out);
     }
 
@@ -591,7 +591,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public String getSource() throws MailException {
+    public String getSource() throws OXException {
         return mail.getSource();
     }
 
@@ -606,7 +606,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public byte[] getSourceBytes() throws MailException {
+    public byte[] getSourceBytes() throws OXException {
         return mail.getSourceBytes();
     }
 

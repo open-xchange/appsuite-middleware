@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.headercache;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.MailAccess;
@@ -79,12 +79,12 @@ public final class DelegatingMailProvider extends MailProvider {
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws MailException {
+    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws OXException {
         return new HeaderCacheMailAccess(session, accountId, mailProvider.createNewMailAccess(session, accountId));
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session) throws MailException {
+    public MailAccess<?, ?> createNewMailAccess(final Session session) throws OXException {
         return new HeaderCacheMailAccess(session, MailAccount.DEFAULT_ID, mailProvider.createNewMailAccess(session, MailAccount.DEFAULT_ID));
     }
 
@@ -114,12 +114,12 @@ public final class DelegatingMailProvider extends MailProvider {
     }
 
     @Override
-    public void shutDown() throws MailException {
+    public void shutDown() throws OXException {
         mailProvider.shutDown();
     }
 
     @Override
-    public void startUp() throws MailException {
+    public void startUp() throws OXException {
         mailProvider.startUp();
     }
 

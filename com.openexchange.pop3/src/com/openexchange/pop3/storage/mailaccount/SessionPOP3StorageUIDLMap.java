@@ -57,7 +57,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
@@ -78,9 +79,9 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
      * 
      * @param pop3Access The POP3 access
      * @return The UIDL map bound to specified POP3 access
-     * @throws MailException If instance cannot be returned
+     * @throws OXException If instance cannot be returned
      */
-    public static SessionPOP3StorageUIDLMap getInstance(final POP3Access pop3Access) throws MailException {
+    public static SessionPOP3StorageUIDLMap getInstance(final POP3Access pop3Access) throws OXException {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getUIDLMap(pop3Access.getAccountId());
         SessionPOP3StorageUIDLMap cached;
@@ -130,7 +131,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private final int[] mode;
 
-    private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee, final Session session, final String key) throws MailException {
+    private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee, final Session session, final String key) throws OXException {
         super();
         rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
@@ -147,7 +148,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         init();
     }
 
-    private void init() throws MailException {
+    private void init() throws OXException {
         final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
         final int size = all.size();
         final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
@@ -159,10 +160,10 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         mode[0] = 0;
     }
 
-    private void checkInit(final Lock obtainedReadLock) throws MailException {
+    private void checkInit(final Lock obtainedReadLock) throws OXException {
         final int m = mode[0];
         if (-1 == m) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, "Error mode. Try again.");
+            throw MailExceptionCode.UNEXPECTED_ERROR.create("Error mode. Try again.");
         }
         if (1 == m) {
             /*
@@ -186,7 +187,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws MailException {
+    public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -205,7 +206,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public FullnameUIDPair getFullnameUIDPair(final String uidl) throws MailException {
+    public FullnameUIDPair getFullnameUIDPair(final String uidl) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -216,7 +217,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws MailException {
+    public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -231,7 +232,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws MailException {
+    public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -242,7 +243,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws MailException {
+    public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -257,7 +258,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public Map<String, FullnameUIDPair> getAllUIDLs() throws MailException {
+    public Map<String, FullnameUIDPair> getAllUIDLs() throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -270,7 +271,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws MailException {
+    public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
@@ -287,7 +288,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         }
     }
 
-    public void deleteUIDLMappings(final String[] uidls) throws MailException {
+    public void deleteUIDLMappings(final String[] uidls) throws OXException {
         final Lock readLock = rwLock.readLock();
         readLock.lock();
         try {

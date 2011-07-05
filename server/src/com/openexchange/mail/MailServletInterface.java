@@ -51,6 +51,7 @@ package com.openexchange.mail;
 
 import java.util.Collection;
 import com.openexchange.api2.MailInterfaceMonitor;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.mail.api.MailConfig;
@@ -101,9 +102,9 @@ public abstract class MailServletInterface {
      * 
      * @param session The session
      * @return An instance of {@link MailServletInterface}
-     * @throws MailException
+     * @throws OXException
      */
-    public static final MailServletInterface getInstance(final Session session) throws MailException {
+    public static final MailServletInterface getInstance(final Session session) throws OXException {
         return new MailServletInterfaceImpl(session);
     }
 
@@ -115,96 +116,96 @@ public abstract class MailServletInterface {
      * @param folder The folder to search in
      * @param messageID The "Message-Id" header
      * @return The ID of the mail corresponding to specified "Message-Id" header
-     * @throws MailException If no mauil could be found
+     * @throws OXException If no mauil could be found
      */
-    public abstract String getMailIDByMessageID(final String folder, final String messageID) throws MailException;
+    public abstract String getMailIDByMessageID(final String folder, final String messageID) throws OXException;
 
     /**
      * Returns all message counts in specified folder in an <code>int</code> array as follows: <code>0</code>: Message Count, <code>1</code>
      * : New Message Count, <code>2</code>: Unread MessageCount, <code>3</code>: Deleted Message Count
      */
-    public abstract int[] getAllMessageCount(String folder) throws MailException;
+    public abstract int[] getAllMessageCount(String folder) throws OXException;
 
     /**
      * Returns the number of messages in folder
      */
-    public abstract int getMessageCount(String folder) throws MailException;
+    public abstract int getMessageCount(String folder) throws OXException;
 
     /**
      * Returns the number of new messages in folder
      */
-    public abstract int getNewMessageCount(String folder) throws MailException;
+    public abstract int getNewMessageCount(String folder) throws OXException;
 
     /**
      * Returns the number of unread messages in folder
      */
-    public abstract int getUnreadMessageCount(String folder) throws MailException;
+    public abstract int getUnreadMessageCount(String folder) throws OXException;
 
     /**
      * Returns the number messages which are marked for deletion in folder
      */
-    public abstract int getDeletedMessageCount(String folder) throws MailException;
+    public abstract int getDeletedMessageCount(String folder) throws OXException;
 
     /**
      * Gets both quota limit and quota usage in an array with length set to <code>2</code> for each resource type
      * 
      * @param types The resource types; {@link #QUOTA_RESOURCE_STORAGE} or {@link #QUOTA_RESOURCE_MESSAGE}
      * @return Both quota limit and quota usage in an array with length set to <code>2</code> for each resource type
-     * @throws MailException If quotas cannot be retrieved
+     * @throws OXException If quotas cannot be retrieved
      */
-    public abstract long[][] getQuotas(int[] types) throws MailException;
+    public abstract long[][] getQuotas(int[] types) throws OXException;
 
     /**
      * Returns the quota limit
      */
-    public abstract long getQuotaLimit(int type) throws MailException;
+    public abstract long getQuotaLimit(int type) throws OXException;
 
     /**
      * Returns the current quota usage
      */
-    public abstract long getQuotaUsage(int type) throws MailException;
+    public abstract long getQuotaUsage(int type) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing max. <code>limit</code> new (unseen) messages located in given folder.
      */
-    public abstract SearchIterator<MailMessage> getNewMessages(String folder, int sortCol, int order, int[] fields, int limit) throws MailException;
+    public abstract SearchIterator<MailMessage> getNewMessages(String folder, int sortCol, int order, int[] fields, int limit) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws MailException;
+    public abstract SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
+    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, SearchTerm<?> searchTerm, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
+    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, SearchTerm<?> searchTerm, boolean linkSearchTermsWithOR, int[] fields) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract SearchIterator<MailMessage> getAllThreadedMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws MailException;
+    public abstract SearchIterator<MailMessage> getAllThreadedMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<MailMessage> getThreadedMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws MailException;
+    public abstract SearchIterator<MailMessage> getThreadedMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws OXException;
 
     /**
      * Returns the an array of messages located in given folder. If <code>fromToUID</code> is not <code>null</code> only messages fitting
      * into uid range will be returned.
      */
-    public abstract MailMessage[] getMessageList(String folder, String[] uids, int[] fields, String[] headerFields) throws MailException;
+    public abstract MailMessage[] getMessageList(String folder, String[] uids, int[] fields, String[] headerFields) throws OXException;
 
     /**
      * Gets the mail identified through given ID from store located in given folder.
@@ -212,9 +213,9 @@ public abstract class MailServletInterface {
      * @param folder The folder path
      * @param msgUID The mail ID
      * @return The mail identified through given ID from store located in given folder.
-     * @throws MailException If mail cannot be fetched from store
+     * @throws OXException If mail cannot be fetched from store
      */
-    public abstract MailMessage getMessage(String folder, String msgUID) throws MailException;
+    public abstract MailMessage getMessage(String folder, String msgUID) throws OXException;
 
     /**
      * Returns a message's attachment located at given <code>attachmentPosition</code> wrapped by an instance of
@@ -222,7 +223,7 @@ public abstract class MailServletInterface {
      * 
      * @param displayVersion <code>true</code> if returned object is for display purpose; otherwise <code>false</code>
      */
-    public abstract MailPart getMessageAttachment(String folder, String msgUID, String attachmentPosition, boolean displayVersion) throws MailException;
+    public abstract MailPart getMessageAttachment(String folder, String msgUID, String attachmentPosition, boolean displayVersion) throws OXException;
 
     /**
      * Returns message's attachments as a ZIP file backed by returned managed file instance.
@@ -231,15 +232,15 @@ public abstract class MailServletInterface {
      * @param msgUID The message ID
      * @param attachmentPositions The attachment positions
      * @return A ZIP file backed by returned managed file instance
-     * @throws MailException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public abstract ManagedFile getMessageAttachments(String folder, String msgUID, String[] attachmentPositions) throws MailException;
+    public abstract ManagedFile getMessageAttachments(String folder, String msgUID, String[] attachmentPositions) throws OXException;
 
     /**
      * Returns a message's inline image located identified with given <code>cid</code> wrapped by an instance of
      * <code>JSONMessageAttachmentObject</code> for a convenient access to its attributes and content.
      */
-    public abstract MailPart getMessageImage(String folder, String msgUID, String cid) throws MailException;
+    public abstract MailPart getMessageImage(String folder, String msgUID, String cid) throws OXException;
 
     /**
      * Saves specified draft mail.
@@ -250,14 +251,14 @@ public abstract class MailServletInterface {
      * @param draftMail The draft mail
      * @param autosave <code>true</code> to indicate an auto-save operation; otherwise <code>false</code>
      * @return The stored draft's mail path
-     * @throws MailException
+     * @throws OXException
      */
-    public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws MailException;
+    public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException;
 
     /**
      * Sends a read acknowledgment to given message
      */
-    public abstract void sendReceiptAck(String folder, String msgUID, String fromAddr) throws MailException;
+    public abstract void sendReceiptAck(String folder, String msgUID, String fromAddr) throws OXException;
 
     /**
      * Sends a form mail.
@@ -265,15 +266,15 @@ public abstract class MailServletInterface {
      * @param composedMail The form mail (without any recipients)
      * @param groupId The identifier of the group to whose members shall receive the mail
      * @param accountId The account identifier
-     * @throws MailException If mail transport fails
+     * @throws OXException If mail transport fails
      */
-    public abstract void sendFormMail(ComposedMailMessage composedMail, int groupId, int accountId) throws MailException;
+    public abstract void sendFormMail(ComposedMailMessage composedMail, int groupId, int accountId) throws OXException;
 
     /**
      * Sends a message described through given instance of <code>msgObj</code> and its possible file attachments contained in given instance
      * of <code>uploadEvent</code>.
      */
-    public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId) throws MailException;
+    public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId) throws OXException;
 
     /**
      * Appends given messages to given folder.
@@ -282,9 +283,9 @@ public abstract class MailServletInterface {
      * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
      * @param force <code>true</code> to enforce append and to omit checks; otherwise <code>false</code>
      * @return The corresponding mail IDs in destination folder
-     * @throws MailException If messages cannot be appended.
+     * @throws OXException If messages cannot be appended.
      */
-    public abstract String[] appendMessages(String destFolder, MailMessage[] msgs, boolean force) throws MailException;
+    public abstract String[] appendMessages(String destFolder, MailMessage[] msgs, boolean force) throws OXException;
     
     /**
      * Overwrite this to implement a different append behaviour for mail imports.
@@ -293,9 +294,9 @@ public abstract class MailServletInterface {
      * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
      * @param force <code>true</code> to enforce append and to omit checks; otherwise <code>false</code>
      * @return The corresponding mail IDs in destination folder
-     * @throws MailException If messages cannot be appended.
+     * @throws OXException If messages cannot be appended.
      */
-    public String[] importMessages(final String destFolder, final MailMessage[] msgs, final boolean force) throws MailException {
+    public String[] importMessages(final String destFolder, final MailMessage[] msgs, final boolean force) throws OXException {
         return appendMessages(destFolder, msgs, force);
     }
 
@@ -304,40 +305,40 @@ public abstract class MailServletInterface {
      * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
      * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
      */
-    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm) throws MailException;
+    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm) throws OXException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through
      * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send
      * the forward.
      */
-    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm) throws MailException;
+    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm) throws OXException;
 
     /**
      * Deletes the message located in given folder corresponding to given <code>msgUID</code>
      */
-    public abstract boolean deleteMessages(String folder, String[] msgUIDs, boolean hardDelete) throws MailException;
+    public abstract boolean deleteMessages(String folder, String[] msgUIDs, boolean hardDelete) throws OXException;
 
     /**
      * Clears all messages out of given folder. <b>NOTE</b> this is a hard delete, thus no copies are created
      */
-    public abstract boolean clearFolder(final String folderArg) throws MailException;
+    public abstract boolean clearFolder(final String folderArg) throws OXException;
 
     /**
      * Copies or moves (if <code>move</code> is set) the defined message from source folder to destination folder.
      */
-    public abstract String[] copyMessages(String sourceFolder, String destFolder, String[] msgUIDs, boolean move) throws MailException;
+    public abstract String[] copyMessages(String sourceFolder, String destFolder, String[] msgUIDs, boolean move) throws OXException;
 
     /**
      * Updates the color label stored in message's user flags
      */
-    public abstract void updateMessageColorLabel(String folder, String[] msgUID, int newColorLabel) throws MailException;
+    public abstract void updateMessageColorLabel(String folder, String[] msgUID, int newColorLabel) throws OXException;
 
     /**
      * Updates message's client-alterable system flags (e.g. //SEEN or //ANSWERED). <code>flagVal</code> determines whether the affected
      * flags are set (<code>true</code>) or unset (<code>false</code>).
      */
-    public abstract void updateMessageFlags(String folder, String[] msgUID, int flagBits, boolean flagVal) throws MailException;
+    public abstract void updateMessageFlags(String folder, String[] msgUID, int flagBits, boolean flagVal) throws OXException;
 
     /**
      * Gets all updated messages in given folder
@@ -346,9 +347,9 @@ public abstract class MailServletInterface {
      * @param since The time stamp in UTC milliseconds
      * @param fields The desired fields to fill in returned messages
      * @return All updated messages in given folder
-     * @throws MailException If updated messages cannot be returned
+     * @throws OXException If updated messages cannot be returned
      */
-    public abstract MailMessage[] getUpdatedMessages(String folder, int[] fields) throws MailException;
+    public abstract MailMessage[] getUpdatedMessages(String folder, int[] fields) throws OXException;
 
     /**
      * Gets all deleted messages in given folder
@@ -357,86 +358,86 @@ public abstract class MailServletInterface {
      * @param since The time stamp in UTC milliseconds
      * @param fields The desired fields to fill in returned messages
      * @return All deleted messages in given folder
-     * @throws MailException If deleted messages cannot be returned
+     * @throws OXException If deleted messages cannot be returned
      */
-    public abstract MailMessage[] getDeletedMessages(String folder, int[] fields) throws MailException;
+    public abstract MailMessage[] getDeletedMessages(String folder, int[] fields) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing the mailbox's default folder
      */
-    public abstract SearchIterator<MailFolder> getRootFolders() throws MailException;
+    public abstract SearchIterator<MailFolder> getRootFolders() throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing the subfolders of given folder
      */
-    public abstract SearchIterator<MailFolder> getChildFolders(String parentFolder, boolean all) throws MailException;
+    public abstract SearchIterator<MailFolder> getChildFolders(String parentFolder, boolean all) throws OXException;
 
     /**
      * Returns the store's folder identfied through given <code>String</code> instance
      */
-    public abstract MailFolder getFolder(String folder, boolean checkFolder) throws MailException;
+    public abstract MailFolder getFolder(String folder, boolean checkFolder) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing all antecessor folders on path to mailbox's default folder
      */
-    public abstract SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws MailException;
+    public abstract SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws OXException;
 
     /**
      * Closes the interface and releases all resources
      * 
      * @param putIntoCache - whether or not to put associated conenction into pool
      */
-    public abstract void close(boolean putIntoCache) throws MailException;
+    public abstract void close(boolean putIntoCache) throws OXException;
 
     /**
      * Creates a new mail folder described by given <code>MailFolderObject</code> instance
      */
-    public abstract String saveFolder(MailFolderDescription mailFolder) throws MailException;
+    public abstract String saveFolder(MailFolderDescription mailFolder) throws OXException;
 
     /**
      * Deletes given folder
      */
-    public abstract String deleteFolder(String folder) throws MailException;
+    public abstract String deleteFolder(String folder) throws OXException;
 
     /**
      * Returns user-defined inbox folder
      */
-    public abstract String getInboxFolder(int accountId) throws MailException;
+    public abstract String getInboxFolder(int accountId) throws OXException;
 
     /**
      * Returns user-defined drafts folder
      */
-    public abstract String getDraftsFolder(int accountId) throws MailException;
+    public abstract String getDraftsFolder(int accountId) throws OXException;
 
     /**
      * Returns user-defined sent folder
      */
-    public abstract String getSentFolder(int accountId) throws MailException;
+    public abstract String getSentFolder(int accountId) throws OXException;
 
     /**
      * Returns user-defined spam folder
      */
-    public abstract String getSpamFolder(int accountId) throws MailException;
+    public abstract String getSpamFolder(int accountId) throws OXException;
 
     /**
      * Returns user-defined trash folder
      */
-    public abstract String getTrashFolder(int accountId) throws MailException;
+    public abstract String getTrashFolder(int accountId) throws OXException;
 
     /**
      * Returns user-defined confirmed spam folder
      */
-    public abstract String getConfirmedSpamFolder(int accountId) throws MailException;
+    public abstract String getConfirmedSpamFolder(int accountId) throws OXException;
 
     /**
      * Returns user-defined confirmed ham folder
      */
-    public abstract String getConfirmedHamFolder(int accountId) throws MailException;
+    public abstract String getConfirmedHamFolder(int accountId) throws OXException;
 
     /**
      * Returns user-specific mail configuration
      */
-    public abstract MailConfig getMailConfig() throws MailException;
+    public abstract MailConfig getMailConfig() throws OXException;
 
     /**
      * Gets the account ID to which the (primary) mail access is connected
@@ -450,7 +451,7 @@ public abstract class MailServletInterface {
      * 
      * @return Possible warnings
      */
-    public abstract Collection<MailException> getWarnings();
+    public abstract Collection<OXException> getWarnings();
     
     /**
      * Get results of imported mails.

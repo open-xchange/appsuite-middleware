@@ -52,7 +52,8 @@ package com.openexchange.mail.api;
 import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -64,11 +65,11 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
  */
 public abstract class MailFolderStorage implements IMailFolderStorage {
 
-    public abstract boolean exists(final String fullname) throws MailException;
+    public abstract boolean exists(final String fullname) throws OXException;
 
-    public abstract MailFolder getFolder(final String fullname) throws MailException;
+    public abstract MailFolder getFolder(final String fullname) throws OXException;
 
-    public abstract MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
+    public abstract MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException;
 
     /**
      * Gets the mailbox's root folder.
@@ -77,19 +78,19 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * It may be overridden if a faster way can be achieved by specific implementation.
      * 
      * @return The mailbox's root folder
-     * @throws MailException If mailbox's default folder cannot be delivered
+     * @throws OXException If mailbox's default folder cannot be delivered
      */
-    public MailFolder getRootFolder() throws MailException {
+    public MailFolder getRootFolder() throws OXException {
         return getFolder(MailFolder.DEFAULT_FOLDER_ID);
     }
 
-    public abstract void checkDefaultFolders() throws MailException;
+    public abstract void checkDefaultFolders() throws OXException;
 
-    public abstract String createFolder(MailFolderDescription toCreate) throws MailException;
+    public abstract String createFolder(MailFolderDescription toCreate) throws OXException;
 
-    public abstract String updateFolder(String fullname, MailFolderDescription toUpdate) throws MailException;
+    public abstract String updateFolder(String fullname, MailFolderDescription toUpdate) throws OXException;
 
-    public abstract String moveFolder(String fullname, String newFullname) throws MailException;
+    public abstract String moveFolder(String fullname, String newFullname) throws OXException;
 
     /**
      * Renames the folder identified through given fullname to the specified new name.
@@ -106,14 +107,14 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * @param fullname The folder fullname
      * @param newName The new name
      * @return The new fullname
-     * @throws MailException If either folder does not exist or cannot be renamed
+     * @throws OXException If either folder does not exist or cannot be renamed
      */
-    public String renameFolder(final String fullname, final String newName) throws MailException {
+    public String renameFolder(final String fullname, final String newName) throws OXException {
         final MailFolder folder = getFolder(fullname);
         if (isEmpty(newName)) {
-            throw new MailException(MailException.Code.INVALID_FOLDER_NAME_EMPTY);
+            throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
         } else if (newName.indexOf(folder.getSeparator()) != -1) {
-            throw new MailException(MailException.Code.INVALID_FOLDER_NAME, String.valueOf(folder.getSeparator()));
+            throw MailExceptionCode.INVALID_FOLDER_NAME.create(String.valueOf(folder.getSeparator()));
         }
         final String newPath;
         if (MailFolder.DEFAULT_FOLDER_ID.equals(folder.getParentFullname())) {
@@ -124,19 +125,19 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
         return moveFolder(fullname, newPath);
     }
 
-    public String deleteFolder(final String fullname) throws MailException {
+    public String deleteFolder(final String fullname) throws OXException {
         return deleteFolder(fullname, false);
     }
 
-    public abstract String deleteFolder(String fullname, boolean hardDelete) throws MailException;
+    public abstract String deleteFolder(String fullname, boolean hardDelete) throws OXException;
 
-    public void clearFolder(final String fullname) throws MailException {
+    public void clearFolder(final String fullname) throws OXException {
         clearFolder(fullname, false);
     }
 
-    public abstract void clearFolder(String fullname, boolean hardDelete) throws MailException;
+    public abstract void clearFolder(String fullname, boolean hardDelete) throws OXException;
 
-    public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
+    public MailFolder[] getPath2DefaultFolder(final String fullname) throws OXException {
         if (fullname.equals(MailFolder.DEFAULT_FOLDER_ID)) {
             return new MailFolder[0];
         }
@@ -151,17 +152,17 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
 
     private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };
 
-    public Quota getStorageQuota(final String folder) throws MailException {
+    public Quota getStorageQuota(final String folder) throws OXException {
         return getQuotas(folder, STORAGE)[0];
     }
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
 
-    public Quota getMessageQuota(final String folder) throws MailException {
+    public Quota getMessageQuota(final String folder) throws OXException {
         return getQuotas(folder, MESSAGE)[0];
     }
 
-    public abstract Quota[] getQuotas(String folder, Quota.Type[] types) throws MailException;
+    public abstract Quota[] getQuotas(String folder, Quota.Type[] types) throws OXException;
 
     /**
      * Gets the prefix (incl. separator character) for default folders.
@@ -169,9 +170,9 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * By now a compound full name is assumed. Override if not appropriate.
      * 
      * @return The prefix
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public String getDefaultFolderPrefix() throws MailException {
+    public String getDefaultFolderPrefix() throws OXException {
         checkDefaultFolders();
         final String trashFullName = getTrashFolder();
         final char separator = getFolder(trashFullName).getSeparator();
@@ -179,18 +180,18 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
         return pos < 0 ? "" : trashFullName.substring(0, pos + 1);
     }
 
-    public abstract String getConfirmedHamFolder() throws MailException;
+    public abstract String getConfirmedHamFolder() throws OXException;
 
-    public abstract String getConfirmedSpamFolder() throws MailException;
+    public abstract String getConfirmedSpamFolder() throws OXException;
 
-    public abstract String getDraftsFolder() throws MailException;
+    public abstract String getDraftsFolder() throws OXException;
 
-    public abstract String getSpamFolder() throws MailException;
+    public abstract String getSpamFolder() throws OXException;
 
-    public abstract String getSentFolder() throws MailException;
+    public abstract String getSentFolder() throws OXException;
 
-    public abstract String getTrashFolder() throws MailException;
+    public abstract String getTrashFolder() throws OXException;
 
-    public abstract void releaseResources() throws MailException;
+    public abstract void releaseResources() throws OXException;
 
 }

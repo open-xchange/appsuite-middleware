@@ -64,7 +64,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -141,9 +142,9 @@ public class HeaderCollection implements Serializable {
      * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> input stream
      * 
      * @param inputStream The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input stream
-     * @throws MailException If parsing the header input stream fails
+     * @throws OXException If parsing the header input stream fails
      */
-    public HeaderCollection(final InputStream inputStream) throws MailException {
+    public HeaderCollection(final InputStream inputStream) throws OXException {
         this();
         load(inputStream);
     }
@@ -167,10 +168,10 @@ public class HeaderCollection implements Serializable {
      * Provided input stream is not going to be closed but is read until <code>EOF</code> or two subsequent <code>CRLF</code>s occur.
      * 
      * @param inputStream The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input stream
-     * @throws MailException If reading from headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input
+     * @throws OXException If reading from headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input
      *             stream fails
      */
-    public void load(final InputStream inputStream) throws MailException {
+    public void load(final InputStream inputStream) throws OXException {
         /*
          * Gather bytes until empty line or EOF
          */
@@ -193,7 +194,7 @@ public class HeaderCollection implements Serializable {
             }
             load(new String(buffer.toByteArray(), CHARSET_US_ASCII));
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

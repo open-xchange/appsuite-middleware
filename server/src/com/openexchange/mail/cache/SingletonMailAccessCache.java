@@ -50,7 +50,8 @@
 package com.openexchange.mail.cache;
 
 import com.openexchange.concurrent.TimeoutConcurrentMap;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -77,9 +78,9 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * Gets the singleton instance.
      * 
      * @return The singleton instance
-     * @throws MailException If instance initialization fails
+     * @throws OXException If instance initialization fails
      */
-    public static SingletonMailAccessCache getInstance() throws MailException {
+    public static SingletonMailAccessCache getInstance() throws OXException {
         if (null == singleton) {
             synchronized (SingletonMailAccessCache.class) {
                 if (null == singleton) {
@@ -115,9 +116,9 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
     /**
      * Prevent instantiation.
      * 
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    private SingletonMailAccessCache() throws MailException {
+    private SingletonMailAccessCache() throws OXException {
         super();
         initCache();
     }
@@ -125,14 +126,14 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
     /**
      * Initializes cache reference.
      * 
-     * @throws MailException If initializing the time-out map reference fails
+     * @throws OXException If initializing the time-out map reference fails
      */
-    public void initCache() throws MailException {
+    public void initCache() throws OXException {
         /*
          * Check for proper started mail cache configuration
          */
         if (!MailCacheConfiguration.getInstance().isStarted()) {
-            throw new MailException(MailException.Code.INITIALIZATION_PROBLEM);
+            throw MailExceptionCode.INITIALIZATION_PROBLEM.create();
         }
         if (timeoutMap != null) {
             return;
@@ -140,7 +141,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         try {
             timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
         timeoutMap.setDefaultTimeoutListener(new MailAccessTimeoutListener());
         defaultIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
@@ -210,9 +211,9 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * Clears the cache entries kept for specified user.
      * 
      * @param session The session
-     * @throws MailException If clearing user entries fails
+     * @throws OXException If clearing user entries fails
      */
-    public void clearUserEntries(final Session session) throws MailException {
+    public void clearUserEntries(final Session session) throws OXException {
         try {
             final int user = session.getUserId();
             final int cid = session.getContextId();
@@ -224,9 +225,9 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
                 timeoutMap.timeout(getUserKey(user, mailAccount.getId(), cid));
             }
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 

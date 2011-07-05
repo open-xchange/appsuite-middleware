@@ -54,7 +54,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
@@ -91,9 +92,9 @@ public final class HeaderCacheMailProviderRegistry {
      * @param session The session
      * @param accountId The account ID
      * @return The appropriate mail provider
-     * @throws MailException If no supporting mail provider can be found
+     * @throws OXException If no supporting mail provider can be found
      */
-    public static MailProvider getMailProviderBySession(final Session session, final int accountId) throws MailException {
+    public static MailProvider getMailProviderBySession(final Session session, final int accountId) throws OXException {
         final String mailServerURL = MailConfig.getMailServerURL(session, accountId);
         final String protocol;
         if (mailServerURL == null) {
@@ -108,7 +109,7 @@ public final class HeaderCacheMailProviderRegistry {
         }
         final MailProvider provider = getMailProvider(protocol);
         if (null == provider || !provider.supportsProtocol(protocol)) {
-            throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, mailServerURL);
+            throw MailExceptionCode.UNKNOWN_PROTOCOL.create(mailServerURL);
         }
         return provider;
     }
@@ -171,9 +172,9 @@ public final class HeaderCacheMailProviderRegistry {
      * @param provider The mail provider to register
      * @return <code>true</code> if mail provider has been successfully registered and no other mail provider supports the same protocol;
      *         otherwise <code>false</code>
-     * @throws MailException If provider's start-up fails
+     * @throws OXException If provider's start-up fails
      */
-    public static boolean registerMailProvider(final String protocol, final MailProvider provider) throws MailException {
+    public static boolean registerMailProvider(final String protocol, final MailProvider provider) throws OXException {
         cache.clear();
         return (null == providers.putIfAbsent(Protocol.parseProtocol(protocol), provider));
     }

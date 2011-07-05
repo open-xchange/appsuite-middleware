@@ -65,7 +65,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -143,15 +144,15 @@ public final class FolderWriter {
 
     public static abstract class MailFolderFieldWriter {
 
-        public void writeField(final JSONValuePutter jsonContainer, final int accountId, final MailFolder folder) throws MailException {
+        public void writeField(final JSONValuePutter jsonContainer, final int accountId, final MailFolder folder) throws OXException {
             writeField(jsonContainer, accountId, folder, null, -1);
         }
 
-        public void writeField(final JSONValuePutter jsonContainer, final int accountId, final MailFolder folder, final String name, final int hasSubfolders) throws MailException {
+        public void writeField(final JSONValuePutter jsonContainer, final int accountId, final MailFolder folder, final String name, final int hasSubfolders) throws OXException {
             writeField(jsonContainer, accountId, folder, name, hasSubfolders, null, -1, false);
         }
 
-        public abstract void writeField(JSONValuePutter putter, int accountId, MailFolder folder, String name, int hasSubfolders, String fullName, int module, boolean all) throws MailException;
+        public abstract void writeField(JSONValuePutter putter, int accountId, MailFolder folder, String name, int hasSubfolders, String fullName, int module, boolean all) throws OXException;
     }
 
     private static abstract class ExtendedMailFolderFieldWriter extends MailFolderFieldWriter {
@@ -174,70 +175,70 @@ public final class FolderWriter {
         WRITERS_MAP.put(DataObject.OBJECT_ID, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     if (null == fullName) {
                         final String value = accountId >= 0 ? prepareFullname(accountId, folder.getFullname()) : folder.getFullname();
                         if (null == value) {
-                            throw new MailException(MailException.Code.MISSING_FULLNAME);
+                            throw MailExceptionCode.MISSING_FULLNAME.create();
                         }
                         putter.put(DataFields.ID, value);
                     } else {
                         putter.put(DataFields.ID, fullName);
                     }
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(DataObject.CREATED_BY, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     putter.put(DataFields.CREATED_BY, Integer.valueOf(-1));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(DataObject.MODIFIED_BY, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     putter.put(DataFields.MODIFIED_BY, Integer.valueOf(-1));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(DataObject.CREATION_DATE, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     putter.put(DataFields.CREATION_DATE, Integer.valueOf(0));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(DataObject.LAST_MODIFIED, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     putter.put(DataFields.LAST_MODIFIED, Integer.valueOf(0));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderChildObject.FOLDER_ID, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     final Object parent;
                     if (null == folder.getParentFullname()) {
@@ -247,47 +248,47 @@ public final class FolderWriter {
                     }
                     putter.put(FolderChildFields.FOLDER_ID, parent);
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.FOLDER_NAME, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     putter.put(FolderFields.TITLE, name == null ? folder.getName() : name);
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.MODULE, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     putter.put(FolderFields.MODULE, AJAXServlet.getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.TYPE, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     putter.put(FolderFields.TYPE, Integer.valueOf(FolderObject.MAIL));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.SUBFOLDERS, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     final boolean boolVal;
                     if (hasSubfolders == -1) {
@@ -300,14 +301,14 @@ public final class FolderWriter {
                      */
                     putter.put(FolderFields.SUBFOLDERS, Boolean.valueOf(boolVal));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.OWN_RIGHTS, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     final MailPermission mp;
                     if (folder.isRootFolder()) {
@@ -343,16 +344,16 @@ public final class FolderWriter {
                      */
                     putter.put(FolderFields.OWN_RIGHTS, Integer.valueOf(permissionBits));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 } catch (final OXException e) {
-                    throw new MailException(e);
+                    throw new OXException(e);
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.PERMISSIONS_BITS, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     final JSONArray ja = new JSONArray();
                     final OCLPermission[] perms = folder.getPermissions();
@@ -368,16 +369,16 @@ public final class FolderWriter {
                      */
                     putter.put(FolderFields.PERMISSIONS, ja);
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 } catch (final OXException e) {
-                    throw new MailException(e);
+                    throw new OXException(e);
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.SUMMARY, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -387,14 +388,14 @@ public final class FolderWriter {
                             folder.getUnreadMessageCount()).append(')').toString();
                     putter.put(FolderFields.SUMMARY, value);
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.STANDARD_FOLDER, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -403,70 +404,70 @@ public final class FolderWriter {
                         FolderFields.STANDARD_FOLDER,
                         Boolean.valueOf(folder.containsDefaultFolder() ? folder.isDefaultFolder() : false));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.TOTAL, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
                      */
                     putter.put(FolderFields.TOTAL, Integer.valueOf(folder.getMessageCount()));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.NEW, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
                      */
                     putter.put(FolderFields.NEW, Integer.valueOf(folder.getNewMessageCount()));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.UNREAD, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
                      */
                     putter.put(FolderFields.UNREAD, Integer.valueOf(folder.getUnreadMessageCount()));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.DELETED, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
                      */
                     putter.put(FolderFields.DELETED, Integer.valueOf(folder.getDeletedMessageCount()));
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.SUBSCRIBED, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     final Object boolVal;
                     if (MailProperties.getInstance().isIgnoreSubscription()) {
@@ -479,14 +480,14 @@ public final class FolderWriter {
                      */
                     putter.put(FolderFields.SUBSCRIBED, boolVal);
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
         WRITERS_MAP.put(FolderObject.SUBSCR_SUBFLDS, new MailFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+            public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
                     final Object boolVal;
                     if (MailProperties.getInstance().isIgnoreSubscription()) {
@@ -501,7 +502,7 @@ public final class FolderWriter {
                      */
                     putter.put(FolderFields.SUBSCR_SUBFLDS, boolVal);
                 } catch (final JSONException e) {
-                    throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
@@ -523,9 +524,9 @@ public final class FolderWriter {
      * @param folder The folder to write
      * @param session The server session
      * @return The written JSON object
-     * @throws MailException
+     * @throws OXException
      */
-    public static JSONObject writeMailFolder(final int accountId, final MailFolder folder, final MailConfig mailConfig, final ServerSession session) throws MailException {
+    public static JSONObject writeMailFolder(final int accountId, final MailFolder folder, final MailConfig mailConfig, final ServerSession session) throws OXException {
         final JSONObject jsonObject = new JSONObject();
         final JSONValuePutter putter = new JSONObjectPutter(jsonObject);
         final MailFolderFieldWriter[] writers = getMailFolderFieldWriter(ALL_FLD_FIELDS, mailConfig, session);
@@ -570,14 +571,14 @@ public final class FolderWriter {
                     retval[i] = new ExtendedMailFolderFieldWriter(mailConfig) {
 
                         @Override
-                        public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+                        public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                             try {
                                 /*
                                  * Put value
                                  */
                                 putter.put(FolderFields.CAPABILITIES, Integer.valueOf(mailConfig.getCapabilities().getCapabilities()));
                             } catch (final JSONException e) {
-                                throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                             }
                         }
                     };
@@ -591,7 +592,7 @@ public final class FolderWriter {
                     retval[i] = new MailFolderFieldWriter() {
 
                         @Override
-                        public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
+                        public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                             try {
                                 /*
                                  * Proper MailFolder-2-FolderObject conversion
@@ -604,7 +605,7 @@ public final class FolderWriter {
                                 fo.setCreatedBy(-1);
                                 putter.put(folderField.getColumnName(), folderField.renderJSON(folderField.getValue(fo, session)));
                             } catch (final JSONException e) {
-                                throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                             }
                         }
 

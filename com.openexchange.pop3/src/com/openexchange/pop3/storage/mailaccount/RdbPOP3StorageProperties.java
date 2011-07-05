@@ -56,7 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.storage.POP3StorageProperties;
@@ -97,9 +97,9 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
      * @param user The user ID
      * @param cid The context ID
      * @param con The connection to use
-     * @throws MailException If dropping properties fails
+     * @throws OXException If dropping properties fails
      */
-    public static void dropProperties(final int accountId, final int user, final int cid, final Connection con) throws MailException {
+    public static void dropProperties(final int accountId, final int user, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_DROP_PROPERTIES);
@@ -125,9 +125,9 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
      * @param cid The context ID
      * @param propertyName The property name
      * @param con The connection to use
-     * @throws MailException If dropping properties fails
+     * @throws OXException If dropping properties fails
      */
-    public static String getProperty(final int accountId, final int user, final int cid, final String propertyName, final Connection con) throws MailException {
+    public static String getProperty(final int accountId, final int user, final int cid, final String propertyName, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -153,7 +153,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
     private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
 
-    public void addProperty(final String propertyName, final String propertyValue) throws MailException {
+    public void addProperty(final String propertyName, final String propertyValue) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
@@ -188,7 +188,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         }
     }
 
-    public String getProperty(final String propertyName) throws MailException {
+    public String getProperty(final String propertyName) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
@@ -202,7 +202,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         }
     }
 
-    public void removeProperty(final String propertyName) throws MailException {
+    public void removeProperty(final String propertyName) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);

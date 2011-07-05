@@ -50,7 +50,8 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
@@ -79,11 +80,11 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
 
-    public abstract String[] appendMessages(String destFolder, MailMessage[] msgs) throws MailException;
+    public abstract String[] appendMessages(String destFolder, MailMessage[] msgs) throws OXException;
 
-    public abstract String[] copyMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws MailException;
+    public abstract String[] copyMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws OXException;
 
-    public abstract void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws MailException;
+    public abstract void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws OXException;
 
     /**
      * A convenience method that delivers all messages contained in given folder through invoking
@@ -102,28 +103,28 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @param order Whether ascending or descending sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The desired, pre-filled instances of {@link MailMessage}
-     * @throws MailException
+     * @throws OXException
      */
-    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
+    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
-    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
+    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         final MailPartHandler handler = new MailPartHandler(sequenceId);
         new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
         final MailPart ret = handler.getMailPart();
         if (ret == null) {
-            throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, sequenceId, mailId, folder);
+            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, mailId, folder);
         }
         return ret;
     }
 
-    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException {
+    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
         new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
         final MailPart ret = handler.getImagePart();
         if (ret == null) {
-            throw new MailException(MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND, contentId, mailId, folder);
+            throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, mailId, folder);
         }
         return ret;
     }
@@ -143,9 +144,9 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
      *            <code>false</code> to leave as-is
      * @return Corresponding message
-     * @throws MailException If message could not be returned
+     * @throws OXException If message could not be returned
      */
-    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
+    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         final MailMessage[] mails = getMessages(folder, new String[] { mailId }, FIELDS_FULL);
         if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
             return null;
@@ -160,9 +161,9 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         return mail;
     }
 
-    public abstract MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws MailException;
+    public abstract MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws OXException;
 
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         return null;
     }
 
@@ -178,9 +179,9 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @param limit The max. number of returned unread messages or <code>-1</code> to request all unread messages in folder
      * @return Unread messages contained in an array of {@link MailMessage}
-     * @throws MailException If unread messages cannot be returned.
+     * @throws OXException If unread messages cannot be returned.
      */
-    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
+    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         if (limit == 0) {
             return EMPTY_RETVAL;
         }
@@ -200,17 +201,17 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @param fast <code>true</code> to perform a fast move operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of String is returned; otherwise <code>false</code>
      * @return The corresponding mail IDs if copied messages in destination folder
-     * @throws MailException If messages cannot be copied.
+     * @throws OXException If messages cannot be copied.
      */
-    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] ids = copyMessages(sourceFolder, destFolder, mailIds, fast);
         deleteMessages(sourceFolder, mailIds, true);
         return ids;
     }
 
-    public abstract void releaseResources() throws MailException;
+    public abstract void releaseResources() throws OXException;
 
-    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException {
+    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         final String uid;
         try {
             final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
@@ -236,13 +237,13 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         return getMessage(draftFullname, uid, true);
     }
 
-    public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
+    public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
-    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws MailException {
+    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         // Empty body here
     }
 
-    public abstract void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws MailException;
+    public abstract void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException;
 
     /**
      * Gets all new and modified messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is returned.
@@ -250,9 +251,9 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @param folder The folder fullname
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All new and modified messages in specified folder
-     * @throws MailException If mails cannot be returned
+     * @throws OXException If mails cannot be returned
      */
-    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws MailException {
+    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
         return EMPTY_RETVAL;
     }
 
@@ -262,9 +263,9 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @param folder The folder fullname
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All deleted messages in specified folder
-     * @throws MailException If mails cannot be returned
+     * @throws OXException If mails cannot be returned
      */
-    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws MailException {
+    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
         return EMPTY_RETVAL;
     }
 }

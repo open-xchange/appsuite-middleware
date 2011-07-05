@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.api;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -73,9 +73,9 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @param headerNames The header names to pre-fill in returned instances of {@link MailMessage}
      * @return Corresponding mails as an array
-     * @throws MailException If message could not be returned
+     * @throws OXException If message could not be returned
      */
-    public MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields, String[] headerNames) throws MailException;
+    public MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields, String[] headerNames) throws OXException;
 
     /**
      * Searches mails located in given folder. If the search yields no results, the constant {@link #EMPTY_RETVAL} may be returned. This
@@ -96,8 +96,8 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @param headerNames The header names to pre-fill in returned instances of {@link MailMessage}
      * @return The desired, pre-filled instances of {@link MailMessage}
-     * @throws MailException If mails cannot be returned
+     * @throws OXException If mails cannot be returned
      */
-    //public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws MailException;
+    //public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException;
 
 }

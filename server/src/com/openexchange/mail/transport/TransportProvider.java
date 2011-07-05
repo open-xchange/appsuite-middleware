@@ -52,7 +52,7 @@ package com.openexchange.mail.transport;
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -130,9 +130,9 @@ public abstract class TransportProvider {
     /**
      * Performs provider's start-up
      * 
-     * @throws MailException If start-up fails
+     * @throws OXException If start-up fails
      */
-    protected final void startUp() throws MailException {
+    protected final void startUp() throws OXException {
         getProtocolProperties().loadProperties();
         MailTransport.startupImpl(createNewMailTransport(null));
     }
@@ -140,9 +140,9 @@ public abstract class TransportProvider {
     /**
      * Performs provider's shut-down
      * 
-     * @throws MailException if shut-down fails
+     * @throws OXException if shut-down fails
      */
-    protected final void shutDown() throws MailException {
+    protected final void shutDown() throws OXException {
         MailTransport.shutdownImpl(createNewMailTransport(null));
         getProtocolProperties().resetProperties();
     }
@@ -171,9 +171,9 @@ public abstract class TransportProvider {
      * 
      * @param session The session providing needed user data
      * @return A newly created {@link MailTransport mail transport}
-     * @throws MailException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    public abstract MailTransport createNewMailTransport(Session session) throws MailException;
+    public abstract MailTransport createNewMailTransport(Session session) throws OXException;
 
     /**
      * Gets a newly created {@link MailTransport mail transport}
@@ -181,9 +181,9 @@ public abstract class TransportProvider {
      * @param session The session providing needed user data
      * @param accountId The account ID
      * @return A newly created {@link MailTransport mail transport}
-     * @throws MailException If instantiation fails
+     * @throws OXException If instantiation fails
      */
-    public abstract MailTransport createNewMailTransport(Session session, int accountId) throws MailException;
+    public abstract MailTransport createNewMailTransport(Session session, int accountId) throws OXException;
 
     /**
      * Gets the protocol properties
@@ -198,18 +198,18 @@ public abstract class TransportProvider {
      * @param session The session for handling temporary uploaded files which shall be added to composed mail
      * @param ctx The context to load session-related data
      * @return A new instance of {@link ComposedMailMessage}
-     * @throws MailException If a new instance of {@link ComposedMailMessage} cannot be created
+     * @throws OXException If a new instance of {@link ComposedMailMessage} cannot be created
      */
-    public abstract ComposedMailMessage getNewComposedMailMessage(Session session, Context ctx) throws MailException;
+    public abstract ComposedMailMessage getNewComposedMailMessage(Session session, Context ctx) throws OXException;
 
     /**
      * Gets a new instance of {@link UploadFileMailPart}
      * 
      * @param uploadFile The upload file
      * @return A new instance of {@link UploadFileMailPart}
-     * @throws MailException If a new instance of {@link UploadFileMailPart} cannot be created
+     * @throws OXException If a new instance of {@link UploadFileMailPart} cannot be created
      */
-    public abstract UploadFileMailPart getNewFilePart(UploadFile uploadFile) throws MailException;
+    public abstract UploadFileMailPart getNewFilePart(UploadFile uploadFile) throws OXException;
 
     /**
      * Gets a new instance of {@link InfostoreDocumentMailPart}
@@ -217,9 +217,9 @@ public abstract class TransportProvider {
      * @param documentId The infostore document's unique ID
      * @param session The session providing needed user data
      * @return A new instance of {@link InfostoreDocumentMailPart}
-     * @throws MailException If a new instance of {@link InfostoreDocumentMailPart} cannot be created
+     * @throws OXException If a new instance of {@link InfostoreDocumentMailPart} cannot be created
      */
-    public abstract InfostoreDocumentMailPart getNewDocumentPart(String documentId, Session session) throws MailException;
+    public abstract InfostoreDocumentMailPart getNewDocumentPart(String documentId, Session session) throws OXException;
 
     /**
      * Gets a new instance of {@link DataMailPart}
@@ -228,18 +228,18 @@ public abstract class TransportProvider {
      * @param dataProperties The data properties
      * @param session The session providing needed user data
      * @return A new instance of {@link DataMailPart}
-     * @throws MailException If a new instance of {@link DataMailPart} cannot be created
+     * @throws OXException If a new instance of {@link DataMailPart} cannot be created
      */
-    public abstract DataMailPart getNewDataPart(Object data, Map<String, String> dataProperties, Session session) throws MailException;
+    public abstract DataMailPart getNewDataPart(Object data, Map<String, String> dataProperties, Session session) throws OXException;
 
     /**
      * Gets a new instance of {@link TextBodyMailPart}
      * 
      * @param textBody The text body
      * @return A new instance of {@link TextBodyMailPart}
-     * @throws MailException If a new instance of {@link TextBodyMailPart} cannot be created
+     * @throws OXException If a new instance of {@link TextBodyMailPart} cannot be created
      */
-    public abstract TextBodyMailPart getNewTextBodyPart(String textBody) throws MailException;
+    public abstract TextBodyMailPart getNewTextBodyPart(String textBody) throws OXException;
 
     /**
      * Gets a new instance of {@link ReferencedMailPart}
@@ -247,9 +247,9 @@ public abstract class TransportProvider {
      * @param referencedPart The referenced part
      * @param session The session providing user data
      * @return A new instance of {@link ReferencedMailPart}
-     * @throws MailException If a new instance of {@link ReferencedMailPart} cannot be created
+     * @throws OXException If a new instance of {@link ReferencedMailPart} cannot be created
      */
-    public abstract ReferencedMailPart getNewReferencedPart(MailPart referencedPart, Session session) throws MailException;
+    public abstract ReferencedMailPart getNewReferencedPart(MailPart referencedPart, Session session) throws OXException;
 
     /**
      * Gets a new instance of {@link ReferencedMailPart}
@@ -257,7 +257,7 @@ public abstract class TransportProvider {
      * @param referencedMail The referenced mail
      * @param session The session providing user data
      * @return A new instance of {@link ReferencedMailPart}
-     * @throws MailException If a new instance of {@link ReferencedMailPart} cannot be created
+     * @throws OXException If a new instance of {@link ReferencedMailPart} cannot be created
      */
-    public abstract ReferencedMailPart getNewReferencedMail(MailMessage referencedMail, Session session) throws MailException;
+    public abstract ReferencedMailPart getNewReferencedMail(MailMessage referencedMail, Session session) throws OXException;
 }

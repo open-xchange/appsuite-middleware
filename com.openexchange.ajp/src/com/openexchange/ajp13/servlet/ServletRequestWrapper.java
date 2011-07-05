@@ -70,7 +70,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
 
 /**
@@ -215,7 +215,7 @@ public class ServletRequestWrapper implements ServletRequest {
             final ContentType ct;
             try {
                 ct = new ContentType(value);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 org.apache.commons.logging.LogFactory.getLog(ServletRequestWrapper.class).error(e.getMessage(), e);
                 throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, e, value);
             }

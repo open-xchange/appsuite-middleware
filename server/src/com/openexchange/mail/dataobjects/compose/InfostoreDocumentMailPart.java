@@ -62,7 +62,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
@@ -96,9 +97,9 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
      * 
      * @param documentId The document's unique ID
      * @param session The session providing needed user data
-     * @throws MailException If infostore document cannot be read
+     * @throws OXException If infostore document cannot be read
      */
-    public InfostoreDocumentMailPart(final String documentId, final Session session) throws MailException {
+    public InfostoreDocumentMailPart(final String documentId, final Session session) throws OXException {
         super();
         IDBasedFileAccess fileAccess = null;
         try {
@@ -117,9 +118,9 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             tmp.setName(getFileName());
             inputStreamProvider = tmp;
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } catch (OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         } finally{
             if(fileAccess != null) {
                 try {
@@ -142,7 +143,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         if (cachedContent != null) {
             return cachedContent;
         }
@@ -156,9 +157,9 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
                 docInputSream = inputStreamProvider.getInputStream();
                 cachedContent = readStream(docInputSream, charset);
             } catch (final FileNotFoundException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
                 if (docInputSream != null) {
                     try {
@@ -175,26 +176,26 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return new DataHandler(getDataSource());
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return null;
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         try {
             return inputStreamProvider.getInputStream();
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

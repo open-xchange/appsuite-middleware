@@ -52,10 +52,10 @@ package com.openexchange.spamhandler.spamassassin.exceptions;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 
 
-public class SpamhandlerSpamassassinException extends MailException {
+public class SpamhandlerSpamassassinException extends OXException {
 
     public static enum Code {
         /**

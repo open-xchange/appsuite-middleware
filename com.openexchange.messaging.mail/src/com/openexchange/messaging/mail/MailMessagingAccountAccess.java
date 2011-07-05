@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.mail;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -105,7 +105,7 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
                             accountId,
                             mailAccess.getMailConfig().getCapabilities(),
                             session);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 throw new MessagingException(e);
             }
         }
@@ -121,7 +121,7 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
             try {
                 messageAccess =
                     tmp = new MailMessagingMessageAccess(mailAccess.getMessageStorage(), mailAccess.getLogicTools(), accountId, session);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 throw new MessagingException(e);
             }
         }
@@ -133,7 +133,7 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
             return MailMessagingFolderAccess.convert2MessagingFolder(
                 mailAccess.getRootFolder(),
                 mailAccess.getMailConfig().getCapabilities());
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.mail;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultFolderFullnameProvider}
@@ -62,56 +62,56 @@ public interface DefaultFolderFullnameProvider {
      * Gets the fullname of default INBOX folder
      * 
      * @return The fullname of default INBOX folder
-     * @throws MailException If INBOX folder's fullname cannot be returned
+     * @throws OXException If INBOX folder's fullname cannot be returned
      */
-    public String getINBOXFolder() throws MailException;
+    public String getINBOXFolder() throws OXException;
 
     /**
      * Gets the fullname of default confirmed ham folder
      * 
      * @return The fullname of default confirmed ham folder
-     * @throws MailException If confirmed ham folder's fullname cannot be returned
+     * @throws OXException If confirmed ham folder's fullname cannot be returned
      */
-    public String getConfirmedHamFolder() throws MailException;
+    public String getConfirmedHamFolder() throws OXException;
 
     /**
      * Gets the fullname of default confirmed spam folder
      * 
      * @return The fullname of default confirmed spam folder
-     * @throws MailException If confirmed spam folder's fullname cannot be returned
+     * @throws OXException If confirmed spam folder's fullname cannot be returned
      */
-    public String getConfirmedSpamFolder() throws MailException;
+    public String getConfirmedSpamFolder() throws OXException;
 
     /**
      * Gets the fullname of default drafts folder
      * 
      * @return The fullname of default drafts folder
-     * @throws MailException If draft folder's fullname cannot be returned
+     * @throws OXException If draft folder's fullname cannot be returned
      */
-    public String getDraftsFolder() throws MailException;
+    public String getDraftsFolder() throws OXException;
 
     /**
      * Gets the fullname of default spam folder
      * 
      * @return The fullname of default spam folder
-     * @throws MailException If spam folder's fullname cannot be returned
+     * @throws OXException If spam folder's fullname cannot be returned
      */
-    public String getSpamFolder() throws MailException;
+    public String getSpamFolder() throws OXException;
 
     /**
      * Gets the fullname of default sent folder
      * 
      * @return The fullname of default sent folder
-     * @throws MailException If sent folder's fullname cannot be returned
+     * @throws OXException If sent folder's fullname cannot be returned
      */
-    public String getSentFolder() throws MailException;
+    public String getSentFolder() throws OXException;
 
     /**
      * Gets the fullname of default trash folder
      * 
      * @return The fullname of default trash folder
-     * @throws MailException If trash folder's fullname cannot be returned
+     * @throws OXException If trash folder's fullname cannot be returned
      */
-    public String getTrashFolder() throws MailException;
+    public String getTrashFolder() throws OXException;
 
 }

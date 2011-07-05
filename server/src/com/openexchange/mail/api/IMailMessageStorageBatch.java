@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.api;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.spamhandler.SpamHandler;
 
@@ -73,9 +73,9 @@ public interface IMailMessageStorageBatch extends IMailMessageStorage {
      * 
      * @param folder The folder full name
      * @param colorLabel The color label to apply
-     * @throws MailException If color label cannot be updated
+     * @throws OXException If color label cannot be updated
      */
-    public void updateMessageColorLabel(String folder, int colorLabel) throws MailException;
+    public void updateMessageColorLabel(String folder, int colorLabel) throws OXException;
 
     /**
      * Updates the flags of all messages located in given folder. If parameter <code>set</code> is
@@ -107,8 +107,8 @@ public interface IMailMessageStorageBatch extends IMailMessageStorage {
      * @param folder The folder full name
      * @param flags The bit pattern for the flags to alter
      * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
-     * @throws MailException If system flags cannot be updated
+     * @throws OXException If system flags cannot be updated
      */
-    public void updateMessageFlags(String folder, int flags, boolean set) throws MailException;
+    public void updateMessageFlags(String folder, int flags, boolean set) throws OXException;
 
 }

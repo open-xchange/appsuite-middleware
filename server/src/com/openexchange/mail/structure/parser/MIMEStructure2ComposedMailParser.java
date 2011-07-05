@@ -74,7 +74,8 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -133,9 +134,9 @@ public final class MIMEStructure2ComposedMailParser {
      * @param session The session
      * @param protocol The server's protocol
      * @param hostName Thje server's host name
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MIMEStructure2ComposedMailParser(final int accountId, final ServerSession session, final String protocol, final String hostName) throws MailException {
+    public MIMEStructure2ComposedMailParser(final int accountId, final ServerSession session, final String protocol, final String hostName) throws OXException {
         super();
         this.session = session;
         managedFiles = new ArrayList<ManagedFile>(4);
@@ -165,9 +166,9 @@ public final class MIMEStructure2ComposedMailParser {
      * 
      * @param jsonMessage The JSON message structure
      * @return The resulting {@link ComposedMailMessage} instances.
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public ComposedMailMessage[] parseMessage(final JSONObject jsonMessage) throws MailException {
+    public ComposedMailMessage[] parseMessage(final JSONObject jsonMessage) throws OXException {
         parseFlags(jsonMessage);
         parsePart(jsonMessage);
         /*
@@ -177,7 +178,7 @@ public final class MIMEStructure2ComposedMailParser {
         return attachmentHandler.generateComposedMails(composedMail);
     }
 
-    private void parseFlags(final JSONObject jsonMessage) throws MailException {
+    private void parseFlags(final JSONObject jsonMessage) throws OXException {
         try {
             /*
              * System flags
@@ -210,11 +211,11 @@ public final class MIMEStructure2ComposedMailParser {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void parsePart(final JSONObject jsonPart) throws MailException {
+    private void parsePart(final JSONObject jsonPart) throws OXException {
         try {
             /*
              * Parse headers
@@ -275,11 +276,11 @@ public final class MIMEStructure2ComposedMailParser {
                 }
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void parseMessageBody(final JSONObject jsonMessage) throws MailException {
+    private void parseMessageBody(final JSONObject jsonMessage) throws OXException {
         final MailMessage mail = MIMEStructureParser.parseStructure(jsonMessage);
         if (mail.getSize() < 0) {
             final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
@@ -289,7 +290,7 @@ public final class MIMEStructure2ComposedMailParser {
         attachmentHandler.addAttachment(transportProvider.getNewReferencedMail(mail, session));
     }
 
-    private void parseMultipartBody(final JSONArray jsonMultiparts, final String subtype) throws MailException {
+    private void parseMultipartBody(final JSONArray jsonMultiparts, final String subtype) throws OXException {
         try {
             final int length = jsonMultiparts.length();
             level++;
@@ -305,11 +306,11 @@ public final class MIMEStructure2ComposedMailParser {
             }
             level--;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void parseSimpleBodyText(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws MailException {
+    private void parseSimpleBodyText(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws OXException {
         try {
             if (isText(contentType.getBaseType())) {
                 if (contentType.startsWith("text/plain")) {
@@ -340,25 +341,25 @@ public final class MIMEStructure2ComposedMailParser {
                 addAsAttachment(jsonBody.getString("data").getBytes("US-ASCII"), contentType, headers);
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void parseSimpleBodyBinary(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws MailException {
+    private void parseSimpleBodyBinary(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws OXException {
         try {
             addAsAttachment(Base64.decodeBase64(jsonBody.getString("data").getBytes("US-ASCII")), contentType, headers);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 
     private static final int IN_MEMORY_LIMIT = 1048576; // 1 MB
 
-    private void addAsAttachment(final byte[] rawBytes, final ContentType contentType, final Map<String, String> headers) throws MailException {
+    private void addAsAttachment(final byte[] rawBytes, final ContentType contentType, final Map<String, String> headers) throws OXException {
         if (rawBytes.length <= IN_MEMORY_LIMIT) {
             addInMemory(rawBytes, contentType, headers);
         } else {
@@ -391,7 +392,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private void addInMemory(final byte[] rawBytes, final ContentType contentType, final Map<String, String> headers) throws MailException {
+    private void addInMemory(final byte[] rawBytes, final ContentType contentType, final Map<String, String> headers) throws OXException {
         try {
             final MimeBodyPart mimePart = new MimeBodyPart();
             mimePart.setDataHandler(new DataHandler(new MessageDataSource(rawBytes, contentType.getBaseType())));
@@ -427,7 +428,7 @@ public final class MIMEStructure2ComposedMailParser {
 
     private static final Set<String> HEADERS_DATE = new HashSet<String>(Arrays.asList("date"));
 
-    private static void parseHeaders(final JSONObject jsonHeaders, final MailMessage composedMail, final ContentType contentType) throws MailException {
+    private static void parseHeaders(final JSONObject jsonHeaders, final MailMessage composedMail, final ContentType contentType) throws OXException {
         try {
             final StringBuilder headerNameBuilder = new StringBuilder(16);
             for (final Entry<String, Object> entry : jsonHeaders.entrySet()) {
@@ -499,15 +500,15 @@ public final class MIMEStructure2ComposedMailParser {
             /*
              * Cannot occur
              */
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static void parseContentType(final JSONObject jsonHeaders, final ContentType contentType) throws MailException {
+    private static void parseContentType(final JSONObject jsonHeaders, final ContentType contentType) throws OXException {
         try {
             if (jsonHeaders.hasAndNotNull("content-type")) {
                 final JSONObject jsonContentType = jsonHeaders.getJSONObject("content-type");
@@ -516,18 +517,18 @@ public final class MIMEStructure2ComposedMailParser {
                 parseParameterList(jsonContentType.getJSONObject("params"), contentType);
             }
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static String parseContentID(final JSONObject jsonHeaders) throws MailException {
+    private static String parseContentID(final JSONObject jsonHeaders) throws OXException {
         try {
             if (jsonHeaders.hasAndNotNull("content-id")) {
                 return jsonHeaders.getString("content-id");
             }
             return null;
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

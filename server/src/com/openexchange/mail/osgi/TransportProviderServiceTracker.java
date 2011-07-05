@@ -52,7 +52,7 @@ package com.openexchange.mail.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 
@@ -100,7 +100,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                     context.ungetService(reference);
                     return null;
                 }
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 context.ungetService(reference);
                 return null;
@@ -122,7 +122,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                         TransportProviderRegistry.unregisterTransportProvider(provider);
                         LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(provider.getProtocol().toString()).append(
                             "' successfully unregistered"));
-                    } catch (final MailException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }

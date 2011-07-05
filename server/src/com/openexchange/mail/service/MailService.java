@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.service;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.session.Session;
@@ -81,9 +81,9 @@ public interface MailService {
      * @param session The session
      * @param accountId The account ID
      * @return An appropriate instance of {@link MailAccess}
-     * @throws MailException If an appropriate instance of {@link MailAccess mail access} cannot be initialized
+     * @throws OXException If an appropriate instance of {@link MailAccess mail access} cannot be initialized
      */
-    public MailAccess<?, ?> getMailAccess(Session session, int accountId) throws MailException;
+    public MailAccess<?, ?> getMailAccess(Session session, int accountId) throws OXException;
 
     /**
      * Gets an appropriate instance of {@link MailTransport mail transport} parameterized with given session.
@@ -102,8 +102,8 @@ public interface MailService {
      * @param session The session providing needed user data
      * @param accountId The account ID
      * @return An appropriate instance of {@link MailTransport}
-     * @throws MailException If an appropriate instance of {@link MailTransport mail transport} cannot be initialized
+     * @throws OXException If an appropriate instance of {@link MailTransport mail transport} cannot be initialized
      */
-    public MailTransport getMailTransport(Session session, int accountId) throws MailException;
+    public MailTransport getMailTransport(Session session, int accountId) throws OXException;
 
 }

@@ -55,7 +55,7 @@ import java.util.Date;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -149,7 +149,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
             try {
                 hasAttachment =
                     Boolean.valueOf(ct.startsWith(MULTI) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || deepAttachmentCheck(ct.getSubType())));
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
             } catch (final MessagingException e) {
@@ -163,7 +163,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
         return hasAttachment.booleanValue();
     }
 
-    private boolean deepAttachmentCheck(final String subType) throws MailException, MessagingException, IOException {
+    private boolean deepAttachmentCheck(final String subType) throws OXException, MessagingException, IOException {
         if (null != bodystructure) {
             /*
              * Body structure is available
@@ -332,7 +332,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
                 contentType.setPrimaryType("text");
                 contentType.setSubType("plain");
                 contentType.setCharsetParameter("us-ascii");
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(e.getMessage(), e);
                 }

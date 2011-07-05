@@ -62,7 +62,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -186,7 +186,7 @@ public class MailMessagingPart implements MessagingPart {
                     cachedContent = tmp = new ReferenceContent(sequenceId == null ? "1" : sequenceId);
                     // cachedContent = tmp = new MailBinaryContent(mailPart);
                 }
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 throw new MessagingException(e);
             } catch (final IOException e) {
                 throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -197,7 +197,7 @@ public class MailMessagingPart implements MessagingPart {
         return tmp;
     }
 
-    private static String readContent(final MailPart mailPart, final com.openexchange.mail.mime.ContentType contentType) throws MailException, IOException {
+    private static String readContent(final MailPart mailPart, final com.openexchange.mail.mime.ContentType contentType) throws OXException, IOException {
         final String charset = getCharset(mailPart, contentType);
         try {
             return MessageUtility.readMailPart(mailPart, charset);
@@ -212,7 +212,7 @@ public class MailMessagingPart implements MessagingPart {
         }
     }
 
-    private static String getCharset(final MailPart mailPart, final com.openexchange.mail.mime.ContentType contentType) throws MailException {
+    private static String getCharset(final MailPart mailPart, final com.openexchange.mail.mime.ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
@@ -329,7 +329,7 @@ public class MailMessagingPart implements MessagingPart {
     public void writeTo(final OutputStream os) throws IOException, MessagingException {
         try {
             mailPart.writeTo(os);
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         }
     }

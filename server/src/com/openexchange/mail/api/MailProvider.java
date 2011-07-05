@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.api;
 
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -121,9 +121,9 @@ public abstract class MailProvider {
     /**
      * Performs provider's start-up
      * 
-     * @throws MailException If start-up fails
+     * @throws OXException If start-up fails
      */
-    public void startUp() throws MailException {
+    public void startUp() throws OXException {
         getProtocolProps().loadProperties();
         final MailAccess<?, ?> access = createNewMailAccess(null);
         if (null != access) {
@@ -134,9 +134,9 @@ public abstract class MailProvider {
     /**
      * Performs provider's shut-down
      * 
-     * @throws MailException if shut-down fails
+     * @throws OXException if shut-down fails
      */
-    public void shutDown() throws MailException {
+    public void shutDown() throws OXException {
         final MailAccess<?, ?> access = createNewMailAccess(null);
         if (null != access) {
             MailAccess.shutdownImpl(access);
@@ -204,9 +204,9 @@ public abstract class MailProvider {
      * 
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @return The newly created {@link MailAccess mail access}.
-     * @throws MailException If new {@link MailAccess mail access} instance cannot be created
+     * @throws OXException If new {@link MailAccess mail access} instance cannot be created
      */
-    public abstract MailAccess<?, ?> createNewMailAccess(Session session) throws MailException;
+    public abstract MailAccess<?, ?> createNewMailAccess(Session session) throws OXException;
 
     /**
      * Gets a newly created {@link MailAccess mail access}.
@@ -217,9 +217,9 @@ public abstract class MailProvider {
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @param accountId The account ID
      * @return The newly created {@link MailAccess mail access}.
-     * @throws MailException If new {@link MailAccess mail access} instance cannot be created
+     * @throws OXException If new {@link MailAccess mail access} instance cannot be created
      */
-    public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> createNewMailAccess(Session session, int accountId) throws MailException;
+    public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> createNewMailAccess(Session session, int accountId) throws OXException;
 
     /**
      * Gets the protocol properties

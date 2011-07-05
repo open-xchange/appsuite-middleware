@@ -91,7 +91,8 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
@@ -158,9 +159,9 @@ public final class MessageParser {
      * @param session The session
      * @param accountId The account ID
      * @return A corresponding instance of {@link ComposedMailMessage}
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parse4Draft(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId) throws MailException {
+    public static ComposedMailMessage parse4Draft(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId) throws OXException {
         return parse(jsonObj, uploadEvent, session, accountId, null, null, false)[0];
     }
 
@@ -175,9 +176,9 @@ public final class MessageParser {
      * @param protocol The server's protocol
      * @param hostname The server's host name
      * @return The corresponding instances of {@link ComposedMailMessage}
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage[] parse4Transport(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName) throws MailException {
+    public static ComposedMailMessage[] parse4Transport(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName) throws OXException {
         return parse(jsonObj, uploadEvent, session, accountId, protocol, hostName, true);
     }
 
@@ -194,9 +195,9 @@ public final class MessageParser {
      * @param prepare4Transport <code>true</code> to parse with the intention to transport returned mail later on; otherwise
      *            <code>false</code>
      * @return The corresponding instances of {@link ComposedMailMessage}
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    private static ComposedMailMessage[] parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final boolean prepare4Transport) throws MailException {
+    private static ComposedMailMessage[] parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final boolean prepare4Transport) throws OXException {
         try {
             final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -242,7 +243,7 @@ public final class MessageParser {
                 if (length > 0) {
                     final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
                     if (conversionService == null) {
-                        throw new MailException(new OXException(
+                        throw new OXException(new OXException(
                             ServiceExceptionCode.SERVICE_UNAVAILABLE,
                             ConversionService.class.getName()));
                     }
@@ -250,11 +251,11 @@ public final class MessageParser {
                     for (int i = 0; i < length; i++) {
                         final JSONObject dataSourceObject = datasourceArray.getJSONObject(i);
                         if (!dataSourceObject.hasAndNotNull(JSON_IDENTIFIER)) {
-                            throw new MailException(MailException.Code.MISSING_PARAM, JSON_IDENTIFIER);
+                            throw MailExceptionCode.MISSING_PARAM.create(JSON_IDENTIFIER);
                         }
                         final DataSource dataSource = conversionService.getDataSource(dataSourceObject.getString(JSON_IDENTIFIER));
                         if (dataSource == null) {
-                            throw new MailException(
+                            throw new OXException(
                                 DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceObject.getString(JSON_IDENTIFIER)));
                         }
                         if (!types.isEmpty()) {
@@ -266,16 +267,16 @@ public final class MessageParser {
                             try {
                                 data = dataSource.getData(InputStream.class, parseDataSourceArguments(dataSourceObject), session);
                             } catch (final OXException e) {
-                                throw new MailException(e);
+                                throw new OXException(e);
                             }
                         } else if (types.contains(byte[].class)) {
                             try {
                                 data = dataSource.getData(byte[].class, parseDataSourceArguments(dataSourceObject), session);
                             } catch (final OXException e) {
-                                throw new MailException(e);
+                                throw new OXException(e);
                             }
                         } else {
-                            throw new MailException(MailException.Code.UNSUPPORTED_DATASOURCE);
+                            throw MailExceptionCode.UNSUPPORTED_DATASOURCE.create();
                         }
                         final DataMailPart dataMailPart =
                             provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
@@ -299,9 +300,9 @@ public final class MessageParser {
              */
             return attachmentHandler.generateComposedMails(composedMail);
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -346,7 +347,7 @@ public final class MessageParser {
         return new StringBuilder(8).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
     }
 
-    private static void parse(final ComposedMailMessage transportMail, final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IAttachmentHandler attachmentHandler, final Context ctx, final boolean prepare4Transport) throws MailException {
+    private static void parse(final ComposedMailMessage transportMail, final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IAttachmentHandler attachmentHandler, final Context ctx, final boolean prepare4Transport) throws OXException {
         parse(
             jsonObj,
             transportMail,
@@ -366,15 +367,15 @@ public final class MessageParser {
      * @param mail The mail(target), which should be empty
      * @param session The session
      * @param accountId The account ID
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session, final int accountId) throws MailException {
+    public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session, final int accountId) throws OXException {
         try {
             parse(jsonObj, mail, TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(
                 session.getUserId(),
                 ContextStorage.getStorageContext(session.getContextId())).getTimeZone()), session, accountId);
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 
@@ -387,9 +388,9 @@ public final class MessageParser {
      * @param timeZone The user time zone
      * @param session The session
      * @param accountId The account ID
-     * @throws MailException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final Session session, final int accountId) throws MailException {
+    public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final Session session, final int accountId) throws OXException {
         parse(
             jsonObj,
             mail,
@@ -401,7 +402,7 @@ public final class MessageParser {
             false);
     }
 
-    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final IAttachmentHandler attachmentHandler, final boolean prepare4Transport) throws MailException {
+    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final IAttachmentHandler attachmentHandler, final boolean prepare4Transport) throws OXException {
         try {
             parseBasics(jsonObj, mail, timeZone, prepare4Transport);
             /*
@@ -440,7 +441,7 @@ public final class MessageParser {
              * TODO: Parse nested messages. Currently not used
              */
         } catch (final JSONException e) {
-            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final AddressException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
@@ -455,13 +456,13 @@ public final class MessageParser {
      * @param timeZone
      * @throws JSONException
      * @throws AddressException
-     * @throws MailException
+     * @throws OXException
      */
-    public static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone) throws JSONException, AddressException, MailException {
+    public static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone) throws JSONException, AddressException, OXException {
         parseBasics(jsonObj, mail, timeZone, false);
     }
 
-    private static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final boolean prepare4Transport) throws JSONException, AddressException, MailException {
+    private static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final boolean prepare4Transport) throws JSONException, AddressException, OXException {
         /*
          * System flags
          */
@@ -615,7 +616,7 @@ public final class MessageParser {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final MailPath transportMailMsgref, final IAttachmentHandler attachmentHandler, final JSONArray attachmentArray) throws MailException, JSONException {
+    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final MailPath transportMailMsgref, final IAttachmentHandler attachmentHandler, final JSONArray attachmentArray) throws OXException, JSONException {
         final int len = attachmentArray.length();
         if (len <= 1) {
             /*
@@ -659,7 +660,7 @@ public final class MessageParser {
                         }
 
                     } catch (final UnsupportedEncodingException e) {
-                        throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+                        throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
                     }
                     /*
                      * As data object
@@ -728,7 +729,7 @@ public final class MessageParser {
         }
     }
 
-    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray) throws MailException, JSONException {
+    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
@@ -764,7 +765,7 @@ public final class MessageParser {
             final MailMessage referencedMail =
                 access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
             if (null == referencedMail) {
-                throw new MailException(MailException.Code.REFERENCED_MAIL_NOT_FOUND, parentMsgRef.getMailID(), parentMsgRef.getFolder());
+                throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
             }
             // Get attachments out of referenced mail
             final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs, true);
@@ -779,7 +780,7 @@ public final class MessageParser {
         return retval;
     }
 
-    private static void processReferencedUploadFile(final TransportProvider provider, final ManagedFileManagement management, final String seqId, final IAttachmentHandler attachmentHandler) throws MailException {
+    private static void processReferencedUploadFile(final TransportProvider provider, final ManagedFileManagement management, final String seqId, final IAttachmentHandler attachmentHandler) throws OXException {
         /*
          * A file reference
          */
@@ -931,7 +932,7 @@ public final class MessageParser {
         }
     }
 
-    private static void prepareMsgRef(final Session session, final MailMessage mail) throws MailException {
+    private static void prepareMsgRef(final Session session, final MailMessage mail) throws OXException {
         final MailPath msgref = mail.getMsgref();
         if (null == msgref) {
             // Nothing to do
@@ -940,7 +941,7 @@ public final class MessageParser {
         mail.setMsgref(prepareMsgRef(session, msgref));
     }
 
-    private static MailPath prepareMsgRef(final Session session, final MailPath msgref) throws MailException {
+    private static MailPath prepareMsgRef(final Session session, final MailPath msgref) throws OXException {
         try {
             final UnifiedINBOXManagement unifiedINBOXManagement =
                 ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
@@ -969,7 +970,7 @@ public final class MessageParser {
             }
             return msgref;
         } catch (final OXException e) {
-            throw new MailException(e);
+            throw new OXException(e);
         }
     }
 

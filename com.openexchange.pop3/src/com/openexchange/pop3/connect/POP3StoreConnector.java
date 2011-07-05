@@ -65,7 +65,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.pop3.POP3Exception;
@@ -118,12 +118,12 @@ public final class POP3StoreConnector {
 
         private POP3Store pop3Store;
 
-        private final List<MailException> warnings;
+        private final List<OXException> warnings;
 
         protected POP3StoreResult(final String capabilities) {
             super();
             this.capabilities = capabilities;
-            warnings = new ArrayList<MailException>(2);
+            warnings = new ArrayList<OXException>(2);
         }
 
         /**
@@ -140,7 +140,7 @@ public final class POP3StoreConnector {
          * 
          * @param warning The warning to add
          */
-        protected void addWarning(final MailException warning) {
+        protected void addWarning(final OXException warning) {
             warnings.add(warning);
         }
 
@@ -149,7 +149,7 @@ public final class POP3StoreConnector {
          * 
          * @return The warnings
          */
-        public Collection<MailException> getWarnings() {
+        public Collection<OXException> getWarnings() {
             return Collections.unmodifiableCollection(warnings);
         }
 
@@ -218,9 +218,9 @@ public final class POP3StoreConnector {
      * @param session The session providing user information
      * @param errorOnMissingUIDL <code>true</code> to throw an error on missing UIDL; otherwise <code>false</code> to ignore
      * @return A connected instance of {@link POP3Store}
-     * @throws MailException If establishing a connected instance of {@link POP3Store} fails
+     * @throws OXException If establishing a connected instance of {@link POP3Store} fails
      */
-    public static POP3StoreResult getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final boolean monitorFailedAuthentication, final Session session, final boolean errorOnMissingUIDL) throws MailException {
+    public static POP3StoreResult getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final boolean monitorFailedAuthentication, final Session session, final boolean errorOnMissingUIDL) throws OXException {
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {

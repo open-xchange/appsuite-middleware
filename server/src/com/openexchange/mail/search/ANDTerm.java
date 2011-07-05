@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Set;
 import javax.mail.Message;
 import javax.mail.search.AndTerm;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -129,12 +129,12 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws MailException {
+    public boolean matches(final Message msg) throws OXException {
         return terms[0].matches(msg) && terms[1].matches(msg);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) throws MailException {
+    public boolean matches(final MailMessage mailMessage) throws OXException {
         return terms[0].matches(mailMessage) && terms[1].matches(mailMessage);
     }
 

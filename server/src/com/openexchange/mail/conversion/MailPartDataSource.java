@@ -52,7 +52,7 @@ package com.openexchange.mail.conversion;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataSource;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
@@ -88,14 +88,14 @@ public abstract class MailPartDataSource implements DataSource {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
             final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
             mailPart.loadContent();
             return mailPart;
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             mailAccess.close(true);

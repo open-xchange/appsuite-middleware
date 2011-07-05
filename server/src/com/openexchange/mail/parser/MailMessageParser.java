@@ -82,7 +82,8 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -238,9 +239,9 @@ public final class MailMessageParser {
      * 
      * @param mail The mail to parse
      * @param handler The call-back handler
-     * @throws MailException If parsing specified mail fails
+     * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler) throws MailException {
+    public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler) throws OXException {
         parseMailMessage(mail, handler, null);
     }
 
@@ -251,14 +252,14 @@ public final class MailMessageParser {
      * @param mail The mail to parse
      * @param handler The call-back handler
      * @param prefix The initial prefix for mail part identifiers; e.g. <code>&quot;1.1&quot;</code>
-     * @throws MailException If parsing specified mail fails
+     * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler, final String prefix) throws MailException {
+    public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler, final String prefix) throws OXException {
         if (null == mail) {
-            throw new MailException(MailException.Code.MISSING_PARAMETER, "mail");
+            throw MailExceptionCode.MISSING_PARAMETER.create("mail");
         }
         if (null == handler) {
-            throw new MailException(MailException.Code.MISSING_PARAMETER, "handler");
+            throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
         try {
             /*
@@ -272,8 +273,8 @@ public final class MailMessageParser {
         } catch (final IOException e) {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
-            throw new MailException(
-                MailException.Code.UNREADBALE_PART_CONTENT,
+            throw new OXException(
+                MailExceptionCode.UNREADBALE_PART_CONTENT,
                 e,
                 null == mailId ? "" : mailId,
                 null == folder ? "" : folder);
@@ -281,7 +282,7 @@ public final class MailMessageParser {
         handler.handleMessageEnd(mail);
     }
 
-    private void parseMailContent(final MailPart mailPartArg, final MailMessageHandler handler, final String prefix, final int partCountArg) throws MailException, IOException {
+    private void parseMailContent(final MailPart mailPartArg, final MailMessageHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
         if (stop) {
             return;
         }
@@ -313,7 +314,7 @@ public final class MailMessageParser {
             try {
                 final int count = mailPart.getEnclosedCount();
                 if (count == -1) {
-                    throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
+                    throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
                 }
                 final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
                 if (!mailPart.containsSequenceId()) {
@@ -339,7 +340,7 @@ public final class MailMessageParser {
                  * Parsing of multipart mail failed fatally; treat as empty plain-text mail
                  */
                 LOG.error("Multipart mail could not be parsed", rte);
-                warnings.add(new MailException(MailException.Code.UNPARSEABLE_MESSAGE, rte, new Object[0]));
+                warnings.add(MailExceptionCode.UNPARSEABLE_MESSAGE.create(rte, new Object[0]));
                 if (!handler.handleInlinePlainText(
                     "",
                     ContentType.DEFAULT_CONTENT_TYPE,
@@ -750,7 +751,7 @@ public final class MailMessageParser {
         }
     }
 
-    private void parseEnvelope(final MailMessage mail, final MailMessageHandler handler) throws MailException {
+    private void parseEnvelope(final MailMessage mail, final MailMessageHandler handler) throws OXException {
         /*
          * FROM
          */
@@ -889,7 +890,7 @@ public final class MailMessageParser {
         return getFileName(null, sequenceId, baseMimeType);
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws MailException, IOException {
+    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
         if (is7BitTransferEncoding(mailPart) && (mailPart instanceof MIMERawSource)) {
             try {
                 final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
@@ -923,7 +924,7 @@ public final class MailMessageParser {
                  * Return textual content
                  */
                 return new String(bytes, charset);
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 // getRawInputStream() failed
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("MIMERawSource.getRawInputStream() failed. Fallback to transfer-decoded reading.", e);
@@ -960,7 +961,7 @@ public final class MailMessageParser {
         return (null == transferEncoding || "7bit".equalsIgnoreCase(transferEncoding.trim()));
     }
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
+    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();

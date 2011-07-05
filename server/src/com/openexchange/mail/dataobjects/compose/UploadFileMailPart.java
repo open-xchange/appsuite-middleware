@@ -60,7 +60,8 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Part;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
@@ -91,9 +92,9 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * Initializes a new {@link UploadFileMailPart}
      * 
      * @param uploadFile The upload file
-     * @throws MailException If upload file's content type cannot be parsed
+     * @throws OXException If upload file's content type cannot be parsed
      */
-    protected UploadFileMailPart(final UploadFile uploadFile) throws MailException {
+    protected UploadFileMailPart(final UploadFile uploadFile) throws OXException {
         super();
         this.uploadFile = uploadFile.getTmpFile();
         final String preparedFileName = uploadFile.getPreparedFileName();
@@ -168,7 +169,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * @see com.openexchange.mail.dataobjects.MailPart#getContent()
      */
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         if (cachedContent != null) {
             return cachedContent;
         }
@@ -182,7 +183,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                             " does not specify a charset. Assumed charset is: ").append(charset).toString());
                     }
                 } catch (final FileNotFoundException e) {
-                    throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
             }
             FileInputStream fis = null;
@@ -190,9 +191,9 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 fis = new FileInputStream(uploadFile);
                 cachedContent = readStream(fis, charset);
             } catch (final FileNotFoundException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
                 if (fis != null) {
                     try {
@@ -212,7 +213,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
      */
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return new DataHandler(getDataSource());
     }
 
@@ -221,7 +222,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
      */
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
@@ -230,7 +231,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
      */
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return null;
     }
 
@@ -239,11 +240,11 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
      */
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         try {
             return new FileInputStream(uploadFile);
         } catch (final FileNotFoundException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

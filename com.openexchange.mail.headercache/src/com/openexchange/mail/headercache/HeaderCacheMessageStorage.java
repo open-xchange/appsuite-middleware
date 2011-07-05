@@ -58,7 +58,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -137,9 +138,9 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
      * 
      * @param session The session
      * @param mailAccess The mail access
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public HeaderCacheMessageStorage(final Session session, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
+    public HeaderCacheMessageStorage(final Session session, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         super();
         this.session = session;
         this.mailAccess = mailAccess;
@@ -149,40 +150,40 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         accountId = mailAccess.getAccountId();
     }
 
-    public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws MailException {
+    public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         final String[] ids = delegatee.appendMessages(destFolder, msgs);
         synchronizeFolder(destFolder, true, true);
         return ids;
     }
 
-    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] ids = delegatee.copyMessages(sourceFolder, destFolder, mailIds, fast);
         synchronizeFolder(destFolder, true, true);
         return ids;
     }
 
-    public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws MailException {
+    public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
         delegatee.deleteMessages(folder, mailIds, hardDelete);
         synchronizeFolder(folder, true, true);
     }
 
-    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
+    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
-    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
+    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         return delegatee.getAttachment(folder, mailId, sequenceId);
     }
 
-    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws MailException {
+    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
         return delegatee.getDeletedMessages(folder, fields);
     }
 
-    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException {
+    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         return delegatee.getImageAttachment(folder, mailId, contentId);
     }
 
-    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
+    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         /*
          * Synchronize since we access the message storage
          */
@@ -193,7 +194,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return delegatee.getMessage(folder, mailId, markSeen);
     }
 
-    public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws MailException {
+    public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         /*
          * Synchronize since we access the message storage
          */
@@ -221,11 +222,11 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return mails;
     }
 
-    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws MailException {
+    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
         return delegatee.getNewAndModifiedMessages(folder, fields);
     }
 
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         /*
          * Synchronize since we access the message storage
          */
@@ -256,7 +257,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return mails;
     }
 
-    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
+    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         /*
          * Synchronize since we access the message storage
          */
@@ -282,24 +283,24 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return unreadMails;
     }
 
-    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] ids = delegatee.moveMessages(sourceFolder, destFolder, mailIds, fast);
         synchronizeFolder(sourceFolder, true, true);
         synchronizeFolder(destFolder, true, true);
         return ids;
     }
 
-    public void releaseResources() throws MailException {
+    public void releaseResources() throws OXException {
         delegatee.releaseResources();
     }
 
-    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException {
+    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         final MailMessage draft = delegatee.saveDraft(draftFullname, draftMail);
         synchronizeFolder(draftFullname, true, true);
         return draft;
     }
 
-    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         /*
          * Synchronize since we access the message storage
          */
@@ -330,12 +331,12 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return mails;
     }
 
-    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws MailException {
+    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         delegatee.updateMessageColorLabel(folder, mailIds, colorLabel);
         synchronizeFolder(folder, true, true);
     }
 
-    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws MailException {
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         delegatee.updateMessageFlags(folder, mailIds, flags, set);
         synchronizeFolder(folder, true, true);
     }
@@ -346,7 +347,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
      * ####################################################################################################################################
      */
 
-    private void fillMails(final String folder, final MailFields originalMailFields, final MailMessage[] mails) throws MailException {
+    private void fillMails(final String folder, final MailFields originalMailFields, final MailMessage[] mails) throws OXException {
         /*
          * Fill messages with cache-available data
          */
@@ -377,7 +378,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
     /**
      * Synchronizes folder either with calling thread or with a separate thread.
      */
-    private void synchronizeFolder(final String folder, final boolean separateThread, final boolean enforce) throws MailException {
+    private void synchronizeFolder(final String folder, final boolean separateThread, final boolean enforce) throws OXException {
         if (separateThread) {
             /*
              * Delegate as task to thread pool
@@ -399,14 +400,14 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
     /**
      * Synchronizes folder with calling thread.
      */
-    private void synchronize(final String folder, final boolean enforce) throws MailException {
+    private void synchronize(final String folder, final boolean enforce) throws OXException {
         synchronize(folder, mailAccess, session, enforce);
     }
 
     /**
      * Dedicated for being performed by a separate thread.
      */
-    static void synchronizeInExternalThread(final String folder, final int accountId, final Session session, final boolean enforce) throws MailException {
+    static void synchronizeInExternalThread(final String folder, final int accountId, final Session session, final boolean enforce) throws OXException {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
             MailAccess.getInstance(session, accountId);
         mailAccess.connect();
@@ -417,7 +418,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         }
     }
 
-    private static void synchronize(final String folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Session session, final boolean enforce) throws MailException {
+    private static void synchronize(final String folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Session session, final boolean enforce) throws OXException {
         /*
          * Sync headers
          */
@@ -473,22 +474,22 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return null;
     }
 
-    private static <V> V getFutureResult(final Future<V> future) throws MailException {
+    private static <V> V getFutureResult(final Future<V> future) throws OXException {
         try {
             return future.get();
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final CancellationException e) {
-            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            if (cause instanceof MailException) {
-                throw ((MailException) cause);
+            if (cause instanceof OXException) {
+                throw ((OXException) cause);
             }
             if (cause instanceof RuntimeException) {
-                throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
             if (cause instanceof Error) {
                 throw (Error) cause;

@@ -50,7 +50,7 @@
 package com.openexchange.pop3.storage;
 
 import java.util.List;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.pop3.POP3Access;
 
@@ -67,19 +67,19 @@ public interface POP3StorageProvider {
      * @param pop3Access The POP3 access to which the storage shall be bound
      * @param properties The properties for the storage; especially the POP3 {@link POP3StoragePropertyNames#PROPERTY_PATH path}
      * @return An appropriate POP3 storage
-     * @throws MailException If no such storage can be found
+     * @throws OXException If no such storage can be found
      * @see POP3StoragePropertyNames
      */
-    public POP3Storage getPOP3Storage(POP3Access pop3Access, POP3StorageProperties properties) throws MailException;
+    public POP3Storage getPOP3Storage(POP3Access pop3Access, POP3StorageProperties properties) throws OXException;
 
     /**
      * Gets the appropriate POP3 storage properties.
      * 
      * @param pop3Access The POP3 access to which the storage properties belong
      * @return The appropriate POP3 storage properties
-     * @throws MailException If no such storage properties can be found
+     * @throws OXException If no such storage properties can be found
      */
-    public POP3StorageProperties getPOP3StorageProperties(POP3Access pop3Access) throws MailException;
+    public POP3StorageProperties getPOP3StorageProperties(POP3Access pop3Access) throws OXException;
 
     /**
      * Gets the POP3 storage name.
