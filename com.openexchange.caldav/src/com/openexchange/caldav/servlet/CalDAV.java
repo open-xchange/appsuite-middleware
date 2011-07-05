@@ -55,9 +55,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.caldav.servlet.CaldavPerformer.Action;
-import com.openexchange.groupware.contexts.impl.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.http.Tools;
@@ -145,7 +144,7 @@ public class CalDAV extends OXServlet {
     }
 
     @Override
-    protected void doReport(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         doIt(req, resp, Action.REPORT);
     }
 
@@ -170,7 +169,7 @@ public class CalDAV extends OXServlet {
         removeCookie(req, resp);
         try {
             LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final LoginException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }

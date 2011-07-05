@@ -53,10 +53,10 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
@@ -65,8 +65,8 @@ import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -78,7 +78,6 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -235,9 +234,9 @@ public final class LoginPerformer {
      * Performs the logout for specified session ID.
      * 
      * @param sessionId The session ID
-     * @throws LoginException If logout fails
+     * @throws OXException If logout fails
      */
-    public Session doLogout(final String sessionId) throws LoginException {
+    public Session doLogout(final String sessionId) throws OXException {
         // Drop the session
         final SessiondService sessiondService;
         try {
@@ -255,13 +254,9 @@ public final class LoginPerformer {
         // Get context
         final ContextStorage contextStor = ContextStorage.getInstance();
         final Context context;
-        try {
-            context = contextStor.getContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new LoginException(e);
-        }
+        context = contextStor.getContext(session.getContextId());
         if (null == context) {
-            throw new LoginException(ContextExceptionCodes.NOT_FOUND.create(Integer.valueOf(session.getContextId())));
+            throw ContextExceptionCodes.NOT_FOUND.create(Integer.valueOf(session.getContextId()));
         }
         // Get user
         final User u;
