@@ -51,10 +51,9 @@ package com.openexchange.config.objects.impl;
 
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.objects.ConfigObjectRegistry;
-import com.openexchange.config.objects.ConfigObjectsException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -75,7 +74,7 @@ public class CascadingConfigObjectRegistry implements ConfigObjectRegistry{
         this.pathMapping = pathMapping;
     }
     
-    public Object get(String path) throws ConfigObjectsException {
+    public Object get(String path) throws OXException {
         try {
             String configKey = transform(path);
             String relevantFile = view.get(configKey, String.class);
@@ -89,7 +88,7 @@ public class CascadingConfigObjectRegistry implements ConfigObjectRegistry{
             }
             return yaml;
         } catch (OXException x) {
-            throw new ConfigObjectsException(x);
+            throw new OXException(x);
         }
         
     }

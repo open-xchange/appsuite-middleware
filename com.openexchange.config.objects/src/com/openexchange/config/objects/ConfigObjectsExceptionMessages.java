@@ -49,10 +49,11 @@
 
 package com.openexchange.config.objects;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ConfigObjectsExceptionMessages} - Exception messages for {@link ConfigObjectsException} that needs to be translated.
+ * {@link ConfigObjectsExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */

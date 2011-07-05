@@ -52,10 +52,7 @@ package com.openexchange.config.objects.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
-import com.openexchange.config.objects.exception.ConfigObjectsExceptionFactory;
 import com.openexchange.config.objects.impl.CascadingConfigObjectRegistryFactory;
-import com.openexchange.exceptions.StringComponent;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
@@ -66,7 +63,6 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 public class ConfigObjectsActivator extends HousekeepingActivator {
 
     private static final Class[] CLASSES = new Class[] { ConfigurationService.class, ConfigViewFactory.class };
-    private ComponentRegistration componentRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -75,8 +71,6 @@ public class ConfigObjectsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        componentRegistration = new ComponentRegistration(context, new StringComponent("CCO"), "com.openexchange.config.objects", ConfigObjectsExceptionFactory.getInstance());
-        
         registerService(ConfigObjectRegistryFactory.class, new CascadingConfigObjectRegistryFactory(
             getService(ConfigViewFactory.class),
             getService(ConfigurationService.class)));
@@ -84,9 +78,6 @@ public class ConfigObjectsActivator extends HousekeepingActivator {
     
     @Override
     protected void stopBundle() throws Exception {
-        if(componentRegistration != null) {
-            componentRegistration.unregister();
-        }
         super.stopBundle();
     }
 

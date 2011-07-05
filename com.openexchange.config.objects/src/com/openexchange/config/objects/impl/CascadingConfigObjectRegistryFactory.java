@@ -53,12 +53,11 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.objects.ConfigObjectRegistry;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
-import com.openexchange.config.objects.ConfigObjectsException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CascadingConfigObjectRegistryFactory}
@@ -73,21 +72,21 @@ public class CascadingConfigObjectRegistryFactory implements ConfigObjectRegistr
 
     private Map<String, String> pathMapping = new HashMap<String, String>();
 
-    public CascadingConfigObjectRegistryFactory(ConfigViewFactory configFactory, ConfigurationService config) throws ConfigObjectsException {
+    public CascadingConfigObjectRegistryFactory(ConfigViewFactory configFactory, ConfigurationService config) throws OXException {
         this.configFactory = configFactory;
         this.config = config;
         initPaths();
     }
 
-    public ConfigObjectRegistry getView(int user, int context) throws ConfigObjectsException {
+    public ConfigObjectRegistry getView(int user, int context) throws OXException {
         try {
             return new CascadingConfigObjectRegistry(configFactory.getView(user, context), config, pathMapping);
         } catch (OXException e) {
-            throw new ConfigObjectsException(e);
+            throw new OXException(e);
         }
     }
 
-    private void initPaths() throws ConfigObjectsException {
+    private void initPaths() throws OXException {
         try {
             ConfigView basicView = configFactory.getView();
             Map<String, ComposedConfigProperty<String>> all = basicView.all();
@@ -101,7 +100,7 @@ public class CascadingConfigObjectRegistryFactory implements ConfigObjectRegistr
             }
 
         } catch (OXException e) {
-            throw new ConfigObjectsException(e);
+            throw new OXException(e);
         }
 
     }

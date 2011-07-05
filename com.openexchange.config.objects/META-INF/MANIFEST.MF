@@ -7,9 +7,9 @@ Bundle-Vendor: Open-XChange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
  com.openexchange.config.cascade,
- com.openexchange.exceptions,
- com.openexchange.exceptions.osgi,
+ com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.i18n,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
  org.osgi.framework

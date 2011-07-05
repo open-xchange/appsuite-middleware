@@ -49,6 +49,8 @@
 
 package com.openexchange.config.objects;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link ConfigObjectRegistryFactory}
@@ -56,5 +58,5 @@ package com.openexchange.config.objects;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ConfigObjectRegistryFactory {
-    public ConfigObjectRegistry getView(int user, int context) throws ConfigObjectsException;
+    public ConfigObjectRegistry getView(int user, int context) throws OXException;
 }
