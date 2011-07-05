@@ -60,10 +60,10 @@ import java.util.concurrent.FutureTask;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.server.OXException;
 import com.openexchange.user.UserService;
 
 

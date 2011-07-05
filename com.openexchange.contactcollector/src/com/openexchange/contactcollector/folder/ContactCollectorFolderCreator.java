@@ -54,12 +54,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -71,7 +68,6 @@ import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -102,14 +98,10 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             con = databaseService.getWritable(cid);
             final String folderName = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             create(login.getSession(), login.getContext(), folderName, con);
-        } catch (final DBPoolingException e) {
-            throw new LoginException(e);
         } catch (final SettingException e) {
-            throw new LoginException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new LoginException(OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage()));
-        } catch (final AbstractOXException e) {
-            throw new LoginException(e);
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (databaseService != null) {
                 databaseService.backWritable(cid, con);
@@ -117,7 +109,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         }
     }
     
-    public void create(final Session session, final Context ctx, final String folderName, final Connection con) throws AbstractOXException, SQLException {
+    public void create(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
         final int cid = session.getContextId();
         final int userId = session.getUserId();
     
@@ -153,7 +145,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
                     true,
                     System.currentTimeMillis()).getObjectID();
         } catch (final OXException folderException) {
-            if (folderException.getDetailNumber() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
+            if (folderException.isPrefix("FLD") && folderException.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
                 LOG.info(new StringBuilder("Found Folder with name of contact collect folder. Guess this is the dedicated folder."));
                 collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);
             }

@@ -55,9 +55,9 @@ import java.util.List;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
