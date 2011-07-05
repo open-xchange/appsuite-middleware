@@ -51,7 +51,7 @@ package com.openexchange.groupware.dataRetrieval.attachments;
 
 import java.io.InputStream;
 import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
@@ -73,7 +73,7 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
     
     private AttachmentBase attachments = null;
     
-    public PIMAttachmentDataProvider(AttachmentBase attachments) {
+    public PIMAttachmentDataProvider(final AttachmentBase attachments) {
         this.attachments = attachments;
     }
     
@@ -81,28 +81,28 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
         return "attachments";
     }
 
-    public InputStream retrieve(PIMAttachmentState state, Map<String, Object> specification, ServerSession session) throws AbstractOXException {
-        int folderId = tolerantInt(specification.get(FOLDER));
-        int objectId = tolerantInt(specification.get(OBJECT));
-        int moduleId = tolerantInt(specification.get(MODULE));
-        int id = tolerantInt(specification.get(ID));
+    public InputStream retrieve(final PIMAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
+        final int folderId = tolerantInt(specification.get(FOLDER));
+        final int objectId = tolerantInt(specification.get(OBJECT));
+        final int moduleId = tolerantInt(specification.get(MODULE));
+        final int id = tolerantInt(specification.get(ID));
 
         return attachments.getAttachedFile(folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
     }
 
-    public FileMetadata retrieveMetadata(PIMAttachmentState state, Map<String, Object> specification, ServerSession session) throws AbstractOXException {
+    public FileMetadata retrieveMetadata(final PIMAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
         
-        int folderId = tolerantInt(specification.get(FOLDER));
-        int objectId = tolerantInt(specification.get(OBJECT));
-        int moduleId = tolerantInt(specification.get(MODULE));
-        int id = tolerantInt(specification.get(ID));
+        final int folderId = tolerantInt(specification.get(FOLDER));
+        final int objectId = tolerantInt(specification.get(OBJECT));
+        final int moduleId = tolerantInt(specification.get(MODULE));
+        final int id = tolerantInt(specification.get(ID));
         
-        AttachmentMetadata attachment = attachments.getAttachment(folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
+        final AttachmentMetadata attachment = attachments.getAttachment(folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
         
         return new AttachmentFileMetadata(attachment);
     }
 
-    private int tolerantInt(Object intable) {
+    private int tolerantInt(final Object intable) {
         return Integer.parseInt(intable.toString());
     }
 
@@ -110,7 +110,7 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
         return null;
     }
 
-    public void close(PIMAttachmentState state) {
+    public void close(final PIMAttachmentState state) {
         
     }
     
@@ -118,7 +118,7 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
 
         private AttachmentMetadata attachment = null;
         
-        public AttachmentFileMetadata(AttachmentMetadata attachment) {
+        public AttachmentFileMetadata(final AttachmentMetadata attachment) {
             this.attachment = attachment;
         }
         
