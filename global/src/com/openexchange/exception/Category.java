@@ -297,6 +297,30 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
+     * The default category for a warning displayed to user.
+     */
+    public static final Category CATEGORY_WARNING = new Category() {
+
+        public LogLevel getLogLevel() {
+            return LogLevel.DEBUG;
+        }
+
+        public Type getType() {
+            return Category.EnumType.WARNING;
+        }
+
+        @Override
+        public String toString() {
+            return Category.EnumType.WARNING.getName();
+        }
+
+        public int compareTo(final Category other) {
+            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+        }
+
+    };
+
+    /**
      * A category's type.
      */
     public static interface Type {

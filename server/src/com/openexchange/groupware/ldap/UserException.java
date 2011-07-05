@@ -49,14 +49,15 @@
 
 package com.openexchange.groupware.ldap;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 
 /**
  * This exception is used if problems occur in the user storage component.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UserException extends AbstractOXException {
+public class UserException extends OXException {
 
     /**
      * For serialization.
@@ -66,42 +67,15 @@ public class UserException extends AbstractOXException {
     /**
      * Detailed information for this exception.
      */
-    private final Detail detail;
+    private final Detail detail = Detail.ERROR;
 
-    public UserException(final AbstractOXException cause) {
+    /**
+     * Initializes a new {@link UserException}.
+     * 
+     * @param cause The cause
+     */
+    public UserException(final Throwable cause) {
         super(cause);
-        detail = Detail.ERROR;
-    }
-
-    /**
-     * Initializes a new exception using the information provides by the code.
-     * @param code code for the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public UserException(final Code code, final Object... messageArgs) {
-        this(code, null, messageArgs);
-    }
-
-    /**
-     * Initializes a new exception using the information provides by the code.
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public UserException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.USER, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
-        this.detail = code.getDetail();
-        setMessageArgs(messageArgs);
-    }
-
-    /**
-     * Initialize e new exception using the information from the nested abstract
-     * OX exception.
-     * @param cause the cause.
-     */
-    public UserException(final LdapException cause) {
-        super(cause);
-        detail = Detail.ERROR;
     }
 
     /**
@@ -131,7 +105,7 @@ public class UserException extends AbstractOXException {
      *
      * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
      */
-    public static enum Code {
+    public static enum Code implements OXExceptionCode {
         /**
          * A property from the ldap.properties file is missing.
          */
