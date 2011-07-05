@@ -136,8 +136,7 @@ public enum ServiceExceptionCode implements OXExceptionCode {
         if (display) {
             ret = new OXException(detailNumber, message, cause, args);
         } else {
-            ret = new OXException(detailNumber, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, new Object[0]);
-            ret.setLogMessage(message, args);
+            ret = new OXException(detailNumber, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, new Object[0]).setLogMessage(message, args);
         }
         return ret.addCategory(category).setPrefix(getPrefix());
     }
