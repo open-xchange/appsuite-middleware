@@ -64,8 +64,9 @@ import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.concurrent.CallerRunsCompletionService;
-import com.openexchange.folderstorage.Folder;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -75,11 +76,8 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.OXException;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -179,7 +177,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 fs.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
@@ -275,7 +273,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     final Log log = LOG;
                     completionService.submit(new Callable<Object>() {
 
-                        public Object call() throws Exception {
+                        public Object call() throws OXException {
                             final StorageParameters newParameters = paramsProvider.getStorageParameters();
                             final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
                             if (tmp.startTransaction(newParameters, false)) {
@@ -292,7 +290,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         ids.add(subfolderIds[index]);
                                     }
                                     folders = tmp.getFolders(treeId, ids, newParameters);
-                                    final Set<AbstractOXException> warnings = newParameters.getWarnings();
+                                    final Set<OXException> warnings = newParameters.getWarnings();
                                     if (!warnings.isEmpty()) {
                                         addWarning(warnings.iterator().next());
                                     }
@@ -382,11 +380,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     fs.rollback(newParameters);
                                 }
                                 throw e;
-                            } catch (final Exception e) {
+                            } catch (final RuntimeException e) {
                                 for (final FolderStorage fs : openedStorages) {
                                     fs.rollback(newParameters);
                                 }
-                                throw OXException.newUnexpectedException(e);
+                                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                             }
                         }
                     });
@@ -400,7 +398,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
         } catch (final OXException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         return ret;
@@ -428,7 +426,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     neededStorage.rollback(storageParameters);
                 }
                 throw e;
-            } catch (final Exception e) {
+            } catch (final RuntimeException e) {
                 if (started) {
                     neededStorage.rollback(storageParameters);
                 }
@@ -464,11 +462,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             }
                             addWarning(e);
                             return Collections.<SortableId> emptyList();
-                        } catch (final Exception e) {
+                        } catch (final RuntimeException e) {
                             if (started) {
                                 neededStorage.rollback(newParameters);
                             }
-                            final OXException OXException = OXException.newUnexpectedException(e);
+                            final OXException OXException = FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                             addWarning(OXException);
                             return Collections.<SortableId> emptyList();
                         }
@@ -490,12 +488,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Throw first warning in set
                  */
-                final AbstractOXException e = getWarnings().iterator().next();
-                e.setCategory(Category.CODE_ERROR);
-                if (!(e instanceof OXException)) {
-                    throw new OXException(e);
-                }
-                throw ((OXException) e);
+                final OXException e = getWarnings().iterator().next();
+                e.addCategory(Category.CATEGORY_ERROR);
+                throw e;
             }
         }
         /*
@@ -565,7 +560,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 ids.add(allSubfolderIds.get(index).getId());
                             }
                             folders = tmp.getFolders(treeId, ids, newParameters);
-                            final Set<AbstractOXException> warnings = newParameters.getWarnings();
+                            final Set<OXException> warnings = newParameters.getWarnings();
                             if (!warnings.isEmpty()) {
                                 addWarning(warnings.iterator().next());
                             }
@@ -662,11 +657,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             fs.rollback(newParameters);
                         }
                         throw e;
-                    } catch (final Exception e) {
+                    } catch (final RuntimeException e) {
                         for (final FolderStorage fs : openedStorages) {
                             fs.rollback(newParameters);
                         }
-                        throw OXException.newUnexpectedException(e);
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                     
                 }
@@ -688,7 +683,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
 
             public OXException newUnexpectedError(final Throwable t) {
-                return OXException.newUnexpectedException(t);
+                return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
         };
 

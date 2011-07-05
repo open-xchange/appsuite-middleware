@@ -64,9 +64,9 @@ import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.concurrent.CallerRunsCompletionService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -78,11 +78,9 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.OXException;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -252,7 +250,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     ids.add(allSubfolderIds.get(index).getId());
                                 }
                                 folders = tmp.getFolders(treeId, ids, newParameters);
-                                final Set<AbstractOXException> warnings = newParameters.getWarnings();
+                                final Set<OXException> warnings = newParameters.getWarnings();
                                 if (!warnings.isEmpty()) {
                                     addWarning(warnings.iterator().next());
                                 }
@@ -342,11 +340,11 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                 fs.rollback(newParameters);
                             }
                             throw e;
-                        } catch (final Exception e) {
+                        } catch (final RuntimeException e) {
                             for (final FolderStorage fs : openedStorages) {
                                 fs.rollback(newParameters);
                             }
-                            throw OXException.newUnexpectedException(e);
+                            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
                         
                     }
@@ -390,7 +388,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -406,7 +404,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             }
 
             public OXException newUnexpectedError(final Throwable t) {
-                return OXException.newUnexpectedException(t);
+                return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
         };
 

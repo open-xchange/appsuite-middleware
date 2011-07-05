@@ -66,7 +66,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -233,14 +232,6 @@ public final class MailFolderStorage implements FolderStorage {
              * Return
              */
             return list.toArray(new SortableId[list.size()]);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -280,8 +271,6 @@ public final class MailFolderStorage implements FolderStorage {
                 recreateMailFolder(accountId, fullname, session, mailAccess);
             }
             addWarnings(mailAccess, storageParameters);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -331,8 +320,6 @@ public final class MailFolderStorage implements FolderStorage {
             addWarnings(mailAccess, storageParameters);
             folder.setID(prepareFullname(accountId, fullname));
             postEvent(accountId, mfd.getParentFullname(), false, storageParameters);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -370,7 +357,7 @@ public final class MailFolderStorage implements FolderStorage {
                     fullname,
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
-            } catch (final OXCachingException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             if (fullname.startsWith(trashFullname)) {
@@ -383,8 +370,6 @@ public final class MailFolderStorage implements FolderStorage {
                 }
                 postEvent(accountId, trashFullname, false, storageParameters);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -419,7 +404,7 @@ public final class MailFolderStorage implements FolderStorage {
                     fullname,
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
-            } catch (final OXCachingException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             if (!hardDelete) {
@@ -428,8 +413,6 @@ public final class MailFolderStorage implements FolderStorage {
             }
             final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
             postEvent4Subfolders(accountId, subfolders, storageParameters);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -467,8 +450,6 @@ public final class MailFolderStorage implements FolderStorage {
                 return prepareFullname(MailAccount.DEFAULT_ID, mailAccess.getFolderStorage().getTrashFolder());
             }
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -495,8 +476,6 @@ public final class MailFolderStorage implements FolderStorage {
             }
             addWarnings(mailAccess, storageParameters);
             return false;
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -531,8 +510,6 @@ public final class MailFolderStorage implements FolderStorage {
                 OrderDirection.DESC,
                 null,
                 new MailField[] { MailField.ID }).length;
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -657,14 +634,6 @@ public final class MailFolderStorage implements FolderStorage {
             retval.setTreeID(treeId);
 
             return retval;
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -688,7 +657,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (!createIfAbsent) {
                 throw e;
             }
-            if ((OXException.Code.FOLDER_NOT_FOUND.getNumber() != e.getDetailNumber()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
+            if ((!e.isPrefix("MSG") || MailExceptionCode.FOLDER_NOT_FOUND.getNumber() != e.getCode()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 throw e;
             }
             return recreateMailFolder(accountId, fullname, session, mailAccess);
@@ -889,14 +858,6 @@ public final class MailFolderStorage implements FolderStorage {
                 list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(tmp.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -946,8 +907,6 @@ public final class MailFolderStorage implements FolderStorage {
             final boolean exists = mailAccess.getFolderStorage().exists(fullname);
             addWarnings(mailAccess, storageParameters);
             return exists;
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -1128,8 +1087,6 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess.getFolderStorage().updateFolder(fullname, mfd);
             addWarnings(mailAccess, storageParameters);
             postEvent(accountId, fullname, false, storageParameters);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             closeMailAccess(mailAccess);
         }

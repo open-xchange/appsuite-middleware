@@ -51,8 +51,8 @@ package com.openexchange.folderstorage.internal;
 
 import java.util.Collection;
 import java.util.Collections;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link FolderResponseImpl}
@@ -69,13 +69,13 @@ public final class FolderResponseImpl<R> implements FolderResponse<R> {
      * @param warnings The warnings
      * @return A new {@link FolderResponse}
      */
-    public static <R> FolderResponse<R> newFolderResponse(final R response, final Collection<AbstractOXException> warnings) {
+    public static <R> FolderResponse<R> newFolderResponse(final R response, final Collection<OXException> warnings) {
         return new FolderResponseImpl<R>(response, warnings);
     }
 
     private final R response;
 
-    private final Collection<AbstractOXException> warnings;
+    private final Collection<OXException> warnings;
 
     /**
      * Initializes a new {@link FolderResponseImpl}.
@@ -83,17 +83,17 @@ public final class FolderResponseImpl<R> implements FolderResponse<R> {
      * @param response The response object
      * @param warnings The warnings
      */
-    private FolderResponseImpl(final R response, final Collection<AbstractOXException> warnings) {
+    private FolderResponseImpl(final R response, final Collection<OXException> warnings) {
         super();
         this.response = response;
-        this.warnings = null == warnings ? Collections.<AbstractOXException> emptySet() : warnings;
+        this.warnings = null == warnings ? Collections.<OXException> emptySet() : warnings;
     }
 
     public R getResponse() {
         return response;
     }
 
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         return warnings;
     }
 

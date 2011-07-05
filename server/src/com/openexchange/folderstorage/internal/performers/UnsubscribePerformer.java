@@ -50,8 +50,8 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;

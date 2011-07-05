@@ -54,17 +54,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -93,7 +92,7 @@ public abstract class AbstractPerformer {
 
     protected StorageParameters storageParameters;
 
-    private final Map<AbstractOXException, Object> warnings;
+    private final Map<OXException, Object> warnings;
 
     /**
      * Initializes a new {@link AbstractPerformer} from given session.
@@ -119,7 +118,7 @@ public abstract class AbstractPerformer {
         user = session.getUser();
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);
-        warnings = new ConcurrentHashMap<AbstractOXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2);
     }
 
     /**
@@ -146,7 +145,7 @@ public abstract class AbstractPerformer {
         this.user = user;
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
-        warnings = new ConcurrentHashMap<AbstractOXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2);
     }
 
     /**
@@ -205,8 +204,8 @@ public abstract class AbstractPerformer {
      * 
      * @param warning The warning to add
      */
-    protected void addWarning(final AbstractOXException warning) {
-        warning.setCategory(Category.WARNING);
+    protected void addWarning(final OXException warning) {
+        warning.addCategory(Category.CATEGORY_WARNING);
         warnings.put(warning, PRESENT);
     }
 
@@ -224,7 +223,7 @@ public abstract class AbstractPerformer {
      * 
      * @return The warnings as an unmodifiable set
      */
-    public Set<AbstractOXException> getWarnings() {
+    public Set<OXException> getWarnings() {
         return Collections.unmodifiableSet(warnings.keySet());
     }
 

@@ -55,12 +55,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StorageParameters;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -95,7 +94,7 @@ public final class StorageParametersImpl implements StorageParameters {
 
     private StackTraceElement[] trace;
 
-    private final Map<AbstractOXException, Object> warnings;
+    private final Map<OXException, Object> warnings;
 
     /**
      * Initializes a new {@link List} from given session.
@@ -110,7 +109,7 @@ public final class StorageParametersImpl implements StorageParameters {
         context = session.getContext();
         contextId = context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
-        warnings = new ConcurrentHashMap<AbstractOXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2);
     }
 
     /**
@@ -127,7 +126,7 @@ public final class StorageParametersImpl implements StorageParameters {
         this.context = context;
         contextId = context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
-        warnings = new ConcurrentHashMap<AbstractOXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2);
     };
 
     private ConcurrentMap<String, Object> getFolderTypeMap(final FolderType folderType, final boolean createIfAbsent) {
@@ -143,7 +142,7 @@ public final class StorageParametersImpl implements StorageParameters {
     }
 
     public void addWarning(final OXException warning) {
-        warning.setCategory(Category.WARNING);
+        warning.addCategory(Category.CATEGORY_WARNING);
         warnings.put(warning, PRESENT);
     }
 

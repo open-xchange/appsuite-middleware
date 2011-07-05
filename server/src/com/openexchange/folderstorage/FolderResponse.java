@@ -50,7 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.util.Collection;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FolderResponse}
@@ -72,6 +72,6 @@ public interface FolderResponse<R> {
      * 
      * @return The warnings
      */
-    Collection<AbstractOXException> getWarnings();
+    Collection<OXException> getWarnings();
 
 }
