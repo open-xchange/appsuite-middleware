@@ -65,7 +65,7 @@
 //import com.openexchange.groupware.settings.IValueHandler;
 //import com.openexchange.groupware.settings.ReadOnlyValue;
 //import com.openexchange.groupware.settings.Setting;
-//import com.openexchange.groupware.settings.SettingException;
+//import com.openexchange.exception.OXException;
 //import com.openexchange.groupware.userconfiguration.UserConfiguration;
 //import com.openexchange.jsieve.SieveHandler;
 //import com.openexchange.jsieve.commands.TestCommand;
@@ -102,7 +102,7 @@
 //    public IValueHandler getSharedValue() {
 //        return new ReadOnlyValue() {
 //
-//            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+//            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
 //                SieveHandler shandler = null;
 //                try {
 //                    final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
@@ -138,21 +138,21 @@
 //                        }
 //                    }
 //                } catch (final OXMailfilterException e) {
-//                    throw new SettingException(e);
+//                    throw new OXException(e);
 //                } catch (final UnknownHostException e) {
-//                    throw new SettingException(com.openexchange.groupware.settings.SettingException.Code.INIT, e);
+//                    throw new OXException(com.openexchange.groupware.settings.OXException.Code.INIT, e);
 //                } catch (final IOException e) {
-//                    throw new SettingException(com.openexchange.groupware.settings.SettingException.Code.INIT, e);
+//                    throw new OXException(com.openexchange.groupware.settings.OXException.Code.INIT, e);
 //                } catch (final JSONException e) {
-//                    throw new SettingException(com.openexchange.groupware.settings.SettingException.Code.JSON_WRITE_ERROR, e);
+//                    throw new OXException(com.openexchange.groupware.settings.OXException.Code.JSON_WRITE_ERROR, e);
 //                } finally {
 //                    if (null != shandler) {
 //                        try {
 //                            shandler.close();
 //                        } catch (final UnsupportedEncodingException e) {
-//                            throw new SettingException(com.openexchange.groupware.settings.SettingException.Code.INIT, e);
+//                            throw new OXException(com.openexchange.groupware.settings.OXException.Code.INIT, e);
 //                        } catch (final IOException e) {
-//                            throw new SettingException(com.openexchange.groupware.settings.SettingException.Code.INIT, e);
+//                            throw new OXException(com.openexchange.groupware.settings.OXException.Code.INIT, e);
 //                        }
 //                    }
 //                }

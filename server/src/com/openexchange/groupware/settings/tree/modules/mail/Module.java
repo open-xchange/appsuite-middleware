@@ -51,15 +51,14 @@ package com.openexchange.groupware.settings.tree.modules.mail;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -97,7 +96,7 @@ public class Module implements PreferencesItemService {
              */
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+                final Setting setting) throws OXException {
                 // Check if multiple mail accounts are enabled
                 if (userConfig.isMultipleMailAccounts() && (ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class) != null)) {
                     setting.setSingleValue(Boolean.TRUE);

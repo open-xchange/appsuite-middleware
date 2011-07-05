@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -66,9 +67,9 @@ public interface IValueHandler {
      * @param session Session.
      * @param userConfig user configuration.
      * @param setting the value should be set in this setting object.
-     * @throws SettingException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException;
+    void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException;
 
     /**
      * @param session Session.
@@ -87,9 +88,9 @@ public interface IValueHandler {
      * @param ctx Context.
      * @param user user object.
      * @param setting contains the value for the setting.
-     * @throws SettingException if the setting can't be written or an error occurs while writing the value.
+     * @throws OXException if the setting can't be written or an error occurs while writing the value.
      */
-    void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException;
+    void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException;
 
     /**
      * If the value should be written simply to the database and read from there a unique identifier must be returned instead of

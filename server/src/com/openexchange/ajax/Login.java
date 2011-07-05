@@ -94,7 +94,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.util.UUIDs;
@@ -865,7 +865,7 @@ public class Login extends AJAXServlet {
                 final Setting setting = ConfigTree.getSettingByPath(modules);
                 SettingStorage.getInstance(session).readValues(setting);
                 json.put(modules, convert2JS(setting));
-            } catch (final SettingException e) {
+            } catch (final OXException e) {
                 LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
             } catch (final JSONException e) {
                 LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);

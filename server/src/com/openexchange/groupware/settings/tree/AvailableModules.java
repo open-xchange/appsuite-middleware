@@ -49,13 +49,13 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -90,7 +90,7 @@ public final class AvailableModules implements PreferencesItemService {
         return new ReadOnlyValue() {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+                final Setting setting) throws OXException {
                 final Setting[] modules = ConfigTree.getSettingByPath("modules")
                     .getElements();
                 final SettingStorage sStor = SettingStorage.getInstance(session,

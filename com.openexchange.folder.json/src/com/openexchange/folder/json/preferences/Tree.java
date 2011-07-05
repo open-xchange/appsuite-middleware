@@ -59,8 +59,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.preferences.ServerUserSetting;
@@ -91,20 +91,20 @@ public class Tree implements PreferencesItemService {
                 return NO_ID;
             }
 
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 Integer tree = ServerUserSetting.getInstance().getFolderTree(ctx.getContextId(), user.getId());
                 if (null == tree) {
                     final ConfigurationService configurationService;
                     try {
                         configurationService = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
                     } catch (final OXException e) {
-                        throw new SettingException(e);
+                        throw new OXException(e);
                     }
                     final String value = configurationService.getProperty(PROPERTY_NAME, "0");
                     try {
                         tree = Integer.valueOf(value);
                     } catch (final NumberFormatException e) {
-                        throw new SettingException(new ConfigurationException(
+                        throw new OXException(new ConfigurationException(
                             ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER,
                             e,
                             PROPERTY_NAME));
@@ -121,13 +121,13 @@ public class Tree implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final String value = setting.getSingleValue().toString();
                 final Integer tree;
                 try {
                     tree = I(Integer.parseInt(value));
                 } catch (final NumberFormatException e) {
-                    throw new SettingException(Code.INVALID_VALUE, e, value, Strings.join(getPath(), "/"));
+                    throw SettingExceptionCodes.INVALID_VALUE.create(e, value, Strings.join(getPath(), "/"));
                 }
                 ServerUserSetting.getInstance().setFolderTree(ctx.getContextId(), user.getId(), tree);
             }

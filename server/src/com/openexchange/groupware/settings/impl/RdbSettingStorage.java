@@ -58,13 +58,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
@@ -123,14 +122,14 @@ public class RdbSettingStorage extends SettingStorage {
     /**
      * Default constructor.
      * @param session Session.
-     * @throws SettingException if the initialization of the setting tree fails.
+     * @throws OXException if the initialization of the setting tree fails.
      */
-    RdbSettingStorage(final Session session) throws SettingException {
+    RdbSettingStorage(final Session session) throws OXException {
         this(session, session.getContextId(), session.getUserId());
     }
 
     RdbSettingStorage(final Session session, final int ctxId,
-        final int userId) throws SettingException {
+        final int userId) throws OXException {
         super();
         this.session = session;
         this.ctxId = ctxId;
@@ -174,23 +173,22 @@ public class RdbSettingStorage extends SettingStorage {
     }
 
     @Override
-    public void save(final Setting setting) throws SettingException {
+    public void save(final Setting setting) throws OXException {
         save(null, setting);
     }
 
     @Override
     public void save(final Connection con, final Setting setting) throws
-        SettingException {
+        OXException {
         if (!setting.isLeaf()) {
-            throw new SettingException(Code.NOT_LEAF, setting.getName());
+            throw SettingExceptionCodes.NOT_LEAF.create(setting.getName());
         }
         if (setting.isShared()) {
             final IValueHandler value = ConfigTree.getSharedValue(setting);
             if (null != value && value.isWritable()) {
                 value.writeValue(session, ctx, user, setting);
             } else {
-                final SettingException e = new SettingException(Code.NO_WRITE,
-                    setting.getName());
+                final OXException e = SettingExceptionCodes.NO_WRITE.create(setting.getName());
                 LOG.debug(e.getMessage(), e);
             }
         } else {
@@ -202,24 +200,19 @@ public class RdbSettingStorage extends SettingStorage {
      * Internally saves a setting into the database.
      * @param con a writable database connection or <code>null</code>.
      * @param setting setting to store.
-     * @throws SettingException if storing fails.
+     * @throws OXException if storing fails.
      */
     private void saveInternal(final Connection con, final Setting setting)
-        throws SettingException {
+        throws OXException {
         if (null == con) {
-            final Connection myCon;
-            try {
-                myCon = DBPool.pickupWriteable(ctx);
-            } catch (final DBPoolingException e) {
-                throw new SettingException(Code.NO_CONNECTION, e);
-            }
+            final Connection myCon = DBPool.pickupWriteable(ctx);
             try {
                 myCon.setAutoCommit(false);
                 saveInternal2(myCon, setting);
                 myCon.commit();
             } catch (final SQLException e) {
                 rollback(myCon);
-                throw new SettingException(Code.SQL_ERROR, e);
+                throw SettingExceptionCodes.SQL_ERROR.create(e);
             } finally {
                 autocommit(myCon);
                 DBPool.closeWriterSilent(ctx, myCon);
@@ -233,10 +226,10 @@ public class RdbSettingStorage extends SettingStorage {
      * Internally saves a setting into the database.
      * @param con a writable database connection.
      * @param setting setting to store.
-     * @throws SettingException if storing fails.
+     * @throws OXException if storing fails.
      */
     private void saveInternal2(final Connection con, final Setting setting)
-        throws SettingException {
+        throws OXException {
         final boolean update = settingExists(con, userId, setting);
         PreparedStatement stmt = null;
         try {
@@ -252,14 +245,14 @@ public class RdbSettingStorage extends SettingStorage {
             stmt.setInt(pos++, setting.getId());
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new SettingException(Code.SQL_ERROR, e);
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
     @Override
-    public void readValues(final Setting setting) throws SettingException {
+    public void readValues(final Setting setting) throws OXException {
         final Connection con;
         if (!setting.isLeaf()) {
             readSubValues(setting);
@@ -268,11 +261,7 @@ public class RdbSettingStorage extends SettingStorage {
         if (setting.isShared()) {
             readSharedValue(setting);
         } else {
-            try {
-                con = DBPool.pickup(ctx);
-            } catch (final DBPoolingException e) {
-                throw new SettingException(Code.NO_CONNECTION, e);
-            }
+            con = DBPool.pickup(ctx);
             try {
                 readValues(con, setting);
             } finally {
@@ -282,7 +271,7 @@ public class RdbSettingStorage extends SettingStorage {
     }
 
     @Override
-    public void readValues(final Connection con, final Setting setting) throws SettingException {
+    public void readValues(final Connection con, final Setting setting) throws OXException {
         if (!setting.isLeaf()) {
             readSubValues(setting);
             return;
@@ -305,7 +294,7 @@ public class RdbSettingStorage extends SettingStorage {
                     setting.setSingleValue(null);
                 }
             } catch (final SQLException e) {
-                throw new SettingException(Code.SQL_ERROR, e);
+                throw SettingExceptionCodes.SQL_ERROR.create(e);
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -325,7 +314,7 @@ public class RdbSettingStorage extends SettingStorage {
                     if (setting.getSingleValue() != null && setting.getSingleValue().equals(IValueHandler.UNDEFINED)) {
                         setting.getParent().removeElement(setting);
                     }
-                } catch (final SettingException e) {
+                } catch (final OXException e) {
                     LOG.error("Problem while reading setting value.", e);
                 }
             } else {
@@ -341,11 +330,11 @@ public class RdbSettingStorage extends SettingStorage {
      * @param setting Setting.
      * @return <code>true</code> if a value for the setting exists in the
      * database.
-     * @throws SettingException if an error occurs.
+     * @throws OXException if an error occurs.
      */
     private boolean settingExists(final Connection con, final int userId,
         final Setting setting)
-        throws SettingException {
+        throws OXException {
         boolean exists = false;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -360,7 +349,7 @@ public class RdbSettingStorage extends SettingStorage {
                 exists = result.getInt(1) == 1;
             }
         } catch (final SQLException e) {
-            throw new SettingException(Code.SQL_ERROR, e);
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -370,10 +359,10 @@ public class RdbSettingStorage extends SettingStorage {
     /**
      * Reads all sub values of a setting.
      * @param setting setting to read.
-     * @throws SettingException if an error occurs while reading the setting.
+     * @throws OXException if an error occurs while reading the setting.
      */
     private void readSubValues(final Setting setting)
-        throws SettingException {
+        throws OXException {
         for (final Setting subSetting : setting.getElements()) {
             readValues(subSetting);
         }

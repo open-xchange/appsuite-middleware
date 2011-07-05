@@ -51,15 +51,14 @@ package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mailaccount.MailAccount;
@@ -100,17 +99,17 @@ public class Drafts implements PreferencesItemService {
             }
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+                final Setting setting) throws OXException {
                 MailServletInterface mail = null;
                 try {
                     mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getDraftsFolder(MailAccount.DEFAULT_ID));
                 } catch (final OXException e) {
-                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                    if (e.isPrefix("ACC") && MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
                         // Admin has no mail access
                         setting.setSingleValue(null);
                     } else {
-                        throw new SettingException(e);
+                        throw e;
                     }
                 } finally {
                     if (mail != null) {

@@ -113,7 +113,7 @@ import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -1895,7 +1895,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (!user.containsConfirm()) {
                     try {
                         user.setConfirm(ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
-                    } catch (final SettingException e) {
+                    } catch (final OXException e) {
                         throw new OXException(e);
                     }
                 }
@@ -1923,7 +1923,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 default:
                     break;
                 }
-            } catch (final SettingException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }

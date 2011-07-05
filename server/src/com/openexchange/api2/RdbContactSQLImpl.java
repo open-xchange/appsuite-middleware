@@ -113,7 +113,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -516,7 +516,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                     if (null != contactCollectFolder && oxfs.exists(contactCollectFolder.intValue())) {
                         searchobject.addFolder(contactCollectFolder.intValue());
                     }
-                } catch (final SettingException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 final EffectivePermission oclPerm = oxfs.getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, userConfiguration);

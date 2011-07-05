@@ -52,17 +52,16 @@ package com.openexchange.groupware.settings.tree;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.I18nServices;
 import com.openexchange.session.Session;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -89,7 +88,7 @@ public class AvailableTimeZones implements PreferencesItemService {
                 return true;
             }
 
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 JSONObject json = new JSONObject();
                 I18nServices i18nServices = I18nServices.getInstance();
                 for (String timeZoneID : TimeZone.getAvailableIDs()) {
@@ -97,7 +96,7 @@ public class AvailableTimeZones implements PreferencesItemService {
                         json.put(timeZoneID, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));
                     } catch (JSONException e) {
                         OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-                        throw new SettingException(e1);
+                        throw new OXException(e1);
                     }
                 }
                 setting.setSingleValue(json);

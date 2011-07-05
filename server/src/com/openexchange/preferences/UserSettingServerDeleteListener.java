@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 
 /**
  * Removes the user setting server entry for a deleted user.
@@ -76,7 +76,7 @@ public final class UserSettingServerDeleteListener implements DeleteListener {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             try {
                 ServerUserSetting.getInstance(writeCon).deleteEntry(event.getContext().getContextId(), event.getId());
-            } catch (final SettingException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }

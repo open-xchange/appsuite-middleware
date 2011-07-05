@@ -49,14 +49,13 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**

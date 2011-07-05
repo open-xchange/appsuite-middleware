@@ -49,13 +49,13 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -98,7 +98,7 @@ public final class ReloadTimes implements PreferencesItemService {
              */
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+                final Setting setting) throws OXException {
                 setting.addMultiValue(Integer.valueOf(0)); // Never
                 setting.addMultiValue(Integer.valueOf(5 * MINUTE));
                 setting.addMultiValue(Integer.valueOf(10 * MINUTE));

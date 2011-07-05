@@ -66,7 +66,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.session.Session;
@@ -224,10 +224,10 @@ public class ConfigMenu extends SessionServlet {
      * Splits a value for a not leaf setting into its subsettings and stores them.
      * @param storage setting storage.
      * @param setting actual setting.
-     * @throws SettingException if an error occurs.
+     * @throws OXException if an error occurs.
      * @throws JSONException if the json object can't be parsed.
      */
-    private void saveSettingWithSubs(SettingStorage storage, Setting setting) throws SettingException, JSONException {
+    private void saveSettingWithSubs(SettingStorage storage, Setting setting) throws OXException, JSONException {
         if (setting.isLeaf()) {
             final String value = (String) setting.getSingleValue();
             if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
@@ -245,7 +245,7 @@ public class ConfigMenu extends SessionServlet {
         } else {
             final JSONObject json = new JSONObject(setting.getSingleValue().toString());
             final Iterator<String> iter = json.keys();
-            SettingException exc = null;
+            OXException exc = null;
             while (iter.hasNext()) {
                 final String key = iter.next();
                 final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
@@ -253,7 +253,7 @@ public class ConfigMenu extends SessionServlet {
                 try {
                     // Catch single exceptions if GUI writes not writable fields.
                     saveSettingWithSubs(storage, sub);
-                } catch (SettingException e) {
+                } catch (OXException e) {
                     exc = e;
                 }
             }

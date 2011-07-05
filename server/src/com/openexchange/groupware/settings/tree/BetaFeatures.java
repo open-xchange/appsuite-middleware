@@ -56,13 +56,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.AbstractUserFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -106,9 +107,9 @@ public final class BetaFeatures implements PreferencesItemService {
                 return true;
             }
             @Override
-            protected void setValue(final UserImpl newUser, final String value, final User originalUser) throws SettingException {
+            protected void setValue(final UserImpl newUser, final String value, final User originalUser) throws OXException {
                 if (!("true".equalsIgnoreCase(value)) && !("false".equalsIgnoreCase(value))) {
-                    throw new SettingException(SettingException.Code.INVALID_VALUE, value, NAME);
+                    throw SettingExceptionCodes.INVALID_VALUE.create(value, NAME);
                 }
                 final Map<String, Set<String>> clonedAttrs = new HashMap<String, Set<String>>(originalUser.getAttributes());
                 final Set<String> beta = new HashSet<String>(1);

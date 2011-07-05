@@ -57,7 +57,7 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -95,7 +95,7 @@ public class AutoSearch implements PreferencesItemService {
             }
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+                final Setting setting) throws OXException {
                 setting.setSingleValue(ParticipantConfig.getInstance()
                     .getProperty(Property.AUTO_SEARCH));
             }

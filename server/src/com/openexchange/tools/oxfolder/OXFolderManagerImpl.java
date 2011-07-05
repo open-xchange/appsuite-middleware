@@ -94,7 +94,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -1699,7 +1699,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     sus.setContactCollectOnMailTransport(ctx.getContextId(), user.getId(), false);
                     sus.setContactCollectionFolder(ctx.getContextId(), user.getId(), null);
                 }
-            } catch (final SettingException e) {
+            } catch (final OXException e) {
                 throw new OXFolderException(e);
             } catch (final LinkException e) {
                 throw new OXFolderException(e);

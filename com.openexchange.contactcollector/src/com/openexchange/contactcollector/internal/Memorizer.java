@@ -82,7 +82,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.preferences.ServerUserSetting;
@@ -301,7 +301,7 @@ public class Memorizer implements Runnable {
             if (null != folder) {
                 retval = folder.intValue();
             }
-        } catch (final SettingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         return retval;
@@ -313,7 +313,7 @@ public class Memorizer implements Runnable {
         try {
             enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
             enabledRight = new ServerSessionAdapter(session).getUserConfiguration().isCollectEmailAddresses();
-        } catch (final SettingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);

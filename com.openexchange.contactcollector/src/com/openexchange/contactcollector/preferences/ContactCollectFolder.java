@@ -54,8 +54,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
@@ -79,7 +79,7 @@ public class ContactCollectFolder implements PreferencesItemService {
                 return -1;
             }
 
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final Integer value = ServerUserSetting.getInstance().getContactCollectionFolder(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
@@ -92,7 +92,7 @@ public class ContactCollectFolder implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 Integer value;
                 try {
                     if (setting.getSingleValue() == null)
@@ -100,7 +100,7 @@ public class ContactCollectFolder implements PreferencesItemService {
                     else
                         value = new Integer(String.valueOf(setting.getSingleValue()));
                 } catch (final NumberFormatException e) {
-                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue(), "contactCollectFolder");
+                    throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue(), "contactCollectFolder");
                 }
                 ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), user.getId(), value);
             }

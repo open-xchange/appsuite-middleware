@@ -50,10 +50,10 @@
 package com.openexchange.groupware.settings.impl;
 
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -73,35 +73,35 @@ public abstract class SettingStorage {
     /**
      * This method stores a specific setting.
      * @param setting the setting to store.
-     * @throws SettingException if an error occurs while saving the setting.
+     * @throws OXException if an error occurs while saving the setting.
      */
-    public abstract void save(Setting setting) throws SettingException;
+    public abstract void save(Setting setting) throws OXException;
 
     /**
      * This method stores a specific setting.
      * @param con writable database connection.
      * @param setting the setting to store.
-     * @throws SettingException if an error occurs while saving the setting.
+     * @throws OXException if an error occurs while saving the setting.
      */
     public abstract void save(Connection con, Setting setting) throws
-        SettingException;
+        OXException;
 
     /**
      * This method reads the setting and its subsettings from the database.
      * @param setting setting to read.
-     * @throws SettingException if an error occurs while reading the setting.
+     * @throws OXException if an error occurs while reading the setting.
      */
     public abstract void readValues(Setting setting)
-        throws SettingException;
+        throws OXException;
 
     /**
      * This method reads the setting and its subsettings from the database.
      * @param con database connection.
      * @param setting setting to read.
-     * @throws SettingException if an error occurs while reading the setting.
+     * @throws OXException if an error occurs while reading the setting.
      */
     public abstract void readValues(Connection con, Setting setting)
-        throws SettingException;
+        throws OXException;
 
     /**
      * @param session Session.
@@ -110,7 +110,7 @@ public abstract class SettingStorage {
     public static SettingStorage getInstance(final Session session) {
         try {
             return new RdbSettingStorage(session);
-        } catch (final SettingException e) {
+        } catch (final OXException e) {
             throw new RuntimeException(e);
         }
     }

@@ -402,7 +402,7 @@ public final class POP3Exception extends OXException {
             category = code.getCategory();
         }
 
-        private Code(final OXException.Code code) {
+        private Code(final OXException.SettingExceptionCodes code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();

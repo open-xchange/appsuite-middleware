@@ -54,8 +54,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
@@ -78,7 +78,7 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 return -1;
             }
 
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 Integer value = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getId());
                 if (value == null) {
                     value = Integer.valueOf(0);
@@ -94,15 +94,15 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 Integer value;
                 try {
                     value = new Integer(String.valueOf(setting.getSingleValue()));
                 } catch (final NumberFormatException e) {
-                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue());
+                    throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue());
                 }
                 if (value < 0 || value > 3) {
-                    throw new SettingException(Code.INVALID_VALUE, setting.getSingleValue());
+                    throw SettingExceptionCodes.INVALID_VALUE.create(setting.getSingleValue());
                 }
                 ServerUserSetting.getInstance().setDefaultStatusPublic(ctx.getContextId(), user.getId(), value);
             }

@@ -60,7 +60,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 
 /**
  * Interface for accessing configuration settings.
@@ -268,7 +269,7 @@ public class ServerUserSetting {
      * @param user user id
      * @return The value or <code>false</code> if no entry is found.
      */
-    public Boolean isContactCollectionEnabled(final int cid, final int user) throws SettingException {
+    public Boolean isContactCollectionEnabled(final int cid, final int user) throws OXException {
         return B(b(isContactCollectOnMailAccess(cid, user)) || b(isContactCollectOnMailTransport(cid, user)));
     }
 
@@ -279,7 +280,7 @@ public class ServerUserSetting {
      * @param user user id
      * @param folder folder id
      */
-    public void setContactCollectionFolder(final int cid, final int user, final Integer folder) throws SettingException {
+    public void setContactCollectionFolder(final int cid, final int user, final Integer folder) throws OXException {
         setAttribute(cid, user, CONTACT_COLLECT_FOLDER, folder);
     }
 
@@ -290,7 +291,7 @@ public class ServerUserSetting {
      * @param user The user id
      * @return folder id or <code>null</code> if no entry found.
      */
-    public Integer getContactCollectionFolder(final int cid, final int user) throws SettingException {
+    public Integer getContactCollectionFolder(final int cid, final int user) throws OXException {
         return getAttribute(cid, user, CONTACT_COLLECT_FOLDER);
     }
 
@@ -300,9 +301,9 @@ public class ServerUserSetting {
      * @param cid The context id
      * @param user The user id
      * @param value The flag to set
-     * @throws SettingException If a setting error occurs
+     * @throws OXException If a setting error occurs
      */
-    public void setContactCollectOnMailAccess(final int cid, final int user, final boolean value) throws SettingException {
+    public void setContactCollectOnMailAccess(final int cid, final int user, final boolean value) throws OXException {
         setAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, Boolean.valueOf(value));
     }
 
@@ -312,9 +313,9 @@ public class ServerUserSetting {
      * @param cid The context id
      * @param user The user id
      * @return The flag for contact collection on incoming mails or <code>false</code>
-     * @throws SettingException If a setting error occurs
+     * @throws OXException If a setting error occurs
      */
-    public Boolean isContactCollectOnMailAccess(final int cid, final int user) throws SettingException {
+    public Boolean isContactCollectOnMailAccess(final int cid, final int user) throws OXException {
         final Boolean attribute = getAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS);
         return null == attribute ? Boolean.FALSE : attribute;
     }
@@ -325,9 +326,9 @@ public class ServerUserSetting {
      * @param cid The context id
      * @param user The user id
      * @param value The flag to set
-     * @throws SettingException If a setting error occurs
+     * @throws OXException If a setting error occurs
      */
-    public void setContactCollectOnMailTransport(final int cid, final int user, final boolean value) throws SettingException {
+    public void setContactCollectOnMailTransport(final int cid, final int user, final boolean value) throws OXException {
         setAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, Boolean.valueOf(value));
     }
 
@@ -337,9 +338,9 @@ public class ServerUserSetting {
      * @param cid The context id
      * @param user The user id
      * @return The flag for contact collection on outgoing mails or <code>false</code>
-     * @throws SettingException If a setting error occurs
+     * @throws OXException If a setting error occurs
      */
-    public Boolean isContactCollectOnMailTransport(final int cid, final int user) throws SettingException {
+    public Boolean isContactCollectOnMailTransport(final int cid, final int user) throws OXException {
         final Boolean attribute = getAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT);
         return null == attribute ? Boolean.FALSE : attribute;
     }
@@ -350,9 +351,9 @@ public class ServerUserSetting {
      * @param cid
      * @param user
      * @return
-     * @throws SettingException If a setting error occurs
+     * @throws OXException If a setting error occurs
      */
-    public Integer getDefaultStatusPrivate(final int cid, final int user) throws SettingException {
+    public Integer getDefaultStatusPrivate(final int cid, final int user) throws OXException {
         Integer value = getAttribute(cid, user, DEFAULT_STATUS_PRIVATE);
         if (value == null) {
             value = I(0);
@@ -366,9 +367,9 @@ public class ServerUserSetting {
      * @param cid
      * @param user
      * @param status
-     * @throws SettingException
+     * @throws OXException
      */
-    public void setDefaultStatusPrivate(final int cid, final int user, final Integer status) throws SettingException {
+    public void setDefaultStatusPrivate(final int cid, final int user, final Integer status) throws OXException {
         setAttribute(cid, user, DEFAULT_STATUS_PRIVATE, status);
     }
 
@@ -378,9 +379,9 @@ public class ServerUserSetting {
      * @param cid
      * @param user
      * @return
-     * @throws SettingException
+     * @throws OXException
      */
-    public Integer getDefaultStatusPublic(final int cid, final int user) throws SettingException {
+    public Integer getDefaultStatusPublic(final int cid, final int user) throws OXException {
         Integer value = getAttribute(cid, user, DEFAULT_STATUS_PUBLIC);
         if (value == null) {
             value = I(0);
@@ -394,9 +395,9 @@ public class ServerUserSetting {
      * @param cid
      * @param user
      * @param status
-     * @throws SettingException
+     * @throws OXException
      */
-    public void setDefaultStatusPublic(final int cid, final int user, final Integer status) throws SettingException {
+    public void setDefaultStatusPublic(final int cid, final int user, final Integer status) throws OXException {
         setAttribute(cid, user, DEFAULT_STATUS_PUBLIC, status);
     }
 
@@ -405,23 +406,23 @@ public class ServerUserSetting {
      * @param cid context identifier
      * @param user user identifier.
      * @return the selected folder tree or <code>null</code>
-     * @throws SettingException if reading the value from the database fails.
+     * @throws OXException if reading the value from the database fails.
      */
-    public Integer getFolderTree(int cid, int user) throws SettingException {
+    public Integer getFolderTree(int cid, int user) throws OXException {
         return getAttribute(cid, user, FOLDER_TREE);
     }
 
-    public void setFolderTree(int cid, int user, Integer value) throws SettingException {
+    public void setFolderTree(int cid, int user, Integer value) throws OXException {
         setAttribute(cid, user, FOLDER_TREE, value);
     }
 
-    private <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute) throws SettingException {
+    private <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute) throws OXException {
         final Connection con;
         if (connection == null) {
             try {
                 con = Database.get(cid, false);
             } catch (final DBPoolingException e) {
-                throw new SettingException(e);
+                throw new OXException(e);
             }
         } else {
             con = connection;
@@ -435,13 +436,13 @@ public class ServerUserSetting {
         }
     }
 
-    private <T> void setAttribute(final int cid, final int user, final Attribute<T> attribute, final T value) throws SettingException {
+    private <T> void setAttribute(final int cid, final int user, final Attribute<T> attribute, final T value) throws OXException {
         final Connection con;
         if (connection == null) {
             try {
                 con = Database.get(cid, true);
             } catch (final DBPoolingException e) {
-                throw new SettingException(e);
+                throw new OXException(e);
             }
         } else {
             con = connection;
@@ -459,13 +460,13 @@ public class ServerUserSetting {
         }
     }
 
-    void deleteEntry(int cid, int user) throws SettingException {
+    void deleteEntry(int cid, int user) throws OXException {
         final Connection con;
         if (connection == null) {
             try {
                 con = Database.get(cid, true);
             } catch (final DBPoolingException e) {
-                throw new SettingException(e);
+                throw new OXException(e);
             }
         } else {
             con = connection;
@@ -479,7 +480,7 @@ public class ServerUserSetting {
         }
     }
 
-    private <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute, final Connection con) throws SettingException {
+    private <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute, final Connection con) throws OXException {
         T retval = null;
         final String select = "SELECT " + attribute.getColumnName() + " FROM user_setting_server WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
@@ -493,14 +494,14 @@ public class ServerUserSetting {
                 retval = attribute.getAttribute(rs);
             }
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e);
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
         return retval;
     }
 
-    private <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
+    private <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE user_setting_server SET " + attribute.getColumnName() + "=? WHERE cid=? AND user=?");
@@ -509,13 +510,13 @@ public class ServerUserSetting {
             stmt.setInt(3, user);
             stmt.execute();
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e);
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(stmt);
         }
     }
 
-    private <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
+    private <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO user_setting_server (" + attribute.getColumnName() + ",cid,user) VALUES (?,?,?)");
@@ -524,13 +525,13 @@ public class ServerUserSetting {
             stmt.setInt(3, user);
             stmt.execute();
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e);
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
-    private void deleteEntry(final int cid, final int user, final Connection con) throws SettingException {
+    private void deleteEntry(final int cid, final int user, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         final ResultSet rs = null;
         try {
@@ -539,13 +540,13 @@ public class ServerUserSetting {
             stmt.setInt(2, user);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e);
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }
     }
 
-    private boolean hasEntry(final int cid, final int user, final Connection con) throws SettingException {
+    private boolean hasEntry(final int cid, final int user, final Connection con) throws OXException {
         boolean retval = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -556,7 +557,7 @@ public class ServerUserSetting {
             rs = stmt.executeQuery();
             retval = rs.next();
         } catch (final SQLException e) {
-            throw new SettingException(SettingException.Code.SQL_ERROR, e);
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
         }

@@ -55,7 +55,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 
 /**
@@ -88,7 +88,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
             .getService(reference);
         try {
             ConfigTree.addPreferencesItem(item);
-        } catch (final SettingException e) {
+        } catch (final OXException e) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Can't add service for preferences item. Path: ");
             final String[] path = item.getPath();

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -66,8 +67,8 @@ public abstract class ReadOnlyValue implements IValueHandler {
         return false;
     }
 
-    public final void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
-        throw new SettingException(SettingException.Code.NO_WRITE, setting.getName());
+    public final void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
+        throw SettingExceptionCodes.NO_WRITE.create(setting.getName());
     }
 
     public int getId() {

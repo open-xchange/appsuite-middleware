@@ -54,7 +54,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
@@ -81,7 +81,7 @@ public class ContactCollectOnMailTransport implements PreferencesItemService {
                 return -1;
             }
 
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final Boolean value = ServerUserSetting.getInstance().isContactCollectOnMailTransport(ctx.getContextId(), user.getId());
                 setting.setSingleValue(value);
             }
@@ -95,7 +95,7 @@ public class ContactCollectOnMailTransport implements PreferencesItemService {
             }
 
             public void writeValue(
-                final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
+                final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
                 ServerUserSetting.getInstance().setContactCollectOnMailTransport(ctx.getContextId(), user.getId(), value);
             }

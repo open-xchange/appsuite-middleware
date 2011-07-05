@@ -55,8 +55,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -89,7 +88,7 @@ public class LineWrap implements PreferencesItemService {
         return new IValueHandler() {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+                final Setting setting) throws OXException {
                 final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
@@ -104,7 +103,7 @@ public class LineWrap implements PreferencesItemService {
                 return true;
             }
             public void writeValue(final Session session, final Context ctx, final User user,
-                final Setting setting) throws SettingException {
+                final Setting setting) throws OXException {
                 final UserSettingMailStorage storage = UserSettingMailStorage
                     .getInstance();
                 final UserSettingMail settings = storage.getUserSettingMail(
@@ -116,9 +115,9 @@ public class LineWrap implements PreferencesItemService {
                         storage.saveUserSettingMail(settings, user.getId(),
                                 ctx);
                     } catch (final NumberFormatException e) {
-                        throw new SettingException(Code.JSON_READ_ERROR, e);
+                        throw SettingExceptionCodes.JSON_READ_ERROR.create(e);
                     } catch (final OXException e) {
-                        throw new SettingException(e);
+                        throw new OXException(e);
                     }
                 }
             }

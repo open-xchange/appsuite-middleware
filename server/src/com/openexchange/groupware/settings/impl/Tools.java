@@ -55,9 +55,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
@@ -74,30 +72,30 @@ public final class Tools {
     }
 
     public static Context getContext(final int contextId)
-        throws SettingException {
+        throws OXException {
         try {
             return ContextStorage.getInstance().getContext(contextId);
         } catch (final OXException e) {
-            throw new SettingException(e);
+            throw new OXException(e);
         }
     }
 
     public static User getUser(final Context ctx, final int userId)
-        throws SettingException {
+        throws OXException {
         try {
             return UserStorage.getInstance().getUser(userId, ctx);
         } catch (final LdapException e) {
-            throw new SettingException(e);
+            throw new OXException(e);
         }
     }
 
     public static UserConfiguration getUserConfiguration(final Context ctx,
-        final int userId) throws SettingException {
+        final int userId) throws OXException {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(
                 userId, ctx);
         } catch (final OXException e) {
-            throw new SettingException(e);
+            throw new OXException(e);
         }
     }
 }

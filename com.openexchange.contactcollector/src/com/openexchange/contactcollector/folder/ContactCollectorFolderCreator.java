@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
@@ -98,7 +98,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             con = databaseService.getWritable(cid);
             final String folderName = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             create(login.getSession(), login.getContext(), folderName, con);
-        } catch (final SettingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -162,7 +162,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         }
     }
     
-    private boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws SettingException {
+    private boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {
         return setting.getContactCollectionFolder(cid, userId) != null;
     }
 

@@ -59,7 +59,7 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -89,7 +89,7 @@ public class Enabled implements PreferencesItemService {
             /**
              * {@inheritDoc}
              */
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 try {
                     final ConfigView view = configViews.getView(user.getId(), ctx.getContextId());
                     final ComposedConfigProperty<Boolean> property = view.property(ENABLED, boolean.class);
@@ -99,7 +99,7 @@ public class Enabled implements PreferencesItemService {
                         setting.setSingleValue(Boolean.TRUE);
                     }
                 } catch (final OXException e) {
-                    throw new SettingException(e);
+                    throw new OXException(e);
                 }
             }
 

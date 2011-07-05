@@ -70,7 +70,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
@@ -143,7 +143,7 @@ public class Activator implements BundleActivator {
                         return NO_ID;
                     }
 
-                    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                         try {
                             Object value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
                             if (UNDEFINED_STRING.equals(value)) {
@@ -160,7 +160,7 @@ public class Activator implements BundleActivator {
                             
                             setting.setSingleValue(value);
                         } catch (OXException e) {
-                            throw new SettingException(e);
+                            throw new OXException(e);
                         }
                     }
 
@@ -172,7 +172,7 @@ public class Activator implements BundleActivator {
                         return writable;
                     }
 
-                    public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
+                    public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
                         Object value = setting.getSingleValue();
                         if(value == null) {
                             Object[] multiValue = setting.getMultiValue();
@@ -198,7 +198,7 @@ public class Activator implements BundleActivator {
                         } else {
                             
                         }} catch (OXException e) {
-                            throw new SettingException(e);
+                            throw new OXException(e);
                         }
                         
                     }
@@ -231,7 +231,7 @@ public class Activator implements BundleActivator {
                             return NO_ID;
                         }
 
-                        public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                        public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                             try {
                                 ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
                                 Object value = prop.get(metadataName);
@@ -245,7 +245,7 @@ public class Activator implements BundleActivator {
                                 
                                 setting.setSingleValue(value);
                             } catch (OXException e) {
-                                throw new SettingException(e);
+                                throw new OXException(e);
                             }
                         }
 
@@ -257,7 +257,7 @@ public class Activator implements BundleActivator {
                             return false;
                         }
 
-                        public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
+                        public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
                             // IGNORE
                         }
                         
@@ -289,7 +289,7 @@ public class Activator implements BundleActivator {
                         return NO_ID;
                     }
 
-                    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                         setting.setSingleValue(writable);
                     }
 
@@ -301,7 +301,7 @@ public class Activator implements BundleActivator {
                         return false;
                     }
 
-                    public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
+                    public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
                         // IGNORE
                     }
                     

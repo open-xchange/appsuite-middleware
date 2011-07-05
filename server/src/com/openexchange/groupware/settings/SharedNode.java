@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -74,8 +75,8 @@ public final class SharedNode implements IValueHandler {
         this.id = id;
     }
 
-    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-        throw new SettingException(SettingException.Code.NOT_LEAF, name);
+    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+        throw SettingExceptionCodes.NOT_LEAF.create(name);
     }
 
     public boolean isAvailable(UserConfiguration userConfig) {
@@ -86,8 +87,8 @@ public final class SharedNode implements IValueHandler {
         return false;
     }
 
-    public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
-        throw new SettingException(SettingException.Code.NO_WRITE, name);
+    public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
+        throw SettingExceptionCodes.NO_WRITE.create(name);
     }
 
     public int getId() {

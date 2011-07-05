@@ -54,9 +54,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
@@ -78,13 +76,13 @@ public abstract class AbstractMailFuncs implements IValueHandler {
      */
     public void getValue(final Session session, final Context ctx,
         final User user, final UserConfiguration userConfig,
-        final Setting setting) throws SettingException {
+        final Setting setting) throws OXException {
         final UserSettingMail settings;
         try {
             settings = UserSettingMailStorage.getInstance().loadUserSettingMail(
                 user.getId(), ctx);
         } catch (final OXException e) {
-            throw new SettingException(e);
+            throw new OXException(e);
         }
 		if (userConfig.hasWebMail()) {
 			setting.setSingleValue(isSet(settings));
@@ -109,20 +107,20 @@ public abstract class AbstractMailFuncs implements IValueHandler {
 	 * {@inheritDoc}
 	 */
 	public void writeValue(final Session session, final Context ctx, final User user,
-	    final Setting setting) throws SettingException {
+	    final Setting setting) throws OXException {
         final UserSettingMailStorage storage = UserSettingMailStorage
             .getInstance();
 		final UserSettingMail settings;
         try {
             settings = storage.loadUserSettingMail(user.getId(), ctx);
         } catch (final OXException e) {
-            throw new SettingException(e);
+            throw new OXException(e);
         }
 		setValue(settings, setting.getSingleValue().toString());
 		try {
 			storage.saveUserSettingMail(settings, user.getId(), ctx);
 		} catch (final OXException e) {
-			throw new SettingException(e);
+			throw new OXException(e);
 		}
 	}
 

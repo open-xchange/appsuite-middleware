@@ -125,7 +125,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
@@ -1065,7 +1065,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             userId).booleanValue()) {
                             triggerContactCollector(session, mail);
                         }
-                    } catch (final SettingException e) {
+                    } catch (final OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
                 }
@@ -1226,7 +1226,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 userId).booleanValue()) {
                                 triggerContactCollector(session, mail);
                             }
-                        } catch (final SettingException e) {
+                        } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);
                         }
                     }
@@ -1300,7 +1300,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 userId).booleanValue()) {
                                 triggerContactCollector(session, mail);
                             }
-                        } catch (final SettingException e) {
+                        } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);
                         }
                     }
@@ -1386,7 +1386,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                         userId).booleanValue()) {
                                         triggerContactCollector(session, mailObject);
                                     }
-                                } catch (final SettingException e) {
+                                } catch (final OXException e) {
                                     LOG.warn("Contact collector could not be triggered.", e);
                                 }
                             }
@@ -1425,7 +1425,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                     userId).booleanValue()) {
                                     triggerContactCollector(session, mail);
                                 }
-                            } catch (final SettingException e) {
+                            } catch (final OXException e) {
                                 LOG.warn("Contact collector could not be triggered.", e);
                             }
                         }
@@ -3448,7 +3448,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         userId).booleanValue()) {
                         triggerContactCollector(session, composedMail);
                     }
-                } catch (final SettingException e) {
+                } catch (final OXException e) {
                     LOG.warn("Contact collector could not be triggered.", e);
                 }
             } finally {
@@ -4387,7 +4387,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                     userId).booleanValue()) {
                                     triggerContactCollector(session, composedMails[0]);
                                 }
-                            } catch (final SettingException e) {
+                            } catch (final OXException e) {
                                 LOG.warn("Contact collector could not be triggered.", e);
                             }
                         }

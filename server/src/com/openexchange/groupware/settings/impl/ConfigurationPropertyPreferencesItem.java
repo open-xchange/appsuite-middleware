@@ -50,13 +50,13 @@
 package com.openexchange.groupware.settings.impl;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -90,7 +90,7 @@ public class ConfigurationPropertyPreferencesItem implements PreferencesItemServ
 
     protected final class Property extends ReadOnlyValue {
 
-        public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+        public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
             setting.setSingleValue(convert(config.getProperty(key)));
         }
 

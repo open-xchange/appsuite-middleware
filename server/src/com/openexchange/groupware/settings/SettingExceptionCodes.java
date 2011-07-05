@@ -1,14 +1,14 @@
 package com.openexchange.groupware.settings;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * The error code enumeration for setting exceptions.
+ * The error codes for settings.
  */
-public enum SettingExceptionCodes {
+public enum SettingExceptionCodes implements OXExceptionCode {
     /** Cannot get connection to database. */
     NO_CONNECTION("Cannot get connection to database.", Category.CATEGORY_SERVICE_DOWN, 1),
     /** An SQL problem occures while reading information from the config database. */
@@ -38,64 +38,56 @@ public enum SettingExceptionCodes {
 
     private final int detailNumber;
 
-    private final boolean display;
-
     private SettingExceptionCodes(final String message, final Category category,
         final int detailNumber) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
-        display = LogLevel.DEBUG.equals(category.getLogLevel());
+    }
+    
+    public String getPrefix() {
+        return "USS";
     }
 
     public Category getCategory() {
         return category;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
     public String getMessage() {
         return message;
     }
-
+    
     /**
-     * Creates an {@link OXException} instance using this error code.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @return The newly created {@link OXException} instance.
+     * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return create(new Object[0]);
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates an {@link OXException} instance using this error code.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param arguments The arguments for message.
-     * @return The newly created {@link OXException} instance.
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... arguments) {
-        return create(null, arguments);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
-    private static final String PREFIX = "USS";
-
     /**
-     * Creates an {@link OXException} instance using this error code.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The initial cause for {@link OXException}
-     * @param arguments The arguments for message.
-     * @return The newly created {@link OXException} instance.
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... arguments) {
-        final OXException ret;
-        if (display) {
-            ret = new OXException(detailNumber, message, cause, arguments);
-        } else {
-            ret = new OXException(detailNumber, OXExceptionStrings.MESSAGE, cause);
-            ret.setLogMessage(message, arguments);
-        }
-        return ret.setPrefix(PREFIX).addCategory(category);
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

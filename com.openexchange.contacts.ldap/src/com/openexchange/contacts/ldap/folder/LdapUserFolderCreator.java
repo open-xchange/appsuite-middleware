@@ -132,7 +132,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
 //            }
 //        } catch (final OXException e) {
 //            throw new LoginException(e);
-//        } catch (final SettingException e) {
+//        } catch (final OXException e) {
 //            throw new LoginException(e);
 //        }
     }

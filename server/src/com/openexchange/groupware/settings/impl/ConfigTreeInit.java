@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.settings.impl;
 
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -77,7 +77,7 @@ public final class ConfigTreeInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void start() throws SettingException {
+    public void start() throws OXException {
         ConfigTree.init();
     }
 
