@@ -67,7 +67,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
@@ -114,7 +113,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
         if (null == userService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
         }
-        try {
+        {
             final User user = userService.getUser(session.getUserId(), ctx);
             if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
                 retval = actionNew(ctx, user, json);
@@ -126,12 +125,10 @@ public final class GroupManageRequest implements AJAXRequestHandler {
                 throw AjaxExceptionCodes.UnknownAction.create( action);
             }
             return retval;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         }
     }
 
-    private AJAXRequestResult actionNew(final Context ctx, final User user, final JSONObject json) throws AbstractOXException, JSONException {
+    private AJAXRequestResult actionNew(final Context ctx, final User user, final JSONObject json) throws OXException, JSONException {
         final Group group = new Group();
         final JSONObject jsonobject = DataParser.checkJSONObject(json, ResponseFields.DATA);
         final GroupParser groupParser = new GroupParser();
@@ -143,7 +140,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
         return new AJAXRequestResult(response, group.getLastModified());
     }
 
-    private AJAXRequestResult actionDelete(final Context ctx, final User user, final JSONObject json) throws AbstractOXException, JSONException {
+    private AJAXRequestResult actionDelete(final Context ctx, final User user, final JSONObject json) throws OXException {
         final JSONObject jsonobject = DataParser.checkJSONObject(json, ResponseFields.DATA);
         final int groupId = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
         final Date timestamp = DataParser.checkDate(json, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -152,7 +149,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
         return new AJAXRequestResult(new JSONArray(), timestamp);
     }
 
-    private AJAXRequestResult actionUpdate(final Context ctx, final User user, final JSONObject json) throws AbstractOXException, JSONException {
+    private AJAXRequestResult actionUpdate(final Context ctx, final User user, final JSONObject json) throws OXException, JSONException {
         final int identifier = DataParser.checkInt(json, AJAXServlet.PARAMETER_ID);
         final Date timestamp = DataParser.checkDate(json, AJAXServlet.PARAMETER_TIMESTAMP);
         final JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
