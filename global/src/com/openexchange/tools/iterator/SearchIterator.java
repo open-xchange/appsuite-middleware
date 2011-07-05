@@ -55,7 +55,6 @@ import com.openexchange.groupware.AbstractOXException;
 /**
  * {@link SearchIterator} - An extended iterator over a collection or a (releasable) resource.
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SearchIterator<T> {

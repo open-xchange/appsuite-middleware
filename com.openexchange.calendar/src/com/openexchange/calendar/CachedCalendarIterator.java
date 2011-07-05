@@ -107,7 +107,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 
     private CalendarFolderObject visibleFolders;
 
-    public CachedCalendarIterator(final CalendarFolderObject visibleFolders, final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws AbstractOXException {
+    public CachedCalendarIterator(final CalendarFolderObject visibleFolders, final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	list = new ArrayList<CalendarDataObject>(16);
     	this.visibleFolders = visibleFolders;
@@ -122,11 +122,11 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
     }
 
-    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws AbstractOXException {
+    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws OXException {
         this(null, non_cached_iterator, c, uid);
     }
 
-    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws AbstractOXException {
+    public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	if (non_cached_iterator.hasWarnings()) {
     		warnings.addAll(Arrays.asList(non_cached_iterator.getWarnings()));
