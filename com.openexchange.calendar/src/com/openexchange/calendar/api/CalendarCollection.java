@@ -2032,7 +2032,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
     }
     
-    private boolean containsParticipant(final Participant[] participants, final Participant p, final Context ctx) throws LdapException {
+    private boolean containsParticipant(final Participant[] participants, final Participant p, final Context ctx) throws OXException {
         for (final Participant part : participants) {
             if (part.getType() == p.getType()) {
                 if (part.getIdentifier() == p.getIdentifier()) {
