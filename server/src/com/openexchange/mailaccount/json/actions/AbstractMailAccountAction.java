@@ -84,7 +84,6 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

@@ -64,7 +64,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
@@ -123,8 +122,8 @@ public final class UpdateAction extends AbstractMailAccountAction {
             final Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
             notAllowed.removeAll(WEBMAIL_ALLOWED);
             if (!session.getUserConfiguration().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw 
+                    MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }

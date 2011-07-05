@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -99,8 +98,8 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
             }
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw 
+                    MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }

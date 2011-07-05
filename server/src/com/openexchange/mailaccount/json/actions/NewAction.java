@@ -63,8 +63,6 @@ import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
@@ -94,8 +92,8 @@ public final class NewAction extends AbstractMailAccountAction {
 
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw 
+                    MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }

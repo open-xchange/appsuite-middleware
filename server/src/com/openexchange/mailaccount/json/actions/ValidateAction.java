@@ -71,7 +71,6 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
@@ -102,13 +101,13 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws com.openexchange.exception.OXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final JSONObject jData = (JSONObject) request.getData();
 
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw 
+                    MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -151,14 +150,13 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         } catch (final GeneralSecurityException e) {
-            throw new OXException(MailAccountExceptionFactory.getInstance().create(
-                MailAccountExceptionCodes.UNEXPECTED_ERROR,
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(
                 e,
-                e.getMessage()));
+                e.getMessage());
         }
     }
 
-    private static JSONObject actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws JSONException, AbstractOXException {
+    private static JSONObject actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws JSONException, OXException {
         if (!actionValidateBoolean(accountDescription, session, warnings).booleanValue()) {
             // TODO: How to indicate error if folder tree requested?
             return null;
@@ -168,7 +166,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return actionValidateTree0(mailAccess, session);
     }
 
-    private static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws AbstractOXException {
+    private static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws OXException {
         try {
             // Validate mail server
             boolean validated = checkMailServerURL(accountDescription, session, warnings);
@@ -187,7 +185,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
     }
 
-    private static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws AbstractOXException {
+    private static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws OXException {
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
         if (null == mailAccess) {
@@ -197,7 +195,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return mailAccess.ping();
     }
 
-    private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws AbstractOXException {
+    private static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<AbstractOXException> warnings) throws OXException {
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);

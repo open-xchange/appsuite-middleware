@@ -61,7 +61,7 @@ public class OXJSONException extends AbstractOXException {
 
     private static final long serialVersionUID = 3931776129684819019L;
 
-    public OXJSONException(AbstractOXException cause) {
+    public OXJSONException(final AbstractOXException cause) {
         super(cause);
     }
 
@@ -71,7 +71,7 @@ public class OXJSONException extends AbstractOXException {
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public OXJSONException(Code code, Object... messageArgs) {
+    public OXJSONException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
@@ -82,7 +82,7 @@ public class OXJSONException extends AbstractOXException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public OXJSONException(Code code, Throwable cause, Object... messageArgs) {
+    public OXJSONException(final Code code, final Throwable cause, final Object... messageArgs) {
         super(EnumComponent.SERVLET, code.getCategory(), code.getNumber(), null == code.getMessage() ? cause.getMessage() : code.getMessage(), cause);
         setMessageArgs(messageArgs);
     }
@@ -90,7 +90,7 @@ public class OXJSONException extends AbstractOXException {
     /**
      * Error codes for servlet exceptions.
      */
-    public enum Code {
+    public static enum Code {
         /** Exception while writing JSON. */
         JSON_WRITE_ERROR("Exception while writing JSON.", Category.CODE_ERROR, 1),
         /** Exception while parsing JSON: "%s". */

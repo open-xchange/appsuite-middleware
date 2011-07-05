@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
@@ -64,10 +63,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link GetAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetAction extends AbstractMailAccountAction {
@@ -99,8 +97,7 @@ public final class GetAction extends AbstractMailAccountAction {
             }
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -108,8 +105,8 @@ public final class GetAction extends AbstractMailAccountAction {
             final JSONObject jsonAccount = MailAccountWriter.write(checkFullNames(mailAccount, storageService, session));
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
         }
     }
-    
+
 }

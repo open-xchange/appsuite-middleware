@@ -57,17 +57,15 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link DeleteAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteAction extends AbstractMailAccountAction {
@@ -96,8 +94,7 @@ public final class DeleteAction extends AbstractMailAccountAction {
                 for (int i = 0; i < len; i++) {
                     final int id = jsonArray.getInt(i);
                     if (MailAccount.DEFAULT_ID != id) {
-                        throw MailAccountExceptionFactory.getInstance().create(
-                            MailAccountExceptionCodes.NOT_ENABLED,
+                        throw MailAccountExceptionCodes.NOT_ENABLED.create(
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()));
                     }
@@ -110,7 +107,11 @@ public final class DeleteAction extends AbstractMailAccountAction {
                 final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
                 if (!isUnifiedINBOXAccount(mailAccount)) {
-                    storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
+                    storageService.deleteMailAccount(
+                        id,
+                        Collections.<String, Object> emptyMap(),
+                        session.getUserId(),
+                        session.getContextId());
                 }
 
                 responseArray.put(id);
@@ -120,8 +121,8 @@ public final class DeleteAction extends AbstractMailAccountAction {
              */
             return new AJAXRequestResult(responseArray);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
         }
     }
-    
+
 }
