@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -148,7 +148,7 @@ public final class MALPollPushListenerRegistry {
             final MALPollPushListener l = i.next();
             try {
                 l.open();
-            } catch (final PushException e) {
+            } catch (final OXException e) {
                 org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRegistry.class).error(
                     MessageFormat.format("Opening MAL Poll listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
@@ -211,7 +211,7 @@ public final class MALPollPushListenerRegistry {
             final SimpleKey key = entry.getKey();
             try {
                 MALPollDBUtility.dropMailIDs(key.cid, key.user);
-            } catch (final PushException e) {
+            } catch (final OXException e) {
                 LOG.error("DB tables could not be cleansed for removed push listener. User=" + key.user + ", context=" + key.cid, e);
             }
         }
@@ -225,7 +225,7 @@ public final class MALPollPushListenerRegistry {
         }
         try {
             MALPollDBUtility.dropMailIDs(key.cid, key.user);
-        } catch (final PushException e) {
+        } catch (final OXException e) {
             LOG.error("DB tables could not be cleansed for removed push listener. User=" + key.user + ", context=" + key.cid, e);
         }
         return true;

@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 
 /**
  * {@link MailNotifyPushDeleteListener} - Delete listener for the push bundle.
@@ -74,7 +74,7 @@ public final class MailNotifyPushDeleteListener implements DeleteListener {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             try {
                 MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(event.getContext().getContextId(), event.getId());
-            } catch (final PushException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }

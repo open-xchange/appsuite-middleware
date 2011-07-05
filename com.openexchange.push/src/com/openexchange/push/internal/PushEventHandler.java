@@ -58,7 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.push.PushException;
+import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.session.Session;
@@ -123,7 +123,7 @@ public final class PushEventHandler implements EventHandler {
                                     " in context ").append(session.getContextId()).append(" by push manager \"").append(
                                     pushManager.toString()).append('"').toString());
                             }
-                        } catch (final PushException e) {
+                        } catch (final OXException e) {
                             LOG.error("Push error while stopping push listener.", e);
                         } catch (final RuntimeException e) {
                             LOG.error("Runtime error while stopping push listener.", e);
@@ -147,7 +147,7 @@ public final class PushEventHandler implements EventHandler {
                                         pushManager.toString()).append('"').toString());
                                 }
                             }
-                        } catch (final PushException e) {
+                        } catch (final OXException e) {
                             LOG.error("Push error while stopping push listener.", e);
                         } catch (final RuntimeException e) {
                             LOG.error("Runtime error while stopping push listener.", e);
@@ -179,7 +179,7 @@ public final class PushEventHandler implements EventHandler {
                                     " in context ").append(session.getContextId()).append(" by push manager \"").append(
                                     pushManager.toString()).append('"').toString());
                             }
-                        } catch (final PushException e) {
+                        } catch (final OXException e) {
                             LOG.error("Push error while starting push listener.", e);
                         } catch (final RuntimeException e) {
                             LOG.error("Runtime error while starting push listener.", e);

@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 
 
 /**
@@ -56,7 +56,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                 }
             } catch (final IOException e) {
                 LOG.error("Receiving of UDP packet failed: " + e.getMessage(), e);
-            } catch (final PushException e) {
+            } catch (final OXException e) {
                 LOG.error("Failed to create push event: " + e.getMessage(), e);
             }
         }

@@ -53,8 +53,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.exception.OXException;
 import com.openexchange.push.internal.ServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -80,9 +80,9 @@ public final class PushUtility {
      * 
      * @param folder The folder identifier; including account information
      * @param session The session providing needed user data
-     * @throws PushException If posting event fails
+     * @throws OXException If posting event fails
      */
-    public static void triggerOSGiEvent(final String folder, final Session session) throws PushException {
+    public static void triggerOSGiEvent(final String folder, final Session session) throws OXException {
         try {
             final EventAdmin eventAdmin = ServiceRegistry.getInstance().getService(EventAdmin.class, true);
             /*
@@ -108,7 +108,7 @@ public final class PushUtility {
                     userId).append(" in context ").append(contextId).toString());
             }
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         }
     }
 

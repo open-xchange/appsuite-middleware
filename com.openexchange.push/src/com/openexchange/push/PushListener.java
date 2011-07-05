@@ -49,6 +49,8 @@
 
 package com.openexchange.push;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link PushListener} - Uses Equinox Event framework to propagate new mails.
  * 
@@ -59,8 +61,8 @@ public interface PushListener {
     /**
      * Notifies about new mails in <code>INBOX</code> folder.
      * 
-     * @throws PushException If notification fails
+     * @throws OXException If notification fails
      */
-    public void notifyNewMail() throws PushException;
+    public void notifyNewMail() throws OXException;
 
 }

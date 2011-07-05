@@ -49,7 +49,7 @@
 
 package com.openexchange.push.imapidle;
 
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.session.Session;
@@ -70,7 +70,7 @@ public final class ImapIdlePushManagerService implements PushManagerService {
         name = "IMAP IDLE Push Manager";
     }
 
-    public PushListener startListener(final Session session) throws PushException {
+    public PushListener startListener(final Session session) throws OXException {
         final ImapIdlePushListener pushListener = ImapIdlePushListener.newInstance(session);
         if (ImapIdlePushListenerRegistry.getInstance().addPushListener(
             session.getContextId(),

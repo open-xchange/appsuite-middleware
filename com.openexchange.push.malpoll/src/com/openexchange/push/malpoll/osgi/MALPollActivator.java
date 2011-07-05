@@ -67,7 +67,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.malpoll.MALPollCreateTableTask;
 import com.openexchange.push.malpoll.MALPollDeleteListener;
@@ -320,7 +320,7 @@ public final class MALPollActivator extends DeferredActivator {
                      */
                     try {
                         l.checkNewMail();
-                    } catch (final PushException e) {
+                    } catch (final OXException e) {
                         log.error(e.getMessage(), e);
                     }
                 }

@@ -60,7 +60,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
@@ -206,9 +206,9 @@ public final class ImapIdlePushListener implements PushListener {
     /**
      * Opens this listener
      * 
-     * @throws PushException If listener cannot be opened
+     * @throws OXException If listener cannot be opened
      */
-    public void open() throws PushException {
+    public void open() throws OXException {
         final ThreadPoolService threadPoolService;
         try {
             threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
@@ -246,9 +246,9 @@ public final class ImapIdlePushListener implements PushListener {
                 access.close(true);
             }
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         }
         imapIdleFuture = threadPoolService.submit(ThreadPools.task(new ImapIdlePushListenerTask(this)));
     }
@@ -270,9 +270,9 @@ public final class ImapIdlePushListener implements PushListener {
     /**
      * Check for new mails
      * 
-     * @throws PushException If check for new mails fails
+     * @throws OXException If check for new mails fails
      */
-    public boolean checkNewMail() throws PushException {
+    public boolean checkNewMail() throws OXException {
         if (shutdown) {
             return false;
         }
@@ -325,7 +325,7 @@ public final class ImapIdlePushListener implements PushListener {
                 inbox.close(false);
             }
         } catch (final OXException e) {
-            // throw new PushException(e);
+            // throw new OXException(e);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
             if (DEBUG_ENABLED) {
                 LOG.error(e);
@@ -355,7 +355,7 @@ public final class ImapIdlePushListener implements PushListener {
         return true;
     }
 
-    public void notifyNewMail() throws PushException {
+    public void notifyNewMail() throws OXException {
         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), session);
     }
 

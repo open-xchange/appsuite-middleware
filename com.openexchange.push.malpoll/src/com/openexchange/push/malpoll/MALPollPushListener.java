@@ -66,7 +66,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
@@ -188,9 +188,9 @@ public final class MALPollPushListener implements PushListener {
     /**
      * Opens this listener (if {@link #isIgnoreOnGlobal()} returns <code>false</code>).
      * 
-     * @throws PushException If listener cannot be opened
+     * @throws OXException If listener cannot be opened
      */
-    public void open() throws PushException {
+    public void open() throws OXException {
         if (ignoreOnGlobal) {
             /*
              * This listener gets its own timer task and is not considered during global run
@@ -199,7 +199,7 @@ public final class MALPollPushListener implements PushListener {
             try {
                 timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class, true);
             } catch (final OXException e) {
-                throw new PushException(e);
+                throw new OXException(e);
             }
             timerTask = timerService.scheduleWithFixedDelay(new MALPollPushListenerRunnable(this), 1000, periodMillis);
         }
@@ -238,9 +238,9 @@ public final class MALPollPushListener implements PushListener {
     /**
      * Check for new mails
      * 
-     * @throws PushException If check for new mails fails
+     * @throws OXException If check for new mails fails
      */
-    public void checkNewMail() throws PushException {
+    public void checkNewMail() throws OXException {
         if (!running.compareAndSet(false, true)) {
             /*
              * Still in process...
@@ -258,9 +258,9 @@ public final class MALPollPushListener implements PushListener {
                 return;
             }
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         }
         try {
             final MailService mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);
@@ -271,15 +271,15 @@ public final class MALPollPushListener implements PushListener {
                 started = true;
             }
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         } finally {
             running.set(false);
         }
     }
 
-    private void firstRun(final MailService mailService) throws PushException, OXException {
+    private void firstRun(final MailService mailService) throws OXException, OXException {
         final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         /*
          * First run
@@ -304,7 +304,7 @@ public final class MALPollPushListener implements PushListener {
         }
     }
 
-    private void subsequentRun(final MailService mailService) throws PushException, OXException {
+    private void subsequentRun(final MailService mailService) throws OXException, OXException {
         final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         /*
          * Subsequent run
@@ -320,7 +320,7 @@ public final class MALPollPushListener implements PushListener {
         }
     }
 
-    private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws OXException, PushException {
+    private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws OXException, OXException {
         final Set<String> newIds;
         final Set<String> delIds;
         {
@@ -398,7 +398,7 @@ public final class MALPollPushListener implements PushListener {
         }
     }
 
-    public void notifyNewMail() throws PushException {
+    public void notifyNewMail() throws OXException {
         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), session);
     }
 

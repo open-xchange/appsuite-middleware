@@ -60,10 +60,7 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.push.PushException;
 import com.openexchange.push.PushManagerService;
-import com.openexchange.push.exception.PushExceptionFactory;
 import com.openexchange.push.internal.PushEventHandler;
 import com.openexchange.push.internal.PushManagerRegistry;
 import com.openexchange.push.internal.ServiceRegistry;
@@ -82,8 +79,6 @@ public final class PushActivator implements BundleActivator {
 
     private List<ServiceTracker> trackers;
 
-    private ComponentRegistration componentRegistration;
-
     /**
      * Initializes a new {@link PushActivator}.
      */
@@ -97,11 +92,6 @@ public final class PushActivator implements BundleActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.push");
             }
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(context, PushException.COMPONENT, "com.openexchange.push", PushExceptionFactory.getInstance());
             /*
              * Initialize and open service tracker for push manager services
              */
@@ -157,12 +147,6 @@ public final class PushActivator implements BundleActivator {
                 trackers = null;
             }
             PushManagerRegistry.shutdown();
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-            }
         } catch (final Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.push: " + e.getMessage(), e);
             throw e;

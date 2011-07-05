@@ -49,6 +49,7 @@
 
 package com.openexchange.push;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -65,17 +66,17 @@ public interface PushManagerService {
      * 
      * @param session The session
      * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws PushException If listener cannot be started due to an error
+     * @throws OXException If listener cannot be started due to an error
      */
-    PushListener startListener(Session session) throws PushException;
+    PushListener startListener(Session session) throws OXException;
 
     /**
      * Stops the listener for specified session.
      * 
      * @param session The session
      * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws PushException If listener cannot be stopped due to an error
+     * @throws OXException If listener cannot be stopped due to an error
      */
-    boolean stopListener(Session session) throws PushException;
+    boolean stopListener(Session session) throws OXException;
 
 }

@@ -49,10 +49,11 @@
 
 package com.openexchange.push;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PushExceptionMessages} - Exception messages for {@link PushException} that must be translated.
+ * {@link PushExceptionMessages} - Exception messages for {@link OXException} that must be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -50,7 +50,7 @@
 package com.openexchange.push.mail.notify;
 
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;
@@ -119,9 +119,9 @@ public final class MailNotifyPushListener implements PushListener {
     /**
      * Opens this listener (if {@link #isIgnoreOnGlobal()} returns <code>false</code>).
      * 
-     * @throws PushException If listener cannot be opened
+     * @throws OXException If listener cannot be opened
      */
-    public void open() throws PushException {
+    public void open() throws OXException {
     }
 
     /**
@@ -130,7 +130,7 @@ public final class MailNotifyPushListener implements PushListener {
     public void close() {
     }
 
-    public void notifyNewMail() throws PushException {
+    public void notifyNewMail() throws OXException {
         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, "INBOX"), session);
     }
 

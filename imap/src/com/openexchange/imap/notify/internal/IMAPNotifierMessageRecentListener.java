@@ -60,7 +60,7 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
@@ -248,7 +248,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                 LOG.info(new StringBuilder(64).append("\n\tNotified new mails in folder \"").append(fullName).append("\" in account ").append(
                     accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
             }
-        } catch (final PushException e) {
+        } catch (final OXException e) {
             LogFactory.getLog(IMAPNotifierMessageRecentListener.class).warn("Couldn't notofy about possible recent message.", e);
         }
     }

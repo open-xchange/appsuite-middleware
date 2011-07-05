@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.util.Map;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.exception.OXException;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 
 /**
  * {@link MailNotifyPushMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for the push bundle.
@@ -77,7 +77,7 @@ public final class MailNotifyPushMailAccountDeleteListener implements MailAccoun
         if (MailNotifyPushListener.getAccountId() == id) {
             try {
                 MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
-            } catch (final PushException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }

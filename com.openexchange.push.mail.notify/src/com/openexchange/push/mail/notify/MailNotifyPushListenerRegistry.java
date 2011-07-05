@@ -59,7 +59,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.mail.notify.services.PushServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -134,9 +134,9 @@ public final class MailNotifyPushListenerRegistry {
      * If the given mboxid is registered for receiving of events, fire event...
      * 
      * @param mboxid
-     * @throws PushException 
+     * @throws OXException 
      */
-    public void fireEvent(final String mboxid) throws PushException {
+    public void fireEvent(final String mboxid) throws OXException {
         final PushListener listener;
         LOG.debug("checking whether to fire event for " + mboxid);
         if (null != (listener = map.get(mboxid))) {
@@ -153,7 +153,7 @@ public final class MailNotifyPushListenerRegistry {
      * @param pushListener The push listener to add
      * @return <code>true</code> if push listener service could be successfully added; otherwise <code>false</code>
      */
-    public boolean addPushListener(final int contextId, final int userId, final MailNotifyPushListener pushListener) throws PushException {
+    public boolean addPushListener(final int contextId, final int userId, final MailNotifyPushListener pushListener) throws OXException {
         boolean notYetPushed = true;
         for(final String id : getMboxIds(contextId, userId)) {
             LOG.debug("adding alias " + id + " to map");
@@ -171,9 +171,9 @@ public final class MailNotifyPushListenerRegistry {
      * @param contextId
      * @param userId
      * @return String Array
-     * @throws PushException
+     * @throws OXException
      */
-    private final String[] getMboxIds(final int contextId, final int userId) throws PushException {
+    private final String[] getMboxIds(final int contextId, final int userId) throws OXException {
         Context storageContext;
         try {
             storageContext = ContextStorage.getStorageContext(contextId);
@@ -202,9 +202,9 @@ public final class MailNotifyPushListenerRegistry {
             }
             return ret;
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         } catch (final LdapException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         }
     }
     /**
@@ -247,7 +247,7 @@ public final class MailNotifyPushListenerRegistry {
             final MailNotifyPushListener l = i.next();
             try {
                 l.open();
-            } catch (final PushException e) {
+            } catch (final OXException e) {
                 org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListenerRegistry.class).error(
                     MessageFormat.format("Opening mail push UDP listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
@@ -262,9 +262,9 @@ public final class MailNotifyPushListenerRegistry {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a push listener for given user-context-pair was found and purged; otherwise <code>false</code>
-     * @throws PushException 
+     * @throws OXException 
      */
-    public boolean purgeUserPushListener(final int contextId, final int userId) throws PushException {
+    public boolean purgeUserPushListener(final int contextId, final int userId) throws OXException {
         return removeListener(getMboxIds(contextId, userId));
     }
 
@@ -275,9 +275,9 @@ public final class MailNotifyPushListenerRegistry {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
-     * @throws PushException 
+     * @throws OXException 
      */
-    public boolean removePushListener(final int contextId, final int userId) throws PushException {
+    public boolean removePushListener(final int contextId, final int userId) throws OXException {
         final SessiondService sessiondService = PushServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
             return removeListener(getMboxIds(contextId, userId));

@@ -49,7 +49,7 @@
 
 package com.openexchange.push.mail.notify;
 
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.session.Session;
@@ -77,7 +77,7 @@ public final class MailNotifyPushManagerService implements PushManagerService {
         this.useEmailAddress = useEmailAddress;
     }
 
-    public PushListener startListener(final Session session) throws PushException {
+    public PushListener startListener(final Session session) throws OXException {
         final MailNotifyPushListener pushListener = MailNotifyPushListener.newInstance(session);
         MailNotifyPushListenerRegistry listener = MailNotifyPushListenerRegistry.getInstance();
         listener.setUseEmailAddress(useEmailAddress);
@@ -92,7 +92,7 @@ public final class MailNotifyPushManagerService implements PushManagerService {
         return null;
     }
 
-    public boolean stopListener(final Session session) throws PushException {
+    public boolean stopListener(final Session session) throws OXException {
         return MailNotifyPushListenerRegistry.getInstance().removePushListener(
             session.getContextId(),
             session.getUserId());

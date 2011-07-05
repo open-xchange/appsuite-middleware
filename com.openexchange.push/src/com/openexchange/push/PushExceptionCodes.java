@@ -49,29 +49,30 @@
 
 package com.openexchange.push;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.push.exception.PushExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link PushExceptionCodes} - Enumeration about all {@link PushException}s.
+ * {@link PushExceptionCodes} - Enumeration about all {@link OXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum PushExceptionCodes implements OXErrorMessage {
+public enum PushExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(PushExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(PushExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY(PushExceptionMessages.MISSING_PROPERTY_MSG, Category.CODE_ERROR, 2),
+    MISSING_PROPERTY(PushExceptionMessages.MISSING_PROPERTY_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY(PushExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 3);
+    INVALID_PROPERTY(PushExceptionMessages.INVALID_PROPERTY_MSG, Category.CATEGORY_ERROR, 3);
 
     private final Category category;
 
@@ -84,6 +85,10 @@ public enum PushExceptionCodes implements OXErrorMessage {
         this.detailNumber = detailNumber;
         this.category = category;
     }
+    
+    public String getPrefix() {
+        return "PUSH";
+    }
 
     public Category getCategory() {
         return category;
@@ -93,32 +98,38 @@ public enum PushExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new push exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new push exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public PushException create(final Object... messageArgs) {
-        return PushExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
     /**
-     * Creates a new push exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new push exception
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public PushException create(final Throwable cause, final Object... messageArgs) {
-        return PushExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

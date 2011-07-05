@@ -62,7 +62,7 @@ import java.util.Set;
 import java.util.UUID;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.push.PushException;
+import com.openexchange.push.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
 import com.openexchange.server.OXException;
@@ -92,9 +92,9 @@ public final class MALPollDBUtility {
      * @param mailIds The new mail IDs
      * @param cid The context ID
      * @return The mail IDs associated with specified hash
-     * @throws PushException If a database resource could not be acquired
+     * @throws OXException If a database resource could not be acquired
      */
-    public static void insertMailIDs(final UUID hash, final Set<String> mailIds, final int cid) throws PushException {
+    public static void insertMailIDs(final UUID hash, final Set<String> mailIds, final int cid) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection writableConnection = getReadWriteConnection(cid, databaseService, false);
         try {
@@ -195,9 +195,9 @@ public final class MALPollDBUtility {
      * @param newIds The new mail IDs
      * @param delIds The deleted mail IDs
      * @param cid The context ID
-     * @throws PushException If a database resource could not be acquired
+     * @throws OXException If a database resource could not be acquired
      */
-    public static void replaceMailIDs(final UUID hash, final Set<String> newIds, final Set<String> delIds, final int cid) throws PushException {
+    public static void replaceMailIDs(final UUID hash, final Set<String> newIds, final Set<String> delIds, final int cid) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection writableConnection = getReadWriteConnection(cid, databaseService, false);
         try {
@@ -220,15 +220,15 @@ public final class MALPollDBUtility {
      * 
      * @param cid The context ID
      * @param user The user ID
-     * @throws PushException If a database resource could not be acquired
+     * @throws OXException If a database resource could not be acquired
      */
-    public static void dropMailIDs(final int cid, final int user) throws PushException {
+    public static void dropMailIDs(final int cid, final int user) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection con;
         try {
             con = databaseService.getForUpdateTask(cid);
         } catch (final DBPoolingException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         }
         try {
             con.setAutoCommit(false);
@@ -304,9 +304,9 @@ public final class MALPollDBUtility {
      * @param hash The hash
      * @param cid The context ID
      * @return The mail IDs associated with specified hash
-     * @throws PushException If a database resource could not be acquired
+     * @throws OXException If a database resource could not be acquired
      */
-    public static Set<String> getMailIDs(final UUID hash, final int cid) throws PushException {
+    public static Set<String> getMailIDs(final UUID hash, final int cid) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection readableConnection = getReadOnlyConnection(cid, databaseService);
         try {
@@ -342,9 +342,9 @@ public final class MALPollDBUtility {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @return The read hash or <code>null</code> if none present
-     * @throws PushException If a database resource could not be acquired
+     * @throws OXException If a database resource could not be acquired
      */
-    public static UUID getHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
+    public static UUID getHash(final int cid, final int user, final int accountId, final String fullname) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection readableConnection = getReadOnlyConnection(cid, databaseService);
         try {
@@ -383,9 +383,9 @@ public final class MALPollDBUtility {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @return The generated hash or <code>null</code> on failure
-     * @throws PushException If a database resource could not be acquired
+     * @throws OXException If a database resource could not be acquired
      */
-    public static UUID insertHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
+    public static UUID insertHash(final int cid, final int user, final int accountId, final String fullname) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection writableConnection = getReadWriteConnection(cid, databaseService);
         try {
@@ -443,23 +443,23 @@ public final class MALPollDBUtility {
      * Gets the {@link DatabaseService database service} from service registry.
      * 
      * @return The database service
-     * @throws PushException If database service is not available
+     * @throws OXException If database service is not available
      */
-    private static DatabaseService getDBService() throws PushException {
+    private static DatabaseService getDBService() throws OXException {
         final DatabaseService databaseService;
         try {
             databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         } catch (final OXException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         }
         return databaseService;
     }
 
-    private static Connection getReadWriteConnection(final int cid, final DatabaseService databaseService) throws PushException {
+    private static Connection getReadWriteConnection(final int cid, final DatabaseService databaseService) throws OXException {
         return getReadWriteConnection(cid, databaseService, true);
     }
 
-    private static Connection getReadWriteConnection(final int cid, final DatabaseService databaseService, final boolean autoCommit) throws PushException {
+    private static Connection getReadWriteConnection(final int cid, final DatabaseService databaseService, final boolean autoCommit) throws OXException {
         try {
             if (autoCommit) {
                 return databaseService.getWritable(cid);
@@ -468,17 +468,17 @@ public final class MALPollDBUtility {
             writableConnection.setAutoCommit(false); // BEGIN
             return writableConnection;
         } catch (final DBPoolingException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static Connection getReadOnlyConnection(final int cid, final DatabaseService databaseService) throws PushException {
+    private static Connection getReadOnlyConnection(final int cid, final DatabaseService databaseService) throws OXException {
         try {
             return databaseService.getReadOnly(cid);
         } catch (final DBPoolingException e) {
-            throw new PushException(e);
+            throw new OXException(e);
         }
     }
 
