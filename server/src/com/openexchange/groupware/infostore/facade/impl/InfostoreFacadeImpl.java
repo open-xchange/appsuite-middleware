@@ -1731,11 +1731,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             this.results = numberOfVersionsIterator(delegate.results(), ctx);
         }
 
-        public SearchIterator<DocumentMetadata> results() {
+        public SearchIterator<DocumentMetadata> results() throws OXException {
             return results;
         }
 
-        public long sequenceNumber() {
+        public long sequenceNumber() throws OXException {
             return sequenceNumber;
         }
 
@@ -1753,11 +1753,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             this.results = lockedUntilIterator(delegate.results(), null, ctx, user, userConfig);
         }
 
-        public SearchIterator<DocumentMetadata> results() {
+        public SearchIterator<DocumentMetadata> results() throws OXException {
             return results;
         }
 
-        public long sequenceNumber() {
+        public long sequenceNumber() throws OXException {
             return sequenceNumber;
         }
 
@@ -1795,11 +1795,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             return newIter;
         }
 
-        public SearchIterator<DocumentMetadata> results() {
+        public SearchIterator<DocumentMetadata> results() throws OXException {
             return new CombinedSearchIterator<DocumentMetadata>(newIter, modified);
         }
 
-        public long sequenceNumber() {
+        public long sequenceNumber() throws OXException {
             return sequenceNumber;
         }
 
@@ -1843,11 +1843,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             return newIter;
         }
 
-        public SearchIterator<DocumentMetadata> results() {
+        public SearchIterator<DocumentMetadata> results() throws OXException {
             return new CombinedSearchIterator<DocumentMetadata>(newIter, modified);
         }
 
-        public long sequenceNumber() {
+        public long sequenceNumber() throws OXException {
             return sequenceNumber;
         }
 

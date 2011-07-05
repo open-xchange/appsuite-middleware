@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.results;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.iterator.CustomizableSearchIterator;
 import com.openexchange.tools.iterator.Customizer;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -69,10 +69,10 @@ public class CustomizableTimedResult<T> implements TimedResult<T>{
         this.result = result;
         this.customizer = customizer;
     }
-    public SearchIterator<T> results() throws AbstractOXException {
+    public SearchIterator<T> results() throws OXException {
         return new CustomizableSearchIterator<T>(result.results(), customizer);
     }
-    public long sequenceNumber() throws AbstractOXException {
+    public long sequenceNumber() throws OXException {
         return result.sequenceNumber();
     }
 

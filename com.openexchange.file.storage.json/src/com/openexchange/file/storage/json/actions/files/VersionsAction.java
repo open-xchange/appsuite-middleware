@@ -52,6 +52,7 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -86,7 +87,7 @@ public class VersionsAction extends AbstractFileAction {
         
         return new TimedResult<File>() {
 
-            public SearchIterator<File> results() throws AbstractOXException {
+            public SearchIterator<File> results() throws OXException {
                 return new FilteringSearchIterator<File>(versions.results()) {
 
                     @Override
@@ -98,7 +99,7 @@ public class VersionsAction extends AbstractFileAction {
                 };
             }
 
-            public long sequenceNumber() throws AbstractOXException {
+            public long sequenceNumber() throws OXException {
                 return versions.sequenceNumber();
             }
             

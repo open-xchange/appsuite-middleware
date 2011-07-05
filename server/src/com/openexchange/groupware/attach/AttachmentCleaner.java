@@ -54,8 +54,8 @@ import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
+import com.openexchange.exception.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.Appointment;
@@ -68,39 +68,38 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface,
-        ContactEventInterface {
-    
-    private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission check.
+public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface {
+
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AttachmentCleaner.class));
+
+    private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission
+                                                                                                        // check.
 
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentCleaner.class);
-    
-    public final void appointmentDeleted(final Appointment appointmentObj,
-            final Session sessionObj) {
-        deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj );
-    }
-    
-    public final void taskDeleted(final Task taskObj, final Session sessionObj) {
-    
-        deleteAttachments(taskObj.getParentFolderID(), taskObj.getObjectID(), Types.TASK, sessionObj);
-    }
-    
-    public final void contactDeleted(final Contact contactObj,
-            final Session sessionObj) {
-        deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
-        
+
+    public final void appointmentDeleted(final Appointment appointmentObj, final Session sessionObj) {
+        deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj);
     }
 
-    public final void appointmentCreated(final Appointment appointmentObj,
-            final Session sessionObj) {
+    public final void taskDeleted(final Task taskObj, final Session sessionObj) {
+
+        deleteAttachments(taskObj.getParentFolderID(), taskObj.getObjectID(), Types.TASK, sessionObj);
+    }
+
+    public final void contactDeleted(final Contact contactObj, final Session sessionObj) {
+        deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
+
+    }
+
+    public final void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
         // TODO Auto-generated method stub
 
     }
 
-    public final void appointmentModified(Appointment appointment, Session session) {
+    public final void appointmentModified(final Appointment appointment, final Session session) {
         // Nothing to do.
 
-    }    
+    }
 
     public final void taskCreated(final Task taskObj, final Session sessionObj) {
         // TODO Auto-generated method stub
@@ -112,63 +111,76 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
     }
 
-    public final void contactCreated(final Contact contactObj,
-            final Session sessionObj) {
+    public final void contactCreated(final Contact contactObj, final Session sessionObj) {
         // TODO Auto-generated method stub
 
     }
 
-    public final void contactModified(Contact contact, Session session) {
+    public final void contactModified(final Contact contact, final Session session) {
         // Nothing to do.
     }
-    
+
     private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
         SearchIterator iter = null;
         try {
             final ServerSession sessionObj = new ServerSessionAdapter(session);
             ATTACHMENT_BASE.startTransaction();
-            final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), null, null);
+            final TimedResult rs =
+                ATTACHMENT_BASE.getAttachments(
+                    parentFolderID,
+                    objectID,
+                    type,
+                    new AttachmentField[] { AttachmentField.ID_LITERAL },
+                    AttachmentField.ID_LITERAL,
+                    AttachmentBase.ASC,
+                    sessionObj.getContext(),
+                    null,
+                    null);
             final TIntArrayList ids = new TIntArrayList();
             iter = rs.results();
-            if(!iter.hasNext()) {
+            if (!iter.hasNext()) {
                 return; // Shortcut
             }
-            while(iter.hasNext()){
-                ids.add(((AttachmentMetadata)iter.next()).getId());
+            while (iter.hasNext()) {
+                ids.add(((AttachmentMetadata) iter.next()).getId());
             }
-            
-            ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, ids.toNativeArray(), sessionObj, sessionObj.getContext(), null, null);
+
+            ATTACHMENT_BASE.detachFromObject(
+                parentFolderID,
+                objectID,
+                type,
+                ids.toNativeArray(),
+                sessionObj,
+                sessionObj.getContext(),
+                null,
+                null);
             ATTACHMENT_BASE.commit();
-        
+
         } catch (final OXException e) {
-            rollback(e);
-        } catch (final OXException e) {
-            LL.log(e);
-        } catch (final AbstractOXException e) {
             rollback(e);
         } finally {
-            if(iter != null) {
+            if (iter != null) {
                 try {
                     iter.close();
-                } catch (final AbstractOXException e) {
-                    LL.log(e);
+                } catch (final OXException e) {
+                    e.log(LOG);
                 }
             }
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LL.log(e);
+                e.log(LOG);
             }
         }
     }
 
-    private void rollback(final AbstractOXException x) {
+    private void rollback(final OXException x) {
         try {
             ATTACHMENT_BASE.rollback();
         } catch (final OXException e) {
-            LL.log(e);
+            e.log(LOG);
         }
-        LL.log(x);
+        x.log(LOG);
     }
 
     public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {

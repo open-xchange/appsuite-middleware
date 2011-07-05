@@ -49,8 +49,8 @@
 
 package com.openexchange.file.storage.infostore;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -97,7 +97,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     }
 
    
-    public SearchIterator<File> results() throws AbstractOXException {
+    public SearchIterator<File> results() throws OXException {
         SearchIterator<DocumentMetadata> results = delegate.results();
         if(results == null) {
             return null;
@@ -106,7 +106,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     }
 
    
-    public long sequenceNumber() throws AbstractOXException {
+    public long sequenceNumber() throws OXException {
         return delegate.sequenceNumber();
     }
 

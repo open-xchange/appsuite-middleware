@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.results;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -77,11 +78,11 @@ public class Results {
             // Do Noting
         }
 
-        public SearchIterator<T> results() {
+        public SearchIterator<T> results() throws OXException {
             return emptyIterator();
         }
 
-        public long sequenceNumber() {
+        public long sequenceNumber() throws OXException {
             return 0;
         }
 
@@ -105,11 +106,11 @@ public class Results {
             return emptyIterator();
         }
 
-        public SearchIterator<T> results() {
+        public SearchIterator<T> results() throws OXException {
             return emptyIterator();
         }
 
-        public long sequenceNumber() {
+        public long sequenceNumber() throws OXException {
             return 0;
         }
 

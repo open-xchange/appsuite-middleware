@@ -49,8 +49,8 @@
 
 package com.openexchange.file.storage.infostore;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -69,7 +69,7 @@ public class InfostoreTimedResult implements TimedResult<File> {
         this.documents = documents;
     }
 
-    public SearchIterator<File> results() throws AbstractOXException {
+    public SearchIterator<File> results() throws OXException {
         SearchIterator<DocumentMetadata> results = documents.results();
         if(results == null) {
             return null;
@@ -77,7 +77,7 @@ public class InfostoreTimedResult implements TimedResult<File> {
         return new InfostoreSearchIterator(results);
     }
 
-    public long sequenceNumber() throws AbstractOXException {
+    public long sequenceNumber() throws OXException {
         return documents.sequenceNumber();
     }
 

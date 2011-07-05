@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.results;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -79,11 +80,11 @@ public class DeltaImpl<T> implements Delta<T> {
         return Deleted;
     }
 
-    public SearchIterator<T> results() {
+    public SearchIterator<T> results() throws OXException {
         return new CombinedSearchIterator<T>(New , Modified);
     }
 
-    public long sequenceNumber() {
+    public long sequenceNumber() throws OXException {
         return sequenceNumber;
     }
     

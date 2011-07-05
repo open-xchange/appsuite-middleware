@@ -66,11 +66,11 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
         this.results = new LastModifiedExtractorIterator(results);
     }
 
-    public SearchIterator<T> results() {
+    public SearchIterator<T> results() throws OXException {
         return results;
     }
 
-    public long sequenceNumber() throws AbstractOXException {
+    public long sequenceNumber() throws OXException {
         if (results.hasNext()) {
             results.fastForward();
         }

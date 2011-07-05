@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -89,11 +90,11 @@ public class RevertTest extends FileActionTest {
         
         fileAccess().expectCall("getVersions", "12").andReturn(new TimedResult<File>() {
 
-            public SearchIterator<File> results() {
+            public SearchIterator<File> results() throws OXException {
                 return new ArrayIterator<File>(new File[]{f1, f2, f3});
             }
 
-            public long sequenceNumber() throws AbstractOXException {
+            public long sequenceNumber() throws OXException {
                 return 0;
             }
             
