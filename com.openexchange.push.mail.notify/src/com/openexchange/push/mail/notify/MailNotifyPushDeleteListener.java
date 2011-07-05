@@ -52,9 +52,7 @@ package com.openexchange.push.mail.notify;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.push.OXException;
 
 /**
  * {@link MailNotifyPushDeleteListener} - Delete listener for the push bundle.

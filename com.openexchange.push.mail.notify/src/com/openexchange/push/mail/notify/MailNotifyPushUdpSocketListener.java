@@ -5,9 +5,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.push.OXException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -25,8 +24,8 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
     
     private final String imapLoginDelimiter;
     
-    public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws ConfigurationException, IOException {
-        InetAddress senderAddress = InetAddress.getByName(udpListenHost);
+    public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws OXException, IOException {
+        final InetAddress senderAddress = InetAddress.getByName(udpListenHost);
 
         this.imapLoginDelimiter = imapLoginDelimiter;
         if (senderAddress != null) {
@@ -37,7 +36,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                 datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
             }
         } else {
-            throw new ConfigurationException(ConfigurationExceptionCodes.INVALID_CONFIGURATION, "Can't get internet addres to given hostname " + udpListenHost);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Can't get internet addres to given hostname " + udpListenHost);
         }
     }
     
@@ -62,7 +61,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
         }
     }
 
-    private String getMailboxName(DatagramPacket datagramPacket) {
+    private String getMailboxName(final DatagramPacket datagramPacket) {
         /* TODO: this currently works with cyrus notify must be configurable somehow later
          * 
          * Format:

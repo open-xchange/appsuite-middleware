@@ -52,20 +52,18 @@ package com.openexchange.push.imapidle;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.push.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -210,7 +208,7 @@ public final class ImapIdlePushListener implements PushListener {
      */
     public void open() throws OXException {
         final ThreadPoolService threadPoolService;
-        try {
+        {
             threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
             mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
             /*
@@ -245,10 +243,6 @@ public final class ImapIdlePushListener implements PushListener {
             } finally {
                 access.close(true);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         imapIdleFuture = threadPoolService.submit(ThreadPools.task(new ImapIdlePushListenerTask(this)));
     }

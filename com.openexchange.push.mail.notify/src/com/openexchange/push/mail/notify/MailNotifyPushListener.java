@@ -49,8 +49,8 @@
 
 package com.openexchange.push.mail.notify;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.push.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;

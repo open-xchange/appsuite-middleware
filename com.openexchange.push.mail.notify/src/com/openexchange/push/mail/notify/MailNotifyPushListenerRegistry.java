@@ -53,13 +53,11 @@ import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.push.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.mail.notify.services.PushServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -85,7 +83,7 @@ public final class MailNotifyPushListenerRegistry {
     /**
      * @param useOXLogin the useOXLogin to set
      */
-    public final void setUseOXLogin(boolean useOXLogin) {
+    public final void setUseOXLogin(final boolean useOXLogin) {
         this.useOXLogin = useOXLogin;
     }
 
@@ -101,7 +99,7 @@ public final class MailNotifyPushListenerRegistry {
     /**
      * @param useEmailAddress the useEmailAddress to set
      */
-    public final void setUseEmailAddress(boolean useEmailAddress) {
+    public final void setUseEmailAddress(final boolean useEmailAddress) {
         this.useEmailAddress = useEmailAddress;
     }
 
@@ -175,9 +173,9 @@ public final class MailNotifyPushListenerRegistry {
      */
     private final String[] getMboxIds(final int contextId, final int userId) throws OXException {
         Context storageContext;
-        try {
+        {
             storageContext = ContextStorage.getStorageContext(contextId);
-            User user = UserStorage.getInstance().getUser(userId, storageContext);
+            final User user = UserStorage.getInstance().getUser(userId, storageContext);
             int alength = user.getAliases().length;
             if( useOXLogin ) {
                 alength++;
@@ -201,10 +199,6 @@ public final class MailNotifyPushListenerRegistry {
                 ret[i] = user.getLoginInfo().toLowerCase();
             }
             return ret;
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final LdapException e) {
-            throw new OXException(e);
         }
     }
     /**

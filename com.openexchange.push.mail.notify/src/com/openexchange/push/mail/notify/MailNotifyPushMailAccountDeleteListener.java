@@ -51,9 +51,8 @@ package com.openexchange.push.mail.notify;
 
 import java.sql.Connection;
 import java.util.Map;
-import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.exception.OXException;
-import com.openexchange.push.OXException;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
  * {@link MailNotifyPushMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for the push bundle.

@@ -49,7 +49,7 @@
 
 package com.openexchange.push.mail.notify;
 
-import com.openexchange.push.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.session.Session;

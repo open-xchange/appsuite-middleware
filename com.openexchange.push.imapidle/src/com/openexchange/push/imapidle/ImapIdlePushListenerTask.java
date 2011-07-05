@@ -51,7 +51,7 @@ package com.openexchange.push.imapidle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.push.OXException;
+import com.openexchange.exception.OXException;
 
 /**
  * Simple {@link Runnable} to trigger a listener's {@link ImapIdlePushListener#checkNewMail()} method.

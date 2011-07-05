@@ -56,8 +56,8 @@ import java.util.concurrent.Future;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
@@ -202,7 +202,7 @@ public final class PushActivator extends DeferredActivator {
         }
     }
 
-    private void readConfiguration() throws ConfigurationException {
+    private void readConfiguration() throws OXException {
         final StringBuilder sb = new StringBuilder();
         sb.append(CRLF);
         sb.append("Properties for mail push:" + CRLF);
@@ -225,7 +225,7 @@ public final class PushActivator extends DeferredActivator {
             udpListenHost = tmp.trim();
             sb.append("\t" + PROP_UDP_LISTEN_HOST + ": " + udpListenHost + CRLF);
         } else {
-            throw new ConfigurationException(ConfigurationExceptionCodes.PROPERTY_MISSING, PROP_UDP_LISTEN_HOST);
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(PROP_UDP_LISTEN_HOST);
         }
 
         tmp = configurationService.getProperty(PROP_IMAP_LOGIN_DELIMITER);
@@ -243,10 +243,10 @@ public final class PushActivator extends DeferredActivator {
                 udpListenPort = Integer.parseInt(tmp.trim());
                 sb.append("\t" + PROP_UDP_LISTEN_PORT + ": " + udpListenPort + CRLF);
             } catch (final NumberFormatException e) {
-                throw new ConfigurationException(ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER, PROP_UDP_LISTEN_PORT);
+                throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(PROP_UDP_LISTEN_PORT);
             }
         } else {
-            throw new ConfigurationException(ConfigurationExceptionCodes.PROPERTY_MISSING, PROP_UDP_LISTEN_PORT);
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(PROP_UDP_LISTEN_PORT);
         }
 
         tmp = configurationService.getProperty(PROP_USE_OX_LOGIN);
@@ -270,7 +270,7 @@ public final class PushActivator extends DeferredActivator {
         LOG.info(sb);
     }
 
-    private void startUdpListener() throws ConfigurationException, IOException {
+    private void startUdpListener() throws OXException, IOException {
         final ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
         udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(udpListenHost, udpListenPort, imapLoginDelimiter, multicast)));
     }
