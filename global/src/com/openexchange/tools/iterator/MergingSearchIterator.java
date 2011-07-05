@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * A {@link MergingSearchIterator} merges multiple (already sorted) search iterators according to a given criterion.
@@ -68,14 +67,14 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     private List<T> topmost = null;
     private boolean hasNext;
     
-    public MergingSearchIterator(Comparator<T> criterion, SearchIterator<T>...iterators) throws AbstractOXException {
+    public MergingSearchIterator(final Comparator<T> criterion, final SearchIterator<T>...iterators) throws OXException {
         this(criterion, Arrays.asList(iterators));
     }
 
-    public MergingSearchIterator(Comparator<T> criterion, List<SearchIterator<T>> iterators) throws AbstractOXException {
+    public MergingSearchIterator(final Comparator<T> criterion, final List<SearchIterator<T>> iterators) throws OXException {
         this.iterators = iterators;
         this.topmost = new ArrayList<T>(iterators.size());
-        for(SearchIterator<T> iterator : iterators) {
+        for(final SearchIterator<T> iterator : iterators) {
             if(iterator.hasNext()) {
                 topmost.add(iterator.next());
                 hasNext = true;
@@ -87,16 +86,16 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     }
 
 
-    public void addWarning(AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         throw new UnsupportedOperationException();
     }
 
     public void close() throws OXException {
-        AbstractOXException exception = null;
-        for (SearchIterator<T> iterator : iterators) {
+        OXException exception = null;
+        for (final SearchIterator<T> iterator : iterators) {
             try {
                 iterator.close();
-            } catch (AbstractOXException x) {
+            } catch (final OXException x) {
                 exception = x;
             }
         }
@@ -105,17 +104,17 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         }
     }
 
-    public AbstractOXException[] getWarnings() {
-        List<AbstractOXException> exceptions = new ArrayList<AbstractOXException>(10);
-        for (SearchIterator<T> iterator : iterators) {
+    public OXException[] getWarnings() {
+        final List<OXException> exceptions = new ArrayList<OXException>(10);
+        for (final SearchIterator<T> iterator : iterators) {
             if (iterator.hasWarnings()) {
-                AbstractOXException[] warnings = iterator.getWarnings();
+                final OXException[] warnings = iterator.getWarnings();
                 if (warnings != null) {
                     exceptions.addAll(Arrays.asList(warnings));
                 }
             }
         }
-        return exceptions.toArray(new AbstractOXException[exceptions.size()]);
+        return exceptions.toArray(new OXException[exceptions.size()]);
     }
 
     public boolean hasNext() throws OXException {
@@ -123,7 +122,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     }
 
     public boolean hasWarnings() {
-        for(SearchIterator<T> iterator : iterators) {
+        for(final SearchIterator<T> iterator : iterators) {
             if(iterator.hasWarnings()) {
                 return true;
             }
@@ -139,7 +138,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         T largest = null;
         int i = -1;
         int largestIndex = 0;
-        for(T candidate : topmost) {
+        for(final T candidate : topmost) {
             i++;
             if(candidate != null && (largest == null || 0 > comparator.compare(largest, candidate))) {
                 largest = candidate;
@@ -155,7 +154,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         
         // hasNext?
         hasNext = false;
-        for(T thing : topmost) {
+        for(final T thing : topmost) {
             if(thing != null) {
                 hasNext = true;
             }
@@ -166,8 +165,8 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
 
     public int size() {
         int size = 0;
-        for (SearchIterator<T> iterator : iterators) {
-            int s = iterator.size();
+        for (final SearchIterator<T> iterator : iterators) {
+            final int s = iterator.size();
             if (s == -1) {
                 return -1;
             }

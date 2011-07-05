@@ -50,7 +50,6 @@
 package com.openexchange.groupware.results;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -89,7 +88,7 @@ public class DeltaImpl<T> implements Delta<T> {
     }
     
     
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         New.close();
         Modified.close();
         Deleted.close();

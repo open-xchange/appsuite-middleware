@@ -53,9 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.tools.iterator.SearchIteratorException.Code;
 
 /**
  * {@link CombinedSearchIterator} - Combines one or more instances of {@link SearchIterator}
@@ -68,7 +65,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
 
     private int i = 0;
 
-    private AbstractOXException[] warnings;
+    private OXException[] warnings;
 
     private Boolean hasWarnings;
 
@@ -101,7 +98,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
 
     public T next() throws OXException {
         if (iterators.length == 0 || !next) {
-            throw new SearchIteratorException(Code.NO_SUCH_ELEMENT, EnumComponent.NONE);
+            throw SearchIteratorException.Code.NO_SUCH_ELEMENT.create("NON");
         }
         return iterators[i].next();
     }
@@ -120,22 +117,22 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
         return false;
     }
 
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         throw new UnsupportedOperationException("Mehtod addWarning() not implemented");
     }
 
-    public AbstractOXException[] getWarnings() {
+    public OXException[] getWarnings() {
         if (null == warnings) {
             if (iterators.length == 0) {
-                warnings = new AbstractOXException[0];
+                warnings = new OXException[0];
             } else {
-                final List<AbstractOXException> list = new ArrayList<AbstractOXException>(iterators.length << 1);
+                final List<OXException> list = new ArrayList<OXException>(iterators.length << 1);
                 for (final SearchIterator<?> iter : iterators) {
                     if (iter.hasWarnings()) {
                         list.addAll(Arrays.asList(iterators[i].getWarnings()));
                     }
                 }
-                warnings = list.toArray(new AbstractOXException[list.size()]);
+                warnings = list.toArray(new OXException[list.size()]);
             }
         }
         return warnings.length == 0 ? null : warnings;

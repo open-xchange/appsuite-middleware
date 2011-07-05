@@ -52,7 +52,6 @@ package com.openexchange.tools.iterator;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -66,7 +65,7 @@ public class ArrayIterator<T> implements SearchIterator<T> {
 
     private final T[] array;
 
-    private final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>();
+    private final List<OXException> warnings = new ArrayList<OXException>();
 
     /**
      * Initializes a new {@link ArrayIterator}
@@ -94,12 +93,12 @@ public class ArrayIterator<T> implements SearchIterator<T> {
         return array.length;
     }
 
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
-    public AbstractOXException[] getWarnings() {
-        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    public OXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
     public boolean hasWarnings() {

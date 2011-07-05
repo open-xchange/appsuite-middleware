@@ -51,7 +51,6 @@ package com.openexchange.file.storage.infostore;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -73,7 +72,7 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
         this.delegate = delegate;        
     }
 
-    public void addWarning(AbstractOXException warning) {
+    public void addWarning(OXException warning) {
         delegate.addWarning(warning);
     }
 
@@ -81,7 +80,7 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
         delegate.close();
     }
 
-    public AbstractOXException[] getWarnings() {
+    public OXException[] getWarnings() {
         return delegate.getWarnings();
     }
 

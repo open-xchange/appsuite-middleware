@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.iterator;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Customizer}
@@ -58,6 +58,6 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface Customizer<T> {
 
-    T customize(T thing) throws AbstractOXException;
+    T customize(T thing) throws OXException;
 
 }

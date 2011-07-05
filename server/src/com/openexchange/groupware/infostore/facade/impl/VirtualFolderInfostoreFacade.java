@@ -214,7 +214,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         public EmptyTimedResult() {
             super(new SearchIterator<DocumentMetadata>() {
 
-                public void addWarning(final AbstractOXException warning) {
+                public void addWarning(final OXException warning) {
                     // Nothing to to.
                 }
 
@@ -222,7 +222,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                     // Nothing to do.
                 }
 
-                public AbstractOXException[] getWarnings() {
+                public OXException[] getWarnings() {
                     return new AbstractOXException[0];
                 }
 

@@ -146,6 +146,10 @@ public enum SessionExceptionCodes implements OXExceptionCode {
         display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
+    public String getMessage() {
+        return message;
+    }
+
     public int getNumber() {
         return number;
     }

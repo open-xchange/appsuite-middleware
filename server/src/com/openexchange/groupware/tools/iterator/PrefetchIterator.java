@@ -121,14 +121,14 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         impl.addWarning(warning);
     }
 
     /**
      * {@inheritDoc}
      */
-    public AbstractOXException[] getWarnings() {
+    public OXException[] getWarnings() {
         return impl.getWarnings();
     }
 
@@ -244,14 +244,14 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public void addWarning(final AbstractOXException warning) {
+        public void addWarning(final OXException warning) {
             warnings.add(warning);
         }
 
         /**
          * {@inheritDoc}
          */
-        public AbstractOXException[] getWarnings() {
+        public OXException[] getWarnings() {
             return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
         }
 
@@ -316,14 +316,14 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public void addWarning(final AbstractOXException warning) {
+        public void addWarning(final OXException warning) {
             delegate.addWarning(warning);
         }
 
         /**
          * {@inheritDoc}
          */
-        public AbstractOXException[] getWarnings() {
+        public OXException[] getWarnings() {
             return delegate.getWarnings();
         }
 

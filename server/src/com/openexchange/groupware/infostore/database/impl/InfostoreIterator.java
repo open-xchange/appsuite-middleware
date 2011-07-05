@@ -220,11 +220,11 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return next;
     }
 
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
-    public AbstractOXException[] getWarnings() {
+    public OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
     }
 

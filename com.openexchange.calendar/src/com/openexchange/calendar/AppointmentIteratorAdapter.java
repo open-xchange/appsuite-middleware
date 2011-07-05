@@ -50,7 +50,6 @@
 package com.openexchange.calendar;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -70,7 +69,7 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
         this.delegate = retval;
     }
 
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         delegate.addWarning(warning);
     }
 
@@ -78,7 +77,7 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
         delegate.close();
     }
 
-    public AbstractOXException[] getWarnings() {
+    public OXException[] getWarnings() {
         return delegate.getWarnings();
     }
 

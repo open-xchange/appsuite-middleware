@@ -55,7 +55,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link SearchIteratorAdapter} - An implementation of {@link SearchIterator} backed by a common instance of {@link Iterator} to which
@@ -95,11 +94,11 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             return 0;
         }
 
-        public void addWarning(final AbstractOXException warning) {
+        public void addWarning(final OXException warning) {
             throw new UnsupportedOperationException("Method is not implemented");
         }
 
-        public AbstractOXException[] getWarnings() {
+        public OXException[] getWarnings() {
             return null;
         }
 
@@ -116,7 +115,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     private final boolean b_size;
 
-    private final List<AbstractOXException> warnings;
+    private final List<OXException> warnings;
 
     /**
      * Initializes a new {@link SearchIteratorAdapter}.
@@ -126,7 +125,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
     public SearchIteratorAdapter(final Iterator<T> iter) {
         super();
         delegate = iter;
-        warnings = new ArrayList<AbstractOXException>(2);
+        warnings = new ArrayList<OXException>(2);
         b_size = false;
         size = -1;
     }
@@ -141,7 +140,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         super();
         delegate = iter;
         this.size = size;
-        warnings = new ArrayList<AbstractOXException>(2);
+        warnings = new ArrayList<OXException>(2);
         b_size = true;
     }
 
@@ -168,12 +167,12 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         return b_size;
     }
 
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
-    public AbstractOXException[] getWarnings() {
-        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    public OXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
     public boolean hasWarnings() {
@@ -187,7 +186,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
      * @return An empty iterator
      */
     public static <T> SearchIterator<T> emptyIterator() {
-        return (SearchIterator<T>) EMPTY;
+        return EMPTY;
     }
 
     /**
@@ -217,7 +216,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             public boolean hasNext() {
                 try {
                     return iterator.hasNext();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     return false;
                 }
@@ -226,7 +225,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             public T next() {
                 try {
                     return iterator.next();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 return null;
@@ -251,10 +250,9 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
      * @param <T> The iterator's type
      * @param iterator The iterator from which to create the list
      * @return The list created from iterator
-     * @throws SearchIteratorException If list cannot be created
      * @throws OXException If list cannot be created
      */
-    public static <T> List<T> toList(final SearchIterator<T> iterator) throws AbstractOXException {
+    public static <T> List<T> toList(final SearchIterator<T> iterator) throws OXException {
         final List<T> list = new ArrayList<T>();
         while (iterator.hasNext()) {
             list.add(iterator.next());

@@ -50,7 +50,6 @@
 package com.openexchange.tools.iterator;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link SearchIterator} - An extended iterator over a collection or a (releasable) resource.
@@ -103,13 +102,13 @@ public interface SearchIterator<T> {
      * 
      * @param warning The warning to add
      */
-    void addWarning(AbstractOXException warning);
+    void addWarning(OXException warning);
 
     /**
      * Gets the iterator's warnings as an array
      * 
      * @return The iterator's warnings as an array or <code>null</code>
      */
-    AbstractOXException[] getWarnings();
+    OXException[] getWarnings();
 
 }

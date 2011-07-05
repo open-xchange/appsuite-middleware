@@ -51,7 +51,7 @@ package com.openexchange.tools.iterator;
 
 import java.util.Comparator;
 import junit.framework.TestCase;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MergingSearchIteratorTest}
@@ -60,14 +60,14 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public class MergingSearchIteratorTest extends TestCase {
 
-    public void testMerge() throws AbstractOXException {
-        Integer[] a = new Integer[] { 0, 3, 4, 7, 9, 12, 13, 16 };
-        Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
-        Integer[] c = new Integer[] { 1, 6, 8, 11, 14, 20 };
+    public void testMerge() throws OXException {
+        final Integer[] a = new Integer[] { 0, 3, 4, 7, 9, 12, 13, 16 };
+        final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
+        final Integer[] c = new Integer[] { 1, 6, 8, 11, 14, 20 };
 
-        Integer[] expected = new Integer[] { 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20 };
+        final Integer[] expected = new Integer[] { 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20 };
         
-        SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
+        final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
             new IntegerComparator(),
             new ArrayIterator<Integer>(a),
             new ArrayIterator<Integer>(b),
@@ -82,14 +82,14 @@ public class MergingSearchIteratorTest extends TestCase {
         assertFalse(complete.hasNext());
     }
     
-    public void testMergeEmptyWithFull() throws AbstractOXException {
-        Integer[] a = new Integer[0];
-        Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
+    public void testMergeEmptyWithFull() throws OXException {
+        final Integer[] a = new Integer[0];
+        final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
         
-        Integer[] expected = b;
+        final Integer[] expected = b;
         
         
-        SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
+        final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
             new IntegerComparator(),
             new ArrayIterator<Integer>(a),
             new ArrayIterator<Integer>(b)
@@ -105,7 +105,7 @@ public class MergingSearchIteratorTest extends TestCase {
 
     private static final class IntegerComparator implements Comparator<Integer> {
 
-        public int compare(Integer o1, Integer o2) {
+        public int compare(final Integer o1, final Integer o2) {
             return o2 - o1;
         }
 

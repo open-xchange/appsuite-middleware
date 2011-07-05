@@ -52,7 +52,6 @@ package com.openexchange.groupware.results;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -83,18 +82,18 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
 
         private SearchIterator<T> results;
 
-        private AbstractOXException oxexception;
+        private OXException oxexception;
 
         private boolean fastForwardDone;
 
-        private int size;
+        private final int size;
 
-        public LastModifiedExtractorIterator(SearchIterator<T> results) {
+        public LastModifiedExtractorIterator(final SearchIterator<T> results) {
             this.results = results;
             this.size = results.size();
         }
 
-        public void addWarning(AbstractOXException warning) {
+        public void addWarning(final OXException warning) {
             results.addWarning(warning);
         }
 
@@ -102,7 +101,7 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             results.close();
         }
 
-        public AbstractOXException[] getWarnings() {
+        public OXException[] getWarnings() {
             return results.getWarnings();
         }
 
@@ -124,30 +123,30 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
                 throw this.oxexception;
             }
 
-            T nextObject = results.next();
+            final T nextObject = results.next();
             if (fastForwardDone) {
                 return nextObject;
             }
-            long timestamp = extractTimestamp(nextObject);
+            final long timestamp = extractTimestamp(nextObject);
             if (timestamp > sequenceNumber) {
                 sequenceNumber = timestamp;
             }
             return nextObject;
         }
 
-        public void fastForward() throws AbstractOXException {
-            List<T> moreValues = new ArrayList<T>();
+        public void fastForward() throws OXException {
+            final List<T> moreValues = new ArrayList<T>();
             while (hasNext()) {
                 try {
                     moreValues.add(next());
-                } catch (AbstractOXException e) {
+                } catch (final OXException e) {
                     this.oxexception = e;
                 }
             }
-            AbstractOXException[] warnings = results.getWarnings();
+            final OXException[] warnings = results.getWarnings();
             results = new SearchIteratorAdapter<T>(moreValues.iterator());
             if (warnings != null) {
-                for (AbstractOXException warning : warnings) {
+                for (final OXException warning : warnings) {
                     results.addWarning(warning);
                 }
             }

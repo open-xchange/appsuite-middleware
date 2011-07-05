@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link SearchIteratorDelegator} - An implementation of {@link SearchIterator} backed by a common instance of {@link Iterator} to which
@@ -68,7 +67,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
 
     private final int size;
 
-    private final List<AbstractOXException> warnings;
+    private final List<OXException> warnings;
 
     /**
      * Initializes a new {@link SearchIteratorDelegator}
@@ -78,7 +77,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
     public SearchIteratorDelegator(final Iterator<T> iter) {
         super();
         delegate = iter;
-        warnings = new ArrayList<AbstractOXException>(2);
+        warnings = new ArrayList<OXException>(2);
         size = -1;
     }
 
@@ -96,7 +95,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         }
         delegate = iter;
         this.size = size;
-        warnings = new ArrayList<AbstractOXException>(2);
+        warnings = new ArrayList<OXException>(2);
     }
 
     /**
@@ -131,12 +130,12 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         return (size >= 0);
     }
 
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
-    public AbstractOXException[] getWarnings() {
-        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+    public OXException[] getWarnings() {
+        return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
     public boolean hasWarnings() {

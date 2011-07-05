@@ -679,7 +679,7 @@ public class InfostoreRequest extends CommonRequest {
             private SearchIteratorException se;
             private OXException oxe;
 
-            public void addWarning(final AbstractOXException warning) {
+            public void addWarning(final OXException warning) {
                 iter.addWarning(warning);
             }
 
@@ -687,7 +687,7 @@ public class InfostoreRequest extends CommonRequest {
                 iter.close();
             }
 
-            public AbstractOXException[] getWarnings() {
+            public OXException[] getWarnings() {
                 return iter.getWarnings();
             }
 

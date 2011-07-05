@@ -50,7 +50,6 @@
 package com.openexchange.groupware.results;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -62,9 +61,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public abstract class FilteringTimedResult<T> implements TimedResult<T> {
 
-    private TimedResult<T> delegate;
+    private final TimedResult<T> delegate;
     
-    public FilteringTimedResult(TimedResult<T> delegate) {
+    public FilteringTimedResult(final TimedResult<T> delegate) {
         this.delegate = delegate;
     }
     
@@ -72,14 +71,14 @@ public abstract class FilteringTimedResult<T> implements TimedResult<T> {
         return new FilteringSearchIterator<T>(delegate.results()){
 
             @Override
-            public boolean accept(T thing) throws AbstractOXException {
+            public boolean accept(final T thing) throws OXException {
                 return FilteringTimedResult.this.accept(thing);
             }
             
         };
     }
 
-    protected abstract boolean accept(T thing) throws AbstractOXException;
+    protected abstract boolean accept(T thing) throws OXException;
 
     public long sequenceNumber() throws OXException {
         return delegate.sequenceNumber();

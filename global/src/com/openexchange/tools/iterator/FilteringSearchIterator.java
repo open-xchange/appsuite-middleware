@@ -61,9 +61,9 @@ import com.openexchange.groupware.AbstractOXException;
 public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
 
     private T next = null;
-    private SearchIterator<T> delegate;
+    private final SearchIterator<T> delegate;
     
-    public FilteringSearchIterator(SearchIterator<T> delegate) throws AbstractOXException {
+    public FilteringSearchIterator(final SearchIterator<T> delegate) throws OXException {
         this.delegate = delegate;
         initNext();
     }
@@ -74,10 +74,10 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
      * @return
      * @throws AbstractOXException
      */
-    public abstract boolean accept(T thing) throws AbstractOXException;
+    public abstract boolean accept(T thing) throws OXException;
     
     
-    public void addWarning(AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         delegate.addWarning(warning);
     }
 
@@ -85,7 +85,7 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
         delegate.close();
     }
 
-    public AbstractOXException[] getWarnings() {
+    public OXException[] getWarnings() {
         return delegate.getWarnings();
     }
 
@@ -98,7 +98,7 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
     }
 
     public T next() throws OXException {
-        T current = next;
+        final T current = next;
         initNext();
         return current;
     }
@@ -107,7 +107,7 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
         return -1;
     }
     
-    protected void initNext() throws AbstractOXException {
+    protected void initNext() throws OXException {
         while(delegate.hasNext()) {
             next = delegate.next();
             if(accept(next)) {

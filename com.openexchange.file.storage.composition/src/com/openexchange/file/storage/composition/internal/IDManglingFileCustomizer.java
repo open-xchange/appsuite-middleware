@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.results.CustomizableDelta;
 import com.openexchange.groupware.results.CustomizableTimedResult;
@@ -74,7 +75,7 @@ public class IDManglingFileCustomizer implements Customizer<File> {
         this.account = account;
     }
 
-    public File customize(final File thing) {
+    public File customize(final File thing) throws OXException {
         return fixIDs(thing, service, account);
     }
 

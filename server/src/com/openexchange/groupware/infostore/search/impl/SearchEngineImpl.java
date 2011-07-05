@@ -509,11 +509,11 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             return false;
         }
 
-        public void addWarning(final AbstractOXException warning) {
+        public void addWarning(final OXException warning) {
             warnings.add(warning);
         }
 
-        public AbstractOXException[] getWarnings() {
+        public OXException[] getWarnings() {
             return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
         }
 

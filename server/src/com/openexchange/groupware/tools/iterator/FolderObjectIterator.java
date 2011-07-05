@@ -142,12 +142,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         @Override
-        public AbstractOXException[] getWarnings() {
+        public com.openexchange.exception.OXException[] getWarnings() {
             return null;
         }
 
         @Override
-        public void addWarning(final AbstractOXException warning) {
+        public void addWarning(final com.openexchange.exception.OXException warning) {
             // Nothing to add
         }
     };
@@ -717,11 +717,11 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return (prefetchQueue != null);
     }
 
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final com.openexchange.exception.OXException warning) {
         warnings.add(warning);
     }
 
-    public AbstractOXException[] getWarnings() {
+    public com.openexchange.exception.OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
     }
 
