@@ -55,71 +55,78 @@ import static com.openexchange.groupware.update.UpdateExceptionMessages.LOADING_
 import static com.openexchange.groupware.update.UpdateExceptionMessages.ONLY_REDUCE_MSG;
 import static com.openexchange.groupware.update.UpdateExceptionMessages.RESET_FORBIDDEN_MSG;
 import static com.openexchange.groupware.update.UpdateExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.groupware.update.UpdateExceptionMessages.UNEXPECTED_ERROR_MSG;
 import static com.openexchange.groupware.update.UpdateExceptionMessages.UNKNOWN_CONCURRENCY_MSG;
 import static com.openexchange.groupware.update.UpdateExceptionMessages.UNKNOWN_SCHEMA_MSG;
 import static com.openexchange.groupware.update.UpdateExceptionMessages.UNKNOWN_TASK_MSG;
 import static com.openexchange.groupware.update.UpdateExceptionMessages.UNRESOLVABLE_DEPENDENCIES_MSG;
 import static com.openexchange.groupware.update.UpdateExceptionMessages.UPDATE_FAILED_MSG;
 import static com.openexchange.groupware.update.UpdateExceptionMessages.WRONG_ROW_COUNT_MSG;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.update.internal.UpdateExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link UpdateExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum UpdateExceptionCodes implements OXErrorMessage {
+public enum UpdateExceptionCodes implements OXExceptionCode {
 
     /**
      * Current version number %1$s is already lower than or equal to desired version number %2$s.
      */
-    ONLY_REDUCE(ONLY_REDUCE_MSG, Category.USER_INPUT, 13),
+    ONLY_REDUCE(ONLY_REDUCE_MSG, Category.CATEGORY_USER_INPUT, 13),
     /**
      * A SQL problem occurred: %1$s.
      */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 14),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 14),
     /**
      * Error loading update task "%1$s".
      */
-    LOADING_TASK_FAILED(LOADING_TASK_FAILED_MSG, Category.USER_INPUT, 15),
+    LOADING_TASK_FAILED(LOADING_TASK_FAILED_MSG, Category.CATEGORY_USER_INPUT, 15),
     /**
      * Unknown schema name: %1$s.
      */
-    UNKNOWN_SCHEMA(UNKNOWN_SCHEMA_MSG, Category.USER_INPUT, 16),
+    UNKNOWN_SCHEMA(UNKNOWN_SCHEMA_MSG, Category.CATEGORY_USER_INPUT, 16),
     /**
      * Update task %1$s returned an unknown concurrency level. Running as blocking task.
      */
-    UNKNOWN_CONCURRENCY(UNKNOWN_CONCURRENCY_MSG, Category.CODE_ERROR, 17),
+    UNKNOWN_CONCURRENCY(UNKNOWN_CONCURRENCY_MSG, Category.CATEGORY_ERROR, 17),
     /**
      * Version can not be set back if update task handling has been migrated to remembered update tasks concept on schema %1$s.
      */
-    RESET_FORBIDDEN(RESET_FORBIDDEN_MSG, Category.USER_INPUT, 18),
+    RESET_FORBIDDEN(RESET_FORBIDDEN_MSG, Category.CATEGORY_USER_INPUT, 18),
     /**
      * Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.
      */
-    UNRESOLVABLE_DEPENDENCIES(UNRESOLVABLE_DEPENDENCIES_MSG, Category.CODE_ERROR, 19),
+    UNRESOLVABLE_DEPENDENCIES(UNRESOLVABLE_DEPENDENCIES_MSG, Category.CATEGORY_ERROR, 19),
     /**
      * %1$s.
      */
-    OTHER_PROBLEM("%1$s", Category.CODE_ERROR, 20),
+    OTHER_PROBLEM("%1$s", Category.CATEGORY_ERROR, 20),
     /**
      * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
      */
-    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CODE_ERROR, 21),
+    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CATEGORY_ERROR, 21),
     /**
      * Updating schema %1$s failed. Cause: %2$s.
      */
-    UPDATE_FAILED(UPDATE_FAILED_MSG, Category.CODE_ERROR, 22),
+    UPDATE_FAILED(UPDATE_FAILED_MSG, Category.CATEGORY_ERROR, 22),
     /**
      * Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).
      */
-    BLOCKING_FIRST(BLOCKING_FIRST_MSG, Category.CODE_ERROR, 23),
+    BLOCKING_FIRST(BLOCKING_FIRST_MSG, Category.CATEGORY_ERROR, 23),
     /** Unknown task: %1$s */
-    UNKNOWN_TASK(UNKNOWN_TASK_MSG, Category.SETUP_ERROR, 24),
+    UNKNOWN_TASK(UNKNOWN_TASK_MSG, Category.CATEGORY_CONFIGURATION, 24),
     /** Column "%1$s" not found in table %2$s. */
-    COLUMN_NOT_FOUND(COLUMN_NOT_FOUND_MSG, Category.CODE_ERROR, 25);
+    COLUMN_NOT_FOUND(COLUMN_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 25),
+    /**
+     * An error occurred: %1$s.
+     */
+    UNEXPECTED_ERROR(UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 26),
+    ;
 
     final String message;
 
@@ -127,34 +134,55 @@ public enum UpdateExceptionCodes implements OXErrorMessage {
 
     final int number;
 
-    private UpdateExceptionCodes(String message, Category category, int number) {
+    private UpdateExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
+    }
+    
+    public String getPrefix() {
+        return "UPD";
     }
 
     public Category getCategory() {
         return category;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return number;
-    }
-
-    public String getHelp() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public UpdateException create(Object... messageArgs) {
-        return UpdateExceptionFactory.getInstance().create(this, messageArgs);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
-    public UpdateException create(Throwable cause, Object... messageArgs) {
-        return UpdateExceptionFactory.getInstance().create(this, cause, messageArgs);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

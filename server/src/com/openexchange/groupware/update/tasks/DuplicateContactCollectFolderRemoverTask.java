@@ -71,13 +71,10 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
@@ -219,8 +216,6 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             try {
                 writeCon = Database.getNoTimeout(contextId, true);
                 writeCon.setAutoCommit(false); // BEGIN
-            } catch (final DBPoolingException e) {
-                throw new UpdateException(e);
             } catch (final SQLException e) {
                 // Auto-Commit mode could not be changed
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -238,13 +233,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
              */
             catch (final Exception e) {
                 rollback(writeCon);
-                throw new UpdateException(
-                    EnumComponent.UPDATE,
-                    Category.CODE_ERROR,
-                    9999,
-                    "Unexpected error: %1$s",
-                    e,
-                    new Object[] { e.getMessage() });
+                throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 /*
                  * Release write-connection

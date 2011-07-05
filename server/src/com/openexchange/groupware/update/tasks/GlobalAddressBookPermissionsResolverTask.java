@@ -65,11 +65,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -111,8 +108,8 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         return DEPENDENCIES;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
-        ProgressState status = params.getProgressState();
+    public void perform(final PerformParameters params) throws AbstractOXException {
+        final ProgressState status = params.getProgressState();
         /*
          * Get all contexts with contained users
          */
@@ -121,7 +118,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         /*
          * Iterate per context
          */
-        for (Map.Entry<Integer, List<Integer>> me : m.entrySet()) {
+        for (final Map.Entry<Integer, List<Integer>> me : m.entrySet()) {
             final int currentContextId = me.getKey().intValue();
             try {
                 iterateUsersPerContext(me.getValue(), currentContextId);
@@ -199,13 +196,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
             throw e;
         } catch (final Exception e) {
             rollback(writeCon);
-            throw new UpdateException(
-                EnumComponent.UPDATE,
-                Category.CODE_ERROR,
-                9999,
-                "Unexpected error: %1$s",
-                e,
-                new Object[] { e.getMessage() });
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             /*
              * Release write-connection

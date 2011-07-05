@@ -81,6 +81,8 @@ public final class UpdateExceptionMessages implements LocalizableStrings {
     public static final String UNKNOWN_TASK_MSG = "Unknown task: %1$s.";
 
     public static final String COLUMN_NOT_FOUND_MSG = "Column \"%1$s\" not found in table %2$s.";
+    
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
     private UpdateExceptionMessages() {
         super();
