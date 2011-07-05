@@ -51,8 +51,8 @@ package com.openexchange.groupware.container;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.tools.StringCollection;
@@ -120,9 +120,9 @@ public class DistributionListEntryObject {
      * @param displayname The display name
      * @param emailaddress The email address
      * @param emailfield The email field
-     * @throws ContactException If specified email address is invalid
+     * @throws OXException If specified email address is invalid
      */
-    public DistributionListEntryObject(final String displayname, final String emailaddress, final int emailfield) throws ContactException {
+    public DistributionListEntryObject(final String displayname, final String emailaddress, final int emailfield) throws OXException {
         this();
         setDisplayname(displayname);
         setEmailaddress(emailaddress);
@@ -188,9 +188,9 @@ public class DistributionListEntryObject {
      * Sets the distribution list entry's email address
      * 
      * @param emailaddress The email address to set
-     * @throws ContactException If specified email address is invalid
+     * @throws OXException If specified email address is invalid
      */
-    public void setEmailaddress(final String emailaddress) throws ContactException {
+    public void setEmailaddress(final String emailaddress) throws OXException {
         /*
          * Verify email address with JavaMail's InternetAddress class
          */
