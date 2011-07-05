@@ -81,7 +81,6 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -156,7 +155,7 @@ public final class Contacts {
         return pos < 0 ? str : str.substring(pos + 2);
     }
 
-    private static void validateEmailAddress(final Contact co) throws ContactException {
+    private static void validateEmailAddress(final Contact co) throws OXException {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
             try {
@@ -175,7 +174,7 @@ public final class Contacts {
         }
     }
 
-    private static byte[] scaleContactImage(final byte[] img, final String mime) throws ContactException {
+    private static byte[] scaleContactImage(final byte[] img, final String mime) throws OXException {
         if (null == mime) {
             throw ContactExceptionCodes.MIME_TYPE_NOT_DEFINED.create();
         }
@@ -328,13 +327,13 @@ public final class Contacts {
         return img;
     }
 
-    private static void checkImageSize(final int imageSize, final int maxSize) throws ContactException {
+    private static void checkImageSize(final int imageSize, final int maxSize) throws OXException {
         if (maxSize > 0 && imageSize > maxSize) {
             throw ContactExceptionCodes.IMAGE_TOO_LARGE.create(I(imageSize), I(maxSize));
         }
     }
 
-    public static void performContactStorageInsert(final Contact contact, final int user, final Session session, final boolean override) throws OXConflictException, ContactException {
+    public static void performContactStorageInsert(final Contact contact, final int user, final Session session, final boolean override) throws OXConflictException, OXException {
 
         final StringBuilder insert_fields = new StringBuilder();
         final StringBuilder insert_values = new StringBuilder();
@@ -358,7 +357,7 @@ public final class Contacts {
 
             final FolderObject contactFolder = oxfs.getFolderObject(fid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(session.getContextId()), I(user)));
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(session.getContextId()), I(user));
             }
 
             final EffectivePermission oclPerm = oxfs.getFolderPermission(
@@ -367,14 +366,14 @@ public final class Contacts {
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), context));
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(session.getContextId()), I(user)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(session.getContextId()), I(user));
             }
             if (!oclPerm.canCreateObjects()) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(fid), I(session.getContextId()), I(user)));
+                throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(fid), I(session.getContextId()), I(user));
             }
 
             if ((contactFolder.getType() != FolderObject.PRIVATE) && contact.getPrivateFlag()) {
-                throw new OXConflictException(ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(I(fid), I(session.getContextId()), I(user)));
+                throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(I(fid), I(session.getContextId()), I(user));
             }
             if (!contact.containsFileAs()) {
                 contact.setFileAs(contact.getDisplayName());
@@ -399,14 +398,6 @@ public final class Contacts {
                     insert_values.append("?,");
                 }
             }
-        } catch (final OXException d) {
-            throw new ContactException(d);
-        } catch (final DBPoolingException d) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(d);
-        } catch (final OXConflictException oe) {
-            throw oe;
-        } catch (final OXException e) {
-            throw new ContactException(e);
         } finally {
             try {
                 DBPool.closeReaderSilent(context, readcon);
@@ -478,10 +469,6 @@ public final class Contacts {
                 writeContactImage(contact.getObjectID(), contact.getImage1(), session.getContextId(), contact.getImageContentType(), writecon);
             }
             writecon.commit();
-        } catch (final DBPoolingException e) {
-            // A DBPoolingException occurs when trying to fetch a connection from pool, therefore corresponding "writecon" variable can only
-            // be null at this location: No rollback needed/possible on connection
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
             rollback(writecon);
             throw Contacts.getTruncation(writecon, se, "prg_contacts", contact);
@@ -501,7 +488,7 @@ public final class Contacts {
         }
     }
 
-    public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXPermissionException {
+    public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXPermissionException {
         validateEmailAddress(co);
 
         boolean can_edit_only_own = false;
@@ -521,27 +508,27 @@ public final class Contacts {
             try {
                 original = getContactById(co.getObjectID(), user, group, ctx, uc, readcon);
             } catch (final OXException e) {
-                throw new OXObjectNotFoundException(ContactExceptionCodes.LOAD_OLD_CONTACT_FAILED.create(
+                throw ContactExceptionCodes.LOAD_OLD_CONTACT_FAILED.create(
                     e,
                     I(ctx.getContextId()),
-                    I(co.getObjectID())));
+                    I(co.getObjectID()));
             }
 
             // Check if contact really exists in specified folder
             if (fid != original.getParentFolderID()) {
-                throw new OXPermissionException(ContactExceptionCodes.NOT_IN_FOLDER.create(
+                throw ContactExceptionCodes.NOT_IN_FOLDER.create(
                     I(co.getObjectID()),
                     I(fid),
-                    I(ctx.getContextId())));
+                    I(ctx.getContextId()));
             }
 
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user && original.getInternalUserId() == user) {
                 // User tries to edit his primary email address which is allowed by administrator only since this email address is used in
                 // various places throughout the system. Therefore it is denied.
-                throw new OXPermissionException(ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(
+                throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(
                     I(ctx.getContextId()),
                     I(co.getObjectID()),
-                    I(user)));
+                    I(user));
             }
 
             // Check Rights for Source Folder
@@ -550,22 +537,22 @@ public final class Contacts {
 
             final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(folder_comesfrom);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(
                     I(folder_comesfrom),
                     I(ctx.getContextId()),
-                    I(user)));
+                    I(user));
             }
             final OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
             final EffectivePermission oclPerm = oxfs.getFolderPermission(folder_comesfrom, user, uc);
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folder_comesfrom), I(ctx.getContextId()), I(user)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folder_comesfrom), I(ctx.getContextId()), I(user));
             }
             if (!oclPerm.canWriteAllObjects()) {
                 if (oclPerm.canWriteOwnObjects()) {
                     can_edit_only_own = true;
                 } else {
-                    throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(co.getParentFolderID()), I(ctx.getContextId()), I(user)));
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(co.getParentFolderID()), I(ctx.getContextId()), I(user));
                 }
             }
 
@@ -576,7 +563,7 @@ public final class Contacts {
                     if (oclPerm.canDeleteOwnObjects()) {
                         can_delete_only_own = true;
                     } else {
-                        throw new OXPermissionException(ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(folder_comesfrom), I(ctx.getContextId()), I(user)));
+                        throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(folder_comesfrom), I(ctx.getContextId()), I(user));
                     }
                 }
 
@@ -584,40 +571,40 @@ public final class Contacts {
 
                 // Can create in destination?
                 if (!op.canCreateObjects()) {
-                    throw new OXPermissionException(ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user)));
+                    throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user));
                 }
                 final FolderObject destination = new OXFolderAccess(readcon, ctx).getFolderObject(folder_whereto);
                 if (destination.getModule() != FolderObject.CONTACT) {
-                    throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folder_whereto), I(ctx.getContextId()), I(user)));
+                    throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folder_whereto), I(ctx.getContextId()), I(user));
                 }
                 if (op.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                    throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user)));
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user));
                 }
                 if (!oclPerm.canCreateObjects()) {
-                    throw new OXPermissionException(ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user)));
+                    throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(folder_whereto), I(ctx.getContextId()), I(user));
                 }
                 // Following if-block should deal with all cases of move and private flag. Optimized with binary algebra
                 if (contactFolder.getType() == FolderObject.PRIVATE && destination.getType() == FolderObject.PUBLIC) {
                     if (co.containsPrivateFlag() && co.getPrivateFlag() || !original.getPrivateFlag() && co.containsPrivateFlag()) {
-                        throw new OXConflictException(ContactExceptionCodes.NO_PRIVATE_MOVE.create(I(ctx.getContextId()), I(co.getObjectID())));
+                        throw ContactExceptionCodes.NO_PRIVATE_MOVE.create(I(ctx.getContextId()), I(co.getObjectID()));
                     }
                 } else if (contactFolder.getType() == FolderObject.PUBLIC && destination.getType() == FolderObject.PUBLIC && co.containsPrivateFlag()) {
-                    throw new OXConflictException(ContactExceptionCodes.MARK_PRIVATE_NOT_ALLOWED.create(I(ctx.getContextId()), I(co.getObjectID())));
+                    throw ContactExceptionCodes.MARK_PRIVATE_NOT_ALLOWED.create(I(ctx.getContextId()), I(co.getObjectID()));
                 }
             }
 
             // ALL RIGHTS CHECK SO FAR, CHECK FOR READ ONLY OWN
             if (can_edit_only_own && (original.getCreatedBy() != user)) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(user)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(user));
             }
             if (can_delete_only_own && (original.getCreatedBy() != user)) {
-                throw new OXConflictException(ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fid), I(ctx.getContextId()), I(user)));
+                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fid), I(ctx.getContextId()), I(user));
             }
             if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag())) {
-                throw new OXConflictException(ContactExceptionCodes.MARK_PRIVATE_NOT_ALLOWED.create(I(ctx.getContextId()), I(co.getObjectID())));
+                throw ContactExceptionCodes.MARK_PRIVATE_NOT_ALLOWED.create(I(ctx.getContextId()), I(co.getObjectID()));
             }
             if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && (original.getCreatedBy() != user)) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(co.getObjectID()), I(ctx.getContextId())));
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(co.getObjectID()), I(ctx.getContextId()));
             }
 
             final java.util.Date server_date = original.getLastModified();
@@ -626,7 +613,7 @@ public final class Contacts {
                     "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()));
             }
             if ((client_date != null) && (client_date.getTime() > -1) && (client_date.getTime() < server_date.getTime())) {
-                throw new OXConcurrentModificationException(ContactExceptionCodes.OBJECT_HAS_CHANGED.create());
+                throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
             }
 
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == co.getParentFolderID()) {
@@ -678,8 +665,6 @@ public final class Contacts {
              */
             checkCharacters(co);
 
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final OXConcurrentModificationException e) {
             throw e;
         } catch (final OXPermissionException e) {
@@ -688,8 +673,6 @@ public final class Contacts {
             throw e;
         } catch (final OXObjectNotFoundException e) {
             throw e;
-        } catch (final OXException e) {
-            throw new ContactException(e);
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
@@ -734,7 +717,7 @@ public final class Contacts {
             }
             final int id = co.getObjectID();
             if (id == -1) {
-                throw new OXConflictException(ContactExceptionCodes.NEGATIVE_OBJECT_ID.create());
+                throw ContactExceptionCodes.NEGATIVE_OBJECT_ID.create();
             }
             final long lmd = System.currentTimeMillis();
 
@@ -845,8 +828,6 @@ public final class Contacts {
         } catch (final OXPermissionException ox) {
             rollback(writecon);
             throw ox;
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
             rollback(writecon);
             throw Contacts.getTruncation(writecon, se, "prg_contacts", co);
@@ -855,7 +836,7 @@ public final class Contacts {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
         } catch (final OXException e) {
             rollback(writecon);
-            throw new ContactException(e);
+            throw e;
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -869,7 +850,7 @@ public final class Contacts {
         }
     }
 
-    public static void performUserContactStorageUpdate(final Contact contact, final java.util.Date lastModified, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig) throws ContactException, OXPermissionException, OXObjectNotFoundException, OXConflictException, OXConcurrentModificationException {
+    public static void performUserContactStorageUpdate(final Contact contact, final java.util.Date lastModified, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig) throws OXException, OXPermissionException, OXObjectNotFoundException, OXConflictException, OXConcurrentModificationException {
         validateEmailAddress(contact);
         if (!contact.containsParentFolderID() || (contact.getParentFolderID() == 0)) {
             contact.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -883,22 +864,22 @@ public final class Contacts {
             try {
                 original = getContactById(contact.getObjectID(), userId, groups, ctx, userConfig, readcon);
             } catch (final Exception e) {
-                throw new OXObjectNotFoundException(ContactExceptionCodes.LOAD_OLD_CONTACT_FAILED.create(e, I(ctx.getContextId()), I(contact.getObjectID())));
+                throw ContactExceptionCodes.LOAD_OLD_CONTACT_FAILED.create(e, I(ctx.getContextId()), I(contact.getObjectID()));
             }
             // Check if contact really exists in specified folder
             if (contact.containsEmail1() && ctx.getMailadmin() != userId && original.getInternalUserId() == userId) {
                 // User tries to edit his primary email address which is allowed by administrator only since this email address is used in
                 // various places throughout the system. Therefore it is denied.
-                throw new OXPermissionException(ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(I(ctx.getContextId()), I(contact.getObjectID()), I(userId)));
+                throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(I(ctx.getContextId()), I(contact.getObjectID()), I(userId));
             }
 
             // user address operation
             if (contact.getParentFolderID() != FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId));
             }
             // ALL RIGHTS CHECK SO FAR, CHECK FOR MODIFY ONLY OWN
             if (original.getCreatedBy() != userId) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId));
             }
 
             final java.util.Date server_date = original.getLastModified();
@@ -906,7 +887,7 @@ public final class Contacts {
                 LOG.debug("Compare Dates for Contact Update\nClient-Date=" + lastModified.getTime() + "\nServer-Date=" + server_date.getTime());
             }
             if ((lastModified != null) && (lastModified.getTime() > -1) && (lastModified.getTime() < server_date.getTime())) {
-                throw new OXConcurrentModificationException(ContactExceptionCodes.OBJECT_HAS_CHANGED.create());
+                throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
             }
             if (contact.containsDisplayName() && (null == contact.getDisplayName() || "".equals(contact.getDisplayName()))) {
                 throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
@@ -952,8 +933,6 @@ public final class Contacts {
 
             // Check for bad characters
             checkCharacters(contact);
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
@@ -994,7 +973,7 @@ public final class Contacts {
             }
             final int id = contact.getObjectID();
             if (id == -1) {
-                throw new OXConflictException(ContactExceptionCodes.NEGATIVE_OBJECT_ID.create());
+                throw ContactExceptionCodes.NEGATIVE_OBJECT_ID.create();
             }
             final long lmd = System.currentTimeMillis();
 
@@ -1086,8 +1065,6 @@ public final class Contacts {
         } catch (final ContactException ox) {
             rollback(writecon);
             throw ox;
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final DataTruncation se) {
             rollback(writecon);
             throw Contacts.getTruncation(writecon, se, "prg_contacts", contact);
@@ -1096,7 +1073,7 @@ public final class Contacts {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
         } catch (final OXException e) {
             rollback(writecon);
-            throw new ContactException(e);
+            throw e;
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -1110,7 +1087,7 @@ public final class Contacts {
         }
     }
 
-    public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
+    public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException, OXObjectNotFoundException {
         final ContactSql contactSQL = new ContactMySql(ctx, user);
 
         StringBuilder sb = new StringBuilder();
@@ -1131,7 +1108,7 @@ public final class Contacts {
 
     private static final int LIMIT = 1000;
 
-    public static Contact[] getUsersById(final int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
+    public static Contact[] getUsersById(final int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException, OXObjectNotFoundException {
         final ContactSql contactSQL = new ContactMySql(ctx, user);
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 650; i++) {
@@ -1153,14 +1130,14 @@ public final class Contacts {
         for (int i = 0; i < userIds.length; i++) {
             final Contact contact = contacts.get(userIds[i]);
             if (null == contact) {
-                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userIds[i]), I(ctx.getContextId())));
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userIds[i]), I(ctx.getContextId()));
             }
             retval[i] = contact;
         }
         return retval;
     }
 
-    public static Contact getContactById(final int objectId, final Session session) throws ContactException, OXException, DBPoolingException, OXObjectNotFoundException {
+    public static Contact getContactById(final int objectId, final Session session) throws OXException, OXException, OXObjectNotFoundException {
         final Context ctx = ContextStorage.getStorageContext(session);
         final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         final Connection readCon = DBPool.pickup(ctx);
@@ -1174,7 +1151,7 @@ public final class Contacts {
         return co;
     }
 
-    public static Contact getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws ContactException, OXObjectNotFoundException {
+    public static Contact getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException, OXObjectNotFoundException {
 
         Contact co = null;
         final ContactSql contactSQL = new ContactMySql(ctx, userId);
@@ -1197,7 +1174,7 @@ public final class Contacts {
         return co;
     }
 
-    private static Contact fillContactObject(final ContactSql contactSQL, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws ContactException, OXObjectNotFoundException {
+    private static Contact fillContactObject(final ContactSql contactSQL, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException, OXObjectNotFoundException {
         final Contact co = new Contact();
         Statement stmt = null;
         ResultSet rs = null;
@@ -1214,7 +1191,7 @@ public final class Contacts {
                     }
                 }
             } else {
-                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create( I(objectId), I(ctx.getContextId())));
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create( I(objectId), I(ctx.getContextId()));
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1224,7 +1201,7 @@ public final class Contacts {
         return co;
     }
 
-    private static TIntObjectHashMap<Contact> fillContactObject(final ContactSql contactSQL, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws ContactException {
+    private static TIntObjectHashMap<Contact> fillContactObject(final ContactSql contactSQL, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
         final TIntObjectHashMap<Contact> contacts = new TIntObjectHashMap<Contact>();
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -1251,11 +1228,11 @@ public final class Contacts {
         return contacts;
     }
 
-    public static void deleteContact(final int id, final int cid, final Connection writecon) throws ContactException {
+    public static void deleteContact(final int id, final int cid, final Connection writecon) throws OXException {
         deleteContact(id, cid, writecon, false);
     }
 
-    public static void deleteContact(final int id, final int cid, final Connection writecon, final boolean admin_delete) throws ContactException {
+    public static void deleteContact(final int id, final int cid, final Connection writecon, final boolean admin_delete) throws OXException {
         Statement del = null;
         try {
             del = writecon.createStatement();
@@ -1270,8 +1247,6 @@ public final class Contacts {
             } else {
                 cs.iFdeleteContact(id, cid, del);
             }
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -1279,7 +1254,7 @@ public final class Contacts {
         }
     }
 
-    public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user, final Context ctx, final Connection readcon) throws ContactException {
+    public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user, final Context ctx, final Connection readcon) throws OXException {
 
         Statement stmt = null;
         ResultSet rs = null;
@@ -1353,7 +1328,7 @@ public final class Contacts {
         return r;
     }
 
-    public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id, final int cid, final Connection writecon) throws ContactException {
+    public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id, final int cid, final Connection writecon) throws OXException {
 
         DistributionListEntryObject dleo = null;
 
@@ -1403,8 +1378,6 @@ public final class Contacts {
 
                 ps.execute();
             }
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -1412,7 +1385,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeDistributionListArrayUpdate(final DistributionListEntryObject[] dleos, final DistributionListEntryObject[] old_dleos, final int id, final int cid, final Connection writecon) throws ContactException {
+    public static void writeDistributionListArrayUpdate(final DistributionListEntryObject[] dleos, final DistributionListEntryObject[] old_dleos, final int id, final int cid, final Connection writecon) throws OXException {
         DistributionListEntryObject new_one = null;
         DistributionListEntryObject old_one = null;
 
@@ -1497,7 +1470,7 @@ public final class Contacts {
         writeDistributionListArrayInsert(insertcut, id, cid, writecon);
     }
 
-    public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws ContactException {
+    public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
         if (dleos.length > 0) {
 
             DistributionListEntryObject dleo = null;
@@ -1554,8 +1527,6 @@ public final class Contacts {
                     ps.execute();
 
                 }
-            } catch (final OXException d) {
-                throw new ContactException(d);
             } catch (final SQLException e) {
                 throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
@@ -1564,7 +1535,7 @@ public final class Contacts {
         }
     }
 
-    public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws ContactException {
+    public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
 
         PreparedStatement ps = null;
         DistributionListEntryObject dleo = null;
@@ -1577,8 +1548,6 @@ public final class Contacts {
                 LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)));
             }
             ps.execute();
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -1611,7 +1580,7 @@ public final class Contacts {
         }
     }
 
-    public static LinkEntryObject[] fillLinkArray(final Contact co, final int user, final Context ctx, final Connection readcon) throws ContactException {
+    public static LinkEntryObject[] fillLinkArray(final Contact co, final int user, final Context ctx, final Connection readcon) throws OXException {
 
         Statement stmt = null;
         ResultSet rs = null;
@@ -1670,7 +1639,7 @@ public final class Contacts {
         return r;
     }
 
-    public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws ContactException {
+    public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws OXException {
         LinkEntryObject leo = null;
 
         PreparedStatement ps = null;
@@ -1689,8 +1658,6 @@ public final class Contacts {
                 }
                 ps.execute();
             }
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -1698,7 +1665,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original, final int id, final int cid, final Connection writecon) throws ContactException {
+    public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original, final int id, final int cid, final Connection writecon) throws OXException {
 
         final int sizey = (null == leos ? 0 : leos.length) + (null == original ? 0 : original.length);
         final LinkEntryObject[] inserts = new LinkEntryObject[sizey];
@@ -1751,7 +1718,7 @@ public final class Contacts {
         writeContactLinkArrayInsert(insertcut, id, cid, writecon);
     }
 
-    public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws ContactException {
+    public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws OXException {
         if (leos.length > 0) {
             LinkEntryObject leo = null;
             PreparedStatement ps = null;
@@ -1768,8 +1735,6 @@ public final class Contacts {
                     }
                     ps.execute();
                 }
-            } catch (final OXException d) {
-                throw new ContactException(d);
             } catch (final SQLException e) {
                 throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
@@ -1778,7 +1743,7 @@ public final class Contacts {
         }
     }
 
-    public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon) throws SQLException, ContactException {
+    public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon) throws SQLException, OXException {
         Date last_mod = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -1789,8 +1754,6 @@ public final class Contacts {
             if (rs.next()) {
                 last_mod = new Date(rs.getLong(1));
             }
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
         } finally {
@@ -1800,7 +1763,7 @@ public final class Contacts {
         return last_mod;
     }
 
-    public static String getContactImageContentType(final int id, final int cid, final Connection readcon) throws SQLException, ContactException {
+    public static String getContactImageContentType(final int id, final int cid, final Connection readcon) throws SQLException, OXException {
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -1811,14 +1774,12 @@ public final class Contacts {
                 return rs.getString(1);
             }
             return null;
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } finally {
             closeSQLStuff(rs, stmt);
         }
     }
 
-    public static void getContactImage(final int contact_id, final Contact co, final int cid, final Connection readcon) throws ContactException {
+    public static void getContactImage(final int contact_id, final Contact co, final int cid, final Connection readcon) throws OXException {
         Date last_mod = null;
 
         Statement stmt = null;
@@ -1836,8 +1797,6 @@ public final class Contacts {
                     co.setImageContentType(rs.getString(3));
                 }
             }
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -1845,9 +1804,9 @@ public final class Contacts {
         }
     }
 
-    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXConflictException, ContactException {
+    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXConflictException, OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
-            throw new OXConflictException(ContactExceptionCodes.IMAGE_BROKEN.create());
+            throw ContactExceptionCodes.IMAGE_BROKEN.create();
         }
         PreparedStatement ps = null;
         try {
@@ -1861,8 +1820,6 @@ public final class Contacts {
                 LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)));
             }
             ps.execute();
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -1870,9 +1827,9 @@ public final class Contacts {
         }
     }
 
-    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXConflictException, ContactException {
+    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXConflictException, OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
-            throw new OXConflictException(ContactExceptionCodes.IMAGE_BROKEN.create());
+            throw ContactExceptionCodes.IMAGE_BROKEN.create();
         }
         PreparedStatement ps = null;
         try {
@@ -1888,8 +1845,6 @@ public final class Contacts {
                 LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)));
             }
             ps.execute();
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -1897,7 +1852,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean performContactReadCheckByID(final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws DBPoolingException {
+    public static boolean performContactReadCheckByID(final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws OXException {
 
         Connection readCon = null;
         ResultSet rs = null;
@@ -1948,7 +1903,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws ContactException {
+    public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws OXException {
         if (ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).hasSpecificContactInterface(
             folderId,
             ctx.getContextId())) {
@@ -1992,8 +1947,6 @@ public final class Contacts {
                 return performContactReadCheck(fid, created_from, user, ctx, uc, readCon);
             }
             return false;
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final SQLException e) {
             LOG.error("UNABLE TO performContactReadCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
             return false;
@@ -2052,18 +2005,17 @@ public final class Contacts {
                 return false;
             }
             return true;
-        } catch (final DBPoolingException e) {
-            final ContactException e1 = ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
+        } catch (final SQLException e) {
+            final OXException e1 = ContactExceptionCodes.SQL_PROBLEM.create(e);
             LOG.error(e1.getMessage(), e1);
             return false;
-        } catch (final SQLException e) {
-            final ContactException e1 = ContactExceptionCodes.SQL_PROBLEM.create(e);
-            LOG.error(e1.getMessage(), e1);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
             return false;
         }
     }
 
-    public static boolean performContactWriteCheckByID(final int folderId, final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws ContactException {
+    public static boolean performContactWriteCheckByID(final int folderId, final int objectId, final int user, final Context ctx, final UserConfiguration uc) throws OXException {
 
         Connection readCon = null;
         ResultSet rs = null;
@@ -2103,8 +2055,6 @@ public final class Contacts {
                 return performContactWriteCheck(fid, created_from, user, ctx, uc, readCon);
             }
             return false;
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final SQLException e) {
             LOG.error("UNABLE TO performContactWriteCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
             return false;
@@ -2144,21 +2094,19 @@ public final class Contacts {
         }
     }
 
-    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so) throws ContactException, DBPoolingException {
+    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so) throws OXException {
         Connection readCon = null;
         Context ct = null;
         try {
             ct = ContextStorage.getStorageContext(so.getContextId());
             readCon = DBPool.pickup(ct);
             return containsForeignObjectInFolder(fid, uid, so, readCon);
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } finally {
             DBPool.closeReaderSilent(ct, readCon);
         }
     }
 
-    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so, final Connection readCon) throws ContactException {
+    public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so, final Connection readCon) throws OXException {
         ResultSet rs = null;
         Statement stmt = null;
         try {
@@ -2169,8 +2117,6 @@ public final class Contacts {
                 return true;
             }
             return false;
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -2178,7 +2124,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean containsAnyObjectInFolder(final int fid, final Context cx) throws ContactException {
+    public static boolean containsAnyObjectInFolder(final int fid, final Context cx) throws OXException {
         Connection readCon = null;
         ResultSet rs = null;
         Statement st = null;
@@ -2188,11 +2134,6 @@ public final class Contacts {
             final ContactSql cs = new ContactMySql(null);
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
             return (rs.next());
-        } catch (final OXException d) {
-            throw new ContactException(d);
-        } catch (final DBPoolingException se) {
-            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
-            return false;
         } catch (final SQLException se) {
             LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
             return false;
@@ -2201,7 +2142,7 @@ public final class Contacts {
         }
     }
 
-    public static boolean containsAnyObjectInFolder(final int fid, final Connection readCon, final Context cx) throws ContactException {
+    public static boolean containsAnyObjectInFolder(final int fid, final Connection readCon, final Context cx) throws OXException {
         ResultSet rs = null;
         Statement st = null;
         try {
@@ -2209,8 +2150,6 @@ public final class Contacts {
             final ContactSql cs = new ContactMySql(null);
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
             return (rs.next());
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException se) {
             LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
             return false;
@@ -2219,11 +2158,11 @@ public final class Contacts {
         }
     }
 
-    public static void deleteContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon) throws ContactException {
+    public static void deleteContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon) throws OXException {
         trashContactsFromFolder(fid, so, readcon, writecon, true);
     }
 
-    public static void trashContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon, final boolean delit) throws ContactException {
+    public static void trashContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon, final boolean delit) throws OXException {
 
         Statement read = null;
         Statement del = null;
@@ -2233,22 +2172,18 @@ public final class Contacts {
         try {
             del = writecon.createStatement();
 
-            try {
+            {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 final FolderObject contactFolder = new OXFolderAccess(readcon, ct).getFolderObject(fid);
                 if (contactFolder.getModule() != FolderObject.CONTACT) {
-                    throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(
+                    throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(
                         I(fid),
                         I(so.getContextId()),
-                        I(so.getUserId())));
+                        I(so.getUserId()));
                 }
                 if (contactFolder.getType() == FolderObject.PRIVATE) {
                     deleteIt = true;
                 }
-            } catch (final OXException d) {
-                throw new ContactException(d);
-            } catch (final OXException e) {
-                throw new ContactException(e);
             }
 
             final ContactSql cs = new ContactMySql(so);
@@ -2297,31 +2232,25 @@ public final class Contacts {
                 LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
             }
             del.execute(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final EventException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(so.getContextId()), I(fid));
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (final OXException e) {
-            throw new ContactException(e);
         } finally {
             closeSQLStuff(rs, read);
             closeSQLStuff(del);
         }
     }
 
-    public static void deleteDistributionList(final int id, final int cid, final Connection writecon) throws SQLException, ContactException {
+    public static void deleteDistributionList(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
         trashDistributionList(id, cid, writecon, true);
     }
 
-    public static void trashDistributionList(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, ContactException {
+    public static void trashDistributionList(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
         final Statement stmt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
             cs.iFtrashDistributionList(delete, id, cid, stmt);
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
         } finally {
@@ -2329,17 +2258,15 @@ public final class Contacts {
         }
     }
 
-    public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException, ContactException {
+    public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
         trashLinks(id, cid, writecon, true);
     }
 
-    public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, ContactException {
+    public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
         final Statement stmt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
             cs.iFtrashLinks(delete, stmt, id, cid);
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
         } finally {
@@ -2347,17 +2274,15 @@ public final class Contacts {
         }
     }
 
-    public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException, ContactException {
+    public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
         trashImage(id, cid, writecon, true);
     }
 
-    public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, ContactException {
+    public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
         final Statement stmt = writecon.createStatement();
         try {
             final ContactSql cs = new ContactMySql(null);
             cs.iFtrashImage(delete, stmt, id, cid);
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException sxe) {
             throw sxe;
         } finally {
@@ -2365,7 +2290,7 @@ public final class Contacts {
         }
     }
 
-    public static void trashAllUserContacts(final int uid, final Session so, final Connection readcon, final Connection writecon) throws ContactException {
+    public static void trashAllUserContacts(final int uid, final Session so, final Connection readcon, final Connection writecon) throws OXException {
         Statement stmt = null;
         Statement del = null;
         ResultSet rs = null;
@@ -2466,8 +2391,6 @@ public final class Contacts {
             } else {
                 cs.iFtrashAllUserContactsDeletedEntries(del, so.getContextId(), uid, ct);
             }
-        } catch (final OXException d) {
-            throw new ContactException(d);
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -2476,7 +2399,7 @@ public final class Contacts {
         }
     }
 
-    public static ContactException getTruncation(final Connection con, final DataTruncation se, final String table, final Contact co) {
+    public static OXException getTruncation(final Connection con, final DataTruncation se, final String table, final Contact co) {
 
         final String[] fields = DBUtils.parseTruncatedFields(se);
         final StringBuilder sFields = new StringBuilder();
@@ -2517,7 +2440,7 @@ public final class Contacts {
                 }
             }
         }
-        final ContactException retval;
+        final OXException retval;
         if (truncateds.length > 0) {
             retval = ContactExceptionCodes.DATA_TRUNCATION.create(
                 se,
@@ -2533,7 +2456,7 @@ public final class Contacts {
         return retval;
     }
 
-    private static void checkCharacters(final Contact co) throws ContactException {
+    private static void checkCharacters(final Contact co) throws OXException {
         for (int i = 0; i < 650; i++) {
             if ((mapping[i] != null) && (i != Contact.IMAGE1)) {
                 String error = null;
