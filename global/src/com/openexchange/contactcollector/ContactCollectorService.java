@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -79,8 +79,8 @@ public interface ContactCollectorService {
      * @param ctx
      * @param folderName
      * @param con
-     * @throws AbstractOXException
      * @throws SQLException
+     * @throws OXException
      */
-    public void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws AbstractOXException, SQLException;
+    public void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws SQLException, OXException;
 }

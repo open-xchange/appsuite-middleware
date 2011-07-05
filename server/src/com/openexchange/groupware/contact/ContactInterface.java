@@ -50,9 +50,6 @@
 package com.openexchange.groupware.contact;
 
 import java.util.Date;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -80,7 +77,7 @@ public interface ContactInterface {
 
     public void insertContactObject(final Contact co) throws OXException;
 
-    public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException, OXConcurrentModificationException, ContactException;
+    public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException;
 
     void updateUserContact(Contact contact, Date lastmodified) throws OXException;
 
@@ -189,7 +186,7 @@ public interface ContactInterface {
      */
     public SearchIterator<Contact> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
 
-    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException;
+    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXException;
 
     /**
      * Loads a range of contacts by the given IDs

@@ -72,7 +72,6 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
@@ -80,9 +79,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.preferences.ServerUserSetting;
@@ -168,12 +165,6 @@ public class Memorizer implements Runnable {
         } catch (final OXException e) {
             LOG.error("Contact collector run aborted.", e);
             return;
-        } catch (final OXException e) {
-            LOG.error("Contact collector run aborted.", e);
-            return;
-        } catch (final UserException e) {
-            LOG.error("Contact collector run aborted.", e);
-            return;
         } catch (final Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
@@ -188,7 +179,7 @@ public class Memorizer implements Runnable {
             if (!aliases.contains(address)) {
                 try {
                     memorizeContact(address, ctx, userConfig);
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.warn("Contact collector run aborted for address: " + address.toUnicodeString(), e);
                 }
             }
@@ -197,7 +188,7 @@ public class Memorizer implements Runnable {
 
     private static final int[] COLUMNS = { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Contact.USE_COUNT };
 
-    private int memorizeContact(final InternetAddress address, final Context ctx, final UserConfiguration userConfig) throws AbstractOXException {
+    private int memorizeContact(final InternetAddress address, final Context ctx, final UserConfiguration userConfig) throws OXException {
         /*
          * Convert email address to a contact
          */
@@ -313,8 +304,6 @@ public class Memorizer implements Runnable {
         try {
             enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
             enabledRight = new ServerSessionAdapter(session).getUserConfiguration().isCollectEmailAddresses();
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }

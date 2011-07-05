@@ -71,16 +71,13 @@ import javax.mail.internet.ParseException;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.preferences.ServerUserSetting;
@@ -351,12 +348,6 @@ public final class MemorizerWorker {
         } catch (final OXException e) {
             LOG.error("Contact collector run aborted.", e);
             return;
-        } catch (final OXException e) {
-            LOG.error("Contact collector run aborted.", e);
-            return;
-        } catch (final UserException e) {
-            LOG.error("Contact collector run aborted.", e);
-            return;
         } catch (final Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
@@ -371,7 +362,7 @@ public final class MemorizerWorker {
             if (!aliases.contains(address)) {
                 try {
                     memorizeContact(address, session, ctx, userConfig);
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.warn("Contact collector run aborted for address: " + address.toUnicodeString(), e);
                 }
             }
@@ -382,7 +373,7 @@ public final class MemorizerWorker {
 
     private static final int[] SEARCH_FIELDS = { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3 };
 
-    private static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws AbstractOXException {
+    private static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws OXException {
         /*
          * Convert email address to a contact
          */
@@ -462,8 +453,6 @@ public final class MemorizerWorker {
         try {
             enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
             enabledRight = new ServerSessionAdapter(session).getUserConfiguration().isCollectEmailAddresses();
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }

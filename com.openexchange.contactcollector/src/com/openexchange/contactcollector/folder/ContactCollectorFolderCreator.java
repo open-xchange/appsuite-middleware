@@ -60,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
