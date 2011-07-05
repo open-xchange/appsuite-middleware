@@ -61,12 +61,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.internal.Server;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.tools.update.Tools;
@@ -90,23 +89,18 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public SchemaUpdateState getSchema(int poolId, String schemaName) throws SchemaException {
-        Connection con;
-        try {
-            con = Database.get(poolId, schemaName);
-        } catch (DBPoolingException e) {
-            throw SchemaExceptionCodes.DATABASE_DOWN.create(e);
-        }
+    public SchemaUpdateState getSchema(final int poolId, final String schemaName) throws OXException {
+        final Connection con = Database.get(poolId, schemaName);
         final SchemaUpdateState retval;
         try {
             con.setAutoCommit(false);
             checkForTable(con);
             retval = loadSchemaStatus(con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (SchemaException e) {
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -120,13 +114,13 @@ public class SchemaStoreImpl extends SchemaStore {
      * @param con connection to master in transaction mode.
      * @return <code>true</code> if the table has been created.
      */
-    private static void checkForTable(Connection con) throws SQLException {
+    private static void checkForTable(final Connection con) throws SQLException {
         if (!Tools.tableExists(con, TABLE_NAME)) {
             createTable(con);
         }
     }
 
-    private static void createTable(Connection con) throws SQLException {
+    private static void createTable(final Connection con) throws SQLException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -137,13 +131,8 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void lockSchema(Schema schema, int contextId, boolean background) throws SchemaException {
-        final Connection con;
-        try {
-            con = Database.get(contextId, true);
-        } catch (DBPoolingException e) {
-            throw new SchemaException(e);
-        }
+    public void lockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
+        final Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false); // BEGIN
             // Insert lock
@@ -154,10 +143,10 @@ public class SchemaStoreImpl extends SchemaStore {
             }
             // Everything went fine. Schema is marked as locked
             con.commit();
-        } catch (SchemaException e) {
+        } catch (final OXException e) {
             rollback(con);
             throw e;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -170,10 +159,10 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static final int MYSQL_DUPLICATE = 1062;
 
-    private static void insertLock(Connection con, Schema schema, String idiom) throws SchemaException {
+    private static void insertLock(final Connection con, final Schema schema, final String idiom) throws OXException {
         // Check for existing lock exclusively
-        ExecutedTask[] tasks = readUpdateTasks(con);
-        for (ExecutedTask task : tasks) {
+        final ExecutedTask[] tasks = readUpdateTasks(con);
+        for (final ExecutedTask task : tasks) {
             if (idiom.equals(task.getTaskName())) {
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
             }
@@ -187,7 +176,7 @@ public class SchemaStoreImpl extends SchemaStore {
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
             }
@@ -197,7 +186,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static void lockOldVersionTable(Connection con, Schema schema) throws SchemaException {
+    private static void lockOldVersionTable(final Connection con, final Schema schema) throws OXException {
         // Check for existing lock
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -211,7 +200,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 // Schema is already locked by another update process
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -225,7 +214,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
             }
             // Everything went fine. Schema is marked as locked
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -233,13 +222,8 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void unlockSchema(Schema schema, int contextId, boolean background) throws SchemaException {
-        final Connection con;
-        try {
-            con = Database.get(contextId, true);
-        } catch (DBPoolingException e) {
-            throw new SchemaException(e);
-        }
+    public void unlockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
+        final Connection con = Database.get(contextId, true);
         try {
             // End of update process, so unlock schema
             con.setAutoCommit(false);
@@ -251,10 +235,10 @@ public class SchemaStoreImpl extends SchemaStore {
             }
             // Everything went fine. Schema is marked as unlocked
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (SchemaException e) {
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -263,11 +247,11 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static void deleteLock(Connection con, Schema schema, String idiom) throws SchemaException {
+    private static void deleteLock(final Connection con, final Schema schema, final String idiom) throws OXException {
         // Check for existing lock exclusively
-        ExecutedTask[] tasks = readUpdateTasks(con);
+        final ExecutedTask[] tasks = readUpdateTasks(con);
         boolean found = false;
-        for (ExecutedTask task : tasks) {
+        for (final ExecutedTask task : tasks) {
             if (idiom.equals(task.getTaskName())) {
                 found = true;
                 break;
@@ -284,7 +268,7 @@ public class SchemaStoreImpl extends SchemaStore {
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.UNLOCK_FAILED.create(schema.getSchema());
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
                 throw SchemaExceptionCodes.UNLOCK_FAILED.create(e, schema.getSchema());
             }
@@ -294,7 +278,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static void unlockOldVersionTable(Connection con, Schema schema) throws SchemaException {
+    private static void unlockOldVersionTable(final Connection con, final Schema schema) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -307,7 +291,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 // Schema is NOT locked by update process
                 throw SchemaExceptionCodes.UPDATE_CONFLICT.create(schema.getSchema());
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -321,7 +305,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 // Schema could not be unlocked
                 throw SchemaExceptionCodes.UNLOCK_FAILED.create(schema.getSchema());
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -332,10 +316,10 @@ public class SchemaStoreImpl extends SchemaStore {
      * Loads the old schema version information from the database.
      * @param con connection to the master in transaction state.
      * @param schema schema object to put the information to.
-     * @throws SchemaException if loading fails.
+     * @throws OXException if loading fails.
      */
-    private static void loadOldVersionTable(Connection con, SchemaImpl schema) throws SchemaException {
-        String sql = "SELECT version,locked,gw_compatible,admin_compatible,server FROM version FOR UPDATE";
+    private static void loadOldVersionTable(final Connection con, final SchemaImpl schema) throws OXException {
+        final String sql = "SELECT version,locked,gw_compatible,admin_compatible,server FROM version FOR UPDATE";
         Statement stmt = null;
         ResultSet result = null;
         try {
@@ -358,7 +342,7 @@ public class SchemaStoreImpl extends SchemaStore {
             if (result.next()) {
                 throw SchemaExceptionCodes.MULTIPLE_VERSION_ENTRY.create(schema.getSchema());
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -368,7 +352,7 @@ public class SchemaStoreImpl extends SchemaStore {
     /**
      * @param con connection to the master in transaction mode.
      */
-    private static SchemaUpdateState loadSchemaStatus(Connection con) throws SchemaException, SQLException {
+    private static SchemaUpdateState loadSchemaStatus(final Connection con) throws OXException, SQLException {
         final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
         loadUpdateTasks(con, retval);
         if (Tools.tableExists(con, "version")) {
@@ -379,18 +363,14 @@ public class SchemaStoreImpl extends SchemaStore {
             retval.setBackgroundUpdatesRunning(false);
             retval.setGroupwareCompatible(true);
             retval.setAdminCompatible(true);
-            try {
-                retval.setServer(Server.getServerName());
-            } catch (DBPoolingException e) {
-                throw new SchemaException(e);
-            }
+            retval.setServer(Server.getServerName());
             retval.setSchema(con.getCatalog());
         }
         return retval;
     }
 
-    private static void loadUpdateTasks(Connection con, SchemaUpdateStateImpl state) throws SchemaException {
-        for (ExecutedTask task : readUpdateTasks(con)) {
+    private static void loadUpdateTasks(final Connection con, final SchemaUpdateStateImpl state) throws OXException {
+        for (final ExecutedTask task : readUpdateTasks(con)) {
             if (LOCKED.equals(task.getTaskName())) {
                 state.setBlockingUpdatesRunning(true);
             } else if (BACKGROUND.equals(task.getTaskName())) {
@@ -401,19 +381,19 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static ExecutedTask[] readUpdateTasks(Connection con) throws SchemaException {
-        String sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
+    private static ExecutedTask[] readUpdateTasks(final Connection con) throws OXException {
+        final String sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
         Statement stmt = null;
         ResultSet result = null;
-        List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
+        final List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
         try {
             stmt = con.createStatement();
             result = stmt.executeQuery(sql);
             while (result.next()) {
-                ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
+                final ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
                 retval.add(task);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -422,16 +402,16 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void addExecutedTask(Connection con, String taskName, boolean success) throws SchemaException {
+    public void addExecutedTask(final Connection con, final String taskName, final boolean success) throws OXException {
         boolean update = false;
-        for (ExecutedTask executed : readUpdateTasks(con)) {
+        for (final ExecutedTask executed : readUpdateTasks(con)) {
             if (taskName.equals(executed.getTaskName())) {
                 update = true;
                 break;
             }
         }
-        String insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)";
-        String updateSQL = "UPDATE updateTask SET successful=?, lastModified=? WHERE cid=0 AND taskName=?";
+        final String insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)";
+        final String updateSQL = "UPDATE updateTask SET successful=?, lastModified=? WHERE cid=0 AND taskName=?";
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(update ? updateSQL : insertSQL);
@@ -439,11 +419,11 @@ public class SchemaStoreImpl extends SchemaStore {
             stmt.setBoolean(pos++, success);
             stmt.setLong(pos++, System.currentTimeMillis());
             stmt.setString(pos++, taskName);
-            int rows = stmt.executeUpdate();
+            final int rows = stmt.executeUpdate();
             if (1 != rows) {
                 throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(rows));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -451,19 +431,14 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws SchemaException {
-        Connection con;
-        try {
-            con = Database.get(poolId, schemaName);
-        } catch (DBPoolingException e) {
-            throw SchemaExceptionCodes.DATABASE_DOWN.create(e);
-        }
+    public ExecutedTask[] getExecutedTasks(final int poolId, final String schemaName) throws OXException {
+        final Connection con = Database.get(poolId, schemaName);
         final ExecutedTask[] retval;
         try {
             con.setAutoCommit(false);
             retval = readUpdateTasks(con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(con);

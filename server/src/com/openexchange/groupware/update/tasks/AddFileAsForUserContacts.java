@@ -58,7 +58,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -87,7 +87,7 @@ public final class AddFileAsForUserContacts extends UpdateTaskAdapter {
         return new Attributes(BACKGROUND, SCHEMA);
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         final Connection con = dbService.getForUpdateTask(contextId);

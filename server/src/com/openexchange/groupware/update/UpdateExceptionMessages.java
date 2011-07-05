@@ -52,7 +52,7 @@ package com.openexchange.groupware.update;
 import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * Exception message texts for the {@link UpdateException}.
+ * Exception message texts for the {@link OXException}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

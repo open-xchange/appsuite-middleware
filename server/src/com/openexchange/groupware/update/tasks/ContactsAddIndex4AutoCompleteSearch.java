@@ -56,11 +56,10 @@ import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 
@@ -86,7 +85,7 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
@@ -148,7 +147,7 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
         }
     }
 
-    private static UpdateException createSQLError(final SQLException e) {
+    private static OXException createSQLError(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 }

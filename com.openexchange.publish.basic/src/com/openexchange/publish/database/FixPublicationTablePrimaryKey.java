@@ -54,7 +54,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -81,7 +81,7 @@ public final class FixPublicationTablePrimaryKey extends UpdateTaskAdapter {
         return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         Connection con = dbService.getForUpdateTask(cid);
         try {

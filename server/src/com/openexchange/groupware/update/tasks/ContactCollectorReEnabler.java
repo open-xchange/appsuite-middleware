@@ -57,11 +57,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
@@ -87,13 +86,13 @@ public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
         return new Attributes(BACKGROUND);
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con;
         try {
             con = Database.getNoTimeout(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         try {
             con.setAutoCommit(false);
@@ -107,7 +106,7 @@ public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
         }
     }
 
-    private void perform(Connection con) throws UpdateException {
+    private void perform(Connection con) throws OXException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();

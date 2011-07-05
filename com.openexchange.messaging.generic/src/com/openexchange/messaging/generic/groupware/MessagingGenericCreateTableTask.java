@@ -57,12 +57,11 @@ import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -111,7 +110,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         return new String[0];
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
         final int contextId = params.getContextId();
         createTable("messagingAccount", getMessagingAccountTable(), contextId);
         final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(MessagingGenericCreateTableTask.class);
@@ -128,7 +127,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws com.openexchange.exception.OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
@@ -140,13 +139,13 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         return new String[] { "messagingAccount" };
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
+    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final DatabaseService ds = getService(DatabaseService.class);
         final Connection writeCon;
         try {
             writeCon = ds.getWritable(contextId);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         try {
@@ -176,11 +175,11 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         return retval;
     }
 
-    private <S> S getService(final Class<? extends S> clazz) throws UpdateException {
+    private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
             return MessagingGenericServiceRegistry.getServiceRegistry().getService(clazz, true);
         } catch (final OXException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
     }
 

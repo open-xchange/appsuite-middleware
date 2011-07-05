@@ -65,9 +65,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.file.FileStorage;
@@ -86,7 +85,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         try {
             filestorages.set(new HashMap<Integer, FileStorage>());
             for(final LeftoverAttachment att : getLeftoverAttachmentsInSchema(contextId)){
@@ -152,7 +151,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private void removeFile(final String fileId,final int ctx_id) throws SQLException, DBPoolingException, OXException, UpdateException {
+    private void removeFile(final String fileId,final int ctx_id) throws SQLException, DBPoolingException, OXException, OXException {
         // We have to use the local file storage to bypass quota handling, which must remain
         // unaffected by these operations
 

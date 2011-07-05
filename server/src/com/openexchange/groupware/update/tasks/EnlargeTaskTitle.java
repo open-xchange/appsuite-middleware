@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.SQL;
 import com.openexchange.groupware.tasks.StorageType;
@@ -102,7 +103,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
      * {@inheritDoc}
      * @throws TaskException 
      */
-    public void perform(final Schema schema, final int contextId) throws TaskException {
+    public void perform(final Schema schema, final int contextId) throws TaskException, OXException {
         LOG.info("Performing update task EnlargeTaskTitle.");
         Connection con = null;
         try {

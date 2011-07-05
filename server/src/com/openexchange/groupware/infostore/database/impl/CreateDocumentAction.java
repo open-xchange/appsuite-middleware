@@ -68,7 +68,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
         };
         try {
             doUpdates(update);
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
     }
@@ -76,7 +76,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
     public void perform() throws AbstractOXException {
         try {
             doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getWritableDocumentFields(), getDocuments());
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
     }

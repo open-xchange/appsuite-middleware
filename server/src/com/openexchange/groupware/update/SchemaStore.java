@@ -53,8 +53,8 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.SchemaStoreImpl;
@@ -79,7 +79,7 @@ public abstract class SchemaStore {
         return new SchemaStoreImpl();
     }
 
-    public abstract SchemaUpdateState getSchema(int poolId, String schemaName) throws SchemaException;
+    public abstract SchemaUpdateState getSchema(int poolId, String schemaName) throws OXException;
 
     /**
      * Marks given schema as locked due to a start of an update process.
@@ -89,7 +89,7 @@ public abstract class SchemaStore {
      * @param background <code>false</code> if blocking tasks are executed.
      * @throws SchemaException
      */
-    public abstract void lockSchema(Schema schema, int contextId, boolean background) throws SchemaException;
+    public abstract void lockSchema(Schema schema, int contextId, boolean background) throws OXException;
 
     /**
      * Marks given schem as unlocked to release this schema from an update process.
@@ -99,37 +99,28 @@ public abstract class SchemaStore {
      * @param background <code>false</code> if blocking tasks finished.
      * @throws SchemaException
      */
-    public abstract void unlockSchema(Schema schema, int contextId, boolean background) throws SchemaException;
+    public abstract void unlockSchema(Schema schema, int contextId, boolean background) throws OXException;
 
-    public final Schema getSchema(Context ctx) throws SchemaException {
+    public final Schema getSchema(final Context ctx) throws OXException {
         return getSchema(ctx.getContextId());
     }
 
-    public final SchemaUpdateState getSchema(int contextId) throws SchemaException {
-        try {
-            return getSchema(Database.resolvePool(contextId, true), Database.getSchema(contextId));
-        } catch (DBPoolingException e) {
-            throw new SchemaException(e);
-        }
+    public final SchemaUpdateState getSchema(final int contextId) throws OXException {
+        return getSchema(Database.resolvePool(contextId, true), Database.getSchema(contextId));
     }
 
-    public abstract ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws SchemaException;
+    public abstract ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws OXException;
 
-    public final void addExecutedTask(int contextId, String taskName, boolean success) throws SchemaException {
-        final Connection con;
-        try {
-            con = Database.get(contextId, true);
-        } catch (DBPoolingException e) {
-            throw new SchemaException(e);
-        }
+    public final void addExecutedTask(final int contextId, final String taskName, final boolean success) throws OXException {
+        final Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false);
             addExecutedTask(con, taskName, success);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (SchemaException e) {
+        } catch (final SchemaException e) {
             rollback(con);
             throw e;
         } finally {
@@ -141,6 +132,6 @@ public abstract class SchemaStore {
     /**
      * @param con a writable database connection but into transaction mode.
      */
-    public abstract void addExecutedTask(Connection con, String taskName, boolean success) throws SchemaException;
+    public abstract void addExecutedTask(Connection con, String taskName, boolean success) throws OXException;
 
 }

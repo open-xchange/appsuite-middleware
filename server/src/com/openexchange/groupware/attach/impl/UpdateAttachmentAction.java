@@ -67,7 +67,7 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
         }
         try {
             doUpdates(getQueryCatalog().getUpdate(), oldAttachments, true);
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         } catch (DBPoolingException e) {
             throw new AttachmentException(e);
@@ -80,7 +80,7 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
         }
         try {
             doUpdates(getQueryCatalog().getUpdate(), getAttachments(), true);
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         } catch (DBPoolingException e) {
             throw new AttachmentException(e);

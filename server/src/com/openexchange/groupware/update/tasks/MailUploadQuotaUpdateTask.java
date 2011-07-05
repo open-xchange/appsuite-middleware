@@ -56,7 +56,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -101,7 +101,7 @@ public final class MailUploadQuotaUpdateTask implements UpdateTask {
 
 	private static final String SQL_MODIFY02 = "ALTER TABLE user_setting_mail MODIFY `upload_quota_per_file` INT4 DEFAULT -1";
 
-	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+	public void perform(final Schema schema, final int contextId) throws OXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
 		}

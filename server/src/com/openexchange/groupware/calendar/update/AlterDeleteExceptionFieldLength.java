@@ -52,7 +52,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.update.Schema;
@@ -75,7 +75,7 @@ public class AlterDeleteExceptionFieldLength implements UpdateTask {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         Connection writecon = null;
         Statement stmt = null;
         try {

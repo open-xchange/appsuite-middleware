@@ -60,7 +60,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -79,7 +79,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
     }
 
     public void perform(final Schema schema, final int contextId)
-            throws AbstractOXException {
+            throws OXException {
         try {
             final List<NameCollision> collisions = NameCollision.getCollisions(contextId, getParentFolder());
             

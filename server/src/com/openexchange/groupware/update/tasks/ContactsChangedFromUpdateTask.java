@@ -56,7 +56,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -100,7 +100,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
 
     private static final String SQL_FIX = "UPDATE prg_contacts SET changed_from=created_from WHERE changed_from IS NULL"; 
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }

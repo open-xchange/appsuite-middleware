@@ -60,7 +60,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -93,7 +93,7 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
         return new String[]{};
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         Connection con = dbService.getForUpdateTask(contextId);

@@ -57,9 +57,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 
@@ -89,7 +88,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
         return UpdateTask.UpdateTaskPriority.HIGHEST.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Starting " + CalendarExtendDNColumnTask.class.getSimpleName());
         }
@@ -102,7 +101,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
 
     private static final String SQL_MODIFY = "ALTER TABLE #TABLE# MODIFY dn varchar(" + DESIRED_SIZE + ") collate utf8_unicode_ci default NULL";
 
-    private void modifyColumnInTable(final String tableName, final int contextId) throws UpdateException {
+    private void modifyColumnInTable(final String tableName, final int contextId) throws OXException {
         if (checkColumnInTable(tableName, contextId)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Going to extend size of column `dn` in table `" + tableName + "`.");
@@ -114,7 +113,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             try {
                 writeCon = Database.getNoTimeout(contextId, true);
             } catch (final DBPoolingException e) {
-                throw new UpdateException(e);
+                throw new OXException(e);
             }
             PreparedStatement stmt = null;
             try {
@@ -136,12 +135,12 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
         }
     }
 
-    private boolean checkColumnInTable(final String tableName, final int contextId) throws UpdateException {
+    private boolean checkColumnInTable(final String tableName, final int contextId) throws OXException {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         ResultSet rs = null;
         try {
@@ -163,11 +162,11 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
         }
     }
 
-    private static UpdateException wrapSQLException(final SQLException e) {
+    private static OXException wrapSQLException(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 
-    private static UpdateException notFound(final String tableName) {
+    private static OXException notFound(final String tableName) {
         return UpdateExceptionCodes.COLUMN_NOT_FOUND.create("dn", tableName);
     }
 }

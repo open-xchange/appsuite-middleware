@@ -58,6 +58,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -112,7 +113,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         private int folder;
     }
     
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         LOG.info("Performing update task TaskReminderFolderZero.");
         final List<ReminderData> reminders = getReminder(contextId);
         final List<ReminderData> update = new ArrayList<ReminderData>();

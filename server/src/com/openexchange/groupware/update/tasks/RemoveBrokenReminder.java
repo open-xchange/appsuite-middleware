@@ -63,7 +63,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -108,7 +108,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
      * {@inheritDoc}
      */
     public void perform(final Schema schema, final int contextId)
-        throws AbstractOXException {
+        throws OXException {
         LOG.info("Performing update task TaskModifiedByNotNull.");
         Connection con = null;
         try {

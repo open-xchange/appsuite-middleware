@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -95,7 +95,7 @@ public final class UpdateExecutor {
         this.tasks = tasks;
     }
 
-    public void execute() throws UpdateException {
+    public void execute() throws OXException {
         if (null != tasks) {
             separatedTasks = UpdateTaskCollection.getInstance().separateTasks(tasks);
             if (separatedTasks.getBlocking().size() > 0) {
@@ -115,7 +115,7 @@ public final class UpdateExecutor {
         }
     }
 
-    private void runUpdates(boolean blocking) throws UpdateException {
+    private void runUpdates(boolean blocking) throws OXException {
         LOG.info("Starting " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
         try {
             lockSchema(blocking);
@@ -128,7 +128,7 @@ public final class UpdateExecutor {
                     LOG.error(e1.getMessage(), e1);
                 }
             }
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         // Lock successfully obtained, thus remember to unlock
         try {
@@ -170,8 +170,8 @@ public final class UpdateExecutor {
             }
             LOG.info("Finished " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
         } catch (SchemaException e) {
-            throw new UpdateException(e);
-        } catch (UpdateException e) {
+            throw new OXException(e);
+        } catch (OXException e) {
             throw e;
         } catch (Throwable t) {
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
@@ -183,7 +183,7 @@ public final class UpdateExecutor {
                     removeContexts();
                 }
             } catch (SchemaException e) {
-                throw new UpdateException(e);
+                throw new OXException(e);
             }
         }
     }
@@ -200,7 +200,7 @@ public final class UpdateExecutor {
         store.addExecutedTask(contextId, taskName, success);
     }
 
-    private final void removeContexts() throws UpdateException {
+    private final void removeContexts() throws OXException {
         ContextStorage contextStorage = ContextStorage.getInstance();
         try {
             int[] contextIds = Database.getContextsInSameSchema(contextId);
@@ -208,9 +208,9 @@ public final class UpdateExecutor {
                 contextStorage.invalidateContext(cid);
             }
         } catch (DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         } catch (OXException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
     }
 }

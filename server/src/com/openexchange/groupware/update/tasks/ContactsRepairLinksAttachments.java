@@ -104,7 +104,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
     /**
      * {@inheritDoc}
      */
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);

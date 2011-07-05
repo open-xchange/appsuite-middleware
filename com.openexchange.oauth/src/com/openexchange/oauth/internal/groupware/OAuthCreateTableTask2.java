@@ -59,9 +59,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
@@ -85,13 +84,13 @@ public final class OAuthCreateTableTask2 extends UpdateTaskAdapter {
         return new String[] { OAuthCreateTableTask.class.getName() };
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection writeCon;
         try {
             writeCon = dbService.getForUpdateTask(contextId);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         try {

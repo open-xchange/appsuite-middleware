@@ -56,7 +56,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -83,7 +83,7 @@ public final class AppointmentExceptionRemoveDuplicateDatePosition implements Up
     }
 
     public void perform(final Schema schema, final int contextId)
-        throws AbstractOXException {
+        throws OXException {
         LOG.info("Performing update task to remove duplicate date recurrence position from appointment change exceptions on schema " + schema.getSchema());
         final Connection con = Database.get(contextId, true);
         Statement st = null;

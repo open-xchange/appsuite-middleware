@@ -74,7 +74,7 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.internal.DynamicList;
@@ -105,9 +105,9 @@ public final class UpdateTaskToolkit {
      * 
      * @param className The update task's class name
      * @param schemaName A valid schema name
-     * @throws UpdateException If update task cannot be performed
+     * @throws OXException If update task cannot be performed
      */
-    public static void forceUpdateTask(final String className, final String schemaName) throws UpdateException {
+    public static void forceUpdateTask(final String className, final String schemaName) throws OXException {
         forceUpdateTask(className, getContextIdBySchema(schemaName));
     }
 
@@ -116,9 +116,9 @@ public final class UpdateTaskToolkit {
      * 
      * @param className The update task's class name
      * @param contextId The context identifier
-     * @throws UpdateException If update task cannot be performed
+     * @throws OXException If update task cannot be performed
      */
-    public static void forceUpdateTask(final String className, final int contextId) throws UpdateException {
+    public static void forceUpdateTask(final String className, final int contextId) throws OXException {
         synchronized (LOCK) {
             forceUpdateTask0(getUpdateTask(className), contextId);
         }
@@ -129,9 +129,9 @@ public final class UpdateTaskToolkit {
      * 
      * @param task The update task
      * @param contextId The context identifier
-     * @throws UpdateException If update task cannot be performed
+     * @throws OXException If update task cannot be performed
      */
-    private static void forceUpdateTask0(final UpdateTask task, final int contextId) throws UpdateException {
+    private static void forceUpdateTask0(final UpdateTask task, final int contextId) throws OXException {
         List<UpdateTask> taskList = new ArrayList<UpdateTask>(1);
         taskList.add(task);
         new UpdateExecutor(getSchema(contextId), contextId, taskList).execute();
@@ -141,9 +141,9 @@ public final class UpdateTaskToolkit {
      * Force (re-)run of update task denoted by given class name on all schemas.
      * 
      * @param className The update task's class name
-     * @throws UpdateException If update task cannot be performed
+     * @throws OXException If update task cannot be performed
      */
-    public static void forceUpdateTaskOnAllSchemas(final String className) throws UpdateException {
+    public static void forceUpdateTaskOnAllSchemas(final String className) throws OXException {
         synchronized (LOCK) {
             // Get update task by class name
             final UpdateTask updateTask = getUpdateTask(className);
@@ -164,9 +164,9 @@ public final class UpdateTaskToolkit {
      * Gets all schemas with their versions.
      * 
      * @return All schemas with their versions
-     * @throws UpdateException If retrieving schemas and versions fails
+     * @throws OXException If retrieving schemas and versions fails
      */
-    public static Map<String, Schema> getSchemasAndVersions() throws UpdateException {
+    public static Map<String, Schema> getSchemasAndVersions() throws OXException {
         // Get schemas with their context IDs
         final Map<String, Set<Integer>> schemasAndContexts = getSchemasAndContexts();
         final Map<String, Schema> schemas = new HashMap<String, Schema>(schemasAndContexts.size());
@@ -183,14 +183,14 @@ public final class UpdateTaskToolkit {
      * Gets schemas and their contexts as a map.
      * 
      * @return A map containing schemas and their contexts.
-     * @throws UpdateException If an error occurs
+     * @throws OXException If an error occurs
      */
-    private static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
+    private static Map<String, Set<Integer>> getSchemasAndContexts() throws OXException {
         final Connection con;
         try {
             con = Database.get(false);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -218,7 +218,7 @@ public final class UpdateTaskToolkit {
 
     }
 
-    public static int getContextIdBySchema(final String schemaName) throws UpdateException {
+    public static int getContextIdBySchema(final String schemaName) throws OXException {
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final Set<Integer> set = map.get(schemaName);
         if (null == set) {
@@ -232,9 +232,9 @@ public final class UpdateTaskToolkit {
      * 
      * @param versionNumber The version number to set
      * @param schemaName A valid schema name
-     * @throws UpdateException If changing version number fails
+     * @throws OXException If changing version number fails
      */
-    public static void resetVersion(final int versionNumber, final String schemaName) throws UpdateException {
+    public static void resetVersion(final int versionNumber, final String schemaName) throws OXException {
         resetVersion(versionNumber, getContextIdBySchema(schemaName));
     }
 
@@ -243,9 +243,9 @@ public final class UpdateTaskToolkit {
      * 
      * @param versionNumber The version number to set
      * @param contextId A valid context identifier contained in target schema
-     * @throws UpdateException If changing version number fails
+     * @throws OXException If changing version number fails
      */
-    public static void resetVersion(final int versionNumber, final int contextId) throws UpdateException {
+    public static void resetVersion(final int versionNumber, final int contextId) throws OXException {
         synchronized (LOCK) {
             // Get schema for given context ID
             final Schema schema = getSchema(contextId);
@@ -278,9 +278,9 @@ public final class UpdateTaskToolkit {
      * Load update task by class name.
      * @param className name of the update task class.
      * @return the update task class.
-     * @throws UpdateException if the update task class can not be determined.
+     * @throws OXException if the update task class can not be determined.
      */
-    private static UpdateTask getUpdateTask(final String className) throws UpdateException {
+    private static UpdateTask getUpdateTask(final String className) throws OXException {
         List<UpdateTask> taskList = DynamicList.getInstance().getTaskList();
         for (UpdateTask task : taskList) {
             if (task.getClass().getName().equals(className)) {
@@ -292,13 +292,13 @@ public final class UpdateTaskToolkit {
 
     private static final String SQL_UPDATE_VERSION = "UPDATE version SET version = ?";
 
-    private static void setVersionNumber(final int versionNumber, final Schema schema, final int contextId) throws UpdateException {
+    private static void setVersionNumber(final int versionNumber, final Schema schema, final int contextId) throws OXException {
         final Connection con;
         try {
             con = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         try {
             PreparedStatement stmt = null;
@@ -319,7 +319,7 @@ public final class UpdateTaskToolkit {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             } catch (SchemaException e) {
                 rollback(con);
-                throw new UpdateException(e);
+                throw new OXException(e);
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -338,7 +338,7 @@ public final class UpdateTaskToolkit {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             } catch (SchemaException e) {
                 rollback(con);
-                throw new UpdateException(e);
+                throw new OXException(e);
             } finally {
                 closeSQLStuff(result, stmt);
             }
@@ -352,29 +352,29 @@ public final class UpdateTaskToolkit {
      * ++++++++++++++++++++++++++++ ++ + HELPER METHODS + ++ ++++++++++++++++++++++++++++
      */
 
-    private static SchemaUpdateState getSchema(final int contextId) throws UpdateException {
+    private static SchemaUpdateState getSchema(final int contextId) throws OXException {
         try {
             return SchemaStore.getInstance().getSchema(contextId);
         } catch (SchemaException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
     }
 
     private static final String SQL_SELECT_LOCKED_FOR_UPDATE = "SELECT locked FROM version FOR UPDATE";
 
-    private static void lockSchema(Schema schema, int contextId) throws UpdateException {
+    private static void lockSchema(Schema schema, int contextId) throws OXException {
         try {
             SchemaStore.getInstance().lockSchema(schema, contextId, false);
         } catch (SchemaException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
     }
 
-    private static void unlockSchema(Schema schema, int contextId) throws UpdateException {
+    private static void unlockSchema(Schema schema, int contextId) throws OXException {
         try {
             SchemaStore.getInstance().unlockSchema(schema, contextId, false);
         } catch (SchemaException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
     }
 

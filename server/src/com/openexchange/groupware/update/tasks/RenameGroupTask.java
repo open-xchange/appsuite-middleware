@@ -59,7 +59,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -100,7 +100,7 @@ public class RenameGroupTask extends UpdateTaskAdapter {
         return DEPENDENCIES;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
         try {

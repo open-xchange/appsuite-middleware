@@ -58,53 +58,55 @@ import static com.openexchange.groupware.update.internal.SchemaExceptionMessages
 import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.UNLOCK_FAILED_MSG;
 import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.UPDATE_CONFLICT_MSG;
 import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.WRONG_ROW_COUNT_MSG;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.groupware.update.SchemaException;
 
 /**
  * Exception codes for the {@link SchemaException}.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum SchemaExceptionCodes implements OXErrorMessage {
+public enum SchemaExceptionCodes implements OXExceptionCode {
 
     /**
      * No row found in table version in schema %1$s.
      */
-    MISSING_VERSION_ENTRY(MISSING_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 1),
+    MISSING_VERSION_ENTRY(MISSING_VERSION_ENTRY_MSG, Category.CATEGORY_CONFIGURATION, 1),
     /**
      * Multiple rows found in table version in schema %1$s.
      */
-    MULTIPLE_VERSION_ENTRY(MULTIPLE_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 2),
+    MULTIPLE_VERSION_ENTRY(MULTIPLE_VERSION_ENTRY_MSG, Category.CATEGORY_CONFIGURATION, 2),
     /**
      * Update conflict detected. Another process is currently updating schema %1$s.
      */
-    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.PERMISSION, 3),
+    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.CATEGORY_PERMISSION_DENIED, 3),
     /**
      * Locking schema %1$s failed. Lock information could not be written to database.
      */
-    LOCK_FAILED(LOCK_FAILED_MSG, Category.INTERNAL_ERROR, 4),
+    LOCK_FAILED(LOCK_FAILED_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * Update conflict detected. Schema %1$s is not marked as locked.
      */
-    UPDATE_CONFLICT(UPDATE_CONFLICT_MSG, Category.INTERNAL_ERROR, 5),
+    UPDATE_CONFLICT(UPDATE_CONFLICT_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * Schema %1$s could not be unlocked. Lock information could no be removed from database.
      */
-    UNLOCK_FAILED(UNLOCK_FAILED_MSG, Category.INTERNAL_ERROR, 6),
+    UNLOCK_FAILED(UNLOCK_FAILED_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * A SQL problem occurred: %1$s.
      */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 7),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * Cannot get database connection.
      */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 8),
+    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.CATEGORY_SERVICE_DOWN, 8),
     /**
      * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
      */
-    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CODE_ERROR, 9);
+    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CATEGORY_ERROR, 9);
 
     /**
      * Message of the exception.
@@ -128,34 +130,55 @@ public enum SchemaExceptionCodes implements OXErrorMessage {
      * @param category category.
      * @param number detail number.
      */
-    private SchemaExceptionCodes(String message, Category category, int number) {
+    private SchemaExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
+    }
+
+    public String getPrefix() {
+        return "UPD";
     }
 
     public Category getCategory() {
         return category;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return number;
-    }
-
-    public String getHelp() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public SchemaException create(Object... messageArgs) {
-        return SchemaExceptionFactory.getInstance().create(this, messageArgs);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
-    public SchemaException create(Throwable cause, Object... messageArgs) {
-        return SchemaExceptionFactory.getInstance().create(this, cause, messageArgs);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

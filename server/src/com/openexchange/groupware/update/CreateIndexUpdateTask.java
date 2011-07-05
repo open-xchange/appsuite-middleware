@@ -52,7 +52,7 @@ package com.openexchange.groupware.update;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.update.Index;
 import com.openexchange.tools.update.IndexNotFoundException;
 
@@ -81,12 +81,12 @@ public abstract class CreateIndexUpdateTask implements UpdateTaskV2 {
     }
 
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         perform(params.getSchema(), params.getContextId());
     }
 
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(Schema schema, int contextId) throws OXException {
         Connection con = null;
         try {
             con = getDatabaseService().getForUpdateTask(contextId);

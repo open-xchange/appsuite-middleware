@@ -72,7 +72,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 	private Context context = null;
 
 	
-	protected int doUpdates(final UpdateBlock...updates) throws UpdateException, OXException {
+	protected int doUpdates(final UpdateBlock...updates) throws OXException, OXException {
 		Connection writeCon = null;
 		UpdateBlock current = null;
 		int counter = 0;
@@ -84,7 +84,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 				current.close();
 			}
 		} catch (final SQLException e) {
-			throw new UpdateException(e,current);
+			throw new OXException(e,current);
 		} finally {
 			if(current != null) {
 				current.close();
@@ -96,7 +96,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		return counter;
 	}
 
-    protected int doUpdates(final List<UpdateBlock> updates) throws OXException, UpdateException {
+    protected int doUpdates(final List<UpdateBlock> updates) throws OXException, OXException {
         return doUpdates(updates.toArray(new UpdateBlock[updates.size()]));
     }
 
@@ -157,13 +157,13 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		
 	}
 	
-	protected static class UpdateException extends Exception {
+	protected static class OXException extends Exception {
 		
 		private static final long serialVersionUID = -3823990951502455901L;
 		private final UpdateBlock update;
 		private final SQLException sqle;
 
-		public UpdateException(final SQLException sqle, final UpdateBlock update) {
+		public OXException(final SQLException sqle, final UpdateBlock update) {
 			super(sqle);
 			this.sqle = sqle;
 			this.update = update;

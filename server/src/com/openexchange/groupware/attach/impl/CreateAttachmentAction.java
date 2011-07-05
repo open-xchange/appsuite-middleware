@@ -70,7 +70,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction {
                 }
 
             });
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         } catch (DBPoolingException e) {
             throw new AttachmentException(e);
@@ -84,7 +84,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction {
         }
         try {
             doUpdates(getQueryCatalog().getInsert(), getAttachments(),false);
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         } catch (DBPoolingException e) {
             throw new AttachmentException(e);

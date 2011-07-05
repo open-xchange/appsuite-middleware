@@ -51,9 +51,8 @@ package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -63,12 +62,12 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public class CreateTableUpdateTask implements UpdateTaskV2 {
 
-    private CreateTableService create;
-    private String[] dependencies;
-    private int version;
-    private DatabaseService databaseService;
+    private final CreateTableService create;
+    private final String[] dependencies;
+    private final int version;
+    private final DatabaseService databaseService;
     
-    public CreateTableUpdateTask(CreateTableService create, String[] dependencies, int version, DatabaseService databaseService) {
+    public CreateTableUpdateTask(final CreateTableService create, final String[] dependencies, final int version, final DatabaseService databaseService) {
         super();
         this.create = create;
         this.dependencies = dependencies;
@@ -86,7 +85,7 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
         return dependencies;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         perform(params.getSchema(), params.getContextId());
     }
 
@@ -98,23 +97,21 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
         return UpdateTask.UpdateTaskPriority.HIGH.priority;
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         Connection con = null;
         try {
             con = getConnection(contextId);
             create.perform(con);
-        } catch (AbstractOXException x) {
-            throw x;
         } finally {
             releaseConnection(contextId, con);
         }
     }
 
-    private void releaseConnection(int contextId, Connection con) {
+    private void releaseConnection(final int contextId, final Connection con) {
         databaseService.backForUpdateTask(contextId, con);
     }
 
-    private Connection getConnection(int contextId) throws DBPoolingException {
+    private Connection getConnection(final int contextId) throws OXException {
         return databaseService.getForUpdateTask(contextId);
     }
 

@@ -59,6 +59,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -99,7 +100,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 
 	private static final String STR_INFO = "Performing update task 'PasswordMechUpdateTask'";
 
-	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+	public void perform(final Schema schema, final int contextId) throws OXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
 		}

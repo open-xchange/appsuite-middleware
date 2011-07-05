@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.internal.PerformParametersImpl;
 import com.openexchange.groupware.update.internal.ProgressStatusImpl;
@@ -64,7 +65,7 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
         super();
     }
 
-    public final void perform(Schema schema, int contextId) throws AbstractOXException {
+    public final void perform(Schema schema, int contextId) throws OXException {
         perform(this, schema, contextId);
     }
 

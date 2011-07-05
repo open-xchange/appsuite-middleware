@@ -56,9 +56,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Tools;
@@ -90,13 +89,13 @@ public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {
         return DEPENDENCIES;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con;
         try {
             con = Database.getNoTimeout(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         try {

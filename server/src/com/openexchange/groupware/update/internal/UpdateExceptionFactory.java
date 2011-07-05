@@ -51,7 +51,7 @@ package com.openexchange.groupware.update.internal;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 
 /**
@@ -59,7 +59,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class UpdateExceptionFactory extends Exceptions<UpdateException> {
+public final class UpdateExceptionFactory extends Exceptions<OXException> {
 
     private static final UpdateExceptionFactory SINGLETON = new UpdateExceptionFactory();
 
@@ -77,7 +77,7 @@ public final class UpdateExceptionFactory extends Exceptions<UpdateException> {
     }
 
     @Override
-    protected UpdateException createException(ErrorMessage message, Throwable cause, Object... args) {
-        return new UpdateException(message, cause, args);
+    protected OXException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new OXException(message, cause, args);
     }
 }

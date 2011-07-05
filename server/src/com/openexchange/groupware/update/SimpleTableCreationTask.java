@@ -55,7 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
@@ -77,7 +77,7 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
     protected abstract String getTableName();
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection con = dbService.getForUpdateTask(contextId);
         try {

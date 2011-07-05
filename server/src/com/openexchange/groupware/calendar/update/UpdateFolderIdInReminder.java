@@ -56,7 +56,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -90,7 +90,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
     
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         Connection writecon = null;
         Statement stmt = null;
         PreparedStatement pst = null;

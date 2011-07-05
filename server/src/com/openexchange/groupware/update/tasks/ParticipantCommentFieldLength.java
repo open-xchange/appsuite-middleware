@@ -55,7 +55,7 @@ import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -72,7 +72,7 @@ public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
         return new String[] { "com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask" };
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {
             con.setAutoCommit(false);

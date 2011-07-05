@@ -66,7 +66,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 
     private List<DocumentMetadata> documents;
 
-    public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws UpdateException, DBPoolingException {
+    public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws OXException, DBPoolingException {
         final UpdateBlock[] updates = new UpdateBlock[docs.size()];
         int i = 0;
 

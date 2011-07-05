@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link UpdateTask} - A single update task.
@@ -73,8 +73,8 @@ public interface UpdateTask {
             this.priority = priority;
         }
 
-        public static UpdateTaskPriority getInstance(int priority) {
-            for (UpdateTaskPriority test : values()) {
+        public static UpdateTaskPriority getInstance(final int priority) {
+            for (final UpdateTaskPriority test : values()) {
                 if (test.priority == priority) {
                     return test;
                 }
@@ -82,7 +82,7 @@ public interface UpdateTask {
             throw new IllegalArgumentException();
         }
 
-        public boolean equalOrHigher(UpdateTaskPriority otherPriority) {
+        public boolean equalOrHigher(final UpdateTaskPriority otherPriority) {
             return this.ordinal() <= otherPriority.ordinal();
         }
     }
@@ -122,8 +122,8 @@ public interface UpdateTask {
      * 
      * @param schema The schema meta data
      * @param contextId The context ID which is used to fetch database connections from the pool.
-     * @throws AbstractOXException if applying the changes fails.
+     * @throws OXException if applying the changes fails.
      */
-    void perform(Schema schema, int contextId) throws AbstractOXException;
+    void perform(Schema schema, int contextId) throws OXException;
 
 }

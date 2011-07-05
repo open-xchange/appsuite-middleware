@@ -58,7 +58,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -93,7 +93,7 @@ public final class CreateReplicationTableTask extends UpdateTaskAdapter {
         return DEPENDENCIES;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         final Connection con = dbService.getForUpdateTask(contextId);

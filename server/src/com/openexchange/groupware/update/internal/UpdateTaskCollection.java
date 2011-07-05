@@ -58,7 +58,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -127,7 +127,7 @@ class UpdateTaskCollection {
                     background.add(toExecuteV2);
                     break;
                 default:
-                    UpdateException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecuteV2.getClass().getName());
+                    OXException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecuteV2.getClass().getName());
                     LOG.error(e.getMessage(), e);
                     blocking.add(toExecuteV2); 
                 }
@@ -145,7 +145,7 @@ class UpdateTaskCollection {
         };
     }
 
-    final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema, boolean blocking) throws UpdateException {
+    final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema, boolean blocking) throws OXException {
         SeparatedTasks tasks = getFilteredAndSeparatedTasks(schema);
         List<UpdateTask> retval = new ArrayList<UpdateTask>();
         if (blocking) {

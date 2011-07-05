@@ -66,7 +66,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 
@@ -97,7 +97,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 
     private static final String STR_INFO = "Performing update task 'ContactsFieldSizeUpdateTask'";
 
-    public void perform(final Schema schema, final int contextId) throws UpdateException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
@@ -105,13 +105,13 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
         correctTable("del_contacts", contextId);
     }
 
-    private void correctTable(final String sqltable, final int contextId) throws UpdateException {
+    private void correctTable(final String sqltable, final int contextId) throws OXException {
         final Result result = determineResult(sqltable, contextId);
         dropColumns(result.toDelete, sqltable, contextId);
         changeColumns(result.toChange, sqltable, contextId);
     }
 
-    private Result determineResult(final String sqltable, final int contextId) throws UpdateException {
+    private Result determineResult(final String sqltable, final int contextId) throws OXException {
         /*
          * Create a map containing desired columns' VARCHAR size
          */
@@ -219,7 +219,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
         try {
             writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         ResultSet rs = null;
         try {
@@ -260,7 +260,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
     }
 
     private void dropColumns(final Set<String> toDelete, final String sqltable, final int contextId)
-            throws UpdateException {
+            throws OXException {
         if (toDelete.isEmpty()) {
             /*
              * Nothing to drop
@@ -289,7 +289,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
     }
 
     private void changeColumns(final Map<String, Integer> toChange, final String sqltable, final int contextId)
-            throws UpdateException {
+            throws OXException {
         if (toChange.isEmpty()) {
             /*
              * Nothing to change
@@ -323,7 +323,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
         executeAlterCommand(alterCommand, contextId);
     }
 
-    private void executeAlterCommand(final String alterCommand, final int contextId) throws UpdateException {
+    private void executeAlterCommand(final String alterCommand, final int contextId) throws OXException {
         /*
          * Fetch a writable connection
          */
@@ -331,7 +331,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
         try {
             writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         Statement st = null;
         try {

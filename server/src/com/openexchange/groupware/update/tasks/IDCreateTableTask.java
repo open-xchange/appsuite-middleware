@@ -57,9 +57,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
@@ -85,19 +84,19 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         createTable("sequenceIds", getCreate(), params.getContextId());
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'IDCreateTableTask' successfully performed!");
         }
     }
 
-    private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
+    private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         try {
@@ -139,7 +138,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
         }
     }
 
-    private static UpdateException createSQLError(final SQLException e) {
+    private static OXException createSQLError(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 }

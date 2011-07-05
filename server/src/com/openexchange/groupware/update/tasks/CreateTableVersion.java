@@ -51,7 +51,7 @@ package com.openexchange.groupware.update.tasks;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 
@@ -87,7 +87,7 @@ public final class CreateTableVersion implements UpdateTask {
         return 1;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'CreateTableVersion' performed!");
         }

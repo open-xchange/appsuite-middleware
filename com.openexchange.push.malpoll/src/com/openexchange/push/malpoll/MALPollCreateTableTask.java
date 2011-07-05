@@ -58,12 +58,11 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -129,11 +128,11 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         return new Attributes();
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable("malPollHash", getCreateHashTable(), contextId);
         createTable("malPollUid", getCreateUIDsTable(), contextId);
@@ -142,7 +141,7 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         }
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException, OXException {
+    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException, OXException {
         final Connection writeCon = Database.get(contextId, true);
         PreparedStatement stmt = null;
         try {

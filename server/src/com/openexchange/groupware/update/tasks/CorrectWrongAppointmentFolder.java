@@ -60,7 +60,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -94,7 +94,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
     }
 
     public void perform(final Schema schema, final int contextId)
-        throws AbstractOXException {
+        throws OXException {
         final String find = "SELECT pd.cid,pd.object_id,pd.member_uid "
             + "FROM prg_dates_members pd JOIN oxfolder_tree f "
             + "ON pd.cid=f.cid AND pd.pfid=f.fuid"

@@ -58,7 +58,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
@@ -96,7 +96,7 @@ public class DefaultConfirmStatusUpdateTask implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(Schema schema, int contextId) throws OXException {
         Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);

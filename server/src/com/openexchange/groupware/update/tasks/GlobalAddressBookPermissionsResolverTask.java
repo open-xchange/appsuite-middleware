@@ -70,7 +70,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.impl.OCLPermission;
@@ -108,7 +108,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         return DEPENDENCIES;
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         final ProgressState status = params.getProgressState();
         /*
          * Get all contexts with contained users
@@ -134,12 +134,12 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         }
     }
 
-    private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws UpdateException {
+    private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws OXException {
         final Connection readCon;
         try {
             readCon = Database.getNoTimeout(contextId, false);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -171,7 +171,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         }
     }
 
-    private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws UpdateException {
+    private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws OXException {
         /*
          * Fetch write-connection
          */
@@ -180,7 +180,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
             writeCon = Database.get(contextId, true);
             writeCon.setAutoCommit(false); // BEGIN
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             // Auto-Commit mode could not be changed
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -191,7 +191,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         } catch (final SQLException e) {
             rollback(writeCon);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             rollback(writeCon);
             throw e;
         } catch (final Exception e) {
@@ -206,7 +206,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         }
     }
 
-    private static void checkGABPermissions4Users(final List<Integer> users, final int contextId, final Connection writeCon) throws UpdateException {
+    private static void checkGABPermissions4Users(final List<Integer> users, final int contextId, final Connection writeCon) throws OXException {
         boolean found = false;
         final Set<Integer> detectedUsers = new HashSet<Integer>();
         int[] permissions = null;
@@ -265,7 +265,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         }
     }
 
-    private static void checkMissingUserPermissions(final List<Integer> users, final Set<Integer> detectedUsers, final int[] permissions, final int contextId, final Connection writeCon) throws UpdateException {
+    private static void checkMissingUserPermissions(final List<Integer> users, final Set<Integer> detectedUsers, final int[] permissions, final int contextId, final Connection writeCon) throws OXException {
         /*
          * Any missing permission?
          */

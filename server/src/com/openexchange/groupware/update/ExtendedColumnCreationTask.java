@@ -55,7 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -73,7 +73,7 @@ public abstract class ExtendedColumnCreationTask extends UpdateTaskAdapter {
         this.dbService = dbService;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         final Connection con = dbService.getForUpdateTask(cid);
         try {

@@ -56,7 +56,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
@@ -69,7 +69,7 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
 
     private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
         try {

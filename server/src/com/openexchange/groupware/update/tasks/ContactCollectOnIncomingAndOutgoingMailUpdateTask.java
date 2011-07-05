@@ -56,7 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -86,7 +86,7 @@ public class ContactCollectOnIncomingAndOutgoingMailUpdateTask implements Update
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(Schema schema, int contextId) throws OXException {
         Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);

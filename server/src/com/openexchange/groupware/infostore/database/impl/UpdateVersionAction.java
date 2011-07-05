@@ -63,7 +63,7 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
         int counter = 0;
         try {
             counter = doUpdates(getQueryCatalog().getVersionUpdate(getModified()), getQueryCatalog().filterForVersion(getModified()), getOldDocuments());
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
         if (counter < 0) {
@@ -77,7 +77,7 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
             Metadata[] fields = getQueryCatalog().filterForVersion(getModified());
             fields = getQueryCatalog().filterWritable(fields);
             counter = doUpdates(getQueryCatalog().getVersionUpdate(fields), fields, getDocuments());
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
         setTimestamp(System.currentTimeMillis());

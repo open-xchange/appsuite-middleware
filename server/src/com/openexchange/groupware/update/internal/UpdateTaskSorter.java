@@ -52,7 +52,7 @@ package com.openexchange.groupware.update.internal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.java.Strings;
@@ -70,7 +70,7 @@ public class UpdateTaskSorter {
         super();
     }
 
-    public List<UpdateTask> sort(String[] executed, List<UpdateTask> toExecute) throws UpdateException {
+    public List<UpdateTask> sort(String[] executed, List<UpdateTask> toExecute) throws OXException {
         List<UpdateTask> retval = new ArrayList<UpdateTask>(toExecute.size());
         boolean found = true;
         while (!toExecute.isEmpty() && found) {

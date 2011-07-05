@@ -56,9 +56,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
@@ -76,7 +75,7 @@ public class ContactInfoField2Text extends UpdateTaskAdapter {
         return new String[] {};
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         Connection con = null;
         try {
@@ -92,7 +91,7 @@ public class ContactInfoField2Text extends UpdateTaskAdapter {
 
     }
 
-    private void innerPerform(Connection con) throws UpdateException {
+    private void innerPerform(Connection con) throws OXException {
         Statement stmt = null;
         try {
             execute(con, UPDATE);

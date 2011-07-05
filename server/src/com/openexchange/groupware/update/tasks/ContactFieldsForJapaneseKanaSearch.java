@@ -55,7 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -76,7 +76,7 @@ public class ContactFieldsForJapaneseKanaSearch extends UpdateTaskAdapter {
         return DEPENDENCIES;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         final Connection con = dbService.getForUpdateTask(cid);

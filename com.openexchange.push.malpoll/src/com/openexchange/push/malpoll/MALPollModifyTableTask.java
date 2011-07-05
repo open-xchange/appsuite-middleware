@@ -59,7 +59,7 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -83,7 +83,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         return new String[] { MALPollCreateTableTask.class.getName() };
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
         try {

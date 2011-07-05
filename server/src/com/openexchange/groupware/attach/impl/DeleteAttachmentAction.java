@@ -71,7 +71,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
                 }
             });
             doUpdates(getQueryCatalog().getInsert(), getAttachments(), false);
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         } catch (DBPoolingException e) {
             throw new AttachmentException(e);
@@ -107,7 +107,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
         };
         try {
             doUpdates(updates);
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         } catch (DBPoolingException e) {
             throw new AttachmentException(e);

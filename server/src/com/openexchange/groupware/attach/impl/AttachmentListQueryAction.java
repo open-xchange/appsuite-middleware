@@ -59,7 +59,7 @@ public abstract class AttachmentListQueryAction extends AbstractAttachmentAction
 	private List<AttachmentMetadata> attachments;
 	
 	
-	protected void doUpdates(final String query, final List<AttachmentMetadata> attachments, final boolean addId) throws DBPoolingException, UpdateException {
+	protected void doUpdates(final String query, final List<AttachmentMetadata> attachments, final boolean addId) throws DBPoolingException, OXException {
 		final UpdateBlock[] updates = new UpdateBlock[attachments.size()];
 		int i = 0;
 		for(final AttachmentMetadata m : attachments) {

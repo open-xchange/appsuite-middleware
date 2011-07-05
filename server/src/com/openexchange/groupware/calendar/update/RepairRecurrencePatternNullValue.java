@@ -56,7 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
@@ -76,7 +76,7 @@ public class RepairRecurrencePatternNullValue implements UpdateTask {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(Schema schema, int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);

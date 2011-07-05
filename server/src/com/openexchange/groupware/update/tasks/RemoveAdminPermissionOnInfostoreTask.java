@@ -62,12 +62,11 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
@@ -100,7 +99,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         return DEPENDENCIES;
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         final int triggeringContextId = params.getContextId();
         final int[] ctxIds = Database.getContextsInSameSchema(triggeringContextId);
 
@@ -112,7 +111,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         try {
             con = Database.getNoTimeout(triggeringContextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         try {
             con.setAutoCommit(false);
@@ -140,7 +139,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         }
     }
 
-    private void dropTopLevelInfostoreFolderPermissionFromAdmin(Connection con, final int contextId) throws UpdateException, OXException {
+    private void dropTopLevelInfostoreFolderPermissionFromAdmin(Connection con, final int contextId) throws OXException, OXException {
         /*
          * Get context's admin
          */
@@ -169,7 +168,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         return ContextExceptionCodes.NO_MAILADMIN.create(I(contextId));
     }
 
-    private int getMailAdmin(final Connection con, final int contextId) throws UpdateException {
+    private int getMailAdmin(final Connection con, final int contextId) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {

@@ -68,35 +68,35 @@ public abstract class Updater {
     /**
      * Factory method to get an updater.
      * @return the updater.
-     * @throws UpdateException if instantiating the implementation fails.
+     * @throws OXException if instantiating the implementation fails.
      */
     public static Updater getInstance() {
         return new UpdaterImpl();
     }
 
-    public final UpdateStatus getStatus(Context ctx) throws UpdateException {
+    public final UpdateStatus getStatus(Context ctx) throws OXException {
         return getStatus(ctx.getContextId());
     }
 
-    public abstract UpdateStatus getStatus(int contextId) throws UpdateException;
+    public abstract UpdateStatus getStatus(int contextId) throws OXException;
 
-    public abstract UpdateStatus getStatus(String schema, int writePoolId) throws UpdateException;
+    public abstract UpdateStatus getStatus(String schema, int writePoolId) throws OXException;
 
     /**
      * Starts the update process on a schema.
      * @param contextId Context inside the schema.
-     * @throws UpdateException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    public final void startUpdate(Context ctx) throws UpdateException {
+    public final void startUpdate(Context ctx) throws OXException {
         startUpdate(ctx.getContextId());
     }
 
     /**
      * Starts the update process on a schema.
      * @param contextId Identifier of a context inside the schema.
-     * @throws UpdateException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    public abstract void startUpdate(int contextId) throws UpdateException;
+    public abstract void startUpdate(int contextId) throws OXException;
 
     public abstract UpdateTask[] getAvailableUpdateTasks();
 }

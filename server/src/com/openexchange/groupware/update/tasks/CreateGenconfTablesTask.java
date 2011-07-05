@@ -52,9 +52,8 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.update.Tools;
@@ -98,7 +97,7 @@ public class CreateGenconfTablesTask implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         Connection con = null;
         try {
             con = Database.getNoTimeout(contextId, true);
@@ -125,7 +124,7 @@ public class CreateGenconfTablesTask implements UpdateTask {
         }
     }
 
-    private static UpdateException createSQLError(final SQLException e) {
+    private static OXException createSQLError(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 }

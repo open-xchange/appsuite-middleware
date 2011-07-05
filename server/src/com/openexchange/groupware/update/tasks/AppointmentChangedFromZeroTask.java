@@ -58,7 +58,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.sql.DBUtils;
@@ -84,7 +84,7 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws DBPoolingException, UpdateException {
+    public void perform(final Schema schema, final int contextId) throws DBPoolingException, OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Performing update task to remove 0 set changed_from in appointments.");
         }

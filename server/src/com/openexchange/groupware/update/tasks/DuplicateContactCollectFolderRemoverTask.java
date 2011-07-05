@@ -83,7 +83,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.i18n.LocaleTools;
@@ -120,7 +120,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         return DEPENDENCIES;
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         /*
          * Logger
          */
@@ -157,12 +157,12 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         });
     }
 
-    private static int getAllUsers(final int contextId, final TIntObjectHashMap<List<Integer>> m) throws UpdateException {
+    private static int getAllUsers(final int contextId, final TIntObjectHashMap<List<Integer>> m) throws OXException {
         final Connection con;
         try {
             con = Database.getNoTimeout(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -195,7 +195,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         }
     }
 
-    static void iterateUsersPerContext(final List<Integer> users, final Map<Locale, String> names, final int contextId, final ProgressState status, final Log log) throws UpdateException {
+    static void iterateUsersPerContext(final List<Integer> users, final Map<Locale, String> names, final int contextId, final ProgressState status, final Log log) throws OXException {
         /*
          * Create context instance
          */
@@ -229,7 +229,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
             /*
-             * catch (final UpdateException e) { rollback(writeCon); throw e; }
+             * catch (final OXException e) { rollback(writeCon); throw e; }
              */
             catch (final Exception e) {
                 rollback(writeCon);
@@ -348,12 +348,12 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         return name;
     }
 
-    private static int getContextMailAdmin(final int cid) throws UpdateException {
+    private static int getContextMailAdmin(final int cid) throws OXException {
         final Connection writeCon;
         try {
             writeCon = Database.getNoTimeout(cid, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         try {
             PreparedStatement stmt = null;

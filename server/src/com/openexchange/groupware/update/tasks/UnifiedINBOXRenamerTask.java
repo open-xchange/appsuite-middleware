@@ -56,11 +56,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
@@ -84,7 +83,7 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
         return new Attributes(BACKGROUND);
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         /*
          * Obtain connection
@@ -93,7 +92,7 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
         try {
             con = Database.getNoTimeout(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         try {

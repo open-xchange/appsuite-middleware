@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.sql.DBUtils;
@@ -96,7 +96,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
      * {@inheritDoc}
      */
     public void perform(final Schema schema, final int contextId)
-        throws DBPoolingException, UpdateException {
+        throws DBPoolingException, OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Performing update task to repair the recurrence string in"
                 + " appointment change exceptions.");

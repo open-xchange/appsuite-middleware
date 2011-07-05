@@ -59,7 +59,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -91,7 +91,7 @@ public class CorrectIndexes implements UpdateTask {
     }
 
     public void perform(final Schema schema, final int contextId)
-        throws AbstractOXException {
+        throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);

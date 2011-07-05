@@ -61,7 +61,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.messaging.facebook.FacebookConstants;
@@ -89,13 +89,13 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         return new String[] { "com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableTask", "com.openexchange.groupware.update.tasks.CreateGenconfTablesTask" };
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection writeCon;
         try {
             writeCon = dbService.getForUpdateTask(contextId);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         try {
             writeCon.setAutoCommit(false);
@@ -120,7 +120,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         }
     }
 
-    private static void dropAccountByData(final int[] data, final Connection writeCon) throws UpdateException {
+    private static void dropAccountByData(final int[] data, final Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         try {
             /*
@@ -147,7 +147,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         }
     }
 
-    private static boolean checkData(final int[] data, final Connection writeCon) throws UpdateException {
+    private static boolean checkData(final int[] data, final Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -164,7 +164,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         }
     }
 
-    private static List<int[]> listFacebookMessagingAccounts(final Connection writeCon) throws UpdateException {
+    private static List<int[]> listFacebookMessagingAccounts(final Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -191,7 +191,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         }
     }
 
-    private static UpdateException createSQLError(final SQLException e) {
+    private static OXException createSQLError(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 }

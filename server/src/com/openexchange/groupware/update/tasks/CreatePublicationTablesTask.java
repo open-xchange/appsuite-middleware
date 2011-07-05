@@ -53,9 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.update.Tools;
@@ -94,7 +93,7 @@ public class CreatePublicationTablesTask implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(Schema schema, int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             if (!Tools.tableExists(con, "publications")) {
@@ -115,7 +114,7 @@ public class CreatePublicationTablesTask implements UpdateTask {
         }
     }
 
-    private static UpdateException createSQLError(SQLException e) {
+    private static OXException createSQLError(SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 }

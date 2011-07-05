@@ -56,12 +56,11 @@ import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -132,22 +131,22 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
         return new Attributes();
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable("mailUUID", getCreateMailUUIDTable(), contextId);
         createTable("headersAsBlob", getCreateHeaderBlobTable(), contextId);
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {
+    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         try {

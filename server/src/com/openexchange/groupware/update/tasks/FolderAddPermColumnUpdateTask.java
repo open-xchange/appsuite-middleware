@@ -59,6 +59,7 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -93,7 +94,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
     private static final String SQL_MODIFY4 = "ALTER TABLE del_oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, fuid, permission_id, system)";
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws OXException {
         if (checkColumn(contextId)) {
             if (LOG.isInfoEnabled()) {
                 LOG

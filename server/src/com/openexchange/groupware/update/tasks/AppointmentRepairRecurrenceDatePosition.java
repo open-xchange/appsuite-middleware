@@ -71,7 +71,7 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -101,7 +101,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
 
     private static final String findSQL = "SELECT cid,timestampfield01,timestampfield02,timezone,intfield01,intfield02,intfield04,intfield05,field06 FROM prg_dates WHERE intfield01!=intfield02 AND field08 IS NULL ORDER BY cid ASC";
 
-    public void perform(final Schema schema, final int contextId) throws DBPoolingException, UpdateException {
+    public void perform(final Schema schema, final int contextId) throws DBPoolingException, OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Performing update task to repair the recurrence date position of appointment change exceptions.");
         }

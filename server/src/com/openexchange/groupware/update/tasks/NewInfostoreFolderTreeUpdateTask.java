@@ -62,10 +62,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.server.impl.OCLPermission;
@@ -117,7 +116,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
     private static final String SQL_01 = "SELECT cid FROM oxfolder_tree WHERE fuid = "
             + FolderObject.SYSTEM_INFOSTORE_FOLDER_ID + " GROUP BY cid";
 
-    public void perform(final Schema schema, final int cid) throws AbstractOXException {
+    public void perform(final Schema schema, final int cid) throws OXException {
         final SortedSet<Integer> contextIds = new TreeSet<Integer>();
         /*
          * Gather all available context IDs
@@ -132,12 +131,12 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
         }
     }
 
-    private void gatherContextIDs(final int cid, final SortedSet<Integer> contextIds) throws UpdateException {
+    private void gatherContextIDs(final int cid, final SortedSet<Integer> contextIds) throws OXException {
         final Connection writeCon;
         try {
             writeCon = Database.getNoTimeout(cid, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -155,13 +154,13 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
         }
     }
 
-    private void processContext(final int cid, final long creatingTime) throws UpdateException {
+    private void processContext(final int cid, final long creatingTime) throws OXException {
         LOG.info("Performing 'NewInfostoreFolderTreeUpdateTask' on context " + cid);
         final Connection writeCon;
         try {
             writeCon = Database.getNoTimeout(cid, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         try {
             final int admin = getContextAdmin(cid, writeCon);
@@ -195,7 +194,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
             rollback(writeCon);
             LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context " + cid);
             throw err(e);
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             rollback(writeCon);
             LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context " + cid);
             throw e;
@@ -212,7 +211,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
             + FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
 
     private void updateInfostorePermissions(final int cid, final Connection writeCon, final long lastModified,
-            final int admin) throws UpdateException {
+            final int admin) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_UPDATE);
@@ -271,7 +270,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 
     private static final String SQL_02 = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ?";
 
-    private boolean checkExists(final int folderId, final int cid, final Connection con) throws UpdateException {
+    private boolean checkExists(final int folderId, final int cid, final Connection con) throws OXException {
         final PreparedStatement stmt;
         try {
             stmt = con.prepareStatement(SQL_02);
@@ -291,7 +290,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 
     private static final String SQL_SELECT_ADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
 
-    private int getContextAdmin(final int cid, final Connection con) throws UpdateException {
+    private int getContextAdmin(final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -316,7 +315,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
             + FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID + ", " + FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
             + ")";
 
-    private void move2UserStore(final int cid, final Connection writeCon) throws UpdateException {
+    private void move2UserStore(final int cid, final Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_MOVE1);
@@ -336,7 +335,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
             + FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID + ", " + FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
             + ")";
 
-    private void move2PublicInfoStore(final int cid, final Connection writeCon) throws UpdateException {
+    private void move2PublicInfoStore(final int cid, final Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_MOVE2);
@@ -414,7 +413,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
         }
     }
 
-    private static UpdateException err(final SQLException e) {
+    private static OXException err(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 }

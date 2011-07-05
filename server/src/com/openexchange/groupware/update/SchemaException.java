@@ -56,7 +56,7 @@ import com.openexchange.groupware.AbstractOXException;
  * Exception for reading or writing schema information from/to the database fails.
  * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
  */
-public class SchemaException extends AbstractOXException {
+public class SchemaException extends OXException {
 
     private static final long serialVersionUID = 1309805080707994273L;
 
@@ -64,7 +64,7 @@ public class SchemaException extends AbstractOXException {
         super(cause);
     }
 
-    public SchemaException(ErrorMessage message, Throwable cause, Object[] args) {
+    public SchemaException(final ErrorMessage message, final Throwable cause, final Object[] args) {
         super(message, cause);
         setMessageArgs(args);
     }

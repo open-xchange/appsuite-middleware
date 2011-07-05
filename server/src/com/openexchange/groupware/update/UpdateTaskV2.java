@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * Second generation of update tasks.
@@ -64,9 +64,9 @@ public interface UpdateTaskV2 extends UpdateTask {
      * Performs the database schema upgrade.
      * @param params Interface carrying some useful parameters for performing the update. This is a parameter interface to be extendable for
      * future requirements without breaking the API.
-     * @throws AbstractOXException should be thrown if the update fails. Then it can be tried to execute this task again.
+     * @throws OXException should be thrown if the update fails. Then it can be tried to execute this task again.
      */
-    void perform(PerformParameters params) throws AbstractOXException;
+    void perform(PerformParameters params) throws OXException;
 
     /**
      * This method is used to determine the order when executing update tasks. Check VERY carefully what update tasks must be run before

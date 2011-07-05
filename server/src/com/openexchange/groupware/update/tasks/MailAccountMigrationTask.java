@@ -72,7 +72,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -110,7 +110,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         return DEPENDENCIES;
     }
 
-    public void perform(final PerformParameters params) throws AbstractOXException {
+    public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Map<Integer, List<Integer>> m = getAllUsers(contextId);
         final ProgressState state = params.getProgressState();
@@ -133,12 +133,12 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws UpdateException {
+    private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws OXException {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -170,12 +170,12 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static boolean existsPrimaryMailAccount(final int userId, final int contextId) throws UpdateException {
+    private static boolean existsPrimaryMailAccount(final int userId, final int contextId) throws OXException {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -194,7 +194,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws UpdateException {
+    private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws OXException {
         final Context ctx = new ContextImpl(contextId);
         final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountMigrationTask.class));
         // First check (and possibly insert) a sequence for specified context
@@ -223,23 +223,23 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                 final UserSettingMail usm = loadUserSettingMail(ctx, userId.intValue());
                 try {
                     handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
-                } catch (final UpdateException e) {
+                } catch (final OXException e) {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 } catch (final OXException e) {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 }
             }
         } catch (final UserException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
     }
 
-    private static User loadUser(final Context ctx, final int userId) throws UpdateException, UserException {
+    private static User loadUser(final Context ctx, final int userId) throws OXException, UserException {
         final Connection con;
         try {
             con = Database.get(ctx, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         try {
             final UserStorage userStorage = new RdbUserStorage();
@@ -249,12 +249,12 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static UserSettingMail loadUserSettingMail(final Context ctx, final int userId) throws UpdateException {
+    private static UserSettingMail loadUserSettingMail(final Context ctx, final int userId) throws OXException {
         final Connection con;
         try {
             con = Database.get(ctx, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         try {
             return UserSettingMailStorage.getInstance().getUserSettingMail(userId, ctx, con);
@@ -263,7 +263,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb, final org.apache.commons.logging.Log LOG) throws UpdateException, OXException {
+    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb, final org.apache.commons.logging.Log LOG) throws OXException, OXException {
         /*
          * Insert
          */
@@ -374,14 +374,14 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         };
     }
 
-    private static void insertDefaultMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx) throws UpdateException {
+    private static void insertDefaultMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx) throws OXException {
         final int cid = ctx.getContextId();
         final int id = MailAccount.DEFAULT_ID;
         Connection con = null;
         try {
             con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         try {
@@ -436,20 +436,20 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         } finally {
             closeSQLStuff(stmt);
             Database.back(cid, true, con);
         }
     }
 
-    private static void checkAndInsertMailAccountSequence(final Context ctx) throws UpdateException {
+    private static void checkAndInsertMailAccountSequence(final Context ctx) throws OXException {
         final int cid = ctx.getContextId();
         Connection con = null;
         try {
             con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;

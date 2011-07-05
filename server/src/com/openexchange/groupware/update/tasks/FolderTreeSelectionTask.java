@@ -54,7 +54,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -77,7 +77,7 @@ public class FolderTreeSelectionTask extends UpdateTaskAdapter {
         return new String[] { TaskCreateUserSettingServer.class.getName() };
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         final Connection con = dbService.getForUpdateTask(contextId);

@@ -59,12 +59,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -92,7 +91,7 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         return new String[0];
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    public void perform(PerformParameters params) throws OXException {
         Schema schema = params.getSchema();
         List<String> executed = determineExecuted(schema.getDBVersion(), Updater.getInstance().getAvailableUpdateTasks());
         int contextId = params.getContextId();
@@ -132,7 +131,7 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         return retval;
     }
 
-    private List<String> excludeAlreadyListed(Connection con, List<String> executed) throws UpdateException {
+    private List<String> excludeAlreadyListed(Connection con, List<String> executed) throws OXException {
         Statement stmt = null;
         ResultSet result = null;
         try {

@@ -79,7 +79,7 @@ import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
-import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 
@@ -206,7 +206,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                         new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString())).run();
                     }
                 }
-            } catch (final UpdateException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
@@ -234,7 +234,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                         UpdateTaskToolkit.resetVersion(versionNumber, sParam);
                     }
                 }
-            } catch (final UpdateException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
@@ -257,7 +257,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 }
 
                 return Utility.toTable(rows, new String[] { "schema", "version", "locked" }, false);
-            } catch (final UpdateException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
@@ -282,7 +282,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                         UpdateTaskToolkit.forceUpdateTask(((String) params[0]), sParam);
                     }
                 }
-            } catch (final UpdateException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
@@ -298,7 +298,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } else if (actionName.equals("forceOnAllSchemas")) {
             try {
                 UpdateTaskToolkit.forceUpdateTaskOnAllSchemas(((String) params[0]));
-            } catch (final UpdateException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
@@ -314,7 +314,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } else if (actionName.equals("listExecutedTasks")) {
             try {
                 return getExecutedTasksList(params[0].toString());
-            } catch (UpdateException e) {
+            } catch (OXException e) {
                 LOG.error(e.getMessage(), e);
                 throw new MBeanException(new Exception(e.getMessage()), e.getMessage());
             } catch (final RuntimeException e) {
@@ -338,7 +338,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         return new AttributeList();
     }
 
-    private TabularDataSupport getExecutedTasksList(String schemaName) throws UpdateException {
+    private TabularDataSupport getExecutedTasksList(String schemaName) throws OXException {
         SchemaStore store = SchemaStore.getInstance();
         final TabularDataSupport retval;
         try {
@@ -351,9 +351,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 retval.put(data);
             }
         } catch (DBPoolingException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         } catch (SchemaException e) {
-            throw new UpdateException(e);
+            throw new OXException(e);
         } catch (OpenDataException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         }

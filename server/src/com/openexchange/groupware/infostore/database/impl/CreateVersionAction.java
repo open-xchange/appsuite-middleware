@@ -68,7 +68,7 @@ public class CreateVersionAction extends AbstractDocumentListAction {
         };
         try {
             doUpdates(update);
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
 
@@ -78,7 +78,7 @@ public class CreateVersionAction extends AbstractDocumentListAction {
         assureExistence();
         try {
             doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getWritableVersionFields(), getDocuments());
-        } catch (final UpdateException e) {
+        } catch (final OXException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
         }
     }
