@@ -56,7 +56,7 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
@@ -83,7 +83,7 @@ public abstract class AbstractMailFuncs implements IValueHandler {
         try {
             settings = UserSettingMailStorage.getInstance().loadUserSettingMail(
                 user.getId(), ctx);
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new SettingException(e);
         }
 		if (userConfig.hasWebMail()) {
@@ -115,7 +115,7 @@ public abstract class AbstractMailFuncs implements IValueHandler {
 		final UserSettingMail settings;
         try {
             settings = storage.loadUserSettingMail(user.getId(), ctx);
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new SettingException(e);
         }
 		setValue(settings, setting.getSingleValue().toString());

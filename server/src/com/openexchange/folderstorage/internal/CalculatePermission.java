@@ -68,7 +68,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.session.ServerSession;
 
@@ -137,7 +137,7 @@ public final class CalculatePermission {
                             Collections.<ContentType> emptyList());
                     }
                 }
-            } catch (final UserConfigurationException e) {
+            } catch (final OXException e) {
                 final Log logger = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalculatePermission.class));
                 logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             } catch (final UserException e) {
@@ -172,7 +172,7 @@ public final class CalculatePermission {
         final UserConfiguration userConfiguration;
         try {
             userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
         final Permission underlyingPermission;
@@ -211,7 +211,7 @@ public final class CalculatePermission {
         final UserConfiguration userConfiguration;
         try {
             userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new FolderException(e);
         }
         final Permission underlyingPermission;

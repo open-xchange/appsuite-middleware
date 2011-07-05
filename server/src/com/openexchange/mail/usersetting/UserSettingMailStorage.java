@@ -54,7 +54,7 @@ import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link UserSettingMailStorage} - Access to {@link UserSettingMail}
@@ -113,13 +113,13 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * @param user The user ID
      * @param cid The context ID
      * @return The instance of {@link UserSettingMail} which matches given user ID and context or <code>null</code> on exception
-     * @throws UserConfigurationException If context cannot be loaded
+     * @throws OXException If context cannot be loaded
      */
-    public final UserSettingMail getUserSettingMail(final int user, final int cid) throws UserConfigurationException {
+    public final UserSettingMail getUserSettingMail(final int user, final int cid) throws OXException {
         try {
             return getUserSettingMail(user, ContextStorage.getStorageContext(cid), null);
         } catch (final OXException e) {
-            throw new UserConfigurationException(e);
+            throw new OXException(e);
         }
     }
 
@@ -147,7 +147,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     public final UserSettingMail getUserSettingMail(final int user, final Context ctx, final Connection readCon) {
         try {
             return loadUserSettingMail(user, ctx, readCon);
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
         }
@@ -159,9 +159,9 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * @param usm the user's mail settings to save
      * @param user the user ID
      * @param ctx the context
-     * @throws UserConfigurationException if user's mail settings could not be saved
+     * @throws OXException if user's mail settings could not be saved
      */
-    public final void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx) throws UserConfigurationException {
+    public final void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx) throws OXException {
         saveUserSettingMail(usm, user, ctx, null);
     }
 
@@ -172,18 +172,18 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * @param user the user ID
      * @param ctx the context
      * @param writeConArg - the writable connection; may be <code>null</code>
-     * @throws UserConfigurationException if user's mail settings could not be saved
+     * @throws OXException if user's mail settings could not be saved
      */
-    public abstract void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws UserConfigurationException;
+    public abstract void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException;
 
     /**
      * Deletes the user's mail settings from database
      * 
      * @param user the user ID
      * @param ctx the context
-     * @throws UserConfigurationException if deletion fails
+     * @throws OXException if deletion fails
      */
-    public final void deleteUserSettingMail(final int user, final Context ctx) throws UserConfigurationException {
+    public final void deleteUserSettingMail(final int user, final Context ctx) throws OXException {
         deleteUserSettingMail(user, ctx, null);
     }
 
@@ -193,9 +193,9 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * @param user the user ID
      * @param ctx the context
      * @param writeConArg the writable connection; may be <code>null</code>
-     * @throws UserConfigurationException - if deletion fails
+     * @throws OXException - if deletion fails
      */
-    public abstract void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws UserConfigurationException;
+    public abstract void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws OXException;
 
     /**
      * Loads user's mail settings from database
@@ -203,9 +203,9 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * @param user the user
      * @param ctx the context
      * @return The instance of {@link UserSettingMail} which matches given user ID and context
-     * @throws UserConfigurationException if loading fails
+     * @throws OXException if loading fails
      */
-    public final UserSettingMail loadUserSettingMail(final int user, final Context ctx) throws UserConfigurationException {
+    public final UserSettingMail loadUserSettingMail(final int user, final Context ctx) throws OXException {
         return loadUserSettingMail(user, ctx, null);
     }
 
@@ -216,25 +216,25 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * @param ctx the context
      * @param readConArg the readable connection
      * @return The instance of {@link UserSettingMail} which matches given user ID and context
-     * @throws UserConfigurationException if loading fails
+     * @throws OXException if loading fails
      */
-    public abstract UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws UserConfigurationException;
+    public abstract UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws OXException;
 
     /**
      * Removes the user's mail settings from cache if any used
      * 
      * @param user the user
      * @param ctx the context
-     * @throws UserConfigurationException if cache removal fails
+     * @throws OXException if cache removal fails
      */
-    public abstract void removeUserSettingMail(final int user, final Context ctx) throws UserConfigurationException;
+    public abstract void removeUserSettingMail(final int user, final Context ctx) throws OXException;
 
     /**
      * Clears this storage's cache if any used
      * 
-     * @throws UserConfigurationException if cache clearing fails
+     * @throws OXException if cache clearing fails
      */
-    public abstract void clearStorage() throws UserConfigurationException;
+    public abstract void clearStorage() throws OXException;
 
     /**
      * Triggers necessary action to shutdown the storage

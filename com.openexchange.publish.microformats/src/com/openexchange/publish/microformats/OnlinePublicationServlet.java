@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -124,7 +124,7 @@ public class OnlinePublicationServlet extends HttpServlet {
             if (userConfiguration.isPublication()) {
                 return true;
             }
-        } catch (UserConfigurationException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         }
         resp.setStatus(HttpServletResponse.SC_FORBIDDEN);

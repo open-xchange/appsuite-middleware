@@ -101,7 +101,7 @@ import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -236,7 +236,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
                         throw MailExceptionCode.NO_MAIL_ACCESS.create();
                     }
-                } catch (final UserConfigurationException e) {
+                } catch (final OXException e) {
                     throw new OXException(e);
                 }
             }

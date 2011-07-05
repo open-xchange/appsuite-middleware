@@ -84,7 +84,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
@@ -169,7 +169,7 @@ public class Memorizer implements Runnable {
         } catch (final OXException e) {
             LOG.error("Contact collector run aborted.", e);
             return;
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         } catch (final UserException e) {

@@ -230,11 +230,11 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         MailMessageCache.getInstance().initCache();
     }
 
-    public void handleAbsence() throws AbstractOXException {
+    public void handleAbsence() throws OXException {
         shutDownCaches();
     }
 
-    public void handleAvailability() throws AbstractOXException {
+    public void handleAvailability() throws OXException {
         startUpCaches();
     }
 

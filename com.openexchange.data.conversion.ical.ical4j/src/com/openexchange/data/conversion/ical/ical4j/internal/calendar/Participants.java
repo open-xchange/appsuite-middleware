@@ -90,7 +90,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
@@ -176,7 +176,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             if ("defaultSenderAddress".equals(senderSource)) { 
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
-                } catch (final UserConfigurationException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     address = resolveUserMail(index, userParticipant, ctx);
                 }

@@ -69,7 +69,7 @@ import com.openexchange.config.cascade.context.matching.UserConfigurationAnalyze
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.userconf.UserConfigurationService;
 
 
@@ -188,7 +188,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     private UserConfiguration getUserConfiguration(Context ctx, int user) throws ConfigCascadeException {
         try {
             return userConfigs.getUserConfiguration(user, ctx);
-        } catch (UserConfigurationException e) {
+        } catch (OXException e) {
             throw new ConfigCascadeException(e);
         }
     }

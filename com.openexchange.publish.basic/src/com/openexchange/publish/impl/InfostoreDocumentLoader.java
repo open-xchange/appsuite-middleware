@@ -57,7 +57,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
@@ -116,7 +116,7 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
     protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws PublicationException {
         try {
             return userConfigs.getUserConfiguration(userId, ctx);
-        } catch (UserConfigurationException e) {
+        } catch (OXException e) {
             throw new PublicationException(e);
         }
     }

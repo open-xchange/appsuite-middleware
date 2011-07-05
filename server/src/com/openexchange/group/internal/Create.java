@@ -64,7 +64,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
@@ -133,7 +133,7 @@ public final class Create {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
                 throw new GroupException(Code.NO_CREATE_PERMISSION);
             }
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new GroupException(e);
         }
     }

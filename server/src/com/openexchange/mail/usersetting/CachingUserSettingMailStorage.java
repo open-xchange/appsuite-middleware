@@ -65,10 +65,9 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCodes;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMail.Signature;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -138,7 +137,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
      * @param user the user ID
      * @param ctx the context
      * @param writeConArg - the writable connection; may be <code>null</code>
-     * @throws UserConfigurationException if user's mail settings could not be saved
+     * @throws OXException if user's mail settings could not be saved
      */
     @Override
     public void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException {
@@ -200,7 +199,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.SQL_ERROR, e, e.getMessage());
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -214,10 +213,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
      * @param user the user ID
      * @param ctx the context
      * @param writeConArg the writable connection; may be <code>null</code>
-     * @throws UserConfigurationException - if deletion fails
+     * @throws OXException - if deletion fails
      */
     @Override
-    public void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws UserConfigurationException {
+    public void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws OXException {
         try {
             Connection writeCon = writeConArg;
             boolean closeWriteCon = false;
@@ -263,10 +262,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.SQL_ERROR, e, e.getMessage());
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.DBPOOL_ERROR, e);
+            throw UserConfigurationCodes.DBPOOL_ERROR.create(e);
         }
     }
 
@@ -276,10 +275,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
      * @param user the user
      * @param ctx the context
      * @param readConArg the readable connection; may be <code>null</code> to fetch own connection.
-     * @throws UserConfigurationException if loading fails
+     * @throws OXException if loading fails
      */
     @Override
-    public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws UserConfigurationException {
+    public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws OXException {
         try {
             final boolean useCache = useCache();
             UserSettingMail usm = useCache ? (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user)) : null;
@@ -310,8 +309,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                         stmt.setInt(2, user);
                         rs = stmt.executeQuery();
                         if (!rs.next()) {
-                            throw new UserConfigurationException(
-                                UserConfigurationException.UserConfigurationCodes.MAIL_SETTING_NOT_FOUND,
+                            throw UserConfigurationCodes.MAIL_SETTING_NOT_FOUND.create(
                                 Integer.valueOf(user),
                                 Integer.valueOf(ctx.getContextId()));
                         }
@@ -352,16 +350,16 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.SQL_ERROR, e, e.getMessage());
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.DBPOOL_ERROR, e);
+            throw UserConfigurationCodes.DBPOOL_ERROR.create(e);
         }
     }
 
     private static final String SQL_LOAD_SIGNATURES = "SELECT id, signature FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
 
-    private static void loadSignatures(final UserSettingMail usm, final int user, final Context ctx, final Connection readConArg) throws UserConfigurationException {
+    private static void loadSignatures(final UserSettingMail usm, final int user, final Context ctx, final Connection readConArg) throws OXException {
         try {
             Connection readCon = readConArg;
             boolean closeCon = false;
@@ -397,10 +395,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.SQL_ERROR, e, e.getMessage());
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.DBPOOL_ERROR, e);
+            throw UserConfigurationCodes.DBPOOL_ERROR.create(e);
         }
     }
 
@@ -462,7 +460,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
     private static final String SQL_INSERT_SIGNATURE = "INSERT INTO user_setting_mail_signature (cid, user, id, signature) VALUES (?, ?, ?, ?)";
 
-    private static boolean saveSignatures(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws UserConfigurationException {
+    private static boolean saveSignatures(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException {
         try {
             Connection writeCon = writeConArg;
             boolean closeCon = false;
@@ -502,10 +500,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.SQL_ERROR, e, e.getMessage());
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCodes.DBPOOL_ERROR, e);
+            throw UserConfigurationCodes.DBPOOL_ERROR.create(e);
         }
     }
 
@@ -537,7 +535,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
      * @see com.openexchange.mail.usersetting.UserSettingMailStorage#clearStorage()
      */
     @Override
-    public void clearStorage() throws UserConfigurationException {
+    public void clearStorage() throws OXException {
         if (useCache()) {
             /*
              * Put clone into cache
@@ -559,7 +557,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
      * @see com.openexchange.mail.usersetting.UserSettingMailStorage#removeUserSettingMail(int, com.openexchange.groupware.contexts.Context)
      */
     @Override
-    public void removeUserSettingMail(final int user, final Context ctx) throws UserConfigurationException {
+    public void removeUserSettingMail(final int user, final Context ctx) throws OXException {
         if (useCache()) {
             /*
              * Put clone into cache
@@ -579,16 +577,16 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     public void shutdownStorage() {
         try {
             releaseCache();
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    public void handleAbsence() throws AbstractOXException {
+    public void handleAbsence() throws OXException {
         releaseCache();
     }
 
-    public void handleAvailability() throws AbstractOXException {
+    public void handleAvailability() throws OXException {
         initCache();
     }
 }

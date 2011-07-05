@@ -164,7 +164,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         reset();
     }
 
-    public void handleAvailability() throws AbstractOXException {
+    public void handleAvailability() throws OXException {
         final FolderCacheManager fcm = FolderCacheManager.getInstance();
         if (null != fcm) {
             fcm.initCache();
@@ -175,7 +175,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         }
     }
 
-    public void handleAbsence() throws AbstractOXException {
+    public void handleAbsence() throws OXException {
         final FolderCacheManager fcm = FolderCacheManager.getInstance();
         if (null != fcm) {
             fcm.releaseCache();

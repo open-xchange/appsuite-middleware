@@ -54,7 +54,7 @@ import java.util.List;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -111,7 +111,7 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
             }
             this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
             doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

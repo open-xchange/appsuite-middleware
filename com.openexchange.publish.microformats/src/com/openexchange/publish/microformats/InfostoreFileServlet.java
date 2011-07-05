@@ -70,7 +70,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.tools.encoding.Helper;
@@ -167,7 +167,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         return users.getUser(publication.getUserId(), publication.getContext());
     }
 
-    private UserConfiguration getUserConfiguration(final Publication publication) throws UserException, UserConfigurationException {
+    private UserConfiguration getUserConfiguration(final Publication publication) throws UserException, OXException {
         return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
     }
 

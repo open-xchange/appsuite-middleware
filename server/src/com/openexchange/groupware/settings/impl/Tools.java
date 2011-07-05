@@ -57,7 +57,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
@@ -96,7 +96,7 @@ public final class Tools {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(
                 userId, ctx);
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new SettingException(e);
         }
     }

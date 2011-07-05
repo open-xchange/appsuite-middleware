@@ -69,7 +69,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
@@ -166,7 +166,7 @@ public final class Delete {
                     throw new GroupException(Code.NO_GROUP_DELETE, I(GroupStorage.GROUP_ZERO_IDENTIFIER));
                 }
             }
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new GroupException(e);
         }
     }

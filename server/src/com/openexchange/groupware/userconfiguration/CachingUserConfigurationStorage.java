@@ -58,10 +58,9 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -89,19 +88,19 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     /**
      * Initializes a new {@link CachingUserConfigurationStorage}.
      * 
-     * @throws UserConfigurationException If an error occurs
+     * @throws OXException If an error occurs
      */
-    public CachingUserConfigurationStorage() throws UserConfigurationException {
+    public CachingUserConfigurationStorage() throws OXException {
         super();
         cacheWriteLock = new ReentrantLock();
         this.delegateStorage = new RdbUserConfigurationStorage();
         cacheAvailabilityListener = new CacheAvailabilityListener() {
 
-            public void handleAbsence() throws AbstractOXException {
+            public void handleAbsence() throws OXException {
                 releaseCache();
             }
 
-            public void handleAvailability() throws AbstractOXException {
+            public void handleAvailability() throws OXException {
                 initCache();
             }
         };
@@ -116,7 +115,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    protected void startInternal() throws AbstractOXException {
+    protected void startInternal() throws OXException {
         final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
         if (null != reg && !reg.registerListener(cacheAvailabilityListener)) {
             LOG.error("Cache availability listener could not be registered", new Throwable());
@@ -124,7 +123,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    protected void stopInternal() throws AbstractOXException {
+    protected void stopInternal() throws OXException {
         final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
         if (null != reg) {
             reg.unregisterListener(cacheAvailabilityListener);
@@ -139,27 +138,25 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     /**
      * Initializes cache reference
      * 
-     * @throws UserConfigurationException If an error occurs
+     * @throws OXException If an error occurs
      */
-    void initCache() throws UserConfigurationException {
+    void initCache() throws OXException {
         if (cache != null) {
             return;
         }
         try {
             cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
-        } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCodes.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         } catch (final RuntimeException e) {
-            throw new UserConfigurationException(UserConfigurationCodes.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+            throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
         }
     }
 
     /**
      * Releases cache reference
      * 
-     * @throws UserConfigurationException If an error occurs
+     * @throws OXException If an error occurs
      */
-    void releaseCache() throws UserConfigurationException {
+    void releaseCache() throws OXException {
         if (cache == null) {
             return;
         }
@@ -169,17 +166,15 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             if (null != cacheService) {
                 cacheService.freeCache(CACHE_REGION_NAME);
             }
-        } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCodes.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         } catch (final RuntimeException e) {
-            throw new UserConfigurationException(UserConfigurationCodes.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+            throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
         } finally {
             cache = null;
         }
     }
 
     @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
         if (cache == null) {
             return getFallback().getUserConfiguration(userId, groups, ctx);
         }
@@ -192,8 +187,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                     userConfig = delegateStorage.getUserConfiguration(userId, groups, ctx);
                     cache.put(key, userConfig);
                 }
-            } catch (final CacheException e) {
-                throw new UserConfigurationException(UserConfigurationCodes.CACHE_PUT_ERROR, e, e.getMessage());
             } catch (final RuntimeException rte) {
                 return getFallback().getUserConfiguration(userId, groups, ctx);
             } finally {
@@ -204,7 +197,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws UserConfigurationException {
+    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
         if (cache == null) {
             return getFallback().getUserConfiguration(ctx, users);
         }
@@ -223,8 +216,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cacheWriteLock.lock();
             try {
                 cache.put(getKey(userConfig.getUserId(), ctx), userConfig);
-            } catch (final CacheException e) {
-                throw new UserConfigurationException(e);
             } catch (final RuntimeException rte) {
                 return getFallback().getUserConfiguration(ctx, users);
             } finally {
@@ -236,15 +227,13 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void clearStorage() throws UserConfigurationException {
+    public void clearStorage() throws OXException {
         if (cache == null) {
             return;
         }
         cacheWriteLock.lock();
         try {
             cache.clear();
-        } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCodes.CACHE_CLEAR_ERROR, e, e.getMessage());
         } catch (final RuntimeException rte) {
             /*
              * Swallow
@@ -256,15 +245,13 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+    public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
         if (cache == null) {
             return;
         }
         cacheWriteLock.lock();
         try {
             cache.remove(getKey(userId, ctx));
-        } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCodes.CACHE_REMOVE_ERROR, e, e.getMessage());
         } catch (final RuntimeException rte) {
             /*
              * Swallow
@@ -276,13 +263,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws UserConfigurationException {
+    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
         delegateStorage.saveUserConfiguration(permissionBits, userId, ctx);
         cacheWriteLock.lock();
         try {
             cache.remove(getKey(userId, ctx));
-        } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCodes.CACHE_REMOVE_ERROR, e, e.getMessage());
         } catch (final RuntimeException rte) {
             /*
              * Swallow

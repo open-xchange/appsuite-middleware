@@ -117,7 +117,7 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.exception.OXException;
@@ -1692,7 +1692,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             } else {
                 try {
                     userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), parameters.getContext());
-                } catch (final UserConfigurationException e) {
+                } catch (final OXException e) {
                     throw new FolderException(e);
                 }
             }

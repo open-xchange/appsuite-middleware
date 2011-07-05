@@ -65,7 +65,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.OXException;
 
@@ -90,7 +90,7 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
             } else if ("defaultSenderAddress".equals(senderSource)) { 
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(calendar.getCreatedBy(), ctx).getSendAddr();
-                } catch (final UserConfigurationException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     address = userResolver.loadUser(calendar.getCreatedBy(), ctx).getMail();
                 }

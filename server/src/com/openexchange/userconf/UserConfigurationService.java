@@ -53,7 +53,7 @@ package com.openexchange.userconf;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link UserConfigurationService} - The user configuration service.
@@ -90,10 +90,10 @@ public interface UserConfigurationService {
      * @param userId - the user ID
      * @param ctx - the context
      * @return the instance of <code>UserConfiguration</code>
-     * @throws UserConfigurationException If user's configuration could not be determined
+     * @throws OXException If user's configuration could not be determined
      * @see #getUserConfiguration(int, int[], Context)
      */
-    public UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException;
+    public UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException;
 
     /**
      * Determines the instance of <code>UserConfiguration</code> that corresponds to given user ID. If <code>groups</code> argument is set,
@@ -103,9 +103,9 @@ public interface UserConfigurationService {
      * @param groups - user's groups
      * @param ctx - the context
      * @return the instance of <code>UserConfiguration</code>
-     * @throws UserConfigurationException If user's configuration could not be determined
+     * @throws OXException If user's configuration could not be determined
      */
-    public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws UserConfigurationException;
+    public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException;
 
     /**
      * This method reads several user module access permissions. This method is faster than reading separately the {@link UserConfiguration}
@@ -113,9 +113,9 @@ public interface UserConfigurationService {
      * @param ctx the context
      * @param users user objects that module access permission should be loaded.
      * @return an array with the module access permissions of the given users.
-     * @throws UserConfigurationException if users configuration could not be loaded.
+     * @throws OXException if users configuration could not be loaded.
      */
-    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException;
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException;
 
     /**
      * <p>
@@ -123,9 +123,9 @@ public interface UserConfigurationService {
      * <p>
      * <b>NOTE:</b> Only the instances are going to be removed from storage; underlying database is not affected
      * 
-     * @throws UserConfigurationException If clearing fails
+     * @throws OXException If clearing fails
      */
-    public void clearStorage() throws UserConfigurationException;
+    public void clearStorage() throws OXException;
 
     /**
      * <p>
@@ -135,17 +135,17 @@ public interface UserConfigurationService {
      * 
      * @param userId - the user ID
      * @param ctx - the context
-     * @throws UserConfigurationException If removal fails
+     * @throws OXException If removal fails
      */
-    public void removeUserConfiguration(int userId, Context ctx) throws UserConfigurationException;
+    public void removeUserConfiguration(int userId, Context ctx) throws OXException;
 
     /**
      * Saves specified user configuration.
      * 
      * @param userConfiguration The user configuration to save.
-     * @throws UserConfigurationException If saving user configuration fails.
+     * @throws OXException If saving user configuration fails.
      */
-    public void saveUserConfiguration(final UserConfiguration userConfiguration) throws UserConfigurationException;
+    public void saveUserConfiguration(final UserConfiguration userConfiguration) throws OXException;
 
     /**
      * Saves specified user configuration.
@@ -153,8 +153,8 @@ public interface UserConfigurationService {
      * @param permissionBits The permission bits.
      * @param userId The user ID.
      * @param ctx The context the user belongs to.
-     * @throws UserConfigurationException If saving user configuration fails.
+     * @throws OXException If saving user configuration fails.
      */
-    public void saveUserConfiguration(int permissionBits, int userId, Context ctx) throws UserConfigurationException;
+    public void saveUserConfiguration(int permissionBits, int userId, Context ctx) throws OXException;
 
 }

@@ -72,7 +72,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
@@ -225,7 +225,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         return document;
     }
 
-    private UserConfiguration loadUserConfig(final Publication publication) throws UserConfigurationException {
+    private UserConfiguration loadUserConfig(final Publication publication) throws OXException {
         return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
     }
 

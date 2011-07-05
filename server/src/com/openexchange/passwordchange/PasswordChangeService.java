@@ -61,7 +61,7 @@ import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
@@ -118,7 +118,7 @@ public abstract class PasswordChangeService {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(event.getSession().getUserId(), context).isEditPassword()) {
                 throw new UserException(UserException.Code.PERMISSION, Integer.valueOf(context.getContextId()));
             }
-        } catch (final UserConfigurationException e1) {
+        } catch (final OXException e1) {
             throw new UserException(e1);
         }
         /*

@@ -52,7 +52,7 @@ package com.openexchange.userconf.internal;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -70,31 +70,31 @@ public final class UserConfigurationServiceImpl implements UserConfigurationServ
         super();
     }
 
-    public void clearStorage() throws UserConfigurationException {
+    public void clearStorage() throws OXException {
         UserConfigurationStorage.getInstance().clearStorage();
     }
 
-    public UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+    public UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
     }
 
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
     }
 
-    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException {
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(ctx, users);
     }
 
-    public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+    public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
         UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
     }
 
-    public void saveUserConfiguration(final UserConfiguration userConfiguration) throws UserConfigurationException {
+    public void saveUserConfiguration(final UserConfiguration userConfiguration) throws OXException {
         UserConfigurationStorage.getInstance().saveUserConfiguration(userConfiguration);
     }
 
-    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws UserConfigurationException {
+    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
         UserConfigurationStorage.getInstance().saveUserConfiguration(permissionBits, userId, ctx);
     }
 

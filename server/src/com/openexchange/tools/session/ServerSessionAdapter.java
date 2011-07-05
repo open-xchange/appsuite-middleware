@@ -56,7 +56,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -277,7 +277,7 @@ public class ServerSessionAdapter implements ServerSession {
                 if (null == tmp) {
                     try {
                         userConfiguration = tmp = UserConfigurationStorage.getInstance().getUserConfiguration(getUserId(), ctx);
-                    } catch (final UserConfigurationException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }

@@ -73,7 +73,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -264,7 +264,7 @@ public final class Tools {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(
                 userId, ctx);
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
     }

@@ -49,30 +49,27 @@
 
 package com.openexchange.cache.registry;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CacheAvailabilityListener} - The listener for cache availability
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface CacheAvailabilityListener {
 
-	/**
-	 * Handles the (re-)availability of cache service
-	 * 
-	 * @throws AbstractOXException
-	 *             If an error occurs
-	 */
-	public void handleAvailability() throws AbstractOXException;
+    /**
+     * Handles the (re-)availability of cache service
+     * 
+     * @throws OXException If an error occurs
+     */
+    public void handleAvailability() throws OXException;
 
-	/**
-	 * Handles the (possibly temporary) absence of cache service
-	 * 
-	 * @throws AbstractOXException
-	 *             If an error occurs
-	 */
-	public void handleAbsence() throws AbstractOXException;
+    /**
+     * Handles the (possibly temporary) absence of cache service
+     * 
+     * @throws OXException If an error occurs
+     */
+    public void handleAbsence() throws OXException;
 
 }

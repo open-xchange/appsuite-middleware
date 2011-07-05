@@ -55,7 +55,7 @@ import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
@@ -96,7 +96,7 @@ public final class MailLoginHandler implements LoginHandlerService {
                  */
                 retentionService.storeOnAccess(retentionData);
             }
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final DataRetentionException e) {
             throw new OXException(e);

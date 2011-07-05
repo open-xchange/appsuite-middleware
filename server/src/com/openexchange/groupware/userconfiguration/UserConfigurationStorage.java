@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -79,9 +79,9 @@ public abstract class UserConfigurationStorage {
      * Sets the singleton instance of {@link UserConfigurationStorage}
      * 
      * @param singleton The singleton instance
-     * @throws AbstractOXException If singleton cannot be configured
+     * @throws OXException If singleton cannot be configured
      */
-    static void setInstance(final UserConfigurationStorage singleton) throws AbstractOXException {
+    static void setInstance(final UserConfigurationStorage singleton) throws OXException {
         UserConfigurationStorage.singleton = singleton;
         UserConfigurationStorage.singleton.start();
     }
@@ -89,9 +89,9 @@ public abstract class UserConfigurationStorage {
     /**
      * Releases the singleton instance of {@link UserConfigurationStorage}
      * 
-     * @throws AbstractOXException If singleton cannot be configured
+     * @throws OXException If singleton cannot be configured
      */
-    static void releaseInstance() throws AbstractOXException {
+    static void releaseInstance() throws OXException {
         UserConfigurationStorage.singleton.stop();
         UserConfigurationStorage.singleton = null;
     }
@@ -106,7 +106,7 @@ public abstract class UserConfigurationStorage {
         return singleton;
     }
 
-    private final void start() throws AbstractOXException {
+    private final void start() throws OXException {
         if (started) {
             return;
         }
@@ -114,7 +114,7 @@ public abstract class UserConfigurationStorage {
         started = true;
     }
 
-    private final void stop() throws AbstractOXException {
+    private final void stop() throws OXException {
         if (!started) {
             return;
         }
@@ -151,7 +151,7 @@ public abstract class UserConfigurationStorage {
     public final UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx) {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
         }
@@ -164,28 +164,28 @@ public abstract class UserConfigurationStorage {
      * @param userId - the user ID
      * @param ctx - the context
      * @return the instance of <code>UserConfiguration</code>
-     * @throws UserConfigurationException If user's configuration could not be
+     * @throws OXException If user's configuration could not be
      *             determined
      * @see #getUserConfiguration(int, int[], Context)
      */
     public final UserConfiguration getUserConfiguration(final int userId, final Context ctx)
-            throws UserConfigurationException {
+            throws OXException {
         return getUserConfiguration(userId, null, ctx);
     }
 
     /**
      * Perform necessary actions to start instance
      * 
-     * @throws AbstractOXException
+     * @throws OXException
      */
-    protected abstract void startInternal() throws AbstractOXException;
+    protected abstract void startInternal() throws OXException;
 
     /**
      * Perform necessary actions to stop instance
      * 
-     * @throws AbstractOXException
+     * @throws OXException
      */
-    protected abstract void stopInternal() throws AbstractOXException;
+    protected abstract void stopInternal() throws OXException;
 
     /**
      * Determines the instance of <code>UserConfiguration</code> that
@@ -196,13 +196,13 @@ public abstract class UserConfigurationStorage {
      * @param groups - user's groups
      * @param ctx - the context
      * @return the instance of <code>UserConfiguration</code>
-     * @throws UserConfigurationException If user's configuration could not be
+     * @throws OXException If user's configuration could not be
      *             determined
      */
     public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx)
-            throws UserConfigurationException;
+            throws OXException;
 
-    public abstract UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException;
+    public abstract UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException;
 
     /**
      * <p>
@@ -212,9 +212,9 @@ public abstract class UserConfigurationStorage {
      * <b>NOTE:</b> Only the instances are going to be removed from storage;
      * underlying database is not affected
      * 
-     * @throws UserConfigurationException If clearing fails
+     * @throws OXException If clearing fails
      */
-    public abstract void clearStorage() throws UserConfigurationException;
+    public abstract void clearStorage() throws OXException;
 
     /**
      * <p>
@@ -226,18 +226,18 @@ public abstract class UserConfigurationStorage {
      * 
      * @param userId - the user ID
      * @param ctx - the context
-     * @throws UserConfigurationException If removal fails
+     * @throws OXException If removal fails
      */
-    public abstract void removeUserConfiguration(int userId, Context ctx) throws UserConfigurationException;
+    public abstract void removeUserConfiguration(int userId, Context ctx) throws OXException;
 
     /**
      * Saves specified user configuration.
      * 
      * @param userConfiguration The user configuration to save.
-     * @throws UserConfigurationException If saving user configuration fails.
+     * @throws OXException If saving user configuration fails.
      */
     public final void saveUserConfiguration(final UserConfiguration userConfiguration)
-            throws UserConfigurationException {
+            throws OXException {
         saveUserConfiguration(userConfiguration.getPermissionBits(), userConfiguration.getUserId(), userConfiguration
                 .getContext());
     }
@@ -248,8 +248,8 @@ public abstract class UserConfigurationStorage {
      * @param permissionBits The permission bits.
      * @param userId The user ID.
      * @param ctx The context the user belongs to.
-     * @throws UserConfigurationException If saving user configuration fails.
+     * @throws OXException If saving user configuration fails.
      */
     public abstract void saveUserConfiguration(int permissionBits, int userId, Context ctx)
-            throws UserConfigurationException;
+            throws OXException;
 }
