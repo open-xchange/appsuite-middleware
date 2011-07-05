@@ -57,17 +57,14 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.sql.SearchStrings;
 
@@ -86,7 +83,7 @@ public class Search {
 
     private final UserConfiguration config;
 
-    private TaskSearchObject search;
+    private final TaskSearchObject search;
 
     private final int orderBy;
 
@@ -96,7 +93,7 @@ public class Search {
 
     private final List<Integer> all = new ArrayList<Integer>(), own = new ArrayList<Integer>(), shared = new ArrayList<Integer>();
 
-    public Search(Context ctx, User user, UserConfiguration config, TaskSearchObject search, int orderBy, Order order, int[] columns) {
+    public Search(final Context ctx, final User user, final UserConfiguration config, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns) {
         super();
         this.config = config;
         this.ctx = ctx;
@@ -107,7 +104,7 @@ public class Search {
         this.columns = columns;
     }
 
-    public SearchIterator<Task> perform() throws TaskException, OXException {
+    public SearchIterator<Task> perform() throws OXException, OXException {
         checkConditions();
         prepareFolder();
         if (all.size() + own.size() + shared.size() == 0) {
@@ -116,25 +113,25 @@ public class Search {
         return TaskStorage.getInstance().search(ctx, getUserId(), search, orderBy, order, columns, all, own, shared);
     }
 
-    private void checkConditions() throws TaskException {
+    private void checkConditions() throws OXException {
         if (TaskSearchObject.NO_PATTERN == search.getPattern()) {
             return;
         }
         final int minimumSearchCharacters;
         try {
             minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (ConfigurationException e) {
-            throw new TaskException(e);
+        } catch (final ConfigurationException e) {
+            throw new OXException(e);
         }
         if (0 == minimumSearchCharacters) {
             return;
         }
         if (SearchStrings.lengthWithoutWildcards(search.getPattern()) < minimumSearchCharacters) {
-            throw new TaskException(Code.PATTERN_TOO_SHORT, I(minimumSearchCharacters));
+            throw TaskExceptionCode.PATTERN_TOO_SHORT.create(I(minimumSearchCharacters));
         }
     }
 
-    private void prepareFolder() throws TaskException, OXException {
+    private void prepareFolder() throws OXException, OXException {
         SearchIterator<FolderObject> folders;
         if (search.hasFolders()) {
             folders = loadFolder(ctx, search.getFolders());
@@ -146,8 +143,8 @@ public class Search {
                     config.getAccessibleModules(),
                     FolderObject.TASK,
                     ctx);
-            } catch (SearchIteratorException e) {
-                throw new OXException(e);
+            } catch (final OXException e) {
+                throw e;
             }
         }
         try {
@@ -165,17 +162,17 @@ public class Search {
                     all.add(Integer.valueOf(folder.getObjectID()));
                 }
             }
-        } catch (AbstractOXException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         if (LOG.isTraceEnabled()) {
             LOG.trace("Search tasks, all: " + all + ", own: " + own + ", shared: " + shared);
         }
     }
 
-    private static SearchIterator<FolderObject> loadFolder(Context ctx, int[] folderIds) throws TaskException {
+    private static SearchIterator<FolderObject> loadFolder(final Context ctx, final int[] folderIds) throws OXException {
         final List<FolderObject> retval = new ArrayList<FolderObject>(folderIds.length);
-        for (int folderId : folderIds) {
+        for (final int folderId : folderIds) {
             retval.add(Tools.getFolder(ctx, folderId));
         }
         return new SearchIteratorAdapter<FolderObject>(retval.iterator());

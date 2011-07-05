@@ -67,8 +67,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -87,10 +85,8 @@ import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.OXException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -121,9 +117,9 @@ public final class TaskLogic {
      * @param task Task to create.
      * @param userId unique identifier of the user that wants to create the task.
      * @param userConfig groupware configuration of the user that wants to create the task.
-     * @throws TaskException if the task can't be created.
+     * @throws OXException if the task can't be created.
      */
-    static void checkNewTask(final Task task, final int userId, final UserConfiguration userConfig, final Set<TaskParticipant> participants) throws TaskException {
+    static void checkNewTask(final Task task, final int userId, final UserConfiguration userConfig, final Set<TaskParticipant> participants) throws OXException {
         checkMissingAttributes(task, userId);
         checkData(task);
         checkDates(task);
@@ -145,9 +141,9 @@ public final class TaskLogic {
      * @param userConfig groupware configuration of the user that wants to change the task.
      * @param newParts changed participants.
      * @param oldParts participants of the original task.
-     * @throws TaskException if the check fails.
+     * @throws OXException if the check fails.
      */
-    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserConfiguration userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws TaskException {
+    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserConfiguration userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws OXException {
         if (!task.containsLastModified()) {
             task.setLastModified(new Date());
         }
@@ -161,7 +157,7 @@ public final class TaskLogic {
         final boolean changedParts = task.containsParticipants();
         // Only creator is allowed to set private flag.
         if (task.containsPrivateFlag() && task.getPrivateFlag() && oldTask.getCreatedBy() != user.getId()) {
-            throw new TaskException(Code.ONLY_CREATOR_PRIVATE);
+            throw TaskExceptionCode.ONLY_CREATOR_PRIVATE.create();
         }
         final boolean privat = task.containsPrivateFlag() ? task.getPrivateFlag() : oldTask.getPrivateFlag();
         checkPrivateFlag(privat, changedParts, oldParts, newParts);
@@ -176,11 +172,11 @@ public final class TaskLogic {
      * 
      * @param task Task to create.
      * @param userId user that wants to create the task and will be therefore used as task creator if no one is defined.
-     * @throws TaskException if the task can't be created.
+     * @throws OXException if the task can't be created.
      */
-    private static void checkMissingAttributes(final Task task, final int userId) throws TaskException {
+    private static void checkMissingAttributes(final Task task, final int userId) throws OXException {
         if (!task.containsParentFolderID()) {
-            throw new TaskException(Code.FOLDER_IS_MISSING);
+            throw TaskExceptionCode.FOLDER_IS_MISSING.create();
         }
         final Date timestamp = new Date();
         if (!task.containsCreationDate()) {
@@ -210,23 +206,23 @@ public final class TaskLogic {
      * Checks every string attribute of a task for invalid characters.
      * 
      * @param task task to check.
-     * @throws TaskException if a string contains invalid characters.
+     * @throws OXException if a string contains invalid characters.
      */
-    private static void checkData(final Task task) throws TaskException {
+    private static void checkData(final Task task) throws OXException {
         for (final Mapper<String> mapper : Mapping.STRING_MAPPERS) {
             if (mapper.isSet(task) && null != mapper.get(task)) {
                 final String result = Check.containsInvalidChars(mapper.get(task));
                 if (null != result) {
-                    throw new TaskException(Code.INVALID_DATA, result);
+                    throw TaskExceptionCode.INVALID_DATA.create(result);
                 }
             }
         }
         final int limit = 130000;
         if (task.containsActualCosts() && null != task.getActualCosts() && (limit < f(task.getActualCosts()) || -limit > f(task.getActualCosts()))) {
-            throw new TaskException(Code.COSTS_OFF_LIMIT);
+            throw TaskExceptionCode.COSTS_OFF_LIMIT.create();
         }
         if (task.containsTargetCosts() && null != task.getTargetCosts() && (limit < f(task.getTargetCosts()) || -limit > f(task.getTargetCosts()))) {
-            throw new TaskException(Code.COSTS_OFF_LIMIT);
+            throw TaskExceptionCode.COSTS_OFF_LIMIT.create();
         }
     }
 
@@ -235,15 +231,15 @@ public final class TaskLogic {
      * ignored.
      * 
      * @param task Task to check the dates of.
-     * @throws TaskException if the start date is before the end date.
+     * @throws OXException if the start date is before the end date.
      */
-    private static void checkDates(final Task task) throws TaskException {
+    private static void checkDates(final Task task) throws OXException {
         if (task.containsStartDate() && task.containsEndDate()) {
             checkDates(task.getStartDate(), task.getEndDate());
         }
     }
 
-    private static void checkDates(final Task task, final Task oldTask) throws TaskException {
+    private static void checkDates(final Task task, final Task oldTask) throws OXException {
         Date start = null;
         if (task.containsStartDate()) {
             start = task.getStartDate();
@@ -259,24 +255,24 @@ public final class TaskLogic {
         checkDates(start, end);
     }
 
-    private static void checkDates(final Date start, final Date end) throws TaskException {
+    private static void checkDates(final Date start, final Date end) throws OXException {
         if (null != start && null != end && start.after(end)) {
-            throw new TaskException(Code.START_NOT_BEFORE_END, start, end);
+            throw TaskExceptionCode.START_NOT_BEFORE_END.create(start, end);
         }
     }
 
-    private static void checkStateAndProgress(final Task task) throws TaskException {
+    private static void checkStateAndProgress(final Task task) throws OXException {
         if (!task.containsPercentComplete() || !task.containsStatus()) {
             return;
         }
         final int progress = task.getPercentComplete();
         if (progress < 0 || progress > Task.PERCENT_MAXVALUE) {
-            throw new TaskException(Code.INVALID_PERCENTAGE, Integer.valueOf(progress));
+            throw TaskExceptionCode.INVALID_PERCENTAGE.create(Integer.valueOf(progress));
         }
         switch (task.getStatus()) {
         case Task.NOT_STARTED:
             if (0 != progress) {
-                throw new TaskException(Code.PERCENTAGE_NOT_ZERO, Integer.valueOf(progress));
+                throw TaskExceptionCode.PERCENTAGE_NOT_ZERO.create(Integer.valueOf(progress));
             }
             break;
         case Task.IN_PROGRESS:
@@ -289,7 +285,7 @@ public final class TaskLogic {
             // Status DONE should not require a 100% progress.
             break;
         default:
-            throw new TaskException(Code.INVALID_TASK_STATE, Integer.valueOf(task.getStatus()));
+            throw TaskExceptionCode.INVALID_TASK_STATE.create(Integer.valueOf(task.getStatus()));
         }
     }
 
@@ -300,19 +296,19 @@ public final class TaskLogic {
      * @param changed if updated task contains participants.
      * @param oldParts original participants of the task.
      * @param newParts changed participants of the task.
-     * @throws TaskException if the check fails.
+     * @throws OXException if the check fails.
      */
-    private static void checkPrivateFlag(final boolean privat, final boolean changed, final Set<TaskParticipant> oldParts, final Set<TaskParticipant> newParts) throws TaskException {
+    private static void checkPrivateFlag(final boolean privat, final boolean changed, final Set<TaskParticipant> oldParts, final Set<TaskParticipant> newParts) throws OXException {
         if (!privat) {
             return;
         }
         if (changed) {
             if (newParts.size() > 0) {
-                throw new TaskException(Code.NO_PRIVATE_DELEGATE);
+                throw TaskExceptionCode.NO_PRIVATE_DELEGATE.create();
             }
         } else {
             if (oldParts.size() > 0) {
-                throw new TaskException(Code.NO_PRIVATE_DELEGATE);
+                throw TaskExceptionCode.NO_PRIVATE_DELEGATE.create();
             }
         }
     }
@@ -321,9 +317,9 @@ public final class TaskLogic {
      * Checks that the creator can't be participant if the according global option isn't set.
      * 
      * @param participants Participants of the task.
-     * @throws TaskException if the check fails.
+     * @throws OXException if the check fails.
      */
-    private static void checkParticipants(final Set<TaskParticipant> participants) throws TaskException {
+    private static void checkParticipants(final Set<TaskParticipant> participants) throws OXException {
         if (null == participants) {
             return;
         }
@@ -334,13 +330,13 @@ public final class TaskLogic {
      * Checks if external participants contain consistent data. Currently external participants are checked to contain an email address.
      * 
      * @param participants external participants.
-     * @throws TaskException if an external participant does not contain an email address.
+     * @throws OXException if an external participant does not contain an email address.
      */
-    private static void checkExternal(final Set<ExternalParticipant> participants) throws TaskException {
+    private static void checkExternal(final Set<ExternalParticipant> participants) throws OXException {
         for (final ExternalParticipant participant : participants) {
             final String mail = participant.getMail();
             if (null == mail || mail.length() == 0) {
-                throw new TaskException(Code.EXTERNAL_WITHOUT_MAIL);
+                throw TaskExceptionCode.EXTERNAL_WITHOUT_MAIL.create();
             }
         }
     }
@@ -350,9 +346,9 @@ public final class TaskLogic {
      * 
      * @param task Recurring task.
      * @param oldTask Original recurring task on update.
-     * @throws TaskException if a necessary recurrence attribute is missing.
+     * @throws OXException if a necessary recurrence attribute is missing.
      */
-    private static void checkRecurrence(final Task task, final Task oldTask) throws TaskException {
+    private static void checkRecurrence(final Task task, final Task oldTask) throws OXException {
         if (Task.NO_RECURRENCE == task.getRecurrenceType() && oldTask != null && Task.NO_RECURRENCE == oldTask.getRecurrenceType()) {
             return;
         }
@@ -360,17 +356,17 @@ public final class TaskLogic {
         if (Task.NO_RECURRENCE != task.getRecurrenceType()) {
             if (null == oldTask) {
                 if (!task.containsStartDate()) {
-                    throw new TaskException(Code.MISSING_RECURRENCE_VALUE, Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
                 }
                 if (!task.containsEndDate()) {
-                    throw new TaskException(Code.MISSING_RECURRENCE_VALUE, Integer.valueOf(Task.END_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.END_DATE));
                 }
             } else {
                 if (task.containsStartDate() && null == task.getStartDate()) {
-                    throw new TaskException(Code.MISSING_RECURRENCE_VALUE, Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
                 }
                 if (task.containsEndDate() && null == task.getEndDate()) {
-                    throw new TaskException(Code.MISSING_RECURRENCE_VALUE, Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
                 }
             }
         }
@@ -393,9 +389,7 @@ public final class TaskLogic {
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true);
             recColl.checkRecurring(task);
         } catch (final OXException e) {
-            throw new TaskException(e);
-        } catch (OXException e) {
-            throw new TaskException(e);
+            throw e;
         }
         if (daysRemoved) {
             task.setDays(0);
@@ -445,7 +439,7 @@ public final class TaskLogic {
         }
     }
 
-    private static void moveToFirstOccurrence(Task task) throws TaskException {
+    private static void moveToFirstOccurrence(final Task task) throws OXException {
         // WebDAV/XML sets null values if value is missing.
         if (!task.containsStartDate() || !task.containsEndDate() || null == task.getStartDate() || null == task.getEndDate() || !task.containsRecurrenceType() || CalendarObject.NO_RECURRENCE == task.getRecurrenceType()) {
             return;
@@ -457,15 +451,15 @@ public final class TaskLogic {
             if (null == results || 0 == results.size()) {
                 return;
             }
-            RecurringResultInterface result = results.getRecurringResult(0);
+            final RecurringResultInterface result = results.getRecurringResult(0);
             if (!new Date(result.getStart()).equals(task.getStartDate())) {
                 task.setStartDate(new Date(result.getStart()));
             }
             if (!new Date(result.getEnd()).equals(task.getEndDate())) {
                 task.setEndDate(new Date(result.getEnd()));
             }
-        } catch (OXException e) {
-            throw new TaskException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
     }
 
@@ -473,9 +467,9 @@ public final class TaskLogic {
 
     /**
      * @return all participants who belong to a group.
-     * @throws TaskException
+     * @throws OXException
      */
-    static Set<InternalParticipant> getGroupParticipants(final Context ctx, final Participant[] participants) throws TaskException {
+    static Set<InternalParticipant> getGroupParticipants(final Context ctx, final Participant[] participants) throws OXException {
         if (groupParticipants == null) {
             createParticipants(ctx, participants);
         }
@@ -489,9 +483,9 @@ public final class TaskLogic {
      * @param ctx Context.
      * @param participants user and group participants.
      * @return a set of task participants.
-     * @throws TaskException if resolving of groups to users fails.
+     * @throws OXException if resolving of groups to users fails.
      */
-    static Set<TaskParticipant> createParticipants(final Context ctx, final Participant[] participants) throws TaskException {
+    static Set<TaskParticipant> createParticipants(final Context ctx, final Participant[] participants) throws OXException {
         final Set<TaskParticipant> retval = new HashSet<TaskParticipant>();
         final Set<InternalParticipant> foundGroupParticipants = new HashSet<InternalParticipant>();
         if (null == participants) {
@@ -507,24 +501,24 @@ public final class TaskLogic {
                 try {
                     final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
                     if (member.length == 0) {
-                        throw new TaskException(Code.GROUP_IS_EMPTY, group.getDisplayName());
+                        throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
                     }
                     for (final int userId : member) {
-                        InternalParticipant tParticipant = new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier()));
+                        final InternalParticipant tParticipant = new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier()));
                         foundGroupParticipants.add(tParticipant);
                         if (!retval.contains(tParticipant)) {
                             retval.add(tParticipant);
                         }
                     }
-                } catch (LdapException e) {
-                    throw new TaskException(e);
+                } catch (final LdapException e) {
+                    throw new OXException(e);
                 }
                 break;
             case Participant.EXTERNAL_USER:
                 retval.add(new ExternalParticipant((ExternalUserParticipant) participant));
                 break;
             default:
-                throw new TaskException(Code.UNKNOWN_PARTICIPANT, Integer.valueOf(participant.getType()));
+                throw TaskExceptionCode.UNKNOWN_PARTICIPANT.create(Integer.valueOf(participant.getType()));
             }
         }
         groupParticipants = foundGroupParticipants;
@@ -712,15 +706,10 @@ public final class TaskLogic {
      * @param task Task to store.
      * @param participants Participants of the task.
      * @param folders Folders the task should appear in.
-     * @throws TaskException if an error occurs while storing the task.
+     * @throws OXException if an error occurs while storing the task.
      */
-    static void insertTask(final Context ctx, final Task task, final Set<TaskParticipant> participants, final Set<Folder> folders) throws TaskException {
-        Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+    static void insertTask(final Context ctx, final Task task, final Set<TaskParticipant> participants, final Set<Folder> folders) throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             final int taskId = IDGenerator.getId(ctx, Types.TASK, con);
@@ -733,15 +722,15 @@ public final class TaskLogic {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new TaskException(Code.INSERT_FAILED, e, e.getMessage());
-        } catch (final TaskException e) {
+            throw TaskExceptionCode.INSERT_FAILED.create(e, e.getMessage());
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
             } catch (final SQLException e) {
-                final TaskException tske = new TaskException(Code.AUTO_COMMIT, e);
+                final OXException tske = TaskExceptionCode.AUTO_COMMIT.create(e);
                 LOG.error(tske.getMessage(), tske);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -754,9 +743,9 @@ public final class TaskLogic {
      * @param ctx Conetxt
      * @param task fully loaded task object to delete.
      * @param lastModified last modification timestamp for concurrent conflicts.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    public static void deleteTask(final Context ctx, final Connection con, final int userId, final Task task, final Date lastModified) throws TaskException {
+    public static void deleteTask(final Context ctx, final Connection con, final int userId, final Task task, final Date lastModified) throws OXException {
         final int taskId = task.getObjectID();
         // Load the folders remembering all task source folders on move
         // operations for clients.
@@ -783,15 +772,10 @@ public final class TaskLogic {
      * @param session Session.
      * @param task fully loaded task object to delete.
      * @param lastModified last modification timestamp for concurrent conflicts.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    public static void deleteTask(final Session session, final Context ctx, final int userId, final Task task, final Date lastModified) throws TaskException {
-        Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+    public static void deleteTask(final Session session, final Context ctx, final int userId, final Task task, final Date lastModified) throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             deleteTask(ctx, con, userId, task, lastModified);
@@ -799,8 +783,8 @@ public final class TaskLogic {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new TaskException(Code.DELETE_FAILED, e, e.getMessage());
-        } catch (final TaskException e) {
+            throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -813,7 +797,7 @@ public final class TaskLogic {
         }
     }
 
-    private static Set<Folder> deleteParticipants(final Context ctx, final Connection con, final int taskId) throws TaskException {
+    private static Set<Folder> deleteParticipants(final Context ctx, final Connection con, final int taskId) throws OXException {
         final Set<InternalParticipant> participants = new HashSet<InternalParticipant>(partStor.selectInternal(ctx, con, taskId, ACTIVE));
         partStor.deleteInternal(ctx, con, taskId, participants, ACTIVE, true);
         final Set<InternalParticipant> removed = partStor.selectInternal(ctx, con, taskId, REMOVED);
@@ -827,7 +811,7 @@ public final class TaskLogic {
         return retval;
     }
 
-    private static void deleteFolder(final Context ctx, final Connection con, final int taskId, final Set<Folder> removed) throws TaskException {
+    private static void deleteFolder(final Context ctx, final Connection con, final int taskId, final Set<Folder> removed) throws OXException {
         final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId, ACTIVE);
         foldStor.deleteFolder(ctx, con, taskId, folders, ACTIVE);
         final Iterator<Folder> iter = removed.iterator();
@@ -847,18 +831,14 @@ public final class TaskLogic {
      * @param ctx the context.
      * @param con writable database connection.
      * @param task Task object.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    static void informDelete(final Session session, final Context ctx, final Connection con, final Task task) throws TaskException {
+    static void informDelete(final Session session, final Context ctx, final Connection con, final Task task) throws OXException {
         Reminder.deleteReminder(ctx, con, task);
         try {
             new EventClient(session).delete(task);
-        } catch (final EventException e) {
-            throw new TaskException(Code.EVENT, e);
         } catch (final OXException e) {
-            throw new TaskException(Code.EVENT, e);
-        } catch (final OXException e) {
-            throw new TaskException(Code.EVENT, e);
+            throw e;
         }
     }
 
@@ -871,9 +851,9 @@ public final class TaskLogic {
      * @param folderId unique identifier of the folder through that the task is accessed.
      * @param taskId unique identifier of the task to remove.
      * @param type storage type of the task (only {@link StorageType#ACTIVE} or {@link StorageType#DELETED}).
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    public static void removeTask(final Session session, final Context ctx, final Connection con, final int folderId, final int taskId, final StorageType type) throws TaskException {
+    public static void removeTask(final Session session, final Context ctx, final Connection con, final int folderId, final int taskId, final StorageType type) throws OXException {
         // Load the task.
         final Task task = storage.selectTask(ctx, con, taskId, type);
         task.setParentFolderID(folderId);

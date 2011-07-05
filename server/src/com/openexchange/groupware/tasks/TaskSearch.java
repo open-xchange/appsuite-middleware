@@ -51,6 +51,7 @@ package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -87,9 +88,9 @@ abstract class TaskSearch {
      * @param userId unique identifier of the user.
      * @param type storage type of task that should be searched.
      * @return an int array with all task identifier found.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    abstract int[] findUserTasks(Context ctx, Connection con, int userId, StorageType type) throws TaskException;
+    abstract int[] findUserTasks(Context ctx, Connection con, int userId, StorageType type) throws OXException;
 
     /**
      * List tasks in a folder that are modified since the specified date.
@@ -103,10 +104,10 @@ abstract class TaskSearch {
      * @param noPrivate <code>true</code> if private tasks should not be listed
      * (shared folder).
      * @return a SearchIterator for iterating over all returned tasks.
-     * @throws TaskException if an error occurs while listing modified tasks.
+     * @throws OXException if an error occurs while listing modified tasks.
      */
     abstract SearchIterator<Task> listModifiedTasks(Context ctx, int folderId,
         StorageType type, int[] columns, Date since, boolean onlyOwn,
-        int userId, boolean noPrivate) throws TaskException;
+        int userId, boolean noPrivate) throws OXException;
 
 }

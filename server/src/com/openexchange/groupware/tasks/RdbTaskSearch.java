@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.tools.Collections;
@@ -78,7 +79,7 @@ public class RdbTaskSearch extends TaskSearch {
     }
 
     @Override
-    int[] findUserTasks(Context ctx, Connection con, int userId, StorageType type) throws TaskException {
+    int[] findUserTasks(final Context ctx, final Connection con, final int userId, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final List<Integer> tasks = new ArrayList<Integer>();
@@ -93,7 +94,7 @@ public class RdbTaskSearch extends TaskSearch {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -107,7 +108,7 @@ public class RdbTaskSearch extends TaskSearch {
     SearchIterator<Task> listModifiedTasks(final Context ctx,
         final int folderId, final StorageType type, final int[] columns,
         final Date since, final boolean onlyOwn, final int userId,
-        final boolean noPrivate) throws TaskException {
+        final boolean noPrivate) throws OXException {
         final StringBuilder sql1 = new StringBuilder();
         sql1.append("SELECT ");
         sql1.append(SQL.getFields(columns, false));

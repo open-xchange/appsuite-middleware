@@ -64,11 +64,10 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
@@ -116,13 +115,8 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    protected TaskIterator load(final Context ctx, final int[] taskIds, final int[] columns) throws TaskException {
-        Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+    protected TaskIterator load(final Context ctx, final int[] taskIds, final int[] columns) throws OXException {
+        final Connection con = DBPool.pickup(ctx);
         try {
             // TODO implement load of multiple tasks.
             return null;
@@ -140,11 +134,11 @@ public class RdbTaskStorage extends TaskStorage {
      * @param lastRead timestamp when the task was last read.
      * @param type ACTIVE or DELETED.
      * @param sanityCheck <code>true</code> to check if task is really deleted.
-     * @throws TaskException if the task has been changed in the meantime or an exception occurred or there is no task to delete and
+     * @throws OXException if the task has been changed in the meantime or an exception occurred or there is no task to delete and
      *             sanityCheck is <code>true</code>.
      */
     @Override
-    void delete(final Context ctx, final Connection con, final int taskId, final Date lastRead, final StorageType type, final boolean sanityCheck) throws TaskException {
+    void delete(final Context ctx, final Connection con, final int taskId, final Date lastRead, final StorageType type, final boolean sanityCheck) throws OXException {
         final String sql = "DELETE FROM @table@ WHERE cid=? AND id=? AND last_modified<=?";
         PreparedStatement stmt = null;
         try {
@@ -155,10 +149,10 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setLong(pos++, lastRead.getTime());
             final int count = stmt.executeUpdate();
             if (sanityCheck && 1 != count) {
-                throw new TaskException(Code.MODIFIED);
+                throw TaskExceptionCode.MODIFIED.create();
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -168,7 +162,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    public int countTasks(final Context ctx, final int userId, final int folderId, final boolean onlyOwn, final boolean noPrivate) throws TaskException {
+    public int countTasks(final Context ctx, final int userId, final int folderId, final boolean onlyOwn, final boolean noPrivate) throws OXException {
         int number = 0;
         number = countTasks(ctx, folderId, onlyOwn, userId, noPrivate);
         return number;
@@ -178,7 +172,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator list(final Context ctx, final int folderId, final int from, final int to, final int orderBy, final Order order, final int[] columns, final boolean onlyOwn, final int userId, final boolean noPrivate) throws TaskException {
+    TaskIterator list(final Context ctx, final int folderId, final int from, final int to, final int orderBy, final Order order, final int[] columns, final boolean onlyOwn, final int userId, final boolean noPrivate) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, false));
@@ -209,7 +203,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws TaskException {
+    TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, true));
@@ -270,15 +264,10 @@ public class RdbTaskStorage extends TaskStorage {
      * @param userId unique identifier of the user.
      * @param noPrivate <code>true</code> if the folder is a shared folder.
      * @return the number of tasks in that folder.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    private int countTasks(final Context ctx, final int folderId, final boolean onlyOwn, final int userId, final boolean noPrivate) throws TaskException {
-        Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+    private int countTasks(final Context ctx, final int folderId, final boolean onlyOwn, final int userId, final boolean noPrivate) throws OXException {
+        final Connection con = DBPool.pickup(ctx);
         int number = 0;
         try {
             final StringBuilder sql = new StringBuilder(COUNT_TASKS);
@@ -302,7 +291,7 @@ public class RdbTaskStorage extends TaskStorage {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             DBPool.closeReaderSilent(ctx, con);
         }
@@ -313,7 +302,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type) throws TaskException {
+    void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type) throws OXException {
         final StringBuilder insert = new StringBuilder();
         insert.append("INSERT INTO ");
         insert.append(SQL.TASK_TABLES.get(type));
@@ -346,7 +335,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, task, type);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -356,7 +345,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    boolean existsTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws TaskException {
+    boolean existsTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(Mapping.getMapping(Task.OBJECT_ID).getDBColumnName());
@@ -377,7 +366,7 @@ public class RdbTaskStorage extends TaskStorage {
                 exists = false;
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -388,7 +377,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    Task selectTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws TaskException {
+    Task selectTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getAllFields());
@@ -412,12 +401,12 @@ public class RdbTaskStorage extends TaskStorage {
                 task.setObjectID(taskId);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
         if (null == task) {
-            throw new TaskException(Code.TASK_NOT_FOUND, I(taskId), I(ctx.getContextId()));
+            throw TaskExceptionCode.TASK_NOT_FOUND.create(I(taskId), I(ctx.getContextId()));
         }
         return task;
     }
@@ -431,10 +420,10 @@ public class RdbTaskStorage extends TaskStorage {
      * @param task Task with the updated values.
      * @param lastRead timestamp when the client last requested the object.
      * @param modified attributes of the task that should be updated.
-     * @throws TaskException if no task is updated.
+     * @throws OXException if no task is updated.
      */
     @Override
-    void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final StorageType type) throws TaskException {
+    void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final StorageType type) throws OXException {
         if (modified.length == 0) {
             return;
         }
@@ -460,27 +449,27 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setLong(pos++, lastRead.getTime());
             final int updatedRows = stmt.executeUpdate();
             if (0 == updatedRows) {
-                throw new TaskException(Code.MODIFIED);
+                throw TaskExceptionCode.MODIFIED.create();
             }
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, task, type);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
     /**
-     * Parses the truncated fields out of the DataTruncation exception and transforms this to a TaskException.
+     * Parses the truncated fields out of the DataTruncation exception and transforms this to a OXException.
      * 
      * @param exc DataTruncation exception.
-     * @return a TaskException.
+     * @return a OXException.
      */
-    private TaskException parseTruncated(final Connection con, final DataTruncation exc, final Task task, final StorageType type) {
+    private OXException parseTruncated(final Connection con, final DataTruncation exc, final Task task, final StorageType type) {
         final String[] fields = DBUtils.parseTruncatedFields(exc);
         final StringBuilder sFields = new StringBuilder();
-        final TaskException.Truncated[] truncateds = new TaskException.Truncated[fields.length];
+        final OXException.Truncated[] truncateds = new OXException.Truncated[fields.length];
         final Mapper<?>[] mappers = SQL.findTruncated(fields);
         for (int i = 0; i < fields.length; i++) {
             sFields.append(fields[i]);
@@ -501,7 +490,7 @@ public class RdbTaskStorage extends TaskStorage {
                 tmp2 = -1;
             }
             final int length = -1 == tmp2 ? 0 : tmp2;
-            truncateds[i] = new TaskException.Truncated() {
+            truncateds[i] = new OXException.Truncated() {
 
                 public int getId() {
                     return mapper.getId();
@@ -517,19 +506,19 @@ public class RdbTaskStorage extends TaskStorage {
             };
         }
         sFields.setLength(sFields.length() - 2);
-        final TaskException tske;
+        final OXException tske;
         if (truncateds.length > 0) {
-            final TaskException.Truncated truncated = truncateds[0];
-            tske = new TaskException(
-                Code.TRUNCATED,
+            final OXException.Truncated truncated = truncateds[0];
+            tske = 
+                TaskExceptionCode.TRUNCATED.create(
                 exc,
                 sFields.toString(),
                 Integer.valueOf(truncated.getMaxSize()),
                 Integer.valueOf(truncated.getLength()));
         } else {
-            tske = new TaskException(Code.TRUNCATED, exc, sFields.toString(), Integer.valueOf(0), Integer.valueOf(0));
+            tske = TaskExceptionCode.TRUNCATED.create(exc, sFields.toString(), Integer.valueOf(0), Integer.valueOf(0));
         }
-        for (final TaskException.Truncated truncated : truncateds) {
+        for (final OXException.Truncated truncated : truncateds) {
             tske.addProblematic(truncated);
         }
         return tske;
@@ -539,7 +528,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    public boolean containsNotSelfCreatedTasks(final Context ctx, final Connection con, final int userId, final int folderId) throws TaskException {
+    public boolean containsNotSelfCreatedTasks(final Context ctx, final Connection con, final int userId, final int folderId) throws OXException {
         final String sql = "SELECT COUNT(id) FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND folder=? AND created_from!=?";
         boolean retval = true;
         try {
@@ -552,12 +541,12 @@ public class RdbTaskStorage extends TaskStorage {
             if (result.next()) {
                 retval = result.getInt(1) > 0;
             } else {
-                throw new TaskException(Code.NO_COUNT_RESULT);
+                throw TaskExceptionCode.NO_COUNT_RESULT.create();
             }
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         }
         return retval;
     }

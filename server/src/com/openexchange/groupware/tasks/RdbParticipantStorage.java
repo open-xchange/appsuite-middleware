@@ -65,10 +65,10 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -96,7 +96,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     @Override
     protected Map<Integer, Set<InternalParticipant>> selectInternal(
         final Context ctx, final Connection con, final int[] tasks,
-        final StorageType type) throws TaskException {
+        final StorageType type) throws OXException {
         final Map<Integer, HashSet<InternalParticipant>> tmp =
             new HashMap<Integer, HashSet<InternalParticipant>>();
         PreparedStatement stmt = null;
@@ -140,7 +140,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(taskParticipant);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -156,7 +156,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     @Override
     void updateInternal(final Context ctx, final Connection con,
         final int taskId, final Set<InternalParticipant> participants,
-        final StorageType type) throws TaskException {
+        final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         try {
             // UPDATE table SET group_id=?, accepted=?, description=? WHERE cid=? AND task=? AND user=?
@@ -179,7 +179,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -191,7 +191,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     @Override
     void deleteInternal(final Context ctx, final Connection con,
         final int taskId, final int[] users, final StorageType type,
-        final boolean check) throws TaskException {
+        final boolean check) throws OXException {
         if (users.length == 0) {
             return;
         }
@@ -213,13 +213,13 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
         if (check && users.length != deleted) {
-            final TaskException tske = new TaskException(Code
-                .PARTICIPANT_DELETE_WRONG, Integer.valueOf(users.length),
+            final OXException tske = TaskExceptionCode
+                .PARTICIPANT_DELETE_WRONG.create(Integer.valueOf(users.length),
                 Integer.valueOf(deleted));
             LOG.error(tske.getMessage(), tske);
         }
@@ -230,7 +230,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
      */
     @Override
     int[] findTasksWithGroup(final Context ctx, final Connection con,
-        final int groupId, final StorageType type) throws TaskException {
+        final int groupId, final StorageType type) throws OXException {
         final List<Integer> tasks = new ArrayList<Integer>();
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -243,7 +243,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -255,7 +255,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
      */
     @Override
     int[] findTasksWithParticipant(final Context ctx, final Connection con,
-        final int userId, final StorageType type) throws TaskException {
+        final int userId, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final List<Integer> tasks = new ArrayList<Integer>();
@@ -269,7 +269,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -282,7 +282,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     @Override
     protected Map<Integer, Set<ExternalParticipant>> selectExternal(
         final Context ctx, final Connection con, final int[] tasks,
-        final StorageType type) throws TaskException {
+        final StorageType type) throws OXException {
         final Map<Integer, Set<ExternalParticipant>> retval =
             new HashMap<Integer, Set<ExternalParticipant>>();
         if (StorageType.REMOVED == type) {
@@ -316,7 +316,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participants.add(participant);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -329,7 +329,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     @Override
     void deleteExternal(final Context ctx, final Connection con,
         final int taskId, final String[] addresses, final StorageType type,
-        final boolean check) throws TaskException {
+        final boolean check) throws OXException {
         if (0 == addresses.length || StorageType.REMOVED == type) {
             return;
         }
@@ -346,13 +346,13 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
         if (check && addresses.length != deleted) {
-            final TaskException exc = new TaskException(Code
-                .PARTICIPANT_DELETE_WRONG, Integer.valueOf(addresses.length),
+            final OXException exc = TaskExceptionCode
+                .PARTICIPANT_DELETE_WRONG.create(Integer.valueOf(addresses.length),
                 Integer.valueOf(deleted));
             LOG.error(exc.getMessage(), exc);
         }
@@ -364,7 +364,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     @Override
     void insertExternals(final Context ctx, final Connection con,
         final int taskId, final Set<ExternalParticipant> participants,
-        final StorageType type) throws TaskException {
+        final StorageType type) throws OXException {
         if (0 == participants.size() || StorageType.REMOVED == type) {
             return;
         }
@@ -389,17 +389,17 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncatedE(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
-    private static TaskException parseTruncatedE(final Connection con,
+    private static OXException parseTruncatedE(final Connection con,
         final DataTruncation dt, final StorageType type,
         final Set<ExternalParticipant> participants) {
         final String[] fields = DBUtils.parseTruncatedFields(dt);
-        final TaskException.Truncated[] truncateds = new TaskException.Truncated[fields.length];
+        final OXException.Truncated[] truncateds = new OXException.Truncated[fields.length];
         final StringBuilder sFields = new StringBuilder();
         int tmp = 0;
         for (final ExternalParticipant participant : participants) {
@@ -424,7 +424,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tmp = 0;
             }
             final int maxSize = tmp;
-            truncateds[i] = new TaskException.Truncated() {
+            truncateds[i] = new OXException.Truncated() {
                 public int getId() {
                     return -1; // No ID defined here
                 }
@@ -437,18 +437,18 @@ public class RdbParticipantStorage extends ParticipantStorage {
             };
         }
         sFields.setLength(sFields.length() - 1);
-        final TaskException tske;
+        final OXException tske;
         if (truncateds.length > 0) {
-            final TaskException.Truncated truncated = truncateds[0];
-            tske = new TaskException(Code.TRUNCATED, dt, sFields.toString(),
+            final OXException.Truncated truncated = truncateds[0];
+            tske = TaskExceptionCode.TRUNCATED.create(dt, sFields.toString(),
                 Integer.valueOf(truncated.getMaxSize()),
                 Integer.valueOf(truncated.getLength()));
         } else {
-            tske = new TaskException(Code.TRUNCATED, dt, sFields.toString(),
+            tske = TaskExceptionCode.TRUNCATED.create(dt, sFields.toString(),
                 Integer.valueOf(0),
                 Integer.valueOf(0));
         }
-        for (final TaskException.Truncated truncated : truncateds) {
+        for (final OXException.Truncated truncated : truncateds) {
             tske.addProblematic(truncated);
         }
         return tske;
@@ -460,7 +460,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     @Override
     void insertInternals(final Context ctx, final Connection con,
         final int taskId, final Set<InternalParticipant> participants,
-        final StorageType type) throws TaskException {
+        final StorageType type) throws OXException {
         if (0 == participants.size()) {
             return;
         }
@@ -498,13 +498,13 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
-    private static TaskException parseTruncated(final Connection con,
+    private static OXException parseTruncated(final Connection con,
         final DataTruncation dt, final StorageType type,
         final Set<InternalParticipant> participants) {
         final String field = "description";
@@ -523,9 +523,9 @@ public class RdbParticipantStorage extends ParticipantStorage {
             tmp = 0;
         }
         final int maxSize = tmp;
-        final TaskException tske = new TaskException(Code.TRUNCATED, dt,
+        final OXException tske = TaskExceptionCode.TRUNCATED.create(dt,
             field, Integer.valueOf(maxSize), Integer.valueOf(maxLength));
-        tske.addProblematic(new TaskException.Truncated() {
+        tske.addProblematic(new OXException.Truncated() {
             public int getId() {
                 return -1; // No ID defined here
             }

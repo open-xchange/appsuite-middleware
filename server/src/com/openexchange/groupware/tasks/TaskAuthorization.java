@@ -86,8 +86,8 @@ public class TaskAuthorization implements AttachmentAuthorization {
             // Check if task appears in folder.
             foldStor.selectFolderById(ctx, taskId, folderId, StorageType
                 .ACTIVE);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -112,13 +112,13 @@ public class TaskAuthorization implements AttachmentAuthorization {
         try {
             folder = Tools.getFolder(ctx, folderId);
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
         try {
             Permission.canReadInFolder(ctx, user, userConfig, folder, task);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 }

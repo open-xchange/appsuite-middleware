@@ -57,11 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
 /**
  * This class implements the delete listener for deleting tasks and participants
@@ -84,7 +81,7 @@ public class TasksDelete implements DeleteListener {
     /**
      * {@inheritDoc}
      */
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         switch (event.getType()) {
         case DeleteEvent.TYPE_USER:
             deleteUser(event, writeCon);
@@ -105,7 +102,7 @@ public class TasksDelete implements DeleteListener {
      * @param con writable database connection.
      * @throws OXException if the delete gives an error.
      */
-    private void deleteUser(DeleteEvent event, Connection con) throws OXException {
+    private void deleteUser(final DeleteEvent event, final Connection con) throws OXException {
         try {
             // First remove the user from the participants of tasks. Then only
             // tasks exist that have other users as participants or no one.
@@ -123,7 +120,7 @@ public class TasksDelete implements DeleteListener {
             assignToAdmin(event, con);
             // Change createdFrom and modifiedBy attributes of left over tasks.
             changeCFMB(event, con);
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -132,9 +129,9 @@ public class TasksDelete implements DeleteListener {
      * Removes the user from task participants.
      * @param event Event.
      * @param con writable database connection.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    private void removeUserFromParticipants(DeleteEvent event, Connection con) throws TaskException {
+    private void removeUserFromParticipants(final DeleteEvent event, final Connection con) throws OXException {
         final Context ctx = event.getContext();
         final int userId = event.getId();
         for (final StorageType type : StorageType.values()) {
@@ -149,9 +146,9 @@ public class TasksDelete implements DeleteListener {
      * Assigns all left tasks to mailadmin.
      * @param event Event.
      * @param con writable database connection.
-     * @throws TaskException if a problem occurs.
+     * @throws OXException if a problem occurs.
      */
-    private void assignToAdmin(DeleteEvent event, Connection con) throws TaskException {
+    private void assignToAdmin(final DeleteEvent event, final Connection con) throws OXException {
         final Session session = event.getSession();
         final Context ctx = event.getContext();
         final int userId = event.getId();
@@ -162,7 +159,7 @@ public class TasksDelete implements DeleteListener {
                 FolderObject folder = null;
                 try {
                     folder = Tools.getFolder(ctx, con, folderId);
-                } catch (final OXFolderNotFoundException e) {
+                } catch (final OXException e) {
                     // Nothing to do.
                 }
                 final int taskId = folderAndTask[1];
@@ -174,7 +171,7 @@ public class TasksDelete implements DeleteListener {
                     } else {
                         folderName = folder.getFolderName();
                     }
-                    throw new TaskException(TaskException.Code.NO_PERMISSION, I(taskId), folderName, I(folderId));
+                    throw TaskExceptionCode.NO_PERMISSION.create(I(taskId), folderName, I(folderId));
                 } else if (folders.size() > 1) {
                     // Participant with userId already removed by
                     // removeUserFromParticipants()
@@ -188,7 +185,7 @@ public class TasksDelete implements DeleteListener {
                 } else if (Tools.isFolderPrivate(folder)) {
                     TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
                 } else {
-                    throw new TaskException(Code.UNIMPLEMENTED);
+                    throw TaskExceptionCode.UNIMPLEMENTED.create();
                 }
             }
         }
@@ -198,9 +195,9 @@ public class TasksDelete implements DeleteListener {
      * Remove deleted user from remaining tasks in the attributes createdFrom and lastModified.
      * @param event Event.
      * @param con writable database connection.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
-    private void changeCFMB(DeleteEvent event, Connection con) throws TaskException {
+    private void changeCFMB(final DeleteEvent event, final Connection con) throws OXException {
         final int[] modified = new int[] { Task.CREATED_BY, Task.MODIFIED_BY, Task.LAST_MODIFIED };
         final Context ctx = event.getContext();
         final int userId = event.getId();
@@ -229,7 +226,7 @@ public class TasksDelete implements DeleteListener {
      * @param writeCon writable database connection.
      * @throws OXException if the delete gives an error.
      */
-    private void deleteGroup(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+    private void deleteGroup(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         final Context ctx = event.getContext();
         final int groupId = event.getId();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
@@ -243,7 +240,7 @@ public class TasksDelete implements DeleteListener {
                     partStor.updateInternal(ctx, writeCon, task, participants, type);
                 }
             }
-        } catch (TaskException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -252,7 +249,7 @@ public class TasksDelete implements DeleteListener {
      * Removes the group from the participants.
      * @param participants task internal participants.
      */
-    private void removeGroup(Set<InternalParticipant> participants) {
+    private void removeGroup(final Set<InternalParticipant> participants) {
         for (final InternalParticipant participant : participants) {
             participant.setGroupId(null);
         }

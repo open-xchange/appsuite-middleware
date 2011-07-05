@@ -61,7 +61,8 @@ import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.SQL;
 import com.openexchange.groupware.tasks.StorageType;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.sql.DBUtils;
@@ -112,7 +113,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
         try {
             con = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new TaskException(TaskException.Code.NO_CONNECTION, e);
+            throw TaskExceptionCode.NO_CONNECTION.create(e);
         }
         try {
             if (Tools.isNullable(con, task_table, changed_from)) {
@@ -124,7 +125,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
                 alterModifiedBy(con, del_task_table);
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Database.back(contextId, true, con);
         }

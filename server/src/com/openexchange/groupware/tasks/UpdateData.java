@@ -64,23 +64,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * This class contains the logic for updating tasks. It calculates what is to modify.
@@ -249,9 +244,9 @@ class UpdateData {
      * Proxy loading method for the task.
      * 
      * @return the original task.
-     * @throws TaskException if loading of the original tasks fails.
+     * @throws OXException if loading of the original tasks fails.
      */
-    private Task getOrigTask() throws TaskException {
+    private Task getOrigTask() throws OXException {
         if (null == origTask) {
             origTask = storage.selectTask(ctx, getTaskId(), type);
             origTask.setParentFolderID(getFolderId());
@@ -262,9 +257,9 @@ class UpdateData {
 
     /**
      * @return the changed participants from the changed task.
-     * @throws TaskException if resolving of groups to users fails.
+     * @throws OXException if resolving of groups to users fails.
      */
-    private Set<TaskParticipant> getChangedParticipants() throws TaskException {
+    private Set<TaskParticipant> getChangedParticipants() throws OXException {
         if (null == changedParticipants) {
             changedParticipants = TaskLogic.createParticipants(ctx, changed.getParticipants());
         }
@@ -273,9 +268,9 @@ class UpdateData {
 
     /**
      * @return the original participants from the task.
-     * @throws TaskException if participants can't be selected.
+     * @throws OXException if participants can't be selected.
      */
-    private Set<TaskParticipant> getOrigParticipants() throws TaskException {
+    private Set<TaskParticipant> getOrigParticipants() throws OXException {
         if (null == origParticipants) {
             origParticipants = partStor.selectParticipants(ctx, getTaskId(), type);
             if (Tools.isFolderPrivate(folder)) {
@@ -285,7 +280,7 @@ class UpdateData {
         return origParticipants;
     }
 
-    Set<TaskParticipant> getUpdatedParticipants() throws TaskException {
+    Set<TaskParticipant> getUpdatedParticipants() throws OXException {
         if (null == updatedParticipants) {
             updatedParticipants = new HashSet<TaskParticipant>();
             if (changed.containsParticipants()) {
@@ -299,9 +294,9 @@ class UpdateData {
 
     /**
      * @return the original folder of the task.
-     * @throws TaskException if folders can't be selected.
+     * @throws OXException if folders can't be selected.
      */
-    private Set<Folder> getOrigFolder() throws TaskException {
+    private Set<Folder> getOrigFolder() throws OXException {
         if (null == origFolders) {
             origFolders = foldStor.selectFolder(ctx, getTaskId(), type);
         }
@@ -310,9 +305,9 @@ class UpdateData {
 
     /**
      * @return the set of folder that will be in the database after the update.
-     * @throws TaskException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    Set<Folder> getUpdatedFolder() throws TaskException {
+    Set<Folder> getUpdatedFolder() throws OXException {
         if (null == updatedFolders) {
             updatedFolders = new HashSet<Folder>();
             updatedFolders.addAll(getOrigFolder());
@@ -325,11 +320,11 @@ class UpdateData {
     /**
      * Checks everything and prepares the data structures for an update.
      * 
-     * @throws TaskException if an error occurs
+     * @throws OXException if an error occurs
      */
-    void prepare() throws TaskException {
+    void prepare() throws OXException {
         if (getOrigTask().getLastModified().after(lastRead)) {
-            throw new TaskException(Code.MODIFIED);
+            throw TaskExceptionCode.MODIFIED.create();
         }
         checkPermission();
         // Do logic checks.
@@ -341,9 +336,9 @@ class UpdateData {
     /**
      * Prepares the data structures for an update.
      * 
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    void prepareWithoutChecks() throws TaskException {
+    void prepareWithoutChecks() throws OXException {
         prepareFields();
         prepareParticipants();
         prepareFolder();
@@ -351,7 +346,7 @@ class UpdateData {
 
     private boolean preparedFields;
 
-    private void prepareFields() throws TaskException {
+    private void prepareFields() throws OXException {
         if (preparedFields) {
             return;
         }
@@ -361,7 +356,7 @@ class UpdateData {
 
     private boolean preparedFolder;
 
-    private void prepareFolder() throws TaskException {
+    private void prepareFolder() throws OXException {
         if (preparedFolder) {
             return;
         }
@@ -423,7 +418,7 @@ class UpdateData {
         preparedFolder = true;
     }
 
-    private void checkPermission() throws TaskException {
+    private void checkPermission() throws OXException {
         if (isMove()) {
             // task is deleted in source folder and created in destination
             // folder.
@@ -431,31 +426,31 @@ class UpdateData {
             Permission.checkCreate(ctx, user, userConfig, getDestFolder());
             // move out of a shared folder is not allowed.
             if (Tools.isFolderShared(folder, user)) {
-                throw new TaskException(Code.NO_SHARED_MOVE, folder.getFolderName(), I(getFolderId()));
+                throw TaskExceptionCode.NO_SHARED_MOVE.create(folder.getFolderName(), I(getFolderId()));
             }
             // move into a shared folder is not allowed.
             if (Tools.isFolderShared(getDestFolder(), user)) {
-                throw new TaskException(Code.NO_SHARED_MOVE, getDestFolder().getFolderName(), I(getDestFolderId()));
+                throw TaskExceptionCode.NO_SHARED_MOVE.create(getDestFolder().getFolderName(), I(getDestFolderId()));
             }
             // moving private tasks to a public folder isn't allowed.
             if (getOrigTask().getPrivateFlag() && Tools.isFolderPublic(getDestFolder())) {
-                throw new TaskException(Code.NO_PRIVATE_MOVE_TO_PUBLIC, getDestFolder().getFolderName(), I(getDestFolderId()));
+                throw TaskExceptionCode.NO_PRIVATE_MOVE_TO_PUBLIC.create(getDestFolder().getFolderName(), I(getDestFolderId()));
             }
         } else {
             Permission.checkWriteInFolder(ctx, user, userConfig, folder, getOrigTask());
             // Check if task appears in folder.
             if (null == FolderStorage.getFolder(getOrigFolder(), getFolderId())) {
-                throw new TaskException(Code.NOT_IN_FOLDER, I(getTaskId()), folder.getFolderName(), I(getFolderId()));
+                throw TaskExceptionCode.NOT_IN_FOLDER.create(I(getTaskId()), folder.getFolderName(), I(getFolderId()));
             }
             if (Tools.isFolderShared(folder, user) && getOrigTask().getPrivateFlag()) {
-                throw new TaskException(Code.NO_PERMISSION, I(getTaskId()), folder.getFolderName(), I(getFolderId()));
+                throw TaskExceptionCode.NO_PERMISSION.create(I(getTaskId()), folder.getFolderName(), I(getFolderId()));
             }
         }
     }
 
     private Set<InternalParticipant> addedGroupParticipants = null;
 
-    private Set<InternalParticipant> getGroupParticipants() throws TaskException {
+    private Set<InternalParticipant> getGroupParticipants() throws OXException {
         if (null == addedGroupParticipants) {
             addedGroupParticipants = TaskLogic.getGroupParticipants(ctx, changed.getParticipants());
         }
@@ -464,7 +459,7 @@ class UpdateData {
 
     private boolean preparedParts;
 
-    private void prepareParticipants() throws TaskException {
+    private void prepareParticipants() throws OXException {
         if (preparedParts) {
             return;
         }
@@ -494,7 +489,7 @@ class UpdateData {
         preparedParts = true;
     }
 
-    private void prepareParticipantsWithChangedGroup() throws TaskException {
+    private void prepareParticipantsWithChangedGroup() throws OXException {
         final Set<TaskParticipant> toCheck = new HashSet<TaskParticipant>();
         final Set<TaskParticipant> orig = getOrigParticipants();
         final HashMap<Integer, InternalParticipant> changedInternals = new HashMap<Integer, InternalParticipant>(getChangedParticipants().size());
@@ -520,7 +515,7 @@ class UpdateData {
         }
     }
 
-    private void generateUpdated() throws TaskException {
+    private void generateUpdated() throws OXException {
         updated = new Task();
         updated.setObjectID(getTaskId());
         for (final Mapper mapper : Mapping.MAPPERS) {
@@ -552,7 +547,7 @@ class UpdateData {
     /**
      * @return the added
      */
-    Set<TaskParticipant> getAdded() throws TaskException {
+    Set<TaskParticipant> getAdded() throws OXException {
         prepareParticipants();
         return added;
     }
@@ -560,25 +555,25 @@ class UpdateData {
     /**
      * @return the participants who belong to group after the update.
      */
-    Set<InternalParticipant> getChangedGroup() throws TaskException {
+    Set<InternalParticipant> getChangedGroup() throws OXException {
         prepareParticipants();
         return changedGroup;
     }
 
     /**
      * @return the addedFolder
-     * @throws TaskException
+     * @throws OXException
      */
-    Set<Folder> getAddedFolder() throws TaskException {
+    Set<Folder> getAddedFolder() throws OXException {
         prepareFolder();
         return addedFolder;
     }
 
     /**
      * @return the modifiedFields
-     * @throws TaskException
+     * @throws OXException
      */
-    int[] getModifiedFields() throws TaskException {
+    int[] getModifiedFields() throws OXException {
         prepareFields();
         return modifiedFields;
     }
@@ -586,21 +581,21 @@ class UpdateData {
     /**
      * @return the removed
      */
-    Set<TaskParticipant> getRemoved() throws TaskException {
+    Set<TaskParticipant> getRemoved() throws OXException {
         prepareParticipants();
         return removed;
     }
 
     /**
      * @return the removedFolder
-     * @throws TaskException
+     * @throws OXException
      */
-    Set<Folder> getRemovedFolder() throws TaskException {
+    Set<Folder> getRemovedFolder() throws OXException {
         prepareFolder();
         return removedFolder;
     }
 
-    Task getUpdated() throws TaskException {
+    Task getUpdated() throws OXException {
         if (null == updated) {
             generateUpdated();
         }
@@ -628,14 +623,14 @@ class UpdateData {
         return changed.containsParentFolderID() && changed.getParentFolderID() != getFolderId();
     }
 
-    private FolderObject getDestFolder() throws TaskException {
+    private FolderObject getDestFolder() throws OXException {
         if (null == destFolder) {
             destFolder = isMove() ? Tools.getFolder(ctx, changed.getParentFolderID()) : folder;
         }
         return destFolder;
     }
 
-    private int getDestFolderId() throws TaskException {
+    private int getDestFolderId() throws OXException {
         return getDestFolder().getObjectID();
     }
 
@@ -644,15 +639,10 @@ class UpdateData {
     /**
      * This method executes the prepared update.
      * 
-     * @throws TaskException
+     * @throws OXException
      */
-    void doUpdate() throws TaskException {
-        Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+    void doUpdate() throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             updateTask(
@@ -677,8 +667,8 @@ class UpdateData {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new TaskException(Code.UPDATE_FAILED, e, e.getMessage());
-        } catch (final TaskException e) {
+            throw TaskExceptionCode.UPDATE_FAILED.create(e, e.getMessage());
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -687,11 +677,11 @@ class UpdateData {
         }
     }
 
-    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws TaskException {
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws OXException {
         updateTask(ctx, con, task, lastRead, modified, add, remove, null, addFolder, removeFolder, ACTIVE);
     }
 
-    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws TaskException {
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws OXException {
         updateTask(ctx, con, task, lastRead, modified, add, remove, changedGroup, addFolder, removeFolder, ACTIVE);
     }
 
@@ -707,9 +697,9 @@ class UpdateData {
      * @param remove removed participants.
      * @param addFolder added folder mappings for the participants.
      * @param removeFolder removed folder mappings for the participants.
-     * @throws TaskException if some SQL command fails.
+     * @throws OXException if some SQL command fails.
      */
-    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder, final StorageType type) throws TaskException {
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder, final StorageType type) throws OXException {
         final int taskId = task.getObjectID();
         storage.updateTask(ctx, con, task, lastRead, modified, type);
         if (null != add) {
@@ -735,19 +725,19 @@ class UpdateData {
         }
     }
 
-    void sentEvent(final Session session) throws TaskException {
+    void sentEvent(final Session session) throws OXException {
         sentEvent(session, getUpdated(), getOrigTask(), getDestFolder());
     }
 
-    static void sentEvent(final Session session, final Task updated, final Task orig, final FolderObject dest) throws TaskException {
+    static void sentEvent(final Session session, final Task updated, final Task orig, final FolderObject dest) throws OXException {
         try {
             new EventClient(session).modify(orig, updated, dest);
-        } catch (final EventException e) {
-            throw new TaskException(Code.EVENT, e);
+        } catch (final OXException e) {
+            throw TaskExceptionCode.EVENT.create(e);
         }
     }
 
-    void updateReminder() throws OXException, TaskException {
+    void updateReminder() throws OXException, OXException {
         updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getUpdatedFolder());
     }
 
@@ -760,7 +750,7 @@ class UpdateData {
         }
     }
 
-    void makeNextRecurrence(final Session session) throws AbstractOXException {
+    void makeNextRecurrence(final Session session) throws OXException {
         if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE == updated.getStatus() && Arrays.contains(
             getModifiedFields(),
             Status.SINGLETON.getId())) {
@@ -772,8 +762,8 @@ class UpdateData {
 
             try {
                 Permission.checkReadInFolder(ctx, user, userConfig, folder);
-            } catch (final TaskException e) {
-                throw new TaskException(e);
+            } catch (final OXException e) {
+                throw e;
             }
 
             final boolean own = Permission.canReadInFolder(ctx, user, userConfig, destFolder);
@@ -816,8 +806,8 @@ class UpdateData {
                         duplicateExists = true;
                         break;
                     }
-                } catch (final SearchIteratorException e) {
-                    throw new TaskException(e);
+                } catch (final OXException e) {
+                    throw e;
                 }
             }
 
@@ -833,17 +823,17 @@ class UpdateData {
      * @param task recurring task.
      * @param parts participants of the updated task.
      * @param folders folders of the updated task.
-     * @throws TaskException if creating the new task fails.
+     * @throws OXException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws TaskException, OXException {
+    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException, OXException {
         // TODO create insert class
         TaskLogic.checkNewTask(task, userId, userConfig, parts);
         TaskLogic.insertTask(ctx, task, parts, folders);
         try {
             new EventClient(session).create(task, folder);
-        } catch (final EventException e) {
-            throw Tools.convert(new TaskException(Code.EVENT, e));
+        } catch (final OXException e) {
+            throw e;
         }
     }
 }

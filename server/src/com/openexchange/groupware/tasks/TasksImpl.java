@@ -87,8 +87,8 @@ final class TasksImpl extends Tasks {
             final Context ctx = Tools.getContext(session.getContextId());
             return TaskStorage.getInstance().containsNotSelfCreatedTasks(ctx,
                 con, session.getUserId(), folderId);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -113,8 +113,8 @@ final class TasksImpl extends Tasks {
                 data.taskId = taskId;
                 removeParticipant.add(data);
             }
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
         try {
             for (final UpdateData data : removeParticipant) {
@@ -148,8 +148,8 @@ final class TasksImpl extends Tasks {
                     data.removeFolder.add(folder);
                 }
             }
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
         removeParticipant.removeAll(deleteTask);
         try {
@@ -166,8 +166,8 @@ final class TasksImpl extends Tasks {
                     data.task, new Date(), data.modified, data.add,
                     data.remove, data.addFolder, data.removeFolder);
             }
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -190,8 +190,8 @@ final class TasksImpl extends Tasks {
         final TaskStorage storage = TaskStorage.getInstance();
         try {
             return storage.countTasks(ctx, -1, folderId, false, false) == 0;
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 

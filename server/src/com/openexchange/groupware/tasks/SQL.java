@@ -56,9 +56,9 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.TaskException.Code;
 
 /**
  * This class contains methods for building the sql query for searches.
@@ -218,10 +218,10 @@ public final class SQL {
      * searches.
      * @return all fields that are specified in the columns colon seperated for
      * using in SELECT and INSERT statements.
-     * @throws TaskException if a mapping for a column isn't implemented.
+     * @throws OXException if a mapping for a column isn't implemented.
      */
     static String getFields(final int[] columns, final boolean folder)
-        throws TaskException {
+        throws OXException {
         final StringBuilder sql = new StringBuilder();
         for (final int i : columns) {
             final Mapper<?> mapper = Mapping.getMapping(i);
@@ -238,7 +238,7 @@ public final class SQL {
                     }
                     break;
                 default:
-                    throw new TaskException(Code.UNKNOWN_ATTRIBUTE, I(i));
+                    throw TaskExceptionCode.UNKNOWN_ATTRIBUTE.create(I(i));
                 }
             } else {
                 sql.append(mapper.getDBColumnName());
@@ -301,16 +301,16 @@ public final class SQL {
     /**
      * @param search task search object.
      * @return SQL condition checking the end of tasks to be in range.
-     * @throws TaskException if the range is not defined properly in the task
+     * @throws OXException if the range is not defined properly in the task
      * search object.
      */
     static String getRangeWhere(final TaskSearchObject search)
-        throws TaskException {
+        throws OXException {
         final StringBuilder sql = new StringBuilder();
         final Date[] range = search.getRange();
         if (null != range) {
             if (range.length < 1 || range.length > 2) {
-                throw new TaskException(Code.WRONG_DATE_RANGE, Integer.valueOf(range.length));
+                throw TaskExceptionCode.WRONG_DATE_RANGE.create(Integer.valueOf(range.length));
             }
             if (range.length >= 1) {
                 sql.append("(end >= ?");

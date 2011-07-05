@@ -68,7 +68,8 @@ import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.internal.SQL;
-import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 
@@ -114,7 +115,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
         try {
             con = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new TaskException(TaskException.Code.NO_CONNECTION, e);
+            throw TaskExceptionCode.NO_CONNECTION.create(e);
         }
         try {
             con.setAutoCommit(false);

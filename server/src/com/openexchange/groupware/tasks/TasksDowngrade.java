@@ -55,12 +55,10 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -105,15 +103,15 @@ public class TasksDowngrade extends DowngradeListener {
             // - All tasks in public folders that can be only edited by this user.
             try {
                 removeTasks(session, ctx, userConfig.getUserId(), con);
-            } catch (final AbstractOXException e) {
-                throw new OXException(e);
+            } catch (final OXException e) {
+                throw e;
             } 
         } else if (!userConfig.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
                 removeDelegations(session, ctx, userConfig.getUserId(), userConfig, con);
-            } catch (final AbstractOXException e) {
-                throw new OXException(e);
+            } catch (final OXException e) {
+                throw e;
             } 
         }
     }
@@ -121,7 +119,7 @@ public class TasksDowngrade extends DowngradeListener {
     private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
     private void removeTasks(final Session session, final Context ctx,
-        final int userId, final Connection con) throws AbstractOXException {
+        final int userId, final Connection con) throws OXException {
         final User user = Tools.getUser(ctx, userId);
         // Find private task folder.
         SearchIterator<FolderObject> iter = OXFolderIteratorSQL
@@ -146,8 +144,7 @@ public class TasksDowngrade extends DowngradeListener {
                     taskId, type);
                 if (0 == folders.size()) {
                     // Inconsistent data
-                    throw new TaskException(TaskException.Code.MISSING_FOLDER,
-                        Integer.valueOf(taskId));
+                    throw TaskExceptionCode.MISSING_FOLDER.create(Integer.valueOf(taskId));
                 } else if (folders.size() > 1) {
                     // Simply remove folder mapping for this user.
                     final Folder folder = FolderStorage.extractFolderOfUser(
@@ -197,7 +194,7 @@ public class TasksDowngrade extends DowngradeListener {
 
     private void removeTaskInPrivateFolder(final Session session,
         final Context ctx, final Connection con, final int userId,
-        final FolderObject folder) throws TaskException {
+        final FolderObject folder) throws OXException {
         for (final StorageType type : StorageType.TYPES_AD) {
             final int[] taskIds = foldStor.getTasksInFolder(ctx, con,
                 folder.getObjectID(), type);
@@ -206,8 +203,7 @@ public class TasksDowngrade extends DowngradeListener {
                     taskId, type);
                 if (0 == folders.size()) {
                     // Inconsistent data
-                    throw new TaskException(TaskException.Code.MISSING_FOLDER,
-                        Integer.valueOf(taskId));
+                    throw TaskExceptionCode.MISSING_FOLDER.create(Integer.valueOf(taskId));
                 } else if (folders.size() > 1) {
                     // Simply remove folder mapping for this user.
                     final int folderId = FolderStorage.extractFolderOfUser(
@@ -227,7 +223,7 @@ public class TasksDowngrade extends DowngradeListener {
 
     private void removeDelegations(final Session session, final Context ctx,
         final int userId, final UserConfiguration userConfig,
-        final Connection con) throws AbstractOXException {
+        final Connection con) throws OXException {
         final User user = Tools.getUser(ctx, userId);
         // Find all private folder.
         SearchIterator<FolderObject> iter = OXFolderIteratorSQL
@@ -274,7 +270,7 @@ public class TasksDowngrade extends DowngradeListener {
     private static FolderStorage foldStor = FolderStorage.getInstance();
 
     private void removeTaskInFolder(final Session session, final Context ctx,
-        final Connection con, final FolderObject folder) throws TaskException {
+        final Connection con, final FolderObject folder) throws OXException {
         for (final StorageType type : StorageType.TYPES_AD) {
             final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder
                 .getObjectID(), type);
@@ -288,7 +284,7 @@ public class TasksDowngrade extends DowngradeListener {
     private void removeDelegationsInFolder(final Session session,
         final Context ctx, final UserConfiguration userConfig,
         final Connection con, final User user, final FolderObject folder)
-        throws TaskException {
+        throws OXException {
         for (final StorageType type : StorageType.TYPES_AD) {
             final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder
                 .getObjectID(), type);

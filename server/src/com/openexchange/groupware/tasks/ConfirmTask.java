@@ -56,13 +56,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 
@@ -110,7 +107,7 @@ public final class ConfirmTask {
      * This method loads all necessary data and prepares the objects for updating
      * the database.
      */
-    void prepare() throws TaskException {
+    void prepare() throws OXException {
         // Check if task exists.
         getOrigTask();
         // Load participant and set confirmation
@@ -127,13 +124,8 @@ public final class ConfirmTask {
     /**
      * This method does all the changes in the database in a transaction.
      */
-    void doConfirmation() throws TaskException {
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+    void doConfirmation() throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             partStor.updateInternal(ctx, con, taskId, changedParticipant, StorageType.ACTIVE);
@@ -141,7 +133,7 @@ public final class ConfirmTask {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
@@ -149,26 +141,18 @@ public final class ConfirmTask {
     }
 
     
-    void sentEvent(final Session session) throws TaskException {
-        try {
-            final EventClient eventClient = new EventClient(session);
-            switch (changedParticipant.getConfirm()) {
-            case CalendarObject.ACCEPT:
-                eventClient.accept(getOrigTask(), getFilledChangedTask());
-                break;
-            case CalendarObject.DECLINE:
-                eventClient.declined(getOrigTask(), getFilledChangedTask());
-                break;
-            case CalendarObject.TENTATIVE:
-                eventClient.tentative(getOrigTask(), getFilledChangedTask());
-                break;
-            }
-        } catch (final EventException e) {
-            throw new TaskException(Code.EVENT, e);
-        } catch (final OXException e) {
-            throw new TaskException(e);
-        } catch (final OXException e) {
-            throw new TaskException(e);
+    void sentEvent(final Session session) throws OXException {
+        final EventClient eventClient = new EventClient(session);
+        switch (changedParticipant.getConfirm()) {
+        case CalendarObject.ACCEPT:
+            eventClient.accept(getOrigTask(), getFilledChangedTask());
+            break;
+        case CalendarObject.DECLINE:
+            eventClient.declined(getOrigTask(), getFilledChangedTask());
+            break;
+        case CalendarObject.TENTATIVE:
+            eventClient.tentative(getOrigTask(), getFilledChangedTask());
+            break;
         }
     }
 
@@ -185,9 +169,9 @@ public final class ConfirmTask {
 
     /**
      * @return the original task.
-     * @throws TaskException if loading of the original tasks fails.
+     * @throws OXException if loading of the original tasks fails.
      */
-    private Task getOrigTask() throws TaskException {
+    private Task getOrigTask() throws OXException {
         if (null == origTask) {
             origTask = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
         }
@@ -197,36 +181,36 @@ public final class ConfirmTask {
     /**
      * @return the original participant.
      */
-    private InternalParticipant getOrigParticipant() throws TaskException {
+    private InternalParticipant getOrigParticipant() throws OXException {
         if (null == origParticipant) {
             origParticipant = ParticipantStorage.getParticipant(ParticipantStorage.extractInternal(getParticipants()), userId);
             if (null == origParticipant) {
-                throw new TaskException(Code.PARTICIPANT_NOT_FOUND, I(userId), I(taskId));
+                throw TaskExceptionCode.PARTICIPANT_NOT_FOUND.create(I(userId), I(taskId));
             }
         }
         return origParticipant;
     }
 
-    private Set<TaskParticipant> getParticipants() throws TaskException {
+    private Set<TaskParticipant> getParticipants() throws OXException {
         if (null == participants) {
             participants = partStor.selectParticipants(ctx, taskId, StorageType.ACTIVE);
         }
         return participants;
     }
 
-    private Set<Folder> getFolders() throws TaskException {
+    private Set<Folder> getFolders() throws OXException {
         if (null == folders) {
             folders =  foldStor.selectFolder(ctx, taskId, StorageType.ACTIVE);
         }
         return folders;
     }
 
-    private boolean filledTask = false;
+    private final boolean filledTask = false;
 
-    private Task getFilledChangedTask() throws TaskException {
+    private Task getFilledChangedTask() throws OXException {
         if (!filledTask) {
-            Task oldTask = getOrigTask();
-            for (Mapper mapper : Mapping.MAPPERS) {
+            final Task oldTask = getOrigTask();
+            for (final Mapper mapper : Mapping.MAPPERS) {
                 if (!mapper.isSet(changedTask) && mapper.isSet(getOrigTask())) {
                     mapper.set(changedTask, mapper.get(getOrigTask()));
                 }
@@ -236,7 +220,7 @@ public final class ConfirmTask {
             Folder folder = FolderStorage.extractFolderOfUser(getFolders(), userId);
             if (null == folder) {
                 if (getFolders().isEmpty()) {
-                    throw new TaskException(TaskException.Code.MISSING_FOLDER, I(taskId));
+                    throw TaskExceptionCode.MISSING_FOLDER.create(I(taskId));
                 }
                 folder = getFolders().iterator().next();
             }

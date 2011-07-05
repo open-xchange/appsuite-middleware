@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -94,11 +95,11 @@ public final class Task2Links {
             final TaskStorage storage = TaskStorage.getInstance();
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             folders = FolderStorage.getInstance().selectFolder(ctx, taskId, StorageType.ACTIVE);
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return false;
         }
-        for (Folder folder : folders) {
+        for (final Folder folder : folders) {
             if (mayRead(ctx, user, userConfig, task, folder)) {
                 return true;
             }
@@ -115,7 +116,7 @@ public final class Task2Links {
             final TaskStorage storage = TaskStorage.getInstance();
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             folder = FolderStorage.getInstance().selectFolderById(ctx, taskId, folderId, StorageType.ACTIVE);
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return false;
         }
@@ -126,7 +127,7 @@ public final class Task2Links {
         final FolderObject folder2;
         try {
             folder2 = Tools.getFolder(ctx, folder.getIdentifier());
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return false;
         }
@@ -134,7 +135,7 @@ public final class Task2Links {
             Permission.isFolderVisible(ctx, user, userConfig, folder2);
             Permission.canReadInFolder(ctx, user, userConfig, folder2, task);
             return true;
-        } catch (final TaskException e) {
+        } catch (final OXException e) {
             return false;
         }
     }

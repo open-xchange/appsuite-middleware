@@ -53,9 +53,8 @@ import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 
 /**
@@ -90,10 +89,10 @@ public abstract class FolderStorage {
      * @param taskId unique identifier of the task.
      * @param folders folder mappings to insert.
      * @param type storage type of folder mappings.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     abstract void insertFolder(Context ctx, Connection con, int taskId,
-        Set<Folder> folders, StorageType type) throws TaskException;
+        Set<Folder> folders, StorageType type) throws OXException;
 
     /**
      * Inserts a task folder mapping.
@@ -102,10 +101,10 @@ public abstract class FolderStorage {
      * @param taskId unique identifier of the task.
      * @param folder folder mapping to insert.
      * @param type storage type of folder mappings.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     void insertFolder(final Context ctx, final Connection con, final int taskId,
-        final Folder folder, final StorageType type) throws TaskException {
+        final Folder folder, final StorageType type) throws OXException {
         final Set<Folder> folders = new HashSet<Folder>();
         folders.add(folder);
         insertFolder(ctx, con, taskId, folders, type);
@@ -118,10 +117,10 @@ public abstract class FolderStorage {
      * @param taskId unique identifier of the task.
      * @param type storage type of the folder mappings.
      * @return the folder objects.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     abstract Set<Folder> selectFolder(Context ctx, Connection con, int taskId,
-        StorageType type) throws TaskException;
+        StorageType type) throws OXException;
 
     /**
      * Reads the folder mappings of a task.
@@ -129,16 +128,11 @@ public abstract class FolderStorage {
      * @param taskId unique identifier of the task.
      * @param type storage type of the folder mappings.
      * @return the folder objects.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     Set<Folder> selectFolder(final Context ctx, final int taskId,
-        final StorageType type) throws TaskException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+        final StorageType type) throws OXException {
+        final Connection con = DBPool.pickup(ctx);
         try {
             return selectFolder(ctx, con, taskId, type);
         } finally {
@@ -155,10 +149,10 @@ public abstract class FolderStorage {
      * @param type storage type of folder mapping that should be selected.
      * @return the folder or <code>null</code> if no folder could be found
      * especially for the user. This can occur for public folders.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     abstract Folder selectFolderByUser(Context ctx, Connection con, int taskId,
-        int userId, StorageType type) throws TaskException;
+        int userId, StorageType type) throws OXException;
 
     /**
      * Reads a task folder mapping.
@@ -169,10 +163,10 @@ public abstract class FolderStorage {
      * @param type storage type of the folder mapping.
      * @return the folder object or <code>null</code> if no folder could be
      * found.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
     abstract Folder selectFolderById(Context ctx, Connection con, int taskId,
-        int folderId, StorageType type) throws TaskException;
+        int folderId, StorageType type) throws OXException;
 
     /**
      * Reads a task folder mapping.
@@ -181,15 +175,10 @@ public abstract class FolderStorage {
      * @param folderId unique identifier of the folder.
      * @param type storage type of the folder mapping.
      * @return the folder object or <code>null</code> if no folder could be found.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    Folder selectFolderById(final Context ctx, final int taskId, final int folderId, final StorageType type) throws TaskException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+    Folder selectFolderById(final Context ctx, final int taskId, final int folderId, final StorageType type) throws OXException {
+        final Connection con = DBPool.pickup(ctx);
         try {
             return selectFolderById(ctx, con, taskId, folderId, type);
         } finally {
@@ -206,11 +195,11 @@ public abstract class FolderStorage {
      * @param type storage type of folder mapping that should be deleted.
      * @param sanityCheck if <code>true</code> it will be checked if all given
      * folders have been deleted.
-     * @throws TaskException if an exception occurs or if not all folder can be
+     * @throws OXException if an exception occurs or if not all folder can be
      * deleted and sanityCheck is <code>true</code>.
      */
     abstract void deleteFolder(Context ctx, Connection con, int taskId,
-        int[] folderIds, StorageType type, boolean sanityCheck) throws TaskException;
+        int[] folderIds, StorageType type, boolean sanityCheck) throws OXException;
 
     /**
      * Deletes a task folder mapping.
@@ -219,10 +208,10 @@ public abstract class FolderStorage {
      * @param taskId unique identifier of the task.
      * @param folderId folder identifier of the to delete mapping.
      * @param type storage type of folder mapping that should be deleted.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
-        final int folderId, final StorageType type) throws TaskException {
+        final int folderId, final StorageType type) throws OXException {
         deleteFolder(ctx, con, taskId, new int[] { folderId }, type, true);
     }
 
@@ -235,12 +224,12 @@ public abstract class FolderStorage {
      * @param type storage type of folder mapping that should be deleted.
      * @param sanityCheck <code>true</code> to check if the folder is really
      * deleted.
-     * @throws TaskException if an exception occurs or if no folder is deleted
+     * @throws OXException if an exception occurs or if no folder is deleted
      * and sanityCheck is <code>true</code>.
      */
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
         final int folderId, final StorageType type, final boolean sanityCheck)
-        throws TaskException {
+        throws OXException {
         deleteFolder(ctx, con, taskId, new int[] { folderId }, type, sanityCheck);
     }
     
@@ -251,11 +240,11 @@ public abstract class FolderStorage {
      * @param taskId unique identifier of the task.
      * @param folders set of folder to delete for the task.
      * @param type storage type of folder mapping that should be deleted.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
         final Set<Folder> folders, final StorageType type)
-        throws TaskException {
+        throws OXException {
         deleteFolder(ctx, con, taskId, folders, type, true);
     }
     
@@ -268,12 +257,12 @@ public abstract class FolderStorage {
      * @param type storage type of folder mapping that should be deleted.
      * @param sanityCheck if <code>true</code> it will be checked if all given
      * folders have been deleted.
-     * @throws TaskException if an exception occurs or if not all folder can be
+     * @throws OXException if an exception occurs or if not all folder can be
      * deleted and sanityCheck is <code>true</code>.
      */
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
         final Set<Folder> folders, final StorageType type,
-        final boolean sanityCheck) throws TaskException {
+        final boolean sanityCheck) throws OXException {
         if (0 == folders.size()) {
             return;
         }
@@ -292,10 +281,10 @@ public abstract class FolderStorage {
      * @param folderId identifier of the folder.
      * @param type ACTIVE or DELETED.
      * @return an int array of tasks in that folder.
-     * @throws TaskException if a sql problem occurs.
+     * @throws OXException if a sql problem occurs.
      */
     abstract int[] getTasksInFolder(Context ctx, Connection con, int folderId,
-        StorageType type) throws TaskException;
+        StorageType type) throws OXException;
 
     /**
      * Selects all task folder mappings for a user.
@@ -305,10 +294,10 @@ public abstract class FolderStorage {
      * @param type storage type of the folder mapping to select.
      * @return an 2-dimensional int array. the first dimension represents all
      * found entries while the second contains folder and task identifier.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     abstract int[][] searchFolderByUser(Context ctx, Connection readCon,
-        int userId, StorageType type) throws TaskException;
+        int userId, StorageType type) throws OXException;
 
     /**
      * @param folders Set of task folder mappings.

@@ -50,10 +50,8 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 
@@ -94,10 +92,8 @@ public abstract class Tasks {
         try {
             ctx = Tools.getContext(session.getContextId());
             con = DBPool.pickup(ctx);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
-        } catch (final DBPoolingException e) {
-            throw Tools.convert(new TaskException(Code.NO_CONNECTION, e));
+        } catch (final OXException e) {
+            throw e;
         }
         try {
             return containsNotSelfCreatedTasks(session, con, folderId);

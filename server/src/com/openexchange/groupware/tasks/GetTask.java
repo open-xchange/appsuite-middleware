@@ -56,6 +56,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.provider.SimpleDBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentException;
@@ -64,9 +65,7 @@ import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
 /**
  * This class collects all information for getting tasks. It is also able to
@@ -160,22 +159,18 @@ public final class GetTask {
     /**
      * TODO instanciate this class with the normal folder object.
      */
-    private FolderObject getFolder() throws TaskException {
+    private FolderObject getFolder() throws OXException {
         if (null == folder) {
             if (null == con) {
                 folder = Tools.getFolder(ctx, folderId);
             } else {
-                try {
-                    folder = Tools.getFolder(ctx, con, folderId);
-                } catch (final OXFolderNotFoundException e) {
-                    throw new TaskException(e);
-                }
+                folder = Tools.getFolder(ctx, con, folderId);
             }
         }
         return folder;
     }
 
-    private Task getTask() throws TaskException {
+    private Task getTask() throws OXException {
         if (null == task) {
             if (null == con) {
                 task = storage.selectTask(ctx, taskId, type);
@@ -186,7 +181,7 @@ public final class GetTask {
         return task;
     }
 
-    private Set<TaskParticipant> getParticipants() throws TaskException {
+    private Set<TaskParticipant> getParticipants() throws OXException {
         if (null == participants) {
             if (null == con) {
                 participants = partStor.selectParticipants(ctx, taskId, type);
@@ -197,7 +192,7 @@ public final class GetTask {
         return participants;
     }
 
-    private Set<Folder> getFolders() throws TaskException {
+    private Set<Folder> getFolders() throws OXException {
         if (null == folderMapping) {
             if (null == con) {
                 folderMapping =  foldStor.selectFolder(ctx, taskId, type);
@@ -208,11 +203,11 @@ public final class GetTask {
         return folderMapping;
     }
 
-    static Task load(final Context ctx, final Connection con, final int folderId, final int taskId, final StorageType type) throws TaskException {
+    static Task load(final Context ctx, final Connection con, final int folderId, final int taskId, final StorageType type) throws OXException {
         return new GetTask(ctx, con, folderId, taskId, type).load();
     }
 
-    static Task load(final Context ctx, final int folderId, final int taskId, final StorageType type) throws TaskException {
+    static Task load(final Context ctx, final int folderId, final int taskId, final StorageType type) throws OXException {
         return new GetTask(ctx, folderId, taskId, type).load();
     }
 
@@ -222,13 +217,13 @@ public final class GetTask {
      * {@link #fillReminder()} if the reminder for the loading user should be
      * loaded.
      */
-    Task load() throws TaskException {
+    Task load() throws OXException {
         fillParticipants();
         fillTask();
         return getTask();
     }
 
-    Task loadAndCheck() throws TaskException {
+    Task loadAndCheck() throws OXException {
         checkPermission();
         fillParticipants();
         fillTask();
@@ -236,9 +231,9 @@ public final class GetTask {
         return getTask();
     }
 
-    void checkPermission() throws TaskException {
+    void checkPermission() throws OXException {
         if (null == user || null == userConfig) {
-            throw new TaskException(Code.UNIMPLEMENTED);
+            throw TaskExceptionCode.UNIMPLEMENTED.create();
         }
         if (null == con) {
             Permission.canReadInFolder(ctx, user, userConfig, getFolder(), getTask());
@@ -247,13 +242,13 @@ public final class GetTask {
         }
         final Folder check = FolderStorage.getFolder(getFolders(), folderId);
         if (null == check || (Tools.isFolderShared(getFolder(), user) && getTask().getPrivateFlag())) {
-            throw new TaskException(Code.NO_PERMISSION, I(taskId), getFolder().getFolderName(), I(folderId));
+            throw TaskExceptionCode.NO_PERMISSION.create(I(taskId), getFolder().getFolderName(), I(folderId));
         }
     }
 
     private boolean filledParts = false;
 
-    private void fillParticipants() throws TaskException {
+    private void fillParticipants() throws OXException {
         if (filledParts) {
             return;
         }
@@ -265,7 +260,7 @@ public final class GetTask {
 
     private boolean filledTask = false;
 
-    private void fillTask() throws TaskException {
+    private void fillTask() throws OXException {
         if (filledTask) {
             return;
         }
@@ -282,7 +277,7 @@ public final class GetTask {
         Date lastModifiedOfNewestAttachment = null;
         try {
             lastModifiedOfNewestAttachment = attachmentBase.getNewestCreationDate(ctx, Types.TASK, task.getObjectID());
-        } catch (AttachmentException e) {
+        } catch (final AttachmentException e) {
             LOG.error(e.getMessage(), e);
         }
         if (null != lastModifiedOfNewestAttachment) {
@@ -291,15 +286,15 @@ public final class GetTask {
         filledTask = true;
     }
 
-    void fillReminder() throws TaskException {
+    void fillReminder() throws OXException {
         Reminder.loadReminder(ctx, getUserId(), getTask());
     }
 
     /* ---------- Convenience methods ---------- */
 
-    private int getUserId() throws TaskException {
+    private int getUserId() throws OXException {
         if (null == user) {
-            throw new TaskException(Code.UNIMPLEMENTED);
+            throw TaskExceptionCode.UNIMPLEMENTED.create();
         }
         return user.getId();
     }

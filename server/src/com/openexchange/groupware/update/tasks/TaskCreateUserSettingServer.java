@@ -55,7 +55,8 @@ import java.sql.Statement;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.update.Tools;
@@ -89,7 +90,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
         try {
             con = Database.getNoTimeout(contextId, true);
         } catch (final DBPoolingException e) {
-            throw new TaskException(TaskException.Code.NO_CONNECTION, e);
+            throw TaskExceptionCode.NO_CONNECTION.create(e);
         }
 
         try {
@@ -97,7 +98,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
                 createTable(con);
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
                 Database.backNoTimeout(contextId, true, con);
         }

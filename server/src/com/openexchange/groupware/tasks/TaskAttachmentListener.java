@@ -57,7 +57,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
 
 /**
  * This class implements the update of a task if a file is attached or detached to the task.
@@ -89,8 +88,8 @@ public class TaskAttachmentListener implements AttachmentListener {
             task.setNumberOfAttachments(oldTask.getNumberOfAttachments() + 1);
             UpdateData.updateTask(ctx, con, task, lastRead, UPDATE_FIELDS, null,
                 null, null, null);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
         if (LOG.isTraceEnabled()) {
             LOG.trace("Increased number of attachments for task "
@@ -116,13 +115,13 @@ public class TaskAttachmentListener implements AttachmentListener {
             final int numOfAttachments = oldTask.getNumberOfAttachments()
                 - event.getDetached().length;
             if (numOfAttachments < 0) {
-                throw new TaskException(Code.WRONG_ATTACHMENT_COUNT);
+                throw TaskExceptionCode.WRONG_ATTACHMENT_COUNT.create();
             }
             task.setNumberOfAttachments(numOfAttachments);
             UpdateData.updateTask(ctx, con, task, lastRead, UPDATE_FIELDS, null,
                 null, null, null);
-        } catch (final TaskException e) {
-            throw Tools.convert(e);
+        } catch (final OXException e) {
+            throw e;
         }
         if (LOG.isTraceEnabled()) {
             LOG.trace("Decreased number of attachments for task "

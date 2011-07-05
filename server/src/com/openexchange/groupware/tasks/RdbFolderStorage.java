@@ -59,8 +59,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.tools.Collections;
 
 /**
@@ -83,7 +83,7 @@ public class RdbFolderStorage extends FolderStorage {
     @Override
     void insertFolder(final Context ctx, final Connection con,
         final int taskId, final Set<Folder> folders, final StorageType type)
-        throws TaskException {
+        throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL.INSERT_FOLDER.get(type));
@@ -98,7 +98,7 @@ public class RdbFolderStorage extends FolderStorage {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -109,7 +109,7 @@ public class RdbFolderStorage extends FolderStorage {
      */
     @Override
     Set<Folder> selectFolder(final Context ctx, final Connection con,
-        final int taskId, final StorageType type) throws TaskException {
+        final int taskId, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final Set<Folder> retval = new HashSet<Folder>();
@@ -122,7 +122,7 @@ public class RdbFolderStorage extends FolderStorage {
                 retval.add(new Folder(result.getInt(1), result.getInt(2)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -135,7 +135,7 @@ public class RdbFolderStorage extends FolderStorage {
     @Override
     Folder selectFolderByUser(final Context ctx, final Connection con,
         final int taskId, final int userId, final StorageType type)
-        throws TaskException {
+        throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         Folder retval = null;
@@ -150,7 +150,7 @@ public class RdbFolderStorage extends FolderStorage {
                 retval = new Folder(result.getInt(1), userId);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -163,7 +163,7 @@ public class RdbFolderStorage extends FolderStorage {
     @Override
     Folder selectFolderById(final Context ctx, final Connection con,
         final int taskId, final int folderId, final StorageType type)
-        throws TaskException {
+        throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         Folder retval = null;
@@ -178,7 +178,7 @@ public class RdbFolderStorage extends FolderStorage {
                 retval = new Folder(folderId, result.getInt(1));
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -191,7 +191,7 @@ public class RdbFolderStorage extends FolderStorage {
     @Override
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
         final int[] folderIds, final StorageType type, final boolean sanityCheck)
-        throws TaskException {
+        throws OXException {
         PreparedStatement stmt = null;
         int deleted = 0;
         try {
@@ -205,12 +205,12 @@ public class RdbFolderStorage extends FolderStorage {
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
         }
         if (sanityCheck && folderIds.length != deleted) {
-            throw new TaskException(Code.FOLDER_DELETE_WRONG, Integer
+            throw TaskExceptionCode.FOLDER_DELETE_WRONG.create(Integer
                 .valueOf(folderIds.length), Integer.valueOf(deleted));
         }
     }
@@ -220,7 +220,7 @@ public class RdbFolderStorage extends FolderStorage {
      */
     @Override
     int[] getTasksInFolder(final Context ctx, final Connection con,
-        final int folderId, final StorageType type) throws TaskException {
+        final int folderId, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final List<Integer> tasks = new ArrayList<Integer>();
@@ -234,7 +234,7 @@ public class RdbFolderStorage extends FolderStorage {
                  tasks.add(Integer.valueOf(result.getInt(1)));
              }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -246,7 +246,7 @@ public class RdbFolderStorage extends FolderStorage {
      */
     @Override
     int[][] searchFolderByUser(final Context ctx, final Connection con,
-        final int userId, final StorageType type) throws TaskException {
+        final int userId, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final List<int[]> tmp = new ArrayList<int[]>();
@@ -263,7 +263,7 @@ public class RdbFolderStorage extends FolderStorage {
                 tmp.add(folderAndTask);
             }
         } catch (final SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }

@@ -58,9 +58,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.server.impl.DBPool;
 
@@ -97,9 +96,9 @@ abstract class ParticipantStorage {
      * @param type type of participant that should be selected.
      * @return a map with the task identifier as key and a set of internal
      * participants as value.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    protected abstract Map<Integer, Set<InternalParticipant>> selectInternal(Context ctx, Connection con, int[] tasks, StorageType type) throws TaskException;
+    protected abstract Map<Integer, Set<InternalParticipant>> selectInternal(Context ctx, Connection con, int[] tasks, StorageType type) throws OXException;
 
     /**
      * Reads the internal participants of a task.
@@ -108,11 +107,11 @@ abstract class ParticipantStorage {
      * @param taskId unique identifier of the task.
      * @param type type of participant that should be selected.
      * @return a set of participants.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
     final Set<InternalParticipant> selectInternal(final Context ctx,
         final Connection con, final int taskId, final StorageType type)
-        throws TaskException {
+        throws OXException {
         Set<InternalParticipant> parts = selectInternal(ctx, con,
             new int[] { taskId }, type).get(Integer.valueOf(taskId));
         if (null == parts) {
@@ -128,12 +127,12 @@ abstract class ParticipantStorage {
      * @param taskId unique identifier of the task.
      * @param userId unique identifier of the user.
      * @return a {@link InternalParticipant} object.
-     * @throws TaskException if an error occurs of the participant doesnot
+     * @throws OXException if an error occurs of the participant doesnot
      * exist.
      */
     final InternalParticipant selectInternal(final Context ctx,
         final Connection con, final int taskId, final int userId,
-        final StorageType type) throws TaskException {
+        final StorageType type) throws OXException {
         return getParticipant(selectInternal(ctx, con, taskId, type), userId);
     }
 
@@ -143,18 +142,13 @@ abstract class ParticipantStorage {
      * @param taskId unique identifier of the task.
      * @param userId unique identifier of the user.
      * @return a {@link InternalParticipant} object.
-     * @throws TaskException if an error occurs of the participant doesnot
+     * @throws OXException if an error occurs of the participant doesnot
      * exist.
      */
     final InternalParticipant selectInternal(final Context ctx,
         final int taskId, final int userId, final StorageType type)
-        throws TaskException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+        throws OXException {
+        final Connection con = DBPool.pickup(ctx);
         try {
             return selectInternal(ctx, con, taskId, userId, type);
         } finally {
@@ -171,15 +165,15 @@ abstract class ParticipantStorage {
      * @param taskId unique identifier of the task.
      * @param participants internal participants with updated values.
      * @param type storage type of participants that should be updated.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
     abstract void updateInternal(Context ctx, Connection con, int taskId,
         Set<InternalParticipant> participants, StorageType type)
-        throws TaskException;
+        throws OXException;
 
     final void updateInternal(final Context ctx, final Connection con,
         final int taskId, final InternalParticipant participant,
-        final StorageType type) throws TaskException {
+        final StorageType type) throws OXException {
         final Set<InternalParticipant> participants =
             new HashSet<InternalParticipant>(1, 1f);
         participants.add(participant);
@@ -195,11 +189,11 @@ abstract class ParticipantStorage {
      * @param type storage type of participants that should be deleted.
      * @param check <code>true</code> enables check if all given users are
      * deleted.
-     * @throws TaskException if an exception occurs or less than the given users
+     * @throws OXException if an exception occurs or less than the given users
      * are deleted and the check is enabled.
      */
     abstract void deleteInternal(Context ctx, Connection con, int taskId,
-        int[] users, StorageType type, boolean check) throws TaskException;
+        int[] users, StorageType type, boolean check) throws OXException;
 
     /**
      * Deletes an internal participant of a task.
@@ -209,12 +203,12 @@ abstract class ParticipantStorage {
      * @param userId unique identifier of the internal participant.
      * @param type storage type of participant that should be deleted.
      * @param check <code>true</code> enables check if the entry is deleted.
-     * @throws TaskException if an exception occurs or less than the given users
+     * @throws OXException if an exception occurs or less than the given users
      * are deleted and the check is enabled.
      */
     final void deleteInternal(final Context ctx, final Connection con,
         final int taskId, final int userId, final StorageType type,
-        final boolean check) throws TaskException {
+        final boolean check) throws OXException {
         deleteInternal(ctx, con, taskId, new int[] { userId }, type, check);
     }
 
@@ -227,12 +221,12 @@ abstract class ParticipantStorage {
      * @param type storage type of participants that should be deleted.
      * @param check <code>true</code> enables check if all given users are
      * deleted.
-     * @throws TaskException if an exception occurs or less than the given users
+     * @throws OXException if an exception occurs or less than the given users
      * are deleted and the check is enabled.
      */
     final void deleteInternal(final Context ctx, final Connection con,
         final int taskId, final Set<InternalParticipant> parts,
-        final StorageType type, final boolean check) throws TaskException {
+        final StorageType type, final boolean check) throws OXException {
         final int[] partIds = new int[parts.size()];
         final Iterator<InternalParticipant> iter = parts.iterator();
         for (int i = 0; i < partIds.length; i++) {
@@ -248,10 +242,10 @@ abstract class ParticipantStorage {
      * @param groupId unique identifier of the group.
      * @param type storage type of participant that should be searched.
      * @return a list of task identifier.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
     abstract int[] findTasksWithGroup(Context ctx, Connection con,
-        int groupId, StorageType type) throws TaskException;
+        int groupId, StorageType type) throws OXException;
 
     /**
      * Finds all tasks with the user as participant.
@@ -260,10 +254,10 @@ abstract class ParticipantStorage {
      * @param userId unique identifier of the user.
      * @param type storage type of participant that should be searched.
      * @return an int array with all tasks identifier found.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     abstract int[] findTasksWithParticipant(Context ctx, Connection con,
-        int userId, StorageType type) throws TaskException;
+        int userId, StorageType type) throws OXException;
 
     /**
      * Reads the internal participants of some tasks.
@@ -273,11 +267,11 @@ abstract class ParticipantStorage {
      * @param type type of participant that should be selected.
      * @return a map with the task identifier as key and a set of internal
      * participants as value.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
     protected abstract Map<Integer, Set<ExternalParticipant>>
         selectExternal(Context ctx, Connection con, int[] tasks,
-            StorageType type) throws TaskException;
+            StorageType type) throws OXException;
 
     /**
      * Reads the external participants of a task.
@@ -286,11 +280,11 @@ abstract class ParticipantStorage {
      * @param taskId unique identifier of the task.
      * @param type type of participants that should be selected.
      * @return a set of participants.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     final Set<ExternalParticipant> selectExternal(final Context ctx,
         final Connection con, final int taskId, final StorageType type)
-        throws TaskException {
+        throws OXException {
         Set<ExternalParticipant> parts = selectExternal(ctx, con,
             new int[] { taskId }, type).get(Integer.valueOf(taskId));
         if (null == parts) {
@@ -308,12 +302,12 @@ abstract class ParticipantStorage {
      * @param type storage type of participants that should be deleted.
      * @param check <code>true</code> enables check if all given addresses are
      * deleted.
-     * @throws TaskException if an exception occurs or less than the given
+     * @throws OXException if an exception occurs or less than the given
      * addresses are deleted and the check is enabled.
      */
     abstract void deleteExternal(Context ctx, Connection con, int taskId,
         String[] addresses, StorageType type, boolean check)
-        throws TaskException;
+        throws OXException;
 
     /**
      * Deletes participants.
@@ -329,7 +323,7 @@ abstract class ParticipantStorage {
     void deleteParticipants(final Context ctx, final Connection con,
         final int taskId, final Set<TaskParticipant> participants,
         final StorageType type, final boolean sanityCheck)
-        throws TaskException {
+        throws OXException {
         if (null == participants || participants.size() == 0) {
             return;
         }
@@ -348,12 +342,12 @@ abstract class ParticipantStorage {
      * @param type storage type of participants that should be deleted.
      * @param check <code>true</code> enables check if all given addresses are
      * deleted.
-     * @throws TaskException if an exception occurs or less than the given
+     * @throws OXException if an exception occurs or less than the given
      * addresses are deleted and the check is enabled.
      */
     final void deleteExternal(final Context ctx, final Connection con,
         final int taskId, final Set<ExternalParticipant> parts,
-        final StorageType type, final boolean check) throws TaskException {
+        final StorageType type, final boolean check) throws OXException {
         final String[] addresses = new String[parts.size()];
         final Iterator<ExternalParticipant> iter = parts.iterator();
         for (int i = 0; i < addresses.length; i++) {
@@ -368,16 +362,11 @@ abstract class ParticipantStorage {
      * @param taskId unique identifier of the task.
      * @param type type of participant that should be selected.
      * @return a set of participants.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     final Set<TaskParticipant> selectParticipants(final Context ctx,
-        final int taskId, final StorageType type) throws TaskException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+        final int taskId, final StorageType type) throws OXException {
+        final Connection con = DBPool.pickup(ctx);
         try {
             return selectParticipants(ctx, con, taskId, type);
         } finally {
@@ -392,11 +381,11 @@ abstract class ParticipantStorage {
      * @param taskId unique identifier of the task.
      * @param type type of participant that should be selected.
      * @return a set of participants.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     final Set<TaskParticipant> selectParticipants(final Context ctx,
         final Connection con, final int taskId, final StorageType type)
-        throws TaskException {
+        throws OXException {
         final Set<TaskParticipant> retval = new HashSet<TaskParticipant>();
         retval.addAll(selectInternal(ctx, con, taskId, type));
         retval.addAll(selectExternal(ctx, con, taskId, type));
@@ -411,17 +400,12 @@ abstract class ParticipantStorage {
      * @return a map with the task identifier as the key and a set of
      * participants as values. If for a task no participants are found no entry
      * exists in this map.
-     * @throws TaskException if an exception occurs.
+     * @throws OXException if an exception occurs.
      */
     final Map<Integer, Set<TaskParticipant>> selectParticipants(
         final Context ctx, final int[] tasks, final StorageType type)
-        throws TaskException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+        throws OXException {
+        final Connection con = DBPool.pickup(ctx);
         final Map<Integer, Set<InternalParticipant>> internals;
         final Map<Integer, Set<ExternalParticipant>> externals;
         try {
@@ -453,23 +437,23 @@ abstract class ParticipantStorage {
         return retval;
     }
 
-    void insertParticipants(Context ctx, Connection con, int taskId, Set<TaskParticipant> participants, StorageType type) throws TaskException {
-        Set<InternalParticipant> internals = extractInternal(participants);
-        Set<ExternalParticipant> externals = extractExternal(participants);
+    void insertParticipants(final Context ctx, final Connection con, final int taskId, final Set<TaskParticipant> participants, final StorageType type) throws OXException {
+        final Set<InternalParticipant> internals = extractInternal(participants);
+        final Set<ExternalParticipant> externals = extractExternal(participants);
         insertInternals(ctx, con, taskId, internals, type);
         insertExternals(ctx, con, taskId, externals, type);
     }
 
     abstract void insertInternals(Context ctx, Connection con, int taskId,
         Set<InternalParticipant> participants, StorageType type)
-        throws TaskException;
+        throws OXException;
 
     abstract void insertExternals(Context ctx, Connection con, int taskId,
         Set<ExternalParticipant> participants, StorageType type)
-        throws TaskException;
+        throws OXException;
 
-    final static Set<ExternalParticipant> extractExternal(Set<TaskParticipant> participants) {
-        Set<ExternalParticipant> retval = new HashSet<ExternalParticipant>();
+    final static Set<ExternalParticipant> extractExternal(final Set<TaskParticipant> participants) {
+        final Set<ExternalParticipant> retval = new HashSet<ExternalParticipant>();
         for (final TaskParticipant participant : participants) {
             if (Type.EXTERNAL == participant.getType()) {
                 retval.add((ExternalParticipant) participant);

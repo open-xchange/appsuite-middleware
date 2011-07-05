@@ -60,7 +60,8 @@ import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.SQL;
 import com.openexchange.groupware.tasks.StorageType;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.sql.DBUtils;
@@ -100,7 +101,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
 
     /**
      * {@inheritDoc}
-     * @throws TaskException 
+     * @throws OXException 
      */
     public void perform(final Schema schema, final int contextId) throws OXException {
         LOG.info("Performing update task EnlargeTaskTitle.");
@@ -110,7 +111,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
                 alterTitle(con, SQL.TASK_TABLES.get(type));
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e);
+            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Database.back(contextId, true, con);
         }

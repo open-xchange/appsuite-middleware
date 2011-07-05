@@ -57,11 +57,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -70,16 +65,14 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
 /**
  * This class contains some tools methods for tasks.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
@@ -97,8 +90,8 @@ public final class Tools {
     }
 
     /**
-     * Creates a dummy task for inserting into the deleted tables to tell
-     * clients that a task has been removed from some folder.
+     * Creates a dummy task for inserting into the deleted tables to tell clients that a task has been removed from some folder.
+     * 
      * @param identifier unique identifier of the task.
      * @param createdBy user identifier that created the task.
      * @param modifiedBy user identifier that moved the task.
@@ -119,8 +112,7 @@ public final class Tools {
 
     /**
      * @param folder the folder object.
-     * @return <code>true</code> if the folder is a tasks folder,
-     * <code>false</code> otherwise.
+     * @return <code>true</code> if the folder is a tasks folder, <code>false</code> otherwise.
      */
     static boolean isFolderTask(final FolderObject folder) {
         return FolderObject.TASK == folder.getModule();
@@ -128,9 +120,9 @@ public final class Tools {
 
     /**
      * Checks if the folder is a public folder.
+     * 
      * @param folder folder object.
-     * @return <code>true</code> if the folder is a public folder,
-     * <code>false</code> otherwise.
+     * @return <code>true</code> if the folder is a public folder, <code>false</code> otherwise.
      */
     static boolean isFolderPublic(final FolderObject folder) {
         return FolderObject.PUBLIC == folder.getType();
@@ -138,9 +130,9 @@ public final class Tools {
 
     /**
      * Checks if the folder is a private folder.
+     * 
      * @param folder folder object.
-     * @return <code>true</code> if the folder is a private folder,
-     * <code>false</code> otherwise.
+     * @return <code>true</code> if the folder is a private folder, <code>false</code> otherwise.
      */
     static boolean isFolderPrivate(final FolderObject folder) {
         return FolderObject.PRIVATE == folder.getType();
@@ -148,85 +140,62 @@ public final class Tools {
 
     /**
      * Checks if the folder is a shared folder.
+     * 
      * @param folder folder object.
      * @param user requesting user.
-     * @return <code>true</code> if the folder is a shared folder,
-     * <code>false</code> otherwise.
+     * @return <code>true</code> if the folder is a shared folder, <code>false</code> otherwise.
      */
     static boolean isFolderShared(final FolderObject folder, final User user) {
-        return (FolderObject.PRIVATE == folder.getType()
-            && folder.getCreatedBy() != user.getId());
+        return (FolderObject.PRIVATE == folder.getType() && folder.getCreatedBy() != user.getId());
     }
 
     /**
      * Returns the unique identifier of the users standard tasks folder.
+     * 
      * @param ctx Context.
      * @param userId unique identifier of the user.
      * @return the unique identifier of the users standard tasks folder.
-     * @throws TaskException if no database connection can be obtained or an
-     * error occurs while reading the folder.
+     * @throws OXException if no database connection can be obtained or an error occurs while reading the folder.
      */
-    static int getUserTaskStandardFolder(final Context ctx, final int userId)
-        throws TaskException {
+    static int getUserTaskStandardFolder(final Context ctx, final int userId) throws OXException {
         int folder;
         try {
-            folder = new OXFolderAccess(ctx).getDefaultFolder(userId,
-                FolderObject.TASK).getObjectID();
+            folder = new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.TASK).getObjectID();
         } catch (final OXException e) {
-            throw new TaskException(e);
+            throw new OXException(e);
         }
         return folder;
     }
 
     /**
      * Reads a folder.
+     * 
      * @param ctx Context.
      * @param folderId unique identifier of the folder to read.
      * @return the folder object.
-     * @throws TaskException if no database connection can be obtained or an
-     * error occurs while reading the folder.
+     * @throws OXException if no database connection can be obtained or an error occurs while reading the folder.
      */
-    static FolderObject getFolder(final Context ctx, final int folderId)
-        throws TaskException {
-        try {
-            return new OXFolderAccess(ctx).getFolderObject(folderId);
-        } catch (final FolderCacheNotEnabledException e) {
-            throw new TaskException(e);
-        } catch (final OXException e) {
-            throw new TaskException(e);
-        }
+    static FolderObject getFolder(final Context ctx, final int folderId) throws OXException {
+        return new OXFolderAccess(ctx).getFolderObject(folderId);
     }
 
     /**
      * Reads a folder.
+     * 
      * @param ctx Context.
      * @param folderId unique identifier of the folder to read.
      * @return the folder object.
-     * @throws TaskException if no database connection can be obtained or an
-     * error occurs while reading the folder.
+     * @throws OXException if no database connection can be obtained or an error occurs while reading the folder.
      * @throws OXFolderNotFoundException if the folder can not be found.
      */
-    static FolderObject getFolder(final Context ctx, final Connection con,
-        final int folderId) throws TaskException, OXFolderNotFoundException {
-        FolderObject folder = null;
-        try {
-            folder = new OXFolderAccess(con, ctx).getFolderObject(folderId);
-        } catch (final FolderCacheNotEnabledException e) {
-            throw new TaskException(e);
-        } catch (final OXFolderNotFoundException e) {
-            throw e;
-        } catch (final OXException e) {
-            throw new TaskException(e);
-        }
-        return folder;
+    static FolderObject getFolder(final Context ctx, final Connection con, final int folderId) throws OXException {
+        return new OXFolderAccess(con, ctx).getFolderObject(folderId);
     }
-    
-    static void fillStandardFolders(final Context ctx,
-        final Set<InternalParticipant> participants) throws TaskException {
+
+    static void fillStandardFolders(final Context ctx, final Set<InternalParticipant> participants) throws OXException {
         for (final InternalParticipant participant : participants) {
             if (UserParticipant.NO_PFID == participant.getFolderId()) {
-                participant.setFolderId(Tools.getUserTaskStandardFolder(ctx,
-                    participant.getIdentifier()));
+                participant.setFolderId(Tools.getUserTaskStandardFolder(ctx, participant.getIdentifier()));
             }
         }
     }
@@ -242,7 +211,7 @@ public final class Tools {
                 Folder folder = folderByUser.get(I(internal.getIdentifier()));
                 if (null == folder) {
                     if (privat) {
-                        LOG.error(new TaskException(Code.PARTICIPANT_FOLDER_INCONSISTENCY, I(internal.getIdentifier()), I(taskId), I(cid)));
+                        LOG.error(TaskExceptionCode.PARTICIPANT_FOLDER_INCONSISTENCY.create(I(internal.getIdentifier()), I(taskId), I(cid)));
                     }
                     folder = new Folder(0, internal.getIdentifier());
                 }
@@ -251,60 +220,28 @@ public final class Tools {
         }
     }
 
-    static Context getContext(final int contextId) throws TaskException {
+    static Context getContext(final int contextId) throws OXException {
         try {
             return ContextStorage.getStorageContext(contextId);
         } catch (final OXException e) {
-            throw new TaskException(e);
+            throw new OXException(e);
         }
     }
 
-    static UserConfiguration getUserConfiguration(final Context ctx,
-        final int userId) throws TaskException {
+    static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
         try {
-            return UserConfigurationStorage.getInstance().getUserConfiguration(
-                userId, ctx);
+            return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
         } catch (final OXException e) {
-            throw new TaskException(e);
+            throw new OXException(e);
         }
     }
 
-    static User getUser(final Context ctx, final int userId)
-        throws TaskException {
+    static User getUser(final Context ctx, final int userId) throws OXException {
         try {
             return UserStorage.getInstance().getUser(userId, ctx);
         } catch (final LdapException e) {
-            throw new TaskException(e);
+            throw new OXException(e);
         }
     }
 
-    /**
-     * Converts a task exception into an OX exception.
-     * @param exc task exception to convert.
-     * @return an OX exception that can be thrown.
-     */
-    static OXException convert(final TaskException exc) {
-        OXException retval;
-        switch (exc.getDetail()) {
-        case MANDATORY_FIELD:
-            retval = new OXMandatoryFieldException(exc);
-            break;
-        case NOT_FOUND:
-            retval = new OXObjectNotFoundException(exc);
-            break;
-        case PERMISSION:
-            retval = new OXPermissionException(exc);
-            break;
-        case CONFLICT:
-            retval = new OXConflictException(exc);
-            break;
-        case CONCURRENT_MODIFICATION:
-            retval = new OXConcurrentModificationException(exc);
-            break;
-        case OTHER:
-        default:
-            retval = new OXException(exc);
-        }
-        return retval;
-    }
 }

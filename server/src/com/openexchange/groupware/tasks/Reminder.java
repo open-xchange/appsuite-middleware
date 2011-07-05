@@ -169,10 +169,10 @@ final class Reminder {
      * @param ctx Context.
      * @param userId unique identifier of the user.
      * @param tasks load reminder for this tasks.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
     static void loadReminder(final Context ctx, final int userId,
-        final Collection<Task> tasks) throws TaskException {
+        final Collection<Task> tasks) throws OXException {
         final ReminderService remStor = new ReminderHandler(ctx);
         final Map<Integer, Task> tmp = new HashMap<Integer, Task>();
         for (final Task task : tasks) {
@@ -183,7 +183,7 @@ final class Reminder {
             reminders = remStor.loadReminder(Collections.toArray(tmp.keySet()),
                 userId, Types.TASK);
         } catch (final OXException e) {
-            throw new TaskException(e);
+            throw e;
         }
         for (final ReminderObject reminder : reminders) {
             tmp.get(Integer.valueOf(reminder.getTargetId())).setAlarm(reminder
@@ -196,10 +196,10 @@ final class Reminder {
      * @param ctx Context.
      * @param userId unique identifier of the user.
      * @param task loaded task.
-     * @throws TaskException if an error occurs.
+     * @throws OXException if an error occurs.
      */
     static void loadReminder(final Context ctx, final int userId,
-        final Task task) throws TaskException {
+        final Task task) throws OXException {
         final ReminderService reminder = new ReminderHandler(ctx);
         final int taskId = task.getObjectID();
         try {
@@ -209,20 +209,20 @@ final class Reminder {
                 task.setAlarm(remind.getDate());
             }
         } catch (final OXException e) {
-            throw new TaskException(e);
+            throw e;
         }
     }
 
-    static void deleteReminder(Context ctx, Connection con, Task task) throws TaskException {
+    static void deleteReminder(final Context ctx, final Connection con, final Task task) throws OXException {
         final ReminderService reminder = new ReminderHandler(ctx);
         try {
             reminder.deleteReminder(task.getObjectID(), Types.TASK, con);
-        } catch (ReminderException e) {
-            if (ReminderException.Code.NOT_FOUND.getDetailNumber() != e.getDetailNumber()) {
-                throw new TaskException(e);
+        } catch (final ReminderException e) {
+            if (!ReminderException.Code.NOT_FOUND.equals(e)) {
+                throw new OXException(e);
             }
-        } catch (OXException e) {
-            throw new TaskException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 }
