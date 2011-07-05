@@ -58,7 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Set;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -771,14 +771,14 @@ public class Contact extends CommonObject implements Serializable {
 
     protected DistributionListEntryObject[] dlists;
 
-    private final Collection<AbstractOXException> warnings;
+    private final Collection<OXException> warnings;
 
     /**
      * Initializes a new {@link Contact}.
      */
     public Contact() {
         reset();
-        warnings = new LinkedList<AbstractOXException>();
+        warnings = new LinkedList<OXException>();
     }
 
     /**
@@ -786,7 +786,7 @@ public class Contact extends CommonObject implements Serializable {
      * 
      * @param warning The warning
      */
-    public void addWarning(final AbstractOXException warning) {
+    public void addWarning(final OXException warning) {
         if (null == warning) {
             return;
         }
@@ -798,7 +798,7 @@ public class Contact extends CommonObject implements Serializable {
      * 
      * @return The warnings
      */
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         return Collections.unmodifiableCollection(warnings);
     }
 

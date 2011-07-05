@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
@@ -137,7 +137,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         dateValidators = new LinkedList<DateValidator>();
     }
 
-    private Object[] makeDate(final Object... objects) throws ContactException {
+    private Object[] makeDate(final Object... objects) throws OXException {
         if (objects[1] instanceof String) {
             /*
              * Not parsed by previous ContactSwitcher
@@ -182,7 +182,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 
     /* CHANGED METHODS */
     @Override
-    public Object creationdate(final Object... objects) throws ContactException {
+    public Object creationdate(final Object... objects) throws OXException {
         try {
             return delegate.creationdate(makeDate(objects));
         } catch (final ClassCastException e) {
@@ -191,7 +191,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     }
 
     @Override
-    public Object anniversary(final Object... objects) throws ContactException {
+    public Object anniversary(final Object... objects) throws OXException {
         try {
             return delegate.anniversary(makeDate(objects));
         } catch (final ClassCastException e) {
@@ -200,7 +200,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     }
 
     @Override
-    public Object birthday(final Object... objects) throws ContactException {
+    public Object birthday(final Object... objects) throws OXException {
         try {
             return delegate.birthday(makeDate(objects));
         } catch (final ClassCastException e) {
@@ -209,7 +209,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     }
 
     @Override
-    public Object imagelastmodified(final Object... objects) throws ContactException {
+    public Object imagelastmodified(final Object... objects) throws OXException {
         try {
             return delegate.imagelastmodified(makeDate(objects));
         } catch (final ClassCastException e) {
@@ -218,7 +218,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     }
 
     @Override
-    public Object lastmodified(final Object... objects) throws ContactException {
+    public Object lastmodified(final Object... objects) throws OXException {
         try {
             return delegate.lastmodified(makeDate(objects));
         } catch (final ClassCastException e) {

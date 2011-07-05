@@ -50,7 +50,7 @@
 package com.openexchange.groupware.contact.helpers;
 
 import java.util.Date;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 
 /**
@@ -73,7 +73,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
 
     /* CHANGED METHODS */
     @Override
-    public Object creationdate(final Object... objects) throws ContactException {
+    public Object creationdate(final Object... objects) throws OXException {
         try {
             try {
                 return delegate.creationdate(makeDate(objects));
@@ -86,7 +86,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
     }
 
     @Override
-    public Object anniversary(final Object... objects) throws ContactException {
+    public Object anniversary(final Object... objects) throws OXException {
         try {
             try {
                 return delegate.anniversary(makeDate(objects));
@@ -99,7 +99,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
     }
 
     @Override
-    public Object birthday(final Object... objects) throws ContactException {
+    public Object birthday(final Object... objects) throws OXException {
         try {
             try {
                 return delegate.birthday(makeDate(objects));
@@ -112,7 +112,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
     }
 
     @Override
-    public Object imagelastmodified(final Object... objects) throws ContactException {
+    public Object imagelastmodified(final Object... objects) throws OXException {
         try {
             try {
                 return delegate.imagelastmodified(makeDate(objects));
@@ -125,7 +125,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
     }
 
     @Override
-    public Object lastmodified(final Object... objects) throws ContactException {
+    public Object lastmodified(final Object... objects) throws OXException {
         try {
             try {
                 return delegate.lastmodified(makeDate(objects));

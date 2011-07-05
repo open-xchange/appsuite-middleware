@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.contact.helpers;
 
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 
 /**
  * This switcher can translate all kinds of objects given to a boolean value.
@@ -106,7 +106,7 @@ public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDeleg
 	}
 
 	@Override
-	public Object privateflag(final Object... objects) throws ContactException {
+	public Object privateflag(final Object... objects) throws OXException {
 		return delegate.privateflag( determineBooleanValue(objects) );
 		
 	}

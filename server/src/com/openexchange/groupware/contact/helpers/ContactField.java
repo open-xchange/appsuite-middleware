@@ -52,7 +52,7 @@ package com.openexchange.groupware.contact.helpers;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.mappers.ContactFieldMapper;
 import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
 import com.openexchange.groupware.contact.mappers.FrenchOutlookMapper;
@@ -247,10 +247,12 @@ public enum ContactField{
 
 
 	public static ContactField getByDBFieldName(final String dbFieldName){
-        if( null == dbFieldName)
+        if( null == dbFieldName) {
             return null;
-        if( "".equals(dbFieldName))
+        }
+        if( "".equals(dbFieldName)) {
             return null;
+        }
         
         for(final ContactField field: values()){
 			if(dbFieldName.equals( field.getDBName() )){
@@ -261,10 +263,12 @@ public enum ContactField{
 	}
 
 	public static ContactField getByDisplayName(final String displayName){
-	    if( null == displayName)
-	        return null;
-	    if( "".equals(displayName))
-	        return null;
+	    if( null == displayName) {
+            return null;
+        }
+	    if( "".equals(displayName)) {
+            return null;
+        }
 	    
 		for(final ContactField field : values()){
 			if(displayName.equals( field.getReadableName() ) ){
@@ -275,10 +279,12 @@ public enum ContactField{
 	}
 	
 	public static ContactField getByFieldName(final String fieldName){
-	       if( null == fieldName)
-	            return null;
-	        if( "".equals(fieldName))
-	            return null;
+	       if( null == fieldName) {
+            return null;
+        }
+	        if( "".equals(fieldName)) {
+                return null;
+            }
 	        
 		for(final ContactField field : values()){
 			if(fieldName.equals( field.getFieldName() ) ){
@@ -321,7 +327,7 @@ public enum ContactField{
 
 
 
-	public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws ContactException{
+	public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws OXException{
 		switch(this){
 		case DISPLAY_NAME : return switcher.displayname(objects);
 		case SUR_NAME : return switcher.surname(objects);
