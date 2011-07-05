@@ -57,7 +57,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ConfigurationException.ConfigurationExceptionCodes;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.webdav.action.WebdavRequest;
 
 

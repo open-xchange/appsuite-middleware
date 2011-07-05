@@ -52,7 +52,6 @@ package com.openexchange.mail.usersetting;
 import java.io.Serializable;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 

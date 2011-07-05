@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCodes;
 import com.openexchange.server.Initialization;
 
 /**
@@ -131,7 +131,7 @@ public final class UserConfigurationStorageInit implements Initialization {
         }
         final String classNameProp = SystemConfig.getProperty(Property.USER_CONF_STORAGE);
         if (null == classNameProp) {
-            throw new UserConfigurationException(UserConfigurationCode.MISSING_SETTING, Property.USER_CONF_STORAGE.getPropertyName());
+            throw new UserConfigurationException(UserConfigurationCodes.MISSING_SETTING, Property.USER_CONF_STORAGE.getPropertyName());
         }
         try {
             final String className = getUserConfigurationImpl(classNameProp);
@@ -143,13 +143,13 @@ public final class UserConfigurationStorageInit implements Initialization {
             UserConfigurationStorage.setInstance(implementingClass.newInstance());
             started.set(true);
         } catch (final ClassNotFoundException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
+            throw new UserConfigurationException(UserConfigurationCodes.CLASS_NOT_FOUND, e, classNameProp);
         } catch (final ClassCastException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
+            throw new UserConfigurationException(UserConfigurationCodes.CLASS_NOT_FOUND, e, classNameProp);
         } catch (final InstantiationException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
+            throw new UserConfigurationException(UserConfigurationCodes.CLASS_NOT_FOUND, e, classNameProp);
         } catch (final IllegalAccessException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
+            throw new UserConfigurationException(UserConfigurationCodes.CLASS_NOT_FOUND, e, classNameProp);
         }
     }
 

@@ -61,7 +61,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -148,9 +148,9 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+            throw new UserConfigurationException(UserConfigurationCodes.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         } catch (final RuntimeException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+            throw new UserConfigurationException(UserConfigurationCodes.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         }
     }
 
@@ -170,9 +170,9 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 cacheService.freeCache(CACHE_REGION_NAME);
             }
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+            throw new UserConfigurationException(UserConfigurationCodes.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         } catch (final RuntimeException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+            throw new UserConfigurationException(UserConfigurationCodes.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
         } finally {
             cache = null;
         }
@@ -193,7 +193,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                     cache.put(key, userConfig);
                 }
             } catch (final CacheException e) {
-                throw new UserConfigurationException(UserConfigurationCode.CACHE_PUT_ERROR, e, e.getMessage());
+                throw new UserConfigurationException(UserConfigurationCodes.CACHE_PUT_ERROR, e, e.getMessage());
             } catch (final RuntimeException rte) {
                 return getFallback().getUserConfiguration(userId, groups, ctx);
             } finally {
@@ -244,7 +244,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache.clear();
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_CLEAR_ERROR, e, e.getMessage());
+            throw new UserConfigurationException(UserConfigurationCodes.CACHE_CLEAR_ERROR, e, e.getMessage());
         } catch (final RuntimeException rte) {
             /*
              * Swallow
@@ -264,7 +264,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache.remove(getKey(userId, ctx));
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getMessage());
+            throw new UserConfigurationException(UserConfigurationCodes.CACHE_REMOVE_ERROR, e, e.getMessage());
         } catch (final RuntimeException rte) {
             /*
              * Swallow
@@ -282,7 +282,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache.remove(getKey(userId, ctx));
         } catch (final CacheException e) {
-            throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getMessage());
+            throw new UserConfigurationException(UserConfigurationCodes.CACHE_REMOVE_ERROR, e, e.getMessage());
         } catch (final RuntimeException rte) {
             /*
              * Swallow

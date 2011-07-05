@@ -50,8 +50,8 @@
 
 package com.openexchange.mail.api;
 
-import com.openexchange.mail.IndexRange;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;

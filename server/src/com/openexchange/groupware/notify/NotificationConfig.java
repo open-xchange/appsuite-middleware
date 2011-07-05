@@ -52,7 +52,7 @@ package com.openexchange.groupware.notify;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ConfigurationException.ConfigurationExceptionCodes;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.server.Initialization;

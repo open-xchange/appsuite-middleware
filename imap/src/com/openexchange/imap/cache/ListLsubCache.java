@@ -61,7 +61,7 @@ import javax.mail.MessagingException;
 import com.openexchange.imap.AccessedIMAPStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;

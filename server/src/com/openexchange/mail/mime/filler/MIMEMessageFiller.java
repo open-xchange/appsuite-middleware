@@ -82,13 +82,11 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.conversion.Data;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.Contacts;
@@ -104,7 +102,6 @@ import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -126,9 +123,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -932,8 +927,6 @@ public class MIMEMessageFiller {
             }
         } catch (final ConverterException e) {
             throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -1322,7 +1315,7 @@ public class MIMEMessageFiller {
                     try {
                         imageProvider = new ImageDataImageProvider(imageData, session);
                     } catch (final OXException e) {
-                        if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                        if (e.isPrefix("MSG") && MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getCode()) {
                             tmp.setLength(0);
                             mr.appendLiteralReplacement(
                                 sb,

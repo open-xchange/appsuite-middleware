@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.text.HTMLProcessing;

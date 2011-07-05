@@ -50,7 +50,7 @@
 package com.openexchange.mail.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -80,7 +80,7 @@ public final class MailPropertiesInit implements Initialization {
         return instance;
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (started.get()) {
             LOG.error(this.getClass().getName() + " already started");
             return;

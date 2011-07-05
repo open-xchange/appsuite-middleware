@@ -50,7 +50,7 @@
 package com.openexchange.mail.transport;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.server.Initialization;
@@ -84,7 +84,7 @@ public final class TransportInitialization implements Initialization {
         started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.warn("Duplicate initialization of transport module aborted.");
             return;

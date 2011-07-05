@@ -62,13 +62,11 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -117,10 +115,6 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             final DocumentInputStreamProvider tmp = new DocumentInputStreamProvider(fileAccess, documentId);
             tmp.setName(getFileName());
             inputStreamProvider = tmp;
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (OXException e) {
-            throw new OXException(e);
         } finally{
             if(fileAccess != null) {
                 try {

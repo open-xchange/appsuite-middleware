@@ -55,7 +55,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.IMAPStore;

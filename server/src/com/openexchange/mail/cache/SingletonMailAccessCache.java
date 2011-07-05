@@ -57,9 +57,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -214,20 +212,14 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * @throws OXException If clearing user entries fails
      */
     public void clearUserEntries(final Session session) throws OXException {
-        try {
-            final int user = session.getUserId();
-            final int cid = session.getContextId();
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
-            final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
-            for (final MailAccount mailAccount : accounts) {
-                timeoutMap.timeout(getUserKey(user, mailAccount.getId(), cid));
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final int user = session.getUserId();
+        final int cid = session.getContextId();
+        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+            MailAccountStorageService.class,
+            true);
+        final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
+        for (final MailAccount mailAccount : accounts) {
+            timeoutMap.timeout(getUserKey(user, mailAccount.getId(), cid));
         }
     }
 

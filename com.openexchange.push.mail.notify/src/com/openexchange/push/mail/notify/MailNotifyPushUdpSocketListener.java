@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.push.PushException;
 
 
@@ -36,7 +37,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                 datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
             }
         } else {
-            throw new ConfigurationException(ConfigurationException.ConfigurationExceptionCodes.INVALID_CONFIGURATION, "Can't get internet addres to given hostname " + udpListenHost);
+            throw new ConfigurationException(ConfigurationExceptionCodes.INVALID_CONFIGURATION, "Can't get internet addres to given hostname " + udpListenHost);
         }
     }
     

@@ -57,7 +57,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ConfigurationException.ConfigurationExceptionCodes;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.io.IOUtils;
 

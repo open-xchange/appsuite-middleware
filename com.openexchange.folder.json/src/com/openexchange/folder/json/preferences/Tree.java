@@ -52,6 +52,7 @@ package com.openexchange.folder.json.preferences;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -104,7 +105,7 @@ public class Tree implements PreferencesItemService {
                         tree = Integer.valueOf(value);
                     } catch (final NumberFormatException e) {
                         throw new SettingException(new ConfigurationException(
-                            ConfigurationException.ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER,
+                            ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER,
                             e,
                             PROPERTY_NAME));
                     }

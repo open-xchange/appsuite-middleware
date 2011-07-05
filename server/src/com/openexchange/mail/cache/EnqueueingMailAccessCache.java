@@ -64,9 +64,7 @@ import com.openexchange.mail.cache.queue.MailAccessQueueImpl;
 import com.openexchange.mail.cache.queue.SingletonMailAccessQueue;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -311,25 +309,19 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @throws OXException If clearing user entries fails
      */
     public void clearUserEntries(final Session session) throws OXException {
-        try {
-            /*
-             * Check if last...
-             */
-            final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            final int user = session.getUserId();
-            final int cid = session.getContextId();
-            if (null == service || 0 == service.getUserSessions(user, cid)) {
-                final MailAccountStorageService storageService =
-                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-                final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
-                for (final MailAccount mailAccount : accounts) {
-                    orderlyClearQueue(keyFor(mailAccount.getId(), session));
-                }
+        /*
+         * Check if last...
+         */
+        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        final int user = session.getUserId();
+        final int cid = session.getContextId();
+        if (null == service || 0 == service.getUserSessions(user, cid)) {
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
+            for (final MailAccount mailAccount : accounts) {
+                orderlyClearQueue(keyFor(mailAccount.getId(), session));
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

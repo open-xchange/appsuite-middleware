@@ -80,9 +80,8 @@ import net.freeutils.tnef.mime.ContactHandler;
 import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.i18n.LocaleTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -191,7 +190,7 @@ public final class MailMessageParser {
 
     private String subject;
 
-    private final List<AbstractOXException> warnings;
+    private final List<OXException> warnings;
 
     /**
      * Constructor
@@ -199,7 +198,7 @@ public final class MailMessageParser {
     public MailMessageParser() {
         super();
         inlineDetector = LENIENT_DETECTOR;
-        warnings = new ArrayList<AbstractOXException>(2);
+        warnings = new ArrayList<OXException>(2);
     }
 
     /**
@@ -218,7 +217,7 @@ public final class MailMessageParser {
      * 
      * @return The warnings
      */
-    public List<AbstractOXException> getWarnings() {
+    public List<OXException> getWarnings() {
         return Collections.unmodifiableList(warnings);
     }
 
@@ -273,8 +272,8 @@ public final class MailMessageParser {
         } catch (final IOException e) {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
-            throw new OXException(
-                MailExceptionCode.UNREADBALE_PART_CONTENT,
+            throw 
+                MailExceptionCode.UNREADBALE_PART_CONTENT.create(
                 e,
                 null == mailId ? "" : mailId,
                 null == folder ? "" : folder);

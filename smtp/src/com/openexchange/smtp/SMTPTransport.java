@@ -86,7 +86,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -438,7 +438,7 @@ public final class SMTPTransport extends MailTransport {
                     transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                 }
             } catch (final javax.mail.AuthenticationFailedException e) {
-                throw new MIMEMailException(MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS, e, smtpConfig.getServer(), e.getMessage());
+                throw new OXException(OXException.Code.TRANSPORT_INVALID_CREDENTIALS, e, smtpConfig.getServer(), e.getMessage());
             }
             try {
                 saveChangesSafe(smtpMessage);
@@ -475,8 +475,8 @@ public final class SMTPTransport extends MailTransport {
                         transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
-                    throw new MIMEMailException(
-                        MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS,
+                    throw new OXException(
+                        OXException.Code.TRANSPORT_INVALID_CREDENTIALS,
                         e,
                         smtpConfig.getServer(),
                         e.getMessage());
@@ -543,8 +543,8 @@ public final class SMTPTransport extends MailTransport {
                         transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), null, null);
                     }
                 } catch (final javax.mail.AuthenticationFailedException e) {
-                    throw new MIMEMailException(
-                        MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS,
+                    throw new OXException(
+                        OXException.Code.TRANSPORT_INVALID_CREDENTIALS,
                         e,
                         smtpConfig.getServer(),
                         e.getMessage());
@@ -631,7 +631,7 @@ public final class SMTPTransport extends MailTransport {
                 }
                 close = true;
             } catch (final javax.mail.AuthenticationFailedException e) {
-                throw new MIMEMailException(MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS, e, config.getServer(), e.getMessage());
+                throw new OXException(OXException.Code.TRANSPORT_INVALID_CREDENTIALS, e, config.getServer(), e.getMessage());
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);

@@ -50,16 +50,15 @@
 package com.openexchange.mail.loginhandler;
 
 import java.util.Date;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.dataretention.DataRetentionException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -78,7 +77,7 @@ public final class MailLoginHandler implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(final LoginResult login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws OXException {
         /*
          * Track mail login in data retention service
          */
@@ -98,20 +97,14 @@ public final class MailLoginHandler implements LoginHandlerService {
                 retentionService.storeOnAccess(retentionData);
             }
         } catch (final UserConfigurationException e) {
-            throw new LoginException(e);
-        } catch (final OXException e) {
-            throw new LoginException(e);
+            throw new OXException(e);
         } catch (final DataRetentionException e) {
-            throw new LoginException(e);
+            throw new OXException(e);
         }
     }
 
-    public void handleLogout(final LoginResult logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws OXException {
         // Time-out mail access cache
-        try {
-            MailAccess.getMailAccessCache().clearUserEntries(logout.getSession());
-        } catch (final OXException e) {
-            throw new LoginException(e);
-        }
+        MailAccess.getMailAccessCache().clearUserEntries(logout.getSession());
     }
 }

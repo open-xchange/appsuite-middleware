@@ -52,9 +52,9 @@ package com.openexchange.mail.cache;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -88,7 +88,7 @@ public final class MailCacheConfiguration implements Initialization {
         return instance;
     }
 
-    private void configure() throws ConfigurationException {
+    private void configure() throws OXException {
         String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
         if (cacheConfigFile == null) {
             /*
@@ -97,19 +97,15 @@ public final class MailCacheConfiguration implements Initialization {
             cacheConfigFile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
                 SystemConfig.Property.MailCacheConfig.getPropertyName());
             if (cacheConfigFile == null) {
-                throw new ConfigurationException(
-                    ConfigurationException.ConfigurationExceptionCodes.PROPERTY_MISSING,
+                throw 
+                    ConfigurationExceptionCodes.PROPERTY_MISSING.create(
                     SystemConfig.Property.MailCacheConfig.getPropertyName());
             }
         }
-        try {
-            ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
-        } catch (final CacheException e) {
-            throw new ConfigurationException(e);
-        }
+        ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been started. Aborting.");
         }
@@ -124,7 +120,7 @@ public final class MailCacheConfiguration implements Initialization {
         if (null != cacheService) {
             try {
                 cacheService.freeCache(MailMessageCache.REGION_NAME);
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

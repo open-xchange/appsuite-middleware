@@ -63,7 +63,7 @@ import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.sun.mail.imap.IMAPFolder;
 
 /**

@@ -124,7 +124,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.messaging.MailMessagingService;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.exception.OXException;
@@ -2065,7 +2065,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                              * Return empty map
                              */
                             return new TreeMap<String, List<String>>(comparator);
-                        } else if (MIMEMailException.Code.INVALID_CREDENTIALS.getNumber() == number) {
+                        } else if (OXException.Code.INVALID_CREDENTIALS.getNumber() == number) {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(e.getMessage(), e);
                             }

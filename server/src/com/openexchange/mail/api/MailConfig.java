@@ -60,10 +60,9 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.internet.AddressException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -71,11 +70,9 @@ import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -277,17 +274,13 @@ public abstract class MailConfig {
         final MailAccount mailAccount;
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
-        try {
+        {
             final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             if (accountId == MailAccount.DEFAULT_ID) {
                 mailAccount = storage.getDefaultMailAccount(userId, contextId);
             } else {
                 mailAccount = storage.getMailAccount(accountId, userId, contextId);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         mailConfig.accountId = accountId;
         mailConfig.session = session;
@@ -372,14 +365,8 @@ public abstract class MailConfig {
         if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
             return MailProperties.getInstance().getMailServer();
         }
-        try {
-            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            return storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        return storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL();
     }
 
     /**
@@ -398,12 +385,11 @@ public abstract class MailConfig {
      * @param server The server address
      * @param ctx The context
      * @return The user IDs from specified pattern dependent on configuration's setting for mail login source
-     * @throws AbstractOXException If resolving user by specified pattern fails
+     * @throws OXException If resolving user by specified pattern fails
      */
-    public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws AbstractOXException {
-        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-            MailAccountStorageService.class,
-            true);
+    public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws OXException {
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
             switch (MailProperties.getInstance().getLoginSource()) {
             case USER_IMAPLOGIN:

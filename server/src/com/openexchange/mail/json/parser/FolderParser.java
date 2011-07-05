@@ -64,7 +64,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailProvider;
@@ -151,8 +150,7 @@ public final class FolderParser {
                         }
                         final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
                         if (!mailPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2], permissionBits[3])) {
-                            throw new OXException(
-                                MailExceptionCode.INVALID_PERMISSION,
+                            throw MailExceptionCode.INVALID_PERMISSION.create(
                                 Integer.valueOf(permissionBits[0]),
                                 Integer.valueOf(permissionBits[1]),
                                 Integer.valueOf(permissionBits[2]),

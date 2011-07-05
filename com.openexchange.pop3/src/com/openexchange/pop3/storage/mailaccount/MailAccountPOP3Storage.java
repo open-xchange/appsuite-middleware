@@ -75,7 +75,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -251,7 +251,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                    if (OXException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
                         // Ignore
                         LOG.trace(e.getMessage(), e);
                     } else {
@@ -263,7 +263,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                    if (OXException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
                         // Ignore
                         LOG.trace(e.getMessage(), e);
                     } else {
@@ -582,7 +582,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 warnings.add(MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession()));
             }
         } catch (final OXException e) {
-            if (MIMEMailException.Code.LOGIN_FAILED.getNumber() == e.getDetailNumber() || MIMEMailException.Code.INVALID_CREDENTIALS.getNumber() == e.getDetailNumber()) {
+            if (OXException.Code.LOGIN_FAILED.getNumber() == e.getDetailNumber() || OXException.Code.INVALID_CREDENTIALS.getNumber() == e.getDetailNumber()) {
                 throw e;
             }
             LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);

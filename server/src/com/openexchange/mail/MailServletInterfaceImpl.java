@@ -123,7 +123,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -1626,7 +1626,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
             } catch (final OXException e) {
                 final int number = e.getCode();
-                if (e.isPrefix("MSG") && (number == MIMEMailException.Code.LOGIN_FAILED.getNumber() || number == MIMEMailException.Code.INVALID_CREDENTIALS.getNumber())) {
+                if (e.isPrefix("MSG") && (number == OXException.Code.LOGIN_FAILED.getNumber() || number == OXException.Code.INVALID_CREDENTIALS.getNumber())) {
                     MailServletInterface.mailInterfaceMonitor.changeNumFailedLogins(true);
                 }
                 throw e;

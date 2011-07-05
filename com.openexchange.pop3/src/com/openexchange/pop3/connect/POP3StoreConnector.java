@@ -66,7 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.POP3Provider;

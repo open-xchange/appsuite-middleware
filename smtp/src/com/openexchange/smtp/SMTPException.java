@@ -51,14 +51,14 @@ package com.openexchange.smtp;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SMTPException}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPException extends MIMEMailException {
+public final class SMTPException extends OXException {
 
     private static final long serialVersionUID = -4944650865952255865L;
 

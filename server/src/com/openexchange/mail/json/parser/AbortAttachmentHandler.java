@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.mail.json.parser;
 
 import com.openexchange.exception.OXException;
@@ -56,7 +55,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.session.Session;
-
 /**
  * {@link AbortAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that throws a {@link OXException} on exceeded quota
  * (either overall or per-file quota).
@@ -65,7 +63,8 @@ import com.openexchange.session.Session;
  */
 public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbortAttachmentHandler.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbortAttachmentHandler.class));
 
     private TextBodyMailPart textPart;
 
@@ -89,8 +88,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 final String fileName = attachment.getFileName();
-                throw new OXException(
-                    MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
+                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
                     Long.valueOf(uploadQuotaPerFile),
                     null == fileName ? "" : fileName,
                     Long.valueOf(size));

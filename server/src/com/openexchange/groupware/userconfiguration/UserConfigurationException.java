@@ -58,7 +58,7 @@ public class UserConfigurationException extends OXException {
 
     private static final long serialVersionUID = 5579597483110227098L;
 
-    public static enum UserConfigurationCode {
+    public static enum UserConfigurationCodes {
 
         /**
          * A SQL error occurred: %1$s
@@ -111,7 +111,7 @@ public class UserConfigurationException extends OXException {
 
         private final Category category;
 
-        private UserConfigurationCode(final String message, final Category category, final int detailNumber) {
+        private UserConfigurationCodes(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.detailNumber = detailNumber;
             this.category = category;
@@ -135,13 +135,13 @@ public class UserConfigurationException extends OXException {
         super(exc);
     }
 
-    public UserConfigurationException(final UserConfigurationCode code, final Throwable cause,
+    public UserConfigurationException(final UserConfigurationCodes code, final Throwable cause,
             final Object... messageArgs) {
         super(EnumComponent.USER_SETTING, code.category, code.detailNumber, code.message, cause);
         super.setMessageArgs(messageArgs);
     }
 
-    public UserConfigurationException(final UserConfigurationCode code, final Object... messageArgs) {
+    public UserConfigurationException(final UserConfigurationCodes code, final Object... messageArgs) {
         super(EnumComponent.USER_SETTING, code.category, code.detailNumber, code.message, null);
         super.setMessageArgs(messageArgs);
     }

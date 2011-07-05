@@ -63,7 +63,6 @@ import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.push.PushEventConstants;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;

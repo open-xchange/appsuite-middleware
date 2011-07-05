@@ -172,11 +172,11 @@ public final class MailProperties implements IMailProperties {
     private int mailAccessCacheIdleSeconds;
 
     private boolean addClientIPAddress;
-    
+
     private boolean rateLimitPrimaryOnly;
-    
+
     private int rateLimit;
-    
+
     private int maxToCcBcc;
 
     private String authProxyDelimiter;
@@ -193,9 +193,9 @@ public final class MailProperties implements IMailProperties {
     /**
      * Exclusively loads the global mail properties
      * 
-     * @throws MailConfigException If loading of global mail properties fails
+     * @throws OXException If loading of global mail properties fails
      */
-    public void loadProperties() throws MailConfigException {
+    public void loadProperties() throws OXException {
         if (!loaded.get()) {
             synchronized (loaded) {
                 if (!loaded.get()) {
@@ -271,7 +271,7 @@ public final class MailProperties implements IMailProperties {
         authProxyDelimiter = null;
     }
 
-    private void loadProperties0() throws MailConfigException {
+    private void loadProperties0() throws OXException {
         final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global mail properties...\n");
 
@@ -280,11 +280,11 @@ public final class MailProperties implements IMailProperties {
         {
             final String loginStr = configuration.getProperty("com.openexchange.mail.loginSource");
             if (loginStr == null) {
-                throw new MailConfigException("Property \"com.openexchange.mail.loginSource\" not set");
+                throw MailConfigException.create("Property \"com.openexchange.mail.loginSource\" not set");
             }
             final LoginSource loginSource = LoginSource.parse(loginStr.trim());
             if (null == loginSource) {
-                throw new MailConfigException(new StringBuilder(256).append(
+                throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr).toString());
             }
             this.loginSource = loginSource;
@@ -294,11 +294,11 @@ public final class MailProperties implements IMailProperties {
         {
             final String pwStr = configuration.getProperty("com.openexchange.mail.passwordSource");
             if (pwStr == null) {
-                throw new MailConfigException("Property \"com.openexchange.mail.passwordSource\" not set");
+                throw MailConfigException.create("Property \"com.openexchange.mail.passwordSource\" not set");
             }
             final PasswordSource pwSource = PasswordSource.parse(pwStr.trim());
             if (null == pwSource) {
-                throw new MailConfigException(new StringBuilder(256).append(
+                throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr).toString());
             }
             passwordSource = pwSource;
@@ -308,11 +308,11 @@ public final class MailProperties implements IMailProperties {
         {
             final String mailSrcStr = configuration.getProperty("com.openexchange.mail.mailServerSource");
             if (mailSrcStr == null) {
-                throw new MailConfigException("Property \"com.openexchange.mail.mailServerSource\" not set");
+                throw MailConfigException.create("Property \"com.openexchange.mail.mailServerSource\" not set");
             }
             final ServerSource mailServerSource = ServerSource.parse(mailSrcStr.trim());
             if (null == mailServerSource) {
-                throw new MailConfigException(new StringBuilder(256).append(
+                throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr).toString());
             }
             this.mailServerSource = mailServerSource;
@@ -322,11 +322,11 @@ public final class MailProperties implements IMailProperties {
         {
             final String transSrcStr = configuration.getProperty("com.openexchange.mail.transportServerSource");
             if (transSrcStr == null) {
-                throw new MailConfigException("Property \"com.openexchange.mail.transportServerSource\" not set");
+                throw MailConfigException.create("Property \"com.openexchange.mail.transportServerSource\" not set");
             }
             final ServerSource transportServerSource = ServerSource.parse(transSrcStr.trim());
             if (null == transportServerSource) {
-                throw new MailConfigException(new StringBuilder(256).append(
+                throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(transSrcStr).toString());
             }
             this.transportServerSource = transportServerSource;
@@ -368,7 +368,8 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String attachDisplaySizeStr = configuration.getProperty("com.openexchange.mail.attachmentDisplaySizeLimit", "8192").trim();
+            final String attachDisplaySizeStr =
+                configuration.getProperty("com.openexchange.mail.attachmentDisplaySizeLimit", "8192").trim();
             try {
                 attachDisplaySize = Integer.parseInt(attachDisplaySizeStr);
                 logBuilder.append("\tAttachment Display Size Limit: ").append(attachDisplaySize).append('\n');
@@ -410,7 +411,8 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String allowNestedStr = configuration.getProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", "false").trim();
+            final String allowNestedStr =
+                configuration.getProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", "false").trim();
             allowNestedDefaultFolderOnAltNamespace = Boolean.parseBoolean(allowNestedStr);
             logBuilder.append("\tAllow Nested Default Folders on AltNamespace: ").append(allowNestedDefaultFolderOnAltNamespace).append(
                 '\n');
@@ -443,7 +445,8 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String adminMailLoginEnabledStr = configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", "false").trim();
+            final String adminMailLoginEnabledStr =
+                configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", "false").trim();
             adminMailLoginEnabled = Boolean.parseBoolean(adminMailLoginEnabledStr);
             logBuilder.append("\tAdmin Mail Login Enabled: ").append(adminMailLoginEnabled).append('\n');
         }
@@ -485,9 +488,8 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String partModifierStr = configuration.getProperty(
-                "com.openexchange.mail.partModifierImpl",
-                DummyPartModifier.class.getName()).trim();
+            final String partModifierStr =
+                configuration.getProperty("com.openexchange.mail.partModifierImpl", DummyPartModifier.class.getName()).trim();
             try {
                 PartModifier.init(partModifierStr);
                 logBuilder.append("\tPartModifier Implementation: ").append(PartModifier.getInstance().getClass().getName()).append('\n');
@@ -567,7 +569,7 @@ public final class MailProperties implements IMailProperties {
             rateLimitPrimaryOnly = Boolean.parseBoolean(rateLimitPrimaryOnlyStr);
             logBuilder.append("\tRate limit primary only: ").append(rateLimitPrimaryOnly).append('\n');
         }
-        
+
         {
             final String rateLimitStr = configuration.getProperty("com.openexchange.mail.rateLimit", "0").trim();
             try {
@@ -577,7 +579,7 @@ public final class MailProperties implements IMailProperties {
                 rateLimit = 0;
                 logBuilder.append("\tSent Rate limit: Invalid value \"").append(rateLimitStr).append("\". Setting to fallback ").append(
                     rateLimit).append('\n');
-                
+
             }
         }
 
@@ -590,10 +592,10 @@ public final class MailProperties implements IMailProperties {
                 maxToCcBcc = 0;
                 logBuilder.append("\tmaxToCcBcc: Invalid value \"").append(maxToCcBccStr).append("\". Setting to fallback ").append(
                     maxToCcBcc).append('\n');
-                
+
             }
         }
-        
+
         {
             String javaMailPropertiesStr = configuration.getProperty("com.openexchange.mail.JavaMailProperties");
             if (null != javaMailPropertiesStr) {
@@ -601,7 +603,7 @@ public final class MailProperties implements IMailProperties {
                 if (javaMailPropertiesStr.indexOf("@oxgroupwaresysconfdir@") >= 0) {
                     final String configPath = configuration.getProperty("CONFIGPATH");
                     if (null == configPath) {
-                        throw new MailConfigException("Missing property \"CONFIGPATH\" in system.properties");
+                        throw MailConfigException.create("Missing property \"CONFIGPATH\" in system.properties");
                     }
                     javaMailPropertiesStr = javaMailPropertiesStr.replaceFirst("@oxgroupwaresysconfdir@", configPath);
                 }
@@ -634,15 +636,15 @@ public final class MailProperties implements IMailProperties {
      * 
      * @param propFile The property file
      * @return The appropriate instance of {@link Properties}
-     * @throws MailConfigException If reading property file fails
+     * @throws OXException If reading property file fails
      */
-    protected static Properties readPropertiesFromFile(final String propFile) throws MailConfigException {
+    protected static Properties readPropertiesFromFile(final String propFile) throws OXException {
         final Properties properties = new Properties();
         final FileInputStream fis;
         try {
             fis = new FileInputStream(new File(propFile));
         } catch (final FileNotFoundException e) {
-            throw new MailConfigException(
+            throw MailConfigException.create(
                 new StringBuilder(256).append("Properties not found at location: ").append(propFile).toString(),
                 e);
         }
@@ -650,7 +652,7 @@ public final class MailProperties implements IMailProperties {
             properties.load(fis);
             return properties;
         } catch (final IOException e) {
-            throw new MailConfigException(
+            throw MailConfigException.create(
                 new StringBuilder(256).append("I/O error while reading properties from file \"").append(propFile).append("\": ").append(
                     e.getMessage()).toString(),
                 e);
@@ -791,7 +793,7 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
-     * Gets the sent mail rate limit (how many mails can be sent in 
+     * Gets the sent mail rate limit (how many mails can be sent in
      * 
      * @return
      */
@@ -809,7 +811,7 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
-     * Gets the sent mail rate limit (how many mails can be sent in 
+     * Gets the sent mail rate limit (how many mails can be sent in
      * 
      * @return
      */
@@ -818,15 +820,14 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
-     * Gets the setting if the rate limit should only affect the primary
-     * account or all accounts 
+     * Gets the setting if the rate limit should only affect the primary account or all accounts
      * 
      * @return
      */
     public boolean getRateLimitPrimaryOnly() {
         return rateLimitPrimaryOnly;
     }
-    
+
     /**
      * Gets the global transport server
      * 
@@ -878,7 +879,6 @@ public final class MailProperties implements IMailProperties {
         return mailAccessCacheIdleSeconds;
     }
 
-    
     /**
      * @return the authProxyDelimiter
      */

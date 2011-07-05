@@ -74,7 +74,6 @@ import org.json.JSONObject;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
@@ -91,7 +90,6 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -108,7 +106,7 @@ import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -118,9 +116,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -134,7 +130,8 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class MessageParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageParser.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageParser.class));
 
     /**
      * No instantiation
@@ -243,9 +240,7 @@ public final class MessageParser {
                 if (length > 0) {
                     final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
                     if (conversionService == null) {
-                        throw new OXException(new OXException(
-                            ServiceExceptionCode.SERVICE_UNAVAILABLE,
-                            ConversionService.class.getName()));
+                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConversionService.class.getName());
                     }
                     final Set<Class<?>> types = new HashSet<Class<?>>(4);
                     for (int i = 0; i < length; i++) {
@@ -371,9 +366,14 @@ public final class MessageParser {
      */
     public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session, final int accountId) throws OXException {
         try {
-            parse(jsonObj, mail, TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(
-                session.getUserId(),
-                ContextStorage.getStorageContext(session.getContextId())).getTimeZone()), session, accountId);
+            parse(
+                jsonObj,
+                mail,
+                TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(
+                    session.getUserId(),
+                    ContextStorage.getStorageContext(session.getContextId())).getTimeZone()),
+                session,
+                accountId);
         } catch (final OXException e) {
             throw new OXException(e);
         }
@@ -652,7 +652,8 @@ public final class MessageParser {
                          * type.
                          */
                         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
-                        final String conformHTML = htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "US-ASCII");
+                        final String conformHTML =
+                            htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "US-ASCII");
                         if (MIMETypes.MIME_TEXT_PLAIN.equals(contentType)) {
                             content = htmlService.html2text(conformHTML, true).getBytes(charsetName);
                         } else {

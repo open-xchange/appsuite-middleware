@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;

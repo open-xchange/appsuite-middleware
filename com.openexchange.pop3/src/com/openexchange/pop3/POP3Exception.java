@@ -51,14 +51,14 @@ package com.openexchange.pop3;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link POP3Exception} - Indicates a POP3 error.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3Exception extends MIMEMailException {
+public final class POP3Exception extends OXException {
 
     /**
      * Serial Version UID
@@ -275,15 +275,15 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Mail folder could not be found: %1$s.
          */
-        FOLDER_NOT_FOUND(MIMEMailException.Code.FOLDER_NOT_FOUND),
+        FOLDER_NOT_FOUND(OXException.Code.FOLDER_NOT_FOUND),
         /**
          * An attempt was made to open a read-only folder with read-write: %1$s
          */
-        READ_ONLY_FOLDER(MIMEMailException.Code.READ_ONLY_FOLDER),
+        READ_ONLY_FOLDER(OXException.Code.READ_ONLY_FOLDER),
         /**
          * Connection was refused or timed out while attempting to connect to remote server %1$s for user %2$s.
          */
-        CONNECT_ERROR(MIMEMailException.Code.CONNECT_ERROR),
+        CONNECT_ERROR(OXException.Code.CONNECT_ERROR),
         /**
          * POP3 does not support to move folders.
          */
@@ -402,7 +402,7 @@ public final class POP3Exception extends MIMEMailException {
             category = code.getCategory();
         }
 
-        private Code(final MIMEMailException.Code code) {
+        private Code(final OXException.Code code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();

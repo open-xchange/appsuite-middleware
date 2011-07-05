@@ -83,13 +83,12 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -100,7 +99,6 @@ import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -169,8 +167,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 if (LOG.isDebugEnabled()) {
                     final String fileName = attachment.getFileName();
                     final OXException e =
-                        new OXException(
-                            MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
+                        MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
                             Long.valueOf(uploadQuotaPerFile),
                             null == fileName ? "" : fileName,
                             Long.valueOf(size));
@@ -536,7 +533,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         return composedMail;
     } // End of copyOf()
 
-    private MailPart createLinksAttachment(final String text) throws OXException, MIMEMailException {
+    private MailPart createLinksAttachment(final String text) throws OXException, OXException {
         try {
             final MimeBodyPart bodyPart = new MimeBodyPart();
             bodyPart.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html");
@@ -591,7 +588,10 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     retry = false;
                 } catch (final OXException x) {
                     fileAccess.rollback();
-                    if (441 != x.getDetailNumber()) {
+                    if (!x.isPrefix("IFO")) {
+                        throw x;
+                    }
+                    if (441 != x.getCode()) {
                         throw new OXException(x);
                     }
                     /*
@@ -608,10 +608,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     }
                     file.setFileName(newName);
                     file.setTitle(newName);
-                } catch (final OXException e) {
-                    fileAccess.rollback();
-                    throw e;
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     fileAccess.rollback();
                     throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
@@ -680,11 +677,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     new StringBuilder("Transaction error while deleting infostore document with ID \"").append(publication.infostoreId).append(
                         "\" failed.").toString(),
                     e);
-            } catch (final OXException e) {
-                LOG.error(
-                    new StringBuilder("Deleting infostore document with ID \"").append(publication.infostoreId).append("\" failed.").toString(),
-                    e);
-            } 
+            }
         }
     } // End of rollbackPublications()
 

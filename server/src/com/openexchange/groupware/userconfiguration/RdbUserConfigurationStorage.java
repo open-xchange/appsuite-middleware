@@ -62,7 +62,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCodes;
 import com.openexchange.server.impl.DBPool;
 
 /**
@@ -110,7 +110,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         } catch (final OXException e) {
             throw new UserConfigurationException(e);
         } catch (final SQLException e) {
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
+            throw new UserConfigurationException(UserConfigurationCodes.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -121,7 +121,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         } catch (final DBPoolingException e) {
             throw new UserConfigurationException(e);
         } catch (final SQLException e) {
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
+            throw new UserConfigurationException(UserConfigurationCodes.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -197,9 +197,9 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             }
             saveUserConfiguration(permissionBits, userId, insert, ctx, null);
         } catch (final SQLException e) {
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
+            throw new UserConfigurationException(UserConfigurationCodes.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e);
+            throw new UserConfigurationException(UserConfigurationCodes.DBPOOL_ERROR, e);
         }
     }
 
@@ -425,7 +425,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             if (rs.next()) {
                 return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
             }
-            throw new UserConfigurationException(UserConfigurationCode.NOT_FOUND, Integer.valueOf(userId), Integer
+            throw new UserConfigurationException(UserConfigurationCodes.NOT_FOUND, Integer.valueOf(userId), Integer
                     .valueOf(ctx.getContextId()));
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);

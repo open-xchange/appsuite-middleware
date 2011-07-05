@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.config;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 
@@ -66,52 +64,29 @@ public final class MailConfigException extends OXException {
      */
     private static final long serialVersionUID = -5676002376855401186L;
 
-    /**
-     * Initializes a new {@link MailConfigException}
-     * 
-     * @param cause The initial error
-     */
-    public MailConfigException(final AbstractOXException cause) {
-        super(cause);
+    private MailConfigException() {
+        super();
     }
 
     /**
      * Constructs a new exception with the given detail message and cause.
      */
-    public MailConfigException(final String message, final Throwable cause) {
-        super(
-            EnumComponent.MAIL,
-            MailExceptionCode.CONFIG_ERROR.getCategory(),
-            MailExceptionCode.CONFIG_ERROR.getNumber(),
-            MailExceptionCode.CONFIG_ERROR.getMessage(),
-            cause);
-        super.setMessageArgs(message);
+    public static OXException create(final String message, final Throwable cause) {
+        return MailExceptionCode.CONFIG_ERROR.create(cause, message);
     }
 
     /**
      * Constructs a new exception with the given detail message.
      */
-    public MailConfigException(final String message) {
-        super(
-            EnumComponent.MAIL,
-            MailExceptionCode.CONFIG_ERROR.getCategory(),
-            MailExceptionCode.CONFIG_ERROR.getNumber(),
-            MailExceptionCode.CONFIG_ERROR.getMessage(),
-            null);
-        super.setMessageArgs(message);
+    public static OXException create(final String message) {
+        return MailExceptionCode.CONFIG_ERROR.create(message);
     }
 
     /**
      * Constructs a new exception from the given <code>Exception</code> instance.
      */
-    public MailConfigException(final Exception e) {
-        super(
-            EnumComponent.MAIL,
-            MailExceptionCode.CONFIG_ERROR.getCategory(),
-            MailExceptionCode.CONFIG_ERROR.getNumber(),
-            MailExceptionCode.CONFIG_ERROR.getMessage(),
-            e);
-        super.setMessageArgs(e.getMessage());
+    public static OXException create(final Exception e) {
+        return MailExceptionCode.CONFIG_ERROR.create(e, new Object[0]);
     }
 
 }

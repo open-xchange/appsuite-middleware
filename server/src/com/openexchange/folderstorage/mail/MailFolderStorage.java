@@ -114,7 +114,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -693,7 +693,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (!createIfAbsent) {
                 throw e;
             }
-            if ((MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() != e.getDetailNumber()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
+            if ((OXException.Code.FOLDER_NOT_FOUND.getNumber() != e.getDetailNumber()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 throw e;
             }
             return recreateMailFolder(accountId, fullname, session, mailAccess);

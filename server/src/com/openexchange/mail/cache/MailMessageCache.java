@@ -54,7 +54,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -148,11 +147,7 @@ public final class MailMessageCache {
         return updaters;
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessageCache.class));
-
-    private static final Object[] EMPTY_ARGS = new Object[0];
-
-    static final String REGION_NAME = "MailMessageCache";
+    protected static final String REGION_NAME = "MailMessageCache";
 
     private static final ConcurrentMap<CacheKey, ReadWriteLock> contextLocks = new ConcurrentHashMap<CacheKey, ReadWriteLock>();
 
@@ -167,9 +162,9 @@ public final class MailMessageCache {
     /**
      * Singleton instantiation.
      * 
-     * @throws OXCachingException If cache instantiation fails
+     * @throws OXException If cache instantiation fails
      */
-    private MailMessageCache() throws OXCachingException {
+    private MailMessageCache() throws OXException {
         super();
         initCache();
     }
@@ -177,32 +172,27 @@ public final class MailMessageCache {
     /**
      * Initializes cache reference.
      * 
-     * @throws OXCachingException If initializing the cache reference fails
+     * @throws OXException If initializing the cache reference fails
      */
-    public void initCache() throws OXCachingException {
+    public void initCache() throws OXException {
         /*
          * Check for proper started mail cache configuration
          */
         if (!MailCacheConfiguration.getInstance().isStarted()) {
-            throw new OXCachingException(MailExceptionCode.INITIALIZATION_PROBLEM.create());
+            throw MailExceptionCode.INITIALIZATION_PROBLEM.create();
         }
         if (cache != null) {
             return;
         }
-        try {
-            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
-        } catch (final CacheException e) {
-            LOG.error(e.getMessage(), e);
-            throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
-        }
+        cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
     }
 
     /**
      * Releases cache reference.
      * 
-     * @throws OXCachingException If clearing cache fails
+     * @throws OXException If clearing cache fails
      */
-    public void releaseCache() throws OXCachingException {
+    public void releaseCache() throws OXException {
         if (cache == null) {
             return;
         }
@@ -212,8 +202,6 @@ public final class MailMessageCache {
             if (null != cacheService) {
                 cacheService.freeCache(REGION_NAME);
             }
-        } catch (final CacheException e) {
-            throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, e.getMessage());
         } finally {
             cache = null;
         }
@@ -241,9 +229,9 @@ public final class MailMessageCache {
      * Gets the singleton instance.
      * 
      * @return The singleton instance
-     * @throws OXCachingException If instance initialization failed
+     * @throws OXException If instance initialization failed
      */
-    public static MailMessageCache getInstance() throws OXCachingException {
+    public static MailMessageCache getInstance() throws OXException {
         MailMessageCache tmp = singleton;
         if (null == tmp) {
             synchronized (MailMessageCache.class) {
@@ -393,23 +381,19 @@ public final class MailMessageCache {
      * 
      * @param userId The user ID
      * @param cid The context ID
-     * @throws OXCachingException
+     * @throws OXException
      */
-    public void removeUserMessages(final int userId, final int cid) throws OXCachingException {
+    public void removeUserMessages(final int userId, final int cid) throws OXException {
         if (null == cache) {
             return;
         }
+        final CacheKey mapKey = getMapKey(userId, cid);
+        final Lock writeLock = getLock(mapKey).writeLock();
+        writeLock.lock();
         try {
-            final CacheKey mapKey = getMapKey(userId, cid);
-            final Lock writeLock = getLock(mapKey).writeLock();
-            writeLock.lock();
-            try {
-                cache.remove(mapKey);
-            } finally {
-                writeLock.unlock();
-            }
-        } catch (final CacheException e) {
-            throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, EMPTY_ARGS);
+            cache.remove(mapKey);
+        } finally {
+            writeLock.unlock();
         }
     }
 
@@ -526,39 +510,35 @@ public final class MailMessageCache {
      * @param mails The messages to cache
      * @param userId The user ID
      * @param cid The context ID
-     * @throws OXCachingException If cache put fails
+     * @throws OXException If cache put fails
      */
-    public void putMessages(final int accountId, final MailMessage[] mails, final int userId, final int cid) throws OXCachingException {
+    public void putMessages(final int accountId, final MailMessage[] mails, final int userId, final int cid) throws OXException {
         if (null == cache) {
             return;
         } else if ((mails == null) || (mails.length == 0)) {
             return;
         }
+        final CacheKey mapKey = getMapKey(userId, cid);
+        final Lock writeLock = getLock(mapKey).writeLock();
+        writeLock.lock();
         try {
-            final CacheKey mapKey = getMapKey(userId, cid);
-            final Lock writeLock = getLock(mapKey).writeLock();
-            writeLock.lock();
-            try {
-                @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
-                    (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
-                if (null == map) {
-                    map = new DoubleKeyMap<CacheKey, String, MailMessage>(MailMessage.class);
-                    cache.put(mapKey, map);
-                }
-                for (final MailMessage mail : mails) {
-                    if (mail != null) {
-                        mail.prepareForCaching();
-                        /*
-                         * TODO: Put cloned version into cache ???
-                         */
-                        map.putValue(getEntryKey(accountId, mail.getFolder()), mail.getMailId(), mail);
-                    }
-                }
-            } finally {
-                writeLock.unlock();
+            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+                (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
+            if (null == map) {
+                map = new DoubleKeyMap<CacheKey, String, MailMessage>(MailMessage.class);
+                cache.put(mapKey, map);
             }
-        } catch (final CacheException e) {
-            throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, EMPTY_ARGS);
+            for (final MailMessage mail : mails) {
+                if (mail != null) {
+                    mail.prepareForCaching();
+                    /*
+                     * TODO: Put cloned version into cache ???
+                     */
+                    map.putValue(getEntryKey(accountId, mail.getFolder()), mail.getMailId(), mail);
+                }
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 

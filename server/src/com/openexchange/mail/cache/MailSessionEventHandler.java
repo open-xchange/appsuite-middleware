@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.cache.OXCachingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -150,7 +150,7 @@ public final class MailSessionEventHandler implements EventHandler {
              */
             try {
                 MailMessageCache.getInstance().removeUserMessages(userId, contextId);
-            } catch (final OXCachingException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             /*

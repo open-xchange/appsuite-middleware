@@ -54,9 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -100,7 +98,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         Field.CREATED,
         Field.CREATED_BY)));
 
-    public void handleLogin(final LoginResult login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws OXException {
         /*
          * Ensure publishing infostore folder exists
          */
@@ -120,14 +118,8 @@ public final class TransportLoginHandler implements LoginHandlerService {
                     folderId = lookUpFolder;
                 }
                 session.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderId));
-            } catch (final DBPoolingException e) {
-                throw new LoginException(e);
             } catch (final SQLException e) {
-                throw new LoginException(OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage()));
-            } catch (final OXException e) {
-                throw new LoginException(e);
-            } catch (final OXException e) {
-                throw new LoginException(e);
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
             /*
              * Check for elapsed documents inside infostore folder
@@ -149,36 +141,29 @@ public final class TransportLoginHandler implements LoginHandlerService {
                 /*
                  * Remove elapsed documents
                  */
+                fileAccess.startTransaction();
                 try {
-                    fileAccess.startTransaction();
-                    try {
-                        fileAccess.removeDocument(toRemove, now);
-                        fileAccess.commit();
-                    } catch (final OXException e) {
-                        fileAccess.rollback();
-                        throw new LoginException(e);
-                    } catch (final OXException e) {
-                        fileAccess.rollback();
-                        throw e;
-                    } catch (final Exception e) {
-                        fileAccess.rollback();
-                        throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-                    } finally {
-                        fileAccess.finish();
-                    }
+                    fileAccess.removeDocument(toRemove, now);
+                    fileAccess.commit();
                 } catch (final OXException e) {
-                    throw new LoginException(e);
+                    fileAccess.rollback();
+                    throw e;
+                } catch (final RuntimeException e) {
+                    fileAccess.rollback();
+                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+                } finally {
+                    fileAccess.finish();
                 }
             }
         }
     }
 
-    private List<String> getElapsedDocuments(final int folderId, final IDBasedFileAccess fileAccess, final ServerSession serverSession, final long now) throws LoginException {
+    private List<String> getElapsedDocuments(final int folderId, final IDBasedFileAccess fileAccess, final ServerSession serverSession, final long now) throws OXException {
         final SearchIterator<File> searchIterator;
         try {
             searchIterator = fileAccess.getDocuments(String.valueOf(folderId), FIELDS).results();
         } catch (final AbstractOXException e) {
-            throw new LoginException(e);
+            throw new OXException(e);
         }
         try {
             final long timeToLive = TransportProperties.getInstance().getPublishedDocumentTimeToLive();
@@ -204,7 +189,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
             }
             return ret;
         } catch (final AbstractOXException e) {
-            throw new LoginException(e);
+            throw new OXException(e);
         } finally {
             try {
                 searchIterator.close();
@@ -222,7 +207,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         return ((now - creationDate) > ttl);
     }
 
-    private int createIfAbsent(final Session session, final Context ctx, final String name) throws DBPoolingException, SQLException, OXException, OXException {
+    private int createIfAbsent(final Session session, final Context ctx, final String name) throws SQLException, OXException {
         final int lookUpFolder =
             OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
         if (-1 == lookUpFolder) {
@@ -268,7 +253,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         return newFolder;
     }
 
-    public void handleLogout(final LoginResult logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws OXException {
         // Nothing to do
     }
 }

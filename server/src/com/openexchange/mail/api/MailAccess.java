@@ -65,7 +65,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailAccessWatcher;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
@@ -75,9 +74,7 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -97,7 +94,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private static final long serialVersionUID = -2580495494392812083L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccess.class));
+    private static final transient org.apache.commons.logging.Log LOG =
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccess.class));
 
     private static final class Key {
 
@@ -161,7 +159,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     private static final BlockingQueue<Object> NO_RESTRICTION = new ArrayBlockingQueue<Object>(1);
 
-    private static final ConcurrentMap<Key, BlockingQueue<Object>> COUNTER_MAP = new ConcurrentHashMap<MailAccess.Key, BlockingQueue<Object>>();
+    private static final ConcurrentMap<Key, BlockingQueue<Object>> COUNTER_MAP =
+        new ConcurrentHashMap<MailAccess.Key, BlockingQueue<Object>>();
 
     private static Key getUserKey(final int user, final int accountId, final int cid) {
         return new Key(user, cid, accountId);
@@ -189,7 +188,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static void signalClosed(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         if (MailAccount.DEFAULT_ID != mailAccess.accountId) {
             final Session session = mailAccess.session;
-            final BlockingQueue<Object> queue = COUNTER_MAP.get(getUserKey(session.getUserId(), mailAccess.accountId, session.getContextId()));
+            final BlockingQueue<Object> queue =
+                COUNTER_MAP.get(getUserKey(session.getUserId(), mailAccess.accountId, session.getContextId()));
             if (null != queue) {
                 /*
                  * Dequeue
@@ -200,7 +200,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Signals that specified {@link MailAccess} which shall be connected. Waiting if capacity bounds specified for a closed {@link MailAccess} instance.
+     * Signals that specified {@link MailAccess} which shall be connected. Waiting if capacity bounds specified for a closed
+     * {@link MailAccess} instance.
      * 
      * @param accountId The account ID
      * @param session The session
@@ -220,25 +221,19 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         final Key key = getUserKey(userId, accountId, contextId);
         BlockingQueue<Object> queue = COUNTER_MAP.get(key);
         if (null == queue) {
-            try {
-                final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-                final int max = provider.getProtocol().getMaxCount(mass.getMailAccount(accountId, userId, contextId).getMailServer());
-                if (max > 0) {
-                    final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
-                    queue = COUNTER_MAP.putIfAbsent(key, nq);
-                    if (null == queue) {
-                        queue = nq;
-                    }
-                } else {
-                    queue = COUNTER_MAP.putIfAbsent(key, NO_RESTRICTION);
-                    if (null == queue) {
-                        queue = NO_RESTRICTION;
-                    }
+            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            final int max = provider.getProtocol().getMaxCount(mass.getMailAccount(accountId, userId, contextId).getMailServer());
+            if (max > 0) {
+                final BlockingQueue<Object> nq = new ArrayBlockingQueue<Object>(max);
+                queue = COUNTER_MAP.putIfAbsent(key, nq);
+                if (null == queue) {
+                    queue = nq;
                 }
-            } catch (final OXException e) {
-                throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
+            } else {
+                queue = COUNTER_MAP.putIfAbsent(key, NO_RESTRICTION);
+                if (null == queue) {
+                    queue = NO_RESTRICTION;
+                }
             }
         }
         if ((null == queue) || (NO_RESTRICTION.equals(queue)) || queue.offer(PRESENT)) {
@@ -391,10 +386,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         mailAccess.shutdown();
     }
 
-    /**-
-     * The max. number of {@link MailAccess} instanced allowed being cached concurrently for a user's account.
-     * 
-     * TODO: Add to configuration?
+    /**
+     * - The max. number of {@link MailAccess} instanced allowed being cached concurrently for a user's account. TODO: Add to configuration?
      */
     private static final int MAX_PER_USER = 2;
 
@@ -742,8 +735,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         } catch (final Exception e) {
             final MailConfig mailConfig = getMailConfig();
             final OXException mailExc =
-                new OXException(
-                    MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED,
+                MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED.create(
                     e,
                     mailConfig.getServer(),
                     Integer.valueOf(session.getUserId()),
@@ -945,8 +937,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets the number of seconds this mail access is allowed to remain idle in {@link SingletonMailAccessCache cache} before being removed and
-     * closed. If the default value shall be used for this mail access, return <code>-1</code>.
+     * Gets the number of seconds this mail access is allowed to remain idle in {@link SingletonMailAccessCache cache} before being removed
+     * and closed. If the default value shall be used for this mail access, return <code>-1</code>.
      * 
      * @return The number of allowed idle seconds or <code>-1</code> to signal using default value.
      */

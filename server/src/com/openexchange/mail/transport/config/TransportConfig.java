@@ -49,16 +49,14 @@
 
 package com.openexchange.mail.transport.config;
 
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -93,17 +91,13 @@ public abstract class TransportConfig extends MailConfig {
          * Fetch mail account
          */
         final MailAccount mailAccount;
-        try {
+        {
             final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             if (accountId == MailAccount.DEFAULT_ID) {
                 mailAccount = storage.getDefaultMailAccount(session.getUserId(), session.getContextId());
             } else {
                 mailAccount = storage.getMailAccount(accountId, session.getUserId(), session.getContextId());
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         transportConfig.accountId = accountId;
         fillLoginAndPassword(
@@ -114,11 +108,10 @@ public abstract class TransportConfig extends MailConfig {
         String serverURL = TransportConfig.getTransportServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
-                throw new MailConfigException(
-                    new StringBuilder(128).append("Property \"").append("com.openexchange.mail.transportServer").append(
-                        "\" not set in mail properties").toString());
+                throw MailConfigException.create(new StringBuilder(128).append("Property \"").append(
+                    "com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
             }
-            throw new MailConfigException(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(
+            throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(
                 session.getUserId()).append(" in context ").append(session.getContextId()).toString());
         }
         {
@@ -159,14 +152,8 @@ public abstract class TransportConfig extends MailConfig {
      * @throws OXException If transport server URL cannot be returned
      */
     public static String getTransportServerURL(final Session session, final int accountId) throws OXException {
-        try {
-            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            return getTransportServerURL(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()));
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        return getTransportServerURL(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
     @Override

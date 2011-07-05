@@ -110,7 +110,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -415,8 +415,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 mail.setFolder(fullName);
                 mail.setMailId(String.valueOf(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
-            } catch (final MIMEMailException e) {
-                if (MIMEMailException.Code.MESSAGE_REMOVED.getNumber() == e.getDetailNumber()) {
+            } catch (final OXException e) {
+                if (OXException.Code.MESSAGE_REMOVED.getNumber() == e.getDetailNumber()) {
                     /*
                      * Obviously message was removed in the meantime
                      */
@@ -425,7 +425,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check for generic messaging error
                  */
-                if (MIMEMailException.Code.MESSAGING_ERROR.getNumber() == e.getDetailNumber()) {
+                if (OXException.Code.MESSAGING_ERROR.getNumber() == e.getDetailNumber()) {
                     /*-
                      * Detected generic messaging error. This most likely hints to a severe JavaMail problem.
                      * 
