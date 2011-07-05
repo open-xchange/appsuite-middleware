@@ -68,7 +68,7 @@ import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -103,7 +103,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
     }
 
     @Override
-    public void downgradePerformed(final DowngradeEvent event) throws DowngradeFailedException {
+    public void downgradePerformed(final DowngradeEvent event) throws OXException {
         final UserConfiguration newUserConfiguration = event.getNewUserConfiguration();
         if (!newUserConfiguration.hasCalendar()) {
             /*
@@ -112,7 +112,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             try {
                 deleteCalendarFolderData(newUserConfiguration.getUserId(), event);
             } catch (final OXException e) {
-                throw new DowngradeFailedException(e);
+                throw new OXException(e);
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("All calendar-related folder data removed due to loss of task module access");
@@ -125,7 +125,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             try {
                 deleteTaskFolderData(newUserConfiguration.getUserId(), event);
             } catch (final OXException e) {
-                throw new DowngradeFailedException(e);
+                throw new OXException(e);
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("All task-related folder data removed due to loss of task module access");
@@ -138,7 +138,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             try {
                 deleteInfostoreFolderData(newUserConfiguration.getUserId(), event);
             } catch (final OXException e) {
-                throw new DowngradeFailedException(e);
+                throw new OXException(e);
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("All infostore-related folder data removed due to loss of task module access");
@@ -151,7 +151,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             try {
                 deleteSharedFolderData(newUserConfiguration.getUserId(), event);
             } catch (final OXException e) {
-                throw new DowngradeFailedException(e);
+                throw new OXException(e);
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("All shared folder data removed due to loss of full shared folder access");

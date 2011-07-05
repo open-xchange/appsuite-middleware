@@ -80,7 +80,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeFailedExceptionCode;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.ldap.LdapException;
@@ -140,7 +140,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
 
-    public void downgradePerformed(DowngradeEvent downgradeEvent) throws DowngradeFailedException {
+    public void downgradePerformed(DowngradeEvent downgradeEvent) throws OXException {
         if (!downgradeEvent.getNewUserConfiguration().hasCalendar()) {
             removePrivate(downgradeEvent);
             removeAppointmentsWhereDowngradedUserIsTheOnlyParticipant(downgradeEvent);
@@ -148,18 +148,18 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
 
-    private void removeAppointmentsWhereDowngradedUserIsTheOnlyParticipant(final DowngradeEvent downgradeEvent) throws DowngradeFailedException {
+    private void removeAppointmentsWhereDowngradedUserIsTheOnlyParticipant(final DowngradeEvent downgradeEvent) throws OXException {
         try {
             removeAppointmentsWithOnlyTheUserAsParticipant(downgradeEvent.getSession(),downgradeEvent.getContext(),downgradeEvent.getNewUserConfiguration().getUserId(), downgradeEvent.getWriteCon());
         } catch (final SQLException e) {
             LOG.error(e);
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new DowngradeFailedException(e);
+            throw new OXException(e);
         }
     }
 
-    private void removeFromParticipants(final DowngradeEvent downgradeEvent) throws DowngradeFailedException {
+    private void removeFromParticipants(final DowngradeEvent downgradeEvent) throws OXException {
         final Connection con = downgradeEvent.getWriteCon();
         final int user = downgradeEvent.getNewUserConfiguration().getUserId();
         final int cid = downgradeEvent.getContext().getContextId();
@@ -205,7 +205,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             LOG.error(e);
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new DowngradeFailedException(e);
+            throw new OXException(e);
         } finally {
             CalendarCollection collection = new CalendarCollection();
             collection.closeResultSet(rs);
@@ -213,7 +213,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
 
-    private void removePrivate(final DowngradeEvent downgradeEvent) throws DowngradeFailedException {
+    private void removePrivate(final DowngradeEvent downgradeEvent) throws OXException {
         final UserConfiguration userConfig = downgradeEvent.getNewUserConfiguration();
         final Context ctx = downgradeEvent.getContext();
         final int userId = userConfig.getUserId();
@@ -273,9 +273,9 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 deleteFromView.executeUpdate();
             }
         } catch (final OXException e) {
-            throw new DowngradeFailedException(e);
+            throw new OXException(e);
         } catch (final AbstractOXException e) {
-            throw new DowngradeFailedException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             LOG.error(e);
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -758,7 +758,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         return new DowngradeListener() {
 
             @Override
-			public void downgradePerformed(final DowngradeEvent event) throws DowngradeFailedException {
+			public void downgradePerformed(final DowngradeEvent event) throws OXException {
                 CalendarAdministration.this.downgradePerformed(event);
             }
 

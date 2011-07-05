@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -93,7 +93,7 @@ public class TasksDowngrade extends DowngradeListener {
      */
     @Override
     public void downgradePerformed(final DowngradeEvent event)
-        throws DowngradeFailedException {
+        throws OXException {
         final UserConfiguration userConfig = event.getNewUserConfiguration();
         final Session session = event.getSession();
         final Context ctx = event.getContext();
@@ -106,14 +106,14 @@ public class TasksDowngrade extends DowngradeListener {
             try {
                 removeTasks(session, ctx, userConfig.getUserId(), con);
             } catch (final AbstractOXException e) {
-                throw new DowngradeFailedException(e);
+                throw new OXException(e);
             } 
         } else if (!userConfig.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
                 removeDelegations(session, ctx, userConfig.getUserId(), userConfig, con);
             } catch (final AbstractOXException e) {
-                throw new DowngradeFailedException(e);
+                throw new OXException(e);
             } 
         }
     }

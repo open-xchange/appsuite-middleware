@@ -80,11 +80,11 @@ public enum DowngradeFailedExceptionCode implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         final OXException ret;
         if (display) {
-            ret = new OXException(number, message, cause, args);
+            ret = new OXException(detailNumber, message, cause, args);
         } else {
             ret =
                 new OXException(
-                    number,
+                    detailNumber,
                     Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
                     new Object[0]);
         }

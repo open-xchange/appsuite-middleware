@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.downgrade;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link DowngradeListener}
  * 
@@ -62,10 +64,10 @@ public abstract class DowngradeListener {
 	 * 
 	 * @param event
 	 *            The downgrade event providing needed data
-	 * @throws DowngradeFailedException
+	 * @throws OXException
 	 *             If removal of unused data fails
 	 */
-	public abstract void downgradePerformed(DowngradeEvent event) throws DowngradeFailedException;
+	public abstract void downgradePerformed(DowngradeEvent event) throws OXException;
 
 	/**
 	 * Gets the listener's order.

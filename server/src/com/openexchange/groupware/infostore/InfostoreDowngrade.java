@@ -53,7 +53,7 @@ import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class InfostoreDowngrade extends DowngradeListener {
     @Override
-	public void downgradePerformed(final DowngradeEvent event) throws DowngradeFailedException {
+	public void downgradePerformed(final DowngradeEvent event) throws OXException {
         final DBProvider provider = new StaticDBPoolProvider(event.getWriteCon());
 
         final ServerSession session = new ServerSessionAdapter(event.getSession(), event.getContext());
@@ -91,14 +91,14 @@ public class InfostoreDowngrade extends DowngradeListener {
             } catch (final OXException e1) {
                 //IGNORE
             }
-            throw new DowngradeFailedException(e);
+            throw new OXException(e);
         } catch (final OXException e) {
             try {
                 infostore.rollback();
             } catch (final OXException e1) {
                 //IGNORE
             }
-            throw new DowngradeFailedException(e);
+            throw new OXException(e);
         } finally {
             try {
                 infostore.finish();

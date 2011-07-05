@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.downgrade;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -76,21 +76,11 @@ public final class DowngradeRegistryInit implements Initialization {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#start()
-	 */
-	public void start() throws AbstractOXException {
+	public void start() throws OXException {
 		DowngradeRegistry.initInstance();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
-	public void stop() throws AbstractOXException {
+	public void stop() throws OXException {
 		DowngradeRegistry.releaseInstance();
 	}
 

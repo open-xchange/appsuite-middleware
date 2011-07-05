@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.infostore.InfostoreDowngrade;
 import com.openexchange.groupware.tasks.TasksDowngrade;
@@ -229,10 +230,10 @@ public final class DowngradeRegistry {
 	 * 
 	 * @param downgradeEvent
 	 *            the downgrade event
-	 * @throws DowngradeFailedException
+	 * @throws OXException
 	 *             if downgrade event could not be performed
 	 */
-	public void fireDowngradeEvent(final DowngradeEvent downgradeEvent) throws DowngradeFailedException {
+	public void fireDowngradeEvent(final DowngradeEvent downgradeEvent) throws OXException {
 		registryLock.lock();
 		try {
 			final int size = listeners.size();
