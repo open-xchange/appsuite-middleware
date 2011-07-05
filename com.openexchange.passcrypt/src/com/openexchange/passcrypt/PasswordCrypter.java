@@ -53,6 +53,7 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -122,7 +123,7 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
         // Nothing to to.
     }
 
-    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
         return null;
     }
 

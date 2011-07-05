@@ -49,7 +49,7 @@
 
 package com.openexchange.secret.recovery;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -66,7 +66,7 @@ public interface SecretConsistencyCheck {
      * @param secret The secret
      * @return <code>null</code> if everything could be decrypted, if not return a pointer to something that could not be decrypted (for
      *         debugging)
-     * @throws AbstractOXException
+     * @throws OXException If an error occurs
      */
-    public String checkSecretCanDecryptStrings(ServerSession session, String secret) throws AbstractOXException;
+    public String checkSecretCanDecryptStrings(ServerSession session, String secret) throws OXException;
 }

@@ -50,6 +50,7 @@
 package com.openexchange.secret.recovery.mail.osgi;
 
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
@@ -88,7 +89,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
 
         consistencyReg = context.registerService(SecretConsistencyCheck.class.getName(), new SecretConsistencyCheck() {
 
-            public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+            public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
                 return mailAccountStorage.checkCanDecryptPasswords(session.getUserId(), session.getContextId(), secret);
             }
 

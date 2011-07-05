@@ -49,7 +49,7 @@
 
 package com.openexchange.secret.recovery;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -60,6 +60,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface SecretInconsistencyDetector {
 
-    String isSecretWorking(ServerSession session) throws AbstractOXException;
+    String isSecretWorking(ServerSession session) throws OXException;
 
 }

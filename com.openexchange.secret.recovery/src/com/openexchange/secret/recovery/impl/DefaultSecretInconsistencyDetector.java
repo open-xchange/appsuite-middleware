@@ -51,7 +51,7 @@ package com.openexchange.secret.recovery.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
@@ -68,7 +68,7 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
     private final List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>();
     private SecretService secretService;
     
-    public String isSecretWorking(final ServerSession session) throws AbstractOXException {
+    public String isSecretWorking(final ServerSession session) throws OXException {
         final List<SecretConsistencyCheck> theChecks = getChecks();
         for (final SecretConsistencyCheck secretConsistencyCheck : theChecks) {
             String reason = secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session));

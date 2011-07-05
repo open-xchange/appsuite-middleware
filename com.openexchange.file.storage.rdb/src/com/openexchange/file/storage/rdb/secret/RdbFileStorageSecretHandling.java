@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.rdb.secret;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.groupware.AbstractOXException;
@@ -71,7 +72,7 @@ public abstract class RdbFileStorageSecretHandling implements SecretConsistencyC
         super();
     }
 
-    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
         final Collection<FileStorageService> messagingServices = getFileStorageServices();
         for (final FileStorageService messagingService : messagingServices) {
             final FileStorageAccountManager accountManager = messagingService.getAccountManager();

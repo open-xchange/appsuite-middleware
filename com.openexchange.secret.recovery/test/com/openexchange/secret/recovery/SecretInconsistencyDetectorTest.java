@@ -52,7 +52,7 @@ package com.openexchange.secret.recovery;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.SimUser;
@@ -80,7 +80,7 @@ public class SecretInconsistencyDetectorTest {
     }
     
     @Test
-    public void shouldDetectWhenSecretStringsCanNotBeDecrypted() throws AbstractOXException {
+    public void shouldDetectWhenSecretStringsCanNotBeDecrypted() throws OXException {
         detector.addCheck(new PassingSecretConsistencyCheck());
         detector.addCheck(new FailingSecretConsistencyCheck());
         
@@ -90,7 +90,7 @@ public class SecretInconsistencyDetectorTest {
     }
     
     @Test
-    public void shouldDetectWhenAllIsWell() throws AbstractOXException {
+    public void shouldDetectWhenAllIsWell() throws OXException {
         detector.addCheck(new PassingSecretConsistencyCheck());
         detector.addCheck(new PassingSecretConsistencyCheck());
         
@@ -102,7 +102,7 @@ public class SecretInconsistencyDetectorTest {
     
     private static final class FailingSecretConsistencyCheck implements SecretConsistencyCheck {
 
-        public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+        public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
             return "Kabooom, Baby!";
         }
         
@@ -110,7 +110,7 @@ public class SecretInconsistencyDetectorTest {
     
     private static final class PassingSecretConsistencyCheck implements SecretConsistencyCheck {
 
-        public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws AbstractOXException {
+        public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
             return null;
         }
         
