@@ -85,12 +85,10 @@ import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
 import com.openexchange.calendar.recurrence.RecurringException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCache;
@@ -2285,7 +2283,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public void triggerModificationEvent(final Session session, final CalendarDataObject oldAppointment,
             final CalendarDataObject newAppointment) throws OXException {
         final EventClient eventclient = new EventClient(session);
-        try {
+        {
             int folderId = oldAppointment.getEffectiveFolderId();
             if (folderId == 0) {
                 final OXFolderAccess folderAccess = new OXFolderAccess(oldAppointment.getContext());
@@ -2293,10 +2291,6 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
             final FolderObject sourceFolder = getFolder(session, folderId);
             eventclient.modify(oldAppointment, newAppointment, sourceFolder); // TODO
-        } catch (final EventException e) {
-            throw OXCalendarExceptionCodes.EVENT_ERROR.create(e, e.getMessage());
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         }
 
     }
