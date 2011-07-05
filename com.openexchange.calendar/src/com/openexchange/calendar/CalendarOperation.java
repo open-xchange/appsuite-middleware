@@ -1225,7 +1225,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return p.getUsers();
     }
 
-    public void close() {
+    public void close() throws OXException {
         if (co_rs != null) {
             try {
                 co_rs.close();

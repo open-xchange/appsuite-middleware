@@ -1352,7 +1352,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
 
-        public void close() {
+        public void close() throws OXException {
             closeSQLStuff(rs, stmt);
             if (readcon != null) {
                 DBPool.closeReaderSilent(ctx, readcon);

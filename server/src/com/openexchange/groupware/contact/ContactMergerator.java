@@ -122,7 +122,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
     public void addWarning(AbstractOXException warning) {
     }
 
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         for (SearchIterator<Contact> iter : delegates) {
             iter.close();
         }

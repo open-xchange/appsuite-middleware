@@ -77,7 +77,7 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
         delegate.addWarning(warning);
     }
 
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         delegate.close();
     }
 

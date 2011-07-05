@@ -110,7 +110,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         return reminderObj;
     }
 
-    public void close() throws SearchIteratorException {
+    public void close() throws SearchIteratorException, OXException {
         try {
             if (rs != null) {
                 rs.close();

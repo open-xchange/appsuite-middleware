@@ -106,7 +106,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
         return iterators[i].next();
     }
 
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         for (final SearchIterator<T> iter : iterators) {
             iter.close();
         }

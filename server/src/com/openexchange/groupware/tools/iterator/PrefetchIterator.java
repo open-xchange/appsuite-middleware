@@ -93,7 +93,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         impl.close();
     }
 
@@ -200,7 +200,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public void close() throws SearchIteratorException {
+        public void close() throws SearchIteratorException, OXException {
             data.clear();
             if (null != closeexc) {
                 throw closeexc;
@@ -288,7 +288,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public void close() throws AbstractOXException {
+        public void close() throws OXException {
             delegate.close();
         }
 

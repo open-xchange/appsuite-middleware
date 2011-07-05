@@ -475,7 +475,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
-        public void close() {
+        public void close() throws OXException {
             next = null;
             try {
                 if (rs != null) {

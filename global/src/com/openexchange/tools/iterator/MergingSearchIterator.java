@@ -91,7 +91,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         throw new UnsupportedOperationException();
     }
 
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         AbstractOXException exception = null;
         for (SearchIterator<T> iterator : iterators) {
             try {

@@ -122,7 +122,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         @Override
-        public void close() {
+        public void close() throws com.openexchange.exception.OXException {
             // Nothing to close
         }
 
@@ -675,7 +675,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return loadFolderPermissions(folderId, ctx.getContextId(), con);
     }
 
-    public void close() {
+    public void close() throws com.openexchange.exception.OXException {
         if (isClosed) {
             return;
         }
@@ -905,7 +905,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
         }
 
-        public void close() {
+        public void close() throws com.openexchange.exception.OXException {
             flag.set(false);
             mainFuture.cancel(true);
             queue.clear();

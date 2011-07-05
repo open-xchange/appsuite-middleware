@@ -178,7 +178,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         this.chooser = chooser;
     }
 
-    public void close() throws SearchIteratorException {
+    public void close() throws SearchIteratorException, OXException {
         if(rs == null) {
             return;
         }

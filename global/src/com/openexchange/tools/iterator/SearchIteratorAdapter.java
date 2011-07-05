@@ -87,7 +87,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             return null;
         }
 
-        public void close() {
+        public void close() throws OXException {
             // empty must not be closed.
         }
 
@@ -153,7 +153,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         return delegate.next();
     }
 
-    public void close() {
+    public void close() throws OXException {
         // delegate does not provide a close method.
     }
 

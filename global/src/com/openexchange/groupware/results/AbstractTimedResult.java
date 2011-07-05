@@ -98,7 +98,7 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             results.addWarning(warning);
         }
 
-        public void close() throws AbstractOXException {
+        public void close() throws OXException {
             results.close();
         }
 

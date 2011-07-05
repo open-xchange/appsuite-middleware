@@ -71,7 +71,7 @@ public class CustomizableSearchIterator<T> implements SearchIterator<T>{
     public void addWarning(AbstractOXException warning) {
         searchIterator.addWarning(warning);
     }
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         searchIterator.close();
     }
     public AbstractOXException[] getWarnings() {

@@ -345,7 +345,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
     }
     
-    public void close() {
+    public void close() throws OXException {
         al = null;
         title = null;
         rrs = null;

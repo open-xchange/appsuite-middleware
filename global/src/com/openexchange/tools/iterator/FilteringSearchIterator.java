@@ -81,7 +81,7 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
         delegate.addWarning(warning);
     }
 
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         delegate.close();
     }
 

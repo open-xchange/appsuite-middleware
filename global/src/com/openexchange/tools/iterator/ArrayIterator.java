@@ -86,7 +86,7 @@ public class ArrayIterator<T> implements SearchIterator<T> {
         return array[index++];
     }
 
-    public void close() {
+    public void close() throws OXException {
         // Does not apply to array-backed iterator
     }
 

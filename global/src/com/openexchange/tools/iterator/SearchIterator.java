@@ -81,9 +81,9 @@ public interface SearchIterator<T> {
     /**
      * Closes the search iterator
      * 
-     * @throws AbstractOXException If closing the search iterator fails
+     * @throws OXException If closing fails
      */
-    void close() throws AbstractOXException;
+    void close() throws OXException;
 
     /**
      * This iterator's size

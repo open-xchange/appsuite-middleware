@@ -116,7 +116,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         return delegate.next();
     }
 
-    public void close() {
+    public void close() throws OXException {
         // Nothing to do
     }
 

@@ -1072,7 +1072,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             return m;
         }
 
-        public void close() {
+        public void close() throws OXException {
             if (delegate != null) {
                 delegate.close();
                 return;

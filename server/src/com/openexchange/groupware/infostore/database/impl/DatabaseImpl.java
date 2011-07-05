@@ -1733,7 +1733,7 @@ public class DatabaseImpl extends DBService {
             }
         }
 
-        public void close() throws SearchIteratorException {
+        public void close() throws SearchIteratorException, OXException {
             next = null;
             try {
                 if (rs != null) {
