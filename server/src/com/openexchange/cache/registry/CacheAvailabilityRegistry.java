@@ -57,7 +57,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CacheAvailabilityRegistry} - The cache availability registry
@@ -140,10 +140,10 @@ public final class CacheAvailabilityRegistry {
 	/**
 	 * Notifies the absence of cache service
 	 * 
-	 * @throws AbstractOXException
+	 * @throws OXException
 	 *             If an error occurs
 	 */
-	public void notifyAbsence() throws AbstractOXException {
+	public void notifyAbsence() throws OXException {
 		registryLock.lock();
 		try {
 			final int size = listeners.size();
@@ -159,10 +159,10 @@ public final class CacheAvailabilityRegistry {
 	/**
 	 * Notifies the availability of cache service
 	 * 
-	 * @throws AbstractOXException
+	 * @throws OXException
 	 *             If an error occurs
 	 */
-	public void notifyAvailability() throws AbstractOXException {
+	public void notifyAvailability() throws OXException {
 		registryLock.lock();
 		try {
 			final int size = listeners.size();
