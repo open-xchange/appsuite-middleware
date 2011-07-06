@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.rss;
 
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.session.Session;
 

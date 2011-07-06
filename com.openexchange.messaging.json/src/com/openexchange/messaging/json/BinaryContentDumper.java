@@ -56,7 +56,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 
 /**

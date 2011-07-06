@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.messaging;
 
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultFolderFullnameProvider}

@@ -50,6 +50,7 @@
 package com.openexchange.messaging;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -67,36 +68,36 @@ public interface MessagingAccountManager {
      * @param account The account to add
      * @param session The session providing needed user data
      * @return The identifier of the newly created account
-     * @throws MessagingException If insertion fails
+     * @throws OXException If insertion fails
      */
-    public int addAccount(MessagingAccount account, Session session) throws MessagingException;
+    public int addAccount(MessagingAccount account, Session session) throws OXException;
 
     /**
      * Updates an existing account.
      * 
      * @param account The account providing the identifier and the data to update
      * @param session The session providing needed user data
-     * @throws MessagingException If update fails
+     * @throws OXException If update fails
      */
-    public void updateAccount(MessagingAccount account, Session session) throws MessagingException;;
+    public void updateAccount(MessagingAccount account, Session session) throws OXException;;
 
     /**
      * Deletes an existing account.
      * 
      * @param account The account to delete
      * @param session The session providing needed user data
-     * @throws MessagingException If deletion fails
+     * @throws OXException If deletion fails
      */
-    public void deleteAccount(MessagingAccount account, Session session) throws MessagingException;
+    public void deleteAccount(MessagingAccount account, Session session) throws OXException;
 
     /**
      * Gets all accounts associated with session user.
      * 
      * @param session The session providing needed user data
      * @return All accounts associated with session user.
-     * @throws MessagingException If listing fails
+     * @throws OXException If listing fails
      */
-    public List<MessagingAccount> getAccounts(Session session) throws MessagingException;;
+    public List<MessagingAccount> getAccounts(Session session) throws OXException;;
 
     /**
      * Gets an existing messaging account.
@@ -104,9 +105,9 @@ public interface MessagingAccountManager {
      * @param id The identifier
      * @param session The session providing needed user data
      * @return The messaging account.
-     * @throws MessagingException If retrieval fails
+     * @throws OXException If retrieval fails
      */
-    public MessagingAccount getAccount(int id, Session session) throws MessagingException;
+    public MessagingAccount getAccount(int id, Session session) throws OXException;
 
     /**
      * Checks whether the given secret can be used to decrypt secret strings in this account.
@@ -114,16 +115,16 @@ public interface MessagingAccountManager {
      * @param session The session providing needed user data
      * @param secret The secret to use for decrypting
      * @return true when all accounts could be decrypted, false otherwise
-     * @throws MessagingException 
+     * @throws OXException 
      */
-    public String checkSecretCanDecryptStrings(Session session, String secret) throws MessagingException;
+    public String checkSecretCanDecryptStrings(Session session, String secret) throws OXException;
 
     /**
      * Migrates all encrypted strings from an old secret to a new one.
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
      * @param session The session providing needed user data
-     * @throws MessagingException 
+     * @throws OXException 
      */
-    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws MessagingException;
+    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
 }

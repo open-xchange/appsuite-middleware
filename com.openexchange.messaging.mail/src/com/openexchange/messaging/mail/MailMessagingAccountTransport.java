@@ -61,7 +61,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.session.Session;

@@ -67,7 +67,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.server.OXException;

@@ -55,7 +55,7 @@ import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.messaging.ContentDisposition;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 import com.openexchange.tools.session.ServerSession;

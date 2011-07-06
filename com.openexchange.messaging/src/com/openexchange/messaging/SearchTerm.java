@@ -51,6 +51,7 @@ package com.openexchange.messaging;
 
 import java.io.Serializable;
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SearchTerm} - A search term.
@@ -79,8 +80,8 @@ public interface SearchTerm<T> extends Serializable {
      * 
      * @param msg The message to check
      * @return <code>true</code> if message matches this search term; otherwise <code>false</code>
-     * @throws MessagingException If check fails
+     * @throws OXException If check fails
      */
-    public boolean matches(MessagingMessage msg) throws MessagingException;
+    public boolean matches(MessagingMessage msg) throws OXException;
 
 }

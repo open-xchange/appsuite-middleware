@@ -57,6 +57,7 @@ import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.FormElement.Widget;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -151,7 +152,7 @@ public class SimMessagingService implements MessagingService {
         this.accManager = accManager;
     }
 
-    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {
+    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
         final MessagingAccountAccess accountAccess = accountAccessMap.get(Integer.valueOf(accountId));
         if (null == accountAccess) {
             // TODO: Throw appropriate error
@@ -163,7 +164,7 @@ public class SimMessagingService implements MessagingService {
         accountAccessMap.put(Integer.valueOf(accountId), accountAccess);
     }
 
-    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws MessagingException {
+    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
         final MessagingAccountTransport accountTransport = accountTransportMap.get(Integer.valueOf(accountId));
         if (null == accountTransport) {
             // TODO: Throw appropriate error

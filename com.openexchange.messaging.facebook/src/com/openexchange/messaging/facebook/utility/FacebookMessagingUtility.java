@@ -67,7 +67,7 @@ import org.json.JSONObject;
 import org.scribe.exceptions.OAuthException;
 import org.w3c.dom.Element;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingFolder;

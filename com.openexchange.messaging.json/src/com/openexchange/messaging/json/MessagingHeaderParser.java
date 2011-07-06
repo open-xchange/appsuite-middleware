@@ -52,7 +52,7 @@ package com.openexchange.messaging.json;
 import java.util.Collection;
 import java.util.Map;
 import org.json.JSONException;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader;
 
 

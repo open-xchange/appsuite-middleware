@@ -52,7 +52,7 @@ package com.openexchange.messaging.generic;
 import java.util.List;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
 import com.openexchange.messaging.generic.internal.Modifier;

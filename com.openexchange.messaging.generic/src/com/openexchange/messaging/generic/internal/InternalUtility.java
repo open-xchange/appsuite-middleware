@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.Flags;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.generic.Utility;

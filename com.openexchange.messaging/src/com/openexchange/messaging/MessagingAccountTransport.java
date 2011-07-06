@@ -50,6 +50,7 @@
 package com.openexchange.messaging;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingAccountTransport} - Provides access to transport.
@@ -65,8 +66,8 @@ public interface MessagingAccountTransport extends MessagingResource {
      * 
      * @param message The message to transport
      * @param recipients The recipients' addresses
-     * @throws MessagingException If transport fails
+     * @throws OXException If transport fails
      */
-    public void transport(MessagingMessage message, Collection<MessagingAddressHeader> recipients) throws MessagingException;
+    public void transport(MessagingMessage message, Collection<MessagingAddressHeader> recipients) throws OXException;
 
 }

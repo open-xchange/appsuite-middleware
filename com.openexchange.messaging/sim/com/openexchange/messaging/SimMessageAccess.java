@@ -52,6 +52,7 @@ package com.openexchange.messaging;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -92,73 +93,73 @@ public class SimMessageAccess implements MessagingMessageAccess {
         this.templateMessage = templateMessage;
     }
 
-    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws OXException {
         called.add(new Call("getAttachment", folder, messageId, sectionId));
         return templatePart;
     }
     
-    public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
+    public void appendMessages(final String folder, final MessagingMessage[] messages) throws OXException {
         called.add(new Call("appendMessages", folder, messages));
     }
 
-    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
+    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         called.add(new Call("copyMessages", sourceFolder, destFolder, messageIds, fast));
         return new ArrayList<String>(Arrays.asList("blupp"));
     }
 
-    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws MessagingException {
+    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws OXException {
         called.add(new Call("deleteMessages", folder, messageIds, hardDelete));
     }
 
-    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws MessagingException {
+    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws OXException {
         called.add(new Call("getAllMessages", folder, indexRange, sortField, order, fields));
         return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
     }
     
 
-    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
+    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
         called.add(new Call("getMessage", folder, id, peek));
         return templateMessage;
     }
 
-    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws OXException {
         called.add(new Call("getMessages", folder, messageIds, fields));
         return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
     }
 
-    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
+    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         called.add(new Call("moveMessages", sourceFolder, destFolder, messageIds, fast));
         return null;
     }
 
-    public MessagingMessage perform(final String folder, final String id, final String action) throws MessagingException {
+    public MessagingMessage perform(final String folder, final String id, final String action) throws OXException {
         called.add(new Call("perform", folder, id, action));
         return templateMessage;
     }
 
-    public MessagingMessage perform(final String action) throws MessagingException {
+    public MessagingMessage perform(final String action) throws OXException {
         called.add(new Call("perform", action));
         return templateMessage;
     }
 
-    public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
+    public MessagingMessage perform(final MessagingMessage message, final String action) throws OXException {
         called.add(new Call("perform", message, action));
         return templateMessage;
     }
 
-    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws OXException {
         called.add(new Call("searchMessages", folder, indexRange, sortField, order, searchTerm, fields));
         return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
     }
 
-    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
+    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws OXException {
         called.add(new Call("updateMessage", message, fields));
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.messaging.MessagingMessageAccess#resolveContent(java.lang.String, java.lang.String, java.lang.String)
      */
-    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -51,7 +51,7 @@ package com.openexchange.messaging.facebook;
 
 import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
 

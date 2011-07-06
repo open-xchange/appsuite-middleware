@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link SimpleContent} - Simple content
  * 
@@ -62,8 +64,8 @@ public interface SimpleContent<D> extends MessagingContent {
      * Gets the data.
      * 
      * @return The data
-     * @throws MessagingException If data cannot be returned
+     * @throws OXException If data cannot be returned
      */
-    public D getData() throws MessagingException;
+    public D getData() throws OXException;
 
 }

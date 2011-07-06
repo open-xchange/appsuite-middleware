@@ -55,7 +55,7 @@ import java.util.Collections;
 import java.util.Date;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingMessage;
 
 /**

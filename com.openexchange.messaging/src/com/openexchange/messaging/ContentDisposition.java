@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link ContentDisposition} - The Content-Disposition header.
@@ -118,9 +120,9 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
      * Sets the Content-Disposition.
      * 
      * @param contentDisposition The Content-Disposition as a string
-     * @throws MessagingException If applying Content-Disposition fails
+     * @throws OXException If applying Content-Disposition fails
      */
-    public void setContentDisposition(final String contentDisposition) throws MessagingException;
+    public void setContentDisposition(final String contentDisposition) throws OXException;
 
     /**
      * Checks if disposition is inline

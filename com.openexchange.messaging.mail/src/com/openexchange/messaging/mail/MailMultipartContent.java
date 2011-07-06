@@ -52,7 +52,7 @@ package com.openexchange.messaging.mail;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.messaging.MessagingBodyPart;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MultipartContent;
 
 /**

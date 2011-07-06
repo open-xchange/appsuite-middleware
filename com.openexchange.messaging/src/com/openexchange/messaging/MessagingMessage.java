@@ -51,6 +51,7 @@ package com.openexchange.messaging;
 
 import java.io.Serializable;
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingMessage} - A message.
@@ -171,17 +172,17 @@ public interface MessagingMessage extends MessagingPart, MessagingContent, Seria
      * Gets the color label.
      * 
      * @return The color label
-     * @throws MessagingException If color label cannot be returned
+     * @throws OXException If color label cannot be returned
      */
-    public int getColorLabel() throws MessagingException;
+    public int getColorLabel() throws OXException;
 
     /**
      * Gets the flag bitmask.
      * 
      * @return The flag bitmask
-     * @throws MessagingException If flag bitmask cannot be returned
+     * @throws OXException If flag bitmask cannot be returned
      */
-    public int getFlags() throws MessagingException;
+    public int getFlags() throws OXException;
 
     /**
      * Gets the received date (storage's internal time stamp).
@@ -194,9 +195,9 @@ public interface MessagingMessage extends MessagingPart, MessagingContent, Seria
      * Gets the user flags.
      * 
      * @return The user flags or <code>null</code> if none available
-     * @throws MessagingException If user flags cannot be returned
+     * @throws OXException If user flags cannot be returned
      */
-    public Collection<String> getUserFlags() throws MessagingException;
+    public Collection<String> getUserFlags() throws OXException;
 
     /**
      * Get the thread level of this message.
@@ -222,8 +223,8 @@ public interface MessagingMessage extends MessagingPart, MessagingContent, Seria
      * This is useful for RSS messages as they contain links to their origin messages or feeds.
      * 
      * @return Gets the URL associated with this message.
-     * @throws MessagingException If no URL can be returned.
+     * @throws OXException If no URL can be returned.
      */
-    public String getUrl() throws MessagingException;
+    public String getUrl() throws OXException;
     
 }

@@ -50,7 +50,7 @@
 package com.openexchange.messaging.generic;
 
 import com.openexchange.messaging.ContentType;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;

@@ -53,7 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.messaging.IndexRange;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.SimMessageAccess;

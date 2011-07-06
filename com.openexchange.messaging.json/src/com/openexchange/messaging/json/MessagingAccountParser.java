@@ -55,7 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormContentParser;
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccount;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;

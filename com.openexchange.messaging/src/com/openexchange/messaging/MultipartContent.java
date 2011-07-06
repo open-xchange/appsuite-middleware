@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link MultipartContent} - A multipart content.
  * 
@@ -62,17 +64,17 @@ public interface MultipartContent extends MessagingContent {
      * Gets the number of enclosed {@link MessagingBodyPart parts}.
      * 
      * @return The number of enclosed parts
-     * @throws MessagingException If the number of enclosed parts cannot be determined
+     * @throws OXException If the number of enclosed parts cannot be determined
      */
-    public int getCount() throws MessagingException;
+    public int getCount() throws OXException;
 
     /**
      * Get the specified {@link MessagingBodyPart part}. Parts are numbered starting at zero.
      * 
      * @param index The zero-based index
      * @return The indexed {@link MessagingBodyPart part}
-     * @throws MessagingException If {@link MessagingBodyPart part} at index position cannot be returned
+     * @throws OXException If {@link MessagingBodyPart part} at index position cannot be returned
      */
-    public MessagingBodyPart get(int index) throws MessagingException;
+    public MessagingBodyPart get(int index) throws OXException;
 
 }

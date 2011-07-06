@@ -50,7 +50,7 @@
 package com.openexchange.messaging.registry;
 
 import java.util.List;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 
 /**
@@ -67,9 +67,9 @@ public interface MessagingServiceRegistry {
      * 
      * @param id The messaging service identifier
      * @return The messaging service associated with specified identifier
-     * @throws MessagingException If no messaging service is associated with specified identifier
+     * @throws OXException If no messaging service is associated with specified identifier
      */
-    public MessagingService getMessagingService(String id, int user, int context) throws MessagingException;
+    public MessagingService getMessagingService(String id, int user, int context) throws OXException;
 
     /**
      * Checks if there is a messaging service associated with specified identifier.
@@ -83,7 +83,7 @@ public interface MessagingServiceRegistry {
      * Gets all messaging services kept in this registry.
      * 
      * @return All messaging services kept in this registry
-     * @throws MessagingException If messaging services cannot be returned
+     * @throws OXException If messaging services cannot be returned
      */
-    public List<MessagingService> getAllServices(int user, int context) throws MessagingException;
+    public List<MessagingService> getAllServices(int user, int context) throws OXException;
 }

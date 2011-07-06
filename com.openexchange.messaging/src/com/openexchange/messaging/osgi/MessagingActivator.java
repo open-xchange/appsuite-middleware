@@ -54,9 +54,6 @@ import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.exception.MessagingExceptionFactory;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
@@ -66,8 +63,6 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
  * @since Open-Xchange v6.16
  */
 public final class MessagingActivator implements BundleActivator {
-
-    private ComponentRegistration componentRegistration;
 
     private OSGIMessagingServiceRegistry registry;
 
@@ -86,15 +81,6 @@ public final class MessagingActivator implements BundleActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.messaging");
             }
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    MessagingException.COMPONENT,
-                    "com.openexchange.messaging",
-                    MessagingExceptionFactory.getInstance());
             /*
              * Start registry tracking
              */
@@ -129,13 +115,6 @@ public final class MessagingActivator implements BundleActivator {
             if (null != registry) {
                 registry.stop();
                 registry = null;
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
         } catch (final Exception e) {
             log.error(e.getMessage(), e);

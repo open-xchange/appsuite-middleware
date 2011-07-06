@@ -50,7 +50,7 @@
 package com.openexchange.folderstorage.messaging;
 
 import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolderAccess;
 
 /**

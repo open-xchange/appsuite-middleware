@@ -54,7 +54,7 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.generic.internal.InternalUtility;

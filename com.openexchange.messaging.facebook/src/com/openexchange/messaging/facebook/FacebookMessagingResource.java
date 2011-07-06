@@ -50,7 +50,7 @@
 package com.openexchange.messaging.facebook;
 
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingResource;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.session.Session;

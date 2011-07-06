@@ -131,7 +131,7 @@ import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;

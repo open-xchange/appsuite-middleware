@@ -63,7 +63,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import com.openexchange.html.HTMLService;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.FacebookURLConnectionContent;

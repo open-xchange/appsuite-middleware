@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
 import com.openexchange.oauth.OAuthAccount;

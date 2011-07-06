@@ -51,6 +51,7 @@ package com.openexchange.messaging;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -67,7 +68,7 @@ public class ByteArrayContent implements BinaryContent {
         this.data = data;
     }
 
-    public InputStream getData() throws MessagingException {
+    public InputStream getData() throws OXException {
         return new ByteArrayInputStream(data);
     }
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link SimAccountAccess}
@@ -65,11 +67,11 @@ public class SimAccountAccess implements MessagingAccountAccess {
         return accountId;
     }
 
-    public MessagingFolderAccess getFolderAccess() throws MessagingException {
+    public MessagingFolderAccess getFolderAccess() throws OXException {
         return folderAccess;
     }
 
-    public MessagingMessageAccess getMessageAccess() throws MessagingException {
+    public MessagingMessageAccess getMessageAccess() throws OXException {
         return messageAccess;
     }
 
@@ -77,11 +79,11 @@ public class SimAccountAccess implements MessagingAccountAccess {
 
     }
 
-    public void connect() throws MessagingException {
+    public void connect() throws OXException {
 
     }
 
-    public boolean ping() throws MessagingException {
+    public boolean ping() throws OXException {
         return true;
     }
 
@@ -93,7 +95,7 @@ public class SimAccountAccess implements MessagingAccountAccess {
         return true;
     }
 
-    public MessagingFolder getRootFolder() throws MessagingException {
+    public MessagingFolder getRootFolder() throws OXException {
         return getFolderAccess().getRootFolder();
     }
 

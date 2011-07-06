@@ -52,7 +52,7 @@ package com.openexchange.messaging.json;
 import org.json.JSONException;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.tools.session.ServerSession;
 

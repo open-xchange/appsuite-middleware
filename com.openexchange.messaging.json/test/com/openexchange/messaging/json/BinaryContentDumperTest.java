@@ -55,7 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import junit.framework.TestCase;
 import com.openexchange.messaging.BinaryContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link BinaryContentDumperTest}

@@ -49,114 +49,115 @@
 
 package com.openexchange.messaging;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.messaging.exception.MessagingExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link MessagingExceptionCodes} - Enumeration of all {@link MessagingException}s.
+ * {@link MessagingExceptionCodes} - Enumeration of all {@link OXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public enum MessagingExceptionCodes implements OXErrorMessage {
+public enum MessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(MessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(MessagingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(MessagingExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 2),
+    SQL_ERROR(MessagingExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MessagingExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 3),
+    IO_ERROR(MessagingExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 3),
     /**
      * An I/O error occurred: %1$s
      */
-    JSON_ERROR(MessagingExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 14),
+    JSON_ERROR(MessagingExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 14),
     /**
      * Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
      */
-    ACCOUNT_NOT_FOUND(MessagingExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 4),
+    ACCOUNT_NOT_FOUND(MessagingExceptionMessages.ACCOUNT_NOT_FOUND_MSG, CATEGORY_ERROR, 4),
     /**
      * The operation is not supported by service %1$s.
      */
-    OPERATION_NOT_SUPPORTED(MessagingExceptionMessages.OPERATION_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 6),
+    OPERATION_NOT_SUPPORTED(MessagingExceptionMessages.OPERATION_NOT_SUPPORTED_MSG, CATEGORY_ERROR, 6),
     /**
      * The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
      */
-    FOLDER_NOT_FOUND(MessagingExceptionMessages.FOLDER_NOT_FOUND_MSG, Category.CODE_ERROR, 7),
+    FOLDER_NOT_FOUND(MessagingExceptionMessages.FOLDER_NOT_FOUND_MSG, CATEGORY_ERROR, 7),
     /**
      * Invalid message identifier: %1$s
      */
-    INVALID_MESSAGE_IDENTIFIER(MessagingExceptionMessages.INVALID_MESSAGE_IDENTIFIER_MSG, Category.CODE_ERROR, 8),
+    INVALID_MESSAGE_IDENTIFIER(MessagingExceptionMessages.INVALID_MESSAGE_IDENTIFIER_MSG, CATEGORY_ERROR, 8),
     /**
      * Invalid header "%1$s": %2$s
      */
-    INVALID_HEADER(MessagingExceptionMessages.INVALID_HEADER_MSG, Category.CODE_ERROR, 9),
+    INVALID_HEADER(MessagingExceptionMessages.INVALID_HEADER_MSG, CATEGORY_ERROR, 9),
     /**
      * Unknown action to perform: %1$s.
      */
-    UNKNOWN_ACTION(MessagingExceptionMessages.UNKNOWN_ACTION_MSG, Category.CODE_ERROR, 10),
+    UNKNOWN_ACTION(MessagingExceptionMessages.UNKNOWN_ACTION_MSG, CATEGORY_ERROR, 10),
     /**
      * A messaging error occurred: %1$s
      */
-    MESSAGING_ERROR(MessagingExceptionMessages.MESSAGING_ERROR_MSG, Category.CODE_ERROR, 11),
+    MESSAGING_ERROR(MessagingExceptionMessages.MESSAGING_ERROR_MSG, CATEGORY_ERROR, 11),
     /**
      * Wrongly formatted address: %1$s.
      */
-    ADDRESS_ERROR(MessagingExceptionMessages.ADDRESS_ERROR_MSG, Category.CODE_ERROR, 12),
+    ADDRESS_ERROR(MessagingExceptionMessages.ADDRESS_ERROR_MSG, CATEGORY_ERROR, 12),
     /**
      * Unknown messaging content: %1$s.
      */
-    UNKNOWN_MESSAGING_CONTENT(MessagingExceptionMessages.UNKNOWN_MESSAGING_CONTENT_MSG, Category.CODE_ERROR, 14),
+    UNKNOWN_MESSAGING_CONTENT(MessagingExceptionMessages.UNKNOWN_MESSAGING_CONTENT_MSG, CATEGORY_ERROR, 14),
     /**
      * Unknown messaging service: %1$s.
      */
-    UNKNOWN_MESSAGING_SERVICE(MessagingExceptionMessages.UNKNOWN_MESSAGING_SERVICE_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
+    UNKNOWN_MESSAGING_SERVICE(MessagingExceptionMessages.UNKNOWN_MESSAGING_SERVICE_MSG, CATEGORY_SERVICE_DOWN, 15),
     /**
      * Missing parameter: %1$s.
      */
-    MISSING_PARAMETER(MessagingExceptionMessages.MISSING_PARAMETER_MSG, Category.USER_INPUT, 16),
+    MISSING_PARAMETER(MessagingExceptionMessages.MISSING_PARAMETER_MSG, CATEGORY_USER_INPUT, 16),
     /**
      * Invalid parameter: %1$s with value '%2$s'.
      */
-    INVALID_PARAMETER(MessagingExceptionMessages.INVALID_PARAMETER_MSG, Category.USER_INPUT, 17),
+    INVALID_PARAMETER(MessagingExceptionMessages.INVALID_PARAMETER_MSG, CATEGORY_USER_INPUT, 17),
     /**
      * Messaging part is read-only: %1$s
      */
-    READ_ONLY(MessagingExceptionMessages.READ_ONLY_MSG, Category.USER_INPUT, 18),
+    READ_ONLY(MessagingExceptionMessages.READ_ONLY_MSG, CATEGORY_USER_INPUT, 18),
     /**
      * Unknown color label index: %1$s
      */
-    UNKNOWN_COLOR_LABEL(MessagingExceptionMessages.UNKNOWN_COLOR_LABEL_MSG, Category.USER_INPUT, 19),
+    UNKNOWN_COLOR_LABEL(MessagingExceptionMessages.UNKNOWN_COLOR_LABEL_MSG, CATEGORY_USER_INPUT, 19),
     /**
      * A duplicate folder named "%1$s" already exists below parent folder "%2$s".
      */
-    DUPLICATE_FOLDER(MessagingExceptionMessages.DUPLICATE_FOLDER_MSG, Category.CODE_ERROR, 20),
+    DUPLICATE_FOLDER(MessagingExceptionMessages.DUPLICATE_FOLDER_MSG, CATEGORY_ERROR, 20),
     /**
      * No create access on mail folder %1$s.
      */
-    NO_CREATE_ACCESS(MessagingExceptionMessages.NO_CREATE_ACCESS_MSG, Category.PERMISSION, 21),
+    NO_CREATE_ACCESS(MessagingExceptionMessages.NO_CREATE_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 21),
     /**
      * Not connected
      */
-    NOT_CONNECTED(MessagingExceptionMessages.NOT_CONNECTED_MSG, Category.PERMISSION, 22), 
+    NOT_CONNECTED(MessagingExceptionMessages.NOT_CONNECTED_MSG, CATEGORY_PERMISSION_DENIED, 22), 
     /**
      * Invalid sorting column. Cannot sort by %1$s.
      */
-    INVALID_SORTING_COLUMN(MessagingExceptionMessages.INVALID_SORTING_COLUMN_MSG, Category.USER_INPUT, 23),
+    INVALID_SORTING_COLUMN(MessagingExceptionMessages.INVALID_SORTING_COLUMN_MSG, CATEGORY_USER_INPUT, 23),
     /**
      * No attachment found with section identifier %1$s in message %2$s in folder %3$s.
      */
-    ATTACHMENT_NOT_FOUND(MessagingExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, Category.CODE_ERROR, 24),
+    ATTACHMENT_NOT_FOUND(MessagingExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, CATEGORY_ERROR, 24),
     /**
      * Message %1$s not found in folder %2$s.
      */
-    MESSAGE_NOT_FOUND(MessagingExceptionMessages.MESSAGE_NOT_FOUND_MSG, Category.CODE_ERROR, 25);
+    MESSAGE_NOT_FOUND(MessagingExceptionMessages.MESSAGE_NOT_FOUND_MSG, CATEGORY_ERROR, 25);
 
     private final Category category;
 
@@ -169,6 +170,10 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
         this.detailNumber = detailNumber;
         this.category = category;
     }
+    
+    public String getPrefix() {
+        return "MESSAGING";
+    }
 
     public Category getCategory() {
         return category;
@@ -178,43 +183,41 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
-    private static final Object[] EMPTY = new Object[0];
-
-    /**
-     * Creates a new messaging exception of this error type with no message arguments.
-     * 
-     * @return A new twitter exception
-     */
-    public MessagingException create() {
-        return MessagingExceptionFactory.getInstance().create(this, EMPTY);
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance
      */
-    public MessagingException create(final Object... messageArgs) {
-        return MessagingExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public MessagingException create(final Throwable cause, final Object... messageArgs) {
-        return MessagingExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

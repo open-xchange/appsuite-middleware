@@ -51,7 +51,7 @@ package com.openexchange.messaging.json;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 
 /**

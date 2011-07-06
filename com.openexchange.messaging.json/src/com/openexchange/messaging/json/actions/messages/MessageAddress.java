@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 
 /**

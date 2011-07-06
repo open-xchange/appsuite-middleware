@@ -51,6 +51,7 @@ package com.openexchange.messaging;
 
 import java.util.Arrays;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 
@@ -63,18 +64,18 @@ public class SimAccountManager implements MessagingAccountManager {
 
     private Session session;
     private MessagingAccount createdAccount;
-    private MessagingException exception;
+    private OXException exception;
     private MessagingAccount updatedAccount;
     private MessagingAccount deletedAccount;
     private MessagingAccount accountToGet;
     private int id;
     private List<MessagingAccount> accounts;
 
-    public MessagingAccount newAccount() throws MessagingException {
+    public MessagingAccount newAccount() throws OXException {
         return new SimMessagingAccount();
     }
 
-    public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public int addAccount(final MessagingAccount account, final Session session) throws OXException {
         createdAccount = account;
         this.session = session;
         exception();
@@ -91,36 +92,36 @@ public class SimAccountManager implements MessagingAccountManager {
         return session;
     }
 
-    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public void deleteAccount(final MessagingAccount account, final Session session) throws OXException {
         deletedAccount = account;
         this.session = session;
         exception();
     }
 
     
-    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
+    public MessagingAccount getAccount(final int id, final Session session) throws OXException {
         this.id = id;
         this.session = session;
         exception();
         return accountToGet;
     }
 
-    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
+    public List<MessagingAccount> getAccounts(final Session session) throws OXException {
         exception();
         return accounts;
     }
 
-    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public void updateAccount(final MessagingAccount account, final Session session) throws OXException {
         updatedAccount = account;
         this.session = session;
         exception();
     }
 
-    public void setException(final MessagingException messagingException) {
-        exception = messagingException;
+    public void setException(final OXException OXException) {
+        exception = OXException;
     }
     
-    private void exception() throws MessagingException {
+    private void exception() throws OXException {
         if(null != exception) {
             throw exception;
         }

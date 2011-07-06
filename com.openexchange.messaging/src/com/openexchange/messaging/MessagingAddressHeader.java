@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link MessagingAddressHeader} - Represents a messaging address header.
  * 
@@ -82,8 +84,8 @@ public interface MessagingAddressHeader extends MessagingHeader {
      * Sets the address.
      * 
      * @param address The address to set
-     * @throws MessagingException If setting address fails
+     * @throws OXException If setting address fails
      */
-    public void setAddress(String address) throws MessagingException;
+    public void setAddress(String address) throws OXException;
 
 }

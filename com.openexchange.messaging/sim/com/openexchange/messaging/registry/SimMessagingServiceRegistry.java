@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 
 
@@ -65,19 +65,19 @@ import com.openexchange.messaging.MessagingService;
 public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
     private final Map<String, MessagingService> services = new HashMap<String, MessagingService>();
 
-    private MessagingException exception;
+    private OXException exception;
     
-    public List<MessagingService> getAllServices(int user, int context) throws MessagingException {
+    public List<MessagingService> getAllServices(int user, int context) throws OXException {
         exception();
         return new ArrayList<MessagingService>(services.values());
     }
 
-    public MessagingService getMessagingService(final String id, int user, int context) throws MessagingException {
+    public MessagingService getMessagingService(final String id, int user, int context) throws OXException {
         exception();
         return services.get(id);
     }
 
-    private void exception() throws MessagingException {
+    private void exception() throws OXException {
         if(exception != null) {
             throw exception;
         }
@@ -87,7 +87,7 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
         services.put(service.getId(), service);
     }
 
-    public void setException(final MessagingException exception) {
+    public void setException(final OXException exception) {
         this.exception = exception;
     }
 

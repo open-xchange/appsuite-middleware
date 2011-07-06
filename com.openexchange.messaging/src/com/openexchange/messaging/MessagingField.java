@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
 
 /**
@@ -245,7 +246,7 @@ public enum MessagingField {
         return FIELDS_MAP.get(name);
     }
     
-    public Object doSwitch(final MessagingMessageSwitcher switcher, final Object...args) throws MessagingException {
+    public Object doSwitch(final MessagingMessageSwitcher switcher, final Object...args) throws OXException {
         switch(this) {
         case ID : return switcher.id(args);
         case FOLDER_ID : return switcher.folderId(args);

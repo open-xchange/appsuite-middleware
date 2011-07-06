@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 /**
  * A ReferenceContent represents a reference to a large message content that should be requested separately.
  * 
@@ -76,7 +78,7 @@ public class ReferenceContent implements SimpleContent<String> {
         id = refId;
     }
 
-    public String getData() throws MessagingException {
+    public String getData() throws OXException {
         return id;
     }
 

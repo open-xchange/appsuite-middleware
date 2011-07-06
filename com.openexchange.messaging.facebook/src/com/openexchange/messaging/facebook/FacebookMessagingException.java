@@ -52,7 +52,7 @@ package com.openexchange.messaging.facebook;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FacebookMessagingException} - A facebook messaging exception

@@ -61,7 +61,7 @@ import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.json.BinaryContentDumper;
 import com.openexchange.messaging.json.MessagingContentDumper;

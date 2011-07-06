@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link MessagingResource} - A messaging resource which is {@link #connect() connectable}, {@link #close() closeable} and {@link #ping()
  * pingable}.
@@ -61,9 +63,9 @@ public interface MessagingResource {
     /**
      * Opens this resource. May be invoked on an already opened resource.
      * 
-     * @throws MessagingException If the resource could not be opened for various reasons
+     * @throws OXException If the resource could not be opened for various reasons
      */
-    void connect() throws MessagingException;
+    void connect() throws OXException;
 
     /**
      * Checks if this connection is currently connected.
@@ -81,9 +83,9 @@ public interface MessagingResource {
      * Pings this resource to check if it can be opened and and immediately closes connection.
      * 
      * @return <code>true</code> if a connection can be established; otherwise <code>false</code>
-     * @throws MessagingException If the ping fails
+     * @throws OXException If the ping fails
      */
-    boolean ping() throws MessagingException;
+    boolean ping() throws OXException;
 
     /**
      * Indicates if this resource may be cached (for a little amount of time) once opened.

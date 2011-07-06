@@ -65,7 +65,7 @@ import org.json.JSONObject;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;

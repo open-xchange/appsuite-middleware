@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link MessagingBodyPart} - A messaging part occurring within a multipart.
@@ -63,8 +65,8 @@ public interface MessagingBodyPart extends MessagingPart {
      * Gets the multipart parent.
      * 
      * @return The multipart parent
-     * @throws MessagingException If multipart parent cannot be returned
+     * @throws OXException If multipart parent cannot be returned
      */
-    public MultipartContent getParent() throws MessagingException;
+    public MultipartContent getParent() throws OXException;
 
 }

@@ -88,7 +88,7 @@ import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAction;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.session.Session;
 

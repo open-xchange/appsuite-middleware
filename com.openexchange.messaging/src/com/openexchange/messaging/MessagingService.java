@@ -52,6 +52,7 @@ package com.openexchange.messaging;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -118,9 +119,9 @@ public interface MessagingService {
      * @param accountId The account identifier
      * @param session The session providing needed user data
      * @return The account access for specified account identifier
-     * @throws MessagingException If account access cannot be returned for given account identifier
+     * @throws OXException If account access cannot be returned for given account identifier
      */
-    public MessagingAccountAccess getAccountAccess(int accountId, Session session) throws MessagingException;
+    public MessagingAccountAccess getAccountAccess(int accountId, Session session) throws OXException;
 
     /**
      * Gets the account transport for specified account identifier.
@@ -128,8 +129,8 @@ public interface MessagingService {
      * @param accountId The account identifier
      * @param session The session providing needed user data
      * @return The account transport for specified account identifier
-     * @throws MessagingException If account transport cannot be returned for given account identifier
+     * @throws OXException If account transport cannot be returned for given account identifier
      */
-    public MessagingAccountTransport getAccountTransport(int accountId, Session session) throws MessagingException;
+    public MessagingAccountTransport getAccountTransport(int accountId, Session session) throws OXException;
 
 }

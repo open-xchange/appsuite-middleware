@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SimpleMessagingMessage}
@@ -118,19 +119,19 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         return userFlags;
     }
 
-    public MessagingContent getContent() throws MessagingException {
+    public MessagingContent getContent() throws OXException {
         return content;
     }
 
-    public String getDisposition() throws MessagingException {
+    public String getDisposition() throws OXException {
         return disposition;
     }
 
-    public String getFileName() throws MessagingException {
+    public String getFileName() throws OXException {
         return fileName;
     }
 
-    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+    public MessagingHeader getFirstHeader(final String name) throws OXException {
         final Collection<MessagingHeader> collection = headers.get(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
@@ -155,7 +156,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         return threadLevel;
     }
 
-    public void writeTo(final OutputStream os) throws IOException, MessagingException {
+    public void writeTo(final OutputStream os) throws IOException, OXException {
         throw new UnsupportedOperationException();
     }
 
@@ -224,7 +225,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         content = new MessagingPartArrayContent(parts);
     }
 
-    public MultipartContent getParent() throws MessagingException {
+    public MultipartContent getParent() throws OXException {
         return parent;
     }
 
@@ -232,7 +233,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         this.parent = parent;
     }
 
-    public ContentType getContentType() throws MessagingException {
+    public ContentType getContentType() throws OXException {
         return contentType;
     }
 
@@ -260,7 +261,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         this.url = url;
     }
     
-    public String getUrl() throws MessagingException {
+    public String getUrl() throws OXException {
       return url;  
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.messaging;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -62,7 +63,7 @@ public class SimMessagingTransport implements MessagingAccountTransport {
     private MessagingMessage message;
     private Collection<MessagingAddressHeader> recipients;
 
-    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         this.message = message;
         this.recipients = recipients;
     }
@@ -71,7 +72,7 @@ public class SimMessagingTransport implements MessagingAccountTransport {
 
     }
 
-    public void connect() throws MessagingException {
+    public void connect() throws OXException {
 
     }
 
@@ -79,7 +80,7 @@ public class SimMessagingTransport implements MessagingAccountTransport {
         return true;
     }
 
-    public boolean ping() throws MessagingException {
+    public boolean ping() throws OXException {
         return true;
     }
     

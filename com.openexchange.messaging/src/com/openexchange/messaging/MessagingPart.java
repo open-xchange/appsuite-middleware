@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingPart} - A message part.
@@ -77,27 +78,27 @@ public interface MessagingPart {
      * Gets the headers as an unmodifiable {@link Map}.
      * 
      * @return The headers as an unmodifiable {@link Map}.
-     * @throws MessagingException If headers cannot be returned
+     * @throws OXException If headers cannot be returned
      */
-    public Map<String, Collection<MessagingHeader>> getHeaders() throws MessagingException;
+    public Map<String, Collection<MessagingHeader>> getHeaders() throws OXException;
 
     /**
      * Gets the header associated with specified name or <code>null</code> if not present
      * 
      * @param name The header name
      * @return The header associated with specified name or <code>null</code> if not present
-     * @throws MessagingException If header cannot be returned
+     * @throws OXException If header cannot be returned
      */
-    public Collection<MessagingHeader> getHeader(String name) throws MessagingException;
+    public Collection<MessagingHeader> getHeader(String name) throws OXException;
 
     /**
      * Gets the first header value associated with specified name or <code>null</code> if not present
      * 
      * @param name The header name
      * @return The first header value associated with specified name or <code>null</code> if not present
-     * @throws MessagingException If header cannot be returned
+     * @throws OXException If header cannot be returned
      */
-    public MessagingHeader getFirstHeader(String name) throws MessagingException;
+    public MessagingHeader getFirstHeader(String name) throws OXException;
 
     /**
      * Gets the disposition.
@@ -113,28 +114,28 @@ public interface MessagingPart {
      * </pre>
      * 
      * @return The disposition of this part, or null if unknown
-     * @throws MessagingException If disposition cannot be returned
+     * @throws OXException If disposition cannot be returned
      * @see #ATTACHMENT
      * @see #INLINE
      */
-    public String getDisposition() throws MessagingException;
+    public String getDisposition() throws OXException;
 
     /**
      * Gets the <code>Content-Type</code> header of this part's content. <code>null</code> is returned if the <code>Content-Type</code>
      * header could not be determined.
      * 
      * @return The <code>Content-Type</code> header of this part
-     * @throws MessagingException If content type cannot be returned
+     * @throws OXException If content type cannot be returned
      */
-    public ContentType getContentType() throws MessagingException;
+    public ContentType getContentType() throws OXException;
 
     /**
      * Get the size of this part in bytes. Return <code>-1</code> if the size cannot be determined.
      * 
      * @return The size of this part or <code>-1</code>
-     * @throws MessagingException If size cannot be returned
+     * @throws OXException If size cannot be returned
      */
-    public long getSize() throws MessagingException;;
+    public long getSize() throws OXException;;
 
     /**
      * Get the filename associated with this part, if possible.
@@ -143,9 +144,9 @@ public interface MessagingPart {
      * directory components.
      * 
      * @return The filename to associate with this part
-     * @throws MessagingException If filename cannot be returned
+     * @throws OXException If filename cannot be returned
      */
-    public String getFileName() throws MessagingException;
+    public String getFileName() throws OXException;
 
     /**
      * Gets the section identifier.
@@ -158,9 +159,9 @@ public interface MessagingPart {
      * Gets the content.
      * 
      * @return The content
-     * @throws MessagingException If content cannot be returned
+     * @throws OXException If content cannot be returned
      */
-    public MessagingContent getContent() throws MessagingException;
+    public MessagingContent getContent() throws OXException;
 
     /**
      * Writes this part's bytes to given output stream. The bytes are typically an aggregation of the headers and appropriately encoded
@@ -169,8 +170,8 @@ public interface MessagingPart {
      * The bytes are typically used for transport.
      * 
      * @exception IOException If an I/O error occurs
-     * @exception MessagingException If an error occurs fetching the data to be written
+     * @exception OXException If an error occurs fetching the data to be written
      */
-    public void writeTo(OutputStream os) throws IOException, MessagingException;
+    public void writeTo(OutputStream os) throws IOException, OXException;
 
 }

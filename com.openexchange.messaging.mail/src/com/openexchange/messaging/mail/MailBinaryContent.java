@@ -53,7 +53,7 @@ import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.messaging.BinaryContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MailBinaryContent} - A mail {@link BinaryContent binary content}.

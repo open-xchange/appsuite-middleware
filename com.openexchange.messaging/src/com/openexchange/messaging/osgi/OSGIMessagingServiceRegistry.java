@@ -59,10 +59,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -126,12 +125,12 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
     }
 
-    public List<MessagingService> getAllServices(int user, int context) throws MessagingException {
+    public List<MessagingService> getAllServices(final int user, final int context) throws OXException {
         return filter(new ArrayList<MessagingService>(map.values()), user, context);
     }
 
 
-    public MessagingService getMessagingService(final String id, int user, int context) throws MessagingException {
+    public MessagingService getMessagingService(final String id, final int user, final int context) throws OXException {
         final MessagingService messagingService = map.get(id);
         if (null == messagingService || ! isAllowed(id, user, context)) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
@@ -139,63 +138,63 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         return messagingService;
     }
 
-    private boolean isAllowed(String id, int user, int context) throws MessagingException {
+    private boolean isAllowed(final String id, final int user, final int context) throws OXException {
         if (user == -1 && context == -1) {
             return true; // Quite the hack
         }
         try {
-            ConfigView configView = getView(user, context);
+            final ConfigView configView = getView(user, context);
             if ( !isMessagingEnabled(configView)) {
                 return false;
             }
-            ComposedConfigProperty<Boolean> configProperty = configView.property(id, boolean.class);
+            final ComposedConfigProperty<Boolean> configProperty = configView.property(id, boolean.class);
             return (configProperty.isDefined() && configProperty.get());
-        } catch (OXException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw e;
         }        
     }
 
-    private List<MessagingService> filter(ArrayList<MessagingService> arrayList, int user, int context) throws MessagingException {
-        List<MessagingService> filteredList = new ArrayList<MessagingService>(arrayList.size());
+    private List<MessagingService> filter(final ArrayList<MessagingService> arrayList, final int user, final int context) throws OXException {
+        final List<MessagingService> filteredList = new ArrayList<MessagingService>(arrayList.size());
         try {
-            ConfigView configView = getView(user, context);
+            final ConfigView configView = getView(user, context);
             if (!isMessagingEnabled(configView)) {
                 return Collections.emptyList();
             }
-            for (MessagingService messagingService : arrayList) {
-                ComposedConfigProperty<Boolean> configProperty = configView.property(messagingService.getId(), boolean.class);
+            for (final MessagingService messagingService : arrayList) {
+                final ComposedConfigProperty<Boolean> configProperty = configView.property(messagingService.getId(), boolean.class);
                 if (configProperty.isDefined() && configProperty.get()) {
                     filteredList.add(messagingService);
                 }
             }
-        } catch (OXException x) {
-            throw new MessagingException(x);
+        } catch (final OXException x) {
+            throw x;
         }
         
         return filteredList;
     }
 
-    private boolean isMessagingEnabled(ConfigView configView) throws MessagingException {
+    private boolean isMessagingEnabled(final ConfigView configView) throws OXException {
         try {
-            ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.messaging.enabled", boolean.class);
+            final ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.messaging.enabled", boolean.class);
             if (property.isDefined() && property.get()) {
                 return true;
             }
-        } catch (OXException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         return false;
     }
 
-    private ConfigView getView(int user, int context) throws OXException {
-        ConfigViewFactory service = (ConfigViewFactory) configTracker.getService();
+    private ConfigView getView(final int user, final int context) throws OXException {
+        final ConfigViewFactory service = (ConfigViewFactory) configTracker.getService();
         return service.getView(user, context);
     }
 
-    public boolean containsMessagingService(final String id, int user, int context) {
+    public boolean containsMessagingService(final String id, final int user, final int context) {
         try {
             return null == id ? false : (map.containsKey(id) && isAllowed(id, user, context));
-        } catch (MessagingException e) {
+        } catch (final OXException e) {
             return false;
         }
     }

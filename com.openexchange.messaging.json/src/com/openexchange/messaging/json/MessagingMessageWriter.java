@@ -72,7 +72,7 @@ import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.DateMessagingHeader;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingHeader.HeaderType;

@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link ContentType} - The Content-Type header.
  * 
@@ -85,9 +87,9 @@ public interface ContentType extends ParameterizedMessagingHeader {
      * Sets base type (e.g. text/plain)
      * 
      * @param baseType The base type
-     * @throws MessagingException If base type cannot be set
+     * @throws OXException If base type cannot be set
      */
-    public void setBaseType(String baseType) throws MessagingException;
+    public void setBaseType(String baseType) throws OXException;
 
     /**
      * Sets <code>"charset"</code> parameter
@@ -125,15 +127,15 @@ public interface ContentType extends ParameterizedMessagingHeader {
      * Sets this content type to given content type.
      * 
      * @param contentType The content type to apply
-     * @throws MessagingException If content type cannot be set
+     * @throws OXException If content type cannot be set
      */
-    public void setContentType(String contentType) throws MessagingException;
+    public void setContentType(String contentType) throws OXException;
 
     /**
      * Sets this content type to given content type.
      * 
      * @param contentType The content type to apply
-     * @throws MessagingException If content type cannot be set
+     * @throws OXException If content type cannot be set
      */
     public void setContentType(ContentType contentType);
 

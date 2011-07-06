@@ -51,7 +51,7 @@ package com.openexchange.messaging.json.actions.messages;
 
 import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 
 /**

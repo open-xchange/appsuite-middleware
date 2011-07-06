@@ -49,10 +49,10 @@
 
 package com.openexchange.messaging;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MessagingExceptionMessages} - Exception messages for {@link MessagingException} that needs to be translated.
+ * {@link MessagingExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16

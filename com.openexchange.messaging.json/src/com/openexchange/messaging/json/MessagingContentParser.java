@@ -53,7 +53,7 @@ import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 
 
 /**

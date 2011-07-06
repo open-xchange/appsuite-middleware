@@ -73,7 +73,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Locale;
 import javax.mail.internet.MailDateFormat;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;

@@ -57,7 +57,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.messaging.MessagingAddressHeader;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 
 /**

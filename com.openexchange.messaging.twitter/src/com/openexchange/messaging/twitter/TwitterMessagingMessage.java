@@ -58,7 +58,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;

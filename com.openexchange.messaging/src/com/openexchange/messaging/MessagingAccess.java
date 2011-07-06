@@ -50,6 +50,7 @@
 package com.openexchange.messaging;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingAccess} - Provides access to message storage.
@@ -67,9 +68,9 @@ public interface MessagingAccess {
      * @param peek <code>true</code> to peek message content (meaning any mechanisms to mark content as read disabled); otherwise
      *            <code>false</code>
      * @return The message associated with specified identifier
-     * @throws MessagingException If message cannot be returned
+     * @throws OXException If message cannot be returned
      */
-    public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException;
+    public MessagingMessage getMessage(String folder, String id, boolean peek) throws OXException;
 
     /**
      * Gets the messages located in given folder whose identifier matches specified identifier.
@@ -82,9 +83,9 @@ public interface MessagingAccess {
      * @param messageIds The message identifiers
      * @param fields The fields to pre-fill in returned instances of {@link MessagingMessage}
      * @return The corresponding messages
-     * @throws MessagingException If message could not be returned
+     * @throws OXException If message could not be returned
      */
-    public List<MessagingMessage> getMessages(String folder, String[] messageIds, MessagingField[] fields) throws MessagingException;
+    public List<MessagingMessage> getMessages(String folder, String[] messageIds, MessagingField[] fields) throws OXException;
 
     /**
      * Searches for messages located in given folder. If the search yields no results, an empty {@link List} is returned. This method's
@@ -104,27 +105,27 @@ public interface MessagingAccess {
      * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return The desired, pre-filled instances of {@link MailMessage}
-     * @throws MessagingException If mails cannot be returned
+     * @throws OXException If mails cannot be returned
      */
-    public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws MessagingException;
+    public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws OXException;
 
     /**
      * Updates specified fields of given message.
      * 
      * @param message The message
      * @param fields The fields to update
-     * @throws MessagingException If update operation fails
+     * @throws OXException If update operation fails
      */
-    public void updateMessage(MessagingMessage message, MessagingField[] fields) throws MessagingException;
+    public void updateMessage(MessagingMessage message, MessagingField[] fields) throws OXException;
 
     /**
      * Appends specified messages to given folder.
      * 
      * @param folder The folder to append to
      * @param messages The messages to append.
-     * @throws MessagingException If appending messages fails
+     * @throws OXException If appending messages fails
      */
-    public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException;
+    public void appendMessages(String folder, MessagingMessage[] messages) throws OXException;
 
     /**
      * Copies specified messages from source folder to destination folder.
@@ -139,9 +140,9 @@ public interface MessagingAccess {
      *            <code>false</code>
      * @return The identifiers of corresponding messages in destination folder. Unless parameter <tt>fast</tt> is set to <code>true</code>;
      *         then <code>null</code> is returned.
-     * @throws MessagingException If copy operation fails
+     * @throws OXException If copy operation fails
      */
-    public List<String> copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException;
+    public List<String> copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws OXException;
 
     /**
      * Moves specified messages from source folder to destination folder.
@@ -156,9 +157,9 @@ public interface MessagingAccess {
      *            <code>false</code>
      * @return The identifiers of corresponding messages in destination folder. Unless parameter <tt>fast</tt> is set to <code>true</code>;
      *         then <code>null</code> is returned.
-     * @throws MessagingException If move operation fails
+     * @throws OXException If move operation fails
      */
-    public List<String> moveMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException;
+    public List<String> moveMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws OXException;
 
     /**
      * Deletes specified messages in folder.
@@ -166,9 +167,9 @@ public interface MessagingAccess {
      * @param folder The folder to delete in
      * @param messageIds The message identifiers
      * @param hardDelete <code>true</code> to perform a hard-delete; otherwise <code>false</code> to backup in default location
-     * @throws MessagingException If delete operation fails
+     * @throws OXException If delete operation fails
      */
-    public void deleteMessages(String folder, String[] messageIds, boolean hardDelete) throws MessagingException;
+    public void deleteMessages(String folder, String[] messageIds, boolean hardDelete) throws OXException;
 
     /**
      * A convenience method to get all messages located in given folder.
@@ -183,9 +184,9 @@ public interface MessagingAccess {
      * @param order Whether ascending or descending sort order
      * @param fields The fields to pre-fill in returned instances of {@link MessagingMessage}
      * @return The desired, pre-filled instances of {@link MessagingMessage}
-     * @throws MessagingException If returning all messages fails
+     * @throws OXException If returning all messages fails
      */
-    public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException;
+    public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws OXException;
 
     /**
      * Performs specified action to given message and returns resulting message.
@@ -194,8 +195,8 @@ public interface MessagingAccess {
      * @param id The message identifier
      * @param action The action to perform
      * @return The resulting message
-     * @throws MessagingException If performing specified action fails
+     * @throws OXException If performing specified action fails
      */
-    public MessagingMessage perform(String folder, String id, String action) throws MessagingException;
+    public MessagingMessage perform(String folder, String id, String action) throws OXException;
 
 }

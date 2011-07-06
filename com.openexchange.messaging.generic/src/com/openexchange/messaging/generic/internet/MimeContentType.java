@@ -54,7 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentType;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.generic.internal.ParameterizedHeader;
 
 /**

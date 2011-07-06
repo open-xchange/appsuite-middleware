@@ -72,7 +72,7 @@ import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingPart;

@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link MessagingAccountAccess} - Provides access to a messaging account.
  * 
@@ -69,17 +71,17 @@ public interface MessagingAccountAccess extends MessagingResource {
      * Gets the message access for associated account.
      * 
      * @return The message access
-     * @throws MessagingException If message access cannot be returned
+     * @throws OXException If message access cannot be returned
      */
-    public MessagingMessageAccess getMessageAccess() throws MessagingException;
+    public MessagingMessageAccess getMessageAccess() throws OXException;
 
     /**
      * Gets the folder access for associated account.
      * 
      * @return The folder access
-     * @throws MessagingException If folder access cannot be returned
+     * @throws OXException If folder access cannot be returned
      */
-    public MessagingFolderAccess getFolderAccess() throws MessagingException;
+    public MessagingFolderAccess getFolderAccess() throws OXException;
 
     /**
      * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
@@ -101,8 +103,8 @@ public interface MessagingAccountAccess extends MessagingResource {
      * }
      * </pre>
      * 
-     * @throws MessagingException If returning the root folder fails
+     * @throws OXException If returning the root folder fails
      */
-    public MessagingFolder getRootFolder() throws MessagingException;
+    public MessagingFolder getRootFolder() throws OXException;
 
 }
