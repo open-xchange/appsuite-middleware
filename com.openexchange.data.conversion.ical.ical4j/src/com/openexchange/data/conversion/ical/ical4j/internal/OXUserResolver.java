@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.ArrayList;
@@ -54,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.user.UserService;
 
@@ -78,13 +78,13 @@ public class OXUserResolver implements UserResolver {
             return users;
         }
         if (null == userService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
         }
-        for(final String mail : mails) {
+        for (final String mail : mails) {
             try {
                 users.add(userService.searchUser(mail, ctx));
             } catch (final OXException x) {
-                if (x.getDetailNumber() != LdapExceptionCode.NO_USER_BY_MAIL.getDetailNumber()) {
+                if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(x)) {
                     throw x;
                 }
             }
@@ -94,14 +94,14 @@ public class OXUserResolver implements UserResolver {
 
     public User loadUser(final int userId, final Context ctx) throws OXException, OXException {
         if (null == userService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
         }
         return userService.getUser(userId, ctx);
     }
 
     /**
      * Sets the userService
-     *
+     * 
      * @param userService The userService to set
      */
     public void setUserService(final UserService userService) {
