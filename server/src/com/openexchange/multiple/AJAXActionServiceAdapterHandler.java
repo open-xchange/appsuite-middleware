@@ -95,7 +95,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         if (null == result) {
             return Collections.<AbstractOXException> emptySet();
         }

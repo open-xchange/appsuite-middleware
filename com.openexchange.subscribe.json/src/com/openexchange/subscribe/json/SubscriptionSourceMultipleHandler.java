@@ -97,7 +97,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         return Collections.<AbstractOXException> emptySet();
     }
 

@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -375,9 +376,9 @@ public final class FolderWriter {
      * @param fields The fields to write or <code>null</code> to write all
      * @param folder The folder
      * @return The JSON array carrying requested fields of given folder
-     * @throws FolderException If writing JSON array fails
+     * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeSingle2Array(final int[] fields, final UserizedFolder folder) throws FolderException {
+    public static JSONArray writeSingle2Array(final int[] fields, final UserizedFolder folder) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
@@ -408,9 +409,9 @@ public final class FolderWriter {
      * @param fields The fields to write to each JSON array or <code>null</code> to write all
      * @param folders The folders
      * @return The JSON array carrying JSON arrays of given folders
-     * @throws FolderException If writing JSON array fails
+     * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws FolderException {
+    public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
@@ -468,9 +469,9 @@ public final class FolderWriter {
      * @param fields The fields to write to each JSON array or <code>null</code> to write all
      * @param folders The folders
      * @return The JSON array carrying JSON arrays of given folders
-     * @throws FolderException If writing JSON array fails
+     * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final Collection<UserizedFolder> folders) throws FolderException {
+    public static JSONArray writeMultiple2Array(final int[] fields, final Collection<UserizedFolder> folders) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
@@ -506,9 +507,9 @@ public final class FolderWriter {
      * @param fields The fields to write or <code>null</code> to write all
      * @param folder The folder
      * @return The JSON object carrying requested fields of given folder
-     * @throws FolderException If writing JSON object fails
+     * @throws OXException If writing JSON object fails
      */
-    public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws FolderException {
+    public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
         final int[] cols = null == fields ? getAllFields(additionalFolderFieldList) : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
@@ -568,9 +569,9 @@ public final class FolderWriter {
      * @param fields The fields to write to each JSON object or <code>null</code> to write all
      * @param folders The folders
      * @return The JSON array carrying JSON objects of given folders
-     * @throws FolderException If writing JSON array fails
+     * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Object(final int[] fields, final UserizedFolder[] folders) throws FolderException {
+    public static JSONArray writeMultiple2Object(final int[] fields, final UserizedFolder[] folders) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {

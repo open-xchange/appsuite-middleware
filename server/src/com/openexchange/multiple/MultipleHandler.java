@@ -55,7 +55,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -110,7 +109,7 @@ public interface MultipleHandler {
      * 
      * @return The warnings
      */
-    public Collection<AbstractOXException> getWarnings();
+    public Collection<OXException> getWarnings();
 
     /**
      * Closes/frees all associated resources.

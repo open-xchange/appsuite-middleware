@@ -114,7 +114,7 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
             }
         }
 
-        public Collection<AbstractOXException> getWarnings() {
+        public Collection<OXException> getWarnings() {
             return Collections.<AbstractOXException> emptySet();
         }
 

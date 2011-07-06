@@ -49,7 +49,6 @@
 
 package com.openexchange.folder.json.osgi;
 
-import javax.security.auth.login.LoginException;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
@@ -70,19 +69,13 @@ public final class FolderConsistencyLoginHandler implements LoginHandlerService 
         super();
     }
 
-    public void handleLogin(final LoginResult login) throws LoginException {
-        try {
-            final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-            folderService.checkConsistency("1", login.getSession());
-            folderService.checkConsistency("0", login.getSession());
-        } catch (final OXException e) {
-            throw new LoginException(e);
-        } catch (final FolderException e) {
-            throw new LoginException(e);
-        }
+    public void handleLogin(final LoginResult login) throws OXException {
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        folderService.checkConsistency("1", login.getSession());
+        folderService.checkConsistency("0", login.getSession());
     }
 
-    public void handleLogout(final LoginResult logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws OXException {
         // Nothing to do
     }
 

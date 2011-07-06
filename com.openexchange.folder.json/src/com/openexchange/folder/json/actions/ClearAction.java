@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
+
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -59,10 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.OXException;
-import com.openexchange.groupware.OXException.Category;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
  com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,7 +79,7 @@ public final class ClearAction extends AbstractFolderAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final com.openexchange.tools.session.ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -112,7 +110,7 @@ public final class ClearAction extends AbstractFolderAction {
                     final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ClearAction.class);
                     log.error(e.getMessage(), e);
                     responseArray.put(folderId);
-                    e.addCategory(com.openexchange.exception.Category.CATEGORY_WARNING);
+                    e.setCategory(com.openexchange.exception.Category.CATEGORY_WARNING);
                     warnings.add(e);
                 }
             }

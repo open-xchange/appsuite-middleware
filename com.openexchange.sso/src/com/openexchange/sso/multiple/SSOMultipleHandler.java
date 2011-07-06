@@ -112,7 +112,7 @@ public final class SSOMultipleHandler implements MultipleHandler {
         result = null;
     }
 
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         return Collections.<AbstractOXException> emptySet();
     }
 

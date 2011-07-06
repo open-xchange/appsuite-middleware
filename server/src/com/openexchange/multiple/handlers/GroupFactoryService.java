@@ -106,7 +106,7 @@ public final class GroupFactoryService implements MultipleHandlerFactoryService 
             return retval;
         }
 
-        public Collection<AbstractOXException> getWarnings() {
+        public Collection<OXException> getWarnings() {
             return Collections.<AbstractOXException> emptySet();
         }
 

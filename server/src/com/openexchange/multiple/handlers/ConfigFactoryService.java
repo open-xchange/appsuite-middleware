@@ -56,7 +56,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
@@ -93,7 +92,7 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
             return null;
         }
 
-        public Collection<AbstractOXException> getWarnings() {
+        public Collection<OXException> getWarnings() {
             return Collections.emptyList();
         }
 

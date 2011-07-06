@@ -60,7 +60,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.TemplateException;
@@ -98,7 +97,7 @@ public class TemplateMultipleHandler implements MultipleHandler {
         return new Date();
     }
 
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         return Collections.emptyList();
     }
 

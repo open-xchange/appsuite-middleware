@@ -112,7 +112,7 @@ public final class UserMultipleHandler implements MultipleHandler {
         result = null;
     }
 
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         if (null == result) {
             return Collections.<AbstractOXException> emptySet();
         }

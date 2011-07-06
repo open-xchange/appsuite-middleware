@@ -80,9 +80,9 @@ public final class FolderParser {
      * 
      * @param folderJsonObject The JSON object containing folder data
      * @return The parsed folder
-     * @throws FolderException If parsing folder fails
+     * @throws OXException If parsing folder fails
      */
-    public static Folder parseFolder(final JSONObject folderJsonObject) throws FolderException {
+    public static Folder parseFolder(final JSONObject folderJsonObject) throws OXException {
         try {
             final ParsedFolder folder = new ParsedFolder();
 
@@ -109,7 +109,7 @@ public final class FolderParser {
                     }
                     folder.setContentType(contentType);
                 } catch (final OXException e) {
-                    throw new FolderException(e);
+                    throw e;
                 }
             }
 
@@ -160,9 +160,9 @@ public final class FolderParser {
      * 
      * @param permissionsAsJSON The JSON array containing permissions data
      * @return The parsed permissions
-     * @throws FolderException If parsing permissions fails
+     * @throws OXException If parsing permissions fails
      */
-    public static Permission[] parsePermission(final JSONArray permissionsAsJSON) throws FolderException {
+    public static Permission[] parsePermission(final JSONArray permissionsAsJSON) throws OXException {
         try {
             final int numberOfPermissions = permissionsAsJSON.length();
             final Permission[] perms = new Permission[numberOfPermissions];

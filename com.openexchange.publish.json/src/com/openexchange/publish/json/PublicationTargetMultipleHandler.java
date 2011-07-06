@@ -112,7 +112,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         }
     }
 
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         return Collections.<AbstractOXException> emptySet();
     }
 

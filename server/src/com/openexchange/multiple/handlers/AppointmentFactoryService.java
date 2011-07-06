@@ -107,7 +107,7 @@ public final class AppointmentFactoryService implements MultipleHandlerFactorySe
             return retval;
         }
 
-        public Collection<AbstractOXException> getWarnings() {
+        public Collection<OXException> getWarnings() {
             return Collections.<AbstractOXException> emptySet();
         }
 
