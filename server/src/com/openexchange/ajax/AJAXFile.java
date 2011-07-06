@@ -82,7 +82,6 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
@@ -305,11 +304,11 @@ public final class AJAXFile extends PermissionServlet {
                  */
                 final String moduleParam = req.getParameter(PARAMETER_MODULE);
                 if (moduleParam == null) {
-                    throw UploadException.UploadCode.MISSING_PARAM.create(null, PARAMETER_MODULE);
+                    throw UploadException.UploadCode.MISSING_PARAM.create(PARAMETER_MODULE);
                 }
                 final String fileTypeFilter = req.getParameter(PARAMETER_TYPE);
                 if (fileTypeFilter == null) {
-                    throw UploadException.UploadCode.MISSING_PARAM.create(null, PARAMETER_TYPE);
+                    throw UploadException.UploadCode.MISSING_PARAM.create(PARAMETER_TYPE);
                 }
                 final ServerSession sessionObj = getSessionObject(req);
                 final UploadQuotaChecker checker =
@@ -322,10 +321,10 @@ public final class AJAXFile extends PermissionServlet {
                 try {
                     action = getAction(req);
                 } catch (final OXConflictException e) {
-                    throw new UploadException(e, null);
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, e.getMessage()).setAction(action);
                 }
                 if (!ACTION_NEW.equalsIgnoreCase(action)) {
-                    throw UploadException.UploadCode.INVALID_ACTION_VALUE.create(action, action);
+                    throw UploadException.UploadCode.INVALID_ACTION_VALUE.create(action).setAction(action);
                 }
                 /*
                  * Process upload
@@ -335,7 +334,7 @@ public final class AJAXFile extends PermissionServlet {
                     final @SuppressWarnings("unchecked") List<FileItem> tmp = upload.parseRequest(req);
                     items = tmp;
                 } catch (final FileUploadException e) {
-                    throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e).setAction(action);
                 }
                 final int size = items.size();
                 final Iterator<FileItem> iter = items.iterator();
@@ -360,7 +359,7 @@ public final class AJAXFile extends PermissionServlet {
                 } catch (final UploadException e) {
                     throw e;
                 } catch (final Exception e) {
-                    throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e).setAction(action);
                 }
                 /*
                  * Return IDs of upload files in response
