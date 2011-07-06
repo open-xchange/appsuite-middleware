@@ -50,6 +50,7 @@
 package com.openexchange.frontend.uwa;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.modules.model.Attribute;
 
 
@@ -59,9 +60,9 @@ import com.openexchange.modules.model.Attribute;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface UWAWidgetService {
-    public void create(UWAWidget widget) throws UWAWidgetException;
-    public UWAWidget get(String id) throws UWAWidgetException;
-    public List<UWAWidget> all() throws UWAWidgetException;
-    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException;
-    public void delete(String id) throws UWAWidgetException;
+    public void create(UWAWidget widget) throws OXException;
+    public UWAWidget get(String id) throws OXException;
+    public List<UWAWidget> all() throws OXException;
+    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws OXException;
+    public void delete(String id) throws OXException;
 }

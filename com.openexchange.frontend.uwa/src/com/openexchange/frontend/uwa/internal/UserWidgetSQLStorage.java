@@ -52,6 +52,7 @@ package com.openexchange.frontend.uwa.internal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.modules.model.Metadata;
@@ -79,7 +80,7 @@ public class UserWidgetSQLStorage extends WidgetSQLStorage {
         SELECT select = new SELECT("id").FROM(metadata.getName()).WHERE(predicate);
         return executeQuery(select, primaryKey(id), new ResultSetHandler<Boolean>() {
 
-            public Boolean handle(ResultSet rs) throws AbstractOXException, SQLException {
+            public Boolean handle(ResultSet rs) throws SQLException, OXException {
                 return rs.next();
             }
             

@@ -49,6 +49,8 @@
 
 package com.openexchange.frontend.uwa;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link UWAWidgetServiceFactory}
@@ -56,6 +58,6 @@ package com.openexchange.frontend.uwa;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface UWAWidgetServiceFactory {
-    public UWAWidgetService getService(int userId, int ctxId) throws UWAWidgetException;
-    public UWAWidgetService getService(int ctxId) throws UWAWidgetException;
+    public UWAWidgetService getService(int userId, int ctxId) throws OXException;
+    public UWAWidgetService getService(int ctxId) throws OXException;
 }

@@ -59,14 +59,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidget.Field;
-import com.openexchange.frontend.uwa.UWAWidgetException;
 import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.groupware.AbstractOXException;
@@ -95,7 +93,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     private int ctxId;
 
-    public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws OXException, UWAWidgetException {
+    public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws OXException, OXException {
         userScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
         contextScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
         positions = new PositionSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
@@ -116,7 +114,7 @@ public class CompositeUWAService implements UWAWidgetService {
     }
     
 
-    private Map<String, Map<String, Object>> ensureType(Object yaml) throws UWAWidgetException {
+    private Map<String, Map<String, Object>> ensureType(Object yaml) throws OXException {
         if (Map.class.isInstance(yaml)) {
             for(Map.Entry<Object, Object> entry : ((Map<Object, Object>) yaml).entrySet()) {
                 Object key = entry.getKey();
@@ -134,7 +132,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     private static final Set<Field> POSITION_FIELDS = EnumSet.of(Field.ADJ);
 
-    public List<UWAWidget> all() throws UWAWidgetException {
+    public List<UWAWidget> all() throws OXException {
         try {
             List<UWAWidget> userWidgets = userScope.load();
             Tools.set(userWidgets, UWAWidget.Field.PROTECTED, false);
@@ -172,7 +170,7 @@ public class CompositeUWAService implements UWAWidgetService {
         } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         }
     }
 
@@ -187,7 +185,7 @@ public class CompositeUWAService implements UWAWidgetService {
         widget.setId(IDMangler.mangle(scope, widget.getId()));
     }
 
-    public void create(UWAWidget widget) throws UWAWidgetException {
+    public void create(UWAWidget widget) throws OXException {
         try {
             int dbId = idGenerator.getId("uwaWidget", ctxId);
             String id = IDMangler.mangle("user", ""+dbId);
@@ -199,14 +197,14 @@ public class CompositeUWAService implements UWAWidgetService {
             positions.create(widget);
             
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         } catch (SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         }
         
     }
 
-    public void delete(String id) throws UWAWidgetException {
+    public void delete(String id) throws OXException {
         if (isProtected(id)) {
             throw UWAWidgetExceptionCodes.PROTECTED.create(id);
         }
@@ -219,12 +217,12 @@ public class CompositeUWAService implements UWAWidgetService {
         } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         } catch (AbstractOXException x) {
-            throw new UWAWidgetException(x);
+            throw new OXException(x);
         }
         
     }
 
-    public UWAWidget get(String id) throws UWAWidgetException {
+    public UWAWidget get(String id) throws OXException {
         List<String> components = IDMangler.unmangle(id);
         String scope = components.get(0);
         String unscopedId = components.get(1);
@@ -238,7 +236,7 @@ public class CompositeUWAService implements UWAWidgetService {
             } catch (SQLException x) {
                 throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
             } catch (AbstractOXException x) {
-                throw new UWAWidgetException(x);
+                throw new OXException(x);
             }
             if (widget == null) {
                 throw UWAWidgetExceptionCodes.NOT_FOUND.create(id);
@@ -257,13 +255,13 @@ public class CompositeUWAService implements UWAWidgetService {
         } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         } catch (AbstractOXException x) {
-            throw new UWAWidgetException(x);
+            throw new OXException(x);
         }
 
         return widget;
     }
 
-    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws OXException {
         if (isProtected(widget.getId())) {
             if (!onlyPositionFields(modified)) {
                 throw UWAWidgetExceptionCodes.PROTECTED.create(widget.getId());
@@ -274,14 +272,14 @@ public class CompositeUWAService implements UWAWidgetService {
         }
     }
 
-    private void regularUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+    private void regularUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws OXException {
         String id = widget.getId();
         String dbId = IDMangler.unmangle(id).get(1);
         try {
             widget.setId(dbId);
             userScope.update(widget, modified);
         } catch (DBPoolingException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         } catch (SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         }
@@ -289,7 +287,7 @@ public class CompositeUWAService implements UWAWidgetService {
         positionUpdate(widget, modified);
     }
 
-    private void positionUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+    private void positionUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws OXException {
         try {
             if (positions.exists(widget.getId())) {
                 positions.update(widget, modified);
@@ -297,7 +295,7 @@ public class CompositeUWAService implements UWAWidgetService {
                 positions.create(widget);
             }
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         } catch (SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         }
@@ -310,7 +308,7 @@ public class CompositeUWAService implements UWAWidgetService {
         return fieldSet.isEmpty();
     }
 
-    private boolean isProtected(String scopedId) throws UWAWidgetException {
+    private boolean isProtected(String scopedId) throws OXException {
         List<String> components = IDMangler.unmangle(scopedId);
         String scope = components.get(0);
 
@@ -319,7 +317,7 @@ public class CompositeUWAService implements UWAWidgetService {
         } catch (SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         }
     }
 

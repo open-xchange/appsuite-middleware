@@ -50,10 +50,9 @@
 package com.openexchange.frontend.uwa.internal;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.frontend.uwa.UWAWidgetException;
+import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
 import com.openexchange.id.IDGeneratorService;
@@ -79,15 +78,15 @@ public class UWAWidgetServiceFactoryImpl implements UWAWidgetServiceFactory {
         this.idGenerator = idGenerator;
     }
 
-    public UWAWidgetService getService(int userId, int ctxId) throws UWAWidgetException {
+    public UWAWidgetService getService(int userId, int ctxId) throws OXException {
         try {
             return new CompositeUWAService(dbService, configViews, config, idGenerator, userId, ctxId);
         } catch (OXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         }
     }
 
-    public UWAWidgetService getService(int ctxId) throws UWAWidgetException {
+    public UWAWidgetService getService(int ctxId) throws OXException {
         return new ContextOnlyUWAService(dbService, idGenerator, ctxId);
     }
 

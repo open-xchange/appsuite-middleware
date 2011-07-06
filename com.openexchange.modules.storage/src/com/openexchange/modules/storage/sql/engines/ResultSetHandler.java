@@ -51,7 +51,7 @@ package com.openexchange.modules.storage.sql.engines;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -60,5 +60,5 @@ import com.openexchange.groupware.AbstractOXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ResultSetHandler<M> {
-    public M handle(ResultSet rs) throws AbstractOXException, SQLException;
+    public M handle(ResultSet rs) throws SQLException, OXException;
 }

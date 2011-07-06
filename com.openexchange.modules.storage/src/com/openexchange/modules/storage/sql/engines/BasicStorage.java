@@ -56,9 +56,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.AttributeHandler;
 import com.openexchange.modules.model.Metadata;
@@ -94,25 +93,25 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
     protected AttributeHandler<T> overridesToDB = AttributeHandler.DO_NOTHING;
      
     
-    public BasicStorage(Metadata<T> metadata, DatabaseService dbService, int ctxId) {
+    public BasicStorage(final Metadata<T> metadata, final DatabaseService dbService, final int ctxId) {
         this.metadata = metadata;
         this.dbService = dbService;
         this.ctxId = ctxId;
         builder = new Builder<T>(metadata);
     }
     
-    public void setOverridesFromDB(AttributeHandler<T> overrides) {
+    public void setOverridesFromDB(final AttributeHandler<T> overrides) {
         this.overridesFromDB = overrides;
     }
 
-    public void setOverridesToDB(AttributeHandler<T> overrides) {
+    public void setOverridesToDB(final AttributeHandler<T> overrides) {
         this.overridesToDB = overrides;
     }
     
-    public void create(T thing) throws SQLException, DBPoolingException {
-        List<Attribute<T>> attributes = getAttributes();
-        INSERT insert = builder.insert(attributes, getExtraFields());
-        List<Object> values = Tools.values(thing, attributes, overridesToDB);
+    public void create(final T thing) throws SQLException, OXException {
+        final List<Attribute<T>> attributes = getAttributes();
+        final INSERT insert = builder.insert(attributes, getExtraFields());
+        final List<Object> values = Tools.values(thing, attributes, overridesToDB);
         values.addAll(getExtraValues());
         executeUpdate(insert, values);
     }
@@ -122,18 +121,18 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         return metadata.getPersistentFields();
     }
 
-    public T load(Object id) throws SQLException, AbstractOXException {
+    public T load(final Object id) throws SQLException, OXException {
         final List<Attribute<T>> attributes = getAttributes();
-        SELECT select = builder.select(attributes);
-        List<Object> primaryKey = primaryKey(id);
+        final SELECT select = builder.select(attributes);
+        final List<Object> primaryKey = primaryKey(id);
         
         return executeQuery(select, primaryKey, new ResultSetHandler<T>() {
 
-            public T handle(ResultSet rs) throws AbstractOXException, SQLException {
+            public T handle(final ResultSet rs) throws OXException, SQLException {
                 if(!rs.next()){
                     return null;
                 }
-                T thing = metadata.create();
+                final T thing = metadata.create();
                 SQLTools.fillObject(rs, thing, attributes, overridesFromDB);
                 return thing;
             }
@@ -143,14 +142,14 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
     }
 
 
-    public List<T> load() throws SQLException, AbstractOXException {
+    public List<T> load() throws SQLException, OXException {
         final List<Attribute<T>> attributes = getAttributes();
-        SELECT select = builder.selectWithoutWhere(attributes);
-        List<String> extraFields = getExtraFields();
+        final SELECT select = builder.selectWithoutWhere(attributes);
+        final List<String> extraFields = getExtraFields();
 
         Predicate predicate = null;
-        for (String field : extraFields) {
-            Predicate old = predicate;
+        for (final String field : extraFields) {
+            final Predicate old = predicate;
             predicate = new EQUALS(field, Constant.PLACEHOLDER);
             if(old != null) {
                 predicate = old.AND(predicate);
@@ -159,16 +158,16 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         
         select.WHERE(predicate);
         
-        List<Object> values = getExtraValues();
+        final List<Object> values = getExtraValues();
         
         
         
         return executeQuery(select, values, new ResultSetHandler<List<T>>() {
 
-            public List<T> handle(ResultSet rs) throws AbstractOXException, SQLException {
-                LinkedList<T> list = new LinkedList<T>();
+            public List<T> handle(final ResultSet rs) throws OXException, SQLException {
+                final LinkedList<T> list = new LinkedList<T>();
                 while(rs.next()) {
-                    T thing = metadata.create();
+                    final T thing = metadata.create();
                     SQLTools.fillObject(rs, thing, attributes, overridesFromDB);
                     list.add(thing);
                 }
@@ -178,39 +177,39 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         });
     }
 
-    public void update(T thing, List<? extends Attribute<T>> updatedAttributes) throws SQLException, DBPoolingException {
+    public void update(final T thing, List<? extends Attribute<T>> updatedAttributes) throws SQLException, OXException {
         updatedAttributes = new ArrayList<Attribute<T>>(updatedAttributes);
         updatedAttributes.remove(metadata.getIdField());
         updatedAttributes.retainAll(getAttributes());
         if(updatedAttributes.isEmpty()) {
             return;
         }
-        UPDATE update = builder.update(updatedAttributes);
+        final UPDATE update = builder.update(updatedAttributes);
         
-        List<Object> values = Tools.values(thing, updatedAttributes, overridesToDB);
+        final List<Object> values = Tools.values(thing, updatedAttributes, overridesToDB);
         values.addAll(primaryKey(thing.get(metadata.getIdField())));
         
         executeUpdate(update, values);
         
     }
     
-    public void delete(Object id) throws SQLException, DBPoolingException {
-        DELETE delete = builder.delete();
+    public void delete(final Object id) throws SQLException, OXException {
+        final DELETE delete = builder.delete();
         
-        List<Object> primaryKey = primaryKey(id);
+        final List<Object> primaryKey = primaryKey(id);
         
         executeUpdate(delete, primaryKey);
     }
     
-    public boolean exists(Object id) throws SQLException, AbstractOXException {
-        SELECT select = new SELECT(metadata.getIdField().getName()).FROM(builder.getTableName());
+    public boolean exists(final Object id) throws SQLException, OXException {
+        final SELECT select = new SELECT(metadata.getIdField().getName()).FROM(builder.getTableName());
         select.WHERE(builder.matchOne());
         
-        List<Object> primaryKey = primaryKey(id);
+        final List<Object> primaryKey = primaryKey(id);
         
         return executeQuery(select, primaryKey, new ResultSetHandler<Boolean>() {
 
-            public Boolean handle(ResultSet rs) throws AbstractOXException, SQLException {
+            public Boolean handle(final ResultSet rs) throws OXException, SQLException {
                 return rs.next();
             }
             
@@ -218,11 +217,11 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
     }
 
     protected List<Object> primaryKey(Object id) {
-        Object overridden = overridesToDB.handle(metadata.getIdField(), id);
+        final Object overridden = overridesToDB.handle(metadata.getIdField(), id);
         if(overridden != null) {
             id = overridden;
         }
-        LinkedList<Object> primaryKey = new LinkedList<Object>();
+        final LinkedList<Object> primaryKey = new LinkedList<Object>();
         primaryKey.add(id);
         primaryKey.add(ctxId);
         return primaryKey;
@@ -236,10 +235,10 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         return new LinkedList<Object>(Arrays.asList(ctxId));
     }
     
-    protected <M> M executeQuery(Command command, List<Object> values, ResultSetHandler<M> handler) throws SQLException, AbstractOXException {
+    protected <M> M executeQuery(final Command command, final List<Object> values, final ResultSetHandler<M> handler) throws SQLException, OXException {
         Connection con = null;
         ResultSet rs = null;
-        StatementBuilder sBuilder = new StatementBuilder();
+        final StatementBuilder sBuilder = new StatementBuilder();
         try {
             con = dbService.getWritable(ctxId);
             rs = sBuilder.executeQuery(con, command, values);
@@ -253,19 +252,19 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         }
     }
 
-    protected void executeUpdate(Command command, List<Object> values) throws DBPoolingException, SQLException {
+    protected void executeUpdate(final Command command, final List<Object> values) throws OXException, SQLException {
         Connection con = null;
 
         try {
             con = dbService.getWritable(ctxId);
-            StatementBuilder sBuilder = new StatementBuilder();
+            final StatementBuilder sBuilder = new StatementBuilder();
             sBuilder.executeStatement(con, command, values);
             
         } finally {
             if(con != null) {
                 try {
                     con.rollback();
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                     // IGNORE
                 }
                 dbService.backWritable(ctxId, con);

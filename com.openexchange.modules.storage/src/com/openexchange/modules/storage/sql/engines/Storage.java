@@ -51,7 +51,7 @@ package com.openexchange.modules.storage.sql.engines;
 
 import java.sql.SQLException;
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Model;
 
@@ -63,14 +63,14 @@ import com.openexchange.modules.model.Model;
  */
 public interface Storage<T extends Model<T>> {
     
-    public void create(T thing) throws SQLException, AbstractOXException;
+    public void create(T thing) throws SQLException, OXException;
     
-    public void update(T thing, List<? extends Attribute<T>> updatedAttributes) throws SQLException, AbstractOXException;
+    public void update(T thing, List<? extends Attribute<T>> updatedAttributes) throws SQLException, OXException;
     
-    public T load(Object id) throws SQLException, AbstractOXException;
+    public T load(Object id) throws SQLException, OXException;
     
-    public List<T> load() throws SQLException, AbstractOXException;
+    public List<T> load() throws SQLException, OXException;
     
-    public void delete(Object id) throws SQLException, AbstractOXException;
+    public void delete(Object id) throws SQLException, OXException;
     
 }

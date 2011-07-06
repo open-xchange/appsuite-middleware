@@ -52,8 +52,8 @@ package com.openexchange.frontend.uwa.internal;
 import java.sql.SQLException;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
-import com.openexchange.frontend.uwa.UWAWidgetException;
 import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.groupware.AbstractOXException;
@@ -80,17 +80,17 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         this.ctxId = ctxId;
     }
     
-    public List<UWAWidget> all() throws UWAWidgetException {
+    public List<UWAWidget> all() throws OXException {
         try {
             return contextWidgets.load();
         } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         }
     }
 
-    public void create(UWAWidget widget) throws UWAWidgetException {
+    public void create(UWAWidget widget) throws OXException {
         try {
             int dbId = idGenerator.getId("uwaWidget", ctxId);
             widget.setId(String.valueOf(dbId));
@@ -98,37 +98,37 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         }
     }
 
-    public void delete(String id) throws UWAWidgetException {
+    public void delete(String id) throws OXException {
         try {
             contextWidgets.delete(id);
         } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         }
     }
 
-    public UWAWidget get(String id) throws UWAWidgetException {
+    public UWAWidget get(String id) throws OXException {
         try {
             return contextWidgets.load(id);
         } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         }
     }
 
-    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws UWAWidgetException {
+    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws OXException {
         try {
             contextWidgets.update(widget, modified);
         } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         } catch (AbstractOXException e) {
-            throw new UWAWidgetException(e);
+            throw new OXException(e);
         }
     }
 

@@ -49,10 +49,11 @@
 
 package com.openexchange.frontend.uwa;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link UWAWidgetExceptionMessages} - Exception messages for {@link UWAWidgetException} that needs to be translated.
+ * {@link UWAWidgetExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  * 
  * @author Francisco Laguna <fla@synapps.de>
  */

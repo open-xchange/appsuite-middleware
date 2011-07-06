@@ -6,7 +6,9 @@ Bundle-Version: 6.20.0.0
 Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.database,
+ com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.i18n,
  com.openexchange.modules.model,
  com.openexchange.sql.builder,
  com.openexchange.sql.grammar,

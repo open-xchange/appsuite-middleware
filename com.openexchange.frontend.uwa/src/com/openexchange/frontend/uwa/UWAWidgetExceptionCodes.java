@@ -49,25 +49,26 @@
 
 package com.openexchange.frontend.uwa;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.frontend.uwa.exception.UWAWidgetExceptionFactory;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link UWAWidgetExceptionCodes} - Enumeration of all {@link UWAWidgetException}s.
+ * {@link UWAWidgetExceptionCodes} - Enumeration of all {@link OXException}s.
  * 
  * @author Francisco Laguna <fla@synapps.de>
  */
-public enum UWAWidgetExceptionCodes implements OXErrorMessage {
+public enum UWAWidgetExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(UWAWidgetExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1), 
-    SQLError(UWAWidgetExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 2), 
-    NOT_FOUND(UWAWidgetExceptionMessages.NOT_FOUND_MSG, Category.USER_INPUT, 3), 
-    PROTECTED(UWAWidgetExceptionMessages.PROTECTED_MSG, Category.CODE_ERROR, 4),
-    INVALID_CONFIGURATION("Invalid configuration in widget definition file. Please ensure the file looks like this:\nwidget12:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget1\n  visible: true\n  title:Widget 1\n\nwidget13:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget2\n  visible: true\n  title:Widget 2\n", Category.SETUP_ERROR, 5);
+    UNEXPECTED_ERROR(UWAWidgetExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1), 
+    SQLError(UWAWidgetExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2), 
+    NOT_FOUND(UWAWidgetExceptionMessages.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 3), 
+    PROTECTED(UWAWidgetExceptionMessages.PROTECTED_MSG, CATEGORY_ERROR, 4),
+    INVALID_CONFIGURATION("Invalid configuration in widget definition file. Please ensure the file looks like this:\nwidget12:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget1\n  visible: true\n  title:Widget 1\n\nwidget13:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget2\n  visible: true\n  title:Widget 2\n", CATEGORY_CONFIGURATION, 5);
     ;
 
     private final Category category;
@@ -81,6 +82,10 @@ public enum UWAWidgetExceptionCodes implements OXErrorMessage {
         this.detailNumber = detailNumber;
         this.category = category;
     }
+    
+    public String getPrefix() {
+        return "UWA_WIDGET";
+    }
 
     public Category getCategory() {
         return category;
@@ -90,43 +95,41 @@ public enum UWAWidgetExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
-    private static final Object[] EMPTY = new Object[0];
-
-    /**
-     * Creates a new file storage exception of this error type with no message arguments.
-     * 
-     * @return A new twitter exception
-     */
-    public UWAWidgetException create() {
-        return UWAWidgetExceptionFactory.getInstance().create(this, EMPTY);
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
-     * Creates a new file storage exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance
      */
-    public UWAWidgetException create(final Object... messageArgs) {
-        return UWAWidgetExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new file storage exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public UWAWidgetException create(final Throwable cause, final Object... messageArgs) {
-        return UWAWidgetExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }
