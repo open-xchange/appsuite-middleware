@@ -62,7 +62,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
@@ -93,7 +93,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
         super();
     }
 
-    public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session, final Context ctx) throws AbstractOXException, JSONException {
+    public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session, final Context ctx) throws OXException, JSONException {
         final UserService userService = getServiceRegistry().getService(UserService.class);
         if (null == userService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
@@ -115,10 +115,10 @@ public class ResourceManageRequest implements AJAXRequestHandler {
      * 
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return The newly created resource's ID wrapped inside a JSON object
-     * @throws AbstractOXException If creation fails
+     * @throws OXException If creation fails
      * @throws JSONException If a JsSON error occurs
      */
-    private AJAXRequestResult actionNew(final JSONObject jsonObj, final User user, final Context ctx) throws AbstractOXException, JSONException {
+    private AJAXRequestResult actionNew(final JSONObject jsonObj, final User user, final Context ctx) throws OXException, JSONException {
         /*
          * Check for "data"
          */
@@ -148,10 +148,10 @@ public class ResourceManageRequest implements AJAXRequestHandler {
      * 
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return An empty JSON object
-     * @throws AbstractOXException If update fails
+     * @throws OXException If update fails
      * @throws JSONException If a JsSON error occurs
      */
-    private AJAXRequestResult actionUpdate(final JSONObject jsonObj, final User user, final Context ctx) throws AbstractOXException, JSONException {
+    private AJAXRequestResult actionUpdate(final JSONObject jsonObj, final User user, final Context ctx) throws OXException, JSONException {
         final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
         if (null == resourceService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
@@ -184,10 +184,10 @@ public class ResourceManageRequest implements AJAXRequestHandler {
      * 
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return An empty JSON array
-     * @throws AbstractOXException If deletion fails
+     * @throws OXException If deletion fails
      * @throws JSONException If a JsSON error occurs
      */
-    private AJAXRequestResult actionDelete(final JSONObject jsonObj, final User user, final Context ctx) throws AbstractOXException, JSONException {
+    private AJAXRequestResult actionDelete(final JSONObject jsonObj, final User user, final Context ctx) throws OXException, JSONException {
         final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
         if (null == resourceService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
