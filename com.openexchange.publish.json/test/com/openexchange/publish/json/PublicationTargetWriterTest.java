@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.Translator;
@@ -99,7 +100,7 @@ public class PublicationTargetWriterTest extends TestCase {
         assertValidates(assertion, object);
     }
 
-    public void testWriteArray() throws JSONException, PublicationJSONException {
+    public void testWriteArray() throws JSONException, OXException {
         JSONArray array = new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"id", "displayName", "icon", "module"}, null, null);
 
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(target.getId(), target.getDisplayName(), target.getIcon(), target.getModule());
@@ -111,7 +112,7 @@ public class PublicationTargetWriterTest extends TestCase {
         try {
             new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"id", "unkownColumn"}, null, null);
             fail("Expected exception");
-        } catch (PublicationJSONException e) {
+        } catch (OXException e) {
             // Hooray!
         }
     }
@@ -130,7 +131,7 @@ public class PublicationTargetWriterTest extends TestCase {
         
     }
     
-    public void testWriteUserSpecificFormInArray() throws PublicationJSONException, JSONException {
+    public void testWriteUserSpecificFormInArray() throws OXException, JSONException {
         TestTarget target = new TestTarget();
         target.setId("com.openexchange.publish.test1");
         target.setDisplayName("Test 1 PubTarget");

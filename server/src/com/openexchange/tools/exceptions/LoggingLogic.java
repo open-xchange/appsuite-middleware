@@ -51,6 +51,8 @@ package com.openexchange.tools.exceptions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.Category.Type;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 public abstract class LoggingLogic {
@@ -76,7 +78,8 @@ public abstract class LoggingLogic {
         this.log = log;
     }
 
-    public void log(final AbstractOXException aox) {
+    public void log(final OXException aox) {
+        final Type type = aox.getCategories().get(0).getType();
         switch (aox.getCategory()) {
         case CODE_ERROR:
             codeError(aox);

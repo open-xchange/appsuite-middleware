@@ -55,8 +55,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -69,35 +68,34 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractPublicationServlet extends PermissionServlet{
 
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().isPublication();
     }
     
-    protected void writeOXException(AbstractOXException x, HttpServletResponse resp) {
-        getLoggingLogic().log(x);
-        Response response = new Response();
+    protected void writeOXException(final OXException x, final HttpServletResponse resp) {
+        x.log(com.openexchange.exception.Log.valueOf(getLog()));
+        final Response response = new Response();
         response.setException(x);
         writeResponseSafely(response, resp);
     }
 
-    protected void writeData(Object data, HttpServletResponse resp) {
-        Response response = new Response();
+    protected void writeData(final Object data, final HttpServletResponse resp) {
+        final Response response = new Response();
         response.setData(data);
         writeResponseSafely(response, resp);
     }
 
-    protected AbstractOXException wrapThrowable(Throwable t) {
+    protected OXException wrapThrowable(final Throwable t) {
         return THROWABLE.create(t, t.getMessage());
     }
 
-    protected void writeResponseSafely(Response response, HttpServletResponse resp) {
+    protected void writeResponseSafely(final Response response, final HttpServletResponse resp) {
         try {
             writeResponse(response, resp);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             getLog().error(e.getMessage(), e);
         }
     }
     
     protected abstract Log getLog();
-    protected abstract LoggingLogic getLoggingLogic();
 }

@@ -50,6 +50,7 @@
 package com.openexchange.publish.json;
 
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.THROWABLE;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -59,7 +60,7 @@ import static com.openexchange.publish.json.PublicationJSONErrorMessage.THROWABL
  *
  */
 public class MultipleHandlerTools {
-    public static PublicationJSONException wrapThrowable(Throwable t) {
+    public static OXException wrapThrowable(Throwable t) {
         return THROWABLE.create(t, t.getMessage());
     }
 }

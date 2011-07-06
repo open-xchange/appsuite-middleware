@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.Translator;
@@ -108,7 +109,7 @@ public class PublicationTargetWriter {
         return new FormDescriptionWriter(translator).write(form);
     }
 
-    public JSONArray writeArray(PublicationTarget target, String[] columns, User user, UserConfiguration userConfig) throws JSONException, PublicationJSONException {
+    public JSONArray writeArray(PublicationTarget target, String[] columns, User user, UserConfiguration userConfig) throws JSONException, OXException {
         JSONArray array = new JSONArray();
         for (String column : columns) {
             if (column.equals(ID)) {
@@ -128,7 +129,7 @@ public class PublicationTargetWriter {
         return array;
     }
 
-    public JSONArray writeJSONArray(Collection<PublicationTarget> targets, String[] columns, User user, UserConfiguration userConfig) throws JSONException, PublicationJSONException {
+    public JSONArray writeJSONArray(Collection<PublicationTarget> targets, String[] columns, User user, UserConfiguration userConfig) throws JSONException, OXException {
         JSONArray array = new JSONArray();
         for (PublicationTarget publicationTarget : targets) {
             array.put(writeArray(publicationTarget, columns, user, userConfig));

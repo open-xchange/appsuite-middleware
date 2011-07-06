@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
@@ -97,7 +98,7 @@ public class PublicationWriterTest extends TestCase {
         publication.setEnabled(true);
     }
     
-    public void testWriteObject() throws JSONException, PublicationJSONException {
+    public void testWriteObject() throws JSONException, OXException {
         PublicationWriter writer = new PublicationWriter();
         JSONObject object = writer.write(publication, null);
         
@@ -120,7 +121,7 @@ public class PublicationWriterTest extends TestCase {
        assertValidates(assertion, object);
     }
     
-    public void testWriteArray() throws JSONException, PublicationJSONException {
+    public void testWriteArray() throws JSONException, OXException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "target", "displayName", "enabled" };
         specialCols.put("com.openexchange.publish.test", new String[] { "siteName" });
@@ -141,7 +142,7 @@ public class PublicationWriterTest extends TestCase {
         try {
             new PublicationWriter().writeArray(publication, new String[]{"id", "unknownColumn"}, new HashMap<String, String[]>(), Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription());
             fail("Should have failed");
-        } catch (PublicationJSONException e) {
+        } catch (OXException e) {
             
         } catch (JSONException e) {
 

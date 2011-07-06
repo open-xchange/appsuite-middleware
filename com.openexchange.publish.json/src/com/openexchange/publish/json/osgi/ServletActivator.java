@@ -57,10 +57,8 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONErrorMessage;
 import com.openexchange.publish.json.PublicationMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationServlet;
 import com.openexchange.publish.json.PublicationTargetMultipleHandlerFactory;
@@ -78,11 +76,9 @@ public class ServletActivator extends DeferredActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PublicationTargetDiscoveryService.class, ConfigurationService.class };
 
-    private ComponentRegistration componentRegistration;
-
     List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
     
-    private List<ServiceRegistration> serviceRegistrations = new LinkedList<ServiceRegistration>();
+    private final List<ServiceRegistration> serviceRegistrations = new LinkedList<ServiceRegistration>();
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -96,18 +92,18 @@ public class ServletActivator extends DeferredActivator {
     }
 
     private void register() {
-        PublicationTargetDiscoveryService discovery = getService(PublicationTargetDiscoveryService.class);
+        final PublicationTargetDiscoveryService discovery = getService(PublicationTargetDiscoveryService.class);
         if(discovery == null) {
             return;
         }
         
-        ConfigurationService config = getService(ConfigurationService.class);
+        final ConfigurationService config = getService(ConfigurationService.class);
         if(config == null){
         	return;
         }
         
-        PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap(), config);
-        PublicationTargetMultipleHandlerFactory publicationTargetHandlerFactory = new PublicationTargetMultipleHandlerFactory(discovery);
+        final PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap(), config);
+        final PublicationTargetMultipleHandlerFactory publicationTargetHandlerFactory = new PublicationTargetMultipleHandlerFactory(discovery);
         
         serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationHandlerFactory, null));
         serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationTargetHandlerFactory, null));
@@ -118,7 +114,7 @@ public class ServletActivator extends DeferredActivator {
         servletRegistrations.add(new SessionServletRegistration(context, new PublicationTargetServlet(), TARGET_ALIAS));
         servletRegistrations.add(new SessionServletRegistration(context, new PublicationServlet(), PUB_ALIAS));
         
-        for (SessionServletRegistration reg : servletRegistrations) {
+        for (final SessionServletRegistration reg : servletRegistrations) {
             reg.open();
         }
     }
@@ -132,12 +128,12 @@ public class ServletActivator extends DeferredActivator {
         PublicationServlet.setFactory(null);
         PublicationTargetServlet.setFactory(null);
         
-        for(ServiceRegistration registration : serviceRegistrations) {
+        for(final ServiceRegistration registration : serviceRegistrations) {
             registration.unregister();
         }
         serviceRegistrations.clear();
         
-        for (SessionServletRegistration reg : servletRegistrations) {
+        for (final SessionServletRegistration reg : servletRegistrations) {
             reg.close();
         }
         servletRegistrations.clear();
@@ -146,18 +142,11 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        componentRegistration = new ComponentRegistration(
-            context,
-            "PUBH",
-            "com.openexchange.publish.json",
-            PublicationJSONErrorMessage.EXCEPTIONS);
-
         register();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         unregister();
-        componentRegistration.unregister();
     }
 }

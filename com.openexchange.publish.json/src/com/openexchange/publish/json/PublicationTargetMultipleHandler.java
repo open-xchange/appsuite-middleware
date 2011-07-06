@@ -63,12 +63,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nTranslator;
 import com.openexchange.i18n.Translator;
 import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
@@ -113,10 +111,10 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
     }
 
     public Collection<OXException> getWarnings() {
-        return Collections.<AbstractOXException> emptySet();
+        return Collections.<OXException> emptySet();
     }
 
-    private JSONValue getTarget(final JSONObject request, final ServerSession session) throws PublicationJSONException, OXException, JSONException {
+    private JSONValue getTarget(final JSONObject request, final ServerSession session) throws OXException, OXException, JSONException {
         final String identifier = request.optString("id");
         if (identifier == null) {
             throw MISSING_PARAMETER.create("id");
@@ -135,7 +133,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }
 
-    private JSONValue listTargets(final JSONObject request, final ServerSession session) throws JSONException, PublicationJSONException, OXException {
+    private JSONValue listTargets(final JSONObject request, final ServerSession session) throws JSONException, OXException, OXException {
         final Collection<PublicationTarget> targets = discoverer.listTargets();
         final String[] columns = getColumns(request);
         final JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns, session.getUser(), session.getUserConfiguration());

@@ -64,6 +64,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.ValueWriterSwitch;
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.json.types.EntityMap;
 
@@ -83,7 +84,7 @@ public class PublicationWriter {
     public PublicationWriter() {
     }
 
-    public JSONObject write(Publication publication, String urlPrefix) throws JSONException, PublicationJSONException {
+    public JSONObject write(Publication publication, String urlPrefix) throws JSONException, OXException {
         JSONObject object = new JSONObject();
         object.put(ID, publication.getId());
         object.put(ENTITY, writeEntity(publication));
@@ -96,7 +97,7 @@ public class PublicationWriter {
         return object;
     }
 
-    public JSONArray writeArray(Publication publication, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) throws PublicationJSONException, JSONException {
+    public JSONArray writeArray(Publication publication, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) throws OXException, JSONException {
         JSONArray array = new JSONArray();
         writeBasicCols(array, publication, basicCols);
         for (String identifier : specialsList) {
@@ -123,7 +124,7 @@ public class PublicationWriter {
         }
     }
 
-    private void writeBasicCols(JSONArray array, Publication publication, String[] basicCols) throws PublicationJSONException, JSONException {
+    private void writeBasicCols(JSONArray array, Publication publication, String[] basicCols) throws OXException, JSONException {
         for (String basicCol : basicCols) {
             if (ID.equals(basicCol)) {
                 array.put(publication.getId());
@@ -143,7 +144,7 @@ public class PublicationWriter {
         }
     }
 
-    private JSONObject writeEntity(Publication publication) throws PublicationJSONException, JSONException {
+    private JSONObject writeEntity(Publication publication) throws OXException, JSONException {
         if (publication.getModule() == null) {
             return new JSONObject();
         }
