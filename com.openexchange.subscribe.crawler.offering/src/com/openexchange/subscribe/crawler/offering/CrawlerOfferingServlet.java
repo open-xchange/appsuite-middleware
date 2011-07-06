@@ -65,7 +65,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
@@ -73,7 +72,6 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.exception.OXException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -166,10 +164,6 @@ public class CrawlerOfferingServlet extends HttpServlet {
             LOG.error(e.getMessage(), e);
             resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            resp.setContentType("text/html;charset=UTF-8");
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -199,7 +193,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
             final OXTemplate template = templateService.loadTemplate(LIST_TEMPLATE);
             resp.setContentType("text/html;charset=UTF-8");
             fillListTemplate(template, req, resp);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -211,7 +205,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
             final OXTemplate template = templateService.loadTemplate(SOURCE_TEMPLATE);
             resp.setContentType("text/html;charset=UTF-8");
             fillSourceTemplate(template, req, resp);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
