@@ -80,9 +80,9 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
      * 
      * @param messagingAccount The facebook account
      * @param session The session
-     * @throws FacebookOXException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public FacebookMessagingAccountAccess(final MessagingAccount messagingAccount, final Session session) throws FacebookOXException {
+    public FacebookMessagingAccountAccess(final MessagingAccount messagingAccount, final Session session) throws OXException {
         super(messagingAccount, session);
     }
 

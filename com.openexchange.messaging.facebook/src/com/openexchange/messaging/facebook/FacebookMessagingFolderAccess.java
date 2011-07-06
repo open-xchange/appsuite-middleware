@@ -261,7 +261,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
         return generateRootFolder();
     }
 
-    private MessagingFolder generateRootFolder() throws FacebookOXException {
+    private MessagingFolder generateRootFolder() throws OXException {
         try {
             /*
              * The collection of users

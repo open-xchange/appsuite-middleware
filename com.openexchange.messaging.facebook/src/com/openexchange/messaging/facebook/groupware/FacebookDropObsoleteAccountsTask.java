@@ -59,7 +59,6 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -79,7 +78,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
     /**
      * Initializes a new {@link FacebookDropObsoleteAccountsTask}.
      */
-    public FacebookDropObsoleteAccountsTask(DatabaseService dbService) {
+    public FacebookDropObsoleteAccountsTask(final DatabaseService dbService) {
         super();
         this.dbService = dbService;
     }
@@ -93,7 +92,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         final Connection writeCon;
         try {
             writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
@@ -108,7 +107,7 @@ public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {
         } catch (final SQLException e) {
             DBUtils.rollback(writeCon);
             throw createSQLError(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(writeCon);
             throw e;
         } catch (final Exception e) {

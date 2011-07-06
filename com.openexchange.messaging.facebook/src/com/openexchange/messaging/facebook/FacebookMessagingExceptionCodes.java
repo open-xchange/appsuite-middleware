@@ -49,89 +49,90 @@
 
 package com.openexchange.messaging.facebook;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link FacebookMessagingExceptionCodes} - Enumeration of all {@link FacebookOXException}s.
+ * {@link FacebookMessagingExceptionCodes} - Enumeration of all {@link OXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
+public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(FacebookMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(FacebookMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(FacebookMessagingExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 2),
+    SQL_ERROR(FacebookMessagingExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(FacebookMessagingExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 3),
+    IO_ERROR(FacebookMessagingExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 3),
     /**
      * An I/O error occurred: %1$s
      */
-    JSON_ERROR(FacebookMessagingExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 4),
+    JSON_ERROR(FacebookMessagingExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 4),
     /**
      * Login to facebook failed for login %1$s.
      */
-    FAILED_LOGIN(FacebookMessagingExceptionMessages.FAILED_LOGIN_MSG, Category.CODE_ERROR, 5),
+    FAILED_LOGIN(FacebookMessagingExceptionMessages.FAILED_LOGIN_MSG, CATEGORY_ERROR, 5),
     /**
      * Communication error with facebook service: %1$s
      */
-    COMMUNICATION_ERROR(FacebookMessagingExceptionMessages.COMMUNICATION_ERROR_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 6),
+    COMMUNICATION_ERROR(FacebookMessagingExceptionMessages.COMMUNICATION_ERROR_MSG, CATEGORY_SERVICE_DOWN, 6),
     /**
      * Login form not found on page: %1$s
      */
-    LOGIN_FORM_NOT_FOUND(FacebookMessagingExceptionMessages.LOGIN_FORM_NOT_FOUND_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 7),
+    LOGIN_FORM_NOT_FOUND(FacebookMessagingExceptionMessages.LOGIN_FORM_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 7),
     /**
      * Element with attribute %1$s not found on page %2$s.
      */
-    ELEMENT_NOT_FOUND(FacebookMessagingExceptionMessages.ELEMENT_NOT_FOUND_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 8),
+    ELEMENT_NOT_FOUND(FacebookMessagingExceptionMessages.ELEMENT_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 8),
     /**
      * Missing permission "%1$s" in facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:<br>
      * %3$s
      */
-    MISSING_PERMISSION(FacebookMessagingExceptionMessages.MISSING_PERMISSION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 9),
+    MISSING_PERMISSION(FacebookMessagingExceptionMessages.MISSING_PERMISSION_MSG, CATEGORY_SERVICE_DOWN, 9),
     /**
      * An error occurred during the processing of a script.
      */
-    SCRIPT_ERROR(FacebookMessagingExceptionMessages.SCRIPT_ERROR_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10),
+    SCRIPT_ERROR(FacebookMessagingExceptionMessages.SCRIPT_ERROR_MSG, CATEGORY_SERVICE_DOWN, 10),
     /**
      * Missing permission for the application associated with configured Facebook API key: %1$s<br>
      * Please grant access for that application in your Facebook account settings.
      */
-    MISSING_APPLICATION_PERMISSION(FacebookMessagingExceptionMessages.MISSING_APPLICATION_PERMISSION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10),
+    MISSING_APPLICATION_PERMISSION(FacebookMessagingExceptionMessages.MISSING_APPLICATION_PERMISSION_MSG, CATEGORY_SERVICE_DOWN, 10),
     /**
      * FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).
      */
-    FQL_QUERY_RESULT_MISMATCH(FacebookMessagingExceptionMessages.FQL_QUERY_RESULT_MISMATCH_MSG, Category.CODE_ERROR, 11),
+    FQL_QUERY_RESULT_MISMATCH(FacebookMessagingExceptionMessages.FQL_QUERY_RESULT_MISMATCH_MSG, CATEGORY_ERROR, 11),
     /**
      * Unsupported query type: %1$s.
      */
-    UNSUPPORTED_QUERY_TYPE(FacebookMessagingExceptionMessages.UNSUPPORTED_QUERY_TYPE_MSG, Category.CODE_ERROR, 12),
+    UNSUPPORTED_QUERY_TYPE(FacebookMessagingExceptionMessages.UNSUPPORTED_QUERY_TYPE_MSG, CATEGORY_ERROR, 12),
     /**
      * An OAuth error occurred: %1$s.
      */
-    OAUTH_ERROR(FacebookMessagingExceptionMessages.OAUTH_ERROR_MSG, Category.CODE_ERROR, 13),
+    OAUTH_ERROR(FacebookMessagingExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_ERROR, 13),
     /**
      * A FQL error of type %1$s occurred: %2$s.
      */
-    FQL_ERROR(FacebookMessagingExceptionMessages.FQL_ERROR_MSG, Category.CODE_ERROR, 14),
+    FQL_ERROR(FacebookMessagingExceptionMessages.FQL_ERROR_MSG, CATEGORY_ERROR, 14),
     /**
      * FQL response body cannot be parsed to a JSON value:<br>
      * %1$s
      */
-    INVALID_RESPONSE_BODY(FacebookMessagingExceptionMessages.INVALID_RESPONSE_BODY_MSG, Category.CODE_ERROR, 15),
+    INVALID_RESPONSE_BODY(FacebookMessagingExceptionMessages.INVALID_RESPONSE_BODY_MSG, CATEGORY_ERROR, 15),
     /**
      * XML parse error: %1$s.
      */
-    XML_PARSE_ERROR(FacebookMessagingExceptionMessages.XML_PARSE_ERROR_MSG, Category.CODE_ERROR, 16);
+    XML_PARSE_ERROR(FacebookMessagingExceptionMessages.XML_PARSE_ERROR_MSG, CATEGORY_ERROR, 16);
     
 
     private final Category category;
@@ -146,6 +147,10 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
         this.category = category;
     }
 
+    public String getPrefix() {
+        return "FACEBOOK";
+    }
+
     public Category getCategory() {
         return category;
     }
@@ -154,32 +159,41 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance
      */
-    public FacebookOXException create(final Object... messageArgs) {
-        return FacebookMessagingExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public FacebookOXException create(final Throwable cause, final Object... messageArgs) {
-        return FacebookMessagingExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

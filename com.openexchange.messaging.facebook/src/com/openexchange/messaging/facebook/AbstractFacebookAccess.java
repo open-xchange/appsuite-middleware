@@ -157,9 +157,9 @@ public abstract class AbstractFacebookAccess {
      * 
      * @param fqlQuery The FQL query
      * @return The queried JSON object
-     * @throws FacebookOXException If FQL query fails
+     * @throws OXException If FQL query fails
      */
-    protected JSONObject performFQLQuery(final String fqlQuery) throws FacebookOXException {
+    protected JSONObject performFQLQuery(final String fqlQuery) throws OXException {
         try {
             final String encodedQuery = encode(fqlQuery);
             final JSONObject result =
@@ -190,9 +190,9 @@ public abstract class AbstractFacebookAccess {
      * 
      * @param fqlQuery The FQL query
      * @return The queried JSON result
-     * @throws FacebookOXException If FQL query fails
+     * @throws OXException If FQL query fails
      */
-    protected <V extends JSONValue> V performFQLQuery(final Class<V> clazz, final String fqlQuery) throws FacebookOXException {
+    protected <V extends JSONValue> V performFQLQuery(final Class<V> clazz, final String fqlQuery) throws OXException {
         try {
             final String encodedQuery = encode(fqlQuery);
             if (JSONObject.class.equals(clazz)) {

@@ -87,9 +87,9 @@ public class FacebookMessagingResource implements MessagingResource {
      * Initializes a new {@link FacebookMessagingResource}.
      * 
      * @param messagingAccount The facebook account
-     * @throws FacebookOXException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) throws FacebookOXException {
+    public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) throws OXException {
         super();
         this.messagingAccount = messagingAccount;
         this.session = session;

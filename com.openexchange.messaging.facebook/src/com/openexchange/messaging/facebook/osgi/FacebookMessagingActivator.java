@@ -60,7 +60,6 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.MessagingService;
@@ -68,8 +67,6 @@ import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingService;
 import com.openexchange.messaging.facebook.FacebookOAuthAccountDeleteListener;
-import com.openexchange.messaging.facebook.FacebookOXException;
-import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionFactory;
 import com.openexchange.messaging.facebook.session.FacebookEventHandler;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
@@ -91,8 +88,6 @@ public final class FacebookMessagingActivator extends DeferredActivator {
     private List<ServiceTracker> trackers;
 
     private List<ServiceRegistration> registrations;
-
-    private ComponentRegistration componentRegistration;
 
     private WhiteboardSecretService secretService;
 
@@ -156,15 +151,6 @@ public final class FacebookMessagingActivator extends DeferredActivator {
              */
             FacebookConstants.init();
             FacebookConfiguration.getInstance().configure(getService(ConfigurationService.class));
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    FacebookOXException.FACEBOOK_COMPONENT,
-                    "com.openexchange.messaging.facebook",
-                    FacebookMessagingExceptionFactory.getInstance());
 
             trackers = new ArrayList<ServiceTracker>(1);
             trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
@@ -200,13 +186,6 @@ public final class FacebookMessagingActivator extends DeferredActivator {
         try {
             if(secretService != null) {
                 secretService.close();
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
             if (null != trackers) {
                 while (!trackers.isEmpty()) {

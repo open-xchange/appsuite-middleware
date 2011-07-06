@@ -291,7 +291,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 final List<Element> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
                 final int size = results.size();
                 if (size != messageIds.length) {
-                    final FacebookOXException warning =
+                    final OXException warning =
                         FacebookMessagingExceptionCodes.FQL_QUERY_RESULT_MISMATCH.create(
                             Integer.valueOf(size),
                             Integer.valueOf(messageIds.length));
