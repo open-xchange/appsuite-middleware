@@ -53,8 +53,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.ajax.MailfilterServlet;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.Initialization;
 
@@ -92,7 +93,7 @@ public class MailFilterServletInit implements Initialization {
 	 * 
 	 * @see com.openexchange.server.Initialization#start()
 	 */
-	public void start() throws OXMailfilterException {
+	public void start() throws OXException {
 		if (!started.compareAndSet(false, true)) {
 			LOG.error("MailFilterServlet already started.");
 			return;
@@ -120,10 +121,10 @@ public class MailFilterServletInit implements Initialization {
 			 */
 			httpService.registerServlet(SC_SRVLT_ALIAS, new MailfilterServlet(), null, null);
 		} catch (final ServletException e) {
-			throw new OXMailfilterException(OXMailfilterException.Code.SERVLET_REGISTRATION_FAILED, e, e
+			throw OXMailfilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e
 					.getMessage());
 		} catch (final NamespaceException e) {
-			throw new OXMailfilterException(OXMailfilterException.Code.SERVLET_REGISTRATION_FAILED, e, e
+			throw OXMailfilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e
 					.getMessage());
 		}
 	}

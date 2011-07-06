@@ -59,6 +59,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
@@ -73,7 +74,6 @@ import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RejectActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.VacationActionFields;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
@@ -152,18 +152,14 @@ final class ActionCommandMapper implements Mapper<Rule> {
             }
             final String text = object.getString(VacationActionFields.TEXT.getFieldname());
             if (null == text) {
-                throw new OXException(
-                    OXJSONExceptionCodes.JSON_READ_ERROR,
-                    "Parameter " + VacationActionFields.TEXT.getFieldname() + " is missing for " + ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + VacationActionFields.TEXT.getFieldname() + " is missing for " + ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
             }
             arrayList.add(stringToList(text.replaceAll("(\r)?\n", "\r\n")));
             return new ActionCommand(ActionCommand.Commands.VACATION, arrayList);
         } else if (ActionCommand.Commands.ADDFLAG.getJsonname().equals(id)) {
             final JSONArray array = object.getJSONArray(AddFlagsActionFields.FLAGS);
             if (null == array) {
-                throw new OXException(
-                    OXJSONExceptionCodes.JSON_READ_ERROR,
-                    "Parameter " + AddFlagsActionFields.FLAGS + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + AddFlagsActionFields.FLAGS + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
             }
             final ArrayList<Object> arrayList = new ArrayList<Object>();
             arrayList.add(Rule2JSON2Rule.JSONArrayToStringList(array));
@@ -301,10 +297,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
         try {
             return jobj.getString(value);
         } catch (final JSONException e) {
-            throw new OXException(
-                OXJSONExceptionCodes.JSON_READ_ERROR,
-                e,
-                "Error while reading ActionCommand " + component + ": " + e.getMessage());
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading ActionCommand " + component + ": " + e.getMessage());
         }
     }
 }

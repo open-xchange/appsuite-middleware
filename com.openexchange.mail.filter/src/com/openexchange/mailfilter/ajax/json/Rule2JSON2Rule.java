@@ -63,13 +63,13 @@ import org.apache.jsieve.parser.generated.Token;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mailfilter.ajax.fields.RuleFields;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**

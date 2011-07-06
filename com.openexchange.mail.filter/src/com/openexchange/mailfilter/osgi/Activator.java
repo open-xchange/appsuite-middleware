@@ -54,8 +54,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.internal.MailFilterServletInit;
@@ -195,13 +194,13 @@ public class Activator extends DeferredActivator {
             if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
                 final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
                 if (masterpassword.length() == 0) {
-                    throw new OXMailfilterException(Code.NO_MASTERPASSWORD_SET);
+                    throw OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.create();
                 }
             } else if (!MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
-                throw new OXMailfilterException(Code.NO_VALID_PASSWORDSOURCE);
+                throw OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
             }
         } else {
-            throw new OXMailfilterException(Code.NO_VALID_PASSWORDSOURCE);
+            throw OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
         }
 
     }

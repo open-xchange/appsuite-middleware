@@ -63,6 +63,7 @@ import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.SieveParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.Command;
@@ -74,8 +75,7 @@ import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
 import com.openexchange.mailfilter.ajax.Credentials;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 
 /**
  * This class will be used to filter out special things which are not part of
@@ -217,7 +217,7 @@ public final class SieveTextFilter {
         this.username = username;
     }
 
-    public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException, OXMailfilterException {
+    public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException, OXException {
         boolean errorsinscript = false;
         // The following line strips off the first line of the script
         // final String first = readFileToString.replaceAll("^.*(\r)?\n", "");
@@ -544,7 +544,7 @@ public final class SieveTextFilter {
         return commentedtext.substring(start, end);
     }
 
-    private ArrayList<RuleComment> getRulenames(final String readFileToString) throws OXMailfilterException {
+    private ArrayList<RuleComment> getRulenames(final String readFileToString) throws OXException {
         final ArrayList<RuleComment> ruleComments = new ArrayList<RuleComment>();
         final ArrayList<String> stringToList = stringToList(readFileToString);
         for (int i = 0; i < stringToList.size(); i++) {
@@ -601,7 +601,7 @@ public final class SieveTextFilter {
         if (null != errormsg) {
             rightrule.setCommands(null);
             addPlainTextToRule(wholetext, commentedtext, rulename, rightrule);
-            printErrorForUser(new OXMailfilterException(Code.SIEVE_ERROR, errormsg));
+            printErrorForUser(OXMailfilterExceptionCode.SIEVE_ERROR.create(errormsg));
             return true;
         }
         return false;
@@ -771,7 +771,7 @@ public final class SieveTextFilter {
         return retval;
     }
 
-    private void printErrorForUser(final OXMailfilterException mailfilterException) {
+    private void printErrorForUser(final OXException mailfilterException) {
         LOG.error("Error in mailfilter rules of user " + this.username + ": " + mailfilterException.getMessage(), mailfilterException);
     }
 

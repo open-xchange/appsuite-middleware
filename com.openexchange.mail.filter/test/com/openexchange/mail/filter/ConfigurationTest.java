@@ -4,7 +4,8 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.osgi.Activator;
 
 
@@ -24,8 +25,8 @@ public class ConfigurationTest extends Activator {
         try {
             checkConfigfile();
             Assert.fail("No exception thrown");
-        } catch (final OXMailfilterException e) {
-            Assert.assertEquals(OXMailfilterException.Code.NO_VALID_PASSWORDSOURCE.getMessage(), e.getOrigMessage());
+        } catch (final OXException e) {
+            Assert.assertTrue(OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.equals(e));
         }
     }
 
@@ -41,8 +42,8 @@ public class ConfigurationTest extends Activator {
         try {
             checkConfigfile();
             Assert.fail("No exception thrown");
-        } catch (final OXMailfilterException e) {
-            Assert.assertEquals(OXMailfilterException.Code.NO_MASTERPASSWORD_SET.getMessage(), e.getOrigMessage());
+        } catch (final OXException e) {
+            Assert.assertTrue(OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.getMessage().equals(e));
         }
     }
     

@@ -63,17 +63,14 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -102,7 +99,7 @@ public abstract class AJAXServlet extends HttpServlet {
     }
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
@@ -117,21 +114,21 @@ public abstract class AJAXServlet extends HttpServlet {
         try {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId == null) {
-                throw new OXMailfilterException(OXMailfilterException.Code.MISSING_PARAMETER, "session");
+                throw OXMailfilterExceptionCode.MISSING_PARAMETER.create("session");
             }
             
             final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null == service) {
-                throw new SessiondException(new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE));
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
             }            
             final Session session = service.getSession(sessionId);
             if (null == session) {
-                throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
+                throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
             }
-            String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
+            final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
-                throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
+                throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
             }
             
             final AbstractRequest request = createRequest();
@@ -151,7 +148,7 @@ public abstract class AJAXServlet extends HttpServlet {
              */
             final AbstractAction action = createAction();
             response.setData(action.action(request));
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
@@ -179,16 +176,16 @@ public abstract class AJAXServlet extends HttpServlet {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
             final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null == service) {
-                throw new SessiondException(new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE));
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class);
             }
             final Session session = service.getSession(sessionId);
             if (null == session) {
-                throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
+                throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
             }
-            String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
+            final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
-                throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, "Can't find session.");
+                throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
             }
             
             final AbstractRequest request = createRequest();
@@ -206,7 +203,7 @@ public abstract class AJAXServlet extends HttpServlet {
             request.setBody(com.openexchange.ajax.AJAXServlet.getBody(req));
             final AbstractAction action = createAction();
             response.setData(action.action(request));
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }

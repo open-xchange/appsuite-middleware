@@ -66,7 +66,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.jsieve.commands.ActionCommand;
@@ -85,15 +85,13 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredential
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest.Parameters;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -155,7 +153,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      * {@inheritDoc}
      */
     @Override
-    protected JSONObject actionConfig(final MailfilterRequest request) throws AbstractOXException {
+    protected JSONObject actionConfig(final MailfilterRequest request) throws OXException {
         final Credentials credentials = request.getCredentials();
         final SieveHandler sieveHandler = connectRight(credentials);
         // First fetch configuration:
@@ -166,28 +164,28 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final ArrayList<String> sieve = capabilities.getSieve();
             tests = getTestAndActionObjects(sieve);
         } catch (final UnsupportedEncodingException e) {
-            throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
         } catch (final JSONException e) {
-            throw new OXMailfilterException(Code.JSON_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final NumberFormatException nfe) {
-            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+            throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
         } catch (final RuntimeException re) {
-            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
+            throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
                     sieveHandler.close();
                 } catch (final UnsupportedEncodingException e) {
-                    throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                 } catch (final IOException e) {
-                    throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
                 }
             }
         }
@@ -198,7 +196,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      * {@inheritDoc}
      */
     @Override
-    protected void actionDelete(final MailfilterRequest request) throws AbstractOXException {
+    protected void actionDelete(final MailfilterRequest request) throws OXException {
         final Credentials credentials = request.getCredentials();
         final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
         final SieveHandler sieveHandler = connectRight(credentials);
@@ -219,34 +217,34 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
             writeScript(sieveHandler, activeScript, writeback);
         } catch (final UnsupportedEncodingException e) {
-            throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
         } catch (final ParseException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final SieveException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
-            throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+            throw OXMailfilterExceptionCode.LEXICAL_ERROR.create(error, error.getMessage());
         } catch (final NumberFormatException nfe) {
-            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+            throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
         } catch (final RuntimeException re) {
-            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
+            throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
                     sieveHandler.close();
                 } catch (final UnsupportedEncodingException e) {
-                    throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                 } catch (final IOException e) {
-                    throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
                 }
             }
         }
@@ -256,7 +254,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      * {@inheritDoc}
      */
     @Override
-    protected JSONArray actionList(final MailfilterRequest request) throws AbstractOXException {
+    protected JSONArray actionList(final MailfilterRequest request) throws OXException {
         final Parameters parameters = request.getParameters();
         final Credentials credentials = request.getCredentials();
         final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
@@ -277,34 +275,34 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             
             return CONVERTER.write(clientrules.toArray(new Rule[clientrules.size()]));
         } catch (final UnsupportedEncodingException e) {
-            throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
         } catch (final ParseException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final SieveException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
-            throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+            throw OXMailfilterExceptionCode.LEXICAL_ERROR.create(error, error.getMessage());
         } catch (final NumberFormatException nfe) {
-            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+            throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
         } catch (final RuntimeException re) {
-            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
+            throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
                     sieveHandler.close();
                 } catch (final UnsupportedEncodingException e) {
-                    throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                 } catch (final IOException e) {
-                    throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
                 }
             }
         }
@@ -314,7 +312,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      * {@inheritDoc}
      */
     @Override
-    protected int actionNew(final MailfilterRequest request) throws AbstractOXException {
+    protected int actionNew(final MailfilterRequest request) throws OXException {
         final Credentials credentials = request.getCredentials();
         final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
         final SieveHandler sieveHandler = connectRight(credentials);
@@ -337,7 +335,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             int position = newrule.getPosition();
             final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
             if (position >= clientrules.size()) {
-                throw new OXMailfilterException(Code.POSITION_TOO_BIG);
+                throw OXMailfilterExceptionCode.POSITION_TOO_BIG.create();
             }
             final int nextuid = rules.getNextuid();
             setUidInRule(newrule, nextuid);
@@ -355,41 +353,41 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
             return nextuid;
         } catch (final UnsupportedEncodingException e) {
-            throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
         } catch (final ParseException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final SieveException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         } catch (final TokenMgrError error) {
-            throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+            throw OXMailfilterExceptionCode.LEXICAL_ERROR.create(error, error.getMessage());
         } catch (final NumberFormatException nfe) {
-            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+            throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
         } catch (final RuntimeException re) {
-            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
+            throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
                     sieveHandler.close();
                 } catch (final UnsupportedEncodingException e) {
-                    throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                 } catch (final IOException e) {
-                    throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
                 }
             }
         }
     }
 
     @Override
-    protected void actionReorder(final MailfilterRequest request) throws AbstractOXException {
+    protected void actionReorder(final MailfilterRequest request) throws OXException {
         final Credentials credentials = request.getCredentials();
         final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
         final SieveHandler sieveHandler = connectRight(credentials);
@@ -419,34 +417,34 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             writeScript(sieveHandler, activeScript, writeback);
 
         } catch (final UnsupportedEncodingException e) {
-            throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
         } catch (final ParseException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final SieveException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
-            throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+            throw OXMailfilterExceptionCode.LEXICAL_ERROR.create(error, error.getMessage());
         } catch (final NumberFormatException nfe) {
-            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+            throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
         } catch (final RuntimeException re) {
-            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
+            throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
                     sieveHandler.close();
                 } catch (final UnsupportedEncodingException e) {
-                    throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                 } catch (final IOException e) {
-                    throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
                 }
             }
         }
@@ -456,7 +454,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      * {@inheritDoc}
      */
     @Override
-    protected void actionUpdate(final MailfilterRequest request) throws AbstractOXException {
+    protected void actionUpdate(final MailfilterRequest request) throws OXException {
         final Credentials credentials = request.getCredentials();
         final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
         final SieveHandler sieveHandler = connectRight(credentials);
@@ -481,7 +479,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 CONVERTER.parse(rightRule.getRule(), json);
                 changeIncomingVacationRule(rightRule.getRule());
             } else {
-                throw new OXMailfilterException(Code.ID_MISSING);
+                throw OXMailfilterExceptionCode.ID_MISSING.create();
             }
 
             final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
@@ -491,40 +489,40 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             writeScript(sieveHandler, activeScript, writeback);
 
         } catch (final UnsupportedEncodingException e) {
-            throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
             handleParsingException(e, credentials);
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
         } catch (final ParseException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final SieveException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, e, e.getMessage());
+            throw OXMailfilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
-            throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+            throw OXMailfilterExceptionCode.LEXICAL_ERROR.create(error, error.getMessage());
         } catch (final NumberFormatException nfe) {
-            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+            throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
         } catch (final RuntimeException re) {
-            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
+            throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
                     sieveHandler.close();
                 } catch (final UnsupportedEncodingException e) {
-                    throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                 } catch (final IOException e) {
-                    throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
                 }
             }
         }
     }
 
     @Override
-    protected void actionDeleteScript(final MailfilterRequest request) throws AbstractOXException {
+    protected void actionDeleteScript(final MailfilterRequest request) throws OXException {
         final Credentials credentials = request.getCredentials();
         final SieveHandler sieveHandler = connectRight(credentials);
         try {
@@ -534,33 +532,33 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             writeScript(sieveHandler, activeScript, "");
 
         } catch (final UnsupportedEncodingException e) {
-            throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
         } catch (final NumberFormatException nfe) {
-            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+            throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
         } catch (final RuntimeException re) {
-            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
+            throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
                     sieveHandler.close();
                 } catch (final UnsupportedEncodingException e) {
-                    throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                 } catch (final IOException e) {
-                    throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
                 }
             }
         }
     }
 
     @Override
-    protected String actionGetScript(final MailfilterRequest request) throws AbstractOXException {
+    protected String actionGetScript(final MailfilterRequest request) throws OXException {
         final Credentials credentials = request.getCredentials();
         final SieveHandler sieveHandler = connectRight(credentials);
         try {
@@ -568,26 +566,26 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final String activeScript = sieveHandler.getActiveScript();
             return sieveHandler.getScript(activeScript);
         } catch (final UnsupportedEncodingException e) {
-            throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
         } catch (final IOException e) {
-            throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+            throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
         } catch (final NumberFormatException nfe) {
-            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+            throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
         } catch (final RuntimeException re) {
-            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
+            throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
                     sieveHandler.close();
                 } catch (final UnsupportedEncodingException e) {
-                    throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                 } catch (final IOException e) {
-                    throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
+                    throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
                 }
             }
         }
@@ -602,7 +600,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     }
 
     // protected so that we can test this
-    protected String getRightPassword(ConfigurationService config, final Credentials creds) throws OXMailfilterException {
+    protected String getRightPassword(final ConfigurationService config, final Credentials creds) throws OXException {
         final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
         if (MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
             return creds.getPassword();
@@ -611,14 +609,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             if (null != masterpassword && masterpassword.length() != 0) {
                 return masterpassword;
             } else {
-                throw new OXMailfilterException(Code.NO_MASTERPASSWORD_SET);
+                throw OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.create();
             }
         } else {
-            throw new OXMailfilterException(Code.NO_VALID_PASSWORDSOURCE);
+            throw OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
         }
     }
 
-    private SieveHandler connectRight(final Credentials creds) throws OXMailfilterException {
+    private SieveHandler connectRight(final Credentials creds) throws OXException {
         final SieveHandler sieveHandler;
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
                 ConfigurationService.class);
@@ -630,12 +628,12 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         if (MailFilterProperties.LoginTypes.GLOBAL.name.equals(logintype)) {
             sieve_server = config.getProperty(MailFilterProperties.Values.SIEVE_SERVER.property);
             if (null == sieve_server) {
-                throw new OXMailfilterException(Code.PROPERTY_ERROR, MailFilterProperties.Values.SIEVE_SERVER.property);
+                throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperties.Values.SIEVE_SERVER.property);
             }
             try {
                 sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
             } catch (final RuntimeException e) {
-                throw new OXMailfilterException(Code.PROPERTY_ERROR, e, MailFilterProperties.Values.SIEVE_PORT.property);
+                throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
             }
         } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
             storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
@@ -644,22 +642,22 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final URI uri;
                 try {
                     uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
-                } catch (URISyntaxException e) {
-                    throw new OXMailfilterException(Code.NO_SERVERNAME_IN_SERVERURL, e, mailServerURL);
+                } catch (final URISyntaxException e) {
+                    throw OXMailfilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
                 }
                 sieve_server = uri.getHost();
                 try {
                     sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
                 } catch (final RuntimeException e) {
-                    throw new OXMailfilterException(Code.PROPERTY_ERROR, e,
+                    throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e,
                             MailFilterProperties.Values.SIEVE_PORT.property);
                 }
             } else {
-                throw new OXMailfilterException(Code.INVALID_CREDENTIALS, "Could not get a valid user object for uid "
+                throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid "
                         + creds.getUserid() + " and contextid " + creds.getContextid());
             }
         } else {
-            throw new OXMailfilterException(Code.NO_VALID_LOGIN_TYPE);
+            throw OXMailfilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
         }
         /*
          * Get SIEVE_AUTH_ENC property
@@ -687,7 +685,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 if (null != storageUser) {
                     authname = storageUser.getImapLogin();
                 } else {
-                    throw new OXMailfilterException(Code.INVALID_CREDENTIALS,
+                    throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(
                             "Could not get a valid user object for uid " + creds.getUserid() + " and contextid "
                                     + creds.getContextid());
                 }
@@ -708,7 +706,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     if (null != storageUser) {
                         authname = storageUser.getMail();
                     } else {
-                        throw new OXMailfilterException(Code.INVALID_CREDENTIALS, "Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+                        throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
                     }
                 }
                 final String username = creds.getUsername();
@@ -719,7 +717,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
                 }
         } else {
-            throw new OXMailfilterException(Code.NO_VALID_CREDSRC);
+            throw OXMailfilterExceptionCode.NO_VALID_CREDSRC.create();
         }
         return sieveHandler;
     }
@@ -815,25 +813,25 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     }
 
     private RuleAndPosition getRightRuleForUniqueId(final ArrayList<Rule> clientrules, final Integer uniqueid,
-            final String userName, final String contextStr) throws OXMailfilterException {
+            final String userName, final String contextStr) throws OXException {
         for (int i = 0; i < clientrules.size(); i++) {
             final Rule rule = clientrules.get(i);
             if (uniqueid.intValue() == rule.getUniqueId()) {
                 return new RuleAndPosition(rule, i);
             }
         }
-        throw new OXMailfilterException(Code.NO_SUCH_ID, uniqueid, userName, contextStr);
+        throw OXMailfilterExceptionCode.NO_SUCH_ID.create(uniqueid, userName, contextStr);
     }
 
     // private int getIndexOfRightRuleForUniqueId(final ArrayList<Rule>
-    // clientrules, Integer uniqueid) throws OXMailfilterException {
+    // clientrules, Integer uniqueid) throws OXException {
     // for (int i = 0; i < clientrules.size(); i++) {
     // final Rule rule = clientrules.get(i);
     // if (uniqueid == rule.getUniqueId()) {
     // return i;
     // }
     // }
-    // throw new OXMailfilterException(Code.NO_SUCH_ID);
+    // throw new OXException(Code.NO_SUCH_ID);
     // }
 
     /**
@@ -874,15 +872,15 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         return testarray;
     }
 
-    private Integer getUniqueId(final JSONObject json) throws OXMailfilterException {
+    private Integer getUniqueId(final JSONObject json) throws OXException {
         if (json.has("id") && !json.isNull("id")) {
             try {
                 return Integer.valueOf(json.getInt("id"));
             } catch (final JSONException e) {
-                throw new OXMailfilterException(Code.ID_MISSING);
+                throw OXMailfilterExceptionCode.ID_MISSING.create();
             }
         }
-        throw new OXMailfilterException(OXMailfilterException.Code.MISSING_PARAMETER, "id");
+        throw OXMailfilterExceptionCode.MISSING_PARAMETER.create("id");
     }
 
     private String fixParsingError(final String script) {
@@ -935,17 +933,17 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      * This method analyses an exception message and throws a more detailed
      * one if possible.
      */
-    private void handleParsingException(final OXSieveHandlerException e, final Credentials credentials) throws OXMailfilterException{
+    private void handleParsingException(final OXSieveHandlerException e, final Credentials credentials) throws OXException{
         final String message = e.toString();
         
         if(message.contains("unexpected SUBJECT")) {
-            throw new OXMailfilterException(Code.EMPTY_MANDATORY_FIELD, e, "ADDRESS (probably)");
+            throw OXMailfilterExceptionCode.EMPTY_MANDATORY_FIELD.create(e, "ADDRESS (probably)");
         }
         if(message.contains("address ''")) {
-            throw new OXMailfilterException(Code.EMPTY_MANDATORY_FIELD, e, "ADDRESS");
+            throw OXMailfilterExceptionCode.EMPTY_MANDATORY_FIELD.create(e, "ADDRESS");
         }
         
-        throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+        throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
             .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
     }
 }
