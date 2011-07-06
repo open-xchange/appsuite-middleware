@@ -288,11 +288,11 @@ public abstract class MailConfig {
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-                throw new MailConfigException(
+                throw MailConfigException.create(
                     new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
                         "\" not set in mail properties").toString());
             }
-            throw new MailConfigException(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(
+            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(
                 " in context ").append(contextId).toString());
         }
         {
@@ -528,9 +528,9 @@ public abstract class MailConfig {
      * @param mailConfig The mail config whose login and password shall be set
      * @param sessionPassword The session password
      * @param mailAccount The mail account
-     * @throws MailConfigException If a configuration error occurs
+     * @throws OXException If a configuration error occurs
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws OXException {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         // Assign login
         final String slogin = session.getLoginName();
@@ -546,7 +546,7 @@ public abstract class MailConfig {
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
                 if (masterPw == null) {
-                    throw new MailConfigException(new StringBuilder().append("Property \"masterPassword\" not set").toString());
+                    throw MailConfigException.create(new StringBuilder().append("Property \"masterPassword\" not set").toString());
                 }
                 mailConfig.password = masterPw;
             } else {
@@ -564,12 +564,12 @@ public abstract class MailConfig {
                     final String secret = secretService.getSecret(session);
                     mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, secret);
                 } catch (final GeneralSecurityException e) {
-                    throw new MailConfigException(MailAccountExceptionCodes.PASSWORD_DECRYPTION_FAILED.create(
+                    throw MailAccountExceptionCodes.PASSWORD_DECRYPTION_FAILED.create(
                         e,
                         mailConfig.login,
                         mailAccount.getMailServer(),
                         Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId())));
+                        Integer.valueOf(session.getContextId()));
                 }
             }
         }

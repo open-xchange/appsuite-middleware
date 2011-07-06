@@ -52,11 +52,11 @@ package com.openexchange.mail.messaging;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAction;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.session.Session;
 
@@ -90,7 +90,7 @@ public final class MailMessagingService implements MessagingService {
         super();
     }
 
-    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {
+    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -100,7 +100,7 @@ public final class MailMessagingService implements MessagingService {
         return null;
     }
 
-    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws MessagingException {
+    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

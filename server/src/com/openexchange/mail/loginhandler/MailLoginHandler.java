@@ -50,12 +50,10 @@
 package com.openexchange.mail.loginhandler;
 
 import java.util.Date;
-import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
@@ -83,23 +81,17 @@ public final class MailLoginHandler implements LoginHandlerService {
          */
         final DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
         final Context ctx = login.getContext();
-        try {
-            final Session session = login.getSession();
-            if (null != retentionService && UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
-                final RetentionData retentionData = retentionService.newInstance();
-                retentionData.setStartTime(new Date(System.currentTimeMillis()));
-                retentionData.setIdentifier(MailAccess.getInstance(session).getMailConfig().getLogin());
-                retentionData.setIPAddress(session.getLocalIp());
-                retentionData.setLogin(session.getLogin());
-                /*
-                 * Finally store it
-                 */
-                retentionService.storeOnAccess(retentionData);
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final Session session = login.getSession();
+        if (null != retentionService && UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
+            final RetentionData retentionData = retentionService.newInstance();
+            retentionData.setStartTime(new Date(System.currentTimeMillis()));
+            retentionData.setIdentifier(MailAccess.getInstance(session).getMailConfig().getLogin());
+            retentionData.setIPAddress(session.getLocalIp());
+            retentionData.setLogin(session.getLogin());
+            /*
+             * Finally store it
+             */
+            retentionService.storeOnAccess(retentionData);
         }
     }
 

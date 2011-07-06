@@ -78,10 +78,8 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailExceptionCode;
@@ -89,14 +87,13 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -225,29 +222,23 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         final Context ctx = getContext();
         final PublicationTarget target;
         final PublicationService publisher;
-        try {
-            /*
-             * Get discovery service
-             */
-            final PublicationTargetDiscoveryService discoveryService =
-                ServerServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class, true);
-            /*
-             * Get discovery service's target
-             */
-            target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
-            if (null == target) {
-                LOG.warn("Missing publication target for ID \"com.openexchange.publish.online.infostore.document\".\nThrowing quota-exceeded exception instead.");
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
-            }
-            /*
-             * ... and in turn target's publication service
-             */
-            publisher = target.getPublicationService();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        /*
+         * Get discovery service
+         */
+        final PublicationTargetDiscoveryService discoveryService =
+            ServerServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class, true);
+        /*
+         * Get discovery service's target
+         */
+        target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
+        if (null == target) {
+            LOG.warn("Missing publication target for ID \"com.openexchange.publish.online.infostore.document\".\nThrowing quota-exceeded exception instead.");
+            throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
         }
+        /*
+         * ... and in turn target's publication service
+         */
+        publisher = target.getPublicationService();
         try {
             return generateComposedMails0(source, publications, folderId, target, publisher, ctx);
         } catch (final OXException e) {
@@ -264,27 +255,21 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
     private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<PublicationAndInfostoreID> publications, final int folderId, final PublicationTarget target, final PublicationService publisher, final Context ctx) throws OXException {
         final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
-        try {
+        /*
+         * Generate publication link for each attachment
+         */
+        final StringBuilder linkBuilder = new StringBuilder(256);
+        for (final MailPart attachment : attachments) {
             /*
-             * Generate publication link for each attachment
+             * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
              */
-            final StringBuilder linkBuilder = new StringBuilder(256);
-            for (final MailPart attachment : attachments) {
-                /*
-                 * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
-                 */
-                final String path = publishAttachmentAndGetPath(attachment, folderId, ctx, publications, target, publisher);
-                /*
-                 * Add to list
-                 */
-                linkBuilder.setLength(0);
-                links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.append(protocol).append("://").append(hostName).append(
-                    path).toString()));
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
+            final String path = publishAttachmentAndGetPath(attachment, folderId, ctx, publications, target, publisher);
+            /*
+             * Add to list
+             */
+            linkBuilder.setLength(0);
+            links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.append(protocol).append("://").append(hostName).append(
+                path).toString()));
         }
         /*
          * Get recipients
@@ -312,8 +297,8 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                  * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
                  * Therefore check for this special error code and throw an exception if it is not equal.
                  */
-                if (LdapExceptionCode.NO_USER_BY_MAIL.getDetailNumber() != e.getDetailNumber()) {
-                    throw new OXException(e);
+                if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(e)) {
+                    throw e;
                 }
                 /*
                  * Retry
@@ -321,8 +306,8 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 try {
                     user = userService.searchUser(QuotedInternetAddress.toIDN(address.getAddress()), ctx);
                 } catch (final OXException inner) {
-                    if (LdapExceptionCode.NO_USER_BY_MAIL.getDetailNumber() != inner.getDetailNumber()) {
-                        throw new OXException(inner);
+                    if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(inner)) {
+                        throw inner;
                     }
                 }
             }

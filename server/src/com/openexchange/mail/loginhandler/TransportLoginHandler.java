@@ -60,7 +60,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.login.LoginHandlerService;
@@ -162,7 +161,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         final SearchIterator<File> searchIterator;
         try {
             searchIterator = fileAccess.getDocuments(String.valueOf(folderId), FIELDS).results();
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
@@ -188,12 +187,10 @@ public final class TransportLoginHandler implements LoginHandlerService {
                 }
             }
             return ret;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } finally {
             try {
                 searchIterator.close();
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

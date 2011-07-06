@@ -63,10 +63,8 @@ import org.json.JSONValue;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -155,7 +153,7 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<AbstractOXException> warnings) throws OXException {
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<OXException> warnings) throws OXException {
         final MailPath mailPath;
         if (mail.getFolder() != null && mail.getMailId() != null) {
             mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
@@ -175,7 +173,7 @@ public final class MessageWriter {
         final MailMessageParser parser = new MailMessageParser();
         parser.parseMailMessage(mail, handler);
         if (null != warnings) {
-            final List<AbstractOXException> list = parser.getWarnings();
+            final List<OXException> list = parser.getWarnings();
             if (!list.isEmpty()) {
                 warnings.addAll(list);
             }

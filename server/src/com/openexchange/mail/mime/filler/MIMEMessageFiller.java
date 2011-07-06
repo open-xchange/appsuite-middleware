@@ -95,7 +95,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HTMLService;
@@ -332,17 +331,11 @@ public class MIMEMessageFiller {
                 }
             }
             final List<InternetAddress> aliases;
-            try {
-                final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-                final User user = userService.getUser(session.getUserId(), ctx);
-                aliases = new ArrayList<InternetAddress>();
-                for (final String alias : user.getAliases()) {
-                    aliases.add(new QuotedInternetAddress(alias));
-                }
-            } catch (final OXException e) {
-                throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
+            final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+            final User user = userService.getUser(session.getUserId(), ctx);
+            aliases = new ArrayList<InternetAddress>();
+            for (final String alias : user.getAliases()) {
+                aliases.add(new QuotedInternetAddress(alias));
             }
             /*
              * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
