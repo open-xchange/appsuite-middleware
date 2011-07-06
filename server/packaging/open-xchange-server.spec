@@ -149,6 +149,19 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-755
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/imap.properties
+   if ! ox_exists_property com.openexchange.imap.notifyRecent $pfile; then
+       ox_set_property com.openexchange.imap.notifyRecent "false" $pfile
+   fi
+   if ! ox_exists_property com.openexchange.imap.notifyFrequencySeconds $pfile; then
+       ox_set_property com.openexchange.imap.notifyFrequencySeconds "300" $pfile
+   fi
+   if ! ox_exists_property com.openexchange.imap.notifyFullNames $pfile; then
+       ox_set_property com.openexchange.imap.notifyFullNames "INBOX" $pfile
+   fi
+
    # SoftwareChange_Request-754
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/whitelist.properties
