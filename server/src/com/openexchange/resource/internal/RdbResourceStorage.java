@@ -65,6 +65,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
+import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.ResourceGroup;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
@@ -482,7 +483,7 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.executeUpdate();
             resource.setLastModified(lastModified);
         } catch (final SQLException e) {
-            throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }
@@ -516,7 +517,7 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.executeUpdate();
             resource.setLastModified(lastModified);
         } catch (final SQLException e) {
-            throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }
@@ -534,7 +535,7 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.setInt(pos++, resourceId); // id
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }

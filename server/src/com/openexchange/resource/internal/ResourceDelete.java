@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
+import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
 import com.openexchange.server.impl.DBPool;
@@ -144,7 +145,7 @@ public final class ResourceDelete {
          */
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
+                throw new ResourceException(ResourceExceptionCode.PERMISSION, Integer.valueOf(ctx.getContextId()));
             }
         } catch (final OXException e1) {
             throw new ResourceException(e1);
@@ -183,13 +184,13 @@ public final class ResourceDelete {
      */
     private void check() throws ResourceException {
         if (null == resource) {
-            throw new ResourceException(ResourceException.Code.NULL);
+            throw new ResourceException(ResourceExceptionCode.NULL);
         }
         /*
          * Check mandatory fields
          */
         if (!resource.isIdentifierSet() || -1 == resource.getIdentifier()) {
-            throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+            throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
         }
         /*
          * Check existence
@@ -199,7 +200,7 @@ public final class ResourceDelete {
          * Check timestamp
          */
         if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
-            throw new ResourceException(ResourceException.Code.CONCURRENT_MODIFICATION);
+            throw new ResourceException(ResourceExceptionCode.CONCURRENT_MODIFICATION);
         }
     }
 
@@ -213,7 +214,7 @@ public final class ResourceDelete {
         try {
             con = DBPool.pickupWriteable(ctx);
         } catch (final DBPoolingException e) {
-            throw new ResourceException(ResourceException.Code.NO_CONNECTION, e);
+            throw new ResourceException(ResourceExceptionCode.NO_CONNECTION, e);
         }
         try {
             con.setAutoCommit(false);
@@ -222,7 +223,7 @@ public final class ResourceDelete {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
         } finally {
             try {
                 con.setAutoCommit(true);

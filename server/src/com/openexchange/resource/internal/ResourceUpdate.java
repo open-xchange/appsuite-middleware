@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
+import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
@@ -140,7 +141,7 @@ public final class ResourceUpdate {
          */
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
+                throw new ResourceException(ResourceExceptionCode.PERMISSION, Integer.valueOf(ctx.getContextId()));
             }
         } catch (final OXException e1) {
             throw new ResourceException(e1);
@@ -179,13 +180,13 @@ public final class ResourceUpdate {
      */
     private void check() throws ResourceException {
         if (null == resource) {
-            throw new ResourceException(ResourceException.Code.NULL);
+            throw new ResourceException(ResourceExceptionCode.NULL);
         }
         /*
          * Check mandatory fields
          */
         if (!resource.isIdentifierSet() || -1 == resource.getIdentifier()) {
-            throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+            throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
         }
         /*
          * Check existence
@@ -195,7 +196,7 @@ public final class ResourceUpdate {
          * Check timestamp
          */
         if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
-            throw new ResourceException(ResourceException.Code.CONCURRENT_MODIFICATION);
+            throw new ResourceException(ResourceExceptionCode.CONCURRENT_MODIFICATION);
         }
         /*
          * Check values to update
@@ -203,30 +204,30 @@ public final class ResourceUpdate {
         try {
             if (resource.isSimpleNameSet()) {
                 if (isEmpty(resource.getSimpleName())) {
-                    throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+                    throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
                 }
                 if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
-                    throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
+                    throw new ResourceException(ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
                 }
                 final Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
                 if (resources.length > 1) {
-                    throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+                    throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT, resource.getSimpleName());
                 } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-                    throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+                    throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT, resource.getSimpleName());
                 }
             }
             if (resource.isMailSet()) {
                 if (isEmpty(resource.getMail())) {
-                    throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+                    throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
                 }
                 if (!ResourceTools.validateResourceEmail(resource.getMail())) {
-                    throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
+                    throw new ResourceException(ResourceExceptionCode.INVALID_RESOURCE_MAIL, resource.getMail());
                 }
                 final Resource[] resources = storage.searchResourcesByMail(resource.getMail(), ctx);
                 if (resources.length > 1) {
-                    throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+                    throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT_MAIL, resource.getMail());
                 } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-                    throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+                    throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT_MAIL, resource.getMail());
                 }
             }
         } catch (final OXException e) {
@@ -244,7 +245,7 @@ public final class ResourceUpdate {
         try {
             con = DBPool.pickupWriteable(ctx);
         } catch (final DBPoolingException e) {
-            throw new ResourceException(ResourceException.Code.NO_CONNECTION, e);
+            throw new ResourceException(ResourceExceptionCode.NO_CONNECTION, e);
         }
         try {
             con.setAutoCommit(false);
@@ -252,7 +253,7 @@ public final class ResourceUpdate {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
         } finally {
             try {
                 con.setAutoCommit(true);

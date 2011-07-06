@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
+import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
@@ -125,7 +126,7 @@ public final class ResourceCreate {
          */
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
+                throw new ResourceException(ResourceExceptionCode.PERMISSION, Integer.valueOf(ctx.getContextId()));
             }
         } catch (final OXException e1) {
             throw new ResourceException(e1);
@@ -164,32 +165,32 @@ public final class ResourceCreate {
      */
     private void check() throws ResourceException {
         if (null == resource) {
-            throw new ResourceException(ResourceException.Code.NULL);
+            throw new ResourceException(ResourceExceptionCode.NULL);
         }
         /*
          * Check mandatory fields: identifier, displayName, and mail
          */
         if (isEmpty(resource.getSimpleName()) || isEmpty(resource.getDisplayName()) || isEmpty(resource.getMail())) {
-            throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+            throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
         }
         /*
          * Check for invalid values
          */
         if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
-            throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
+            throw new ResourceException(ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
         }
         if (!ResourceTools.validateResourceEmail(resource.getMail())) {
-            throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
+            throw new ResourceException(ResourceExceptionCode.INVALID_RESOURCE_MAIL, resource.getMail());
         }
         /*
          * Check if another resource with the same textual identifier or email address exists in storage
          */
         try {
             if (storage.searchResources(resource.getSimpleName(), ctx).length > 0) {
-                throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+                throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT, resource.getSimpleName());
             }
             if (storage.searchResourcesByMail(resource.getMail(), ctx).length > 0) {
-                throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+                throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT_MAIL, resource.getMail());
             }
         } catch (final OXException e) {
             throw new ResourceException(e);
@@ -207,7 +208,7 @@ public final class ResourceCreate {
         try {
             con = DBPool.pickupWriteable(ctx);
         } catch (final DBPoolingException e) {
-            throw new ResourceException(ResourceException.Code.NO_CONNECTION, e);
+            throw new ResourceException(ResourceExceptionCode.NO_CONNECTION, e);
         }
         try {
             con.setAutoCommit(false);
@@ -215,7 +216,7 @@ public final class ResourceCreate {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
         } finally {
             try {
                 con.setAutoCommit(true);
@@ -245,7 +246,7 @@ public final class ResourceCreate {
             resource.setIdentifier(id);
             storage.insertResource(ctx, con, resource);
         } catch (final SQLException e) {
-            throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
         }
     }
 

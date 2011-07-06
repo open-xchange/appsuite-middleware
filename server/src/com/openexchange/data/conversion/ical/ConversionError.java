@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical;
 
+import com.openexchange.exception.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -65,10 +66,14 @@ public class ConversionError extends ConversionWarning {
      */
     @Deprecated
     public ConversionError(final int index, final String message, final Object... args) {
-        super(index,message, args);
+        super(index, message, args);
     }
 
-    public ConversionError(final int index, final Code code, final Object...args) {
+    public ConversionError(final int index, final OXException cause) {
+        super(index, cause);
+    }
+
+    public ConversionError(final int index, final Code code, final Object... args) {
         this(index, code, null, args);
     }
 
