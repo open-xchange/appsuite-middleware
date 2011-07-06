@@ -280,6 +280,15 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Gets the plain log message.
+     * 
+     * @return The plain log message.
+     */
+    public String getPlainLogMessage() {
+        return logMessage;
+    }
+
+    /**
      * Gets the arguments for display message.
      * 
      * @return The display arguments

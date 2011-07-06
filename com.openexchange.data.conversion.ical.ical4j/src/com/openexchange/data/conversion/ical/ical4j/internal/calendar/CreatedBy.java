@@ -63,7 +63,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -98,11 +97,9 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
             }
             organizer.setValue("mailto:" + address);
         } catch (final URISyntaxException e) {
-            warnings.add(new ConversionWarning(index, "URI problem.", e));
+            warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, e, "URI problem."));
         } catch (final OXException e) {
-            warnings.add(new ConversionWarning(index, e));
-        } catch (final OXException e) {
-            warnings.add(new ConversionWarning(index, e));
+            warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, e));
         }
         component.getProperties().add(organizer);
     }

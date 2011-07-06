@@ -179,7 +179,13 @@ public class ConversionWarning extends OXException {
         /**
          * 
          */
-        INSUFFICIENT_INFORMATION("Insufficient information for parsing/writing this element.", Category.CATEGORY_ERROR, 18);
+        INSUFFICIENT_INFORMATION("Insufficient information for parsing/writing this element.", Category.CATEGORY_ERROR, 18),
+        /**
+         * An error occurred: %1$s
+         */
+        UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 19),
+        
+        ;
 
         /**
          * Message of the exception.
