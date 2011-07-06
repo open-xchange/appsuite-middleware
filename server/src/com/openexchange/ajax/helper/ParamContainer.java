@@ -59,10 +59,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
@@ -205,7 +205,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Date checkDateParam(final String paramName) throws AbstractOXException {
+        public Date checkDateParam(final String paramName) throws OXException {
             final String tmp = map.get(paramName);
             if (tmp == null) {
                 throw new ParamContainerException(
@@ -231,7 +231,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+        public int[] checkIntArrayParam(final String paramName) throws OXException {
             final String tmp = map.get(paramName);
             if (tmp == null) {
                 throw new ParamContainerException(
@@ -262,7 +262,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int checkIntParam(final String paramName) throws AbstractOXException {
+        public int checkIntParam(final String paramName) throws OXException {
             final String tmp = map.get(paramName);
             if (tmp == null) {
                 throw new ParamContainerException(
@@ -288,7 +288,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public long checkLongParam(final String paramName) throws AbstractOXException {
+        public long checkLongParam(final String paramName) throws OXException {
             final String tmp = map.get(paramName);
             if (tmp == null) {
                 throw new ParamContainerException(
@@ -329,7 +329,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Date getDateParam(final String paramName) throws AbstractOXException {
+        public Date getDateParam(final String paramName) throws OXException {
             final String tmp = map.get(paramName);
             if (tmp == null) {
                 return null;
@@ -354,7 +354,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+        public int[] getIntArrayParam(final String paramName) throws OXException {
             final String tmp = map.get(paramName);
             if (tmp == null) {
                 return null;
@@ -379,7 +379,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int getIntParam(final String paramName) throws AbstractOXException {
+        public int getIntParam(final String paramName) throws OXException {
             final String tmp = map.get(paramName);
             if (tmp == null) {
                 return NOT_FOUND;
@@ -399,7 +399,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public long getLongParam(final String paramName) throws AbstractOXException {
+        public long getLongParam(final String paramName) throws OXException {
             final String tmp = map.get(paramName);
             if (tmp == null) {
                 return NOT_FOUND;
@@ -462,7 +462,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Date checkDateParam(final String paramName) throws AbstractOXException {
+        public Date checkDateParam(final String paramName) throws OXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
                 throw new ParamContainerException(
@@ -488,7 +488,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+        public int[] checkIntArrayParam(final String paramName) throws OXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
                 throw new ParamContainerException(
@@ -519,7 +519,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public long checkLongParam(final String paramName) throws AbstractOXException {
+        public long checkLongParam(final String paramName) throws OXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
                 throw new ParamContainerException(
@@ -545,7 +545,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int checkIntParam(final String paramName) throws AbstractOXException {
+        public int checkIntParam(final String paramName) throws OXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
                 throw new ParamContainerException(
@@ -586,7 +586,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Date getDateParam(final String paramName) throws AbstractOXException {
+        public Date getDateParam(final String paramName) throws OXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
                 return null;
@@ -611,7 +611,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+        public int[] getIntArrayParam(final String paramName) throws OXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
                 return null;
@@ -636,7 +636,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int getIntParam(final String paramName) throws AbstractOXException {
+        public int getIntParam(final String paramName) throws OXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
                 return NOT_FOUND;
@@ -656,7 +656,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public long getLongParam(final String paramName) throws AbstractOXException {
+        public long getLongParam(final String paramName) throws OXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
                 return NOT_FOUND;
@@ -711,7 +711,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Date checkDateParam(final String paramName) throws AbstractOXException {
+        public Date checkDateParam(final String paramName) throws OXException {
             if (!jo.has(paramName) || jo.isNull(paramName)) {
                 throw new ParamContainerException(
                     component,
@@ -736,7 +736,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+        public int[] checkIntArrayParam(final String paramName) throws OXException {
             if (!jo.has(paramName) || jo.isNull(paramName)) {
                 throw new ParamContainerException(
                     component,
@@ -778,7 +778,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int checkIntParam(final String paramName) throws AbstractOXException {
+        public int checkIntParam(final String paramName) throws OXException {
             if (!jo.has(paramName) || jo.isNull(paramName)) {
                 throw new ParamContainerException(
                     component,
@@ -803,7 +803,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public long checkLongParam(final String paramName) throws AbstractOXException {
+        public long checkLongParam(final String paramName) throws OXException {
             if (!jo.has(paramName) || jo.isNull(paramName)) {
                 throw new ParamContainerException(
                     component,
@@ -853,7 +853,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Date getDateParam(final String paramName) throws AbstractOXException {
+        public Date getDateParam(final String paramName) throws OXException {
             if (!jo.has(paramName) || jo.isNull(paramName)) {
                 return null;
             }
@@ -877,7 +877,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+        public int[] getIntArrayParam(final String paramName) throws OXException {
             if (!jo.has(paramName) || jo.isNull(paramName)) {
                 return null;
             }
@@ -913,7 +913,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public int getIntParam(final String paramName) throws AbstractOXException {
+        public int getIntParam(final String paramName) throws OXException {
             if (!jo.has(paramName) || jo.isNull(paramName)) {
                 return NOT_FOUND;
             }
@@ -932,7 +932,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public long getLongParam(final String paramName) throws AbstractOXException {
+        public long getLongParam(final String paramName) throws OXException {
             if (!jo.has(paramName) || jo.isNull(paramName)) {
                 return NOT_FOUND;
             }
@@ -994,9 +994,9 @@ public abstract class ParamContainer {
      * 
      * @param paramName - the parameter name
      * @return parameter value as <code>String</code> or <code>null</code> if not found
-     * @throws AbstractOXException
+     * @throws OXException If parameter could not be found
      */
-    public abstract String getStringParam(String paramName) throws AbstractOXException;
+    public abstract String getStringParam(String paramName) throws OXException;
 
     /**
      * Gets the parameter names.
@@ -1010,81 +1010,81 @@ public abstract class ParamContainer {
      * 
      * @param paramName - the parameter name
      * @return parameter value as <code>String</code>
-     * @throws AbstractOXException if parameter could not be found
+     * @throws OXException If parameter could not be found
      */
-    public abstract String checkStringParam(String paramName) throws AbstractOXException;
+    public abstract String checkStringParam(String paramName) throws OXException;
 
     /**
      * Gets a parameter as <code>int</code>
      * 
      * @param paramName - the parameter name
      * @return parameter value as <code>int</code> or constant <code>NOT_FOUND</code> if not found
-     * @throws AbstractOXException
+     * @throws OXException If parameter could not be found
      */
-    public abstract int getIntParam(String paramName) throws AbstractOXException;
+    public abstract int getIntParam(String paramName) throws OXException;
 
     /**
      * Requires a parameter as <code>int</code>
      * 
      * @param paramName - the parameter name
      * @return parameter value as <code>int</code>
-     * @throws AbstractOXException if parameter could not be found
+     * @throws OXException If parameter could not be found
      */
-    public abstract int checkIntParam(String paramName) throws AbstractOXException;
+    public abstract int checkIntParam(String paramName) throws OXException;
 
     /**
      * Gets a parameter as <code>long</code>
      * 
      * @param paramName - the parameter name
      * @return parameter value as <code>long</code> or constant <code>NOT_FOUND</code> if not found
-     * @throws AbstractOXException
+     * @throws OXException If parameter could not be found
      */
-    public abstract long getLongParam(String paramName) throws AbstractOXException;
+    public abstract long getLongParam(String paramName) throws OXException;
 
     /**
      * Requires a parameter as <code>long</code>
      * 
      * @param paramName - the parameter name
      * @return parameter value as <code>long</code>
-     * @throws AbstractOXException if parameter could not be found
+     * @throws OXException If parameter could not be found
      */
-    public abstract long checkLongParam(String paramName) throws AbstractOXException;
+    public abstract long checkLongParam(String paramName) throws OXException;
 
     /**
      * Gets a parameter as an array of <code>int</code>
      * 
      * @param paramName - the parameter name
      * @return parameter value as an array of <code>int</code> or <code>null</code> if not found
-     * @throws AbstractOXException
+     * @throws OXException If parameter could not be found
      */
-    public abstract int[] getIntArrayParam(String paramName) throws AbstractOXException;
+    public abstract int[] getIntArrayParam(String paramName) throws OXException;
 
     /**
      * Requires a parameter as an array of <code>int</code>
      * 
      * @param paramName - the parameter name
      * @return parameter value as an array of <code>int</code>
-     * @throws AbstractOXException if parameter could not be found
+     * @throws OXException If parameter could not be found
      */
-    public abstract int[] checkIntArrayParam(String paramName) throws AbstractOXException;
+    public abstract int[] checkIntArrayParam(String paramName) throws OXException;
 
     /**
      * Gets a parameter as a <code>java.util.Date</code>
      * 
      * @param paramName - the parameter name
      * @return parameter value as an array of <code>java.util.Date</code> or <code>null</code> if not found
-     * @throws AbstractOXException
+     * @throws OXException If parameter could not be found
      */
-    public abstract Date getDateParam(String paramName) throws AbstractOXException;
+    public abstract Date getDateParam(String paramName) throws OXException;
 
     /**
      * Requires a parameter as a <code>java.util.Date</code>
      * 
      * @param paramName - the parameter name
      * @return parameter value as <code>java.util.Date</code>
-     * @throws AbstractOXException if parameter could not be found
+     * @throws OXException If parameter could not be found
      */
-    public abstract Date checkDateParam(String paramName) throws AbstractOXException;
+    public abstract Date checkDateParam(String paramName) throws OXException;
 
     /**
      * Gets a header

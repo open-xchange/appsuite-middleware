@@ -175,7 +175,7 @@ public final class AJAXFile extends PermissionServlet {
             final String id = paramContainer.checkStringParam(PARAMETER_ID);
             final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             management.getByID(id);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             response.setException(e);
         }
         /*
