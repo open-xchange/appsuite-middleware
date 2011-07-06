@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -96,7 +97,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
     /* (non-Javadoc)
      * @see com.openexchange.groupware.infostore.InfostoreFacade#getDelta(long, long, com.openexchange.groupware.infostore.utils.Metadata[], boolean, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
      */
-    public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException {
+    public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException, SearchIteratorException, OXException {
         // TODO Auto-generated method stub
         return null;
     }

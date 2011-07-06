@@ -53,7 +53,6 @@ package com.openexchange.file.storage.infostore.internal;
 
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -80,12 +79,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         return false;
     }
 
-    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
         return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
     }
 
-    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
         return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
     }
@@ -225,7 +224,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                 }
 
                 public OXException[] getWarnings() {
-                    return new AbstractOXException[0];
+                    return new OXException[0];
                 }
 
                 public boolean hasNext() throws OXException {
