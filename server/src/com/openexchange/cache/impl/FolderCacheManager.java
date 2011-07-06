@@ -72,7 +72,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
@@ -348,7 +347,7 @@ public final class FolderCacheManager {
      */
     FolderObject loadFolderObjectInternal(final int folderId, final Context ctx, final Connection readCon) throws OXException {
         if (folderId <= 0) {
-            throw new OXFolderNotFoundException(folderId, ctx);
+            throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
         }
         return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
     }
@@ -680,7 +679,7 @@ public final class FolderCacheManager {
 
         public FolderObject getFolderObject() throws OXException {
             if (folderId <= 0) {
-                throw new OXFolderNotFoundException(folderId, ctx);
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
             }
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
         }
