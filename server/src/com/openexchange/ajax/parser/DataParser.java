@@ -58,11 +58,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.AbstractOXException.Parsing;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -134,11 +133,11 @@ public abstract class DataParser {
         return retval;
     }
 
-    public static int parseInt(JSONObject json, String name) throws JSONException, OXException {
+    public static int parseInt(final JSONObject json, final String name) throws JSONException, OXException {
         if (!json.has(name)) {
             return NO_INT;
         }
-        String tmp = json.getString(name);
+        final String tmp = json.getString(name);
         if (tmp == null || json.isNull(name) || tmp.length() == 0) {
             return 0;
         }
@@ -197,7 +196,7 @@ public abstract class DataParser {
         }
         try {
             return Long.valueOf(tmp);
-        } catch (NumberFormatException e1) {
+        } catch (final NumberFormatException e1) {
             // Check if it parses into a BigInteger.
             try {
                 new BigInteger(tmp);
@@ -223,10 +222,10 @@ public abstract class DataParser {
         return d;
     }
 
-    private int getOffSet(TimeZone timeZone, Date d) {
+    private int getOffSet(final TimeZone timeZone, final Date d) {
         int offset = timeZone.getOffset(d.getTime());
-        Date test = new Date(d.getTime() - offset);
-        int clientOffset = timeZone.getOffset(test.getTime());
+        final Date test = new Date(d.getTime() - offset);
+        final int clientOffset = timeZone.getOffset(test.getTime());
         if (clientOffset != offset) {
             // UI offset addition triggered DST, use not DST
             offset = clientOffset;
@@ -257,14 +256,14 @@ public abstract class DataParser {
         return tmp;
     }
 
-    public static int checkInt(JSONObject json, String name) throws OXException, OXException {
+    public static int checkInt(final JSONObject json, final String name) throws OXException, OXException {
         final String tmp = checkString(json, name);
         if (tmp == null || tmp.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
         }
         try {
             return Integer.parseInt(tmp);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
         }
     }

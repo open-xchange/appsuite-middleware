@@ -55,11 +55,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -77,15 +76,15 @@ public class ContactParser extends CommonParser {
         super(parseAll, timeZone);
     }
 
-    public void parse(final Contact contactobject, final JSONObject jsonobject) throws OXException, ContactException {
+    public void parse(final Contact contactobject, final JSONObject jsonobject) throws OXException, OXException {
         try {
             parseElementContact(contactobject, jsonobject);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
     }
 
-    protected void parseElementContact(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXException, ContactException {
+    protected void parseElementContact(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXException, OXException {
         for (int i = 0; i < mapping.length; i++) {
             if (mapping[i].jsonObjectContains(jsonobject)) {
                 mapping[i].setObject(contactobject, jsonobject);
@@ -100,7 +99,7 @@ public class ContactParser extends CommonParser {
         parseElementCommon(contactobject, jsonobject);
     }
 
-    protected void parseDistributionList(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXException, ContactException {
+    protected void parseDistributionList(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXException, OXException {
         final JSONArray jdistributionlist = jsonobject.getJSONArray(ContactFields.DISTRIBUTIONLIST);
         final DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jdistributionlist.length()];
         for (int a = 0; a < jdistributionlist.length(); a++) {
