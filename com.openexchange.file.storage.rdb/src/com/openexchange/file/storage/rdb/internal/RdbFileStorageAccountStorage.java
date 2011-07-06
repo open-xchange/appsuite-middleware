@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -575,9 +574,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                 }
             }
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            return false;
+            throw e;
         }
         return true;
     }
@@ -649,9 +646,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                 genericConfStorageService.update(ctx, confId, update);
             }
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 }
