@@ -49,12 +49,10 @@
 
 package com.openexchange.mail.twitter;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
@@ -63,7 +61,6 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.twitter.converters.TwitterFolderConverter;
 import com.openexchange.mail.twitter.services.TwitterServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -107,8 +104,6 @@ public final class TwitterFolderStorage extends MailFolderStorage {
             try {
                 final UserService userService = TwitterServiceRegistry.getServiceRegistry().getService(UserService.class, true);
                 user = userService.getUser(session.getUserId(), ctx);
-            } catch (final OXException e) {
-                throw new OXException(e);
             } catch (final OXException e) {
                 throw new OXException(e);
             }

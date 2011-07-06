@@ -55,11 +55,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -73,13 +71,10 @@ import com.openexchange.mail.twitter.converters.TwitterStatusConverter;
 import com.openexchange.mail.twitter.services.TwitterServiceRegistry;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.TwitterAccess;
-import com.openexchange.twitter.TwitterException;
 import com.openexchange.user.UserService;
 
 /**
@@ -119,8 +114,6 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             ctx = contextService.getContext(session.getContextId());
         } catch (final OXException e) {
             throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -130,8 +123,6 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
                 final MailAccountStorageService storageService =
                     TwitterServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            } catch (final OXException e) {
-                throw new OXException(e);
             } catch (final OXException e) {
                 throw new OXException(e);
             }
@@ -150,8 +141,6 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             try {
                 final UserService userService = TwitterServiceRegistry.getServiceRegistry().getService(UserService.class, true);
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
-            } catch (final OXException e) {
-                throw new OXException(e);
             } catch (final OXException e) {
                 throw new OXException(e);
             }
@@ -215,8 +204,8 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             }
 
             return msgs;
-        } catch (final TwitterException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -245,8 +234,8 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             for (int i = 0; i < size; i++) {
                 msgs.add(TwitterStatusConverter.convertStatus2Message(timeline.get(i), accountId, accountName));
             }
-        } catch (final TwitterException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            throw e;
         }
         if (null != searchTerm) {
             // Filter them
