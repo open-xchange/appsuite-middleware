@@ -55,7 +55,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
@@ -78,7 +78,7 @@ public final class DownloadUtility {
         super();
     }
     
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws AbstractOXException {
+    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws OXException {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
     }
 
@@ -91,9 +91,9 @@ public final class DownloadUtility {
      * @param overridingDisposition Overrides the content disposition header, optional.
      * @param userAgent The user agent
      * @return The checked download providing input stream, content type, and content disposition to use
-     * @throws AbstractOXException If checking download fails
+     * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, String overridingDisposition, final String userAgent) throws AbstractOXException {
+    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, String overridingDisposition, final String userAgent) throws OXException {
         final BrowserDetector browserDetector = new BrowserDetector(userAgent);
         final boolean msieOnWindows = (browserDetector.isMSIE() && browserDetector.isWindows());
         /*

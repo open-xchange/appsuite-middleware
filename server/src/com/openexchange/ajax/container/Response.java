@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Date;
+import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -170,11 +171,7 @@ public final class Response {
         if (null == exception) {
             return null;
         }
-        final Object[] messageArgs = exception.getMessageArgs();
-        if (null == messageArgs || 0 == messageArgs.length) {
-            return exception.getMessage();
-        }
-        return String.format(exception.getMessage(), messageArgs);
+        return exception.getDisplayMessage(Locale.US);
     }
 
     /**
