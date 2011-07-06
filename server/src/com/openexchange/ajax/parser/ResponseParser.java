@@ -59,11 +59,13 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.AbstractOXException.Parsing;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
-import com.openexchange.groupware.AbstractOXException.Truncated;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Parsing;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 
@@ -112,25 +114,74 @@ public final class ResponseParser {
         final String message = json.optString(ResponseFields.ERROR, null);
         final String code = json.optString(ResponseFields.ERROR_CODE, null);
         if (message != null || code != null) {
-            final Component component = parseComponent(code);
+            final String prefix = parseComponent(code);
             final int number = parseErrorNumber(code);
             final int categoryCode = json.optInt(ResponseFields.ERROR_CATEGORY, -1);
             final Category category;
             if (-1 == categoryCode) {
-                category = CATEGORY_ERROR;
+                category = Category.CATEGORY_ERROR;
             } else {
-                category = Category.byCode(categoryCode);
+                switch (categoryCode) {
+                case 1:
+                    category = Category.CATEGORY_USER_INPUT;
+                    break;
+                case 2:
+                    category = Category.CATEGORY_CONFIGURATION;
+                    break;
+                case 3:
+                    category = Category.CATEGORY_PERMISSION_DENIED;
+                    break;
+                case 4:
+                    category = Category.CATEGORY_TRY_AGAIN;
+                    break;
+                case 5:
+                    category = Category.CATEGORY_SERVICE_DOWN;
+                    break;
+                case 6:
+                    category = Category.CATEGORY_CONNECTIVITY;
+                    break;
+                case 7:
+                    // fall-through
+                case 8:
+                    category = Category.CATEGORY_ERROR;
+                    break;
+                case 9:
+                    category = Category.CATEGORY_CONFLICT;
+                    break;
+                case 10:
+                    category = Category.CATEGORY_CONFIGURATION;
+                    break;
+                case 11:
+                    category = Category.CATEGORY_CAPACITY;
+                    break;
+                case 12:
+                    category = Category.CATEGORY_TRUNCATED;
+                    break;
+                case 13:
+                    category = Category.CATEGORY_WARNING;
+                    break;
+                default:
+                    category = Category.CATEGORY_ERROR;
+                    break;
+                }
             }
-            final AbstractOXException exception = new AbstractOXException(component, category, number, message, null);
-            if (Category.WARNING.equals(category)) {
+            final Object[] args = parseErrorMessageArgs(json.optJSONArray(ResponseFields.ERROR_PARAMS));
+            final OXException exception;
+            if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+                exception = new OXException(number, message, args);
+            } else {
+                exception = new OXException(number, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, args);
+                exception.setLogMessage(message);
+            }
+            exception.setCategory(category).setPrefix(prefix);
+            if (Category.CATEGORY_WARNING.equals(category)) {
                 response.setWarning(exception);
             } else {
                 response.setException(exception);
             }
             if (json.has(ResponseFields.ERROR_ID)) {
-                exception.overrideExceptionID(json.getString(ResponseFields.ERROR_ID));
+                exception.setExceptionId(json.getString(ResponseFields.ERROR_ID));
             }
-            parseErrorMessageArgs(json.optJSONArray(ResponseFields.ERROR_PARAMS), exception);
             parseProblematics(json.optJSONArray(ResponseFields.PROBLEMATIC), exception);
         }
     }
@@ -142,20 +193,20 @@ public final class ResponseParser {
      *            error code to parse.
      * @return the parsed component or {@link EnumComponent#NONE}.
      */
-    private static Component parseComponent(final String code) {
+    private static String parseComponent(final String code) {
         if (code == null || code.length() == 0) {
-            return EnumComponent.NONE;
+            return EnumComponent.NONE.getAbbreviation();
         }
         final int pos = code.indexOf('-');
         if (pos != -1) {
             final String abbr = code.substring(0, pos);
             final EnumComponent component = EnumComponent.byAbbreviation(abbr);
             if (component != null) {
-                return component;
+                return component.getAbbreviation();
             }
-            return new StringComponent(abbr);
+            return abbr;
         }
-        return EnumComponent.NONE;
+        return EnumComponent.NONE.getAbbreviation();
     }
 
     /**
@@ -189,18 +240,18 @@ public final class ResponseParser {
      * @param exception
      *            the error message arguments will be stored in this exception.
      */
-    private static void parseErrorMessageArgs(final JSONArray jArgs,
-        final AbstractOXException exception) {
+    private static Object[] parseErrorMessageArgs(final JSONArray jArgs) {
         if (null != jArgs) {
             final Object[] args = new Object[jArgs.length()];
             for (int i = 0; i < jArgs.length(); i++) {
                 args[i] = jArgs.opt(i);
             }
-            exception.setMessageArgs(args);
+            return args;
         }
+        return new Object[0];
     }
 
-    private static void parseProblematics(final JSONArray probs, final AbstractOXException exc) throws JSONException {
+    private static void parseProblematics(final JSONArray probs, final OXException exc) throws JSONException {
         if (null == probs) {
             return;
         }
