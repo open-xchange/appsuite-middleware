@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum EAVErrorMessage implements OXErrorMessage {
+public enum EAVErrorMessage implements OXExceptionCode {
 
     NO_OPTIONS(1, "The type %s may not have any options", "", Category.USER_INPUT),
     UNKNOWN_OPTION(2, "The type %s may not have any options other than %s", "", Category.USER_INPUT), 

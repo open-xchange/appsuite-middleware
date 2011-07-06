@@ -49,9 +49,10 @@
 
 package com.openexchange.messaging.mail;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.messaging.mail.exceptions.MailMessagingExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link MailMessagingExceptionCodes} - Enumeration of all {@link MailMessagingException}s.
@@ -59,32 +60,32 @@ import com.openexchange.messaging.mail.exceptions.MailMessagingExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
-public enum MailMessagingExceptionCodes implements OXErrorMessage {
+public enum MailMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(MailMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(MailMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(MailMessagingExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 2),
+    SQL_ERROR(MailMessagingExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MailMessagingExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 3),
+    IO_ERROR(MailMessagingExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 3),
     /**
      * An I/O error occurred: %1$s
      */
-    JSON_ERROR(MailMessagingExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 4),
+    JSON_ERROR(MailMessagingExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 4),
     /**
      * Missing configuration parameter: %1$s.
      */
-    MISSING_CONFIGURATION_PARAMETER(MailMessagingExceptionMessages.MISSING_CONFIGURATION_PARAMETER_MSG, Category.CODE_ERROR, 5),
+    MISSING_CONFIGURATION_PARAMETER(MailMessagingExceptionMessages.MISSING_CONFIGURATION_PARAMETER_MSG, CATEGORY_ERROR, 5),
     /**
      * Wrong configuration parameter type. Should be %1$s, but is %2$s.
      */
-    WRONG_CONFIGURATION_PARAMETER(MailMessagingExceptionMessages.WRONG_CONFIGURATION_PARAMETER_MSG, Category.CODE_ERROR, 5);
+    WRONG_CONFIGURATION_PARAMETER(MailMessagingExceptionMessages.WRONG_CONFIGURATION_PARAMETER_MSG, CATEGORY_ERROR, 5);
 
     private final Category category;
 
@@ -98,6 +99,10 @@ public enum MailMessagingExceptionCodes implements OXErrorMessage {
         this.category = category;
     }
 
+    public String getPrefix() {
+        return "MAIL";
+    }
+
     public Category getCategory() {
         return category;
     }
@@ -106,32 +111,41 @@ public enum MailMessagingExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance
      */
-    public MailMessagingException create(final Object... messageArgs) {
-        return MailMessagingExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public MailMessagingException create(final Throwable cause, final Object... messageArgs) {
-        return MailMessagingExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

@@ -82,7 +82,7 @@ public final class SpellCheckException extends AbstractOXException {
         /**
          * An I/O error occurred: %1$s
          */
-        IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 5),
+        IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 5),
         /**
          * No locale directory found
          */
@@ -94,31 +94,31 @@ public final class SpellCheckException extends AbstractOXException {
         /**
          * A SQL error occurred: %1$s
          */
-        SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 8),
+        SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 8),
         /**
          * Invalid format of user dictionary: %1$s
          */
-        INVALID_FORMAT("Invalid format of user dictionary: %1$s", Category.CODE_ERROR, 9),
+        INVALID_FORMAT("Invalid format of user dictionary: %1$s", CATEGORY_ERROR, 9),
         /**
          * Spell check servlet cannot be registered: %1$s
          */
-        SERVLET_REGISTRATION_FAILED("Spell check servlet cannot be registered: %1$s", Category.CODE_ERROR, 10),
+        SERVLET_REGISTRATION_FAILED("Spell check servlet cannot be registered: %1$s", CATEGORY_ERROR, 10),
         /**
          * Missing parameter %1$s
          */
-        MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 11),
+        MISSING_PARAM("Missing parameter %1$s", CATEGORY_ERROR, 11),
         /**
          * Unsupported value parameter %1$s: %2$s
          */
-        UNSUPPORTED_PARAM("Unsupported value parameter %1$s: %2$s", Category.CODE_ERROR, 12),
+        UNSUPPORTED_PARAM("Unsupported value parameter %1$s: %2$s", CATEGORY_ERROR, 12),
         /**
          * A JSON error occurred: %1$s
          */
-        JSON_ERROR("A JSON error occurred: %1$s", Category.CODE_ERROR, 13),
+        JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 13),
         /**
          * Invalid locale string: %1$s
          */
-        INVALID_LOCALE_STR("Invalid locale string: %1$s", Category.CODE_ERROR, 14);
+        INVALID_LOCALE_STR("Invalid locale string: %1$s", CATEGORY_ERROR, 14);
 
         private final String message;
 

@@ -84,13 +84,13 @@ public class OXMandatoryFieldException extends OXException {
     }
 
 	public OXMandatoryFieldException(final EnumComponent component, final int detailNumber, final String missingField) {
-		super(component, Category.CODE_ERROR, detailNumber, EXC_MSG, null);
+		super(component, CATEGORY_ERROR, detailNumber, EXC_MSG, null);
 		setMessageArgs(missingField);
 	}
 
 	public OXMandatoryFieldException(final EnumComponent component, final int detailNumber, final Throwable cause,
 			final String missingField) {
-		super(component, Category.CODE_ERROR, detailNumber, EXC_MSG, cause);
+		super(component, CATEGORY_ERROR, detailNumber, EXC_MSG, cause);
 		setMessageArgs(missingField);
 	}
 

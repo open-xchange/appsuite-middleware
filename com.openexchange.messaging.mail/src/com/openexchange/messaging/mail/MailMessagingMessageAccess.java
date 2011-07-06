@@ -64,7 +64,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
@@ -112,7 +111,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         this.session = session;
     }
 
-    public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
+    public void appendMessages(final String folder, final MessagingMessage[] messages) throws OXException {
         try {
             final MailMessage[] mails = new MailMessage[messages.length];
             final UnsynchronizedByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
@@ -123,13 +122,13 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             }
             messageStorage.appendMessages(folder, mails);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         } catch (final IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 
-    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws OXException {
         final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
         new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
         final MessagingPart part = handler.getMessagingPart();
@@ -139,24 +138,24 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         return part;
     }
 
-    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
+    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         try {
             final String[] ids = messageStorage.copyMessages(sourceFolder, destFolder, messageIds, fast);
             return fast ? Collections.<String> emptyList() : Arrays.asList(ids);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws MessagingException {
+    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws OXException {
         try {
             messageStorage.deleteMessages(folder, messageIds, hardDelete);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws MessagingException {
+    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws OXException {
         try {
             final MailMessage[] mails =
                 messageStorage.getAllMessages(folder, from(indexRange), fromSort(sortField), from(order), from(fields));
@@ -166,19 +165,19 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             }
             return list;
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
+    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
         try {
             return from(messageStorage.getMessage(folder, id, !peek));
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws OXException {
         try {
             final MailMessage[] mails = messageStorage.getMessages(folder, messageIds, from(fields));
             final List<MessagingMessage> list = new ArrayList<MessagingMessage>();
@@ -187,20 +186,20 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             }
             return list;
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
+    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         try {
             final String[] ids = messageStorage.moveMessages(sourceFolder, destFolder, messageIds, fast);
             return fast ? Collections.<String> emptyList() : Arrays.asList(ids);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public MessagingMessage perform(final String folder, final String id, final String action) throws MessagingException {
+    public MessagingMessage perform(final String folder, final String id, final String action) throws OXException {
         try {
             if (MailConstants.TYPE_FORWARD.equalsIgnoreCase(action)) {
                 final MailMessage fowardMessage =
@@ -216,25 +215,25 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
                 throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
             }
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public MessagingMessage perform(final String action) throws MessagingException {
+    public MessagingMessage perform(final String action) throws OXException {
         /*
          * No supported actions for this perform() method
          */
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
-    public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
+    public MessagingMessage perform(final MessagingMessage message, final String action) throws OXException {
         /*
          * No supported actions for this perform() method
          */
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
-    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws OXException {
         try {
             final MailMessage[] mails =
                 messageStorage.searchMessages(folder, from(indexRange), fromSort(sortField), from(order), from(searchTerm), from(fields));
@@ -244,11 +243,11 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
             }
             return list;
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
+    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws OXException {
         try {
             final EnumSet<MessagingField> set = EnumSet.copyOf(Arrays.asList(fields));
             if (set.contains(MessagingField.COLOR_LABEL)) {
@@ -258,15 +257,15 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
                 messageStorage.updateMessageFlags(message.getFolder(), new String[] { message.getId() }, message.getFlags(), true);
             }
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
         try {
             return new MailBinaryContent(messageStorage.getAttachment(folder, id, referenceId));
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 

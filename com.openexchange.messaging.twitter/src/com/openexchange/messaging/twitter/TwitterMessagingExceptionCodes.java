@@ -59,16 +59,16 @@ import com.openexchange.messaging.twitter.exception.TwitterMessagingExceptionFac
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public enum TwitterMessagingExceptionCodes implements OXErrorMessage {
+public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(TwitterMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(TwitterMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.
      */
-    INVALID_ACCOUNT(TwitterMessagingExceptionMessages.INVALID_ACCOUNT_MSG, Category.CODE_ERROR, 2),
+    INVALID_ACCOUNT(TwitterMessagingExceptionMessages.INVALID_ACCOUNT_MSG, CATEGORY_ERROR, 2),
     
     
     ;

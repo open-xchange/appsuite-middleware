@@ -61,14 +61,14 @@ import com.openexchange.groupware.links.internal.LinkExceptionFactory;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum LinkExceptionCodes implements OXErrorMessage {
+public enum LinkExceptionCodes implements OXExceptionCode {
 
     /** Unable to access link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d */
     NO_LINK_ACCESS_PERMISSION(NO_LINK_ACCESS_PERMISSION_MSG, Category.PERMISSION, 100),
     /** Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d */
     ALREADY_LINKED(ALREADY_LINKED_MSG, Category.USER_INPUT, 101),
     /** Invalid SQL Query: %s */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 103),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, CATEGORY_ERROR, 103),
     ;
 
     private String message;

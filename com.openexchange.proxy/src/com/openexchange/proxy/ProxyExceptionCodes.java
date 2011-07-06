@@ -58,32 +58,32 @@ import com.openexchange.proxy.exception.ProxyExceptionFactory;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ProxyExceptionCodes implements OXErrorMessage {
+public enum ProxyExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(ProxyExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(ProxyExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * Duplicate proxy registration: %1$s
      */
-    DUPLICATE_REGISTRATION(ProxyExceptionMessages.DUPLICATE_REGISTRATION_MSG, Category.CODE_ERROR, 2),
+    DUPLICATE_REGISTRATION(ProxyExceptionMessages.DUPLICATE_REGISTRATION_MSG, CATEGORY_ERROR, 2),
     /**
      * Malformed URL: %1$s
      */
-    MALFORMED_URL(ProxyExceptionMessages.MALFORMED_URL_MSG, Category.CODE_ERROR, 3),
+    MALFORMED_URL(ProxyExceptionMessages.MALFORMED_URL_MSG, CATEGORY_ERROR, 3),
     /**
      * HTTP request to VoipNow server %1$s failed. Status line: %2$s
      */
-    HTTP_REQUEST_FAILED(ProxyExceptionMessages.HTTP_REQUEST_FAILED_MSG, Category.CODE_ERROR, 4),
+    HTTP_REQUEST_FAILED(ProxyExceptionMessages.HTTP_REQUEST_FAILED_MSG, CATEGORY_ERROR, 4),
     /**
      * Malformed URI: %1$s
      */
-    MALFORMED_URI(ProxyExceptionMessages.MALFORMED_URI_MSG, Category.CODE_ERROR, 5),
+    MALFORMED_URI(ProxyExceptionMessages.MALFORMED_URI_MSG, CATEGORY_ERROR, 5),
     /**
      * Invalid session identifier: %1$s
      */
-    INVALID_SESSION_ID(ProxyExceptionMessages.INVALID_SESSION_ID_MSG, Category.CODE_ERROR, 6);
+    INVALID_SESSION_ID(ProxyExceptionMessages.INVALID_SESSION_ID_MSG, CATEGORY_ERROR, 6);
 
     private final Category category;
 

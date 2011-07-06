@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ConsistencyExceptionCodes implements OXErrorMessage {
+public enum ConsistencyExceptionCodes implements OXExceptionCode {
     /** Error communicating with mbean in server: %s */
     COMMUNICATION_PROBLEM(COMMUNICATION_PROBLEM_MSG, Category.INTERNAL_ERROR, 1),
     /** Registration of consistency MBean failed. */

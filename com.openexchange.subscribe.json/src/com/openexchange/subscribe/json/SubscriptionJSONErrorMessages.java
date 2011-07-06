@@ -49,7 +49,7 @@
 
 package com.openexchange.subscribe.json;
 
-import static com.openexchange.groupware.AbstractOXException.Category.CODE_ERROR;
+import static com.openexchange.groupware.AbstractOXException.CATEGORY_ERROR;
 import static com.openexchange.groupware.AbstractOXException.Category.USER_INPUT;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
@@ -61,7 +61,7 @@ import com.openexchange.groupware.AbstractOXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum SubscriptionJSONErrorMessages implements OXErrorMessage {
+public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
     MISSING_PARAMETER(SubscriptionSourceMultipleHandler.CLASS_ID*100+1, "Missing parameter %s", "", CODE_ERROR),
     UNKNOWN_ACTION(SubscriptionSourceMultipleHandler.CLASS_ID*100+2, "Unknown Action: %s", "", CODE_ERROR),

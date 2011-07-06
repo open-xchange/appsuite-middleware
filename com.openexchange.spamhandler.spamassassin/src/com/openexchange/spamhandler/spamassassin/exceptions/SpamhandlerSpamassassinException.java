@@ -61,27 +61,27 @@ public class SpamhandlerSpamassassinException extends OXException {
         /**
          * Spamd returned wrong exit code "%s"
          */
-        WRONG_SPAMD_EXIT("Spamd returned wrong exit code \"%s\"", Category.CODE_ERROR, 3000),
+        WRONG_SPAMD_EXIT("Spamd returned wrong exit code \"%s\"", CATEGORY_ERROR, 3000),
 
         /**
          * Internal error: Wrong arguments are given to the tell command: "%s"
          */
-        WRONG_TELL_CMD_ARGS("Internal error: Wrong arguments are given to the tell command: \"%s\"", Category.CODE_ERROR, 3001),
+        WRONG_TELL_CMD_ARGS("Internal error: Wrong arguments are given to the tell command: \"%s\"", CATEGORY_ERROR, 3001),
 
         /**
          * Error during communication with spamd: "%s"
          */
-        COMMUNICATION_ERROR("Error during communication with spamd: \"%s\"", Category.CODE_ERROR, 3002),
+        COMMUNICATION_ERROR("Error during communication with spamd: \"%s\"", CATEGORY_ERROR, 3002),
 
         /**
          * Can't handle spam because MailService isn't available
          */
-        MAILSERVICE_MISSING("Can't handle spam because MailService isn't available", Category.CODE_ERROR, 3003),
+        MAILSERVICE_MISSING("Can't handle spam because MailService isn't available", CATEGORY_ERROR, 3003),
         
         /**
          * Error while getting spamd provider from service: "%s"
          */
-        ERROR_GETTING_SPAMD_PROVIDER("Error while getting spamd provider from service: \"%s\"", Category.CODE_ERROR, 3004);
+        ERROR_GETTING_SPAMD_PROVIDER("Error while getting spamd provider from service: \"%s\"", CATEGORY_ERROR, 3004);
 
 
         

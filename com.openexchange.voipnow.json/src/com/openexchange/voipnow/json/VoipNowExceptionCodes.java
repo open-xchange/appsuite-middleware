@@ -58,20 +58,20 @@ import com.openexchange.voipnow.json.exception.VoipNowExceptionFactory;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum VoipNowExceptionCodes implements OXErrorMessage {
+public enum VoipNowExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(VoipNowExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(VoipNowExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY(VoipNowExceptionMessages.MISSING_PROPERTY_MSG, Category.CODE_ERROR, 2),
+    MISSING_PROPERTY(VoipNowExceptionMessages.MISSING_PROPERTY_MSG, CATEGORY_ERROR, 2),
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY(VoipNowExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 3),
+    INVALID_PROPERTY(VoipNowExceptionMessages.INVALID_PROPERTY_MSG, CATEGORY_ERROR, 3),
     /**
      * Missing main extension attribute for user %1$s in context %2$s.
      */
@@ -79,27 +79,27 @@ public enum VoipNowExceptionCodes implements OXErrorMessage {
     /**
      * HTTP request to VoipNow server %1$s failed. Status line: %2$s
      */
-    HTTP_REQUEST_FAILED(VoipNowExceptionMessages.HTTP_REQUEST_FAILED_MSG, Category.CODE_ERROR, 5),
+    HTTP_REQUEST_FAILED(VoipNowExceptionMessages.HTTP_REQUEST_FAILED_MSG, CATEGORY_ERROR, 5),
     /**
      * VoipNow request failed. Error code: %1$s. Error message: %2$s
      */
-    VOIPNOW_REQUEST_FAILED(VoipNowExceptionMessages.VOIPNOW_REQUEST_FAILED_MSG, Category.CODE_ERROR, 6),
+    VOIPNOW_REQUEST_FAILED(VoipNowExceptionMessages.VOIPNOW_REQUEST_FAILED_MSG, CATEGORY_ERROR, 6),
     /**
      * A remote error occurred: %1$s
      */
-    REMOTE_ERROR(VoipNowExceptionMessages.REMOTE_ERROR_MSG, Category.CODE_ERROR, 7),
+    REMOTE_ERROR(VoipNowExceptionMessages.REMOTE_ERROR_MSG, CATEGORY_ERROR, 7),
     /**
      * A SOAP fault occurred: %1$s
      */
-    SOAP_FAULT(VoipNowExceptionMessages.SOAP_FAULT_MSG, Category.CODE_ERROR, 8),
+    SOAP_FAULT(VoipNowExceptionMessages.SOAP_FAULT_MSG, CATEGORY_ERROR, 8),
     /**
      * A HTTP error occurred: %1$s
      */
-    HTTP_ERROR(VoipNowExceptionMessages.HTTP_ERROR_MSG, Category.CODE_ERROR, 9),
+    HTTP_ERROR(VoipNowExceptionMessages.HTTP_ERROR_MSG, CATEGORY_ERROR, 9),
     /**
      * Unparseable HTTP response: %1$s
      */
-    UNPARSEABLE_HTTP_RESPONSE(VoipNowExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, Category.CODE_ERROR, 10);
+    UNPARSEABLE_HTTP_RESPONSE(VoipNowExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, CATEGORY_ERROR, 10);
 
     private final Category category;
 

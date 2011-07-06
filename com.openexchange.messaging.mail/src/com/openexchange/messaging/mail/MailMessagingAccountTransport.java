@@ -61,7 +61,6 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.session.Session;
@@ -82,18 +81,18 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
      * 
      * @param accountId The account ID
      * @param session The session providing user data
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MailMessagingAccountTransport(final int accountId, final Session session) throws MessagingException {
+    public MailMessagingAccountTransport(final int accountId, final Session session) throws OXException {
         super();
         try {
             mailTransport = MailTransport.getInstance(session, accountId);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         try {
             final UnsynchronizedByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
             message.writeTo(out);
@@ -107,7 +106,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         } catch (final UnsupportedEncodingException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         } catch (final IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
@@ -125,7 +124,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         }
     }
 
-    public void connect() throws MessagingException {
+    public void connect() throws OXException {
         // Nope
     }
 
@@ -133,7 +132,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
         return true;
     }
 
-    public boolean ping() throws MessagingException {
+    public boolean ping() throws OXException {
         try {
             mailTransport.ping();
             return true;

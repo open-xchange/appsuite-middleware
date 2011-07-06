@@ -100,7 +100,7 @@ public enum InfostoreExceptionCodes {
     /** Could not load documents to check the permissions */
     COULD_NOT_LOAD(COULD_NOT_LOAD_MSG, Category.USER_INPUT, 301),
     /** The folder %d is not an Infostore folder */
-    NOT_INFOSTORE_FOLDER(NOT_INFOSTORE_FOLDER_MSG, Category.CODE_ERROR, 302),
+    NOT_INFOSTORE_FOLDER(NOT_INFOSTORE_FOLDER_MSG, CATEGORY_ERROR, 302),
     /** You do not have sufficient read permissions to read objects in this folder. */
     NO_READ_PERMISSION(NO_READ_PERMISSION_MSG, Category.PERMISSION, 400),
     /** You do not have sufficient permissions to create objects in this folder. */
@@ -114,7 +114,7 @@ public enum InfostoreExceptionCodes {
     /** You do not have sufficient permission to delete this version. */
     NO_DELETE_PERMISSION_FOR_VERSION(NO_DELETE_PERMISSION_FOR_VERSION_MSG, Category.PERMISSION, 406),
     /** Could not iterate result. */
-    ITERATE_FAILED(ITERATE_FAILED_MSG, Category.CODE_ERROR, 413),
+    ITERATE_FAILED(ITERATE_FAILED_MSG, CATEGORY_ERROR, 413),
     /** This document is locked. */
     ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.CONCURRENT_MODIFICATION, 415),
     /** You cannot unlock this document. */
@@ -124,7 +124,7 @@ public enum InfostoreExceptionCodes {
     /** You need write permissions to lock a document. */
     WRITE_PERMS_FOR_LOCK_MISSING(WRITE_PERMS_FOR_LOCK_MISSING_MSG, Category.PERMISSION, 418),
     /** Could not generate new ID. */
-    NEW_ID_FAILED(NEW_ID_FAILED_MSG, Category.CODE_ERROR, 420),
+    NEW_ID_FAILED(NEW_ID_FAILED_MSG, CATEGORY_ERROR, 420),
     /** You are not allowed to delete objects in the source folder, so this document cannot be moved. */
     NO_SOURCE_DELETE_PERMISSION(NO_SOURCE_DELETE_PERMISSION_MSG, Category.PERMISSION, 421),
     /** The document you requested does not exist. */
@@ -132,13 +132,13 @@ public enum InfostoreExceptionCodes {
     /** Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s. */
     FILENAME_NOT_UNIQUE(FILENAME_NOT_UNIQUE_MSG, Category.USER_INPUT, 441),
     /** Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s */
-    NUMBER_OF_VERSIONS_FAILED(NUMBER_OF_VERSIONS_FAILED_MSG, Category.CODE_ERROR, 442),
+    NUMBER_OF_VERSIONS_FAILED(NUMBER_OF_VERSIONS_FAILED_MSG, CATEGORY_ERROR, 442),
     /** You do not have the permissions to delete at least one of the info items. */
     NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, Category.PERMISSION, 445),
     /** Illegal argument: Document %d contains no file */
-    DOCUMENT_CONTAINS_NO_FILE(DOCUMENT_CONTAINS_NO_FILE_MSG, Category.CODE_ERROR, 500),
+    DOCUMENT_CONTAINS_NO_FILE(DOCUMENT_CONTAINS_NO_FILE_MSG, CATEGORY_ERROR, 500),
     /** Folder %d has two subfolders named %s. The database for context %d is not consistent. */
-    DUPLICATE_SUBFOLDER(DUPLICATE_SUBFOLDER_MSG, Category.CODE_ERROR, 501),
+    DUPLICATE_SUBFOLDER(DUPLICATE_SUBFOLDER_MSG, CATEGORY_ERROR, 501),
     /** In order to accomplish the search, %1$d or more characters are required. */
     PATTERN_NEEDS_MORE_CHARACTERS(PATTERN_NEEDS_MORE_CHARACTERS_MSG, Category.USER_INPUT, 602),
     /** Could not delete DocumentMetadata %d. Please try again. */

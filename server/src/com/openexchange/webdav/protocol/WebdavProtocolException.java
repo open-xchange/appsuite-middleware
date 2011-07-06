@@ -67,15 +67,15 @@ public class WebdavProtocolException extends WebdavException implements WebdavSt
         /**
          * A WebDAV error occurred.
          */
-        GENERAL_ERROR("A WebDAV error occurred.", Category.CODE_ERROR, 1000),
+        GENERAL_ERROR("A WebDAV error occurred.", CATEGORY_ERROR, 1000),
         /**
          * The folder %s doesn't exist.
          */
-        FOLDER_NOT_FOUND("The folder %s doesn't exist.", Category.CODE_ERROR, 1001),
+        FOLDER_NOT_FOUND("The folder %s doesn't exist.", CATEGORY_ERROR, 1001),
         /**
          * The directory already exists.
          */
-        DIRECTORY_ALREADY_EXISTS("The directory already exists.", Category.CODE_ERROR, 1002),
+        DIRECTORY_ALREADY_EXISTS("The directory already exists.", CATEGORY_ERROR, 1002),
         /**
          * No write permission.
          */
@@ -83,19 +83,19 @@ public class WebdavProtocolException extends WebdavException implements WebdavSt
         /**
          * File &quot;%1$s&quot; already exists
          */
-        FILE_ALREADY_EXISTS("File \"%1$s\" already exists.", Category.CODE_ERROR, 1004),
+        FILE_ALREADY_EXISTS("File \"%1$s\" already exists.", CATEGORY_ERROR, 1004),
         /**
          * Collections must not have bodies.
          */
-        NO_BODIES_ALLOWED("Collections must not have bodies.", Category.CODE_ERROR, 1005),
+        NO_BODIES_ALLOWED("Collections must not have bodies.", CATEGORY_ERROR, 1005),
         /**
          * File "%1$s" does not exist.
          */
-        FILE_NOT_FOUND("File \"%1$s\" does not exist.", Category.CODE_ERROR, 1006),
+        FILE_NOT_FOUND("File \"%1$s\" does not exist.", CATEGORY_ERROR, 1006),
         /**
          * "%1$s" is a directory.
          */
-        FILE_IS_DIRECTORY("\"%1$s\" is a directory.", Category.CODE_ERROR, 1007);
+        FILE_IS_DIRECTORY("\"%1$s\" is a directory.", CATEGORY_ERROR, 1007);
 
         private final String message;
 

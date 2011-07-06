@@ -67,13 +67,12 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingPart;
@@ -118,7 +117,7 @@ public class MailMessagingPart implements MessagingPart {
 
     private static final String CT_MUL = "multipart/";
 
-    public MessagingContent getContent() throws MessagingException {
+    public MessagingContent getContent() throws OXException {
         MessagingContent tmp = cachedContent;
         if (null == tmp) {
             try {
@@ -187,11 +186,11 @@ public class MailMessagingPart implements MessagingPart {
                     // cachedContent = tmp = new MailBinaryContent(mailPart);
                 }
             } catch (final OXException e) {
-                throw new MessagingException(e);
+                throw e;
             } catch (final IOException e) {
                 throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final javax.mail.MessagingException e) {
-                throw new MessagingException(MIMEMailException.handleMessagingException(e));
+                throw MIMEMailException.handleMessagingException(e);
             }
         }
         return tmp;
@@ -247,20 +246,20 @@ public class MailMessagingPart implements MessagingPart {
         return charset;
     }
 
-    public ContentType getContentType() throws MessagingException {
+    public ContentType getContentType() throws OXException {
         final com.openexchange.mail.mime.ContentType contentType = mailPart.getContentType();
         return null == contentType ? null : new MailContentType(contentType);
     }
 
-    public String getDisposition() throws MessagingException {
+    public String getDisposition() throws OXException {
         return mailPart.getContentDisposition().getDisposition();
     }
 
-    public String getFileName() throws MessagingException {
+    public String getFileName() throws OXException {
         return mailPart.getFileName();
     }
 
-    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+    public MessagingHeader getFirstHeader(final String name) throws OXException {
         final String firstHeader = mailPart.getFirstHeader(name);
         if (null == firstHeader) {
             return null;
@@ -274,11 +273,11 @@ public class MailMessagingPart implements MessagingPart {
         return tmp.remove(0);
     }
 
-    public Collection<MessagingHeader> getHeader(final String name) throws MessagingException {
+    public Collection<MessagingHeader> getHeader(final String name) throws OXException {
         return convertTo(name);
     }
 
-    public Map<String, Collection<MessagingHeader>> getHeaders() throws MessagingException {
+    public Map<String, Collection<MessagingHeader>> getHeaders() throws OXException {
         final Map<String, Collection<MessagingHeader>> ret = new HashMap<String, Collection<MessagingHeader>>();
         for (final Iterator<String> iter = mailPart.getHeaders().getHeaderNames(); iter.hasNext();) {
             final String name = iter.next();
@@ -290,7 +289,7 @@ public class MailMessagingPart implements MessagingPart {
         return ret;
     }
 
-    private Collection<MessagingHeader> convertTo(final String name) throws MessagingException {
+    private Collection<MessagingHeader> convertTo(final String name) throws OXException {
         final String[] headers = mailPart.getHeader(name);
         if (null == headers) {
             return null;
@@ -322,16 +321,12 @@ public class MailMessagingPart implements MessagingPart {
         mailPart.setSequenceId(sectionId);
     }
 
-    public long getSize() throws MessagingException {
+    public long getSize() throws OXException {
         return mailPart.getSize();
     }
 
-    public void writeTo(final OutputStream os) throws IOException, MessagingException {
-        try {
-            mailPart.writeTo(os);
-        } catch (final OXException e) {
-            throw new MessagingException(e);
-        }
+    public void writeTo(final OutputStream os) throws IOException, OXException {
+        mailPart.writeTo(os);
     }
 
     /*-
@@ -348,9 +343,9 @@ public class MailMessagingPart implements MessagingPart {
          * 
          * @param header The header to convert to a {@link MessagingHeader} instance
          * @param collection The collection to add to
-         * @throws MessagingException If adding header fails
+         * @throws OXException If adding header fails
          */
-        void handleHeader(String header, Collection<MessagingHeader> collection) throws MessagingException;
+        void handleHeader(String header, Collection<MessagingHeader> collection) throws OXException;
     } // End of HeaderHandler interface
 
     /**
@@ -365,14 +360,14 @@ public class MailMessagingPart implements MessagingPart {
             this.name = name;
         }
 
-        public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws MessagingException {
+        public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws OXException {
             try {
                 collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header));
-            } catch (final MessagingException e) {
+            } catch (final OXException e) {
                 /*
                  * Could not be parsed to a RFC822 address
                  */
-                if (MessagingExceptionCodes.ADDRESS_ERROR.getDetailNumber() != e.getDetailNumber()) {
+                if (!MessagingExceptionCodes.ADDRESS_ERROR.equals(e)) {
                     throw e;
                 }
             }
@@ -391,14 +386,14 @@ public class MailMessagingPart implements MessagingPart {
 
         m.put(HeaderName.valueOf(MimeContentDisposition.getContentDispositionName()), new HeaderHandler() {
 
-            public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws MessagingException {
+            public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeContentDisposition(header));
             }
         });
 
         m.put(HeaderName.valueOf(MimeContentType.getContentTypeName()), new HeaderHandler() {
 
-            public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws MessagingException {
+            public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeContentType(header));
             }
         });
@@ -407,7 +402,7 @@ public class MailMessagingPart implements MessagingPart {
 
             private final String name = MessagingHeader.KnownHeader.DATE.toString();
 
-            public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws MessagingException {
+            public void handleHeader(final String header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeDateMessagingHeader(name, header));
             }
         });

@@ -54,8 +54,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.messaging.MessagingMessage;
 
 /**
@@ -85,7 +85,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         this.mailMessage = mailMessage;
     }
 
-    public int getColorLabel() throws MessagingException {
+    public int getColorLabel() throws OXException {
         return mailMessage.getColorLabel();
     }
 
@@ -98,7 +98,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.setColorLabel(colorLabel);
     }
 
-    public int getFlags() throws MessagingException {
+    public int getFlags() throws OXException {
         return mailMessage.getFlags();
     }
 
@@ -111,7 +111,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         mailMessage.setFlags(flags);
     }
 
-    public Collection<String> getUserFlags() throws MessagingException {
+    public Collection<String> getUserFlags() throws OXException {
         final String[] userFlags = mailMessage.getUserFlags();
         return null == userFlags ? Collections.<String> emptyList() : Arrays.asList(userFlags);
     }
@@ -195,7 +195,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
         this.picture = picture;
     }
 
-    public String getUrl() throws MessagingException {
+    public String getUrl() throws OXException {
         return null;
     }
 

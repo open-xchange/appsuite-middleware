@@ -58,19 +58,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.mail.services.MailMessagingServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -91,11 +88,11 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         this.mailMessageService = mailMessageService;
     }
 
-    public MessagingAccount newAccount() throws MessagingException {
+    public MessagingAccount newAccount() throws OXException {
         return new MessagingAccountImpl();
     }
 
-    public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public int addAccount(final MessagingAccount account, final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
                 MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
@@ -166,13 +163,11 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 getContext(session.getContextId()),
                 session.getPassword());
         } catch (final OXException e) {
-            throw new MessagingException(e);
-        } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public void deleteAccount(final MessagingAccount account, final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
                 MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
@@ -180,22 +175,18 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             mass.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
 
         } catch (final OXException e) {
-            throw new MessagingException(e);
-        } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
+    public MessagingAccount getAccount(final int id, final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
                 MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             final MailAccount mailAccount = mass.getMailAccount(id, session.getUserId(), session.getContextId());
             return convert2MessagingAccount(mailAccount);
         } catch (final OXException e) {
-            throw new MessagingException(e);
-        } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
@@ -247,7 +238,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         return ret;
     }
 
-    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
+    public List<MessagingAccount> getAccounts(final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
                 MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
@@ -259,13 +250,11 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             }
             return list;
         } catch (final OXException e) {
-            throw new MessagingException(e);
-        } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public void updateAccount(final MessagingAccount account, final Session session) throws OXException {
         try {
             final MailAccountStorageService mass =
                 MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
@@ -492,13 +481,11 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
             mass.updateMailAccount(accountDescription, attributes, session.getUserId(), session.getContextId(), session.getPassword());
         } catch (final OXException e) {
-            throw new MessagingException(e);
-        } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    private static String optString(final String name, final Map<String, Object> configuration) throws MailMessagingException {
+    private static String optString(final String name, final Map<String, Object> configuration) throws OXException {
         final Object value = configuration.get(name);
         if (null == value) {
             return null;
@@ -510,7 +497,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         }
     }
 
-    private static String getString(final String name, final Map<String, Object> configuration) throws MailMessagingException {
+    private static String getString(final String name, final Map<String, Object> configuration) throws OXException {
         final Object value = configuration.get(name);
         if (null == value) {
             throw MailMessagingExceptionCodes.MISSING_CONFIGURATION_PARAMETER.create(name);
@@ -522,7 +509,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         }
     }
 
-    private static int getInt(final String name, final Map<String, Object> configuration) throws MailMessagingException {
+    private static int getInt(final String name, final Map<String, Object> configuration) throws OXException {
         final Object value = configuration.get(name);
         if (null == value) {
             throw MailMessagingExceptionCodes.MISSING_CONFIGURATION_PARAMETER.create(name);
@@ -541,7 +528,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         }
     }
 
-    private static int optInt(final String name, final Map<String, Object> configuration) throws MailMessagingException {
+    private static int optInt(final String name, final Map<String, Object> configuration) throws OXException {
         final Object value = configuration.get(name);
         if (null == value) {
             return -1;
@@ -560,7 +547,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         }
     }
 
-    private static Boolean optBoolean(final String name, final Map<String, Object> configuration) throws MailMessagingException {
+    private static Boolean optBoolean(final String name, final Map<String, Object> configuration) throws OXException {
         final Object value = configuration.get(name);
         if (null == value) {
             return null;
@@ -580,15 +567,9 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         }
     }
 
-    private static Context getContext(final int contextId) throws MailMessagingException {
-        try {
-            final ContextService service = MailMessagingServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
-            return service.getContext(contextId);
-        } catch (final OXException e) {
-            throw new MailMessagingException(e);
-        } catch (final OXException e) {
-            throw new MailMessagingException(e);
-        }
+    private static Context getContext(final int contextId) throws OXException {
+        final ContextService service = MailMessagingServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+        return service.getContext(contextId);
     }
 
     private static class MessagingAccountImpl implements MessagingAccount {
@@ -642,11 +623,11 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
 
     }
 
-    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {
+    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
         return null; // Mail Accounts are handled elsewhere, this is just an adapter class between the mail system and the messaging system
     }
 
-    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws MessagingException {
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         return; // We do this elsewhere
     }
 }

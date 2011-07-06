@@ -53,7 +53,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingResource;
 import com.openexchange.session.Session;
 
@@ -77,16 +76,16 @@ public class MailMessagingResource implements MessagingResource {
      * 
      * @param accountId The account ID
      * @param session The session
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    protected MailMessagingResource(final int accountId, final Session session) throws MessagingException {
+    protected MailMessagingResource(final int accountId, final Session session) throws OXException {
         super();
         this.accountId = accountId;
         this.session = session;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
@@ -101,11 +100,11 @@ public class MailMessagingResource implements MessagingResource {
         mailAccess.close(true);
     }
 
-    public void connect() throws MessagingException {
+    public void connect() throws OXException {
         try {
             mailAccess.connect();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
@@ -113,11 +112,11 @@ public class MailMessagingResource implements MessagingResource {
         return mailAccess.isConnected();
     }
 
-    public boolean ping() throws MessagingException {
+    public boolean ping() throws OXException {
         try {
             return mailAccess.ping();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 

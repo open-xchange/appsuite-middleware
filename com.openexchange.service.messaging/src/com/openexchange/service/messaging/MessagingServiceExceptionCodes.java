@@ -59,56 +59,56 @@ import com.openexchange.service.messaging.exception.MessagingServiceExceptionFac
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
  */
-public enum MessagingServiceExceptionCodes implements OXErrorMessage {
+public enum MessagingServiceExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(MessagingServiceExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(MessagingServiceExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MessagingServiceExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 2),
+    IO_ERROR(MessagingServiceExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * The IP address of host %1$s could not be determined.
      */
-    UNKNOWN_HOST(MessagingServiceExceptionMessages.UNKNOWN_HOST_MSG, Category.CODE_ERROR, 3),
+    UNKNOWN_HOST(MessagingServiceExceptionMessages.UNKNOWN_HOST_MSG, CATEGORY_ERROR, 3),
     /**
      * 
      */
-    INT_TOO_BIG(MessagingServiceExceptionMessages.INT_TOO_BIG_MSG, Category.CODE_ERROR, 4),
+    INT_TOO_BIG(MessagingServiceExceptionMessages.INT_TOO_BIG_MSG, CATEGORY_ERROR, 4),
     /**
      * Missing previous truncated message package(s).
      */
-    MISSING_PREV_PACKAGE(MessagingServiceExceptionMessages.MISSING_PREV_PACKAGE_MSG, Category.CODE_ERROR, 5),
+    MISSING_PREV_PACKAGE(MessagingServiceExceptionMessages.MISSING_PREV_PACKAGE_MSG, CATEGORY_ERROR, 5),
     /**
      * Conflicting truncated message package(s).
      */
-    CONFLICTING_TRUNCATED_PACKAGES(MessagingServiceExceptionMessages.CONFLICTING_TRUNCATED_PACKAGES_MSG, Category.CODE_ERROR, 6),
+    CONFLICTING_TRUNCATED_PACKAGES(MessagingServiceExceptionMessages.CONFLICTING_TRUNCATED_PACKAGES_MSG, CATEGORY_ERROR, 6),
     /**
      * Missing or wrong magic bytes: %1$s
      */
-    BROKEN_MAGIC_BYTES(MessagingServiceExceptionMessages.BROKEN_MAGIC_BYTES_MSG, Category.CODE_ERROR, 7),
+    BROKEN_MAGIC_BYTES(MessagingServiceExceptionMessages.BROKEN_MAGIC_BYTES_MSG, CATEGORY_ERROR, 7),
     /**
      * Unknown prefix code: %1$s
      */
-    UNKNOWN_PREFIX_CODE(MessagingServiceExceptionMessages.UNKNOWN_PREFIX_CODE_MSG, Category.CODE_ERROR, 8),
+    UNKNOWN_PREFIX_CODE(MessagingServiceExceptionMessages.UNKNOWN_PREFIX_CODE_MSG, CATEGORY_ERROR, 8),
     /**
      * Invalid message package
      */
-    INVALID_MSG_PACKAGE(MessagingServiceExceptionMessages.INVALID_MSG_PACKAGE_MSG, Category.CODE_ERROR, 9),
+    INVALID_MSG_PACKAGE(MessagingServiceExceptionMessages.INVALID_MSG_PACKAGE_MSG, CATEGORY_ERROR, 9),
     /**
      * Unparseable string.
      */
-    UNPARSEABLE_STRING(MessagingServiceExceptionMessages.UNPARSEABLE_STRING_MSG, Category.CODE_ERROR, 10),
+    UNPARSEABLE_STRING(MessagingServiceExceptionMessages.UNPARSEABLE_STRING_MSG, CATEGORY_ERROR, 10),
     /**
      * Invalid quoted-printable encoding.
      */
-    INVALID_QUOTED_PRINTABLE(MessagingServiceExceptionMessages.INVALID_QUOTED_PRINTABLE_MSG, Category.CODE_ERROR, 11),
+    INVALID_QUOTED_PRINTABLE(MessagingServiceExceptionMessages.INVALID_QUOTED_PRINTABLE_MSG, CATEGORY_ERROR, 11),
     /**
      * Messaging server socket could not be bound to port %1$d. Probably another process is already listening on this port.
      */
-    BIND_ERROR(MessagingServiceExceptionMessages.BIND_ERROR_MSG, Category.CODE_ERROR, 12),
+    BIND_ERROR(MessagingServiceExceptionMessages.BIND_ERROR_MSG, CATEGORY_ERROR, 12),
     
     ;
 

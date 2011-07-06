@@ -112,7 +112,7 @@ public class PushUDPException extends AbstractOXException {
         /**
          * Push UDP Exception.
          */
-        PUSH_UDP_EXCEPTION("Push UDP Exception.", 1, AbstractOXException.Category.CODE_ERROR),
+        PUSH_UDP_EXCEPTION("Push UDP Exception.", 1, AbstractOXException.CATEGORY_ERROR),
         /**
          * Missing Push UDP configuration.
          */
@@ -120,51 +120,51 @@ public class PushUDPException extends AbstractOXException {
         /**
          * User ID is not a number: %1$s.
          */
-        USER_ID_NAN("User ID is not a number: %1$s.", 3, AbstractOXException.Category.CODE_ERROR),
+        USER_ID_NAN("User ID is not a number: %1$s.", 3, AbstractOXException.CATEGORY_ERROR),
         /**
          * Context ID is not a number: %1$s.
          */
-        CONTEXT_ID_NAN("Context ID is not a number: %1$s.", 4, AbstractOXException.Category.CODE_ERROR),
+        CONTEXT_ID_NAN("Context ID is not a number: %1$s.", 4, AbstractOXException.CATEGORY_ERROR),
         /**
          * Magic bytes are not a number: %1$s.
          */
-        MAGIC_NAN("Magic bytes are not a number: %1$s.", 5, AbstractOXException.Category.CODE_ERROR),
+        MAGIC_NAN("Magic bytes are not a number: %1$s.", 5, AbstractOXException.CATEGORY_ERROR),
         /**
          * Invalid Magic bytes: %1$s.
          */
-        INVALID_MAGIC("Invalid Magic bytes: %1$s.", 6, AbstractOXException.Category.CODE_ERROR),
+        INVALID_MAGIC("Invalid Magic bytes: %1$s.", 6, AbstractOXException.CATEGORY_ERROR),
         /**
          * Folder ID is not a number: %1$s.
          */
-        FOLDER_ID_NAN("Folder ID is not a number: %1$s.", 7, AbstractOXException.Category.CODE_ERROR),
+        FOLDER_ID_NAN("Folder ID is not a number: %1$s.", 7, AbstractOXException.CATEGORY_ERROR),
         /**
          * Module is not a number: %1$s.
          */
-        MODULE_NAN("Module is not a number: %1$s.", 8, AbstractOXException.Category.CODE_ERROR),
+        MODULE_NAN("Module is not a number: %1$s.", 8, AbstractOXException.CATEGORY_ERROR),
         /**
          * Port is not a number: %1$s.
          */
-        PORT_NAN("Port is not a number: %1$s.", 9, AbstractOXException.Category.CODE_ERROR),
+        PORT_NAN("Port is not a number: %1$s.", 9, AbstractOXException.CATEGORY_ERROR),
         /**
          * Request type is not a number: %1$s.
          */
-        TYPE_NAN("Request type is not a number: %1$s.", 10, AbstractOXException.Category.CODE_ERROR),
+        TYPE_NAN("Request type is not a number: %1$s.", 10, AbstractOXException.CATEGORY_ERROR),
         /**
          * Length is not a number: %1$s.
          */
-        LENGTH_NAN("Length is not a number: %1$s.", 11, AbstractOXException.Category.CODE_ERROR),
+        LENGTH_NAN("Length is not a number: %1$s.", 11, AbstractOXException.CATEGORY_ERROR),
         /**
          * Invalid user IDs: %1$s.
          */
-        INVALID_USER_IDS("Invalid user IDs: %1$s.", 12, AbstractOXException.Category.CODE_ERROR),
+        INVALID_USER_IDS("Invalid user IDs: %1$s.", 12, AbstractOXException.CATEGORY_ERROR),
         /**
          * Unknown request type: %1$s.
          */
-        INVALID_TYPE("Unknown request type: %1$s.", 13, AbstractOXException.Category.CODE_ERROR),
+        INVALID_TYPE("Unknown request type: %1$s.", 13, AbstractOXException.CATEGORY_ERROR),
         /**
          * Missing payload in datagram package.
          */
-        MISSING_PAYLOAD("Missing payload in datagram package.", 14, AbstractOXException.Category.CODE_ERROR);
+        MISSING_PAYLOAD("Missing payload in datagram package.", 14, AbstractOXException.CATEGORY_ERROR);
 
         /**
          * Message of the exception.

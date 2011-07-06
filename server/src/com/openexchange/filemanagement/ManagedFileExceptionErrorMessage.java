@@ -57,20 +57,20 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ManagedFileExceptionErrorMessage implements OXErrorMessage {
+public enum ManagedFileExceptionErrorMessage implements OXExceptionCode {
 
     /**
      * File not found: %1$s
      */
-    FILE_NOT_FOUND(ManagedFileExceptionMessages.FILE_NOT_FOUND_MSG, Category.CODE_ERROR, 1),
+    FILE_NOT_FOUND(ManagedFileExceptionMessages.FILE_NOT_FOUND_MSG, CATEGORY_ERROR, 1),
     /**
      * I/O error: %1$s
      */
-    IO_ERROR(ManagedFileExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 2),
+    IO_ERROR(ManagedFileExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * No such managed file associated with ID: %1$s
      */
-    NOT_FOUND(ManagedFileExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 3);
+    NOT_FOUND(ManagedFileExceptionMessages.NOT_FOUND_MSG, CATEGORY_ERROR, 3);
 
     private final Category category;
 

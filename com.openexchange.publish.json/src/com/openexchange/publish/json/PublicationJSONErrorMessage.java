@@ -59,7 +59,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum PublicationJSONErrorMessage implements OXErrorMessage {
+public enum PublicationJSONErrorMessage implements OXExceptionCode {
     THROWABLE(Category.INTERNAL_ERROR, 1, "Please try again later.", "An unexpected error occurred: %s"),
     MISSING_PARAMETER(Category.USER_INPUT, 2, "Please correct the client program", "Missing value for parameter %s"),
     UNKNOWN_ACTION(Category.USER_INPUT, 3, "Please correct the client program","Unknown Action: %s"),

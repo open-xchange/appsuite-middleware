@@ -59,12 +59,12 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum OXMFSubscriptionErrorMessage implements OXErrorMessage{
+public enum OXMFSubscriptionErrorMessage implements OXExceptionCode{
 
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", OXMFErrorStrings.PARSE_EXCEPTION),
+    ParseException(CATEGORY_ERROR, 2, "Provide well-formed HTML.", OXMFErrorStrings.PARSE_EXCEPTION),
     IOException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 3, "Try again later.", OXMFErrorStrings.IOException),
     HttpException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 4, "Try again later.", OXMFErrorStrings.HttpException), 
     CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES(Category.INTERNAL_ERROR, 5,"Try again later.", OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES),

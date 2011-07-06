@@ -74,7 +74,7 @@ public final class POP3Exception extends OXException {
         /**
          * No connection available to access mailbox
          */
-        NOT_CONNECTED("No connection available to access mailbox", Category.CODE_ERROR, 2001),
+        NOT_CONNECTED("No connection available to access mailbox", CATEGORY_ERROR, 2001),
         /**
          * Missing parameter %1$s
          */
@@ -142,7 +142,7 @@ public final class POP3Exception extends OXException {
         /**
          * POP3 does not support mail folder creation
          */
-        FOLDER_CREATION_FAILED("POP3 does not support mail folder creation", Category.CODE_ERROR, 2015),
+        FOLDER_CREATION_FAILED("POP3 does not support mail folder creation", CATEGORY_ERROR, 2015),
         /**
          * The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by
          * POP3 server. However, the folder has been created.
@@ -159,19 +159,19 @@ public final class POP3Exception extends OXException {
         /**
          * Deletion of folder %1$s failed
          */
-        DELETE_FAILED("Deletion of folder %1$s failed", Category.CODE_ERROR, 2019),
+        DELETE_FAILED("Deletion of folder %1$s failed", CATEGORY_ERROR, 2019),
         /**
          * POP3 default folder %1$s could not be created
          */
-        NO_DEFAULT_FOLDER_CREATION("POP3 default folder %1$s could not be created", Category.CODE_ERROR, 2020),
+        NO_DEFAULT_FOLDER_CREATION("POP3 default folder %1$s could not be created", CATEGORY_ERROR, 2020),
         /**
          * Missing default %1$s folder in user mail settings
          */
-        MISSING_DEFAULT_FOLDER_NAME("Missing default %1$s folder in user mail settings", Category.CODE_ERROR, 2021),
+        MISSING_DEFAULT_FOLDER_NAME("Missing default %1$s folder in user mail settings", CATEGORY_ERROR, 2021),
         /**
          * Update of folder %1$s failed
          */
-        UPDATE_FAILED("Update of folder %1$s failed", Category.CODE_ERROR, 2022),
+        UPDATE_FAILED("Update of folder %1$s failed", CATEGORY_ERROR, 2022),
         /**
          * Folder %1$s must not be deleted
          */
@@ -195,7 +195,7 @@ public final class POP3Exception extends OXException {
         /**
          * Number of search fields (%d) do not match number of search patterns (%d)
          */
-        INVALID_SEARCH_PARAMS("Number of search fields (%d) do not match number of search patterns (%d)", Category.CODE_ERROR, 2028),
+        INVALID_SEARCH_PARAMS("Number of search fields (%d) do not match number of search patterns (%d)", CATEGORY_ERROR, 2028),
         /**
          * POP3 search failed due to following reason: %1$s. Switching to application-based search
          */
@@ -207,7 +207,7 @@ public final class POP3Exception extends OXException {
         /**
          * Unknown search field: %1$s
          */
-        UNKNOWN_SEARCH_FIELD("Unknown search field: %1$s", Category.CODE_ERROR, 2031),
+        UNKNOWN_SEARCH_FIELD("Unknown search field: %1$s", CATEGORY_ERROR, 2031),
         /**
          * Message field %1$s cannot be handled
          */
@@ -223,7 +223,7 @@ public final class POP3Exception extends OXException {
         /**
          * Missing %1$s folder in mail move operation
          */
-        MISSING_SOURCE_TARGET_FOLDER_ON_MOVE("Missing %1$s folder in mail move operation", Category.CODE_ERROR, 2035),
+        MISSING_SOURCE_TARGET_FOLDER_ON_MOVE("Missing %1$s folder in mail move operation", CATEGORY_ERROR, 2035),
         /**
          * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
          */
@@ -231,11 +231,11 @@ public final class POP3Exception extends OXException {
         /**
          * Folder read-only check failed
          */
-        FAILED_READ_ONLY_CHECK("POP3 folder read-only check failed", Category.CODE_ERROR, 2037),
+        FAILED_READ_ONLY_CHECK("POP3 folder read-only check failed", CATEGORY_ERROR, 2037),
         /**
          * Unknown folder open mode %d
          */
-        UNKNOWN_FOLDER_MODE("Unknown folder open mode %d", Category.CODE_ERROR, 2038),
+        UNKNOWN_FOLDER_MODE("Unknown folder open mode %d", CATEGORY_ERROR, 2038),
         /**
          * Message(s) %1$s in folder %2$s could not be deleted due to following error: %3$s
          */
@@ -247,7 +247,7 @@ public final class POP3Exception extends OXException {
         /**
          * The raw content's input stream of message %1$s in folder %2$s cannot be read
          */
-        MESSAGE_CONTENT_ERROR("The raw content's input stream of message %1$s in folder %2$s cannot be read", Category.CODE_ERROR, 2042),
+        MESSAGE_CONTENT_ERROR("The raw content's input stream of message %1$s in folder %2$s cannot be read", CATEGORY_ERROR, 2042),
         /**
          * No attachment was found with id %1$s in message
          */
@@ -259,11 +259,11 @@ public final class POP3Exception extends OXException {
         /**
          * Versit object %1$s could not be saved
          */
-        FAILED_VERSIT_SAVE("Versit object could not be saved", Category.CODE_ERROR, 2045),
+        FAILED_VERSIT_SAVE("Versit object could not be saved", CATEGORY_ERROR, 2045),
         /**
          * POP3 server does not support capability "THREAD=REFERENCES"
          */
-        THREAD_SORT_NOT_SUPPORTED("POP3 server does not support capability \"THREAD=REFERENCES\"", Category.CODE_ERROR, 2046),
+        THREAD_SORT_NOT_SUPPORTED("POP3 server does not support capability \"THREAD=REFERENCES\"", CATEGORY_ERROR, 2046),
         /**
          * Unsupported charset-encoding: %1$s
          */
@@ -287,75 +287,75 @@ public final class POP3Exception extends OXException {
         /**
          * POP3 does not support to move folders.
          */
-        MOVE_DENIED("POP3 does not support to move folders.", Category.CODE_ERROR, 2048),
+        MOVE_DENIED("POP3 does not support to move folders.", CATEGORY_ERROR, 2048),
         /**
          * Sort field %1$s is not supported via POP3 SORT command
          */
-        UNSUPPORTED_SORT_FIELD("Sort field %1$s is not supported via POP3 SORT command", Category.CODE_ERROR, 2049),
+        UNSUPPORTED_SORT_FIELD("Sort field %1$s is not supported via POP3 SORT command", CATEGORY_ERROR, 2049),
         /**
          * Missing personal namespace
          */
-        MISSING_PERSONAL_NAMESPACE("Missing personal namespace", Category.CODE_ERROR, 2050),
+        MISSING_PERSONAL_NAMESPACE("Missing personal namespace", CATEGORY_ERROR, 2050),
         /**
          * Parsing thread-sort string failed: %1$s.
          */
-        THREAD_SORT_PARSING_ERROR("Parsing thread-sort string failed: %1$s.", Category.CODE_ERROR, 2051),
+        THREAD_SORT_PARSING_ERROR("Parsing thread-sort string failed: %1$s.", CATEGORY_ERROR, 2051),
         /**
          * POP3 does not support to create folders.
          */
-        CREATE_DENIED("POP3 does not support to create folders.", Category.CODE_ERROR, 2052),
+        CREATE_DENIED("POP3 does not support to create folders.", CATEGORY_ERROR, 2052),
         /**
          * POP3 does not support to delete folders.
          */
-        DELETE_DENIED("POP3 does not support to delete folders.", Category.CODE_ERROR, 2053),
+        DELETE_DENIED("POP3 does not support to delete folders.", CATEGORY_ERROR, 2053),
         /**
          * POP3 does not support to update folders.
          */
-        UPDATE_DENIED("POP3 does not support to update folders.", Category.CODE_ERROR, 2054),
+        UPDATE_DENIED("POP3 does not support to update folders.", CATEGORY_ERROR, 2054),
         /**
          * A SQL error occurred: %1$s.
          */
-        SQL_ERROR("A SQL error occurred: %1$s.", Category.CODE_ERROR, 2055),
+        SQL_ERROR("A SQL error occurred: %1$s.", CATEGORY_ERROR, 2055),
         /**
          * POP3 does not support to move messages.
          */
-        MOVE_MSGS_DENIED("POP3 does not support to move messages.", Category.CODE_ERROR, 2056),
+        MOVE_MSGS_DENIED("POP3 does not support to move messages.", CATEGORY_ERROR, 2056),
         /**
          * POP3 does not support to copy messages.
          */
-        COPY_MSGS_DENIED("POP3 does not support to copy messages.", Category.CODE_ERROR, 2057),
+        COPY_MSGS_DENIED("POP3 does not support to copy messages.", CATEGORY_ERROR, 2057),
         /**
          * POP3 does not support to append messages.
          */
-        APPEND_MSGS_DENIED("POP3 does not support to append messages.", Category.CODE_ERROR, 2058),
+        APPEND_MSGS_DENIED("POP3 does not support to append messages.", CATEGORY_ERROR, 2058),
         /**
          * POP3 does not support draft messages.
          */
-        DRAFTS_NOT_SUPPORTED("POP3 does not support draft messages.", Category.CODE_ERROR, 2059),
+        DRAFTS_NOT_SUPPORTED("POP3 does not support draft messages.", CATEGORY_ERROR, 2059),
         /**
          * Missing POP3 storage name for user %1$s in context %2$s.
          */
-        MISSING_POP3_STORAGE_NAME("Missing POP3 storage name for user %1$s in context %2$s.", Category.CODE_ERROR, 2060),
+        MISSING_POP3_STORAGE_NAME("Missing POP3 storage name for user %1$s in context %2$s.", CATEGORY_ERROR, 2060),
         /**
          * Missing POP3 storage for user %1$s in context %2$s.
          */
-        MISSING_POP3_STORAGE("Missing POP3 storage for user %1$s in context %2$s.", Category.CODE_ERROR, 2061),
+        MISSING_POP3_STORAGE("Missing POP3 storage for user %1$s in context %2$s.", CATEGORY_ERROR, 2061),
         /**
          * POP3 default folder %1$s must not be moved.
          */
-        NO_DEFAULT_FOLDER_MOVE("POP3 default folder %1$s must not be moved.", Category.CODE_ERROR, 2062),
+        NO_DEFAULT_FOLDER_MOVE("POP3 default folder %1$s must not be moved.", CATEGORY_ERROR, 2062),
         /**
          * POP3 default folder %1$s must not be renamed.
          */
-        NO_DEFAULT_FOLDER_RENAME("POP3 default folder %1$s must not be renamed.", Category.CODE_ERROR, 2063),
+        NO_DEFAULT_FOLDER_RENAME("POP3 default folder %1$s must not be renamed.", CATEGORY_ERROR, 2063),
         /**
          * Inconsistency detected in UIDL map.
          */
-        UIDL_INCONSISTENCY("Inconsistency detected in UIDL map.", Category.CODE_ERROR, 2064),
+        UIDL_INCONSISTENCY("Inconsistency detected in UIDL map.", CATEGORY_ERROR, 2064),
         /**
          * Missing POP3 storage path for user %1$s in context %2$s.
          */
-        MISSING_PATH("Missing POP3 storage path for user %1$s in context %2$s.", Category.CODE_ERROR, 2065),
+        MISSING_PATH("Missing POP3 storage path for user %1$s in context %2$s.", CATEGORY_ERROR, 2065),
         /**
          * Illegal move operation.
          */
@@ -377,7 +377,7 @@ public final class POP3Exception extends OXException {
         /**
          * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
          */
-        ILLEGAL_PATH("POP3 storage path \"%1$s\" cannot be created for user %2$s in context %3$s.", Category.CODE_ERROR, 2069),
+        ILLEGAL_PATH("POP3 storage path \"%1$s\" cannot be created for user %2$s in context %3$s.", CATEGORY_ERROR, 2069),
         /**
          * Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s
          * (user=%4$s, context=%5$s).

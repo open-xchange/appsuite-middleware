@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ContextExceptionCodes implements OXErrorMessage {
+public enum ContextExceptionCodes implements OXExceptionCode {
 
     CONTEXT_DISABLED(CONTEXT_DISABLED_MSG, Category.PERMISSION, 100);
 

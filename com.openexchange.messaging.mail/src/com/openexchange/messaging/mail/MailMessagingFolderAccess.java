@@ -61,7 +61,6 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.DefaultMessagingPermission;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.MessagingFolderAccess;
@@ -102,23 +101,23 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         this.caps = caps;
     }
 
-    public void clearFolder(final String folderId) throws MessagingException {
+    public void clearFolder(final String folderId) throws OXException {
         try {
             folderStorage.clearFolder(folderId);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public void clearFolder(final String folderId, final boolean hardDelete) throws MessagingException {
+    public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         try {
             folderStorage.clearFolder(folderId, hardDelete);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String createFolder(final MessagingFolder toCreate) throws MessagingException {
+    public String createFolder(final MessagingFolder toCreate) throws OXException {
         try {
             final MailFolderDescription mfd = new MailFolderDescription();
 
@@ -134,66 +133,66 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
 
             return folderStorage.createFolder(mfd);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String deleteFolder(final String folderId) throws MessagingException {
+    public String deleteFolder(final String folderId) throws OXException {
         try {
             return folderStorage.deleteFolder(folderId);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String deleteFolder(final String folderId, final boolean hardDelete) throws MessagingException {
+    public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         try {
             return folderStorage.deleteFolder(folderId, hardDelete);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public boolean exists(final String folderId) throws MessagingException {
+    public boolean exists(final String folderId) throws OXException {
         try {
             return folderStorage.exists(folderId);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String getConfirmedHamFolder() throws MessagingException {
+    public String getConfirmedHamFolder() throws OXException {
         try {
             return folderStorage.getConfirmedHamFolder();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String getConfirmedSpamFolder() throws MessagingException {
+    public String getConfirmedSpamFolder() throws OXException {
         try {
             return folderStorage.getConfirmedSpamFolder();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String getDraftsFolder() throws MessagingException {
+    public String getDraftsFolder() throws OXException {
         try {
             return folderStorage.getDraftsFolder();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public MessagingFolder getFolder(final String folderId) throws MessagingException {
+    public MessagingFolder getFolder(final String folderId) throws OXException {
         try {
             final MailFolder folder = folderStorage.getFolder(folderId);
 
             final DefaultMessagingFolder dmf = convert2MessagingFolder(folder, caps);
             return dmf;
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
@@ -294,12 +293,12 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
-    public Quota getMessageQuota(final String folderId) throws MessagingException {
+    public Quota getMessageQuota(final String folderId) throws OXException {
         try {
             final com.openexchange.mail.Quota messageQuota = folderStorage.getMessageQuota(folderId);
             return getQuotaFrom(messageQuota);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
 
     }
@@ -320,7 +319,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
-    public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws MessagingException {
+    public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         try {
             final MailFolder[] mailFolders = folderStorage.getPath2DefaultFolder(folderId);
             final MessagingFolder[] ret = new MessagingFolder[mailFolders.length];
@@ -329,11 +328,11 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
             }
             return ret;
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public Quota[] getQuotas(final String folder, final Type[] types) throws MessagingException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         try {
             final com.openexchange.mail.Quota.Type[] oTypes = new com.openexchange.mail.Quota.Type[types.length];
             for (int i = 0; i < oTypes.length; i++) {
@@ -346,7 +345,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
             }
             return ret;
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
@@ -362,40 +361,40 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
         }
     }
 
-    public MessagingFolder getRootFolder() throws MessagingException {
+    public MessagingFolder getRootFolder() throws OXException {
         try {
             return convert2MessagingFolder(folderStorage.getRootFolder(), caps);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String getSentFolder() throws MessagingException {
+    public String getSentFolder() throws OXException {
         try {
             return folderStorage.getSentFolder();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String getSpamFolder() throws MessagingException {
+    public String getSpamFolder() throws OXException {
         try {
             return folderStorage.getSpamFolder();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public Quota getStorageQuota(final String folderId) throws MessagingException {
+    public Quota getStorageQuota(final String folderId) throws OXException {
         try {
             final com.openexchange.mail.Quota messageQuota = folderStorage.getStorageQuota(folderId);
             return getQuotaFrom(messageQuota);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws MessagingException {
+    public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         try {
             final MailFolder[] mailFolders = folderStorage.getSubfolders(parentIdentifier, all);
             final MessagingFolder[] ret = new MessagingFolder[mailFolders.length];
@@ -404,35 +403,35 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
             }
             return ret;
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String getTrashFolder() throws MessagingException {
+    public String getTrashFolder() throws OXException {
         try {
             return folderStorage.getTrashFolder();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String moveFolder(final String folderId, final String newParentId) throws MessagingException {
+    public String moveFolder(final String folderId, final String newParentId) throws OXException {
         try {
             return folderStorage.moveFolder(folderId, newParentId);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String renameFolder(final String folderId, final String newName) throws MessagingException {
+    public String renameFolder(final String folderId, final String newName) throws OXException {
         try {
             return folderStorage.renameFolder(folderId, newName);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public String updateFolder(final String identifier, final MessagingFolder toUpdate) throws MessagingException {
+    public String updateFolder(final String identifier, final MessagingFolder toUpdate) throws OXException {
         try {
             final MailFolderDescription mfd = new MailFolderDescription();
 
@@ -450,7 +449,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
 
             return folderStorage.updateFolder(identifier, mfd);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 

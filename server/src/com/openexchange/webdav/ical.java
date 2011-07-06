@@ -770,7 +770,7 @@ public final class ical extends PermissionServlet {
                 retval = null;
             }
         } catch (final SQLException e) {
-            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
+            throw new OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(ctx, con);
@@ -799,7 +799,7 @@ public final class ical extends PermissionServlet {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
+            throw new OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(null, ps);
             DBUtils.autocommit(con);
@@ -823,7 +823,7 @@ public final class ical extends PermissionServlet {
             ps.setInt(4, principal.getId());
             ps.executeUpdate();
         } catch (final SQLException e) {
-            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
+            throw new OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(null, ps);
             DBPool.closeWriterSilent(ctx, con);
@@ -851,7 +851,7 @@ public final class ical extends PermissionServlet {
      * (final Map.Entry<String, Integer> entry : entriesTask.entrySet()) { final int objectId = IDGenerator.getId(ctx, Types.ICAL, con);
      * ps.setInt(1, objectId); ps.setLong(2, ctx.getContextId()); ps.setInt(3, principal.getId()); ps.setString(4, entry.getKey());
      * ps.setInt(5, entry.getValue().intValue()); ps.setInt(6, Types.TASK); ps.addBatch(); } ps.executeBatch(); con.commit(); } catch (final
-     * SQLException e) { DBUtils.rollback(con); throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e); }
+     * SQLException e) { DBUtils.rollback(con); throw new OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e); }
      * finally { DBUtils.closeSQLStuff(null, ps); DBUtils.autocommit(con); DBPool.closeWriterSilent(ctx, con); } }
      */
 
@@ -865,7 +865,7 @@ public final class ical extends PermissionServlet {
      * mapping.client2Task.keySet()) { if (!entriesTask.containsKey(clientId)) { ps.setInt(1, ctx.getContextId()); ps.setInt(2,
      * principal.getId()); ps.setInt(3, mapping.client2Task.get(clientId).intValue()); ps.setInt(4, Types.TASK); ps.addBatch(); } }
      * ps.executeBatch(); con.commit(); } catch (final SQLException e) { DBUtils.rollback(con); throw new OXException(EnumComponent.ICAL,
-     * Category.CODE_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(null, ps); DBUtils.autocommit(con);
+     * CATEGORY_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(null, ps); DBUtils.autocommit(con);
      * DBPool.closeWriterSilent(ctx, con); } }
      */
 
@@ -909,7 +909,7 @@ public final class ical extends PermissionServlet {
      * rs.getString(2); final int target_id = rs.getInt(3); final int module = rs.getInt(4); switch (module) { case Types.APPOINTMENT:
      * mapping.addAppointment(client_id, target_id); break; case Types.TASK: mapping.addTask(client_id, target_id); break; default:
      * LOG.warn("Unknown iCal object mapping module " + module); } } } catch (final SQLException e) { throw new
-     * OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(rs, ps);
+     * OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(rs, ps);
      * DBPool.closeReaderSilent(context, readCon); } return mapping; }
      */
 

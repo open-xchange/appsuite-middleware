@@ -97,36 +97,36 @@ import com.openexchange.groupware.importexport.internal.ImportExportExceptionFac
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ImportExportExceptionCodes implements OXErrorMessage {
+public enum ImportExportExceptionCodes implements OXExceptionCode {
 
     /** Could not export the folder %1$s in the format %2$s. */
     CANNOT_EXPORT(CANNOT_EXPORT_MSG, Category.PERMISSION, 100),
     /** Could not load contacts */
     LOADING_CONTACTS_FAILED(LOADING_CONTACTS_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 102),
     /** Could not encode as UTF-8 */
-    UTF8_ENCODE_FAILED(UTF8_ENCODE_FAILED_MSG, Category.CODE_ERROR, 104),
+    UTF8_ENCODE_FAILED(UTF8_ENCODE_FAILED_MSG, CATEGORY_ERROR, 104),
     /** Can not get connection to database. */
     NO_DATABASE_CONNECTION(NO_DATABASE_CONNECTION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 110),
     /** Invalid SQL Query: %s */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 200),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, CATEGORY_ERROR, 200),
     /** Could not load folder %s */
-    LOADING_FOLDER_FAILED(LOADING_FOLDER_FAILED_MSG, Category.CODE_ERROR, 204),
+    LOADING_FOLDER_FAILED(LOADING_FOLDER_FAILED_MSG, CATEGORY_ERROR, 204),
     /** The necessary iCal emitter serivce is missing. */
-    ICAL_EMITTER_SERVICE_MISSING(ICAL_EMITTER_SERVICE_MISSING_MSG, Category.CODE_ERROR, 206),
+    ICAL_EMITTER_SERVICE_MISSING(ICAL_EMITTER_SERVICE_MISSING_MSG, CATEGORY_ERROR, 206),
     /** Parsing %1$s to a number failed. */
-    NUMBER_FAILED(NUMBER_FAILED_MSG, Category.CODE_ERROR, 207),
+    NUMBER_FAILED(NUMBER_FAILED_MSG, CATEGORY_ERROR, 207),
     /** Conversion to iCal failed. */
-    ICAL_CONVERSION_FAILED(ICAL_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 208),
+    ICAL_CONVERSION_FAILED(ICAL_CONVERSION_FAILED_MSG, CATEGORY_ERROR, 208),
     /** Conversion to vCard failed. */
-    VCARD_CONVERSION_FAILED(VCARD_CONVERSION_FAILED_MSG, Category.CODE_ERROR, 304),
+    VCARD_CONVERSION_FAILED(VCARD_CONVERSION_FAILED_MSG, CATEGORY_ERROR, 304),
     /** Can not import the format %2$s into folder %1$s. */
-    CANNOT_IMPORT(CANNOT_IMPORT_MSG, Category.CODE_ERROR, 500),
+    CANNOT_IMPORT(CANNOT_IMPORT_MSG, CATEGORY_ERROR, 500),
     /** Module calendar not enabled for user, cannot import appointments. */
     CALENDAR_DISABLED(CALENDAR_DISABLED_MSG, Category.PERMISSION, 507),
     /** Module tasks not enabled for user, cannot import tasks. */
     TASKS_DISABLED(TASKS_DISABLED_MSG, Category.PERMISSION, 508),
     /** The necessary iCal parser service is missing. */
-    ICAL_PARSER_SERVICE_MISSING(ICAL_PARSER_SERVICE_MISSING_MSG, Category.CODE_ERROR, 512),
+    ICAL_PARSER_SERVICE_MISSING(ICAL_PARSER_SERVICE_MISSING_MSG, CATEGORY_ERROR, 512),
     /** Failed importing appointment due to hard conflicting resource. */
     RESOURCE_HARD_CONFLICT(RESOURCE_HARD_CONFLICT_MSG, Category.USER_INPUT, 513),
     /** Warnings when importing file: %i warnings */
@@ -154,19 +154,19 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     /** No field was set that might give the contact in line %s a display name: no name, no company nor e-mail. */
     NO_FIELD_FOR_NAMING_IN_LINE(NO_FIELD_FOR_NAMING_IN_LINE_MSG, Category.USER_INPUT, 808),
     /** Could not read InputStream as string */
-    IOEXCEPTION(IOEXCEPTION_MSG, Category.CODE_ERROR, 902),
+    IOEXCEPTION(IOEXCEPTION_MSG, CATEGORY_ERROR, 902),
     /** Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file? */
     BROKEN_CSV(BROKEN_CSV_MSG, Category.USER_INPUT, 1000),
     /** Illegal state: Found data after presumed last line. */
-    DATA_AFTER_LAST_LINE(DATA_AFTER_LAST_LINE_MSG, Category.CODE_ERROR, 1001),
+    DATA_AFTER_LAST_LINE(DATA_AFTER_LAST_LINE_MSG, CATEGORY_ERROR, 1001),
     /** Cannot find an importer for format %s into folders %s */
     NO_IMPORTER(NO_IMPORTER_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 1100),
     /** Cannot find an exporter for folder %s to format %s */
     NO_EXPORTER(NO_EXPORTER_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 1101),
     /** Cannot translate id=%d to a constant from Types. */
-    NO_TYPES_CONSTANT(NO_TYPES_CONSTANT_MSG, Category.CODE_ERROR, 1200),
+    NO_TYPES_CONSTANT(NO_TYPES_CONSTANT_MSG, CATEGORY_ERROR, 1200),
     /** Cannot translate id=%d to a constant from FolderObject. */
-    NO_FOLDEROBJECT_CONSTANT(NO_FOLDEROBJECT_CONSTANT_MSG, Category.CODE_ERROR, 1201),
+    NO_FOLDEROBJECT_CONSTANT(NO_FOLDEROBJECT_CONSTANT_MSG, CATEGORY_ERROR, 1201),
     /** Can only handle one file, not %s */
     ONLY_ONE_FILE(ONLY_ONE_FILE_MSG, Category.USER_INPUT, 1300),
     /** Unknown format: %s */

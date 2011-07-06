@@ -104,7 +104,7 @@ public class ConfigJumpException extends AbstractOXException {
         /**
          * Unknown problem: "%s".
          */
-        UNKNOWN("Unknown problem: \"%s\".", Category.CODE_ERROR, 1),
+        UNKNOWN("Unknown problem: \"%s\".", CATEGORY_ERROR, 1),
         /**
          * Too few (%d) login attributes.
          */
@@ -116,7 +116,7 @@ public class ConfigJumpException extends AbstractOXException {
         /**
          * Instantiating the class failed.
          */
-        INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 4),
+        INSTANTIATION_FAILED("Instantiating the class failed.", CATEGORY_ERROR, 4),
         /**
          * Class %1$s can not be found.
          */
@@ -128,7 +128,7 @@ public class ConfigJumpException extends AbstractOXException {
         /**
          * URL "%s" is malformed.
          */
-        MALFORMED_URL("URL \"%s\" is malformed.", Category.CODE_ERROR, 7),
+        MALFORMED_URL("URL \"%s\" is malformed.", CATEGORY_ERROR, 7),
         /**
          * Link is not implemented.
          */

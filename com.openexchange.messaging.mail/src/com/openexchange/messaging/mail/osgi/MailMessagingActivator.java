@@ -55,12 +55,9 @@ import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.mail.MailMessageService;
-import com.openexchange.messaging.mail.MailMessagingException;
-import com.openexchange.messaging.mail.exceptions.MailMessagingExceptionFactory;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -76,8 +73,6 @@ public final class MailMessagingActivator extends DeferredActivator {
     private List<ServiceTracker> trackers;
 
     private List<ServiceRegistration> registrations;
-
-    private ComponentRegistration componentRegistration;
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -129,15 +124,6 @@ public final class MailMessagingActivator extends DeferredActivator {
                     }
                 }
             }
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    MailMessagingException.MAIL_COMPONENT,
-                    "com.openexchange.messaging.mail",
-                    MailMessagingExceptionFactory.getInstance());
 
             trackers = new ArrayList<ServiceTracker>();
             for (final ServiceTracker tracker : trackers) {
@@ -157,13 +143,6 @@ public final class MailMessagingActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
-            }
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
                     trackers.remove(0).close();

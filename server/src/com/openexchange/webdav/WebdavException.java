@@ -66,31 +66,31 @@ public class WebdavException extends AbstractOXException {
         /**
          * Invalid value in element &quot;%1$s&quot;: %2$s.
          */
-        INVALID_VALUE("Invalid value in element \"%1$s\": %2$s.", Category.CODE_ERROR, 1),
+        INVALID_VALUE("Invalid value in element \"%1$s\": %2$s.", CATEGORY_ERROR, 1),
         /**
          * An I/O error occurred.
          */
-        IO_ERROR("An I/O error occurred.", Category.CODE_ERROR, 2),
+        IO_ERROR("An I/O error occurred.", CATEGORY_ERROR, 2),
         /**
          * Missing field %1$s.
          */
-        MISSING_FIELD("Missing field %1$s.", Category.CODE_ERROR, 3),
+        MISSING_FIELD("Missing field %1$s.", CATEGORY_ERROR, 3),
         /**
          * Missing header field %1$s.
          */
-        MISSING_HEADER_FIELD("Missing header field %1$s.", Category.CODE_ERROR, 4),
+        MISSING_HEADER_FIELD("Missing header field %1$s.", CATEGORY_ERROR, 4),
         /**
          * Invalid action %1$s.
          */
-        INVALID_ACTION("Invalid action %1$s.", Category.CODE_ERROR, 5),
+        INVALID_ACTION("Invalid action %1$s.", CATEGORY_ERROR, 5),
         /**
          * %1$s is not a number.
          */
-        NOT_A_NUMBER("%1$s is not a number.", Category.CODE_ERROR, 6),
+        NOT_A_NUMBER("%1$s is not a number.", CATEGORY_ERROR, 6),
         /**
          * No principal found: %1$s.
          */
-        NO_PRINCIPAL("No principal found: %1$s.", Category.CODE_ERROR, 7),
+        NO_PRINCIPAL("No principal found: %1$s.", CATEGORY_ERROR, 7),
         /**
          * Empty passwords are not allowed.
          */
@@ -98,15 +98,15 @@ public class WebdavException extends AbstractOXException {
         /**
          * Unsupported authorization mechanism in "Authorization" header: %1$s.
          */
-        UNSUPPORTED_AUTH_MECH("Unsupported authorization mechanism in \"Authorization\" header: %1$s.", Category.CODE_ERROR, 9),
+        UNSUPPORTED_AUTH_MECH("Unsupported authorization mechanism in \"Authorization\" header: %1$s.", CATEGORY_ERROR, 9),
         /**
          * Resolving user name "%1$s" failed.
          */
-        RESOLVING_USER_NAME_FAILED("Resolving user name \"%1$s\" failed.", Category.CODE_ERROR, 10),
+        RESOLVING_USER_NAME_FAILED("Resolving user name \"%1$s\" failed.", CATEGORY_ERROR, 10),
         /**
          * Authentication failed for user name: %1$s
          */
-        AUTH_FAILED("Authentication failed for user name: %1$s", Category.CODE_ERROR, 11);
+        AUTH_FAILED("Authentication failed for user name: %1$s", CATEGORY_ERROR, 11);
 
         private final String message;
 

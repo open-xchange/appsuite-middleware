@@ -57,32 +57,32 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SearchExceptionMessages implements OXErrorMessage {
+public enum SearchExceptionMessages implements OXExceptionCode {
 
     /**
      * Search failed: %1$s.
      */
-    SEARCH_FAILED(SearchExceptionStrings.SEARCH_FAILED_MSG, Category.CODE_ERROR, 1),
+    SEARCH_FAILED(SearchExceptionStrings.SEARCH_FAILED_MSG, CATEGORY_ERROR, 1),
     /**
      * Missing operation in JSON object.
      */
-    PARSING_FAILED_MISSING_OPERATION(SearchExceptionStrings.PARSING_FAILED_MISSING_OPERATION_MSG, Category.CODE_ERROR, 2),
+    PARSING_FAILED_MISSING_OPERATION(SearchExceptionStrings.PARSING_FAILED_MISSING_OPERATION_MSG, CATEGORY_ERROR, 2),
     /**
      * Missing operands in JSON object.
      */
-    PARSING_FAILED_MISSING_OPERANDS(SearchExceptionStrings.PARSING_FAILED_MISSING_OPERANDS_MSG, Category.CODE_ERROR, 3),
+    PARSING_FAILED_MISSING_OPERANDS(SearchExceptionStrings.PARSING_FAILED_MISSING_OPERANDS_MSG, CATEGORY_ERROR, 3),
     /**
      * Invalid search term in JSON object.
      */
-    PARSING_FAILED_INVALID_SEARCH_TERM(SearchExceptionStrings.PARSING_FAILED_INVALID_SEARCH_TERM_MSG, Category.CODE_ERROR, 4),
+    PARSING_FAILED_INVALID_SEARCH_TERM(SearchExceptionStrings.PARSING_FAILED_INVALID_SEARCH_TERM_MSG, CATEGORY_ERROR, 4),
     /**
      * Missing field "%1$s" in JSON object.
      */
-    PARSING_FAILED_MISSING_FIELD(SearchExceptionStrings.PARSING_FAILED_MISSING_FIELD_MSG, Category.CODE_ERROR, 5),
+    PARSING_FAILED_MISSING_FIELD(SearchExceptionStrings.PARSING_FAILED_MISSING_FIELD_MSG, CATEGORY_ERROR, 5),
     /**
      * Unknown operation: %1$s.
      */
-    UNKNOWN_OPERATION(SearchExceptionStrings.UNKNOWN_OPERATION_MSG, Category.CODE_ERROR, 6);
+    UNKNOWN_OPERATION(SearchExceptionStrings.UNKNOWN_OPERATION_MSG, CATEGORY_ERROR, 6);
 
     /**
      * Message of the exception.

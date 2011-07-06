@@ -51,7 +51,6 @@ package com.openexchange.messaging.mail;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
@@ -81,9 +80,9 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
      * 
      * @param accountId The account ID
      * @param session The session
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MailMessagingAccountAccess(final int accountId, final Session session) throws MessagingException {
+    public MailMessagingAccountAccess(final int accountId, final Session session) throws OXException {
         super(accountId, session);
     }
 
@@ -91,7 +90,7 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
         return accountId;
     }
 
-    public MessagingFolderAccess getFolderAccess() throws MessagingException {
+    public MessagingFolderAccess getFolderAccess() throws OXException {
         if (!mailAccess.isConnected()) {
             throw MessagingExceptionCodes.NOT_CONNECTED.create();
         }
@@ -106,13 +105,13 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
                             mailAccess.getMailConfig().getCapabilities(),
                             session);
             } catch (final OXException e) {
-                throw new MessagingException(e);
+                throw e;
             }
         }
         return tmp;
     }
 
-    public MessagingMessageAccess getMessageAccess() throws MessagingException {
+    public MessagingMessageAccess getMessageAccess() throws OXException {
         if (!mailAccess.isConnected()) {
             throw MessagingExceptionCodes.NOT_CONNECTED.create();
         }
@@ -122,19 +121,19 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
                 messageAccess =
                     tmp = new MailMessagingMessageAccess(mailAccess.getMessageStorage(), mailAccess.getLogicTools(), accountId, session);
             } catch (final OXException e) {
-                throw new MessagingException(e);
+                throw e;
             }
         }
         return tmp;
     }
 
-    public MessagingFolder getRootFolder() throws MessagingException {
+    public MessagingFolder getRootFolder() throws OXException {
         try {
             return MailMessagingFolderAccess.convert2MessagingFolder(
                 mailAccess.getRootFolder(),
                 mailAccess.getMailConfig().getCapabilities());
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 

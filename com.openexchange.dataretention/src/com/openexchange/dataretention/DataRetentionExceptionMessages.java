@@ -57,16 +57,16 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum DataRetentionExceptionMessages implements OXErrorMessage {
+public enum DataRetentionExceptionMessages implements OXExceptionCode {
 
     /**
      * Data retention failed: %1$s.
      */
-    ERROR(DataRetentionExceptionStrings.ERROR_MSG, Category.CODE_ERROR, 1),
+    ERROR(DataRetentionExceptionStrings.ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * AN I/O error occurred: %1$s.
      */
-    IO(DataRetentionExceptionStrings.IO_MSG, Category.CODE_ERROR, 2);
+    IO(DataRetentionExceptionStrings.IO_MSG, CATEGORY_ERROR, 2);
 
     /**
      * Message of the exception.

@@ -55,7 +55,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public enum I18NErrorMessages implements OXErrorMessage {
+public enum I18NErrorMessages implements OXExceptionCode {
 
     UNEXPECTED_TOKEN(101, I18NErrorStrings.UNEXPECTED_TOKEN, I18NErrorStrings.CHECK_FILE, Category.SETUP_ERROR),
     UNEXPECTED_TOKEN_CONSUME(102, I18NErrorStrings.UNEXPECTED_TOKEN, I18NErrorStrings.CHECK_FILE, Category.SETUP_ERROR),

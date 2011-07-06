@@ -49,9 +49,9 @@
 
 package com.openexchange.messaging.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.messaging.MessagingBodyPart;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MultipartContent;
 
 /**
@@ -87,7 +87,7 @@ public class MailMessagingBodyPart extends MailMessagingPart implements Messagin
         this.parent = parent;
     }
 
-    public MultipartContent getParent() throws MessagingException {
+    public MultipartContent getParent() throws OXException {
         return parent;
     }
 

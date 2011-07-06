@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentType;
-import com.openexchange.exception.OXException;
 
 
 /**
@@ -112,11 +111,11 @@ public final class MailContentType implements ContentType {
         return contentType.isMimeType(pattern);
     }
 
-    public void setBaseType(final String baseType) throws MessagingException {
+    public void setBaseType(final String baseType) throws OXException {
         try {
             contentType.setBaseType(baseType);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
@@ -124,11 +123,11 @@ public final class MailContentType implements ContentType {
         contentType.setCharsetParameter(charset);
     }
 
-    public void setContentType(final String contentType) throws MessagingException {
+    public void setContentType(final String contentType) throws OXException {
         try {
             this.contentType.setContentType(contentType);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 

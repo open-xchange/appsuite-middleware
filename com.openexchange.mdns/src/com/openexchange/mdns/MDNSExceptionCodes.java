@@ -59,20 +59,20 @@ import com.openexchange.mdns.exception.MDNSExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
  */
-public enum MDNSExceptionCodes implements OXErrorMessage {
+public enum MDNSExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(MDNSExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(MDNSExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MDNSExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 2),
+    IO_ERROR(MDNSExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * A JSON occurred: %1$s
      */
-    JSON_ERROR(MDNSExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 3),
+    JSON_ERROR(MDNSExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 3),
 
     ;
 

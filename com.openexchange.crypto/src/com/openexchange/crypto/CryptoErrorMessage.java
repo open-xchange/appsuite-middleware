@@ -56,7 +56,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public enum CryptoErrorMessage implements OXErrorMessage {
+public enum CryptoErrorMessage implements OXExceptionCode {
     /**
      * Bad password.
      */
@@ -64,11 +64,11 @@ public enum CryptoErrorMessage implements OXErrorMessage {
     /**
      * Encoding error.
      */
-    EncodingException(Category.CODE_ERROR, 2, "Check the encoding.", "Error during encoding operation."),
+    EncodingException(CATEGORY_ERROR, 2, "Check the encoding.", "Error during encoding operation."),
     /**
      * Security Exception.
      */
-    SecurityException(Category.CODE_ERROR, 3, "Check cipher initialization", "General Security Exception occurred."),
+    SecurityException(CATEGORY_ERROR, 3, "Check cipher initialization", "General Security Exception occurred."),
     /**
      * No salt given.
      */

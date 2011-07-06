@@ -66,19 +66,19 @@ public final class PasswordChangeServletException extends AbstractOXException {
         /**
          * A JSON error occurred: %1$s
          */
-        JSON_ERROR("A JSON error occurred: %1$s", Category.CODE_ERROR, 1),
+        JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 1),
         /**
          * Invalid locale string: %1$s
          */
-        INVALID_LOCALE_STR("Invalid locale string: %1$s", Category.CODE_ERROR, 2),
+        INVALID_LOCALE_STR("Invalid locale string: %1$s", CATEGORY_ERROR, 2),
         /**
          * Unsupported action %1$s via %2$s request
          */
-        UNSUPPORTED_ACTION("Unsupported action %1$s via %2$s request", Category.CODE_ERROR, 3),
+        UNSUPPORTED_ACTION("Unsupported action %1$s via %2$s request", CATEGORY_ERROR, 3),
         /**
          * Missing parameter %1$s
          */
-        MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 4);
+        MISSING_PARAM("Missing parameter %1$s", CATEGORY_ERROR, 4);
 
         private final String message;
 

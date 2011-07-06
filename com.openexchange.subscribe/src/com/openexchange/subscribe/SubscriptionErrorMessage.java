@@ -59,20 +59,20 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum SubscriptionErrorMessage implements OXErrorMessage {
+public enum SubscriptionErrorMessage implements OXExceptionCode {
 
     /**
      * A SQL Error occurred.
      */
-    SQLException(Category.CODE_ERROR, 1, SubscriptionErrorStrings.TRY_AGAIN, SubscriptionErrorStrings.SQL_ERROR),
+    SQLException(CATEGORY_ERROR, 1, SubscriptionErrorStrings.TRY_AGAIN, SubscriptionErrorStrings.SQL_ERROR),
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(Category.CODE_ERROR, 2, SubscriptionErrorStrings.WELL_FORMED, SubscriptionErrorStrings.PARSING_ERROR),
+    ParseException(CATEGORY_ERROR, 2, SubscriptionErrorStrings.WELL_FORMED, SubscriptionErrorStrings.PARSING_ERROR),
     /**
      * Can not save a given ID.
      */
-    IDGiven(Category.CODE_ERROR, 3, SubscriptionErrorStrings.DONT_SET_ID, SubscriptionErrorStrings.CANT_SAVE_ID),
+    IDGiven(CATEGORY_ERROR, 3, SubscriptionErrorStrings.DONT_SET_ID, SubscriptionErrorStrings.CANT_SAVE_ID),
     /**
      * Could not find Subscription (according ID and Context).
      */
@@ -80,7 +80,7 @@ public enum SubscriptionErrorMessage implements OXErrorMessage {
     /**
      * Parsing error.
      */
-    ParsingError(Category.CODE_ERROR, 6, SubscriptionErrorStrings.CHECK_VALUE, SubscriptionErrorStrings.PARSING_ERROR2),
+    ParsingError(CATEGORY_ERROR, 6, SubscriptionErrorStrings.CHECK_VALUE, SubscriptionErrorStrings.PARSING_ERROR2),
     
     INVALID_LOGIN(Category.USER_INPUT, 7, SubscriptionErrorStrings.CORRECT_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD),
     COMMUNICATION_PROBLEM(Category.SUBSYSTEM_OR_SERVICE_DOWN, 8, SubscriptionErrorStrings.CHECK_WEBSITE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE),

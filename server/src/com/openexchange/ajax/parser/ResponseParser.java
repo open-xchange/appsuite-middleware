@@ -117,7 +117,7 @@ public final class ResponseParser {
             final int categoryCode = json.optInt(ResponseFields.ERROR_CATEGORY, -1);
             final Category category;
             if (-1 == categoryCode) {
-                category = Category.CODE_ERROR;
+                category = CATEGORY_ERROR;
             } else {
                 category = Category.byCode(categoryCode);
             }

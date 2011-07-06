@@ -52,7 +52,6 @@ package com.openexchange.messaging.mail;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.messaging.MessagingBodyPart;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MultipartContent;
 
 /**
@@ -96,7 +95,7 @@ public class MailMultipartContent implements MultipartContent {
         mimeMultipart.setSequenceId(sectionId);
     }
 
-    public MessagingBodyPart get(final int index) throws MessagingException {
+    public MessagingBodyPart get(final int index) throws OXException {
         try {
             final MailPart enclosedMailPart = mimeMultipart.getEnclosedMailPart(index);
             final MailMessagingBodyPart bodyPart = new MailMessagingBodyPart(enclosedMailPart, this);
@@ -118,15 +117,15 @@ public class MailMultipartContent implements MultipartContent {
              */
             return bodyPart;
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
-    public int getCount() throws MessagingException {
+    public int getCount() throws OXException {
         try {
             return mimeMultipart.getEnclosedCount();
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 

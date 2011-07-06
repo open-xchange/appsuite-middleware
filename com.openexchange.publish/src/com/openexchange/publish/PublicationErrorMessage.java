@@ -64,24 +64,24 @@ import com.openexchange.groupware.AbstractOXException.Category;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public enum PublicationErrorMessage implements OXErrorMessage {
+public enum PublicationErrorMessage implements OXExceptionCode {
 
     /**
      * A SQL Error occurred.
      */
-    SQLException(Category.CODE_ERROR, 1, "Please try again later.", SQL_EXCEPTION_MSG),
+    SQLException(CATEGORY_ERROR, 1, "Please try again later.", SQL_EXCEPTION_MSG),
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", PARSE_EXCEPTION_MSG),
+    ParseException(CATEGORY_ERROR, 2, "Provide well-formed HTML.", PARSE_EXCEPTION_MSG),
     /**
      * Could not load publications of type %1$s
      */
-    NoLoaderFound(Category.CODE_ERROR, 3, "Only publish supported document types", NO_LOADER_FOUND_MSG),
+    NoLoaderFound(CATEGORY_ERROR, 3, "Only publish supported document types", NO_LOADER_FOUND_MSG),
     /**
      * Can not save a given ID.
      */
-    IDGiven(Category.CODE_ERROR, 4, "Do not set a ID when saving a publication", ID_GIVEN_MSG),
+    IDGiven(CATEGORY_ERROR, 4, "Do not set a ID when saving a publication", ID_GIVEN_MSG),
     /**
      * Cannot find the publication site (according ID and Context).
      */

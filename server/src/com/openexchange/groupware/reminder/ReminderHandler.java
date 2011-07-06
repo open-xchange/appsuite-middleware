@@ -578,7 +578,7 @@ public class ReminderHandler implements ReminderService {
             }
             throw new ReminderException(Code.NOT_FOUND, I(objectId), I(contextId));
         } catch (final SQLException exc) {
-            throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
+            throw new OXException(EnumComponent.REMINDER, CATEGORY_ERROR, -1, "SQL Problem.", exc);
         } finally {
             DBUtils.closeSQLStuff(ps);
         }
@@ -691,7 +691,7 @@ public class ReminderHandler implements ReminderService {
         } catch (final SQLException exc) {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(context, readCon);
-            throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
+            throw new OXException(EnumComponent.REMINDER, CATEGORY_ERROR, -1, "SQL Problem.", exc);
         }
     }
 

@@ -67,10 +67,10 @@ public class PipesAndFiltersException extends AbstractOXException {
     }
 
     public PipesAndFiltersException(InterruptedException e) {
-        super(new ErrorMessage(1, new StringComponent("PAF"), "com.openexchange.pipe&filters", Category.CODE_ERROR, "Waiting in pipe failed.", "Please contact administrator."), e);
+        super(new ErrorMessage(1, new StringComponent("PAF"), "com.openexchange.pipe&filters", CATEGORY_ERROR, "Waiting in pipe failed.", "Please contact administrator."), e);
     }
 
     public PipesAndFiltersException(Throwable t) {
-        super(new ErrorMessage(1, new StringComponent("PAF"), "com.openexchange.pipe&filters", Category.CODE_ERROR, t.getMessage(), "Please contact administrator."), t);
+        super(new ErrorMessage(1, new StringComponent("PAF"), "com.openexchange.pipe&filters", CATEGORY_ERROR, t.getMessage(), "Please contact administrator."), t);
     }
 }
