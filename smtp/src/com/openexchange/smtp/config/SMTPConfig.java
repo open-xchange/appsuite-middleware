@@ -51,10 +51,11 @@ package com.openexchange.smtp.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
-import com.openexchange.smtp.SMTPException;
+import com.openexchange.smtp.SMTPExceptionCode;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 
@@ -117,12 +118,12 @@ public final class SMTPConfig extends TransportConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) throws SMTPException {
+    protected void parseServerURL(final String serverURL) throws OXException {
         final URI uri;
         try {
             uri = URIParser.parse(serverURL, URIDefaults.SMTP);
-        } catch (URISyntaxException e) {
-            throw new SMTPException(SMTPException.Code.URI_PARSE_FAILED, e, serverURL);
+        } catch (final URISyntaxException e) {
+            throw SMTPExceptionCode.URI_PARSE_FAILED.create(e, serverURL);
         }
         secure = PROTOCOL_SMTP_SECURE.equals(uri.getScheme());
         smtpServer = uri.getHost();
