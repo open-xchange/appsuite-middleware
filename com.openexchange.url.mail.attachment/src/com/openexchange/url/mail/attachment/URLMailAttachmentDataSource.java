@@ -58,12 +58,11 @@ import java.net.URLConnection;
 import javax.net.ssl.HttpsURLConnection;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -210,9 +209,6 @@ public final class URLMailAttachmentDataSource implements DataSource {
              * No closure of URL connection here
              */
             throw e;
-        } catch (final AbstractOXException e) {
-            closeURLConnection(urlCon);
-            throw new OXException(e);
         } catch (final IOException e) {
             closeURLConnection(urlCon);
             throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
