@@ -94,7 +94,6 @@ import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.DefaultMessagingPermission;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingFolder;
@@ -216,8 +215,8 @@ public final class MessagingFolderStorage implements FolderStorage {
                     getServiceRegistry().getService(MessagingServiceRegistry.class, true).getMessagingService(serviceId, session.getUserId(), session.getContextId()).getAccountAccess(
                         accountId,
                         session);
-            } catch (final MessagingException e) {
-                throw new OXException(e);
+            } catch (final OXException e) {
+                throw e;
             }
             final MessagingAccountAccess prev = accesses.putIfAbsent(key, accountAccess);
             if (null != prev) {
@@ -227,11 +226,11 @@ public final class MessagingFolderStorage implements FolderStorage {
         return accountAccess;
     }
 
-    private void openMessagingAccess(final MessagingAccountAccess accountAccess) throws MessagingException {
+    private void openMessagingAccess(final MessagingAccountAccess accountAccess) throws OXException {
         if (!accountAccess.isConnected()) {
             try {
                 accountAccess.connect();
-            } catch (final MessagingException e) {
+            } catch (final OXException e) {
                 throw e;
             }
         }
@@ -313,8 +312,8 @@ public final class MessagingFolderStorage implements FolderStorage {
 
             final String fullname = accountAccess.getFolderAccess().createFolder(dmf);
             folder.setID(new MessagingFolderIdentifier(serviceId, accountId, fullname).toString());
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -340,8 +339,8 @@ public final class MessagingFolderStorage implements FolderStorage {
             final MessagingFolderAccess folderAccess = accountAccess.getFolderAccess();
             final String trashFolder = folderAccess.getTrashFolder();
             folderAccess.clearFolder(fullname, (null != trashFolder && fullname.startsWith(trashFolder)));
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -367,8 +366,8 @@ public final class MessagingFolderStorage implements FolderStorage {
             final MessagingFolderAccess folderAccess = accountAccess.getFolderAccess();
             final String trashFolder = folderAccess.getTrashFolder();
             folderAccess.deleteFolder(fullname, (null != trashFolder && fullname.startsWith(trashFolder)));
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -411,8 +410,8 @@ public final class MessagingFolderStorage implements FolderStorage {
                 return MessagingFolderIdentifier.getFQN(mailServiceId, primaryAccountId, accountAccess.getFolderAccess().getTrashFolder());
             }
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -450,8 +449,8 @@ public final class MessagingFolderStorage implements FolderStorage {
                 }
             }
             return false;
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -481,8 +480,8 @@ public final class MessagingFolderStorage implements FolderStorage {
              */
             openMessagingAccess(accountAccess);
             return 0 == accountAccess.getFolderAccess().getFolder(fullname).getMessageCount();
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -598,8 +597,8 @@ public final class MessagingFolderStorage implements FolderStorage {
             retval.setTreeID(treeId);
 
             return retval;
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -759,8 +758,8 @@ public final class MessagingFolderStorage implements FolderStorage {
                 list.add(new MessagingId(MessagingFolderIdentifier.getFQN(serviceId, accountId, cur.getId()), j, cur.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -826,8 +825,8 @@ public final class MessagingFolderStorage implements FolderStorage {
             openMessagingAccess(accountAccess);
 
             return accountAccess.getFolderAccess().exists(mfi.getFullname());
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -1010,12 +1009,12 @@ public final class MessagingFolderStorage implements FolderStorage {
              * Handle update of permission or subscription
              */
             accountAccess.getFolderAccess().updateFolder(id, dmf);
-        } catch (final MessagingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
-    private void check4DuplicateFolder(final MessagingAccountAccess accountAccess, final String parentId, final String name2check) throws MessagingException {
+    private void check4DuplicateFolder(final MessagingAccountAccess accountAccess, final String parentId, final String name2check) throws OXException {
         final MessagingFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(parentId, true);
         for (final MessagingFolder subfolder : subfolders) {
             if (name2check.equals(subfolder.getName())) {
@@ -1024,7 +1023,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         }
     }
 
-    private static String fullCopy(final MessagingAccountAccess srcAccess, final String srcFullname, final MessagingAccountAccess destAccess, final String destParent, final char destSeparator, final int user, final boolean hasPermissions) throws MessagingException {
+    private static String fullCopy(final MessagingAccountAccess srcAccess, final String srcFullname, final MessagingAccountAccess destAccess, final String destParent, final char destSeparator, final int user, final boolean hasPermissions) throws OXException {
         // Create folder
         final MessagingFolder source = srcAccess.getFolderAccess().getFolder(srcFullname);
         final DefaultMessagingFolder mfd = new DefaultMessagingFolder();

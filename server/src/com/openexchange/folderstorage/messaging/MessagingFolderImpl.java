@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -68,7 +69,6 @@ import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.MessagingPermission;
@@ -201,7 +201,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
                 } else {
                     messagingFolderType = MessagingFolderType.NONE;
                 }
-            } catch (final MessagingException e) {
+            } catch (final OXException e) {
                 org.apache.commons.logging.LogFactory.getLog(MessagingFolderImpl.class).error(e.getMessage(), e);
                 messagingFolderType = MessagingFolderType.NONE;
             }

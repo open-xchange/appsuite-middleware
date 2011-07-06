@@ -62,56 +62,56 @@ public interface DefaultFolderFullnameProvider {
      * Gets the fullname of default INBOX folder
      * 
      * @return The fullname of default INBOX folder
-     * @throws MessagingException If INBOX folder's fullname cannot be returned
+     * @throws OXException If INBOX folder's fullname cannot be returned
      */
-    public String getINBOXFolder() throws MessagingException;
+    public String getINBOXFolder() throws OXException;
 
     /**
      * Gets the fullname of default confirmed ham folder
      * 
      * @return The fullname of default confirmed ham folder
-     * @throws MessagingException If confirmed ham folder's fullname cannot be returned
+     * @throws OXException If confirmed ham folder's fullname cannot be returned
      */
-    public String getConfirmedHamFolder() throws MessagingException;
+    public String getConfirmedHamFolder() throws OXException;
 
     /**
      * Gets the fullname of default confirmed spam folder
      * 
      * @return The fullname of default confirmed spam folder
-     * @throws MessagingException If confirmed spam folder's fullname cannot be returned
+     * @throws OXException If confirmed spam folder's fullname cannot be returned
      */
-    public String getConfirmedSpamFolder() throws MessagingException;
+    public String getConfirmedSpamFolder() throws OXException;
 
     /**
      * Gets the fullname of default drafts folder
      * 
      * @return The fullname of default drafts folder
-     * @throws MessagingException If draft folder's fullname cannot be returned
+     * @throws OXException If draft folder's fullname cannot be returned
      */
-    public String getDraftsFolder() throws MessagingException;
+    public String getDraftsFolder() throws OXException;
 
     /**
      * Gets the fullname of default spam folder
      * 
      * @return The fullname of default spam folder
-     * @throws MessagingException If spam folder's fullname cannot be returned
+     * @throws OXException If spam folder's fullname cannot be returned
      */
-    public String getSpamFolder() throws MessagingException;
+    public String getSpamFolder() throws OXException;
 
     /**
      * Gets the fullname of default sent folder
      * 
      * @return The fullname of default sent folder
-     * @throws MessagingException If sent folder's fullname cannot be returned
+     * @throws OXException If sent folder's fullname cannot be returned
      */
-    public String getSentFolder() throws MessagingException;
+    public String getSentFolder() throws OXException;
 
     /**
      * Gets the fullname of default trash folder
      * 
      * @return The fullname of default trash folder
-     * @throws MessagingException If trash folder's fullname cannot be returned
+     * @throws OXException If trash folder's fullname cannot be returned
      */
-    public String getTrashFolder() throws MessagingException;
+    public String getTrashFolder() throws OXException;
 
 }
