@@ -57,7 +57,6 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
@@ -161,7 +160,7 @@ public class FolderParser {
         }
     }
 
-    public OCLPermission[] parseOCLPermission(final JSONArray permissionsAsJSON, Integer objectID) throws JSONException, OXFolderException, OXException {
+    public OCLPermission[] parseOCLPermission(final JSONArray permissionsAsJSON, final Integer objectID) throws JSONException, OXException {
         final int numberOfPermissions = permissionsAsJSON.length();
         final OCLPermission[] perms = new OCLPermission[numberOfPermissions];
         for (int i = 0; i < numberOfPermissions; i++) {
