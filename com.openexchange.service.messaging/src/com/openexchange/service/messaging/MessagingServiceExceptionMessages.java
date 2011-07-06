@@ -49,7 +49,7 @@
 
 package com.openexchange.service.messaging;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link MessagingServiceExceptionMessages} - Exception messages for {@link MessagingServiceException} that needs to be translated.
