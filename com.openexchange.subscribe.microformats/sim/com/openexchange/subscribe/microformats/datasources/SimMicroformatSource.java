@@ -51,8 +51,8 @@ package com.openexchange.subscribe.microformats.datasources;
 
 import java.io.Reader;
 import java.io.StringReader;
-import com.openexchange.subscribe.Subscription;
 import com.openexchange.exception.OXException;
+import com.openexchange.subscribe.Subscription;
 
 
 /**

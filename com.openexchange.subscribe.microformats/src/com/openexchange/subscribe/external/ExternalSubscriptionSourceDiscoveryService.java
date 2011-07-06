@@ -56,11 +56,10 @@ import java.util.List;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceCollector;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -68,7 +67,7 @@ import com.openexchange.subscribe.external.parser.ListingParser;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
-import com.openexchange.subscribe.microformats.OXMFSubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.datasources.HTTPFormSubmittingOXMFDataSource;
 import com.openexchange.subscribe.microformats.datasources.HTTPToolkit;
 import com.openexchange.subscribe.microformats.parser.OXMFForm;
@@ -88,22 +87,22 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
 
     private static final Log LOG = LogFactory.getLog(ExternalSubscriptionSourceDiscoveryService.class);
     
-    private String sourceURL;
+    private final String sourceURL;
     private SubscriptionSourceCollector sources = new SubscriptionSourceCollector();
-    private OXMFParserFactoryService parserFactory;
-    private OXMFFormParser formParser;
+    private final OXMFParserFactoryService parserFactory;
+    private final OXMFFormParser formParser;
     
-    public ExternalSubscriptionSourceDiscoveryService(String sourceURL, OXMFParserFactoryService parserFactory, OXMFFormParser formParser) {
+    public ExternalSubscriptionSourceDiscoveryService(final String sourceURL, final OXMFParserFactoryService parserFactory, final OXMFFormParser formParser) {
         this.sourceURL = sourceURL;
         this.parserFactory = parserFactory;
         this.formParser = formParser;
     }
     
-    public SubscriptionSource getSource(String identifier) {
+    public SubscriptionSource getSource(final String identifier) {
         return sources.getSource(identifier);
     }
 
-    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
+    public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         return sources.getSource(context, subscriptionId);
     }
 
@@ -111,45 +110,43 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         return sources.getSources();
     }
 
-    public List<SubscriptionSource> getSources(int folderModule) {
+    public List<SubscriptionSource> getSources(final int folderModule) {
         return sources.getSources(folderModule);
     }
 
-    public boolean knowsSource(String identifier) {
+    public boolean knowsSource(final String identifier) {
         return sources.knowsSource(identifier);
     }
     
-    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+    public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return null;
     }
     
     public void refresh() throws OXException {
         try {
-            List<ExternalSubscriptionSource> listing = grabListing();
-            SubscriptionSourceCollector sources = new SubscriptionSourceCollector();
-            for (ExternalSubscriptionSource external : listing) {
-                MicroformatSubscribeService service = grabService(external);
+            final List<ExternalSubscriptionSource> listing = grabListing();
+            final SubscriptionSourceCollector sources = new SubscriptionSourceCollector();
+            for (final ExternalSubscriptionSource external : listing) {
+                final MicroformatSubscribeService service = grabService(external);
                 if(service != null) {
                     sources.addSubscribeService(service);
                 }
             }
             this.sources = sources;
-        } catch (OXException x) {
+        } catch (final OXException x) {
             throw x;
-        } catch (AbstractOXException x) {
-            throw new OXException(x);
         }
     }
 
-    private MicroformatSubscribeService grabService(final ExternalSubscriptionSource external) throws OXMFSubscriptionException {
-        String externalAddress = resolveRelative(sourceURL, external.getExternalAddress());
+    private MicroformatSubscribeService grabService(final ExternalSubscriptionSource external) throws OXException {
+        final String externalAddress = resolveRelative(sourceURL, external.getExternalAddress());
         external.setExternalAddress(externalAddress);
         
         String icon = resolveRelative(sourceURL, external.getIcon());
         external.setIcon(icon);
         
         try {
-            Reader r = HTTPToolkit.grab(externalAddress);
+            final Reader r = HTTPToolkit.grab(externalAddress);
             final OXMFForm form = formParser.parse(r);
             
             ListingParser.apply(external, form.getMetaInfo());
@@ -157,17 +154,17 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             icon = resolveRelative(externalAddress, external.getIcon());
             external.setIcon(icon);
 
-            String action = resolveRelative(externalAddress, form.getAction());
+            final String action = resolveRelative(externalAddress, form.getAction());
             form.setAction(action);
             
-            MapToObjectTransformer transformer = getTransformer(external.getFolderModule());
+            final MapToObjectTransformer transformer = getTransformer(external.getFolderModule());
             if(transformer == null) {
                 LOG.error("We don't support subscription sources of type "+Module.getModuleString(external.getFolderModule(), -1)+" yet");
                 return null;
             }
-            MicroformatSubscribeService subscribeService = new MicroformatSubscribeService() {
+            final MicroformatSubscribeService subscribeService = new MicroformatSubscribeService() {
                 @Override
-                protected String getDisplayName(Subscription subscription) {
+                protected String getDisplayName(final Subscription subscription) {
                     if(form.getDisplayNameField() == null) {
                         return external.getDisplayName();
                     } else {
@@ -186,10 +183,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             external.setSubscribeService(subscribeService);
             
             return subscribeService;
-        } catch (HttpException e) {
+        } catch (final HttpException e) {
             LOG.error("Could not grab external service: "+externalAddress+" Got Error: "+e.getMessage(), e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), externalAddress, e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error("Could not grab external service: "+externalAddress+" Got Error: "+e.getMessage(), e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), externalAddress, e);
         }
@@ -197,7 +194,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
 
    
 
-    private String resolveRelative(String sibling, String relative) {
+    private String resolveRelative(final String sibling, final String relative) {
         if(relative == null) {
             return null;
         }
@@ -209,21 +206,21 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             return resolveServerRelative(sibling, relative);
         }
         
-        String directory = sibling.substring(0,sibling.lastIndexOf('/'));
+        final String directory = sibling.substring(0,sibling.lastIndexOf('/'));
         return directory + '/'+ relative;
     }
 
-    private String resolveServerRelative(String sibling, String relative) {
+    private String resolveServerRelative(final String sibling, final String relative) {
         try {
-            java.net.URL url = new java.net.URL(sibling);
+            final java.net.URL url = new java.net.URL(sibling);
             return url.getProtocol()+"://"+url.getHost()+relative;
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             LOG.error(e.getMessage(), e);
             return relative;
         }
     }
 
-    private String getContainerElement(int folderModule) {
+    private String getContainerElement(final int folderModule) {
         if(folderModule == Module.CONTACTS.getFolderConstant()) {
             return "ox_contact";
         } else if (folderModule == Module.INFOSTORE.getFolderConstant()) {
@@ -232,7 +229,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         return null;
     }
 
-    private MapToObjectTransformer getTransformer(int folderModule) {
+    private MapToObjectTransformer getTransformer(final int folderModule) {
         if(folderModule == Module.CONTACTS.getFolderConstant()) {
             return new MapToContactObjectTransformer();
         } else if (folderModule == Module.INFOSTORE.getFolderConstant()) {
@@ -242,15 +239,15 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         return null;
     }
 
-    private List<ExternalSubscriptionSource> grabListing() throws AbstractOXException {
-        ListingParser parser = new ListingParser(parserFactory);
+    private List<ExternalSubscriptionSource> grabListing() throws OXException {
+        final ListingParser parser = new ListingParser(parserFactory);
         try {
-            Reader r = HTTPToolkit.grab(sourceURL);
+            final Reader r = HTTPToolkit.grab(sourceURL);
             return parser.parse(r);
-        } catch (HttpException e) {
+        } catch (final HttpException e) {
             LOG.error(e.getMessage(), e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
         }

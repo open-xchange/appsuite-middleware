@@ -67,8 +67,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 import com.openexchange.subscribe.microformats.parser.ObjectParser;
 

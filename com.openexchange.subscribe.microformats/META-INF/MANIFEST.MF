@@ -8,8 +8,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
  com.openexchange.datatypes.genericonf,
- com.openexchange.exceptions,
- com.openexchange.exceptions.osgi,
+ com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,

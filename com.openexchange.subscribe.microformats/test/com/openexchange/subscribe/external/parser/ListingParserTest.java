@@ -51,7 +51,7 @@ package com.openexchange.subscribe.external.parser;
 
 import java.util.List;
 import junit.framework.TestCase;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFactory;
@@ -94,15 +94,15 @@ public class ListingParserTest extends TestCase {
 
     
     
-    public void testParseCompleteListing() throws AbstractOXException {
-        List<ExternalSubscriptionSource> externalSources = new ListingParser(new HTMLMicroformatParserFactory()).parse(LISTING1);
+    public void testParseCompleteListing() throws OXException {
+        final List<ExternalSubscriptionSource> externalSources = new ListingParser(new HTMLMicroformatParserFactory()).parse(LISTING1);
     
         assertNotNull(externalSources);
         assertEquals(2, externalSources.size());
         
         boolean foundA = false, foundB = false;
         
-        for (ExternalSubscriptionSource source : externalSources) {
+        for (final ExternalSubscriptionSource source : externalSources) {
             if("com.openexchange.subscribe.tasks.rally".equals(source.getId())) {
                 assertEquals("http://localhost/icon.png", source.getIcon());
                 assertEquals(FolderObject.TASK, source.getFolderModule());

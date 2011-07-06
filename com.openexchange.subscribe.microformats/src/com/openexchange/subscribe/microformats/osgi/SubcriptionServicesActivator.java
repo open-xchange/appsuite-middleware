@@ -61,7 +61,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.subscribe.SubscribeService;
@@ -69,7 +68,6 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 import com.openexchange.subscribe.microformats.OXMFServiceRegistry;
-import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 import com.openexchange.subscribe.microformats.datasources.HTTPOXMFDataSource;
 import com.openexchange.subscribe.microformats.objectparser.OXHCardParser;
 import com.openexchange.subscribe.microformats.parser.CybernekoOXMFFormParser;
@@ -86,8 +84,6 @@ import com.openexchange.subscribe.microformats.transformers.MapToDocumentMetadat
  */
 public class SubcriptionServicesActivator implements BundleActivator {
 
-    private ComponentRegistration componentRegistration;
-
     private List<ServiceRegistration> registrations;
 
     private List<ServiceTracker> trackers;
@@ -100,9 +96,6 @@ public class SubcriptionServicesActivator implements BundleActivator {
     }
 
     public void start(final BundleContext context) throws Exception {
-        componentRegistration =
-            new ComponentRegistration(context, "MFS", "com.openexchange.subscribe.microformats", OXMFSubscriptionErrorMessage.EXCEPTIONS);
-
         final HTTPOXMFDataSource dataSource = new HTTPOXMFDataSource();
         final HTMLMicroformatParserFactory parserFactory = new HTMLMicroformatParserFactory();
         final MapToContactObjectTransformer mapToContactObject = new MapToContactObjectTransformer();
@@ -173,10 +166,6 @@ public class SubcriptionServicesActivator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
-        if (null != componentRegistration) {
-            componentRegistration.unregister();
-            componentRegistration = null;
-        }
         if (null != registrations) {
             for (final ServiceRegistration registration : registrations) {
                 registration.unregister();

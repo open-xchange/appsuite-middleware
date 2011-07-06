@@ -57,9 +57,9 @@ import java.util.Map;
 import org.htmlparser.util.ParserException;
 import org.microformats.hCard.HCard;
 import org.microformats.hCard.HCardParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.parser.ObjectParser;
 import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTransformer;
 

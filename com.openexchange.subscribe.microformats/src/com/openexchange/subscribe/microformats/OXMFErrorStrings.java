@@ -49,8 +49,7 @@
 
 package com.openexchange.subscribe.microformats;
 
-import com.openexchange.exceptions.LocalizableStrings;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link OXMFErrorStrings}

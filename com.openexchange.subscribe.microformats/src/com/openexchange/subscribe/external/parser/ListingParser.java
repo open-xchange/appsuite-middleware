@@ -54,7 +54,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.OXMFParser;
@@ -77,42 +77,42 @@ public class ListingParser {
     private static final String PRIORITY = "ox_priority";
     
     
-    private OXMFParserFactoryService parserFactory;
+    private final OXMFParserFactoryService parserFactory;
 
     /**
      * Initializes a new {@link ListingParser}.
      * @param microformatParserFactory
      */
-    public ListingParser(OXMFParserFactoryService parserFactory) {
+    public ListingParser(final OXMFParserFactoryService parserFactory) {
         super();
         this.parserFactory = parserFactory;
     }
 
-    public List<ExternalSubscriptionSource> parse(String html) throws AbstractOXException {
+    public List<ExternalSubscriptionSource> parse(final String html) throws OXException {
         return parse(new StringReader(html));
     }
     
-    public List<ExternalSubscriptionSource> parse(Reader html) throws AbstractOXException {
-        OXMFParser parser = parserFactory.getParser();
+    public List<ExternalSubscriptionSource> parse(final Reader html) throws OXException {
+        final OXMFParser parser = parserFactory.getParser();
         parser.addAttributePrefix("ox_");
         parser.addContainerElement("ox_subscriptionSource");
-        List<Map<String, String>> parsed = parser.parse(html);
+        final List<Map<String, String>> parsed = parser.parse(html);
      
-        List<ExternalSubscriptionSource> sources = new ArrayList<ExternalSubscriptionSource>(parsed.size());
-        for(Map<String, String> attributes : parsed) {
+        final List<ExternalSubscriptionSource> sources = new ArrayList<ExternalSubscriptionSource>(parsed.size());
+        for(final Map<String, String> attributes : parsed) {
             sources.add(transform(attributes));
         }
         
         return sources;
     }
 
-    private ExternalSubscriptionSource transform(Map<String, String> attributes) {
-        ExternalSubscriptionSource source = new ExternalSubscriptionSource();
+    private ExternalSubscriptionSource transform(final Map<String, String> attributes) {
+        final ExternalSubscriptionSource source = new ExternalSubscriptionSource();
         apply(source, attributes);
         return source;
     }
     
-    public static void apply(ExternalSubscriptionSource source, Map<String, String> attributes) {
+    public static void apply(final ExternalSubscriptionSource source, final Map<String, String> attributes) {
         if(attributes.containsKey(SOURCE_ID)) {
             source.setId(attributes.get(SOURCE_ID));
         }
