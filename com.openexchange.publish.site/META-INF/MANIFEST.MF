@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
  com.openexchange.context,
  com.openexchange.datatypes.genericonf,
+ com.openexchange.exception,
  com.openexchange.exceptions,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,

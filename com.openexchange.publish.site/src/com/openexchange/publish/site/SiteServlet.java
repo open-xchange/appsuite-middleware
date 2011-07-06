@@ -70,11 +70,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.publish.Publication;
@@ -128,14 +128,14 @@ public class SiteServlet extends HttpServlet {
                 return;
             }
 
-            List<String> subpath = (List<String>) args.get(SITE);
+            final List<String> subpath = (List<String>) args.get(SITE);
 
             if (subpath.isEmpty()) {
                 subpath.add("index.html");
             }
 
-            IDBasedFileAccess fileAccess = files.createAccess(new PublicationSession(publication));
-            File file = resolve(ctx, fileAccess, subpath, publication.getEntityId());
+            final IDBasedFileAccess fileAccess = files.createAccess(new PublicationSession(publication));
+            final File file = resolve(ctx, fileAccess, subpath, publication.getEntityId());
 
             if (file == null) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -155,7 +155,7 @@ public class SiteServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         try {
             final Map<String, Object> args = getPublicationArguments(req);
 
@@ -170,14 +170,14 @@ public class SiteServlet extends HttpServlet {
                 return;
             }
 
-            List<String> subpath = (List<String>) args.get(SITE);
+            final List<String> subpath = (List<String>) args.get(SITE);
 
             if (subpath.isEmpty()) {
                 subpath.add("index.html");
             }
 
-            IDBasedFileAccess fileAccess = files.createAccess(new PublicationSession(publication));
-            File file = resolve(ctx, fileAccess, subpath, publication.getEntityId());
+            final IDBasedFileAccess fileAccess = files.createAccess(new PublicationSession(publication));
+            final File file = resolve(ctx, fileAccess, subpath, publication.getEntityId());
 
             if (file == null) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -200,15 +200,15 @@ public class SiteServlet extends HttpServlet {
 
     // TODO: Whitelisting
 
-    private void updateFile(File file, HttpServletRequest req, IDBasedFileAccess fileAccess) throws IOException, OXException {
+    private void updateFile(final File file, final HttpServletRequest req, final IDBasedFileAccess fileAccess) throws IOException, OXException {
         BufferedReader r = null;
-        File f = new DefaultFile();
+        final File f = new DefaultFile();
         f.setId(file.getId());
         f.setFolderId(file.getFolderId());
         try {
-            ServletInputStream inputStream = req.getInputStream();
+            final ServletInputStream inputStream = req.getInputStream();
             r = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder b = new StringBuilder();
+            final StringBuilder b = new StringBuilder();
             String l = null;
             while((l = r.readLine()) != null) {
                 b.append(l).append("\n");
@@ -224,12 +224,12 @@ public class SiteServlet extends HttpServlet {
         
     }
 
-    private void sendDescription(File file, HttpServletResponse resp) throws IOException {
+    private void sendDescription(final File file, final HttpServletResponse resp) throws IOException {
         resp.setContentType("text/plain");
         resp.getWriter().print(file.getDescription());
     }
 
-    private void sendFile(File file, HttpServletResponse resp, IDBasedFileAccess files) throws OXException, IOException {
+    private void sendFile(final File file, final HttpServletResponse resp, final IDBasedFileAccess files) throws OXException, IOException {
         resp.setContentType(file.getFileMIMEType());
         resp.setContentLength((int) file.getFileSize());
 
@@ -237,7 +237,7 @@ public class SiteServlet extends HttpServlet {
 
         try {
             document = new BufferedInputStream(files.getDocument(file.getId(), file.getVersion()));
-            ServletOutputStream outputStream = resp.getOutputStream();
+            final ServletOutputStream outputStream = resp.getOutputStream();
             int d = 0;
             while ((d = document.read()) != -1) {
                 outputStream.write(d);
@@ -249,13 +249,13 @@ public class SiteServlet extends HttpServlet {
         }
     }
 
-    private File resolve(Context ctx, IDBasedFileAccess files, List<String> subpath, String entityId) throws Exception {
+    private File resolve(final Context ctx, final IDBasedFileAccess files, final List<String> subpath, final String entityId) throws Exception {
         if (entityId == null) {
             return null;
         }
-        String currentElement = subpath.get(0);
+        final String currentElement = subpath.get(0);
 
-        boolean needFile = subpath.size() == 1;
+        final boolean needFile = subpath.size() == 1;
 
         if (needFile) {
             return getFileWithName(files, entityId, currentElement);
@@ -264,9 +264,9 @@ public class SiteServlet extends HttpServlet {
         }
     }
 
-    private String getFolderWithName(Context ctx, String entityId, String currentElement) throws Exception {
-        List<IdAndName> subfolderIdAndNames = OXFolderLoader.getSubfolderIdAndNames(Integer.parseInt(entityId), ctx, null);
-        for (IdAndName idAndName : subfolderIdAndNames) {
+    private String getFolderWithName(final Context ctx, final String entityId, final String currentElement) throws Exception {
+        final List<IdAndName> subfolderIdAndNames = OXFolderLoader.getSubfolderIdAndNames(Integer.parseInt(entityId), ctx, null);
+        for (final IdAndName idAndName : subfolderIdAndNames) {
             if (idAndName.getName().equals(currentElement)) {
                 return new Integer(idAndName.getFolderId()).toString();
             }
@@ -274,14 +274,14 @@ public class SiteServlet extends HttpServlet {
         return null;
     }
 
-    private File getFileWithName(IDBasedFileAccess files, String entityId, String filename) throws AbstractOXException {
-        TimedResult<File> documents = files.getDocuments(entityId);
-        SearchIterator<File> results = documents.results();
+    private File getFileWithName(final IDBasedFileAccess files, final String entityId, final String filename) throws OXException {
+        final TimedResult<File> documents = files.getDocuments(entityId);
+        final SearchIterator<File> results = documents.results();
         try {
             while (results.hasNext()) {
-                File next = results.next();
-                String name = next.getFileName();
-                String title = next.getTitle();
+                final File next = results.next();
+                final String name = next.getFileName();
+                final String title = next.getTitle();
                 if ((name != null && name.equals(filename)) || (title != null && title.equals(filename))) {
                     return next;
                 }
