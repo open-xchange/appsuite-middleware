@@ -279,14 +279,14 @@ public class CachingUserStorage extends UserStorage {
                 identifiers = delegate.resolveIMAPLogin(imapLogin, context);
                 try {
                     cache.put(key, identifiers);
-                } catch (final CacheException e) {
+                } catch (final OXException e) {
                     throw UserExceptionCode.CACHE_PROBLEM.create(e);
                 }
             } else {
                 identifiers = tmp;
             }
             return identifiers;
-        } catch (final CacheException e) {
+        } catch (final OXException e) {
             throw UserExceptionCode.CACHE_PROBLEM.create(e);
         }
     }
@@ -298,7 +298,7 @@ public class CachingUserStorage extends UserStorage {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
                 cache.remove(cache.newCacheKey(ctx.getContextId(), userId));
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 throw UserExceptionCode.CACHE_PROBLEM.create(e);
             }
         }
@@ -315,7 +315,7 @@ public class CachingUserStorage extends UserStorage {
         if (cacheService != null) {
             try {
                 cacheService.freeCache(REGION_NAME);
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }
