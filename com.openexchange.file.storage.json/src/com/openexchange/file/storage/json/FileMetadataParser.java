@@ -54,13 +54,13 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -89,7 +89,7 @@ public class FileMetadataParser implements FileMetadataParserService{
         jsonHandler = new JSONParserHandler();
     }
     
-    public File parse(JSONObject object) throws AbstractOXException {
+    public File parse(JSONObject object) throws OXException {
         DefaultFile file = new DefaultFile();
 
         try {

@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler;
 import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.DefaultConverter.Step;
 import com.openexchange.ajax.requesthandler.ResultConverter.Quality;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -156,7 +157,7 @@ public class DefaultConverterTest extends TestCase {
             this.quality = quality;
         }
 
-        public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) {
+        public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
 
         }
 

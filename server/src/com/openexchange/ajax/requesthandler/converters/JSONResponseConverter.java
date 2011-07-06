@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,7 +80,7 @@ public class JSONResponseConverter implements ResultConverter {
         return Quality.GOOD;
     }
        
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) {
+    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         final Response response = new Response();
         response.setData(result.getResultObject());
         response.setTimestamp(result.getTimestamp());

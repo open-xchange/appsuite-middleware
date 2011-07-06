@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -71,6 +71,6 @@ public interface ResultConverter {
 
     Quality getQuality();
 
-    void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws AbstractOXException;
+    void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
 
 }

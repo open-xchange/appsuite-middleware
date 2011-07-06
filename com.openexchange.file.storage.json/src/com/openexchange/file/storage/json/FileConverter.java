@@ -53,9 +53,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,14 +69,16 @@ public class FileConverter implements ResultConverter {
 
     private static final FileMetadataWriter writer = new FileMetadataWriter();
     
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws AbstractOXException {
-        AJAXInfostoreRequest iReq = new AJAXInfostoreRequest(request, session);
+    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final AJAXInfostoreRequest iReq = new AJAXInfostoreRequest(request, session);
         Object resultObject = result.getResultObject();
         
         if (resultObject instanceof File) {
             resultObject = writer.write((File) resultObject, iReq.getTimezone());
         } else if (resultObject instanceof SearchIterator) {
-            resultObject = writer.write((SearchIterator<File>) resultObject, iReq.getColumns(), iReq.getTimezone());
+            @SuppressWarnings("unchecked")
+            final SearchIterator<File> iterator = (SearchIterator<File>) resultObject;
+            resultObject = writer.write(iterator, iReq.getColumns(), iReq.getTimezone());
         }
         
         result.setResultObject(resultObject);

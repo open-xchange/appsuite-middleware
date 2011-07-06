@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.upload.impl;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
@@ -57,7 +59,7 @@ import com.openexchange.groupware.EnumComponent;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UploadException extends AbstractOXException {
+public class UploadException extends OXException {
 
     private static final long serialVersionUID = 8590042770250274015L;
 

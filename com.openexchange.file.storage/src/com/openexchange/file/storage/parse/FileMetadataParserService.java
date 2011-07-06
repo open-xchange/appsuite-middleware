@@ -3,9 +3,9 @@ package com.openexchange.file.storage.parse;
 
 import java.util.List;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link FileMetadataParserService} - The JSON parsing service for file storage.
@@ -20,9 +20,9 @@ public interface FileMetadataParserService {
      * 
      * @param object The JSON object
      * @return The parsed file
-     * @throws AbstractOXException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public File parse(JSONObject object) throws AbstractOXException;
+    public File parse(JSONObject object) throws OXException;
 
     /**
      * Gets all present fields from given JSON object.

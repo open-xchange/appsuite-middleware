@@ -65,6 +65,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -73,12 +74,10 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.file.storage.json.services.Services;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -95,9 +94,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     private Field sortingField;
 
-    private ServerSession session;
+    private final ServerSession session;
 
-    private Map<String, String> folderMapping = new HashMap<String, String>();
+    private final Map<String, String> folderMapping = new HashMap<String, String>();
 
     private List<String> ids = null;
 
@@ -115,17 +114,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     private List<String> folders = null;
     
-    public AJAXInfostoreRequest(AJAXRequestData requestData, ServerSession session) {
+    public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
         this.data = requestData;
         this.session = session;
     }
 
-    public InfostoreRequest require(Param... params) throws OXException {
-        String[] names = new String[params.length];
+    public InfostoreRequest require(final Param... params) throws OXException {
+        final String[] names = new String[params.length];
         for (int i = 0; i < params.length; i++) {
             names[i] = params[i].getName();
         }
-        List<String> missingParameters = data.getMissingParameters(names);
+        final List<String> missingParameters = data.getMissingParameters(names);
         if (!missingParameters.isEmpty()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( missingParameters.toString());
         }
@@ -139,7 +138,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return this;
     }
     
-    public boolean has(String paramName) {
+    public boolean has(final String paramName) {
         return data.getParameter(paramName) != null;
     }
     
@@ -147,25 +146,25 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return requireBody(); 
     }
 
-    public String getFolderId() throws AbstractOXException {
+    public String getFolderId() throws OXException {
         return data.getParameter(Param.FOLDER_ID.getName());
     }
 
-    public List<Field> getColumns() throws AbstractOXException {
+    public List<Field> getColumns() throws OXException {
         if (columns != null) {
             return columns;
         }
 
-        String parameter = data.getParameter(Param.COLUMNS.getName());
+        final String parameter = data.getParameter(Param.COLUMNS.getName());
         if (parameter == null || parameter.equals("")) {
             return columns = Arrays.asList(File.Field.values());
         }
-        String[] columnStrings = parameter.split("\\s*,\\s*");
-        List<Field> fields = new ArrayList<Field>(columnStrings.length);
-        List<String> unknownColumns = new ArrayList<String>(columnStrings.length);
+        final String[] columnStrings = parameter.split("\\s*,\\s*");
+        final List<Field> fields = new ArrayList<Field>(columnStrings.length);
+        final List<String> unknownColumns = new ArrayList<String>(columnStrings.length);
 
-        for (String columnNumberOrName : columnStrings) {
-            Field field = Field.get(columnNumberOrName);
+        for (final String columnNumberOrName : columnStrings) {
+            final Field field = Field.get(columnNumberOrName);
             if (field == null) {
                 unknownColumns.add(columnNumberOrName);
             } else {
@@ -180,30 +179,30 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return columns = fields;
     }
 
-    public Field getSortingField() throws AbstractOXException {
+    public Field getSortingField() throws OXException {
         if (sortingField != null) {
             return sortingField;
         }
-        String sort = data.getParameter(Param.SORT.getName());
+        final String sort = data.getParameter(Param.SORT.getName());
         if (sort == null) {
             return null;
         }
-        Field field = sortingField = Field.get(sort);
+        final Field field = sortingField = Field.get(sort);
         if (field == null) {
             throw AjaxExceptionCodes.InvalidParameterValue.create( Param.SORT.getName(), sort);
         }
         return field;
     }
 
-    public SortDirection getSortingOrder() throws AbstractOXException {
-        SortDirection sortDirection = SortDirection.get(data.getParameter(Param.ORDER.getName()));
+    public SortDirection getSortingOrder() throws OXException {
+        final SortDirection sortDirection = SortDirection.get(data.getParameter(Param.ORDER.getName()));
         if (sortDirection == null) {
             throw AjaxExceptionCodes.InvalidParameterValue.create( Param.ORDER.getName(), sortDirection);
         }
         return sortDirection;
     }
 
-    public TimeZone getTimezone() throws AbstractOXException {
+    public TimeZone getTimezone() throws OXException {
         String parameter = data.getParameter(Param.TIMEZONE.getName());
         if (parameter == null) {
             parameter = getSession().getUser().getTimeZone();
@@ -231,7 +230,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     public int getVersion() {
-        String parameter = data.getParameter(Param.VERSION.getName());
+        final String parameter = data.getParameter(Param.VERSION.getName());
         if (parameter == null) {
             return FileStorageFileAccess.CURRENT_VERSION;
         }
@@ -239,7 +238,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     public Set<String> getIgnore() {
-        String parameter = data.getParameter(Param.IGNORE.getName());
+        final String parameter = data.getParameter(Param.IGNORE.getName());
         if (parameter == null) {
             return Collections.emptySet();
         }
@@ -248,7 +247,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     public long getTimestamp() {
-        String parameter = data.getParameter(Param.TIMESTAMP.getName());
+        final String parameter = data.getParameter(Param.TIMESTAMP.getName());
         if (parameter == null) {
             return FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER;
         }
@@ -261,7 +260,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return ids;
     }
 
-    public String getFolderForID(String id) throws OXException {
+    public String getFolderForID(final String id) throws OXException {
         parseIDList();
         return folderMapping.get(id);
     }
@@ -271,23 +270,23 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             if (ids != null) {
                 return;
             }
-            JSONArray array = (JSONArray) data.getData();
+            final JSONArray array = (JSONArray) data.getData();
             ids = new ArrayList<String>(array.length());
             folders = new ArrayList<String>(array.length());
             for (int i = 0, size = array.length(); i < size; i++) {
-                JSONObject tuple = array.getJSONObject(i);
-                String id = tuple.getString(Param.ID.getName());
+                final JSONObject tuple = array.getJSONObject(i);
+                final String id = tuple.getString(Param.ID.getName());
                 ids.add(id);
                 folders.add(tuple.optString(Param.FOLDER_ID.getName()));
                 folderMapping.put(id, tuple.optString(Param.FOLDER_ID.getName()));
             }
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSONError.create( x.getMessage());
         }
 
     }
     
-    public String getFolderAt(int index) {
+    public String getFolderAt(final int index) {
         return folders.get(index);
     }
     
@@ -299,21 +298,21 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (versions != null) {
             return versions;
         }
-        JSONArray body = (JSONArray) data.getData();
+        final JSONArray body = (JSONArray) data.getData();
 
         try {
             versions = new int[body.length()];
             for (int i = 0; i < versions.length; i++) {
                 versions[i] = body.getInt(i);
             }
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSONError.create( x.getMessage());
         }
         return versions;
     }
 
     public long getDiff() {
-        String parameter = data.getParameter(Param.DIFF.getName());
+        final String parameter = data.getParameter(Param.DIFF.getName());
         if (parameter == null) {
             return -1;
         }
@@ -321,7 +320,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     public int getStart() {
-        String parameter = data.getParameter("start");
+        final String parameter = data.getParameter("start");
         if(parameter == null ) {
             if(data.getParameter("limit") != null){
                 return 0;
@@ -343,25 +342,25 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return Integer.valueOf(parameter);
     }
 
-    public String getSearchFolderId() throws AbstractOXException {
+    public String getSearchFolderId() throws OXException {
         return getFolderId();
     }
 
     public String getSearchQuery() throws OXException {
-        Object data2 = data.getData();
+        final Object data2 = data.getData();
         if(data2 == null) {
             return "";
         }
-        JSONObject queryObject = (JSONObject) data2;
+        final JSONObject queryObject = (JSONObject) data2;
         
         try {
             return queryObject.getString("pattern");
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSONError.create( x.getMessage());
         }
     }
     
-    protected void parseFile() throws AbstractOXException {
+    protected void parseFile() throws OXException {
         if(file != null) {
             return;
         }
@@ -371,7 +370,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if(object == null) {
             try {
                 object = new JSONObject(data.getParameter(JSON));
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw AjaxExceptionCodes.JSONError.create( e.getMessage());
             }
         }
@@ -400,7 +399,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             // TODO: Guess Content-Type
         }
         
-        String fileDisplay = data.getParameter("filedisplay");
+        final String fileDisplay = data.getParameter("filedisplay");
         if(fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
             file.setFileName(fileDisplay);
             fields.add(File.Field.FILENAME);
@@ -412,40 +411,40 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
     }
     
-    public File getFile() throws AbstractOXException {
+    public File getFile() throws OXException {
         parseFile();
         return file;
     }
     
-    public List<Field> getSentColumns() throws AbstractOXException {
+    public List<Field> getSentColumns() throws OXException {
         parseFile();
         return fields;
     }
     
-    public boolean hasUploads() throws AbstractOXException {
+    public boolean hasUploads() throws OXException {
         return data.hasUploads();
     }
     
-    public InputStream getUploadedFileData() throws AbstractOXException {
+    public InputStream getUploadedFileData() throws OXException {
         if(data.hasUploads()) {
             try {
-                UploadFile uploadFile = data.getFiles().get(0);
+                final UploadFile uploadFile = data.getFiles().get(0);
                 checkSize( uploadFile );
                 return new FileInputStream(uploadFile.getTmpFile());
-            } catch (FileNotFoundException e) {
+            } catch (final FileNotFoundException e) {
                 throw AjaxExceptionCodes.IOError.create(  e.getMessage());
             }
         }
         return null;
     }
 
-    private void checkSize(UploadFile uploadFile) throws AbstractOXException{
+    private void checkSize(final UploadFile uploadFile) throws OXException{
         final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
         if (maxSize == 0) {
             return;
         }
 
-        long size = uploadFile.getSize();
+        final long size = uploadFile.getSize();
         if (size > maxSize) {
             throw new UploadSizeExceededException(size, maxSize, true);
         }
@@ -463,7 +462,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return getInt(Param.MODULE);
     }
 
-    private int getInt(Param param) {
+    private int getInt(final Param param) {
         return Integer.parseInt(data.getParameter(param.getName()));
     }
     

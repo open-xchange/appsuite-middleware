@@ -53,14 +53,13 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -77,21 +76,21 @@ public interface InfostoreRequest {
 
     InfostoreRequest requireFileMetadata() throws OXException;
 
-    public IDBasedFileAccess getFileAccess() throws AbstractOXException;
+    public IDBasedFileAccess getFileAccess() throws OXException;
 
-    String getId() throws AbstractOXException;
+    String getId() throws OXException;
 
-    int getVersion() throws AbstractOXException;
+    int getVersion() throws OXException;
     
-    String getFolderId() throws AbstractOXException;
+    String getFolderId() throws OXException;
 
-    List<Field> getColumns() throws AbstractOXException;
+    List<Field> getColumns() throws OXException;
 
-    Field getSortingField() throws AbstractOXException;
+    Field getSortingField() throws OXException;
 
-    SortDirection getSortingOrder() throws AbstractOXException;
+    SortDirection getSortingOrder() throws OXException;
  
-    TimeZone getTimezone() throws AbstractOXException;
+    TimeZone getTimezone() throws OXException;
     
     ServerSession getSession() throws OXException;
 
@@ -105,23 +104,23 @@ public interface InfostoreRequest {
 
     int[] getVersions() throws OXException;
 
-    long getDiff() throws AbstractOXException;
+    long getDiff() throws OXException;
 
-    String getSearchQuery() throws AbstractOXException;
+    String getSearchQuery() throws OXException;
 
-    String getSearchFolderId() throws AbstractOXException;
+    String getSearchFolderId() throws OXException;
 
-    int getStart() throws AbstractOXException;
+    int getStart() throws OXException;
 
-    int getEnd() throws AbstractOXException;
+    int getEnd() throws OXException;
 
-    File getFile() throws AbstractOXException;
+    File getFile() throws OXException;
 
-    List<File.Field> getSentColumns() throws AbstractOXException;
+    List<File.Field> getSentColumns() throws OXException;
     
-    public boolean hasUploads() throws AbstractOXException;
+    public boolean hasUploads() throws OXException;
     
-    public InputStream getUploadedFileData() throws AbstractOXException;
+    public InputStream getUploadedFileData() throws OXException;
 
     int getAttachedId();
 

@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -69,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DebugConverter implements ResultConverter {
 
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) {
+    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         StringBuilder out = new StringBuilder("<!DOCTYPE html><head><title>").append(request.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(request.getAction()).append("</h1>");
         out.append("<h2>Parameters:</h2>");
         out.append("<table>");

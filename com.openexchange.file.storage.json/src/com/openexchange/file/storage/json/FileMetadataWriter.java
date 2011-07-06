@@ -57,11 +57,11 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldGet;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -74,24 +74,24 @@ public class FileMetadataWriter {
     
     private static final JSONHandler JSON = new JSONHandler();
     
-    public JSONArray write(SearchIterator<File> files, List<File.Field> columns, TimeZone timeZone) throws AbstractOXException {
-        JSONArray array = new JSONArray();
+    public JSONArray write(final SearchIterator<File> files, final List<File.Field> columns, final TimeZone timeZone) throws OXException {
+        final JSONArray array = new JSONArray();
         while (files.hasNext()) {
             array.put(writeArray(files.next(), columns, timeZone));
         }
         return array;
     }
 
-    public JSONArray writeArray(File f, List<File.Field> columns, TimeZone tz) {
-        JSONArray array = new JSONArray();
-        for (Field field : columns) {
+    public JSONArray writeArray(final File f, final List<File.Field> columns, final TimeZone tz) {
+        final JSONArray array = new JSONArray();
+        for (final Field field : columns) {
             array.put( writeAttribute(f, field, tz));
         }
         return array;
     }
     
     
-    private Object writeAttribute(File f, Field field, TimeZone tz) {
+    private Object writeAttribute(final File f, final Field field, final TimeZone tz) {
         return field.handle(JSON, f, tz);
     }
 
@@ -99,15 +99,15 @@ public class FileMetadataWriter {
     public static class JSONHandler extends AbstractFileFieldHandler {
         private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-        private FileFieldGet get = new FileFieldGet();
+        private final FileFieldGet get = new FileFieldGet();
 
-        public Object handle(Field field, Object... args) {
-            Object value = field.doSwitch(get, args);
+        public Object handle(final Field field, final Object... args) {
+            final Object value = field.doSwitch(get, args);
             if(value == null && field == File.Field.LOCKED_UNTIL) {
                 return 0;
             }
             if(Date.class.isInstance(value)) {
-                Date d = (Date) value;
+                final Date d = (Date) value;
                 TimeZone tz = get(1, TimeZone.class, args);
                 if(field == Field.LAST_MODIFIED_UTC) {
                     tz = UTC;
@@ -126,7 +126,7 @@ public class FileMetadataWriter {
             return value;
         }
 
-        private Object writeDate(Date date, TimeZone tz) {
+        private Object writeDate(final Date date, final TimeZone tz) {
             final int offset = (tz == null) ? 0 : tz.getOffset(date.getTime());
             long time = date.getTime()+offset;
             // Happens on infinite locks.
@@ -136,13 +136,13 @@ public class FileMetadataWriter {
             return time;
         }
 
-        private JSONArray handleCategories(String value) {
+        private JSONArray handleCategories(final String value) {
             if(value == null) {
                 return null;
             }
-            String[] strings = value.split("\\s*,\\s*");
-            JSONArray array = new JSONArray();
-            for (String string : strings) {
+            final String[] strings = value.split("\\s*,\\s*");
+            final JSONArray array = new JSONArray();
+            for (final String string : strings) {
                 array.put(string);
             }
             
@@ -155,11 +155,11 @@ public class FileMetadataWriter {
     public JSONObject write(final File file, final TimeZone timezone) {
         return File.Field.inject(new AbstractFileFieldHandler() {
 
-            public Object handle(Field field, Object... args) {
-                JSONObject o = get(0, JSONObject.class, args);
+            public Object handle(final Field field, final Object... args) {
+                final JSONObject o = get(0, JSONObject.class, args);
                 try {
                     o.put(field.getName(), JSON.handle(field, file, timezone));
-                } catch (JSONException e) {
+                } catch (final JSONException e) {
                     LOG.error("Error writing field: "+field.getName()+": "+e.getMessage(), e);
                 }
                 return o;
