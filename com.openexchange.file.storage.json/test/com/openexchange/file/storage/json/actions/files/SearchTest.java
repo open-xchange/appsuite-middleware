@@ -53,10 +53,10 @@ import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 
@@ -71,12 +71,12 @@ public class SearchTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testAction() throws AbstractOXException, JSONException {
+    public void testAction() throws OXException, JSONException {
         request()
             .body(new JSONObject("{pattern: 'someSearch'}"))
             .param("folder", "12")

@@ -50,10 +50,10 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -67,15 +67,15 @@ public class LockActionTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testAction() throws AbstractOXException {
+    public void testAction() throws OXException {
         request().param("id", "12").param("diff", "1337");
         
-        File document = new DefaultFile();
+        final File document = new DefaultFile();
         document.setLastModified(new Date());
         
         fileAccess().expectCall("lock", "12", 1337l);

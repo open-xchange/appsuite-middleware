@@ -53,9 +53,9 @@ import java.util.Arrays;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Results;
 
 
@@ -70,17 +70,17 @@ public class ListTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testAction() throws AbstractOXException, JSONException {
+    public void testAction() throws OXException, JSONException {
         request()
             .param("columns", "1,700,702") // id, title and filename
             .param("timezone", "Europe/Berlin").body(new JSONArray("[{ folder: 'folder', id: 'id1'}, {folder: 'folder', id: 'id2'}]"));
         
-        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID);
+        final List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID);
         fileAccess().expectCall("getDocuments", Arrays.asList("id1", "id2"), columns).andReturn(Results.emptyTimedResult()); 
         
         perform();

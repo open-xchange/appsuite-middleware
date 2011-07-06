@@ -52,11 +52,11 @@ package com.openexchange.file.storage.json.actions.files;
 import static com.openexchange.time.TimeTools.D;
 import java.util.Arrays;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Results;
 
 /**
@@ -70,12 +70,12 @@ public class UpdatesTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testAction() throws AbstractOXException {
+    public void testAction() throws OXException {
         request()
             .param("folder", "12")
             .param("columns", "1,700,702") // id, title and filename
@@ -94,7 +94,7 @@ public class UpdatesTest extends FileActionTest {
         
     }
     
-    public void testTimestampDefaultsToDistantPast() throws AbstractOXException {
+    public void testTimestampDefaultsToDistantPast() throws OXException {
         request()
         .param("folder", "12")
         .param("columns", "1,700,702") // id, title and filename

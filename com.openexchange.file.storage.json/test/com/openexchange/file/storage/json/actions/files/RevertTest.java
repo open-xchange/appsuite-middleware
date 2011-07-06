@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -71,12 +70,12 @@ public class RevertTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testAction() throws AbstractOXException {
+    public void testAction() throws OXException {
         request().param("id", "12");
         
         final DefaultFile f1 = new DefaultFile();

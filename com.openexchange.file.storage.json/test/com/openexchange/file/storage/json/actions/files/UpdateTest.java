@@ -52,9 +52,9 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -68,12 +68,12 @@ public class UpdateTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testNoUpload() throws JSONException, AbstractOXException {
+    public void testNoUpload() throws JSONException, OXException {
         request().param("timestamp", "1337").body(new JSONObject("{id: '23', folder_id: '12', title: 'nice title'}"));
         
         DefaultFile file = new DefaultFile();
@@ -93,7 +93,7 @@ public class UpdateTest extends FileActionTest {
         try {
             action.handle(request);
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
         

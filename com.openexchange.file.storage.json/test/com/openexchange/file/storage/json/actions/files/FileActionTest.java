@@ -50,8 +50,8 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.json.FileTest;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -71,7 +71,7 @@ public abstract class FileActionTest extends FileTest {
         action = createAction();
     }
     
-    public AJAXRequestResult perform() throws AbstractOXException {
+    public AJAXRequestResult perform() throws OXException {
         return result = action.handle(request);
     }
     

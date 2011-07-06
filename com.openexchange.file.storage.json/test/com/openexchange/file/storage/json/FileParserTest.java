@@ -65,8 +65,8 @@ import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -76,8 +76,8 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public class FileParserTest extends TestCase {
     
-    public void testParse() throws JSONException, AbstractOXException {
-        JSONObject object = new JSONObject();
+    public void testParse() throws JSONException, OXException {
+        final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
         object.put("color_label", 12);
         object.put("creation_date", 1337);
@@ -98,7 +98,7 @@ public class FileParserTest extends TestCase {
         object.put("version", 33);
         object.put("version_comment", "This is the best version");
         
-        File file = FileMetadataParser.getInstance().parse(object);
+        final File file = FileMetadataParser.getInstance().parse(object);
         
         assertNotNull(file);
         assertEquals("cat1, cat2, cat3", file.getCategories());
@@ -123,7 +123,7 @@ public class FileParserTest extends TestCase {
     }
     
     public void testFindFields() throws JSONException {
-        JSONObject object = new JSONObject();
+        final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
         object.put("color_label", 12);
         object.put("description", "description");
@@ -134,9 +134,9 @@ public class FileParserTest extends TestCase {
         object.put("version", 33);
         object.put("version_comment", "This is the best version");
         
-        List<File.Field> fields = FileMetadataParser.getInstance().getFields(object);
+        final List<File.Field> fields = FileMetadataParser.getInstance().getFields(object);
         
-        for(File.Field field : EnumSet.of(CATEGORIES, COLOR_LABEL, DESCRIPTION, FILENAME, FOLDER_ID, MODIFIED_BY, NUMBER_OF_VERSIONS, VERSION, VERSION_COMMENT)) {
+        for(final File.Field field : EnumSet.of(CATEGORIES, COLOR_LABEL, DESCRIPTION, FILENAME, FOLDER_ID, MODIFIED_BY, NUMBER_OF_VERSIONS, VERSION, VERSION_COMMENT)) {
             assertTrue("Missing field "+field, fields.contains(field));
         }
     }

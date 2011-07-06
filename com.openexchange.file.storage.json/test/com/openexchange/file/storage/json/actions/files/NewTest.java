@@ -51,9 +51,9 @@ package com.openexchange.file.storage.json.actions.files;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -67,15 +67,15 @@ public class NewTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testNoUpload() throws JSONException, AbstractOXException {
+    public void testNoUpload() throws JSONException, OXException {
         request().body(new JSONObject("{folder: '12', title: 'nice title'}"));
         
-        DefaultFile file = new DefaultFile();
+        final DefaultFile file = new DefaultFile();
         file.setFolderId("12");
         file.setTitle("nice title");
         file.setId(FileStorageFileAccess.NEW);

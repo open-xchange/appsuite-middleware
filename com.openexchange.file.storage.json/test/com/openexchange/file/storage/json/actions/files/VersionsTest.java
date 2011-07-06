@@ -51,10 +51,10 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Arrays;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Results;
 
 
@@ -69,12 +69,12 @@ public class VersionsTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testAction() throws AbstractOXException {
+    public void testAction() throws OXException {
         request()
             .param("id", "12")
             .param("columns", "1,700,702") // id, title and filename

@@ -52,9 +52,9 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -68,12 +68,12 @@ public class DetachTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testAction() throws AbstractOXException, JSONException {
+    public void testAction() throws OXException, JSONException {
         request()
             .param("timestamp", "1337")
             .param("id", "12")
@@ -81,7 +81,7 @@ public class DetachTest extends FileActionTest {
         
         fileAccess().expectCall("removeVersion", "12", new int[]{1,2,5}).andReturn(new int[0]); 
         
-        DefaultFile updated = new DefaultFile();
+        final DefaultFile updated = new DefaultFile();
         updated.setLastModified(new Date());
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(updated);
         

@@ -53,7 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -67,12 +67,12 @@ public class DeleteTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testAction() throws AbstractOXException, JSONException {
+    public void testAction() throws OXException, JSONException {
         request().param("timestamp", "1337").body(new JSONArray("[{ folder: 'folder', id: 'id1'}, {folder: 'folder', id: 'id2'}]"));
         
         fileAccess().expectCall("removeDocument", Arrays.asList("id1", "id2"), 1337l).andReturn(Collections.emptyList()); 

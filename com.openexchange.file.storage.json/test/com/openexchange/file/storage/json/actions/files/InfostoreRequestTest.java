@@ -57,12 +57,11 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.json.FileTest;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.SimUser;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link InfostoreRequestTest}
@@ -71,24 +70,24 @@ import com.openexchange.exception.OXException;
  */
 public class InfostoreRequestTest extends FileTest {
 
-    public void testShouldGetTheFolderId() throws AbstractOXException {
+    public void testShouldGetTheFolderId() throws OXException {
 
         request().param("folder", "12");
         assertEquals(request.getFolderId(), "12");
 
     }
 
-    public void testShouldGetColumns() throws AbstractOXException {
+    public void testShouldGetColumns() throws OXException {
         request().param("columns", "1,700,702");
         assertEquals(Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME), request.getColumns());
     }
 
-    public void testShouldGetColumnsByName() throws AbstractOXException {
+    public void testShouldGetColumnsByName() throws OXException {
         request().param("columns", "id,title,filename");
         assertEquals(Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME), request.getColumns());
     }
 
-    public void testColumnsDefaultToAllColumns() throws AbstractOXException {
+    public void testColumnsDefaultToAllColumns() throws OXException {
         assertEquals(Arrays.asList(File.Field.values()), request().getColumns());
     }
 
@@ -97,7 +96,7 @@ public class InfostoreRequestTest extends FileTest {
         try {
             request.getColumns();
             fail("Expected Exception");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
@@ -107,13 +106,13 @@ public class InfostoreRequestTest extends FileTest {
         try {
             request.getColumns();
             fail("Expected Exception");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
 
         }
     }
     
-    public void testSortingColumn() throws AbstractOXException {
+    public void testSortingColumn() throws OXException {
         request().param("sort", "700");
         assertEquals(File.Field.TITLE, request.getSortingField());
 
@@ -121,7 +120,7 @@ public class InfostoreRequestTest extends FileTest {
         assertEquals(File.Field.TITLE, request.getSortingField());
 }
     
-    public void testUnsetSortingColumn() throws AbstractOXException {
+    public void testUnsetSortingColumn() throws OXException {
         assertEquals(null, request().getSortingField());
     }
     
@@ -129,20 +128,20 @@ public class InfostoreRequestTest extends FileTest {
         try {
             request().param("sort", "1024").getSortingField();
             fail("Expected Exception");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
 
         try {
             request().param("sort", "gnitzness").getSortingField();
             fail("Expected Exception");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
 
     }
     
-    public void testGetSortingOrder() throws AbstractOXException {
+    public void testGetSortingOrder() throws OXException {
         request().param("order", "asc");
         assertEquals(FileStorageFileAccess.SortDirection.ASC, request.getSortingOrder());
         
@@ -150,7 +149,7 @@ public class InfostoreRequestTest extends FileTest {
         assertEquals(FileStorageFileAccess.SortDirection.DESC, request.getSortingOrder());
     }
     
-    public void testSortingOrderDefault() throws AbstractOXException {
+    public void testSortingOrderDefault() throws OXException {
         assertEquals(FileStorageFileAccess.SortDirection.ASC, request().getSortingOrder());
     }
     
@@ -158,18 +157,18 @@ public class InfostoreRequestTest extends FileTest {
         try {
             request().param("order", "supercalifragilisticexplialidocious").getSortingOrder();
             fail("Expected Exception");
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             assertTrue(true);
         }
     }
     
-    public void testGetTimezone() throws AbstractOXException {
+    public void testGetTimezone() throws OXException {
         request().param("timezone", "Europe/Berlin");
         assertEquals(TimeZone.getTimeZone("Europe/Berlin"), request.getTimezone());
     }
     
-    public void testGetTimezoneDefaultsToUserTimeZone() throws AbstractOXException {
-        SimUser simUser = new SimUser();
+    public void testGetTimezoneDefaultsToUserTimeZone() throws OXException {
+        final SimUser simUser = new SimUser();
         simUser.setTimeZone("Europe/Berlin");
         request().getSimSession().setUser(simUser);
         
@@ -177,43 +176,43 @@ public class InfostoreRequestTest extends FileTest {
     }
     
     public void testGetId() {
-        String id = request().param("id", "12").getId();
+        final String id = request().param("id", "12").getId();
         assertEquals("12", id);
     }
     
     public void testGetVersion() {
-        int version = request().param("version", "2").getVersion();
+        final int version = request().param("version", "2").getVersion();
         assertEquals(2, version);
     }
     
     public void testGetVersionDefaultsToCurrentVersion()  {
-        int version = request().getVersion();
+        final int version = request().getVersion();
         assertEquals(FileStorageFileAccess.CURRENT_VERSION, version);
     }
     
     public void testGetIgnore() {
-        Set<String> ignore = request().param("ignore", "deleted,nice,blue").getIgnore();
+        final Set<String> ignore = request().param("ignore", "deleted,nice,blue").getIgnore();
         assertEquals(new HashSet<String>(Arrays.asList("deleted", "nice", "blue")), ignore);
     }
     
     public void testGetTimestamp() {
-        long timestamp = request().param("timestamp", "1337").getTimestamp();
+        final long timestamp = request().param("timestamp", "1337").getTimestamp();
         assertEquals(1337, timestamp);
     }
     
     public void testTimestampDefaultsToDistantPast() {
-        long timestamp = request().getTimestamp();
+        final long timestamp = request().getTimestamp();
         assertEquals(FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, timestamp);
     }
     
     public void testGetIDs() throws JSONException, OXException {
-        List<String> ids = request().body(new JSONArray("[{id: 'id1', folder: 'folder'}, {id: 'id2', folder: 'folder'}]")).getIds();
+        final List<String> ids = request().body(new JSONArray("[{id: 'id1', folder: 'folder'}, {id: 'id2', folder: 'folder'}]")).getIds();
         assertEquals(Arrays.asList("id1", "id2"), ids);
         
     }
     
     public void testGetVersions() throws JSONException, OXException {
-        int[] versions = request().body(new JSONArray("[1,3,5]")).getVersions();
+        final int[] versions = request().body(new JSONArray("[1,3,5]")).getVersions();
         
         assertEquals(1, versions[0]);
         assertEquals(3, versions[1]);
@@ -249,18 +248,18 @@ public class InfostoreRequestTest extends FileTest {
         assertEquals(FileStorageFileAccess.NOT_SET, request.getEnd());
     }
     
-    public void testSearchFolder() throws AbstractOXException {
-        String searchFolderId = request().param("folder", "12").getSearchFolderId();
+    public void testSearchFolder() throws OXException {
+        final String searchFolderId = request().param("folder", "12").getSearchFolderId();
         assertEquals("12", searchFolderId);
     }
     
-    public void testSearchFolderDefaultsToAllFolders() throws AbstractOXException {
-        String searchFolderId = request().getSearchFolderId();
+    public void testSearchFolderDefaultsToAllFolders() throws OXException {
+        final String searchFolderId = request().getSearchFolderId();
         assertEquals(FileStorageFileAccess.ALL_FOLDERS, searchFolderId);
     }
     
     public void testSearchQuery() throws JSONException, OXException {
-        String searchQuery = request().body(new JSONObject("{pattern: 'somePattern'}")).getSearchQuery();
+        final String searchQuery = request().body(new JSONObject("{pattern: 'somePattern'}")).getSearchQuery();
         assertEquals("somePattern", searchQuery);
     }
 
