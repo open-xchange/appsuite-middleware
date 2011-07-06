@@ -49,7 +49,7 @@
 
 package com.openexchange.dataretention;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link DataRetentionExceptionStrings} - The data retention exception strings.

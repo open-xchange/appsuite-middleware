@@ -49,8 +49,10 @@
 
 package com.openexchange.dataretention;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link DataRetentionExceptionMessages} - The error messages for data retention exceptions.
@@ -96,11 +98,15 @@ public enum DataRetentionExceptionMessages implements OXExceptionCode {
         number = detailNumber;
     }
 
+    public String getPrefix() {
+        return "DATARET";
+    }
+
     public Category getCategory() {
         return category;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return number;
     }
 
@@ -112,25 +118,37 @@ public enum DataRetentionExceptionMessages implements OXExceptionCode {
         return message;
     }
 
-    /**
-     * Creates a new data retention exception instance with specified message arguments.
-     * 
-     * @param messageArgs The message arguments.
-     * @return A new data retention exception instance with specified message arguments.
-     */
-    public DataRetentionException create(final Object... messageArgs) {
-        return DataRetentionExceptionFactory.getInstance().create(this, messageArgs);
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
-     * Creates a new data retention exception instance with specified message arguments. <br>
-     * Exception's init cause is set to provided {@link Throwable} instance.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The init cause.
-     * @param messageArgs The message arguments.
-     * @return A new data retention exception instance with specified message arguments and init cause.
+     * @return The newly created {@link OXException} instance
      */
-    public DataRetentionException create(final Throwable cause, final Object... messageArgs) {
-        return DataRetentionExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

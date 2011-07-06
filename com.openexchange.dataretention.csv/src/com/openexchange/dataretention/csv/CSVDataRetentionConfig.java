@@ -55,7 +55,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.dataretention.DataRetentionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.DataRetentionExceptionMessages;
 
 /**
@@ -128,9 +128,9 @@ public final class CSVDataRetentionConfig {
      * Initializes this configuration with specified configuration service.
      * 
      * @param configurationService The configuration service
-     * @throws DataRetentionException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public void init(final ConfigurationService configurationService) throws DataRetentionException {
+    public void init(final ConfigurationService configurationService) throws OXException {
         final StringBuilder logBuilder = LOG.isInfoEnabled() ? new StringBuilder(512).append("\nCSV data retention configuration:") : null;
         // Directory
         {

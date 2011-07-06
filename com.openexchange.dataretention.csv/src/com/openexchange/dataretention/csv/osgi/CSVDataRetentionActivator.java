@@ -51,7 +51,7 @@ package com.openexchange.dataretention.csv.osgi;
 
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.dataretention.DataRetentionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
 import com.openexchange.dataretention.csv.CSVDataRetentionService;
@@ -87,7 +87,7 @@ public final class CSVDataRetentionActivator extends DeferredActivator {
     protected void handleAvailability(final Class<?> clazz) {
         try {
             CSVDataRetentionConfig.getInstance().init((ConfigurationService) getService(clazz));
-        } catch (final DataRetentionException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }

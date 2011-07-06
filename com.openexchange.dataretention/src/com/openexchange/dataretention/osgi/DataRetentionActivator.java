@@ -51,9 +51,6 @@ package com.openexchange.dataretention.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.dataretention.DataRetentionException;
-import com.openexchange.dataretention.DataRetentionExceptionFactory;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 /**
  * {@link DataRetentionActivator} - Simple {@link BundleActivator activator} which registers data retention bundle's exception class.
@@ -61,8 +58,6 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DataRetentionActivator implements BundleActivator {
-
-    private ComponentRegistration componentRegistration;
 
     /**
      * Initializes a new {@link DataRetentionActivator}.
@@ -72,16 +67,11 @@ public final class DataRetentionActivator implements BundleActivator {
     }
 
     public void start(final BundleContext context) throws Exception {
-        componentRegistration = new ComponentRegistration(
-            context,
-            DataRetentionException.DATA_RETENTION_COMPONENT,
-            "com.openexchange.dataretention",
-            DataRetentionExceptionFactory.getInstance());
+        // Nope
     }
 
     public void stop(final BundleContext arg0) throws Exception {
-        componentRegistration.unregister();
-        componentRegistration = null;
+        // Nope
     }
 
 }

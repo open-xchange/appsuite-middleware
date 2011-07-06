@@ -50,7 +50,7 @@
 package com.openexchange.dataretention.csv.tasks;
 
 import java.util.Date;
-import com.openexchange.dataretention.DataRetentionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.dataretention.csv.CSVFile;
 import com.openexchange.dataretention.csv.CSVWriter.TransactionType;
@@ -124,7 +124,7 @@ public final class OutboundMailWriteTask extends AbstractWriteTask {
     }
 
     @Override
-    protected String getCSVLine() throws DataRetentionException {
+    protected String getCSVLine() throws OXException {
         return generateCSVLine();
     }
 

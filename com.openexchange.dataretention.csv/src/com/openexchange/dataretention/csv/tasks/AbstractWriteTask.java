@@ -60,7 +60,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.dataretention.DataRetentionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.DataRetentionExceptionMessages;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.dataretention.csv.CSVFile;
@@ -156,9 +156,9 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * file are performed in a single <b>atomic</b> operation. Therefore the file denoted by this writer task's file reference is only
      * created once.
      * 
-     * @throws DataRetentionException If an error occurs
+     * @throws OXException If an error occurs
      */
-    private void ensureExistence() throws DataRetentionException {
+    private void ensureExistence() throws OXException {
         if (csvFile.exists()) {
             return;
         }
@@ -215,7 +215,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             ensureExistence();
             // Write CSV line to file
             writeCSVLine(getCSVLine());
-        } catch (final DataRetentionException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (final FileNotFoundException e) {
             LOG.error(e.getMessage(), e);
@@ -230,9 +230,9 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * Gets the CSV line to write.
      * 
      * @return The CSV line to write.
-     * @throws DataRetentionException If a data retention exception occurs while generating the CSV line
+     * @throws OXException If a data retention exception occurs while generating the CSV line
      */
-    protected abstract String getCSVLine() throws DataRetentionException;
+    protected abstract String getCSVLine() throws OXException;
 
     /**
      * Writes specified CSV line to this task's CSV file.

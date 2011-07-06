@@ -81,7 +81,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.dataretention.DataRetentionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.OXException;
@@ -2082,7 +2082,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     retentionService.storeOnTransport(retentionData);
                 } catch (final OXException e) {
                     l.error(e.getMessage(), e);
-                } catch (final DataRetentionException e) {
+                } catch (final OXException e) {
                     l.error(e.getMessage(), e);
                 }
             }

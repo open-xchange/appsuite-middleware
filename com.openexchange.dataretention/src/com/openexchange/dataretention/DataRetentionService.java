@@ -49,6 +49,8 @@
 
 package com.openexchange.dataretention;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link DataRetentionService} - The data retention or Sch&auml;uble service.
  * 
@@ -60,17 +62,17 @@ public interface DataRetentionService {
      * Stores specified retention data on a mail transport event.
      * 
      * @param retentionData The retention data
-     * @throws DataRetentionException If data retention fails
+     * @throws OXException If data retention fails
      */
-    public void storeOnTransport(RetentionData retentionData) throws DataRetentionException;
+    public void storeOnTransport(RetentionData retentionData) throws OXException;
 
     /**
      * Stores specified retention data on a mailbox access event.
      * 
      * @param retentionData The retention data
-     * @throws DataRetentionException If data retention fails
+     * @throws OXException If data retention fails
      */
-    public void storeOnAccess(RetentionData retentionData) throws DataRetentionException;
+    public void storeOnAccess(RetentionData retentionData) throws OXException;
 
     /**
      * Gets a newly created instance of {@link RetentionData} ready for being filled with available retention data.

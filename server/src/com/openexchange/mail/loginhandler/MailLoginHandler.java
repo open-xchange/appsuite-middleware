@@ -50,7 +50,7 @@
 package com.openexchange.mail.loginhandler;
 
 import java.util.Date;
-import com.openexchange.dataretention.DataRetentionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.OXException;
@@ -98,7 +98,7 @@ public final class MailLoginHandler implements LoginHandlerService {
             }
         } catch (final OXException e) {
             throw new OXException(e);
-        } catch (final DataRetentionException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
