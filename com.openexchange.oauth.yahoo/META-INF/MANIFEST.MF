@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.container,
  com.openexchange.http.deferrer,
