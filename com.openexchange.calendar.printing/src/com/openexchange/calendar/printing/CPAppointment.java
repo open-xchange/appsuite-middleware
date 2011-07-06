@@ -61,7 +61,6 @@ import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.user.UserService;
 
 /**
@@ -165,8 +164,6 @@ public class CPAppointment {
                 try {
                     final UserService userService = CPServiceRegistry.getInstance().getService(UserService.class, true);
                     retval.add(userService.getUser(participant.getIdentifier(), context).getDisplayName());
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
