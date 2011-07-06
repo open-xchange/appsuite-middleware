@@ -50,7 +50,11 @@
 package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
@@ -65,51 +69,51 @@ public class UploadException extends OXException {
 
     private final String action;
 
-    public static enum UploadCode {
+    public static enum UploadCode implements OXExceptionCode {
         /**
          * File upload failed: %1$s
          */
-        UPLOAD_FAILED("File upload failed: %1$s", Category.INTERNAL_ERROR, 1),
+        UPLOAD_FAILED("File upload failed: %1$s", CATEGORY_ERROR, 1),
         /**
          * Missing affiliation id
          */
-        MISSING_AFFILIATION_ID("Missing affiliation id", Category.CODE_ERROR, 2),
+        MISSING_AFFILIATION_ID("Missing affiliation id", CATEGORY_ERROR, 2),
         /**
          * Unknown action value: %1$s
          */
-        UNKNOWN_ACTION_VALUE("Unknown action value: %1$s", Category.CODE_ERROR, 3),
+        UNKNOWN_ACTION_VALUE("Unknown action value: %1$s", CATEGORY_ERROR, 3),
         /**
          * Header "content-type" does not indicate multipart content
          */
-        NO_MULTIPART_CONTENT("Header \"content-type\" does not indicate multipart content", Category.CODE_ERROR, 4),
+        NO_MULTIPART_CONTENT("Header \"content-type\" does not indicate multipart content", CATEGORY_ERROR, 4),
         /**
          * Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
          */
-        MAX_UPLOAD_SIZE_EXCEEDED("Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s", Category.USER_INPUT, 5),
+        MAX_UPLOAD_SIZE_EXCEEDED("Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s", CATEGORY_USER_INPUT, 5),
         /**
          * Missing parameter %1$s
          */
-        MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 6),
+        MISSING_PARAM("Missing parameter %1$s", CATEGORY_ERROR, 6),
         /**
          * Unknown module: %1$d
          */
-        UNKNOWN_MODULE("Unknown module: %1$d", Category.CODE_ERROR, 7),
+        UNKNOWN_MODULE("Unknown module: %1$d", CATEGORY_ERROR, 7),
         /**
          * An uploaded file referenced by %1$s could not be found
          */
-        UPLOAD_FILE_NOT_FOUND("An uploaded file referenced by %1$s could not be found", Category.USER_INPUT, 8),
+        UPLOAD_FILE_NOT_FOUND("An uploaded file referenced by %1$s could not be found", CATEGORY_USER_INPUT, 8),
         /**
          * Invalid action value: %1$s
          */
-        INVALID_ACTION_VALUE("Invalid action value: %1$s", Category.CODE_ERROR, 9),
+        INVALID_ACTION_VALUE("Invalid action value: %1$s", CATEGORY_ERROR, 9),
         /**
          * Upload file with id %1$s could not be found
          */
-        FILE_NOT_FOUND("Upload file with id %1$s could not be found", Category.CODE_ERROR, 10),
+        FILE_NOT_FOUND("Upload file with id %1$s could not be found", CATEGORY_ERROR, 10),
         /**
          * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
          */
-        INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"", Category.CODE_ERROR, 11);
+        INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"", CATEGORY_ERROR, 11);
 
         private final String message;
 
@@ -123,6 +127,10 @@ public class UploadException extends OXException {
             this.detailNumber = detailNumber;
         }
 
+        public String getPrefix() {
+            return "UPL";
+        }
+
         public final Category getCategory() {
             return category;
         }
@@ -133,6 +141,51 @@ public class UploadException extends OXException {
 
         public final String getMessage() {
             return message;
+        }
+        
+        public boolean equals(final OXException e) {
+            return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        }
+
+        /**
+         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * 
+         * @return The newly created {@link OXException} instance
+         */
+        public OXException create() {
+            return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        }
+
+        /**
+         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * 
+         * @param args The message arguments in case of printf-style message
+         * @return The newly created {@link OXException} instance
+         */
+        public OXException create(final Object... args) {
+            return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        }
+
+        /**
+         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * 
+         * @param cause The optional initial cause
+         * @param args The message arguments in case of printf-style message
+         * @return The newly created {@link OXException} instance
+         */
+        public OXException create(final Throwable cause, final Object... args) {
+            final Category category = code.getCategory();
+            final OXException ret;
+            if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+                ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
+            } else {
+                ret =
+                    new OXException(
+                        code.getNumber(),
+                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                        new Object[0]).setLogMessage(code.getMessage(), args);
+            }
+            return ret.addCategory(category).setPrefix(code.getPrefix());
         }
     }
 
