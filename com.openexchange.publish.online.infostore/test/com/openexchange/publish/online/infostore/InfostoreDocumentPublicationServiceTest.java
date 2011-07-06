@@ -50,9 +50,9 @@
 package com.openexchange.publish.online.infostore;
 
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.OXException;
 
 
 /**
