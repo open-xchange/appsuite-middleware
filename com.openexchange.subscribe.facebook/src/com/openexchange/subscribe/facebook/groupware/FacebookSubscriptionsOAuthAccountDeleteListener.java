@@ -52,11 +52,9 @@ package com.openexchange.subscribe.facebook.groupware;
 import java.sql.Connection;
 import java.util.Map;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.facebook.FacebookSubscribeService;
 
 
@@ -67,31 +65,31 @@ import com.openexchange.subscribe.facebook.FacebookSubscribeService;
  */
 public class FacebookSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
 
-    private FacebookSubscribeService fbService;
-    private ContextService contexts;
+    private final FacebookSubscribeService fbService;
+    private final ContextService contexts;
 
-    public FacebookSubscriptionsOAuthAccountDeleteListener(FacebookSubscribeService fbService, ContextService contexts) {
+    public FacebookSubscriptionsOAuthAccountDeleteListener(final FacebookSubscribeService fbService, final ContextService contexts) {
         this.fbService = fbService;
         this.contexts = contexts;
     }
     
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+    public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         try {
             fbService.deleteAllUsingOAuthAccount(getContext(cid), id);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
 
-    private Context getContext(int cid) throws OXException {
+    private Context getContext(final int cid) throws OXException {
         try {
             return contexts.getContext(cid);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
 
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+    public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         // IGNORE
     }
 
