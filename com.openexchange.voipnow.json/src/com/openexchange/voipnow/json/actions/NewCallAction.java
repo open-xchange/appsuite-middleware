@@ -60,11 +60,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.Utility;
-import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
@@ -88,7 +87,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
              * Parse parameters
@@ -190,7 +189,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
      */
     private static final Pattern PATTERN_CODE = Pattern.compile("<Code[^>]*>([0-9]+)</Code>", Pattern.CASE_INSENSITIVE);
 
-    private AJAXRequestResult parseXML(final GetMethod getMethod) throws IOException, VoipNowException {
+    private AJAXRequestResult parseXML(final GetMethod getMethod) throws IOException, OXException {
         /*
          * Check response body
          */

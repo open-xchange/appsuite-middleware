@@ -59,16 +59,13 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.user.UserService;
-import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.actions.VoipNowActionFactory;
-import com.openexchange.voipnow.json.exception.VoipNowExceptionFactory;
 import com.openexchange.voipnow.json.multiple.VoipNowMultipleHandlerFactory;
 import com.openexchange.voipnow.json.preferences.GUI;
 import com.openexchange.voipnow.json.preferences.VoipNowEnabled;
@@ -83,8 +80,6 @@ import com.openexchange.voipnow.json.servlet.VoipNowServlet;
  */
 public class Activator implements BundleActivator {
 
-    private ComponentRegistration componentRegistration;
-
     private List<ServiceRegistration> serviceRegistrations;
 
     private Stack<ServiceTracker> trackers;
@@ -98,15 +93,6 @@ public class Activator implements BundleActivator {
 
     public void start(final BundleContext context) throws Exception {
         try {
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    VoipNowException.COMPONENT,
-                    "com.openexchange.voipnow.json",
-                    VoipNowExceptionFactory.getInstance());
             /*
              * Register user multiple service
              */
@@ -183,13 +169,6 @@ public class Activator implements BundleActivator {
                 }
                 serviceRegistrations.clear();
                 serviceRegistrations = null;
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
         } catch (final Exception e) {
             final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);

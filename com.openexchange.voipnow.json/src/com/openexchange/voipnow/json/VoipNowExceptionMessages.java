@@ -49,10 +49,10 @@
 
 package com.openexchange.voipnow.json;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link VoipNowExceptionMessages} - Exception messages for {@link VoipNowException} that must be translated.
+ * {@link VoipNowExceptionMessages} - Exception messages that must be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

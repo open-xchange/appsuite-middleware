@@ -61,7 +61,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import com.openexchange.voipnow.json.VoipNowException;
+import com.openexchange.exception.OXException;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 import com.openexchange.voipnow.json.http.TrustAllAdapter;
 
@@ -117,7 +117,7 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
      * @param message The error message or <code>null</code> if none available
      * @return A new VoipNow exception for failed request
      */
-    protected static VoipNowException newRequestFailedException(final String code, final String message) {
+    protected static OXException newRequestFailedException(final String code, final String message) {
         return VoipNowExceptionCodes.VOIPNOW_REQUEST_FAILED.create(code == null ? "" : code, message == null ? "" : message);
     }
 
@@ -127,9 +127,9 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
      * @param setting The VoipNow server setting
      * @param queryString The query string to apply to HTTP method
      * @return The executed HTTP method
-     * @throws VoipNowException If executing HTTP method fails
+     * @throws OXException If executing HTTP method fails
      */
-    protected M configure(final VoipNowServerSetting setting, final String queryString) throws VoipNowException {
+    protected M configure(final VoipNowServerSetting setting, final String queryString) throws OXException {
         M httpMethod = null;
         try {
             final HttpClient client = new HttpClient();
@@ -193,7 +193,7 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
                 throw VoipNowExceptionCodes.HTTP_REQUEST_FAILED.create(host, httpMethod.getStatusLine().toString());
             }
             return httpMethod;
-        } catch (final VoipNowException e) {
+        } catch (final OXException e) {
             if (null != httpMethod) {
                 closeResponse(httpMethod);
                 httpMethod.releaseConnection();

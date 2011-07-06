@@ -56,7 +56,7 @@ import com._4psa.pbx._2_5_1.PBXPort;
 import com._4psa.pbxmessagesinfo_xsd._2_5.PingResponseType;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -85,7 +85,7 @@ public class PingAction extends AbstractVoipNowSOAPAction<PBXInterface> {
         super();
     }
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
 
 		PBXInterface stub = configureStub(setting);

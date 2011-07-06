@@ -74,10 +74,9 @@ import com._4psa.headerdata_xsd._2_5.ServerInfo;
 import com._4psa.headerdata_xsd._2_5.UserCredentials;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
@@ -114,7 +113,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
         super();
     }
 
-    public AJAXRequestResult perform(AJAXRequestData ajaxRequest, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData ajaxRequest, ServerSession session) throws OXException {
         try {
             String[] transferTo;
             {
@@ -182,7 +181,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
     }
 
 	private String deleteExistingFollowMeRules(BigInteger userId, ExtensionInterface port, List<BigInteger> followMeRulesIDs, UserCredentials userCredentials)
-			throws VoipNowException {
+			throws OXException {
 		String successStr = "success";
 		if (!followMeRulesIDs.isEmpty()) {
 			DelCallRulesInRequest delRequest = new DelCallRulesInRequest();

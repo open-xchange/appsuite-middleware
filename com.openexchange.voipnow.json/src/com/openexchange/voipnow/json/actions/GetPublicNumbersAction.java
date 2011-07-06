@@ -61,7 +61,7 @@ import com._4psa.channelmessagesinfo_xsd._2_5.GetNoSelectionResponseType;
 import com._4psa.headerdata_xsd._2_5.ServerInfo;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -90,7 +90,7 @@ public class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<ChannelInt
         super();
     }
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
 		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
 

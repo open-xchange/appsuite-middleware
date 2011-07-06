@@ -57,7 +57,7 @@ import com._4psa.clientmessages_xsd._2_5.GetClientDetailsResponse;
 import com._4psa.headerdata_xsd._2_5.ServerInfo;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -86,7 +86,7 @@ public class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientInterfa
         super();
     }
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String clientId = checkStringParameter(request, "id");
 
 		GetClientDetailsRequest detailRequest = new GetClientDetailsRequest();

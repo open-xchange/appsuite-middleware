@@ -58,7 +58,7 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetExtensionDetailsResponseType;
 import com._4psa.headerdata_xsd._2_5.ServerInfo;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -87,7 +87,7 @@ public class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<ExtensionI
         super();
     }
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String extensionId = checkStringParameter(request, "id");
 		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
 

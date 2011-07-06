@@ -59,7 +59,7 @@ import com._4psa.pbxmessages_xsd._2_5.GetTimeIntervalBlocksRequest;
 import com._4psa.pbxmessagesinfo_xsd._2_5.GetTimeIntervalBlocksResponseType;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -97,7 +97,7 @@ public class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXInterfac
         return new PBXPort(getWsdlLocation()).getPBXPort();
     }
 
-    public AJAXRequestResult perform(AJAXRequestData ajaxRequest, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData ajaxRequest, ServerSession session) throws OXException {
 
 		String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
 		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);

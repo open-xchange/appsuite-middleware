@@ -55,13 +55,11 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.Utility;
-import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 import com.openexchange.voipnow.json.services.ServiceRegistry;
 
@@ -92,9 +90,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param sessionUser The session user
      * @param contextId The context identifier
      * @return The (internal) phone number of given session user's main extension
-     * @throws VoipNowException If (internal) phone number cannot be returned
+     * @throws OXException If (internal) phone number cannot be returned
      */
-    protected String getMainExtensionNumberOfSessionUser(final User sessionUser, final int contextId) throws VoipNowException {
+    protected String getMainExtensionNumberOfSessionUser(final User sessionUser, final int contextId) throws OXException {
         final String attributeName = "com.4psa.voipnow/mainExtension";
         final Set<String> set = sessionUser.getAttributes().get(attributeName);
         if (null == set || set.isEmpty()) {
@@ -118,9 +116,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param sessionUser The session user
      * @param contextId The context identifier
      * @return The numeric identifier of given session user's main extension
-     * @throws VoipNowException If numeric identifier cannot be returned
+     * @throws OXException If numeric identifier cannot be returned
      */
-    protected BigInteger getMainExtensionIDOfSessionUser(final User sessionUser, final int contextId) throws VoipNowException {
+    protected BigInteger getMainExtensionIDOfSessionUser(final User sessionUser, final int contextId) throws OXException {
         final String attrName = ATTR_MAIN_EXTENSION;
         final Set<String> set = sessionUser.getAttributes().get(attrName);
         if (null == set || set.isEmpty()) {
@@ -148,9 +146,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param session The session
      * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
      * @return The VoipNow setting
-     * @throws AbstractOXException If returning VoipNow setting fails
+     * @throws OXException If returning VoipNow setting fails
      */
-    protected static VoipNowServerSetting getSOAPVoipNowServerSetting(final ServerSession session) throws AbstractOXException {
+    protected static VoipNowServerSetting getSOAPVoipNowServerSetting(final ServerSession session) throws OXException {
         return getVoipNowServerSetting(session, false);
     }
 
@@ -160,9 +158,9 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @param session The session
      * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
      * @return The VoipNow setting
-     * @throws AbstractOXException If returning VoipNow setting fails
+     * @throws OXException If returning VoipNow setting fails
      */
-    protected static VoipNowServerSetting getVoipNowServerSetting(final ServerSession session, final boolean httpApi) throws AbstractOXException {
+    protected static VoipNowServerSetting getVoipNowServerSetting(final ServerSession session, final boolean httpApi) throws OXException {
         final VoipNowServerSetting retval = new VoipNowServerSetting();
         final StaticVoipNowServerSetting staticInstance = StaticVoipNowServerSetting.getInstance();
         if (null == staticInstance) {
