@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVType}
@@ -121,11 +122,11 @@ public enum EAVType {
         throw new IllegalArgumentException(this.name());
     }
 
-    public void checkCoercible(EAVType origType, Object value) throws EAVException {
+    public void checkCoercible(EAVType origType, Object value) throws OXException {
         if(!isCoercibleFrom(origType)) {
             throw EAVErrorMessage.INCOMPATIBLE_TYPES.create(origType.name(), this.name());
         }
-        EAVException result = (EAVException) doSwitch(validationSwitch, value);
+        OXException result = (OXException) doSwitch(validationSwitch, value);
         if(result != null) {
             throw result;
         }

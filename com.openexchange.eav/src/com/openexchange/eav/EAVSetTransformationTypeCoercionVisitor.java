@@ -50,6 +50,7 @@
 package com.openexchange.eav;
 
 import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -88,7 +89,7 @@ public class EAVSetTransformationTypeCoercionVisitor extends AbstractEAVExceptio
             node.setAdd(coercion.coerceMultiple(node.getType(), node.getAdd(), metadataNode, defaultTZ));
             node.setRemove(coercion.coerceMultiple(node.getType(), node.getRemove(), metadataNode, defaultTZ));
             node.setType(metadataNode.getType());
-        } catch (EAVException e) {
+        } catch (OXException e) {
             setException( e );
             throw BREAK;
         }

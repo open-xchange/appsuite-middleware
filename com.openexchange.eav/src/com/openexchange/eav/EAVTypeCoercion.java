@@ -56,6 +56,7 @@ import java.util.TimeZone;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVTypeCoercion}
@@ -74,11 +75,11 @@ public class EAVTypeCoercion {
         this.mode = mode;
     }
     
-    public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo) throws EAVException {
+    public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo) throws OXException {
         return coerce(origType, payload, typeInfo, null);
     }
 
-    public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) throws EAVException {
+    public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) throws OXException {
         EAVType type = typeInfo.getType();
         if(type == null) {
             type = origType;
@@ -124,11 +125,11 @@ public class EAVTypeCoercion {
         return utc;
     }
 
-    public Object[] coerceMultiple(EAVType origType, Object[] payload, EAVTypeMetadataNode typeInfo) throws EAVException {
+    public Object[] coerceMultiple(EAVType origType, Object[] payload, EAVTypeMetadataNode typeInfo) throws OXException {
         return coerceMultiple(origType, payload, typeInfo, null);
     }
 
-    public Object[] coerceMultiple(EAVType origType, Object[] payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) throws EAVException {
+    public Object[] coerceMultiple(EAVType origType, Object[] payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) throws OXException {
         EAVType type = typeInfo.getType();
         if(type == null) {
             type = origType;

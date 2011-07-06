@@ -50,6 +50,7 @@
 package com.openexchange.eav;
 
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -59,7 +60,7 @@ import java.util.Map;
  *
  */
 public class EAVTypeOptionVerifierTest extends EAVUnitTest {
-    private EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
+    private final EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
     
     public void testStringsHaveNoOptions() {
         assertFails(EAVErrorMessage.NO_OPTIONS, EAVType.STRING, M("someOption", "someValue"));
@@ -97,14 +98,14 @@ public class EAVTypeOptionVerifierTest extends EAVUnitTest {
         assertFails(EAVErrorMessage.ILLEGAL_OPTION, EAVType.TIME, M("timezone", "stardate"));
     }
     
-    protected void assertPasses(EAVType type, Map<String, Object> options) {
+    protected void assertPasses(final EAVType type, final Map<String, Object> options) {
         assertSame("Verification failed", null, type.doSwitch(verifier, options));
     }
     
-    protected void assertFails(EAVErrorMessage expectedMessage, EAVType type, Map<String, Object> options) {
-        EAVException exception = (EAVException) type.doSwitch(verifier, options);
+    protected void assertFails(final EAVErrorMessage expectedMessage, final EAVType type, final Map<String, Object> options) {
+        final OXException exception = (OXException) type.doSwitch(verifier, options);
         assertNotNull("Expected: "+expectedMessage.getMessage()+" but got null", exception);
-        assertEquals(expectedMessage.getDetailNumber(), exception.getDetailNumber());
+        assertEquals(expectedMessage.getNumber(), exception.getCode());
     }
     
     

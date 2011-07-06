@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -131,9 +132,9 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
  
     private static final EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
     
-    public void verifyOptions() throws EAVException {
+    public void verifyOptions() throws OXException {
         if(isLeaf()) {
-            EAVException x = (EAVException) type.doSwitch(verifier, options);
+            OXException x = (OXException) type.doSwitch(verifier, options);
             if(x != null) {
                 throw x;
             }
@@ -150,7 +151,7 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
     }
 
 
-    public EAVTypeMetadataNode mergeWith(EAVTypeMetadataNode other) throws EAVException {
+    public EAVTypeMetadataNode mergeWith(EAVTypeMetadataNode other) throws OXException {
         if(isLeaf()) {
             if(other != null && ! hasEqualPayloadAs(other)) {
                 throw EAVErrorMessage.WRONG_TYPES.create(getPath().toString(), getTypeDescription(), other.getTypeDescription());

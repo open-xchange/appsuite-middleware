@@ -50,6 +50,7 @@
 package com.openexchange.eav;
 
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -60,22 +61,22 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface EAVStorage {
 
-    void insert(Context ctx, EAVPath parentPath, EAVNode tree) throws EAVException;
+    void insert(Context ctx, EAVPath parentPath, EAVNode tree) throws OXException;
 
-    void update(Context ctx, EAVPath parentPath, EAVNode tree) throws EAVException;
+    void update(Context ctx, EAVPath parentPath, EAVNode tree) throws OXException;
 
-    void updateSets(Context ctx, EAVPath path, EAVSetTransformation update) throws EAVException;
+    void updateSets(Context ctx, EAVPath path, EAVSetTransformation update) throws OXException;
 
-    void replace(Context ctx, EAVPath path, EAVNode tree) throws EAVException;
+    void replace(Context ctx, EAVPath path, EAVNode tree) throws OXException;
 
-    EAVNode get(Context ctx, EAVPath path) throws EAVException;
+    EAVNode get(Context ctx, EAVPath path) throws OXException;
 
-    EAVNode get(Context ctx, EAVPath path, boolean allBinaries) throws EAVException;
+    EAVNode get(Context ctx, EAVPath path, boolean allBinaries) throws OXException;
 
-    EAVNode get(Context ctx, EAVPath path, Set<EAVPath> loadBinaries) throws EAVException;
+    EAVNode get(Context ctx, EAVPath path, Set<EAVPath> loadBinaries) throws OXException;
 
-    void delete(Context ctx, EAVPath path) throws EAVException;
+    void delete(Context ctx, EAVPath path) throws OXException;
 
-    EAVTypeMetadataNode getTypes(Context ctx, EAVPath parent, EAVNode node) throws EAVException;
+    EAVTypeMetadataNode getTypes(Context ctx, EAVPath parent, EAVNode node) throws OXException;
 
 }

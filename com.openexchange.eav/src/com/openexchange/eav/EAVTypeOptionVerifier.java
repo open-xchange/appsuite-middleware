@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVTypeOptionVerifier}
@@ -134,7 +135,7 @@ public class EAVTypeOptionVerifier implements EAVTypeSwitcher {
         return timezone.contains("GMT");
     }
 
-    private EAVException noOptions(EAVType type, Object... args) {
+    private OXException noOptions(EAVType type, Object... args) {
         Map<String, Object> options = (Map<String, Object>) args[0];
         if (options.size() != 0) {
             return EAVErrorMessage.NO_OPTIONS.create(type);

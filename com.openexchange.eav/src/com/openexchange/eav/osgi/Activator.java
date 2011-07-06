@@ -51,8 +51,6 @@ package com.openexchange.eav.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.eav.EAVErrorMessage;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 
 /**
@@ -63,14 +61,12 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
  */
 public class Activator implements BundleActivator{
 
-    private ComponentRegistration componentRegistration;
-
-    public void start(BundleContext context) throws Exception {
-        componentRegistration = new ComponentRegistration(context, "EAV", "com.openexchange.eav", EAVErrorMessage.FACTORY);
+    public void start(final BundleContext context) throws Exception {
+        // Nope
     }
 
-    public void stop(BundleContext context) throws Exception {
-        componentRegistration.unregister();
+    public void stop(final BundleContext context) throws Exception {
+        // Nope
     }
 
 }

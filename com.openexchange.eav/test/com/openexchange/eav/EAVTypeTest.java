@@ -52,6 +52,7 @@ package com.openexchange.eav;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVTypeTest}
@@ -65,23 +66,23 @@ public class EAVTypeTest extends EAVUnitTest {
      */
 
     public void testInvalidDate() {
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(new Date());
         calendar.set(Calendar.HOUR, 23);
 
-        long notMidnightUTC = calendar.getTimeInMillis();
+        final long notMidnightUTC = calendar.getTimeInMillis();
 
         try {
             EAVType.DATE.checkCoercible(EAVType.NUMBER, notMidnightUTC);
             fail("Validate non date value");
-        } catch (EAVException x) {
-            assertEquals(EAVErrorMessage.ILLEGAL_VALUE.getDetailNumber(), x.getDetailNumber());
+        } catch (final OXException x) {
+            assertTrue(EAVErrorMessage.ILLEGAL_VALUE.equals(x));
         }
     }
 
     public void testEAVTypeMismatch() {
-        for (EAVType type1 : EAVType.values()) {
-            for (EAVType type2 : EAVType.values()) {
+        for (final EAVType type1 : EAVType.values()) {
+            for (final EAVType type2 : EAVType.values()) {
                 if (type1 == type2) {
                     assertCoercible(type1, type2);
                 } else if (type1 == EAVType.NULL) {
@@ -114,11 +115,11 @@ public class EAVTypeTest extends EAVUnitTest {
         }
     }
 
-    private void assertNotCoercible(EAVType t1, EAVType t2) {
+    private void assertNotCoercible(final EAVType t1, final EAVType t2) {
         assertFalse("Should not be able to coerce from " + t1.name() + " to " + t2.name(), t2.isCoercibleFrom(t1));
     }
 
-    private void assertCoercible(EAVType t1, EAVType t2) {
+    private void assertCoercible(final EAVType t1, final EAVType t2) {
         assertTrue("Should be able to coerce from " + t1.name() + " to " + t2.name(), t2.isCoercibleFrom(t1));
     }
 

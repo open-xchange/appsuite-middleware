@@ -50,63 +50,65 @@
 package com.openexchange.eav;
 
 import java.util.TimeZone;
-
+import com.openexchange.exception.OXException;
 
 /**
  * {@link EAVNodeTypeCoercionVisitor}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class EAVNodeTypeCoercionVisitor extends AbstractEAVExceptionHolder implements AbstractNodeVisitor<EAVNode> {
 
-    private EAVTypeMetadataNode metadata;
+    private final EAVTypeMetadataNode metadata;
+
     private EAVTypeCoercion coercion = null;
-    private TimeZone defaultTZ;
-    
-    public EAVNodeTypeCoercionVisitor(EAVTypeMetadataNode metadata, TimeZone defaultTZ, EAVTypeCoercion.Mode mode) {
+
+    private final TimeZone defaultTZ;
+
+    public EAVNodeTypeCoercionVisitor(final EAVTypeMetadataNode metadata, final TimeZone defaultTZ, final EAVTypeCoercion.Mode mode) {
         this.metadata = metadata;
         this.defaultTZ = defaultTZ;
         this.coercion = new EAVTypeCoercion(mode);
     }
 
-    public void visit(int index, EAVNode node) {
-        if(!node.isLeaf()) {
+    public void visit(final int index, final EAVNode node) {
+        if (!node.isLeaf()) {
             return;
         }
-        EAVTypeMetadataNode metadataNode = metadata.resolve(node.getPath().shiftLeft());
-        if(metadataNode == null) {
+        final EAVTypeMetadataNode metadataNode = metadata.resolve(node.getPath().shiftLeft());
+        if (metadataNode == null) {
             return;
         }
-        
+
         try {
-            if(node.getContainerType() != null && metadataNode.getContainerType() != null && node.getContainerType().isMultiple() != metadataNode.getContainerType().isMultiple()) {
-                setException( EAVErrorMessage.WRONG_TYPES.create(node.getPath(), node.getTypeDescription(), metadataNode.getTypeDescription()) );
+            if (node.getContainerType() != null && metadataNode.getContainerType() != null && node.getContainerType().isMultiple() != metadataNode.getContainerType().isMultiple()) {
+                setException(EAVErrorMessage.WRONG_TYPES.create(
+                    node.getPath(),
+                    node.getTypeDescription(),
+                    metadataNode.getTypeDescription()));
                 throw BREAK;
             }
             EAVType type = metadataNode.getType();
-            if(type == null) {
+            if (type == null) {
                 type = node.getType();
             }
-            if(node.isMultiple()) {
+            if (node.isMultiple()) {
                 EAVContainerType containerType = metadataNode.getContainerType();
-                if(containerType == null) {
+                if (containerType == null) {
                     containerType = node.getContainerType();
                 }
-                Object[] origPayload = (Object[]) node.getPayload();
-                Object[] coercedPayload = coercion.coerceMultiple(node.getType(), origPayload, metadataNode, defaultTZ);
-                Object[] restrictedPayload = containerType.applyRestrictions(type, coercedPayload);
+                final Object[] origPayload = (Object[]) node.getPayload();
+                final Object[] coercedPayload = coercion.coerceMultiple(node.getType(), origPayload, metadataNode, defaultTZ);
+                final Object[] restrictedPayload = containerType.applyRestrictions(type, coercedPayload);
                 node.setPayload(type, containerType, restrictedPayload);
             } else {
-                Object payload = coercion.coerce(node.getType(), node.getPayload(), metadataNode, defaultTZ);
+                final Object payload = coercion.coerce(node.getType(), node.getPayload(), metadataNode, defaultTZ);
                 node.setPayload(type, node.getContainerType(), payload);
             }
-        } catch (EAVException e) {
-            setException( e );
+        } catch (final OXException e) {
+            setException(e);
             throw BREAK;
         }
     }
-    
-    
 
 }
