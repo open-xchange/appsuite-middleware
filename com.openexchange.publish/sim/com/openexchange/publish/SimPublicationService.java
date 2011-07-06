@@ -52,6 +52,7 @@ package com.openexchange.publish;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -67,13 +68,13 @@ public class SimPublicationService implements PublicationService {
 
     private int updatedId;
 
-    private Set<Integer> deletedIds = new HashSet<Integer>();
+    private final Set<Integer> deletedIds = new HashSet<Integer>();
 
     /*
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#create(com.openexchange.publish.Publication)
      */
-    public void create(Publication publication) {
+    public void create(final Publication publication) {
         publication.setId(newId);
     }
 
@@ -81,7 +82,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#delete(com.openexchange.publish.Publication)
      */
-    public void delete(Publication publication) {
+    public void delete(final Publication publication) {
         deletedIds.add(publication.getId());
     }
 
@@ -89,7 +90,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context)
      */
-    public Collection<Publication> getAllPublications(Context ctx) {
+    public Collection<Publication> getAllPublications(final Context ctx) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -98,7 +99,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#getAllPublications(com.openexchange.groupware.contexts.Context, int)
      */
-    public Collection<Publication> getAllPublications(Context ctx, String entityId) {
+    public Collection<Publication> getAllPublications(final Context ctx, final String entityId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -115,7 +116,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#knows(com.openexchange.groupware.contexts.Context, int)
      */
-    public boolean knows(Context ctx, int publicationId) {
+    public boolean knows(final Context ctx, final int publicationId) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -124,7 +125,7 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#load(com.openexchange.groupware.contexts.Context, int)
      */
-    public Publication load(Context ctx, int publicationId) {
+    public Publication load(final Context ctx, final int publicationId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -133,15 +134,15 @@ public class SimPublicationService implements PublicationService {
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#update(com.openexchange.publish.Publication)
      */
-    public void update(Publication publication) {
+    public void update(final Publication publication) {
         this.updatedId = publication.getId();
     }
 
-    public void setTarget(PublicationTarget publicationTarget) {
+    public void setTarget(final PublicationTarget publicationTarget) {
         this.target = publicationTarget;
     }
 
-    public void setNewId(int i) {
+    public void setNewId(final int i) {
         this.newId = i;
     }
 
@@ -153,7 +154,7 @@ public class SimPublicationService implements PublicationService {
         return deletedIds;
     }
 
-	public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException {
+	public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
 		// TODO Auto-generated method stub
 		return null;
 	}
