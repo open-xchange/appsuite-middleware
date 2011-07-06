@@ -51,7 +51,6 @@ package com.openexchange.oauth.osgi;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -71,11 +70,11 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
         super(DatabaseService.class);
     }
 
-    public Connection getReadConnection(final Context ctx) throws DBPoolingException {
+    public Connection getReadConnection(final Context ctx) throws OXException {
         try {
             return getService().getReadOnly(ctx);
         } catch (final OXException e) {
-            throw new DBPoolingException(e);
+            throw e;
         }
     }
 
@@ -89,11 +88,11 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
         }
     }
 
-    public Connection getWriteConnection(final Context ctx) throws DBPoolingException {
+    public Connection getWriteConnection(final Context ctx) throws OXException {
         try {
             return getService().getWritable(ctx);
         } catch (final OXException e) {
-            throw new DBPoolingException(e);
+            throw e;
         }
     }
 

@@ -55,13 +55,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.context.SimContextService;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.id.SimIDGenerator;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.SimOAuthServiceMetaDataRegistry;
@@ -110,14 +109,17 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
                 return "com.openexchange.test";
             }
 
+            @Override
             public boolean needsRequestToken() {
                 return true;
             }
 
+            @Override
             public String getScope() {
                 return null;
             }
 
+            @Override
             public String processAuthorizationURL(final String authUrl) {
                 return authUrl;
             }
@@ -137,7 +139,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     
     // Success Cases
     
-    public void testCreateAccount() throws OXException, DBPoolingException, SQLException {
+    public void testCreateAccount() throws OXException, SQLException {
         final OAuthAccount authAccount = createTestAccount();
         
         assertNotNull(authAccount);

@@ -81,11 +81,9 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.DefaultOAuthAccount;
@@ -314,8 +312,6 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             return account;
         } catch (final OXException x) {
             throw x;
-        } catch (final AbstractOXException x) {
-            throw new OXException(x);
         }
     }
 
@@ -364,8 +360,6 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             return account;
         } catch (final OXException x) {
             throw x;
-        } catch (final AbstractOXException x) {
-            throw new OXException(x);
         }
     }
 
@@ -676,7 +670,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         try {
             return contexts.getContext(contextId);
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 
@@ -747,9 +741,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
             return cryptoService.encrypt(toEncrypt, password);
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 
@@ -761,10 +753,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class, true);
             return cryptoService.decrypt(toDecrypt, password);
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
+            throw e;
         }
     }
 

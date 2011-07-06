@@ -72,7 +72,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
         try {
             return getService().getAllContextIds();
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 
@@ -80,7 +80,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
         try {
             return getService().getContext(contextId);
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 
@@ -88,7 +88,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
         try {
             return getService().getContextId(loginContextInfo);
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 
@@ -96,7 +96,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
         try {
             getService().invalidateContext(contextId);
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 
@@ -104,7 +104,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
         try {
             getService().invalidateLoginInfo(loginContextInfo);
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 
@@ -112,7 +112,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
         try {
             return getService().loadContext(contextId);
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 

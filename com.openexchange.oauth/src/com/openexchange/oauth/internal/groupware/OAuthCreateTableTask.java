@@ -54,10 +54,9 @@ import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
@@ -70,7 +69,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
 
     private final DatabaseService dbService;
 
-    public OAuthCreateTableTask(DatabaseService dbService) {
+    public OAuthCreateTableTask(final DatabaseService dbService) {
         super();
         this.dbService = dbService;
     }
@@ -80,12 +79,12 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
     }
 
     public void perform(final PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
+        final int contextId = params.getContextId();
         final Connection writeCon;
         try {
             writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {

@@ -49,11 +49,10 @@
 
 package com.openexchange.oauth;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link OAuthExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
+ * {@link OAuthExceptionMessages} - Exception messages that needs to be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2

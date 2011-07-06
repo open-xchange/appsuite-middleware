@@ -58,8 +58,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
@@ -78,8 +76,6 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthActivator extends DeferredActivator {
-
-    private ComponentRegistration componentRegistration;
 
     private List<ServiceRegistration> registrations;
 
@@ -140,14 +136,6 @@ public final class OAuthActivator extends DeferredActivator {
             }
             DeleteListenerRegistry.initInstance();
             /*
-             * Register component
-             */
-            componentRegistration = new ComponentRegistration(
-                context,
-                OXException.COMPONENT,
-                "com.openexchange.oauth",
-                OAuthExceptionFactory.getInstance());
-            /*
              * Collect OAuth services
              */
             final OSGiMetaDataRegistry registry = OSGiMetaDataRegistry.getInstance();
@@ -171,7 +159,7 @@ public final class OAuthActivator extends DeferredActivator {
             delegateServices.put(IDGeneratorService.class, new OSGiIDGeneratorService().start(context));
             delegateServices.startAll(context);
 
-            OAuthServiceImpl oauthService = new OAuthServiceImpl(
+            final OAuthServiceImpl oauthService = new OAuthServiceImpl(
                 delegateServices.get(DBProvider.class),
                 delegateServices.get(IDGeneratorService.class),
                 registry,
@@ -212,13 +200,6 @@ public final class OAuthActivator extends DeferredActivator {
             }
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
-            }
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.oauth\" failed.", e);
             throw e;

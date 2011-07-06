@@ -57,10 +57,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
@@ -75,7 +74,7 @@ public final class OAuthCreateTableTask2 extends UpdateTaskAdapter {
 
     private final DatabaseService dbService;
 
-    public OAuthCreateTableTask2(DatabaseService dbService) {
+    public OAuthCreateTableTask2(final DatabaseService dbService) {
         super();
         this.dbService = dbService;
     }
@@ -85,17 +84,17 @@ public final class OAuthCreateTableTask2 extends UpdateTaskAdapter {
     }
 
     public void perform(final PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
+        final int contextId = params.getContextId();
         final Connection writeCon;
         try {
             writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
-        PreparedStatement stmt = null;
+        final PreparedStatement stmt = null;
         try {
             startTransaction(writeCon);
-            List<Column> toChange = new ArrayList<Column>();
+            final List<Column> toChange = new ArrayList<Column>();
             if (Tools.isVARCHAR(writeCon, "oauthAccounts", "accessToken")) {
                 toChange.add(new Column("accessToken", "TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL"));
             }
