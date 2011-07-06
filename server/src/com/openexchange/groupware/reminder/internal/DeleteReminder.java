@@ -57,8 +57,8 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.reminder.ReminderException;
-import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
 
@@ -81,20 +81,20 @@ public class DeleteReminder {
         this.reminder = reminder;
     }
 
-    public void perform() throws ReminderException {
+    public void perform() throws OXException {
         final Connection con;
         try {
             con = Database.get(ctx, true);
         } catch (final DBPoolingException e) {
-            throw new ReminderException(e);
+            throw new OXException(e);
         }
         try {
             con.setAutoCommit(false);
             delete(con);
             con.commit();
         } catch (final SQLException e) {
-            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (final ReminderException e) {
+            throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -103,12 +103,12 @@ public class DeleteReminder {
         }
     }
 
-    private void delete(final Connection con) throws ReminderException {
+    private void delete(final Connection con) throws OXException {
         try {
             STORAGE.deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
             TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(ctx, con, reminder.getTargetId(), reminder.getUser());
         } catch (final AbstractOXException e) {
-            throw new ReminderException(e);
+            throw new OXException(e);
         }
     }
 }

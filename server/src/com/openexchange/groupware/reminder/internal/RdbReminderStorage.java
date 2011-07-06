@@ -61,8 +61,8 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderException;
-import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
 
@@ -78,7 +78,7 @@ public class RdbReminderStorage extends ReminderStorage {
     }
 
     @Override
-    public ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws ReminderException {
+    public ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         List<ReminderObject> retval = new ArrayList<ReminderObject>();
@@ -94,7 +94,7 @@ public class RdbReminderStorage extends ReminderStorage {
                 retval.add(reminder);
             }
         } catch (SQLException e) {
-            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+            throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -102,7 +102,7 @@ public class RdbReminderStorage extends ReminderStorage {
     }
 
     @Override
-    public void deleteReminder(Connection con, int ctxId, int reminderId) throws ReminderException {
+    public void deleteReminder(Connection con, int ctxId, int reminderId) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL.DELETE_WITH_ID);
@@ -111,10 +111,10 @@ public class RdbReminderStorage extends ReminderStorage {
             stmt.setInt(pos++, reminderId);
             int deleted = stmt.executeUpdate();
             if (deleted == 0) {
-                throw new ReminderException(Code.NOT_FOUND, I(reminderId), I(ctxId));
+                throw ReminderExceptionCode.NOT_FOUND.create(I(reminderId), I(ctxId));
             }
         } catch (final SQLException exc) {
-            throw new ReminderException(Code.DELETE_EXCEPTION, exc);
+            throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
         } finally {
             closeSQLStuff(stmt);
         }

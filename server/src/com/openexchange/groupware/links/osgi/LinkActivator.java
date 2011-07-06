@@ -51,9 +51,6 @@ package com.openexchange.groupware.links.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.links.internal.LinkExceptionFactory;
 
 /**
  * {@link LinkActivator}
@@ -62,17 +59,15 @@ import com.openexchange.groupware.links.internal.LinkExceptionFactory;
  */
 public class LinkActivator implements BundleActivator {
 
-    private ComponentRegistration registration;
-
     public LinkActivator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.LINKING, "com.openexchange.groupware.links", LinkExceptionFactory.getInstance());
+    public void start(final BundleContext context) throws Exception {
+        // Nope
     }
 
-    public void stop(BundleContext context) throws Exception {
-        registration.unregister();
+    public void stop(final BundleContext context) throws Exception {
+        // Nope
     }
 }

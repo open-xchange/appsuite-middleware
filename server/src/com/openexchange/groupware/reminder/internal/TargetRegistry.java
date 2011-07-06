@@ -53,8 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.TIntObjectHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.reminder.ReminderException;
-import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.TargetService;
 
 /**
@@ -77,10 +77,10 @@ public class TargetRegistry {
         return SINGLETON;
     }
 
-    public TargetService getService(int module) throws ReminderException {
+    public TargetService getService(int module) throws OXException {
         TargetService retval = registry.get(module);
         if (null == retval) {
-            throw new ReminderException(Code.NO_TARGET_SERVICE, I(module));
+            throw ReminderExceptionCode.NO_TARGET_SERVICE.create(I(module));
         }
         return retval;
     }

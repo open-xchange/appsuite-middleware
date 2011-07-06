@@ -80,7 +80,8 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -258,7 +259,7 @@ public final class ReminderRequest {
         final ReminderObject reminder = new ReminderObject();
         new ReminderParser(tz).parse(reminder, jreminder);
         if (null == reminder.getDate()) {
-            throw new ReminderException(ReminderException.Code.MANDATORY_FIELD_ALARM);
+            throw ReminderExceptionCode.MANDATORY_FIELD_ALARM.create();
         }
         reminder.setObjectId(reminderId);
         /*
@@ -271,7 +272,7 @@ public final class ReminderRequest {
              * Check module permission
              */
             if (!hasModulePermission(storageReminder)) {
-                throw new ReminderException(ReminderException.Code.UNEXPECTED_ERROR, "No module permission.");
+                throw ReminderExceptionCode.UNEXPECTED_ERROR.create("No module permission.");
             }
             /*
              * Set other fields

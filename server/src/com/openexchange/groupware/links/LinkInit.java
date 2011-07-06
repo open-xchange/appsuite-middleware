@@ -49,7 +49,7 @@
 package com.openexchange.groupware.links;
 
 import com.openexchange.api2.RdbLinkSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
 import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.server.Initialization;
@@ -60,12 +60,12 @@ import com.openexchange.server.Initialization;
 public class LinkInit implements Initialization {
     private CalendarListener copyLinks = null;
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         copyLinks = new CopyLinksForChangeExceptions(new RdbLinkSQLInterface());
         CalendarCallbacks.getInstance().addListener(copyLinks);
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         CalendarCallbacks.getInstance().removeListener(copyLinks);
     }
 }

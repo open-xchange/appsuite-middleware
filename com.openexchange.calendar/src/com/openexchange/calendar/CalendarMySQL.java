@@ -108,8 +108,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.reminder.ReminderException;
-import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
@@ -4080,8 +4080,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                     } else {
                         rsql.deleteReminder(oid, uid, Types.APPOINTMENT);
                     }
-                } catch (final ReminderException exc) {
-                    if (ReminderException.Code.NOT_FOUND.getDetailNumber() == exc.getCode()) {
+                } catch (final OXException exc) {
+                    if (ReminderExceptionCode.NOT_FOUND.getDetailNumber() == exc.getCode()) {
                         LOG.debug("Reminder was not found for deletion", exc);
                     } else {
                         throw exc;
@@ -4578,7 +4578,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             rsql.deleteReminder(oid, Types.APPOINTMENT, con);
         } catch (final OXException oxe) {
             // this is wanted if Code = Code.NOT_FOUND
-            if (!oxe.isPrefix("REM") || oxe.getCode() != Code.NOT_FOUND.getDetailNumber()) {
+            if (!oxe.isPrefix("REM") || oxe.getCode() != ReminderExceptionCode.NOT_FOUND.getDetailNumber()) {
                 throw oxe;
             }
         }

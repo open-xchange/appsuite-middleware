@@ -62,15 +62,13 @@ import com.openexchange.ajax.helper.CombinedInputStream;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.conversion.Data;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataProperties;
+import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.servlet.http.Tools;
@@ -125,8 +123,7 @@ public final class ImageServlet extends HttpServlet {
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {
-                throw new SessiondException(
-                    ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName()));
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
             }
             final String uid = req.getParameter(PARAMETER_UID);
             if (uid == null) {
@@ -155,12 +152,8 @@ public final class ImageServlet extends HttpServlet {
                 final String logMsg = "No session found for uid " + uid;
                 sendErrorAndLog(resp, HttpServletResponse.SC_NOT_FOUND, errorMsg, logMsg);
             }
-        } catch (final SessiondException e) {
-            sendErrorAndLog(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, null, e.getMessage(), e);
         } catch (final OXException e) {
             sendErrorAndLog(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, e.getMessage(), e);
-        } catch (final OXException e) {
-            sendErrorAndLog(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, null, e.getMessage(), e);
         }
     }
     

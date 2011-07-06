@@ -64,8 +64,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.reminder.ReminderException;
-import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.internal.SQL;
 import com.openexchange.exception.OXException;
@@ -124,8 +124,8 @@ public final class RemoveBrokenReminder implements UpdateTask {
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
-            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (final ReminderException e) {
+            throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -134,7 +134,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
         }
     }
 
-    private void deleteBroken(final Connection con, final ReminderObject[] brokens) throws ReminderException {
+    private void deleteBroken(final Connection con, final ReminderObject[] brokens) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL.DELETE_WITH_ID);
@@ -150,17 +150,17 @@ public final class RemoveBrokenReminder implements UpdateTask {
                 rows += mRow;
             }
             if (brokens.length != rows) {
-                throw new ReminderException(Code.SQL_ERROR, "Strangely deleted "
+                throw new OXException(ReminderExceptionCode.SQL_ERROR, "Strangely deleted "
                     + rows + " instead of " + brokens.length);
             }
         } catch (final SQLException e) {
-            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+            throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
-    private ReminderObject[] getBroken(final Connection con) throws ReminderException {
+    private ReminderObject[] getBroken(final Connection con) throws OXException {
         final List<ReminderObject> tmp = new ArrayList<ReminderObject>();
         Statement stmt = null;
         ResultSet result = null;
@@ -176,7 +176,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
                 broken.setObjectId(result.getInt(2));
             }
         } catch (final SQLException e) {
-            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+            throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }

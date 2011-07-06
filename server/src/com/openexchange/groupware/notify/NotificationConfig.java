@@ -51,10 +51,10 @@ package com.openexchange.groupware.notify;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
 
@@ -94,10 +94,10 @@ public class NotificationConfig extends AbstractConfig implements Initialization
     }
 
     @Override
-    protected String getPropertyFileName() throws ConfigurationException {
+    protected String getPropertyFileName() throws OXException {
         final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
-            throw new ConfigurationException(ConfigurationExceptionCodes.PROPERTY_MISSING,
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(
                 KEY.getPropertyName());
         }
         return filename;
@@ -107,7 +107,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         if(!INSTANCE.isPropertiesLoadInternal()) {
             try {
                 INSTANCE.loadPropertiesInternal();
-            } catch (final ConfigurationException e) {
+            } catch (final OXException e) {
                 LOG.error(e);
                 return def;
             }
@@ -126,7 +126,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         return Boolean.parseBoolean(boolVal);
     }
 
-    public void start() throws ConfigurationException {
+    public void start() throws OXException {
         if(!INSTANCE.isPropertiesLoadInternal()) {
             INSTANCE.loadPropertiesInternal();
         }

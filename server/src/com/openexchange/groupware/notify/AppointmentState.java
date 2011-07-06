@@ -64,6 +64,7 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -73,7 +74,6 @@ import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.replacement.LocationReplacement;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -226,8 +226,6 @@ public class AppointmentState extends LinkableState {
 
         } catch (final OXException e) {
             LOGGER.error("Can't add attachment", e);
-        } catch (final ConversionError conversionError) {
-            LOGGER.error("Can't add attachment", conversionError);
         }
     }
 
@@ -262,8 +260,8 @@ public class AppointmentState extends LinkableState {
         I(Appointment.SHOWN_AS)
     ));
 
-    public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
-        Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
+    public boolean onlyIrrelevantFieldsChanged(final CalendarObject oldObj, final CalendarObject newObj) {
+        final Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);
         return differingFields.isEmpty();
     }

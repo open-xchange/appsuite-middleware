@@ -56,13 +56,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.iterator.SearchIteratorException.Code;
 
 class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
@@ -74,23 +71,23 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
     private final Connection readCon;
 
-    private final List<AbstractOXException> warnings;
+    private final List<OXException> warnings;
 
     private final Context ctx;
 
-    ReminderSearchIterator(Context ctx, final PreparedStatement preparedStatement, final ResultSet rs, final Connection readCon) throws SearchIteratorException {
+    ReminderSearchIterator(final Context ctx, final PreparedStatement preparedStatement, final ResultSet rs, final Connection readCon) throws OXException {
         super();
         this.ctx = ctx;
-        this.warnings =  new ArrayList<AbstractOXException>(2);
+        this.warnings =  new ArrayList<OXException>(2);
         this.rs = rs;
         this.readCon = readCon;
         this.preparedStatement = preparedStatement;
         try {
             next = ReminderHandler.result2Object(ctx, rs, preparedStatement, false);
-        } catch (final ReminderException exc) {
+        } catch (final OXException exc) {
             next = null;
         } catch (final SQLException exc) {
-            throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.REMINDER);
+            throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         }
     }
 
@@ -98,14 +95,14 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         return next != null;
     }
 
-    public ReminderObject next() throws SearchIteratorException, OXException {
+    public ReminderObject next() throws OXException {
         final ReminderObject reminderObj = next;
         try {
             next = ReminderHandler.result2Object(ctx, rs, preparedStatement, false);
-        } catch (final ReminderException exc) {
+        } catch (final OXException exc) {
             next = null;
         } catch (final SQLException exc) {
-            throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.REMINDER);
+            throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         }
         return reminderObj;
     }
@@ -122,7 +119,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
             DBPool.closeReaderSilent(ctx,readCon);
         } catch (final SQLException exc) {
-            throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.REMINDER);
+            throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         }
     }
 
@@ -139,7 +136,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
     }
 
     public OXException[] getWarnings() {
-        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+        return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
     public boolean hasWarnings() {

@@ -51,8 +51,8 @@ package com.openexchange.groupware.reminder;
 
 import java.sql.Connection;
 import java.util.Date;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.internal.RdbReminderStorage;
@@ -74,13 +74,8 @@ public abstract class ReminderStorage {
         return SINGLETON;
     }
 
-    public ReminderObject[] selectReminder(Context ctx, User user, Date end) throws ReminderException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, false);
-        } catch (DBPoolingException e) {
-            throw new ReminderException(e);
-        }
+    public ReminderObject[] selectReminder(final Context ctx, final User user, final Date end) throws OXException {
+        final Connection con = Database.get(ctx, false);
         try {
             return selectReminder(ctx, con, user, end);
         } finally {
@@ -88,15 +83,10 @@ public abstract class ReminderStorage {
         }
     }
 
-    public abstract ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws ReminderException;
+    public abstract ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws OXException;
 
-    public void deleteReminder(Context ctx, ReminderObject reminder) throws ReminderException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, true);
-        } catch (DBPoolingException e) {
-            throw new ReminderException(e);
-        }
+    public void deleteReminder(final Context ctx, final ReminderObject reminder) throws OXException {
+        final Connection con = Database.get(ctx, true);
         try {
             deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
         } finally {
@@ -104,5 +94,5 @@ public abstract class ReminderStorage {
         }
     }
 
-    public abstract void deleteReminder(Connection con, int ctxId, int reminderId) throws ReminderException;
+    public abstract void deleteReminder(Connection con, int ctxId, int reminderId) throws OXException;
 }

@@ -81,13 +81,11 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.ITipContainer;
 import com.openexchange.data.conversion.ical.ITipMethod;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.impl.AppointmentEventInterface2;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -103,9 +101,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
@@ -136,7 +132,6 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -144,7 +139,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
-import com.openexchange.server.OXException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -257,7 +251,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             mail.send();
         } catch (final OXException e) {
-            LL.log(e);
+            e.log(LOG);
         }
     }
 
@@ -300,7 +294,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return r;
     }
 
-    protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, OXException, DBPoolingException, OXException {
+    protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, OXException {
         return RdbUserConfigurationStorage.loadUserConfiguration(id, groups, context);
     }
 
@@ -313,7 +307,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             folderOwner = getFolderOwner(appointmentObj, new ServerSessionAdapter(session));
         } catch (final OXException e) {
-            LL.log(e);
+            e.log(LOG);
         }
         sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_NEW), folderOwner == session.getUserId() ? Notifications.APPOINTMENT_CREATE_MAIL : Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF, State.Type.NEW), false, false, false);
@@ -603,7 +597,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             allUserIds = loadAllUsersSet(session.getContext());
         } catch (final OXException ue) {
-            LL.log(ue);
+            ue.log(LOG);
             return Collections.emptyList();
         }
 
@@ -633,8 +627,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             p.id,
                             session.getUserId()) && ((!newObj.containsNotification() || newObj.getNotification()) || (forceNotifyOthers && p.id != session.getUserId()));
                         tz = p.timeZone;
-                    } catch (final AbstractOXException e) {
-                        LL.log(e);
+                    } catch (final OXException e) {
+                        e.log(LOG);
                     }
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
@@ -748,7 +742,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 return true;
             }
         } catch (final OXException e) {
-            LL.log(e);
+            e.log(LOG);
         }
 
         return false;
@@ -1141,7 +1135,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             return oxfa.getFolderOwner(cal.getParentFolderID());
         } catch (final OXException e) {
-            LL.log(e);
+            e.log(LOG);
             return session.getUserId();
         }
     }
@@ -1206,7 +1200,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     createdByDisplayName = resolveUsers(ctx, newObj.getCreatedBy())[0].getDisplayName();
                 } catch (final OXException e) {
                     createdByDisplayName = STR_UNKNOWN;
-                    LL.log(e);
+                    e.log(LOG);
                 }
             }
             String modifiedByDisplayName = STR_UNKNOWN;
@@ -1214,7 +1208,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 modifiedByDisplayName = resolveUsers(ctx, session.getUserId())[0].getDisplayName();
             } catch (final OXException e) {
                 modifiedByDisplayName = STR_UNKNOWN;
-                LL.log(e);
+                e.log(LOG);
             }
 
             String onBehalfDisplayName = STR_UNKNOWN;
@@ -1222,9 +1216,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             try {
                 onBehalfDisplayName = resolveUsers(ctx, oxfa.getFolderOwner(newObj.getParentFolderID()))[0].getDisplayName();
             } catch (final OXException e) {
-                LL.log(e);
-            } catch (final OXException e) {
-                LL.log(e);
+                e.log(LOG);
             }
             renderMap.put(new StringReplacement(TemplateToken.CREATED_BY, createdByDisplayName));
             renderMap.put(new StringReplacement(TemplateToken.CHANGED_BY, modifiedByDisplayName));
@@ -1431,7 +1423,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             }
                         }
                     } catch (final OXException e) {
-                        LL.log(e);
+                        e.log(LOG);
                     }
                     break;
                 default:
@@ -1604,7 +1596,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         }
                     }
                 } catch (final OXException e) {
-                    LL.log(e);
+                    e.log(LOG);
                 }
                 break;
             default:
@@ -1675,7 +1667,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         }
                     }
                 } catch (final OXException e) {
-                    LL.log(e);
+                    e.log(LOG);
                 }
                 break;
             default:
@@ -1750,7 +1742,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 // userParticipant.getIdentifier()+": "+folderId);
             }
         } catch (final OXException e) {
-            LL.log(e);
+            e.log(LOG);
         }
 
         if (mail != null) {
@@ -1805,7 +1797,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 displayName = participant.getDisplayName();
             }
         } catch (final OXException e) {
-            LL.log(e);
+            e.log(LOG);
         }
 
         Locale l;
@@ -1887,7 +1879,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 false);
             addReceiver(emailable, receivers, all);
         } catch (final OXException e) {
-            LL.log(e);
+            e.log(LOG);
         }
     }
 

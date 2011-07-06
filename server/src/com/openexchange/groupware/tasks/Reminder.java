@@ -61,7 +61,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.Collections;
@@ -217,8 +218,8 @@ final class Reminder {
         final ReminderService reminder = new ReminderHandler(ctx);
         try {
             reminder.deleteReminder(task.getObjectID(), Types.TASK, con);
-        } catch (final ReminderException e) {
-            if (!ReminderException.Code.NOT_FOUND.equals(e)) {
+        } catch (final OXException e) {
+            if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 throw new OXException(e);
             }
         } catch (final OXException e) {

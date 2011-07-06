@@ -53,7 +53,8 @@ import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.session.Session;
 
@@ -92,11 +93,11 @@ public class RemindAgain {
     public void remindAgain() throws OXException {
         final int module = reminder.getModule();
         if (Types.APPOINTMENT == module) {
-            throw new ReminderException(ReminderException.Code.UNEXPECTED_ERROR, "Operation not supported for module calendar.");
+            throw ReminderExceptionCode.UNEXPECTED_ERROR.create("Operation not supported for module calendar.");
         } else if (Types.TASK == module) {
             remindAgainTask();
         } else {
-            throw new ReminderException(ReminderException.Code.UNEXPECTED_ERROR, "Unknown module: " + module);
+            throw ReminderExceptionCode.UNEXPECTED_ERROR.create("Unknown module: " + module);
         }
     }
 

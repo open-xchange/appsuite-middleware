@@ -63,8 +63,8 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderException;
-import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
 import com.openexchange.server.OXException;
@@ -96,18 +96,18 @@ public class GetArisingReminder {
         this.end = (Date) end.clone();
     }
 
-    public SearchIterator<ReminderObject> loadWithIterator() throws ReminderException {
+    public SearchIterator<ReminderObject> loadWithIterator() throws OXException {
         ReminderObject[] reminders = STORAGE.selectReminder(ctx, user, end);
         reminders = removeAppointments(reminders);
         return new ArrayIterator<ReminderObject>(reminders);
     }
 
-    public ReminderObject[] removeAppointments(final ReminderObject[] reminders) throws ReminderException {
+    public ReminderObject[] removeAppointments(final ReminderObject[] reminders) throws OXException {
         AppointmentSqlFactoryService factoryService;
         try {
             factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true);
         } catch (final OXException e) {
-            throw new ReminderException(e);
+            throw new OXException(e);
         }
         final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
         final List<ReminderObject> retval = new ArrayList<ReminderObject>(reminders.length);
@@ -121,11 +121,11 @@ public class GetArisingReminder {
                     STORAGE.deleteReminder(ctx, reminder);
                     continue;
                 } catch (final OXException e) {
-                    final ReminderException re = new ReminderException(e);
+                    final OXException re = new OXException(e);
                     LOG.error(re.getMessage(), re);
                     continue;
                 } catch (final SQLException e) {
-                    final ReminderException re = new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+                    final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                     LOG.error(re.getMessage(), re);
                     continue;
                 }

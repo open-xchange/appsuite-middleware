@@ -56,7 +56,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -73,16 +73,16 @@ public interface ReminderService {
 
     public int insertReminder(ReminderObject reminderObj, Connection writeCon) throws OXMandatoryFieldException, OXConflictException, OXException;
 
-    void updateReminder(ReminderObject reminder) throws ReminderException;
+    void updateReminder(ReminderObject reminder) throws OXException;
 
     /**
      * This method updates a reminder.
      * @param reminder object with new values for the reminder.
      * @param con writable database connection.
-     * @throws ReminderException TODO
+     * @throws OXException TODO
      */
     void updateReminder(ReminderObject reminder, Connection con)
-        throws ReminderException;
+        throws OXException;
 
     public void deleteReminder(ReminderObject reminder) throws OXException;
 
