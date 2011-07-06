@@ -151,7 +151,7 @@ public final class POP3Exception extends OXException {
         /**
          * No admin permission specified for folder %1$s
          */
-        NO_ADMIN_ACL("No administer permission specified for folder %1$s", Category.USER_INPUT, 2017),
+        NO_ADMIN_ACL("No administer permission specified for folder %1$s", CATEGORY_USER_INPUT, 2017),
         /**
          * Default folder %1$s must not be updated
          */
@@ -199,11 +199,11 @@ public final class POP3Exception extends OXException {
         /**
          * POP3 search failed due to following reason: %1$s. Switching to application-based search
          */
-        POP3_SEARCH_FAILED("POP3 search failed due to following reason: %1$s. Switching to application-based search", Category.SUBSYSTEM_OR_SERVICE_DOWN, 2029),
+        POP3_SEARCH_FAILED("POP3 search failed due to following reason: %1$s. Switching to application-based search", CATEGORY_SERVICE_DOWN, 2029),
         /**
          * POP3 sort failed due to following reason: %1$s Switching to application-based sorting
          */
-        POP3_SORT_FAILED("POP3 sort failed due to following reason: %1$s Switching to application-based sorting", Category.SUBSYSTEM_OR_SERVICE_DOWN, 2030),
+        POP3_SORT_FAILED("POP3 sort failed due to following reason: %1$s Switching to application-based sorting", CATEGORY_SERVICE_DOWN, 2030),
         /**
          * Unknown search field: %1$s
          */
@@ -227,7 +227,7 @@ public final class POP3Exception extends OXException {
         /**
          * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
          */
-        NO_EQUAL_MOVE("Message move aborted for user %1$s. Source and destination folder are equal: %2$s", Category.USER_INPUT, 2036),
+        NO_EQUAL_MOVE("Message move aborted for user %1$s. Source and destination folder are equal: %2$s", CATEGORY_USER_INPUT, 2036),
         /**
          * Folder read-only check failed
          */
@@ -251,7 +251,7 @@ public final class POP3Exception extends OXException {
         /**
          * No attachment was found with id %1$s in message
          */
-        NO_ATTACHMENT_FOUND("No attachment was found with id %1$s in message", Category.USER_INPUT, 2043),
+        NO_ATTACHMENT_FOUND("No attachment was found with id %1$s in message", CATEGORY_USER_INPUT, 2043),
         /**
          * Versit attachment could not be saved due to an unsupported MIME type: %1$s
          */
@@ -359,12 +359,12 @@ public final class POP3Exception extends OXException {
         /**
          * Illegal move operation.
          */
-        MOVE_ILLEGAL("Illegal move operation.", Category.USER_INPUT, 2066),
+        MOVE_ILLEGAL("Illegal move operation.", CATEGORY_USER_INPUT, 2066),
         /**
          * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s).<br>
          * Error message from server: %5$s
          */
-        LOGIN_DELAY("Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s).\nError message from server: %5$s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 2067),
+        LOGIN_DELAY("Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s).\nError message from server: %5$s", CATEGORY_SERVICE_DOWN, 2067),
         /**
          * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
          * Error message from server: %6$s
@@ -373,7 +373,7 @@ public final class POP3Exception extends OXException {
         /**
          * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
          */
-        MISSING_REQUIRED_CAPABILITY("Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2068),
+        MISSING_REQUIRED_CAPABILITY("Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", CATEGORY_CONFIGURATION, 2068),
         /**
          * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
          */
@@ -382,7 +382,7 @@ public final class POP3Exception extends OXException {
          * Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s
          * (user=%4$s, context=%5$s).
          */
-        EXPUNGE_MODE_ONLY("Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2070);
+        EXPUNGE_MODE_ONLY("Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, context=%5$s).", CATEGORY_CONFIGURATION, 2070);
 
         private final String message;
 

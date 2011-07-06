@@ -50,6 +50,7 @@
 package com.openexchange.configjump;
 
 import java.net.URL;
+import com.openexchange.exception.OXException;
 
 /**
  * This interface defines the methods that will be used to generate browser links that redirect the user to the setup system.
@@ -63,7 +64,7 @@ public interface ConfigJumpService {
      * 
      * @param values the implementation of this method can define a number of objects to pass for generating a user specific link.
      * @return a ready to use link to redirect the user to the setup system.
-     * @throws ConfigJumpException if creating the url fails.
+     * @throws OXException if creating the url fails.
      */
-    URL getLink(Replacements values) throws ConfigJumpException;
+    URL getLink(Replacements values) throws OXException;
 }

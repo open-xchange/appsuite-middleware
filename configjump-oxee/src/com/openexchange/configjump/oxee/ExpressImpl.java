@@ -58,6 +58,7 @@ import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import com.openexchange.configjump.ConfigJumpException;
+import com.openexchange.configjump.ConfigJumpExceptionCode;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.ICookie;
 import com.openexchange.configjump.Replacements;
@@ -99,8 +100,7 @@ public class ExpressImpl implements ConfigJumpService {
             urlInst = new URL(url);
             newUrlInst = new URL(protocol, host, port, urlInst.getPath());
         } catch (MalformedURLException e1) {
-            throw new ConfigJumpException(ConfigJumpException.Code.MALFORMED_URL,
-                    e1);
+            throw ConfigJumpExceptionCode.MALFORMED_URL.create(e1);
         }
         final HttpClient httpClient = new HttpClient();
         final HttpState state = httpClient.getState();
@@ -119,7 +119,7 @@ public class ExpressImpl implements ConfigJumpService {
             return new URL(newUrlInst.toExternalForm() + ";jsessionid="
                 + session);
         } catch (IOException e) {
-            throw new ConfigJumpException(ConfigJumpException.Code
+            throw new ConfigJumpException(ConfigJumpExceptionCode
                 .COMMUNICATION, e);
         }
     }

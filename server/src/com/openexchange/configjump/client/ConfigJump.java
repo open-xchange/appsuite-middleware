@@ -51,7 +51,7 @@ package com.openexchange.configjump.client;
 
 import java.net.URL;
 import com.openexchange.configjump.ConfigJumpException;
-import com.openexchange.configjump.ConfigJumpException.Code;
+import com.openexchange.configjump.ConfigJumpExceptionCode;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.Replacements;
 
@@ -74,7 +74,7 @@ public final class ConfigJump {
     public static URL getLink(final Replacements replacements) throws ConfigJumpException {
         final ConfigJumpService service = holder.getService();
         if (null == service) {
-            throw new ConfigJumpException(Code.NOT_IMPLEMENTED);
+            throw new ConfigJumpException(ConfigJumpExceptionCode.NOT_IMPLEMENTED);
         }
         try {
             return service.getLink(replacements);

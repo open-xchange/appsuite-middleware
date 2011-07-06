@@ -148,7 +148,7 @@ public class ImportServlet extends ImportExport {
                 throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
             }
         } catch (final AbstractOXException e) {
-            if (Category.USER_INPUT.equals(e.getCategory())) {
+            if (CATEGORY_USER_INPUT.equals(e.getCategory())) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);

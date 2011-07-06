@@ -96,9 +96,9 @@ public enum InfostoreExceptionCodes {
     /** Cannot pre-fetch results. */
     PREFETCH_FAILED(PREFETCH_FAILED_MSG, Category.TRY_AGAIN, 219, false),
     /** The requested item does not exist. */
-    NOT_EXIST(NOT_EXIST_MSG, Category.USER_INPUT, 300),
+    NOT_EXIST(NOT_EXIST_MSG, CATEGORY_USER_INPUT, 300),
     /** Could not load documents to check the permissions */
-    COULD_NOT_LOAD(COULD_NOT_LOAD_MSG, Category.USER_INPUT, 301),
+    COULD_NOT_LOAD(COULD_NOT_LOAD_MSG, CATEGORY_USER_INPUT, 301),
     /** The folder %d is not an Infostore folder */
     NOT_INFOSTORE_FOLDER(NOT_INFOSTORE_FOLDER_MSG, CATEGORY_ERROR, 302),
     /** You do not have sufficient read permissions to read objects in this folder. */
@@ -128,9 +128,9 @@ public enum InfostoreExceptionCodes {
     /** You are not allowed to delete objects in the source folder, so this document cannot be moved. */
     NO_SOURCE_DELETE_PERMISSION(NO_SOURCE_DELETE_PERMISSION_MSG, Category.PERMISSION, 421),
     /** The document you requested does not exist. */
-    DOCUMENT_NOT_EXIST(DOCUMENT_NOT_EXISTS_MSG, Category.USER_INPUT, 438),
+    DOCUMENT_NOT_EXIST(DOCUMENT_NOT_EXISTS_MSG, CATEGORY_USER_INPUT, 438),
     /** Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s. */
-    FILENAME_NOT_UNIQUE(FILENAME_NOT_UNIQUE_MSG, Category.USER_INPUT, 441),
+    FILENAME_NOT_UNIQUE(FILENAME_NOT_UNIQUE_MSG, CATEGORY_USER_INPUT, 441),
     /** Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s */
     NUMBER_OF_VERSIONS_FAILED(NUMBER_OF_VERSIONS_FAILED_MSG, CATEGORY_ERROR, 442),
     /** You do not have the permissions to delete at least one of the info items. */
@@ -140,7 +140,7 @@ public enum InfostoreExceptionCodes {
     /** Folder %d has two subfolders named %s. The database for context %d is not consistent. */
     DUPLICATE_SUBFOLDER(DUPLICATE_SUBFOLDER_MSG, CATEGORY_ERROR, 501),
     /** In order to accomplish the search, %1$d or more characters are required. */
-    PATTERN_NEEDS_MORE_CHARACTERS(PATTERN_NEEDS_MORE_CHARACTERS_MSG, Category.USER_INPUT, 602),
+    PATTERN_NEEDS_MORE_CHARACTERS(PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602),
     /** Could not delete DocumentMetadata %d. Please try again. */
     DELETE_FAILED(DELETE_FAILED_MSG, Category.CONCURRENT_MODIFICATION, 700),
     /** The document could not be updated because it was modified. Reload the view. */
@@ -148,9 +148,9 @@ public enum InfostoreExceptionCodes {
     /** The document was updated in between do and undo. The Database is now probably inconsistent. */
     UPDATED_BETWEEN_DO_AND_UNDO(UPDATED_BETWEEN_DO_AND_UNDO_MSG, Category.CONCURRENT_MODIFICATION, 1303),
     /** This folder is a virtual folder. It cannot contain documents. */
-    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, Category.USER_INPUT, 1700),
+    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, CATEGORY_USER_INPUT, 1700),
     /** Validation failed: %s */
-    VALIDATION_FAILED(VALIDATION_FAILED_MSG, Category.USER_INPUT, 2100);
+    VALIDATION_FAILED(VALIDATION_FAILED_MSG, CATEGORY_USER_INPUT, 2100);
 
     private final String message;
 

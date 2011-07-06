@@ -244,7 +244,7 @@ public abstract class OXServlet extends WebDavServlet {
             try {
                 session = addSession(loginRequest);
             } catch (final LoginException e) {
-                if (e.getCategory() == Category.USER_INPUT) {
+                if (e.getCategory() == CATEGORY_USER_INPUT) {
                     addUnauthorizedHeader(req, resp);
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 } else {

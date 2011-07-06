@@ -225,7 +225,7 @@ public class VCardImporter extends AbstractImporter {
                                 contactInterface.insertContactObject(contactObj);
                             }
                         } catch (OXException oxEx) {
-                            if (Category.USER_INPUT.equals(oxEx.getCategory())) {
+                            if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
                                 LOG.debug(oxEx.getMessage(), oxEx);
                             } else {
                                 LOG.error(oxEx.getMessage(), oxEx);

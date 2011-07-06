@@ -121,7 +121,7 @@ public class OXPermissionException extends OXException {
         /**
          * No permission for module: %s.
          */
-        NoPermissionForModul("No permission for module: %s.", Category.USER_INPUT, 1),
+        NoPermissionForModul("No permission for module: %s.", CATEGORY_USER_INPUT, 1),
 
         /**
          * No folder permission.

@@ -89,7 +89,7 @@ public final class SMTPException extends OXException {
         /**
          * No recipient(s) has been defined for new message
          */
-        MISSING_RECIPIENTS("There are no recipient(s) for the new message.", Category.USER_INPUT, 3006),
+        MISSING_RECIPIENTS("There are no recipient(s) for the new message.", CATEGORY_USER_INPUT, 3006),
         /**
          * Message has been successfully sent, but a copy could not be placed in your sent folder
          */
@@ -115,7 +115,7 @@ public final class SMTPException extends OXException {
          */
         NOT_CONNECTED("No storage access because mail connection is not connected", CATEGORY_ERROR, 3012),
         /** Unable to parse SMTP server URI "%1$s". */
-        URI_PARSE_FAILED("Unable to parse SMTP server URI \"%1$s\".", Category.SETUP_ERROR, 3013);
+        URI_PARSE_FAILED("Unable to parse SMTP server URI \"%1$s\".", CATEGORY_CONFIGURATION, 3013);
 
         private final String message;
 

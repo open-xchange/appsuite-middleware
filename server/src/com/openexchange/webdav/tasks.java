@@ -285,7 +285,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                 LOG.debug(_parsePropChilds, exc);
                 writeResponse(task, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
             } catch (OXException e) {
-                if (e.getCategory() == Category.USER_INPUT) {
+                if (e.getCategory() == CATEGORY_USER_INPUT) {
                     LOG.debug(_parsePropChilds, e);
                     writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(e, USER_INPUT_EXCEPTION), clientId, os, xo);
                 } else {

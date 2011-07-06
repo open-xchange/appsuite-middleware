@@ -307,7 +307,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
                 LOG.debug(_parsePropChilds, exc);
                 writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
             } catch (final OXException exc) {
-                if (exc.getCategory() == Category.USER_INPUT) {
+                if (exc.getCategory() == CATEGORY_USER_INPUT) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
                             USER_INPUT_EXCEPTION), clientId, os, xo);

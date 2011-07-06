@@ -65,10 +65,10 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode{
      * A parsing error occurred: %1$s.
      */
     ParseException(CATEGORY_ERROR, 2, "Provide well-formed HTML.", OXMFErrorStrings.PARSE_EXCEPTION),
-    IOException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 3, "Try again later.", OXMFErrorStrings.IOException),
-    HttpException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 4, "Try again later.", OXMFErrorStrings.HttpException), 
+    IOException(CATEGORY_SERVICE_DOWN, 3, "Try again later.", OXMFErrorStrings.IOException),
+    HttpException(CATEGORY_SERVICE_DOWN, 4, "Try again later.", OXMFErrorStrings.HttpException), 
     CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES(Category.INTERNAL_ERROR, 5,"Try again later.", OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES),
-    ERROR_LOADING_SUBSCRIPTION(Category.SUBSYSTEM_OR_SERVICE_DOWN, 6, "Try again later.", OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION), 
+    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, "Try again later.", OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION), 
     ;
     
     private Category category;

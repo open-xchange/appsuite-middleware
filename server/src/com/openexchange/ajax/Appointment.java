@@ -101,7 +101,7 @@ public class Appointment extends DataServlet {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final AbstractOXException e) {
-            if (e.getCategory() == Category.USER_INPUT) {
+            if (e.getCategory() == CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);
@@ -167,7 +167,7 @@ public class Appointment extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         } catch (final AbstractOXException e) {
-            if (e.getCategory() == Category.USER_INPUT) {
+            if (e.getCategory() == CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);

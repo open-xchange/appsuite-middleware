@@ -97,7 +97,7 @@ public class Tasks extends DataServlet {
             response.setTimestamp(taskRequest.getTimestamp());
             response.setData(responseObj);
         } catch (final AbstractOXException e) {
-            if (e.getCategory() == Category.USER_INPUT) {
+            if (e.getCategory() == CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);
@@ -157,7 +157,7 @@ public class Tasks extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         } catch (final AbstractOXException e) {
-            if (e.getCategory() == Category.USER_INPUT) {
+            if (e.getCategory() == CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);

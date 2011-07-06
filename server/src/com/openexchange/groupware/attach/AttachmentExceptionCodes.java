@@ -81,29 +81,29 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
     /** Invalid SQL Query: %s */
     SQL_PROBLEM(SQL_PROBLEM_MSG, CATEGORY_ERROR, 100),
     /** Could not save file to the file store. */
-    SAVE_FAILED(SAVE_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 400),
+    SAVE_FAILED(SAVE_FAILED_MSG, CATEGORY_SERVICE_DOWN, 400),
     /** Attachments must contain a file. */
-    FILE_MISSING(FILE_MISSING_MSG, Category.USER_INPUT, 401),
+    FILE_MISSING(FILE_MISSING_MSG, CATEGORY_USER_INPUT, 401),
     /** Cannot generate ID for new attachment: %s */
     GENERATIING_ID_FAILED(GENERATING_ID_FAILED_MSG, CATEGORY_ERROR, 402),
     /** Could not retrieve file: %s */
-    READ_FAILED(READ_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 404),
+    READ_FAILED(READ_FAILED_MSG, CATEGORY_SERVICE_DOWN, 404),
     /** The attachment you requested no longer exists. Please refresh the view. */
-    ATTACHMENT_NOT_FOUND(ATTACHMENT_NOT_FOUND_MSG, Category.USER_INPUT, 405),
+    ATTACHMENT_NOT_FOUND(ATTACHMENT_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 405),
     /** Could not delete attachment. */
     DELETE_FAILED(DELETE_FAILED_MSG, CATEGORY_ERROR, 407),
     /** Could not find an attachment with the file_id %s. Either the file is orphaned or belongs to another module. */
     ATTACHMENT_WITH_FILEID_NOT_FOUND(ATTACHMENT_WITH_FILEID_NOT_FOUND_MSG, CATEGORY_ERROR, 408),
     /** Could not delete files from filestore. Context: %d. */
-    FILE_DELETE_FAILED(FILE_DELETE_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 416),
+    FILE_DELETE_FAILED(FILE_DELETE_FAILED_MSG, CATEGORY_SERVICE_DOWN, 416),
     /** Validation failed: %s */
-    INVALID_CHARACTERS(INVALID_CHARACTERS_MSG, Category.USER_INPUT, 418),
+    INVALID_CHARACTERS(INVALID_CHARACTERS_MSG, CATEGORY_USER_INPUT, 418),
     /** An error occurred executing the search in the database. */
     SEARCH_PROBLEM(SEARCH_PROBLEM_MSG, CATEGORY_ERROR, 420),
     /** Unable to access the filestore. */
-    FILESTORE_DOWN(FILESTORE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 421),
+    FILESTORE_DOWN(FILESTORE_DOWN_MSG, CATEGORY_SERVICE_DOWN, 421),
     /** Writing to filestore failed. */
-    FILESTORE_WRITE_FAILED(FILESTORE_WRITE_FAILED_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 422),
+    FILESTORE_WRITE_FAILED(FILESTORE_WRITE_FAILED_MSG, CATEGORY_SERVICE_DOWN, 422),
     /** Changes done to the object this attachment was added to could not be undone. Your database is probably inconsistent, run the consistency tool. */
     UNDONE_FAILED(UNDONE_FAILED_MSG, CATEGORY_ERROR, 600),
     /** An error occurred attaching to the given object. */
@@ -111,9 +111,9 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
     /** The Object could not be detached because the update to an underlying object failed. */
     DETACH_FAILED(DETACH_FAILED_MSG, CATEGORY_ERROR, 602),
     /** Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number. */
-    INVALID_REQUEST_PARAMETER(INVALID_REQUEST_PARAMETER_MSG, Category.USER_INPUT, 701),
+    INVALID_REQUEST_PARAMETER(INVALID_REQUEST_PARAMETER_MSG, CATEGORY_USER_INPUT, 701),
     /** Conflicting services registered for context %1$i and folder %2$i */
-    SERVICE_CONFLICT(SERVICE_CONFLICT_MSG, Category.SETUP_ERROR, 900),
+    SERVICE_CONFLICT(SERVICE_CONFLICT_MSG, CATEGORY_CONFIGURATION, 900),
     ;
 
     private final String message;

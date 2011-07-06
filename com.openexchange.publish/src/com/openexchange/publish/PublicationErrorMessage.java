@@ -85,8 +85,8 @@ public enum PublicationErrorMessage implements OXExceptionCode {
     /**
      * Cannot find the publication site (according ID and Context).
      */
-    PublicationNotFound(Category.USER_INPUT, 5, "Provide a valid id.", PUBLICATION_NOT_FOUND_MSG),
-    UniquenessConstraintViolation(Category.USER_INPUT, 6, "Choose a different value", UNIQUENESS_CONSTRAINT_VIOLATION),
+    PublicationNotFound(CATEGORY_USER_INPUT, 5, "Provide a valid id.", PUBLICATION_NOT_FOUND_MSG),
+    UniquenessConstraintViolation(CATEGORY_USER_INPUT, 6, "Choose a different value", UNIQUENESS_CONSTRAINT_VIOLATION),
     AccessDenied(Category.PERMISSION, 7, "Try again when you have the correct permissions", ACCESS_DENIED_MSG);
 
     private Category category;

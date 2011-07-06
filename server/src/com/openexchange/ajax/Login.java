@@ -477,7 +477,7 @@ public class Login extends AJAXServlet {
                     LOG.debug(e.getMessage(), e);
                     response.setException(e);
                 } catch (final LoginException e) {
-                    if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
+                    if (AbstractOXException.CATEGORY_USER_INPUT == e.getCategory()) {
                         LOG.debug(e.getMessage(), e);
                     } else {
                         LOG.error(e.getMessage(), e);
@@ -737,7 +737,7 @@ public class Login extends AJAXServlet {
             appendModules(session, json, req);
             response.setData(json);
         } catch (final LoginException e) {
-            if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
+            if (AbstractOXException.CATEGORY_USER_INPUT == e.getCategory()) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);

@@ -288,7 +288,7 @@ public class AbstractOXException extends Exception {
     public AbstractOXException(final Component component, final Throwable cause) {
         super(cause);
         this.component = component;
-        category = CATEGORY_ERROR;
+        category = Category.CODE_ERROR;
         problematics = new ArrayList<ProblematicAttribute>();
     }
 

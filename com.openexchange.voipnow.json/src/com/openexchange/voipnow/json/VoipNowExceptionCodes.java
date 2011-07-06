@@ -75,7 +75,7 @@ public enum VoipNowExceptionCodes implements OXExceptionCode {
     /**
      * Missing main extension attribute for user %1$s in context %2$s.
      */
-    MISSING_MAIN_EXTENSION(VoipNowExceptionMessages.MISSING_MAIN_EXTENSION_MSG, Category.SETUP_ERROR, 4),
+    MISSING_MAIN_EXTENSION(VoipNowExceptionMessages.MISSING_MAIN_EXTENSION_MSG, CATEGORY_CONFIGURATION, 4),
     /**
      * HTTP request to VoipNow server %1$s failed. Status line: %2$s
      */

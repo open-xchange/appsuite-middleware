@@ -143,23 +143,23 @@ public class PasswordException extends AbstractOXException {
         /**
          * New password too short.
          */
-        PASSWORD_SHORT("New password is too short.", Category.USER_INPUT, Detail.ERROR, 2),
+        PASSWORD_SHORT("New password is too short.", CATEGORY_USER_INPUT, Detail.ERROR, 2),
         /**
          * New password too weak.
          */
-        PASSWORD_WEAK("New password is too weak.", Category.USER_INPUT, Detail.ERROR, 3),
+        PASSWORD_WEAK("New password is too weak.", CATEGORY_USER_INPUT, Detail.ERROR, 3),
         /**
          * User not found.
          */
-        PASSWORD_NOUSER("Cannot find user.", Category.SETUP_ERROR, Detail.ERROR, 4),
+        PASSWORD_NOUSER("Cannot find user.", CATEGORY_CONFIGURATION, Detail.ERROR, 4),
         /**
          * User not found.
          */
-        LDAP_ERROR("LDAP error.", Category.SETUP_ERROR, Detail.ERROR, 5),
+        LDAP_ERROR("LDAP error.", CATEGORY_CONFIGURATION, Detail.ERROR, 5),
         /**
          * A database connection cannot be obtained.
          */
-        NO_CONNECTION("Cannot get database connection.", Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.ERROR, 6),
+        NO_CONNECTION("Cannot get database connection.", CATEGORY_SERVICE_DOWN, Detail.ERROR, 6),
 
         /**
          * No permission to modify resources in context %1$s

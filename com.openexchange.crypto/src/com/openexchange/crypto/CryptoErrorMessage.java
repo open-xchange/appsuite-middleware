@@ -60,7 +60,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
     /**
      * Bad password.
      */
-    BadPassword(Category.USER_INPUT, 1, "Provide correct password.", "Wrong Password."),
+    BadPassword(CATEGORY_USER_INPUT, 1, "Provide correct password.", "Wrong Password."),
     /**
      * Encoding error.
      */
@@ -72,7 +72,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
     /**
      * No salt given.
      */
-    NoSalt(Category.USER_INPUT, 4, "Provide salt", "No salt given.");
+    NoSalt(CATEGORY_USER_INPUT, 4, "Provide salt", "No salt given.");
 
     private Category category;
 

@@ -116,7 +116,7 @@ public class PushUDPException extends AbstractOXException {
         /**
          * Missing Push UDP configuration.
          */
-        MISSING_CONFIG("Missing Push UDP configuration.", 2, AbstractOXException.Category.SETUP_ERROR),
+        MISSING_CONFIG("Missing Push UDP configuration.", 2, AbstractOXException.CATEGORY_CONFIGURATION),
         /**
          * User ID is not a number: %1$s.
          */

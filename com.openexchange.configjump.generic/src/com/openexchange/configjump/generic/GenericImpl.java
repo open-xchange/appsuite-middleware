@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.configjump.ConfigJumpException;
+import com.openexchange.configjump.ConfigJumpExceptionCode;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.Replacements;
 
@@ -88,8 +89,7 @@ public class GenericImpl implements ConfigJumpService {
             replacedUrl = replacedUrl.replace("%c", extract(loginInfos, contextId));
             return new URL(replacedUrl);
         } catch (final MalformedURLException e) {
-            throw new ConfigJumpException(ConfigJumpException.Code.MALFORMED_URL,
-                e, replacedUrl);
+            throw ConfigJumpExceptionCode.MALFORMED_URL.create(e, replacedUrl);
         }
     }
 

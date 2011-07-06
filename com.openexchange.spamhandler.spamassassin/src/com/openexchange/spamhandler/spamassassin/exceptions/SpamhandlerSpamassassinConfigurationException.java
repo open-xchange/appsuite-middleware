@@ -70,37 +70,37 @@ public class SpamhandlerSpamassassinConfigurationException extends OXException {
         /**
          * The given value for mode "%s" is not a possible one
          */
-        MODE_TYPE_WRONG("The given value for mode \"%s\" is not a possible one", Category.SETUP_ERROR, 1),
+        MODE_TYPE_WRONG("The given value for mode \"%s\" is not a possible one", CATEGORY_CONFIGURATION, 1),
         
         /**
          * The parameter "%s" is not set in the property file
          */
-        PARAMETER_NOT_SET("The parameter \"%s\" is not set in property file", Category.SETUP_ERROR, 2),
+        PARAMETER_NOT_SET("The parameter \"%s\" is not set in property file", CATEGORY_CONFIGURATION, 2),
 
         /**
          * The parameter "%s" must be set in the property file if spamd is true
          */
-        PARAMETER_NOT_SET_SPAMD("The parameter \"%s\" must be set in the property file if spamd is true", Category.SETUP_ERROR, 3),
+        PARAMETER_NOT_SET_SPAMD("The parameter \"%s\" must be set in the property file if spamd is true", CATEGORY_CONFIGURATION, 3),
         
         /**
          * The parameter "%s" must be an integer value but is "%s"
          */
-        PARAMETER_NO_INTEGER("The parameter \"%s\" must be an integer value but is \"%s\"", Category.SETUP_ERROR, 4),
+        PARAMETER_NO_INTEGER("The parameter \"%s\" must be an integer value but is \"%s\"", CATEGORY_CONFIGURATION, 4),
 
         /**
          * The parameter "userSource" must be set in the property file if spamd is true
          */
-        USERSOURCE_NOT_SET("The parameter \"userSource\" must be set in the property file if spamd is true", Category.SETUP_ERROR, 5),
+        USERSOURCE_NOT_SET("The parameter \"userSource\" must be set in the property file if spamd is true", CATEGORY_CONFIGURATION, 5),
 
         /**
          * The given value for userSource "%s" is not a possible one
          */
-        USERSOURCE_WRONG("The given value for userSource \"%s\" is not a possible one", Category.SETUP_ERROR, 6),
+        USERSOURCE_WRONG("The given value for userSource \"%s\" is not a possible one", CATEGORY_CONFIGURATION, 6),
 
         /**
          * The parameter "%s" must be an long value but is "%s"
          */
-        PARAMETER_NO_LONG("The parameter \"%s\" must be an long value but is \"%s\"", Category.SETUP_ERROR, 7);
+        PARAMETER_NO_LONG("The parameter \"%s\" must be an long value but is \"%s\"", CATEGORY_CONFIGURATION, 7);
 
         
         /**

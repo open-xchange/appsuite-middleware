@@ -50,7 +50,7 @@
 package com.openexchange.subscribe.json;
 
 import static com.openexchange.groupware.AbstractOXException.CATEGORY_ERROR;
-import static com.openexchange.groupware.AbstractOXException.Category.USER_INPUT;
+import static com.openexchange.groupware.AbstractOXException.CATEGORY_USER_INPUT;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 

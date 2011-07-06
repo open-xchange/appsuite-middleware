@@ -66,19 +66,19 @@ public final class SpellCheckServletException extends AbstractOXException {
         /**
          * Spell check property '%1$s' not specified in configuration.
          */
-        MISSING_PROPERTY("Spell check property '%1$s' not specified in configuration.", Category.SETUP_ERROR, 1),
+        MISSING_PROPERTY("Spell check property '%1$s' not specified in configuration.", CATEGORY_CONFIGURATION, 1),
         /**
          * Spell check directory '%1$s' not found or is not a directory
          */
-        MISSING_DIR("Spell check directory '%1$s' not found or is not a directory", Category.SETUP_ERROR, 2),
+        MISSING_DIR("Spell check directory '%1$s' not found or is not a directory", CATEGORY_CONFIGURATION, 2),
         /**
          * Only one phonetic file is allowed per locale
          */
-        ONLY_ONE_PHON_FILE("Only one phonetic file is allowed per locale", Category.SETUP_ERROR, 3),
+        ONLY_ONE_PHON_FILE("Only one phonetic file is allowed per locale", CATEGORY_CONFIGURATION, 3),
         /**
          * At least one word list file per locale
          */
-        AT_LEAST_ONE_WL_FILE("At least one word list file per locale", Category.SETUP_ERROR, 4),
+        AT_LEAST_ONE_WL_FILE("At least one word list file per locale", CATEGORY_CONFIGURATION, 4),
         /**
          * An I/O error occurred: %1$s
          */
@@ -86,11 +86,11 @@ public final class SpellCheckServletException extends AbstractOXException {
         /**
          * No locale directory found
          */
-        NO_LOCALE_FOUND("No locale directory found", Category.SETUP_ERROR, 6),
+        NO_LOCALE_FOUND("No locale directory found", CATEGORY_CONFIGURATION, 6),
         /**
          * No dictionary available for locale %1$s
          */
-        MISSING_LOCALE_DIC("No dictionary available for locale %1$s", Category.SETUP_ERROR, 7),
+        MISSING_LOCALE_DIC("No dictionary available for locale %1$s", CATEGORY_CONFIGURATION, 7),
         /**
          * A SQL error occurred: %1$s
          */

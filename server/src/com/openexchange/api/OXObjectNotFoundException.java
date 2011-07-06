@@ -108,7 +108,7 @@ public class OXObjectNotFoundException extends OXException
     	/**
     	 * Object not found. %s
     	 */
-        OBJECT_NOT_FOUND("Object not found. %s", 1, AbstractOXException.Category.USER_INPUT)
+        OBJECT_NOT_FOUND("Object not found. %s", 1, AbstractOXException.CATEGORY_USER_INPUT)
         ;
         
         /**
