@@ -49,7 +49,7 @@
 
 package com.openexchange.authorization;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link AuthorizationExceptionMessages}

@@ -52,10 +52,7 @@ package com.openexchange.authorization.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.authorization.AuthorizationException;
-import com.openexchange.authorization.AuthorizationExceptionFactory;
 import com.openexchange.authorization.AuthorizationService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.server.osgi.AuthorizationCustomizer;
 
 /**
@@ -66,22 +63,11 @@ public class AuthorizationActivator implements BundleActivator {
 
     private ServiceTracker tracker;
 
-    private ComponentRegistration componentRegistration;
-
     public AuthorizationActivator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        /*
-         * Register component
-         */
-        componentRegistration =
-            new ComponentRegistration(
-                context,
-                AuthorizationException.AUTHORIZATION_COMPONENT,
-                "com.openexchange.authorization",
-                AuthorizationExceptionFactory.getInstance());
+    public void start(final BundleContext context) throws Exception {
         /*
          * Start tracker
          */
@@ -89,17 +75,10 @@ public class AuthorizationActivator implements BundleActivator {
         tracker.open();
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         if (null != tracker) {
             tracker.close();
             tracker = null;
-        }
-        /*
-         * Unregister component
-         */
-        if (null != componentRegistration) {
-            componentRegistration.unregister();
-            componentRegistration = null;
         }
     }
 }
