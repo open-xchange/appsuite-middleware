@@ -52,8 +52,8 @@ package com.openexchange.pop3;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
-import com.openexchange.mail.IndexRange;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -65,11 +65,9 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -119,9 +117,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
                     true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (final OXException e) {
-                throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
+                throw e;
             }
         }
         return mailAccount;

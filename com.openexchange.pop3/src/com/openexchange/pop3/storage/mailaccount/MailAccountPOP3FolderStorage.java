@@ -54,9 +54,8 @@ import static com.openexchange.pop3.storage.mailaccount.util.Utility.stripPathFr
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSessionCache;
@@ -77,12 +76,10 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
@@ -139,9 +136,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
             try {
                 return POP3ServiceRegistry.getServiceRegistry().getService(ContextService.class, true).getContext(session.getContextId());
             } catch (final OXException e) {
-                throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
+                throw e;
             }
         }
         return ctx;
@@ -226,9 +221,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                     final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), getContext());
                     isSpamOptionEnabled = usm.isSpamOptionEnabled();
                 } catch (final OXException e) {
-                    throw new OXException(e);
-                } catch (final OXException e) {
-                    throw new OXException(e);
+                    throw e;
                 }
                 /*
                  * Get default folder names
@@ -384,7 +377,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     public String deleteFolder(final String fullname, final boolean hardDelete) throws OXException {
         // TODO: Shall we deny mail folder deletion in POP3 accounts?
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
-            throw new POP3Exception(POP3Exception.Code.NO_DEFAULT_FOLDER_DELETE, fullname);
+            throw POP3ExceptionCode.NO_DEFAULT_FOLDER_DELETE.create(fullname);
         }
         final String realFullname = getRealFullname(fullname);
         if (hardDelete || performHardDelete(fullname)) {
@@ -577,19 +570,19 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     public String moveFolder(final String fullname, final String newFullname) throws OXException {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(newFullname)) {
-            throw new POP3Exception(POP3Exception.Code.MOVE_ILLEGAL);
+            throw POP3ExceptionCode.MOVE_ILLEGAL.create();
         } else if (isDefaultFolder(fullname)) {
-            throw new POP3Exception(POP3Exception.Code.MOVE_ILLEGAL);
+            throw POP3ExceptionCode.MOVE_ILLEGAL.create();
         } else if (isDefaultFolder(newFullname)) {
-            throw new POP3Exception(POP3Exception.Code.MOVE_ILLEGAL);
+            throw POP3ExceptionCode.MOVE_ILLEGAL.create();
         }
         final String[] parentAndName = getParentAndName(newFullname, storage.getSeparator());
         final String parentFullname = parentAndName[0];
         if (null == parentFullname) {
-            throw new POP3Exception(POP3Exception.Code.MOVE_ILLEGAL);
+            throw POP3ExceptionCode.MOVE_ILLEGAL.create();
         }
         if (delegatee.exists(getRealFullname(newFullname))) {
-            throw new POP3Exception(POP3Exception.Code.MOVE_ILLEGAL);
+            throw POP3ExceptionCode.MOVE_ILLEGAL.create();
         }
         // Move folder
         moveFolder0(delegatee.getFolder(getRealFullname(fullname)), getRealFullname(parentFullname), parentAndName[1]);

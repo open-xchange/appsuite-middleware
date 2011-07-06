@@ -67,8 +67,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.config.MailAccountPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
@@ -83,7 +82,6 @@ import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.pop3.util.POP3CapabilityCache;
 import com.openexchange.pop3.util.POP3StorageUtil;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Store;
 
@@ -216,8 +214,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
              */
             String providerName = POP3StorageUtil.getPOP3StorageProviderName(pop3Access.accountId, user, cid);
             if (null == providerName) {
-                final POP3Exception e =
-                    new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
+                final OXException e =
+                    POP3ExceptionCode.MISSING_POP3_STORAGE_NAME.create(Integer.valueOf(user), Integer.valueOf(cid));
                 LOG.warn("Using fallback storage \"mailaccount\".\n" + e.getMessage(), e);
                 providerName = MailAccountPOP3StorageProvider.NAME;
                 /*
@@ -229,7 +227,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             }
             final POP3StorageProvider provider = POP3StorageProviderRegistry.getInstance().getPOP3StorageProvider(providerName);
             if (null == provider) {
-                throw new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE, Integer.valueOf(user), Integer.valueOf(cid));
+                throw POP3ExceptionCode.MISSING_POP3_STORAGE.create(Integer.valueOf(user), Integer.valueOf(cid));
             }
             final POP3StorageProperties properties = provider.getPOP3StorageProperties(pop3Access);
             pop3Access.pop3Storage = provider.getPOP3Storage(pop3Access, properties);
@@ -399,10 +397,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             } catch (final MessagingException e) {
                 LOG.warn(e.getMessage(), e);
             }
-        } catch (final POP3Exception e) {
-            throw e;
         } catch (final OXException e) {
-            return false;
+            throw e;
         }
         return true;
     }
@@ -479,7 +475,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     public POP3FolderStorage getFolderStorage() throws OXException {
         if (!connected) {
-            throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
+            throw POP3ExceptionCode.NOT_CONNECTED.create();
         }
         if (null == folderStorage) {
             folderStorage = new POP3FolderStorage(pop3Storage);
@@ -490,7 +486,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     public POP3MessageStorage getMessageStorage() throws OXException {
         if (!connected) {
-            throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
+            throw POP3ExceptionCode.NOT_CONNECTED.create();
         }
         if (null == messageStorage) {
             messageStorage = new POP3MessageStorage(pop3Storage, accountId, session);
@@ -501,7 +497,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     public MailLogicTools getLogicTools() throws OXException {
         if (!connected) {
-            throw new POP3Exception(POP3Exception.Code.NOT_CONNECTED);
+            throw POP3ExceptionCode.NOT_CONNECTED.create();
         }
         if (null == logicTools) {
             logicTools = new MailLogicTools(session, accountId);
@@ -544,9 +540,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
-            throw new POP3Exception(e);
-        } catch (final OXException e) {
-            throw new POP3Exception(e);
+            throw e;
         }
     }
 

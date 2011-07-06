@@ -57,11 +57,10 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.session.Session;
 
@@ -112,7 +111,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
@@ -126,8 +125,8 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -146,7 +145,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             stmt.setString(pos++, uidl);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
@@ -159,8 +158,8 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -171,7 +170,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
@@ -184,8 +183,8 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -202,7 +201,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             }
             return set;
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, false, con);
@@ -213,8 +212,8 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -226,7 +225,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             stmt.setString(pos++, uidl);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
@@ -237,8 +236,8 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -264,7 +263,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);

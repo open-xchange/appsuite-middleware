@@ -52,11 +52,12 @@ package com.openexchange.pop3.config;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.pop3.POP3Capabilities;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 
 /**
  * {@link POP3Config} - The POP3 configuration.
@@ -164,14 +165,14 @@ public final class POP3Config extends MailConfig {
      * Gets the internet address of the POP3 server.
      * 
      * @return The internet address of the POP3 server.
-     * @throws IMAPException If POP3 server cannot be resolved
+     * @throws OXException If POP3 server cannot be resolved
      */
-    public InetAddress getPOP3ServerAddress() throws POP3Exception {
+    public InetAddress getPOP3ServerAddress() throws OXException {
         if (null == pop3ServerAddress) {
             try {
                 pop3ServerAddress = InetAddress.getByName(pop3Server);
             } catch (final UnknownHostException e) {
-                throw new POP3Exception(POP3Exception.Code.IO_ERROR, e, e.getMessage());
+                throw POP3ExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }
         return pop3ServerAddress;
@@ -183,7 +184,7 @@ public final class POP3Config extends MailConfig {
      * @return The socket address (internet address + port) of the POP3 server.
      * @throws IMAPException If POP3 server cannot be resolved
      */
-    public InetSocketAddress getPOP3ServerSocketAddress() throws POP3Exception {
+    public InetSocketAddress getPOP3ServerSocketAddress() throws OXException {
         if (null == pop3ServerSocketAddress) {
             pop3ServerSocketAddress = new InetSocketAddress(getPOP3ServerAddress(), pop3Port);
         }

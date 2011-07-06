@@ -54,11 +54,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.session.Session;
 
@@ -109,7 +108,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
@@ -143,7 +142,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
             }
             return null;
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -157,8 +156,8 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -181,7 +180,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
             stmt.setString(pos++, propertyValue);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
@@ -192,8 +191,8 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         try {
             return getProperty(accountId, user, cid, propertyName, con);
@@ -206,8 +205,8 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -220,7 +219,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
             stmt.setString(pos++, propertyName);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);

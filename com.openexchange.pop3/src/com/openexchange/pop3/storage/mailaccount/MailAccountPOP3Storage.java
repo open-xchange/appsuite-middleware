@@ -75,14 +75,14 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.connect.POP3StoreConnector;
 import com.openexchange.pop3.connect.POP3StoreConnector.POP3StoreResult;
@@ -93,7 +93,6 @@ import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.pop3.storage.mailaccount.util.Utility;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Message;
@@ -141,9 +140,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         {
             String tmp = properties.getProperty(POP3StoragePropertyNames.PROPERTY_PATH);
             if (null == tmp) {
-                final POP3Exception e = new POP3Exception(
-                    POP3Exception.Code.MISSING_PATH,
-                    Integer.valueOf(session.getUserId()),
+                final OXException e = POP3ExceptionCode.MISSING_PATH.create(Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
                 LOG.warn("Path is null. Error: " + e.getMessage(), e);
                 // Try to compose path
@@ -154,9 +151,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             path = tmp;
         }
         if (null == path) {
-            throw new POP3Exception(
-                POP3Exception.Code.MISSING_PATH,
-                Integer.valueOf(session.getUserId()),
+            throw POP3ExceptionCode.MISSING_PATH.create(Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
         }
         separator = 0;
@@ -178,9 +173,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     true);
                 accountName = stripSpecials(storageService.getMailAccount(pop3AccountId, user, cid).getName());
             } catch (final OXException e) {
-                throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
+                throw e;
             }
             String fullname;
             if (pos == -1) {
@@ -251,7 +244,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (OXException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                    if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
                         // Ignore
                         LOG.trace(e.getMessage(), e);
                     } else {
@@ -263,7 +256,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (OXException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                    if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
                         // Ignore
                         LOG.trace(e.getMessage(), e);
                     } else {
@@ -373,9 +366,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 try {
                     fs.createFolder(toCreate);
                 } catch (final OXException e) {
-                    throw new POP3Exception(
-                        POP3Exception.Code.ILLEGAL_PATH,
-                        e,
+                    throw POP3ExceptionCode.ILLEGAL_PATH.create(e,
                         path,
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
@@ -582,7 +573,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 warnings.add(MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession()));
             }
         } catch (final OXException e) {
-            if (OXException.Code.LOGIN_FAILED.getNumber() == e.getDetailNumber() || OXException.Code.INVALID_CREDENTIALS.getNumber() == e.getDetailNumber()) {
+            if (MIMEMailExceptionCode.LOGIN_FAILED.equals(e) || MIMEMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
                 throw e;
             }
             LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);

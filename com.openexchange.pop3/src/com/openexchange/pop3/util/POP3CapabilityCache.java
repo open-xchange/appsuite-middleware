@@ -63,7 +63,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.exception.OXException;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -239,7 +239,7 @@ public final class POP3CapabilityCache {
              */
             return new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)).call();
         } catch (final java.net.SocketTimeoutException e) {
-            throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, e, address, login);
+            throw POP3ExceptionCode.CONNECT_ERROR.create(e, address, login);
         }
     }
 
@@ -269,7 +269,7 @@ public final class POP3CapabilityCache {
             throw ((OXException) cause);
         }
         if (cause instanceof java.net.SocketTimeoutException) {
-            throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, e, address, login);
+            throw POP3ExceptionCode.CONNECT_ERROR.create(e, address, login);
         }
         if (cause instanceof IOException) {
             throw ((IOException) cause);

@@ -54,11 +54,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.session.Session;
 import com.planetj.math.rabinhash.RabinHashFunction64;
 
@@ -118,8 +117,8 @@ public final class UIDUtil {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -134,7 +133,7 @@ public final class UIDUtil {
             }
             return rs.getString(1);
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e.getMessage(), e);
+            throw POP3ExceptionCode.SQL_ERROR.create(e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);

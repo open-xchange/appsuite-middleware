@@ -61,10 +61,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 
 /**
@@ -92,14 +92,14 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The POP3 storage provider name of specified user for given account
-     * @throws POP3Exception If POP3 storage provider name cannot be returned
+     * @throws OXException If POP3 storage provider name cannot be returned
      */
-    public static String getPOP3StorageProviderName(final int accountId, final int user, final int cid) throws POP3Exception {
+    public static String getPOP3StorageProviderName(final int accountId, final int user, final int cid) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -116,7 +116,7 @@ public class POP3StorageUtil {
             }
             return null;
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
@@ -134,14 +134,14 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @param name The provider name
-     * @throws POP3Exception If POP3 storage provider name cannot be set
+     * @throws OXException If POP3 storage provider name cannot be set
      */
-    public static void setPOP3StorageProviderName(final int accountId, final int user, final int cid, final String name) throws POP3Exception {
+    public static void setPOP3StorageProviderName(final int accountId, final int user, final int cid, final String name) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -163,7 +163,7 @@ public class POP3StorageUtil {
             stmt.setString(pos++, name);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
             Database.back(cid, true, con);
@@ -177,9 +177,9 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The number of new messages since last sync
-     * @throws POP3Exception If determining new messages fails
+     * @throws OXException If determining new messages fails
      */
-    public static int getNewMessageCount(final String[] uidls, final int user, final int cid) throws POP3Exception {
+    public static int getNewMessageCount(final String[] uidls, final int user, final int cid) throws OXException {
         final List<String> databaseUIDLs = getUIDLs(user, cid);
         final List<String> actualUIDLs = Arrays.asList(uidls);
 
@@ -196,9 +196,9 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The number of deleted messages since last sync
-     * @throws POP3Exception If determining deleted messages fails
+     * @throws OXException If determining deleted messages fails
      */
-    public static int getDeletedMessageCount(final String[] uidls, final int user, final int cid) throws POP3Exception {
+    public static int getDeletedMessageCount(final String[] uidls, final int user, final int cid) throws OXException {
         final List<String> databaseUIDLs = getUIDLs(user, cid);
         final List<String> actualUIDLs = Arrays.asList(uidls);
 
@@ -215,9 +215,9 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The number of new messages since last sync
-     * @throws POP3Exception If synchronizing messages fails
+     * @throws OXException If synchronizing messages fails
      */
-    public static int syncDBEntries(final String[] uidls, final int user, final int cid) throws POP3Exception {
+    public static int syncDBEntries(final String[] uidls, final int user, final int cid) throws OXException {
         final List<String> databaseUIDLs = getUIDLs(user, cid);
         final List<String> actualUIDLs = Arrays.asList(uidls);
 
@@ -241,14 +241,14 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The UIDLs of the messages currently kept in database
-     * @throws POP3Exception If UIDLs cannot be retrieved from database
+     * @throws OXException If UIDLs cannot be retrieved from database
      */
-    public static List<String> getUIDLs(final int user, final int cid) throws POP3Exception {
+    public static List<String> getUIDLs(final int user, final int cid) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         final List<String> uidls = new ArrayList<String>();
         PreparedStatement stmt = null;
@@ -263,7 +263,7 @@ public class POP3StorageUtil {
                 uidls.add(rs.getString(1));
             }
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
@@ -279,14 +279,14 @@ public class POP3StorageUtil {
      * @param uidls The collection of UIDLs
      * @param user The user ID
      * @param cid The context ID
-     * @throws POP3Exception If messages cannot be deleted
+     * @throws OXException If messages cannot be deleted
      */
-    public static void deleteMessagesFromTables(final Collection<String> uidls, final int user, final int cid) throws POP3Exception {
+    public static void deleteMessagesFromTables(final Collection<String> uidls, final int user, final int cid) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -299,7 +299,7 @@ public class POP3StorageUtil {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
@@ -314,14 +314,14 @@ public class POP3StorageUtil {
      * @param uidls The collection of UIDLs
      * @param user The user ID
      * @param cid The context ID
-     * @throws POP3Exception If messages cannot be inserted
+     * @throws OXException If messages cannot be inserted
      */
-    public static void insertMessagesIntoTables(final Collection<String> uidls, final int user, final int cid) throws POP3Exception {
+    public static void insertMessagesIntoTables(final Collection<String> uidls, final int user, final int cid) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -339,7 +339,7 @@ public class POP3StorageUtil {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
@@ -352,9 +352,9 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The number of unread messages kept in database
-     * @throws POP3Exception
+     * @throws OXException
      */
-    public static int getUnreadMessagesCount(final int user, final int cid) throws POP3Exception {
+    public static int getUnreadMessagesCount(final int user, final int cid) throws OXException {
         return getUnreadMessages(user, cid).size();
     }
 
@@ -366,14 +366,14 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The UIDLs of unread messages kept in database
-     * @throws POP3Exception If unread messages cannot be retrieved
+     * @throws OXException If unread messages cannot be retrieved
      */
-    public static Set<String> getUnreadMessages(final int user, final int cid) throws POP3Exception {
+    public static Set<String> getUnreadMessages(final int user, final int cid) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         final Set<String> uidls = new HashSet<String>();
         PreparedStatement stmt = null;
@@ -390,7 +390,7 @@ public class POP3StorageUtil {
                 uidls.add(rs.getString(1));
             }
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
@@ -407,14 +407,14 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The system flags of the message identified by specified UIDL
-     * @throws POP3Exception If message's flags cannot be retrieved
+     * @throws OXException If message's flags cannot be retrieved
      */
-    public static int getSystemFlags(final String uidl, final int user, final int cid) throws POP3Exception {
+    public static int getSystemFlags(final String uidl, final int user, final int cid) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -429,7 +429,7 @@ public class POP3StorageUtil {
             }
             return rs.getInt(1);
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
@@ -445,14 +445,14 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The color flag of the message identified by specified UIDL
-     * @throws POP3Exception If message's color flag cannot be retrieved
+     * @throws OXException If message's color flag cannot be retrieved
      */
-    public static int getColorFlag(final String uidl, final int user, final int cid) throws POP3Exception {
+    public static int getColorFlag(final String uidl, final int user, final int cid) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -467,7 +467,7 @@ public class POP3StorageUtil {
             }
             return rs.getInt(1);
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
@@ -483,14 +483,14 @@ public class POP3StorageUtil {
      * @param user The user ID
      * @param cid The context ID
      * @return The user flags of the message identified by specified UIDL
-     * @throws POP3Exception If message's flags cannot be retrieved
+     * @throws OXException If message's flags cannot be retrieved
      */
-    public static String[] getUserFlags(final String uidl, final int user, final int cid) throws POP3Exception {
+    public static String[] getUserFlags(final String uidl, final int user, final int cid) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -509,7 +509,7 @@ public class POP3StorageUtil {
             } while (rs.next());
             return tmp.toArray(new String[tmp.size()]);
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);

@@ -58,7 +58,6 @@ import java.util.Locale;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3Provider;
@@ -143,7 +142,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
             RdbPOP3StorageTrashContainer.dropTrash(id, user, cid, con);
             RdbPOP3StorageUIDLMap.dropIDs(id, user, cid, con);
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 

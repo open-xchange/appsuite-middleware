@@ -56,11 +56,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.session.Session;
@@ -112,7 +111,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
@@ -122,12 +121,12 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_INSERT_UIDLS = "INSERT INTO " + TABLE_NAME + " (cid, user, id, uidl, fullname, uid) VALUES (?, ?, ?, ?, ?, ?)";
 
-    public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
+    public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -164,7 +163,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
@@ -173,12 +172,12 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_SELECT_PAIR = "SELECT fullname, uid FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND uidl = ?";
 
-    public FullnameUIDPair getFullnameUIDPair(final String uidl) throws POP3Exception {
+    public FullnameUIDPair getFullnameUIDPair(final String uidl) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -195,7 +194,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             }
             return null;
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
@@ -204,12 +203,12 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_SELECT_UIDL = "SELECT uidl FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND fullname = ? AND uid = ?";
 
-    public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws POP3Exception {
+    public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -227,14 +226,14 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             }
             return null;
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
         }
     }
 
-    public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
+    public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final String[] uidls = new String[fullnameUIDPairs.length];
         for (int i = 0; i < uidls.length; i++) {
             uidls[i] = getUIDL(fullnameUIDPairs[i]);
@@ -242,7 +241,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         return uidls;
     }
 
-    public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws POP3Exception {
+    public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws OXException {
         final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
         for (int i = 0; i < pairs.length; i++) {
             pairs[i] = getFullnameUIDPair(uidls[i]);
@@ -252,12 +251,12 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_SELECT_ALL_UIDL = "SELECT uidl, fullname, uid FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
 
-    public Map<String, FullnameUIDPair> getAllUIDLs() throws POP3Exception {
+    public Map<String, FullnameUIDPair> getAllUIDLs() throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -275,7 +274,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             }
             return m;
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, false, con);
@@ -284,12 +283,12 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final String SQL_DELETE_PAIRS = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND fullname = ? AND uid = ?";
 
-    public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws POP3Exception {
+    public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -306,19 +305,19 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);
         }
     }
 
-    public void deleteUIDLMappings(final String[] uidls) throws POP3Exception {
+    public void deleteUIDLMappings(final String[] uidls) throws OXException {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
-            throw new POP3Exception(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -333,7 +332,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(cid, true, con);

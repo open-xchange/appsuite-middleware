@@ -66,9 +66,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
-import com.openexchange.pop3.POP3Exception;
+import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
@@ -362,18 +362,14 @@ public final class POP3StoreConnector {
                 if (responseCodeAware && e.getMessage().indexOf("[LOGIN-DELAY]") >= 0) {
                     final int seconds = parseLoginDelaySeconds(capabilities);
                     if (-1 == seconds) {
-                        throw new POP3Exception(
-                            POP3Exception.Code.LOGIN_DELAY,
-                            e,
+                        throw POP3ExceptionCode.LOGIN_DELAY.create(e,
                             server,
                             login,
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()),
                             e.getMessage());
                     }
-                    throw new POP3Exception(
-                        POP3Exception.Code.LOGIN_DELAY2,
-                        e,
+                    throw POP3ExceptionCode.LOGIN_DELAY2.create(e,
                         server,
                         login,
                         Integer.valueOf(session.getUserId()),
@@ -411,17 +407,13 @@ public final class POP3StoreConnector {
                          * Avoid fetching UIDs when further working with JavaMail API
                          */
                         if (errorOnMissingUIDL) {
-                            throw new POP3Exception(
-                                POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
-                                "UIDL",
+                            throw POP3ExceptionCode.MISSING_REQUIRED_CAPABILITY.create("UIDL",
                                 server,
                                 login,
                                 Integer.valueOf(session.getUserId()),
                                 Integer.valueOf(session.getContextId()));
                         }
-                        result.addWarning(new POP3Exception(
-                            POP3Exception.Code.EXPUNGE_MODE_ONLY,
-                            "UIDL",
+                        result.addWarning(POP3ExceptionCode.EXPUNGE_MODE_ONLY.create("UIDL",
                             server,
                             login,
                             Integer.valueOf(session.getUserId()),
@@ -432,9 +424,7 @@ public final class POP3StoreConnector {
                          * Probe failed.
                          * Mandatory to further work with JavaMail API
                          */
-                        throw new POP3Exception(
-                            POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
-                            "TOP",
+                        throw POP3ExceptionCode.MISSING_REQUIRED_CAPABILITY.create("TOP",
                             server,
                             login,
                             Integer.valueOf(session.getUserId()),
@@ -481,7 +471,7 @@ public final class POP3StoreConnector {
         }
     }
 
-    private static void checkTemporaryDown(final POP3Config pop3Config) throws POP3Exception {
+    private static void checkTemporaryDown(final POP3Config pop3Config) throws OXException {
         final HostAndPort key = new HostAndPort(pop3Config.getServer(), pop3Config.getPort());
         final Long range = timedOutServers.get(key);
         if (range != null) {
@@ -489,7 +479,7 @@ public final class POP3StoreConnector {
                 /*
                  * Still treated as being temporary broken
                  */
-                throw new POP3Exception(POP3Exception.Code.CONNECT_ERROR, pop3Config.getServer(), pop3Config.getLogin());
+                throw POP3ExceptionCode.CONNECT_ERROR.create(pop3Config.getServer(), pop3Config.getLogin());
             }
             timedOutServers.remove(key);
         }
