@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.messaging.rss.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.datatypes.genericonf,
+ com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.html,
  com.openexchange.i18n,

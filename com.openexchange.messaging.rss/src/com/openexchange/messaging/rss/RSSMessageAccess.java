@@ -53,10 +53,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
@@ -91,7 +91,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         this.accounts = accounts;
     }
 
-    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws OXException {
         final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
         new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
         final MessagingPart part = handler.getMessagingPart();
@@ -101,34 +101,34 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         return part;
     }
 
-    public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
+    public void appendMessages(final String folder, final MessagingMessage[] messages) throws OXException {
         checkFolder(folder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
 
-    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
+    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         checkFolder(sourceFolder);
         checkFolder(destFolder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws MessagingException {
+    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws OXException {
         checkFolder(folder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
 
-    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws MessagingException {
+    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws OXException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
-    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
+    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
         checkFolder(folder);
         return loadFeed().get(id);
     }
 
-    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws OXException {
         checkFolder(folder);
         final List<MessagingMessage> messages = new ArrayList<MessagingMessage>(messageIds.length);
         for (final String id : messageIds) {
@@ -137,25 +137,25 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         return messages;
     }
 
-    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
+    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         checkFolder(sourceFolder);
         checkFolder(destFolder);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public MessagingMessage perform(final String folder, final String id, final String action) throws MessagingException {
+    public MessagingMessage perform(final String folder, final String id, final String action) throws OXException {
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
-    public MessagingMessage perform(final String action) throws MessagingException {
+    public MessagingMessage perform(final String action) throws OXException {
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
-    public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
+    public MessagingMessage perform(final MessagingMessage message, final String action) throws OXException {
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
-    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws OXException {
         checkFolder(folder);
         List<SyndMessage> messages = loadFeed().getMessages();
         
@@ -184,7 +184,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         return messages.subList(start, end);
     }
 
-    private void sort(final List<SyndMessage> messages, final MessagingField sortField, final OrderDirection order) throws MessagingException {
+    private void sort(final List<SyndMessage> messages, final MessagingField sortField, final OrderDirection order) throws OXException {
         if(sortField == null) {
             return;
         }
@@ -196,14 +196,14 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
             }
         } catch (final RuntimeException x) {
             final Throwable cause = x.getCause();
-            if(MessagingException.class.isInstance(cause)) {
-                throw (MessagingException) cause;
+            if(OXException.class.isInstance(cause)) {
+                throw (OXException) cause;
             }
-            throw x;
+            throw new OXException(x);
         }
     }
 
-    private List<SyndMessage> filter(final List<SyndMessage> messages, final SearchTerm<?> searchTerm) throws MessagingException {
+    private List<SyndMessage> filter(final List<SyndMessage> messages, final SearchTerm<?> searchTerm) throws OXException {
         if(searchTerm == null) {
             return messages;
         }
@@ -218,11 +218,11 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         return list;
     }
 
-    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
+    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
     
-    private FeedAdapter loadFeed() throws MessagingException {
+    private FeedAdapter loadFeed() throws OXException {
         if(feed != null) {
             return feed;
         }
@@ -235,7 +235,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         }
     }
 
-    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
         throw new UnsupportedOperationException();
     }
 

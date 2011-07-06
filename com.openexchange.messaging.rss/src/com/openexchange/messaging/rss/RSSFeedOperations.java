@@ -50,11 +50,11 @@
 package com.openexchange.messaging.rss;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
@@ -88,15 +88,15 @@ public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccou
         return accountId;
     }
 
-    public MessagingFolderAccess getFolderAccess() throws MessagingException {
+    public MessagingFolderAccess getFolderAccess() throws OXException {
         return folderAccess;
     }
 
-    public MessagingMessageAccess getMessageAccess() throws MessagingException {
+    public MessagingMessageAccess getMessageAccess() throws OXException {
         return messageAccess;
     }
 
-    public MessagingFolder getRootFolder() throws MessagingException {
+    public MessagingFolder getRootFolder() throws OXException {
         return folderAccess.getRootFolder();
     }
 
@@ -104,7 +104,7 @@ public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccou
         connected = false;
     }
 
-    public void connect() throws MessagingException {
+    public void connect() throws OXException {
         connected = true;
     }
 
@@ -112,11 +112,11 @@ public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccou
         return connected;
     }
 
-    public boolean ping() throws MessagingException {
+    public boolean ping() throws OXException {
         return true;
     }
 
-    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 

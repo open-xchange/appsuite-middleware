@@ -71,7 +71,7 @@ public class RSSCommon {
     
     protected static final String EMPTY = "";
     
-    protected void checkFolder(final String folder) throws MessagingException {
+    protected void checkFolder(final String folder) throws OXException {
         if (!EMPTY.equals(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
                 folder,

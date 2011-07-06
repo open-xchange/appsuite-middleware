@@ -68,26 +68,26 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
         super(accountId, session);
     }
 
-    public void clearFolder(final String folderId) throws MessagingException {
+    public void clearFolder(final String folderId) throws OXException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public void clearFolder(final String folderId, final boolean hardDelete) throws MessagingException {
+    public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String createFolder(final MessagingFolder toCreate) throws MessagingException {
+    public String createFolder(final MessagingFolder toCreate) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String deleteFolder(final String folderId) throws MessagingException {
+    public String deleteFolder(final String folderId) throws OXException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String deleteFolder(final String folderId, final boolean hardDelete) throws MessagingException {
+    public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         checkFolder(folderId);
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
@@ -108,14 +108,14 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
         return null;
     }
 
-    public MessagingFolder getFolder(final String folderId) throws MessagingException {
+    public MessagingFolder getFolder(final String folderId) throws OXException {
         checkFolder(folderId);
         return new RSSFolder(session.getUserId());
     }
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
 
-    public Quota getMessageQuota(final String folderId) throws MessagingException {
+    public Quota getMessageQuota(final String folderId) throws OXException {
         checkFolder(folderId);
         return getQuotas(folderId, MESSAGE)[0];
     }
@@ -126,7 +126,7 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
         return EMPTY_PATH;
     }
 
-    public Quota[] getQuotas(final String folder, final Type[] types) throws MessagingException {
+    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         checkFolder(folder);
         return Quota.getUnlimitedQuotas(types);
     }
@@ -145,29 +145,29 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
 
     private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };
 
-    public Quota getStorageQuota(final String folderId) throws MessagingException {
+    public Quota getStorageQuota(final String folderId) throws OXException {
         checkFolder(folderId);
         return getQuotas(folderId, STORAGE)[0];
     }
 
-    public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws MessagingException {
+    public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         checkFolder(parentIdentifier);
         return new MessagingFolder[0];
     }
 
-    public String getTrashFolder() throws MessagingException {
+    public String getTrashFolder() throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String moveFolder(final String folderId, final String newParentId) throws MessagingException {
+    public String moveFolder(final String folderId, final String newParentId) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String renameFolder(final String folderId, final String newName) throws MessagingException {
+    public String renameFolder(final String folderId, final String newName) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public String updateFolder(final String identifier, final MessagingFolder toUpdate) throws MessagingException {
+    public String updateFolder(final String identifier, final MessagingFolder toUpdate) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 

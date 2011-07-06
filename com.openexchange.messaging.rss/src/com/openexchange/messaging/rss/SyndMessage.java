@@ -60,10 +60,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
@@ -96,9 +96,9 @@ public class SyndMessage implements MessagingMessage {
     private final String sessionId;
     private boolean b_picUrl;
     private String picUrl;
-    private String id;
+    private final String id;
      
-    public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder, final Session session) throws MessagingException {
+    public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder, final Session session) throws OXException {
         entry = syndEntry;
         this.folder = folder;
         this.feed = feed;
@@ -136,7 +136,7 @@ public class SyndMessage implements MessagingMessage {
         return "" + sb.toString().hashCode();
     }
 
-    private void setContent(final SyndContent content, final String sessionId) throws MessagingException {
+    private void setContent(final SyndContent content, final String sessionId) throws OXException {
         String type = content.getType();
         if(type == null) {
             type = "text/plain";
@@ -193,11 +193,11 @@ public class SyndMessage implements MessagingMessage {
         headers.put(header.toString(), Arrays.asList(value));
     }
     
-    public int getColorLabel() throws MessagingException {
+    public int getColorLabel() throws OXException {
         return -1;
     }
 
-    public int getFlags() throws MessagingException {
+    public int getFlags() throws OXException {
         return -1;
     }
 
@@ -217,7 +217,7 @@ public class SyndMessage implements MessagingMessage {
         return -1;
     }
 
-    public Collection<String> getUserFlags() throws MessagingException {
+    public Collection<String> getUserFlags() throws OXException {
         final List categories = entry.getCategories();
         if(categories == null) {
             return null;
@@ -229,37 +229,37 @@ public class SyndMessage implements MessagingMessage {
         return strings;
     }
 
-    public MessagingContent getContent() throws MessagingException {
+    public MessagingContent getContent() throws OXException {
         return content;
     }
 
-    public ContentType getContentType() throws MessagingException {
+    public ContentType getContentType() throws OXException {
         return (ContentType) getFirstHeader(CONTENT_TYPE);
     }
 
-    public String getDisposition() throws MessagingException {
+    public String getDisposition() throws OXException {
         return INLINE;
     }
 
-    public String getFileName() throws MessagingException {
+    public String getFileName() throws OXException {
         return null;
     }
 
-    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+    public MessagingHeader getFirstHeader(final String name) throws OXException {
         if(headers.containsKey(name)) {
             return headers.get(name).iterator().next();
         }
         return null;
     }
 
-    public Collection<MessagingHeader> getHeader(final String name) throws MessagingException {
+    public Collection<MessagingHeader> getHeader(final String name) throws OXException {
         if(headers.containsKey(name)) {
             return headers.get(name);
         }
         return null;
     }
 
-    public Map<String, Collection<MessagingHeader>> getHeaders() throws MessagingException {
+    public Map<String, Collection<MessagingHeader>> getHeaders() throws OXException {
         return headers;
     }
 
@@ -267,11 +267,11 @@ public class SyndMessage implements MessagingMessage {
         return null;
     }
 
-    public long getSize() throws MessagingException {
+    public long getSize() throws OXException {
         return 0;
     }
 
-    public void writeTo(final OutputStream os) throws IOException, MessagingException {
+    public void writeTo(final OutputStream os) throws IOException, OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create();
     }
     
@@ -320,7 +320,7 @@ public class SyndMessage implements MessagingMessage {
         return null;
     }
 
-    public String getUrl() throws MessagingException {
+    public String getUrl() throws OXException {
         return entry.getLink();
     }
 

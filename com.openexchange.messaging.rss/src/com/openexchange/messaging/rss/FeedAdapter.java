@@ -70,7 +70,7 @@ public class FeedAdapter {
     
     private final Map<String, SyndMessage> messages = new LinkedHashMap<String, SyndMessage>();
     
-    public FeedAdapter(final SyndFeed feed, final String folder, final Session session) throws MessagingException {
+    public FeedAdapter(final SyndFeed feed, final String folder, final Session session) throws OXException {
         this.feed = feed;
     
         final List<SyndEntry> entries = feed.getEntries();
