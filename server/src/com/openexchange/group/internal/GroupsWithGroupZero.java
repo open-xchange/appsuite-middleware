@@ -60,8 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
 
 /**
  * Implementation of the group storage that adds group with identifier 0 to all requests.
@@ -139,14 +137,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
     @Override
     public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context ctx) throws OXException {
         final Pattern pat = Pattern.compile(pattern.replace("*", ".*"), Pattern.CASE_INSENSITIVE);
-        final Group zero;
-        try {
-            zero = GroupTools.getGroupZero(ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Group zero = GroupTools.getGroupZero(ctx);
         final Matcher match = pat.matcher(zero.getDisplayName());
         final List<Group> groups = new ArrayList<Group>();
         groups.addAll(Arrays.asList(delegate.searchGroups(pattern, loadMembers, ctx)));

@@ -63,9 +63,7 @@ import com.openexchange.group.GroupStorage.StorageType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
@@ -155,9 +153,6 @@ public final class Delete {
             if (groupId == GroupTools.GROUP_ZERO.getIdentifier()) {
                 try {
                     throw GroupExceptionCodes.NO_GROUP_DELETE.create(GroupTools.getGroupZero(ctx).getDisplayName());
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                    throw GroupExceptionCodes.NO_GROUP_DELETE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     throw GroupExceptionCodes.NO_GROUP_DELETE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));

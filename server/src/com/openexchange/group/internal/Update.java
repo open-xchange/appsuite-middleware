@@ -62,9 +62,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
@@ -155,9 +153,6 @@ final class Update {
             if (changed.getIdentifier() == GroupTools.GROUP_ZERO.getIdentifier()) {
                 try {
                     throw GroupExceptionCodes.NO_GROUP_UPDATE.create(GroupTools.getGroupZero(ctx).getDisplayName());
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                    throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));

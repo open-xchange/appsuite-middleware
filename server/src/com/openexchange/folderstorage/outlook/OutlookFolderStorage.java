@@ -126,7 +126,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -1765,12 +1764,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                              */
                             try {
                                 messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
-                            } catch (final MessagingException e) {
+                            } catch (final OXException e) {
                                 LOG.error(e.getMessage(), e);
                             }
                         }
                     }
-                } catch (final MessagingException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 if (messagingAccounts.isEmpty()) {
