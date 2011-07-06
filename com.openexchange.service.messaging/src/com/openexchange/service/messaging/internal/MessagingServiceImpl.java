@@ -52,7 +52,7 @@ package com.openexchange.service.messaging.internal;
 import java.net.DatagramSocket;
 import com.openexchange.service.messaging.Message;
 import com.openexchange.service.messaging.MessagingService;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.internal.delivery.MessagingDatagramPoster;
 
 /**
@@ -67,14 +67,14 @@ public final class MessagingServiceImpl implements MessagingService {
     /**
      * Initializes a new {@link MessagingServiceImpl}.
      * 
-     * @throws MessagingServiceException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MessagingServiceImpl(final DatagramSocket datagramSocket) throws MessagingServiceException {
+    public MessagingServiceImpl(final DatagramSocket datagramSocket) throws OXException {
         super();
         this.poster = new MessagingDatagramPoster(datagramSocket);
     }
 
-    public void postMessage(final Message message) throws MessagingServiceException {
+    public void postMessage(final Message message) throws OXException {
         /*
          * Deliver message
          */

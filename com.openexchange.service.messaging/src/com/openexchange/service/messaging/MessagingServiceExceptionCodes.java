@@ -55,7 +55,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link MessagingServiceExceptionCodes} - Enumeration of all {@link MessagingServiceException}s.
+ * {@link MessagingServiceExceptionCodes} - Enumeration of all {@link OXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22

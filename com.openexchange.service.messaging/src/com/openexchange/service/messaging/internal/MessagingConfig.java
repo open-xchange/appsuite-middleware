@@ -56,7 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 
 /**
@@ -83,9 +83,9 @@ public final class MessagingConfig {
      * Initializes the instance with given bundle configuration.
      * 
      * @param configurationService The configuration service
-     * @throws MessagingServiceException If re-initialization fails
+     * @throws OXException If re-initialization fails
      */
-    public static void initInstance(final ConfigurationService configurationService) throws MessagingServiceException {
+    public static void initInstance(final ConfigurationService configurationService) throws OXException {
         synchronized (MessagingConfig.class) {
             MessagingConfig config = instance;
             if (null == config) {
@@ -98,7 +98,7 @@ public final class MessagingConfig {
         }
     }
 
-    private static void readFromConfigurationService(final MessagingConfig config, final ConfigurationService configurationService, final boolean update) throws MessagingServiceException {
+    private static void readFromConfigurationService(final MessagingConfig config, final ConfigurationService configurationService, final boolean update) throws OXException {
         try {
             {
                 final String property = getProperty("com.openexchange.service.message.bindAddress", "*", configurationService).trim();

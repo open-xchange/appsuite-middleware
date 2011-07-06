@@ -68,7 +68,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.service.messaging.Message;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.service.messaging.internal.MessagingRemoteServerProvider;
@@ -99,9 +99,9 @@ public final class MessagingDatagramPoster {
     /**
      * Initializes a new {@link MessagingDatagramPoster}.
      * 
-     * @throws MessagingServiceException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MessagingDatagramPoster(final DatagramSocket datagramSocket) throws MessagingServiceException {
+    public MessagingDatagramPoster(final DatagramSocket datagramSocket) throws OXException {
         super();
         this.datagramSocket = datagramSocket;
         try {
@@ -116,9 +116,9 @@ public final class MessagingDatagramPoster {
     /**
      * Posts the passed message.
      * 
-     * @throws MessagingServiceException If posting fails
+     * @throws OXException If posting fails
      */
-    public void post(final Message message) throws MessagingServiceException {
+    public void post(final Message message) throws OXException {
         final List<InetSocketAddress> servers = MessagingRemoteServerProvider.getInstance().getRemoteMessagingServers();
         final List<byte[]> chunks = createChunks(message);
         for (final InetSocketAddress server : servers) {
@@ -153,7 +153,7 @@ public final class MessagingDatagramPoster {
             this.datagramSocket = datagramSocket;
         }
 
-        public Object call() throws MessagingServiceException {
+        public Object call() throws OXException {
             try {
                 for (final byte[] chunk : chunks) {
                     datagramSocket.send(new DatagramPacket(chunk, chunk.length, server));
@@ -170,7 +170,7 @@ public final class MessagingDatagramPoster {
 
     } // End of PosterCallable class
 
-    private static List<byte[]> createChunks(final Message message) throws MessagingServiceException {
+    private static List<byte[]> createChunks(final Message message) throws OXException {
         try {
             /*
              * Get the payload to write
@@ -294,7 +294,7 @@ public final class MessagingDatagramPoster {
         return offset + uuid.length;
     }
 
-    private static int appendCounterBytes(final int count, final int offset, final byte[] dest) throws MessagingServiceException {
+    private static int appendCounterBytes(final int count, final int offset, final byte[] dest) throws OXException {
         final byte[] cbytes = writeInt(count);
         System.arraycopy(cbytes, 0, dest, offset, cbytes.length);
         return offset + cbytes.length;
@@ -314,7 +314,7 @@ public final class MessagingDatagramPoster {
         return Constants.GEN_PREFIX_LENGTH + topicByteCount;
     }
 
-    private static byte[] writeString(final String string) throws MessagingServiceException {
+    private static byte[] writeString(final String string) throws OXException {
         final int len = string.length();
         if (len <= 0) {
             /*
@@ -343,7 +343,7 @@ public final class MessagingDatagramPoster {
         return bytes;
     }
 
-    private static byte[] writeInt(final int i) throws MessagingServiceException {
+    private static byte[] writeInt(final int i) throws OXException {
         if (i > MAX_INT_VALUE) {
             throw MessagingServiceExceptionCodes.INT_TOO_BIG.create(Integer.valueOf(i));
         }

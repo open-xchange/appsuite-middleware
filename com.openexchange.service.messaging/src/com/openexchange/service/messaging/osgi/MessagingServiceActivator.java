@@ -58,13 +58,10 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.service.messaging.MessageHandler;
 import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.service.messaging.MessagingServiceConstants;
-import com.openexchange.service.messaging.MessagingServiceException;
-import com.openexchange.service.messaging.exception.MessagingServiceExceptionFactory;
 import com.openexchange.service.messaging.internal.DelegateEventHandler;
 import com.openexchange.service.messaging.internal.DelegateMessageHandler;
 import com.openexchange.service.messaging.internal.MessageHandlerTracker;
@@ -81,8 +78,6 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingServiceActivator extends DeferredActivator {
-
-    private ComponentRegistration componentRegistration;
 
     private List<ServiceRegistration> registrations;
 
@@ -141,14 +136,6 @@ public final class MessagingServiceActivator extends DeferredActivator {
                     }
                 }
             }
-            /*
-             * Register component
-             */
-            componentRegistration = new ComponentRegistration(
-                context,
-                MessagingServiceException.COMPONENT,
-                "com.openexchange.service.messaging",
-                MessagingServiceExceptionFactory.getInstance());
             /*
              * Initialize
              */
@@ -216,13 +203,6 @@ public final class MessagingServiceActivator extends DeferredActivator {
                     registrations.remove(0).unregister();
                 }
                 registrations = null;
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
             MessagingRemoteServerProvider.dropInstance();
             MessagingConfig.dropInstance();

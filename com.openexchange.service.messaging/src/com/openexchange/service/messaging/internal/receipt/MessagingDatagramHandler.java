@@ -62,7 +62,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.service.messaging.Message;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.service.messaging.internal.MessageHandlerTracker;
@@ -186,7 +186,7 @@ public class MessagingDatagramHandler {
                         }
                     }
                 }
-            } catch (final MessagingServiceException e) {
+            } catch (final OXException e) {
                 logger.error(e.getMessage(), e);
             }
             return null;
@@ -196,9 +196,9 @@ public class MessagingDatagramHandler {
          * Parses given datagram to a message.
          * 
          * @return The parsed message or <code>null</code> if a contiguous package was passed
-         * @throws MessagingServiceException If parsing fails
+         * @throws OXException If parsing fails
          */
-        private Message parse2Message() throws MessagingServiceException {
+        private Message parse2Message() throws OXException {
             try {
                 final MessagingParsedMessage pm;
                 {

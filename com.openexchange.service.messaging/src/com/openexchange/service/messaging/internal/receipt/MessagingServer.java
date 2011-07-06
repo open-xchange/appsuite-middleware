@@ -57,7 +57,7 @@ import java.net.SocketException;
 import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.service.messaging.internal.MessageHandlerTracker;
@@ -112,9 +112,9 @@ public final class MessagingServer implements Runnable {
      * Starts the messaging server parameterized with given configuration.
      * 
      * @param config The configuration
-     * @throws MessagingServiceException If start-up fails
+     * @throws OXException If start-up fails
      */
-    public void startServer(final MessagingConfig config) throws MessagingServiceException {
+    public void startServer(final MessagingConfig config) throws OXException {
         if (running.compareAndSet(false, true)) {
             listenerPort = config.getListenerPort();
             try {

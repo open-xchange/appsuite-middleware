@@ -56,7 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.service.messaging.Message;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -114,9 +114,9 @@ public final class MessagingContiguousMessage {
      * This method may only be invoked if contiguous message has completed gathering data.
      * 
      * @return The resulting {@link Message} instance
-     * @throws MessagingServiceException If conversion fails
+     * @throws OXException If conversion fails
      */
-    public Message toMessage() throws MessagingServiceException {
+    public Message toMessage() throws OXException {
         synchronized (chunks) {
             final ObjectInputStream ois;
             try {

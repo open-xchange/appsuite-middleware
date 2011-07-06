@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 import com.openexchange.mdns.MDNSServiceInfo;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingRemoteServerProvider} - Provides the addresses to remote messaging servers either dynamically looked-up or statically
@@ -180,9 +180,9 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
      * Gets remote messaging servers.
      * 
      * @return
-     * @throws MessagingServiceException
+     * @throws OXException
      */
-    public List<InetSocketAddress> getRemoteMessagingServers() throws MessagingServiceException {
+    public List<InetSocketAddress> getRemoteMessagingServers() throws OXException {
         final MessagingConfig config = MessagingConfig.getInstance();
         if (config.isMdnsEnabled()) {
             final MDNSService mdnsService = mdnsServiceRef.get();
@@ -198,7 +198,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
                     }
                     return addrs;
                 } catch (final OXException e) {
-                    throw new MessagingServiceException(e);
+                    throw new OXException(e);
                 }
             }
         }

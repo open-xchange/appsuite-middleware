@@ -54,7 +54,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.UUID;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -83,9 +83,9 @@ public final class MessagingMessageParser {
      * Gets the parsed contiguous message.
      * 
      * @return The parsed contiguous message
-     * @throws MessagingServiceException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public MessagingParsedMessage parse() throws MessagingServiceException {
+    public MessagingParsedMessage parse() throws OXException {
         try {
             /*
              * Ensure magic bytes
@@ -137,7 +137,7 @@ public final class MessagingMessageParser {
         return (b[pos++] & 0xff);
     }
 
-    private String parseString() throws MessagingServiceException {
+    private String parseString() throws OXException {
         return parseString(nextByte(), nextByte());
     }
 
@@ -148,7 +148,7 @@ public final class MessagingMessageParser {
     /**
      * First two bytes, which indicate length of string, already consumed.
      */
-    private String parseString(final int firstByte, final int secondByte) throws MessagingServiceException {
+    private String parseString(final int firstByte, final int secondByte) throws OXException {
         /*
          * Special byte 0xFF indicates absence of current string value.
          */
@@ -194,9 +194,9 @@ public final class MessagingMessageParser {
      * 
      * @param bytes The array of quoted-printable characters
      * @return The array of original bytes
-     * @throws MessagingServiceException If quoted-printable decoding fails
+     * @throws OXException If quoted-printable decoding fails
      */
-    private static final byte[] decodeQuotedPrintable(final byte[] bytes) throws MessagingServiceException {
+    private static final byte[] decodeQuotedPrintable(final byte[] bytes) throws OXException {
         if (bytes == null) {
             return null;
         }

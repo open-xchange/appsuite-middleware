@@ -59,7 +59,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.service.messaging.Message;
 import com.openexchange.service.messaging.MessagingService;
-import com.openexchange.service.messaging.MessagingServiceException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DelegateEventHandler} - The event handler delegating incoming events with topic <b><code>"remote/*"</code></b> to message service.
@@ -107,7 +107,7 @@ public final class DelegateEventHandler implements EventHandler {
         }
         try {
             messagingService.postMessage(new Message(event.getTopic(), messageProperties));
-        } catch (final MessagingServiceException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
