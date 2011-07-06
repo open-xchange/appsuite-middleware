@@ -52,7 +52,7 @@ package com.openexchange.publish.online.infostore;
 import junit.framework.TestCase;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 
 
 /**
@@ -69,7 +69,7 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase{
     }
     
 
-    public void testAddSecretBeforeCreate() throws PublicationException {
+    public void testAddSecretBeforeCreate() throws OXException {
         Publication publication = new Publication();
         publicationService.beforeCreate(publication);
         
@@ -85,7 +85,7 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase{
         assertFalse(secret1.equals(secret2));
     }
     
-    public void testAddURLToOutgoingPublications() throws PublicationException {
+    public void testAddURLToOutgoingPublications() throws OXException {
         
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
@@ -101,7 +101,7 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase{
         
     }
     
-public void testRemoveSecretFromOutgoingPublications() throws PublicationException {
+public void testRemoveSecretFromOutgoingPublications() throws OXException {
         
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));

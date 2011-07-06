@@ -79,7 +79,7 @@ public class SimPublicationTargetDiscoveryService implements PublicationTargetDi
         return targets.get(id);
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
+    public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         for (PublicationTarget target : targets.values()) {
             if (target.getPublicationService().knows(context, publicationId)) {
                 return target;

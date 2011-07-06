@@ -55,9 +55,9 @@ import static com.openexchange.publish.Asserts.assertKnows;
 import static com.openexchange.publish.Asserts.assertTargets;
 import java.util.Collection;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationService;
 
@@ -110,16 +110,16 @@ public class PublicationTargetCollectorTest extends TestCase {
         assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2");
     }
     
-    public void testGetTarget() throws PublicationException {
+    public void testGetTarget() throws OXException {
         assertGettable(collector, "com.openexchange.publish.test1");
     }
     
-    public void testKnows() throws PublicationException {
+    public void testKnows() throws OXException {
         assertKnows(collector, "com.openexchange.publish.test1");
         assertDoesNotKnow(collector, "com.openexchange.publish.unknown");
     }
     
-    public void testGetTargetForEntity() throws PublicationException {
+    public void testGetTargetForEntity() throws OXException {
         PublicationTarget target = collector.getTarget(new SimContext(1), 12);
         assertNotNull("Target was null!", target);
         assertEquals("com.openexchange.publish.test2", target.getId());

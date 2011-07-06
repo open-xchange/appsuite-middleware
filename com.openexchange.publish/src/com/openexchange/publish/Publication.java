@@ -51,6 +51,7 @@ package com.openexchange.publish;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -83,7 +84,7 @@ public class Publication {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -91,7 +92,7 @@ public class Publication {
         return entityId;
     }
 
-    public void setEntityId(String entityId) {
+    public void setEntityId(final String entityId) {
         this.entityId = entityId;
     }
     
@@ -103,7 +104,7 @@ public class Publication {
         return module;
     }
 
-    public void setModule(String module) {
+    public void setModule(final String module) {
         this.module = module;
     }
     
@@ -115,7 +116,7 @@ public class Publication {
         return target;
     }
 
-    public void setTarget(PublicationTarget target) {
+    public void setTarget(final PublicationTarget target) {
         this.target = target;
     }
 
@@ -127,7 +128,7 @@ public class Publication {
         return configuration;
     }
 
-    public void setConfiguration(Map<String, Object> configuration) {
+    public void setConfiguration(final Map<String, Object> configuration) {
         this.configuration = configuration;
     }
 
@@ -135,7 +136,7 @@ public class Publication {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(final int userId) {
         this.userId = userId;
     }
     
@@ -147,7 +148,7 @@ public class Publication {
         return context;
     }
 
-    public void setContext(Context context) {
+    public void setContext(final Context context) {
         this.context = context;
     }
 
@@ -155,7 +156,7 @@ public class Publication {
         return this.displayName;
     }
 
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
     
@@ -163,7 +164,7 @@ public class Publication {
         return enabled != null ? enabled : true;
     }
     
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
     }
     
@@ -171,15 +172,15 @@ public class Publication {
         return enabled != null;
     }
 
-    public void create() throws PublicationException {
+    public void create() throws OXException {
         getTarget().getPublicationService().create(this);
     }
 
-    public void update() throws PublicationException {
+    public void update() throws OXException {
         getTarget().getPublicationService().update(this);
     }
 
-    public void destroy() throws PublicationException {
+    public void destroy() throws OXException {
         getTarget().getPublicationService().delete(this);
     }
 

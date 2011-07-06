@@ -59,8 +59,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -103,7 +103,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
     public Object addingService(ServiceReference reference) {
         try {
             return add(reference);
-        } catch (PublicationException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         }
         return null;
@@ -116,12 +116,12 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
     public void removedService(ServiceReference reference, Object service) {
         try {
             remove(reference, service);
-        } catch (PublicationException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    private void grabAll() throws PublicationException {
+    private void grabAll() throws OXException {
         grabbedAll = true;
         try {
             ServiceReference[] refs = context.getAllServiceReferences(PublicationService.class.getName(), null);
@@ -138,48 +138,48 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         
     }
     
-    private void remove(ServiceReference reference, Object service) throws PublicationException {
+    private void remove(ServiceReference reference, Object service) throws OXException {
         references.remove(reference);
         context.ungetService(reference);
         delegate.removePublicationService((PublicationService) service);
     }
 
-    private PublicationService add(ServiceReference reference) throws PublicationException {
+    private PublicationService add(ServiceReference reference) throws OXException {
         references.add(reference);
         PublicationService publisher = (PublicationService) context.getService(reference);
         delegate.addPublicationService(publisher);
         return publisher;
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
+    public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTarget(context, publicationId);
     }
 
-    public PublicationTarget getTarget(String id) throws PublicationException {
+    public PublicationTarget getTarget(String id) throws OXException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTarget(id);
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException {
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws OXException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTargetsForEntityType(module);
     }
 
-    public boolean knows(String id) throws PublicationException {
+    public boolean knows(String id) throws OXException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.knows(id);
     }
 
-    public Collection<PublicationTarget> listTargets() throws PublicationException {
+    public Collection<PublicationTarget> listTargets() throws OXException {
         if(!grabbedAll) {
             grabAll();
         }

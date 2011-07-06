@@ -58,7 +58,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
@@ -97,7 +97,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     private PublicationTarget target;
 
     @Override
-    public PublicationTarget getTarget() throws PublicationException {
+    public PublicationTarget getTarget() throws OXException {
         if(target == null) {
             return target = buildTarget();
         }
@@ -105,7 +105,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     }
 
     @Override
-    public void beforeCreate(Publication publication) throws PublicationException {
+    public void beforeCreate(Publication publication) throws OXException {
         super.beforeCreate(publication);
         String secret = null;
         Context ctx = publication.getContext();
@@ -125,13 +125,13 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     }
 
     @Override
-    public void modifyOutgoing(Publication publication) throws PublicationException {
+    public void modifyOutgoing(Publication publication) throws OXException {
         super.modifyOutgoing(publication);
         publication.getConfiguration().put(URL, PREFIX+"/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get(SECRET));
         publication.getConfiguration().remove(SECRET);
     }
 
-    public Publication getPublication(Context ctx, String secret) throws PublicationException {
+    public Publication getPublication(Context ctx, String secret) throws OXException {
         Map<String, Object> query = new HashMap<String, Object>();
         query.put(SECRET, secret);
         Collection<Publication> result = getDefaultStorage().search(ctx, getTarget().getId(), query);

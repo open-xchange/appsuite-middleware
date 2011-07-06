@@ -56,9 +56,7 @@ import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorage
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.sql.PublicationSQLStorage;
@@ -84,7 +82,7 @@ public class PublicationUserDeleteListener implements DeleteListener {
         try {
             final PublicationStorage store = getStorage(writeCon);
             store.deletePublicationsOfUser(userID, context);
-        } catch (final PublicationException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

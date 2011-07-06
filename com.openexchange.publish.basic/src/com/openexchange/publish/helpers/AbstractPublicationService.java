@@ -51,11 +51,10 @@ package com.openexchange.publish.helpers;
 
 import java.util.Collection;
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.PublicationTarget;
@@ -78,7 +77,7 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     private static PublicationStorage STORAGE = new DummyStorage(); // Must be overwritten by activator
 
-    public static void setDefaultStorage(PublicationStorage storage) {
+    public static void setDefaultStorage(final PublicationStorage storage) {
         STORAGE = storage;
     }
     
@@ -86,7 +85,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         return STORAGE;
     }
     
-    public void create(Publication publication) throws PublicationException {
+    public void create(final Publication publication) throws OXException {
         checkPermission(Permission.CREATE, publication);
         modifyIncoming(publication);
         beforeCreate(publication);
@@ -95,32 +94,32 @@ public abstract class AbstractPublicationService implements PublicationService {
         modifyOutgoing(publication);
     }
 
-    public void delete(Publication publication) throws PublicationException {
+    public void delete(final Publication publication) throws OXException {
         checkPermission(Permission.DELETE, publicationForPermissionCheck(publication));
         beforeDelete(publication);
         STORAGE.forgetPublication(publication);
         afterDelete(publication);
     }
 
-    public Collection<Publication> getAllPublications(Context ctx) throws PublicationException {
-        List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getId());
-        for (Publication publication : publications) {
+    public Collection<Publication> getAllPublications(final Context ctx) throws OXException {
+        final List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getId());
+        for (final Publication publication : publications) {
             modifyOutgoing(publication);
         }
         afterLoad(publications);
         return publications;
     }
 
-    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws PublicationException {
-        List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getModule(), entityId);
-        for (Publication publication : publications) {
+    public Collection<Publication> getAllPublications(final Context ctx, final String entityId) throws OXException {
+        final List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getModule(), entityId);
+        for (final Publication publication : publications) {
             modifyOutgoing(publication);
         }
         afterLoad(publications);
         return publications;
     }
     
-    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws PublicationException {
+    public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
     	List<Publication> publications;
     	if (module == null) {
     		publications = STORAGE.getPublicationsOfUser(ctx, userId);
@@ -128,19 +127,19 @@ public abstract class AbstractPublicationService implements PublicationService {
     		publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
     	}
     	
-    	for (Publication publication : publications) {
+    	for (final Publication publication : publications) {
             modifyOutgoing(publication);
         }
         afterLoad(publications);
         return publications;
     }
 
-    public boolean knows(Context ctx, int publicationId) throws PublicationException {
+    public boolean knows(final Context ctx, final int publicationId) throws OXException {
         return load(ctx, publicationId) != null;
     }
 
-    public Publication load(Context ctx, int publicationId) throws PublicationException {
-        Publication publication = loadInternally(ctx, publicationId);
+    public Publication load(final Context ctx, final int publicationId) throws OXException {
+        final Publication publication = loadInternally(ctx, publicationId);
         if(publication != null) {
             modifyOutgoing(publication);
         }
@@ -148,15 +147,15 @@ public abstract class AbstractPublicationService implements PublicationService {
         return publication;
     }
 
-    protected Publication loadInternally(Context ctx, int publicationId) throws PublicationException {
-        Publication publication = STORAGE.getPublication(ctx, publicationId);
+    protected Publication loadInternally(final Context ctx, final int publicationId) throws OXException {
+        final Publication publication = STORAGE.getPublication(ctx, publicationId);
         if (null != publication && publication.getTarget() != null && publication.getTarget().getId().equals(getTarget().getId())) {
             return publication;
         }
         return null;
     }
 
-    public void update(Publication publication) throws PublicationException {
+    public void update(final Publication publication) throws OXException {
         checkPermission(Permission.UPDATE, publicationForPermissionCheck(publication));
         modifyIncoming(publication);
         beforeUpdate(publication);
@@ -164,8 +163,8 @@ public abstract class AbstractPublicationService implements PublicationService {
         afterUpdate(publication);
     }
 
-    private Publication publicationForPermissionCheck(Publication publication) throws PublicationException {
-        Publication loaded = load(publication.getContext(), publication.getId());
+    private Publication publicationForPermissionCheck(final Publication publication) throws OXException {
+        final Publication loaded = load(publication.getContext(), publication.getId());
         loaded.setUserId(publication.getUserId());
         if (null != publication.getEntityId()) {
             loaded.setEntityId(publication.getEntityId());
@@ -179,49 +178,49 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     // Callbacks for subclasses
 
-    public abstract PublicationTarget getTarget() throws PublicationException;
+    public abstract PublicationTarget getTarget() throws OXException;
 
-    public void modifyIncoming(Publication publication) throws PublicationException {
-
-    }
-
-    public void modifyOutgoing(Publication publication) throws PublicationException {
+    public void modifyIncoming(final Publication publication) throws OXException {
 
     }
 
-    public void beforeCreate(Publication publication) throws PublicationException {
+    public void modifyOutgoing(final Publication publication) throws OXException {
 
     }
 
-    public void afterCreate(Publication publication) throws PublicationException {
+    public void beforeCreate(final Publication publication) throws OXException {
 
     }
 
-    public void beforeUpdate(Publication publication) throws PublicationException {
+    public void afterCreate(final Publication publication) throws OXException {
 
     }
 
-    public void afterUpdate(Publication publication) throws PublicationException {
+    public void beforeUpdate(final Publication publication) throws OXException {
 
     }
 
-    public void beforeDelete(Publication publication) throws PublicationException {
+    public void afterUpdate(final Publication publication) throws OXException {
 
     }
 
-    public void afterDelete(Publication publication) throws PublicationException {
+    public void beforeDelete(final Publication publication) throws OXException {
 
     }
 
-    public void afterLoad(Collection<Publication> publications) throws PublicationException {
+    public void afterDelete(final Publication publication) throws OXException {
 
     }
 
-    public PublicationException uniquenessConstraintViolation(String key, String value) {
+    public void afterLoad(final Collection<Publication> publications) throws OXException {
+
+    }
+
+    public OXException uniquenessConstraintViolation(final String key, final String value) {
         return PublicationErrorMessage.UniquenessConstraintViolation.create(value, key);
     }
 
-    public void checkPermission(Permission permission, Publication publication) throws PublicationException {
+    public void checkPermission(final Permission permission, final Publication publication) throws OXException {
         boolean allow = false;
         try {
             switch (permission) {
@@ -235,25 +234,23 @@ public abstract class AbstractPublicationService implements PublicationService {
                 allow = mayDelete(publication);
                 break;
             }
-        } catch (PublicationException x) {
+        } catch (final OXException x) {
             throw x;
-        } catch (AbstractOXException x) {
-            throw new PublicationException(x);
         }
         if (!allow) {
             throw PublicationErrorMessage.AccessDenied.create(permission);
         }
     }
 
-    protected boolean mayDelete(Publication publication) throws AbstractOXException {
+    protected boolean mayDelete(final Publication publication) throws OXException {
         return getSecurityStrategy().mayDelete(publication);
     }
 
-    protected boolean mayUpdate(Publication publication) throws AbstractOXException {
+    protected boolean mayUpdate(final Publication publication) throws OXException {
         return getSecurityStrategy().mayUpdate(publication);
     }
 
-    protected boolean mayCreate(Publication publication) throws AbstractOXException {
+    protected boolean mayCreate(final Publication publication) throws OXException {
         return getSecurityStrategy().mayCreate(publication);
     }
 

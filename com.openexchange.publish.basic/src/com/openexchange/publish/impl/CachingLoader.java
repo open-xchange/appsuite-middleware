@@ -54,9 +54,9 @@ import java.util.Collection;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.server.osgiservice.Whiteboard;
 
 
@@ -71,42 +71,42 @@ public class CachingLoader implements PublicationDataLoaderService {
     private static final String CACHE_REGION = "com.openexchange.publish.dataloader";
     
     private PublicationDataLoaderService delegate = null;
-    private Whiteboard whiteboard;
-    private CacheService cachingService;
+    private final Whiteboard whiteboard;
+    private final CacheService cachingService;
     
-    public CachingLoader(Whiteboard whiteboard, PublicationDataLoaderService delegate) {
+    public CachingLoader(final Whiteboard whiteboard, final PublicationDataLoaderService delegate) {
         this.whiteboard = whiteboard;
         this.delegate = delegate;
         this.cachingService = whiteboard.getService(CacheService.class);
     }
     
-    public Collection<? extends Object> load(Publication publication) throws PublicationException {
+    public Collection<? extends Object> load(final Publication publication) throws OXException {
         try {
-            Collection<? extends Object> fromCache = tryCache(publication);
+            final Collection<? extends Object> fromCache = tryCache(publication);
             if(fromCache == null) {
-                Collection<? extends Object> loaded = delegate.load(publication);
+                final Collection<? extends Object> loaded = delegate.load(publication);
                 remember(publication, loaded);
                 return loaded;
             }
             return fromCache;
         
-        } catch (CacheException x) {
-            throw new PublicationException(x);
+        } catch (final OXException x) {
+            throw x;
         }
    }
 
-    private void remember(Publication publication, Collection<? extends Object> loaded) throws CacheException {
+    private void remember(final Publication publication, final Collection<? extends Object> loaded) throws OXException {
         if(! allElementsAreSerializable(loaded)) {
             return;
         }
-        Cache cache = getCache();
+        final Cache cache = getCache();
         if(cache == null) {
             return;
         }
         cache.put(new PublicationKey(publication), (Serializable) loaded, modifyAttributes(cache.getDefaultElementAttributes()));
     }
 
-    private ElementAttributes modifyAttributes(ElementAttributes attributes) {
+    private ElementAttributes modifyAttributes(final ElementAttributes attributes) {
        
         if(attributes.getMaxLifeSeconds() == -1) {
             attributes.setMaxLifeSeconds(30);
@@ -120,8 +120,8 @@ public class CachingLoader implements PublicationDataLoaderService {
         return attributes;
     }
 
-    private boolean allElementsAreSerializable(Collection<? extends Object> loaded) {
-        for (Object object : loaded) {
+    private boolean allElementsAreSerializable(final Collection<? extends Object> loaded) {
+        for (final Object object : loaded) {
             if(!Serializable.class.isInstance(object)) {
                 return false;
             }
@@ -129,15 +129,15 @@ public class CachingLoader implements PublicationDataLoaderService {
         return true;
     }
 
-    private Collection<? extends Object> tryCache(Publication publication) throws CacheException {
-        Cache cache = getCache();
+    private Collection<? extends Object> tryCache(final Publication publication) throws OXException {
+        final Cache cache = getCache();
         if(cache == null) {
             return null;
         }
         return (Collection<? extends Object>) cache.get(new PublicationKey(publication));
     }
     
-    private Cache getCache() throws CacheException {
+    private Cache getCache() throws OXException {
         if(! whiteboard.isActive(cachingService)) {
             return null;
         }
@@ -145,10 +145,10 @@ public class CachingLoader implements PublicationDataLoaderService {
     }
 
     private static final class PublicationKey implements Serializable {
-        private int id;
-        private int ctxId;
+        private final int id;
+        private final int ctxId;
 
-        public PublicationKey(Publication publication) {
+        public PublicationKey(final Publication publication) {
             this.id = publication.getId();
             this.ctxId = publication.getContext().getContextId();
         }
@@ -163,7 +163,7 @@ public class CachingLoader implements PublicationDataLoaderService {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -173,7 +173,7 @@ public class CachingLoader implements PublicationDataLoaderService {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            PublicationKey other = (PublicationKey) obj;
+            final PublicationKey other = (PublicationKey) obj;
             if (ctxId != other.ctxId) {
                 return false;
             }

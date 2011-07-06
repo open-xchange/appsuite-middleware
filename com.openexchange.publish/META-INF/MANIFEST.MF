@@ -6,8 +6,9 @@ Bundle-Version: 6.20.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.datatypes.genericonf,
- com.openexchange.exceptions,
+ com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
+ com.openexchange.i18n,
  org.apache.commons.logging
 Export-Package: com.openexchange.publish

@@ -53,9 +53,9 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
@@ -100,7 +100,7 @@ public class IsPublished implements AdditionalFolderField {
                     return Boolean.TRUE;
                 }
             }
-        } catch (final PublicationException x) {
+        } catch (final OXException x) {
             LOG.error(x.getMessage(), x);
         }
         return Boolean.FALSE;

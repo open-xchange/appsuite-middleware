@@ -59,6 +59,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.contact.LdapServer;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;

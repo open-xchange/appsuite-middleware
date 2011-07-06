@@ -51,17 +51,14 @@ package com.openexchange.publish.impl;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -76,10 +73,10 @@ import com.openexchange.userconf.UserConfigurationService;
 public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
     private InfostoreFacade infostore = null;
-    private UserService users;
-    private UserConfigurationService userConfigs;
+    private final UserService users;
+    private final UserConfigurationService userConfigs;
     
-    public InfostoreFolderLoader(InfostoreFacade infostore, UserService users, UserConfigurationService userConfigs) {
+    public InfostoreFolderLoader(final InfostoreFacade infostore, final UserService users, final UserConfigurationService userConfigs) {
         super();
         this.infostore = infostore;
         this.users = users;
@@ -88,37 +85,37 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
 
 
-    public Collection<? extends Object> load(Publication publication) throws PublicationException {
+    public Collection<? extends Object> load(final Publication publication) throws OXException {
         final LinkedList<Object> list = new LinkedList<Object>();
         try {
             final int folderId = Integer.parseInt(publication.getEntityId());
             final SearchIterator documentsInFolder = infostore.getDocuments(folderId, Metadata.HTTPAPI_VALUES_ARRAY, Metadata.TITLE_LITERAL, InfostoreFacade.ASC, getContext(publication), getUser(publication), getUserConfig(publication)).results();
             while(documentsInFolder.hasNext()) {
-                Object next = documentsInFolder.next();
+                final Object next = documentsInFolder.next();
                 list.add(next);
             }
             documentsInFolder.close();
-        } catch (final AbstractOXException e) {
-            throw new PublicationException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         return list;
     }
 
 
 
-    private UserConfiguration getUserConfig(Publication publication) throws PublicationException, OXException {
+    private UserConfiguration getUserConfig(final Publication publication) throws OXException, OXException {
         return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
     }
 
 
 
-    private User getUser(Publication publication) throws PublicationException, OXException {
+    private User getUser(final Publication publication) throws OXException, OXException {
         return users.getUser(publication.getUserId(), publication.getContext());
     }
 
 
 
-    private Context getContext(Publication publication) {
+    private Context getContext(final Publication publication) {
         return publication.getContext();
     }
 

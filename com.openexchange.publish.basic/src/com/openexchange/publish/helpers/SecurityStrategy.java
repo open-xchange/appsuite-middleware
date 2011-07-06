@@ -49,7 +49,7 @@
 
 package com.openexchange.publish.helpers;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 
 
@@ -61,10 +61,10 @@ import com.openexchange.publish.Publication;
  */
 public interface SecurityStrategy {
 
-    boolean mayCreate(Publication publication) throws AbstractOXException;
+    boolean mayCreate(Publication publication) throws OXException;
 
-    boolean mayUpdate(Publication publication) throws AbstractOXException;
+    boolean mayUpdate(Publication publication) throws OXException;
 
-    boolean mayDelete(Publication publication) throws AbstractOXException;
+    boolean mayDelete(Publication publication) throws OXException;
 
 }

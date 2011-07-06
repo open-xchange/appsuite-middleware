@@ -59,11 +59,9 @@ import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
-import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.sql.builder.StatementBuilder;
@@ -99,39 +97,38 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
 
     protected PublicationSQLStorage storage;
 
+    @Override
     public void setUp() throws Exception {
-        PublicationErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.publish");
-        PublicationErrorMessage.EXCEPTIONS.setComponent(new StringComponent("PUB"));
         loadProperties();
         super.setUp();
 
 
         // First
-        FormElement formElementLogin1 = new FormElement();
+        final FormElement formElementLogin1 = new FormElement();
         formElementLogin1.setName("login1");
         formElementLogin1.setDisplayName("Login1");
         formElementLogin1.setMandatory(true);
         formElementLogin1.setWidget(FormElement.Widget.INPUT);
         formElementLogin1.setDefaultValue("default login1");
 
-        FormElement formElementPassword1 = new FormElement();
+        final FormElement formElementPassword1 = new FormElement();
         formElementPassword1.setName("password1");
         formElementPassword1.setDisplayName("Password1");
         formElementPassword1.setMandatory(true);
         formElementPassword1.setWidget(FormElement.Widget.PASSWORD);
 
-        DynamicFormDescription formDescription1 = new DynamicFormDescription();
+        final DynamicFormDescription formDescription1 = new DynamicFormDescription();
         formDescription1.addFormElement(formElementLogin1);
         formDescription1.addFormElement(formElementPassword1);
 
-        PublicationTarget target1 = new PublicationTarget();
+        final PublicationTarget target1 = new PublicationTarget();
         target1.setDisplayName("Target 1");
         target1.setFormDescription(formDescription1);
         target1.setIcon("/path/to/icon1");
         target1.setModule(module1);
         target1.setId("com.openexchange.publication.test.basic1");
 
-        Map<String, Object> config1 = new HashMap<String, Object>();
+        final Map<String, Object> config1 = new HashMap<String, Object>();
         config1.put("key1.1", 123);
         config1.put("key1.2", "Hello World!");
         
@@ -145,20 +142,20 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         pub1.setEnabled(true);
         
         // Second
-        FormElement formElementLogin2 = new FormElement();
+        final FormElement formElementLogin2 = new FormElement();
         formElementLogin2.setName("login2");
         formElementLogin2.setDisplayName("Login2");
         formElementLogin2.setMandatory(true);
         formElementLogin2.setWidget(FormElement.Widget.INPUT);
         formElementLogin2.setDefaultValue("default login2");
 
-        FormElement formElementPassword2 = new FormElement();
+        final FormElement formElementPassword2 = new FormElement();
         formElementPassword2.setName("password2");
         formElementPassword2.setDisplayName("Password2");
         formElementPassword2.setMandatory(true);
         formElementPassword2.setWidget(FormElement.Widget.PASSWORD);
 
-        DynamicFormDescription formDescription2 = new DynamicFormDescription();
+        final DynamicFormDescription formDescription2 = new DynamicFormDescription();
         formDescription2.addFormElement(formElementLogin2);
         formDescription2.addFormElement(formElementPassword2);
 
@@ -175,28 +172,29 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         pub2.setUserId(userId);
         pub2.setTarget(target1);
         
-        SimPublicationTargetDiscoveryService discoveryService = new SimPublicationTargetDiscoveryService();
+        final SimPublicationTargetDiscoveryService discoveryService = new SimPublicationTargetDiscoveryService();
         discoveryService.addTarget(target1);
         discoveryService.addTarget(target1);
         storage = new PublicationSQLStorage(getDBProvider(), new SimConfigurationStorageService(), discoveryService);
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (publicationsToDelete.size() > 0) {
-            List<Expression> placeholder = new ArrayList<Expression>();
-            for (int delId : publicationsToDelete) {
+            final List<Expression> placeholder = new ArrayList<Expression>();
+            for (final int delId : publicationsToDelete) {
                 placeholder.add(PLACEHOLDER);
                 
-                Publication publicationToDelete = new Publication();
+                final Publication publicationToDelete = new Publication();
                 publicationToDelete.setId(delId);
                 publicationToDelete.setContext(ctx);
                 storage.forgetPublication(publicationToDelete);
             }
             
-            DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", new LIST(placeholder))));
+            final DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", new LIST(placeholder))));
             
-            Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-            List<Integer> values = new ArrayList<Integer>();
+            final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
+            final List<Integer> values = new ArrayList<Integer>();
             values.add(ctx.getContextId());
             values.addAll(publicationsToDelete);
             new StatementBuilder().executeStatement(writeConnection, delete, values);
@@ -207,7 +205,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
     }
     
     
-    protected void assertEquals(Publication expected, Publication actual) {
+    protected void assertEquals(final Publication expected, final Publication actual) {
         assertEquals(expected.getEntityId(), actual.getEntityId());
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getModule(), actual.getModule());
@@ -216,7 +214,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         assertEquals(expected.isEnabled(), actual.isEnabled());
     }
     
-    protected void assertEquals(PublicationTarget expected, PublicationTarget actual) {
+    protected void assertEquals(final PublicationTarget expected, final PublicationTarget actual) {
         assertEquals(expected.getDisplayName(), actual.getDisplayName());
         assertEquals(expected.getIcon(), actual.getIcon());
         assertEquals(expected.getId(), actual.getId());
@@ -224,11 +222,11 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getFormDescription(), actual.getFormDescription());
     }
     
-    protected void assertEquals(DynamicFormDescription expected, DynamicFormDescription actual) {
+    protected void assertEquals(final DynamicFormDescription expected, final DynamicFormDescription actual) {
         assertEquals("Form Element size does notg match", expected.getFormElements().size(), actual.getFormElements().size());
-        for (FormElement formElementExpected : expected.getFormElements()) {
+        for (final FormElement formElementExpected : expected.getFormElements()) {
             boolean found = false;
-            for (FormElement formElementActual : actual.getFormElements()) {
+            for (final FormElement formElementActual : actual.getFormElements()) {
                 if (formElementExpected.getName().equals(formElementActual.getName())) {
                     found = true;
                     assertEquals(formElementExpected, formElementActual);
@@ -240,22 +238,22 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         }
     }
     
-    protected void removePublicationsForTarget(String targetId) throws Exception {
-        Connection writeConnection = getDBProvider().getWriteConnection(ctx);
+    protected void removePublicationsForTarget(final String targetId) throws Exception {
+        final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
         
-        DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("target_id", PLACEHOLDER));
-        List<Object> values = new ArrayList<Object>();
+        final DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("target_id", PLACEHOLDER));
+        final List<Object> values = new ArrayList<Object>();
         values.add(targetId);
         new StatementBuilder().executeStatement(writeConnection, delete, values);
         
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
     
-    protected void removePublicationsForEntity(String entity, String module) throws Exception {
-        Connection writeConnection = getDBProvider().getWriteConnection(ctx);
+    protected void removePublicationsForEntity(final String entity, final String module) throws Exception {
+        final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
         
-        DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("entity", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)));
-        List<Object> values = new ArrayList<Object>();
+        final DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("entity", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)));
+        final List<Object> values = new ArrayList<Object>();
         values.add(entity);
         values.add(module);
         new StatementBuilder().executeStatement(writeConnection, delete, values);

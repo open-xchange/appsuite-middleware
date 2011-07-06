@@ -75,7 +75,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.session.ServerSession;
@@ -183,7 +183,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         infostore.removeDocument(new int[]{document.getId()}, Long.MAX_VALUE, session);
     }
 
-    private boolean hasMorePublications(final Context ctx, final DocumentMetadata document) throws PublicationException {
+    private boolean hasMorePublications(final Context ctx, final DocumentMetadata document) throws OXException {
         return !publisher.getAllPublications(ctx, String.valueOf(document.getId())).isEmpty();
     }
 
@@ -191,7 +191,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         return publication.getConfiguration().get(DESTROY_DOCUMENT) == Boolean.TRUE;
     }
 
-    private void destroy(final Publication publication) throws PublicationException {
+    private void destroy(final Publication publication) throws OXException {
         publisher.delete(publication);
     }
 
@@ -251,7 +251,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         }
     }
 
-    private InputStream loadContent(final Publication publication) throws PublicationException {
+    private InputStream loadContent(final Publication publication) throws OXException {
         final Collection<? extends Object> load = loader.load(publication);
         if(load == null || load.isEmpty()) {
             return new ByteArrayInputStream(new byte[0]);
@@ -259,7 +259,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         return (InputStream) load.iterator().next();
     }
 
-    private Publication getPublication(final String secret, final Context ctx) throws PublicationException {
+    private Publication getPublication(final String secret, final Context ctx) throws OXException {
         return publisher.getPublication(ctx, secret);
     }
 

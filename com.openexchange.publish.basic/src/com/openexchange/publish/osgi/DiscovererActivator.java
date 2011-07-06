@@ -56,9 +56,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.database.PublicationUserDeleteListener;
 import com.openexchange.publish.helpers.AbstractPublicationService;
@@ -72,8 +70,6 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class DiscovererActivator implements BundleActivator {
-
-    private ComponentRegistration componentRegistration;
 
     private ServiceRegistration discoveryRegistration;
 
@@ -109,8 +105,6 @@ public class DiscovererActivator implements BundleActivator {
         AbstractPublicationService.setDefaultStorage( new PublicationSQLStorage(provider, confStorage, compositeDiscovererCollector) );
         AbstractPublicationService.FOLDER_ADMIN_ONLY = new FolderSecurityStrategy(whiteboard.getService(UserConfigurationService.class));
 
-        componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);
-        
         final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
         listener.setDiscoveryService(compositeDiscovererCollector);
         listener.setGenConfStorage(confStorage);
@@ -121,8 +115,6 @@ public class DiscovererActivator implements BundleActivator {
     public void stop(final BundleContext context) throws Exception {
         discoveryRegistration.unregister();
         discoveryRegistration = null;
-        componentRegistration.unregister();
-        componentRegistration = null;
         pubServiceCollector.close();
         pubServiceCollector = null;
         discovererCollector.close();

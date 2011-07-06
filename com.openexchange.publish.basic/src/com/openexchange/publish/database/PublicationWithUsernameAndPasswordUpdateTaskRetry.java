@@ -56,7 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 
@@ -68,7 +68,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
  */
 public class PublicationWithUsernameAndPasswordUpdateTaskRetry extends PublicationWithUsernameAndPasswordUpdateTask {
 
-    public PublicationWithUsernameAndPasswordUpdateTaskRetry(DatabaseService dbService) {
+    public PublicationWithUsernameAndPasswordUpdateTaskRetry(final DatabaseService dbService) {
         super(dbService);
     }
 
@@ -78,15 +78,15 @@ public class PublicationWithUsernameAndPasswordUpdateTaskRetry extends Publicati
     }
 
     @Override
-    public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
+    public void perform(final PerformParameters params) throws OXException {
+        final int contextId = params.getContextId();
         final Connection con = getDbService().getForUpdateTask(contextId);
         try {
             con.setAutoCommit(false);
             innerPerform(con);
             fixExecutedTask(con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -95,7 +95,7 @@ public class PublicationWithUsernameAndPasswordUpdateTaskRetry extends Publicati
         }
     }
 
-    private static final void fixExecutedTask(Connection con) throws SQLException {
+    private static final void fixExecutedTask(final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE updateTask SET successful=true WHERE taskName=?");

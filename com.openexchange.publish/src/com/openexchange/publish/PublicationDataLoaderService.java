@@ -50,6 +50,7 @@
 package com.openexchange.publish;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -59,5 +60,5 @@ import java.util.Collection;
  *
  */
 public interface PublicationDataLoaderService {
-    public Collection<? extends Object> load(Publication publication) throws PublicationException;
+    public Collection<? extends Object> load(Publication publication) throws OXException;
 }

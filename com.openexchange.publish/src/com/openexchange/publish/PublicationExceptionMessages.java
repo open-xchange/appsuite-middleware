@@ -49,10 +49,11 @@
 
 package com.openexchange.publish;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * Messages to translate for {@link PublicationException}.
+ * Messages to translate for {@link OXException}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

@@ -52,13 +52,13 @@ package com.openexchange.publish.impl;
 import java.util.Collection;
 import java.util.LinkedList;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -85,7 +85,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
      */
-    public Collection<? extends Object> load(final Publication publication) throws PublicationException {
+    public Collection<? extends Object> load(final Publication publication) throws OXException {
         final LinkedList<Contact> list = new LinkedList<Contact>();
         try {
             final int folderId = Integer.parseInt(publication.getEntityId());
@@ -99,7 +99,7 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
                 }
             }
         } catch (final AbstractOXException e) {
-            throw new PublicationException(e);
+            throw new OXException(e);
         }
         // FIXME add sorting
         return list;

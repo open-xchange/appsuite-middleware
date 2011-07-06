@@ -59,8 +59,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -69,16 +69,16 @@ public class Transaction {
 
     private Connection connection;
 
-    private int contextId;
+    private final int contextId;
 
-    public Transaction(int contextId) {
+    public Transaction(final int contextId) {
         this.contextId = contextId;
     }
 
-    public List<Integer> executeStatement(String sql, Object... objects) throws DBPoolingException, SQLException {
+    public List<Integer> executeStatement(final String sql, final Object... objects) throws OXException, SQLException {
         PreparedStatement statement = null;
         ResultSet keys = null;        
-        List<Integer> retval = new ArrayList<Integer>();
+        final List<Integer> retval = new ArrayList<Integer>();
         try {
             if (connection == null) {
                 connection = Database.get(contextId, true);
@@ -104,11 +104,11 @@ public class Transaction {
         return retval;
     }
 
-    public List<Map<String, Object>> executeQuery(String sql, Object... objects) throws DBPoolingException, SQLException {
+    public List<Map<String, Object>> executeQuery(final String sql, final Object... objects) throws OXException, SQLException {
         Connection con = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
-        List<Map<String, Object>> retval = new ArrayList<Map<String, Object>>();
+        final List<Map<String, Object>> retval = new ArrayList<Map<String, Object>>();
 
         try {
             if (connection == null) {
@@ -123,11 +123,11 @@ public class Transaction {
             }
 
             rs = statement.executeQuery();
-            ResultSetMetaData rsmd = rs.getMetaData();
+            final ResultSetMetaData rsmd = rs.getMetaData();
             while (rs.next()) {
-                Map<String, Object> row = new HashMap<String, Object>();
+                final Map<String, Object> row = new HashMap<String, Object>();
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    String column = rsmd.getColumnName(i);
+                    final String column = rsmd.getColumnName(i);
                     row.put(column, rs.getObject(column));
                 }
                 retval.add(row);
@@ -145,15 +145,15 @@ public class Transaction {
         return retval;
     }
 
-    public static List<Integer> commitStatement(int contextId, String sql, Object... objects) throws DBPoolingException, SQLException {
-        Transaction transaction = new Transaction(contextId);
-        List<Integer> retval = transaction.executeStatement(sql, objects);
+    public static List<Integer> commitStatement(final int contextId, final String sql, final Object... objects) throws OXException, SQLException {
+        final Transaction transaction = new Transaction(contextId);
+        final List<Integer> retval = transaction.executeStatement(sql, objects);
         transaction.commit();
         return retval;
     }
 
-    public static List<Map<String, Object>> commitQuery(int contextId, String sql, Object... objects) throws DBPoolingException, SQLException {
-        Transaction transaction = new Transaction(contextId);
+    public static List<Map<String, Object>> commitQuery(final int contextId, final String sql, final Object... objects) throws OXException, SQLException {
+        final Transaction transaction = new Transaction(contextId);
         return transaction.executeQuery(sql, objects);
     }
 
@@ -175,7 +175,7 @@ public class Transaction {
         Database.back(contextId, true, connection);
     }
 
-    private void closeSQLStuff(Connection con, Statement stmt, ResultSet rs) throws SQLException {
+    private void closeSQLStuff(final Connection con, final Statement stmt, final ResultSet rs) throws SQLException {
         if (rs != null) {
             try {
                 rs.close();
@@ -198,7 +198,7 @@ public class Transaction {
     /**
      * Tries to turn everything into an int
      */
-    public static int INT(Object result) {
+    public static int INT(final Object result) {
         if(Long.class.isInstance(result)) {
             return (int) (long) (Long)result;
         } else if (Integer.class.isInstance(result)) {

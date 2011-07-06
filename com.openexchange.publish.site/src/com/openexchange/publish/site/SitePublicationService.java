@@ -60,7 +60,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
@@ -108,7 +108,7 @@ public class SitePublicationService extends AbstractPublicationService implement
     }
 
     @Override
-    public PublicationTarget getTarget() throws PublicationException {
+    public PublicationTarget getTarget() throws OXException {
         return target;
     }
 
@@ -118,7 +118,7 @@ public class SitePublicationService extends AbstractPublicationService implement
         return INSTANCE != null ? INSTANCE : (INSTANCE = new SitePublicationService());
     }
 
-    public Publication getPublication(Context ctx, String secret) throws PublicationException {
+    public Publication getPublication(Context ctx, String secret) throws OXException {
         Map<String, Object> query = new HashMap<String, Object>();
         query.put(SECRET, secret);
 
@@ -131,14 +131,14 @@ public class SitePublicationService extends AbstractPublicationService implement
     }
 
     @Override
-    public void beforeCreate(Publication publication) throws PublicationException {
+    public void beforeCreate(Publication publication) throws OXException {
         super.beforeCreate(publication);
         publication.getConfiguration().remove(URL);
         addSecret(publication, null);
     }
 
     @Override
-    public void beforeUpdate(Publication publication) throws PublicationException {
+    public void beforeUpdate(Publication publication) throws OXException {
         super.beforeUpdate(publication);
         Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
         addSecret(publication, oldPublication);
@@ -146,7 +146,7 @@ public class SitePublicationService extends AbstractPublicationService implement
     }
 
     @Override
-    public void modifyOutgoing(Publication publication) throws PublicationException {
+    public void modifyOutgoing(Publication publication) throws OXException {
         super.modifyOutgoing(publication);
 
         Map<String, Object> configuration = publication.getConfiguration();

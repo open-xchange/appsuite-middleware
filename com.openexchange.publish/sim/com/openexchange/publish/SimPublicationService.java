@@ -153,7 +153,7 @@ public class SimPublicationService implements PublicationService {
         return deletedIds;
     }
 
-	public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws PublicationException {
+	public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException {
 		// TODO Auto-generated method stub
 		return null;
 	}

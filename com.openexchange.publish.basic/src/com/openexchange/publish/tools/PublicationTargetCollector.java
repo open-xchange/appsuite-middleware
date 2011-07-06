@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -74,7 +74,7 @@ public class PublicationTargetCollector implements PublicationTargetDiscoverySer
         return targets.get(id);
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
+    public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         for(PublicationTarget target : targets.values()) {
             if(target.getPublicationService().knows(context, publicationId)) {
                 return target;
@@ -101,11 +101,11 @@ public class PublicationTargetCollector implements PublicationTargetDiscoverySer
         return targets.values();
     }
 
-    public void addPublicationService(PublicationService publicationService) throws PublicationException {
+    public void addPublicationService(PublicationService publicationService) throws OXException {
         targets.put(publicationService.getTarget().getId(), publicationService.getTarget());
     }
     
-    public void removePublicationService(PublicationService publicationService) throws PublicationException {
+    public void removePublicationService(PublicationService publicationService) throws OXException {
         targets.remove(publicationService.getTarget().getId());
     }
     

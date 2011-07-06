@@ -49,7 +49,7 @@
 
 package com.openexchange.publish.helpers;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.publish.Publication;
@@ -66,34 +66,34 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class FolderSecurityStrategy implements SecurityStrategy {
 
-    private UserConfigurationService userConfigs;
+    private final UserConfigurationService userConfigs;
 
-    public FolderSecurityStrategy(UserConfigurationService userConfigs) {
+    public FolderSecurityStrategy(final UserConfigurationService userConfigs) {
         this.userConfigs = userConfigs;
     }
     
-    public boolean mayCreate(Publication publication) throws AbstractOXException {
+    public boolean mayCreate(final Publication publication) throws OXException {
         return isFolderAdmin(publication);
     }
 
-    public boolean mayDelete(Publication publication) throws AbstractOXException {
+    public boolean mayDelete(final Publication publication) throws OXException {
         return isFolderAdmin(publication);
     }
 
-    public boolean mayUpdate(Publication publication) throws AbstractOXException {
+    public boolean mayUpdate(final Publication publication) throws OXException {
         return isFolderAdmin(publication);
     }
 
-    private boolean isFolderAdmin(Publication publication) throws AbstractOXException {
-        OCLPermission permission = loadFolderPermission(publication);
+    private boolean isFolderAdmin(final Publication publication) throws OXException {
+        final OCLPermission permission = loadFolderPermission(publication);
         return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION;
     }
 
-    public OCLPermission loadFolderPermission(Publication publication) throws AbstractOXException {
-        int folderId = Integer.valueOf(publication.getEntityId());
-        int userId = publication.getUserId();
-        Context ctx = publication.getContext();
-        UserConfiguration userConfig = userConfigs.getUserConfiguration(userId, ctx);
+    public OCLPermission loadFolderPermission(final Publication publication) throws OXException {
+        final int folderId = Integer.valueOf(publication.getEntityId());
+        final int userId = publication.getUserId();
+        final Context ctx = publication.getContext();
+        final UserConfiguration userConfig = userConfigs.getUserConfiguration(userId, ctx);
         
         
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);

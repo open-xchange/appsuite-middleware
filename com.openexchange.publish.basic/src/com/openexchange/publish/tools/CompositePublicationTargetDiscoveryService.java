@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 
@@ -76,7 +76,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         services.remove(service);
     }
 
-    public List<PublicationTarget> listTargets() throws PublicationException {
+    public List<PublicationTarget> listTargets() throws OXException {
         LinkedList<PublicationTarget> targets = new LinkedList<PublicationTarget>();
         for (PublicationTargetDiscoveryService service : services) {
             targets.addAll(service.listTargets());
@@ -84,7 +84,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return targets;
     }
 
-    public boolean knows(String id) throws PublicationException {
+    public boolean knows(String id) throws OXException {
         for (PublicationTargetDiscoveryService service : services) {
             if(service.knows(id)) {
                 return true;
@@ -93,7 +93,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return false;
     }
     
-    public PublicationTarget getTarget(String id) throws PublicationException {
+    public PublicationTarget getTarget(String id) throws OXException {
         for (PublicationTargetDiscoveryService service : services) {
             if(service.knows(id)) {
                 return service.getTarget(id);
@@ -102,7 +102,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return null;
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
+    public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         for(PublicationTargetDiscoveryService service : services) {
             PublicationTarget target = service.getTarget(context, publicationId);
             if (target != null) {
@@ -112,7 +112,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         return null;
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException {
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws OXException {
         List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
         for(PublicationTargetDiscoveryService service : services) {
             targets.addAll(service.getTargetsForEntityType(module));

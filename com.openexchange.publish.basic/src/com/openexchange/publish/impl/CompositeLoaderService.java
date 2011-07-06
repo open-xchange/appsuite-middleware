@@ -52,10 +52,10 @@ package com.openexchange.publish.impl;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationErrorMessage;
-import com.openexchange.publish.PublicationException;
 
 
 /**
@@ -68,11 +68,11 @@ public class CompositeLoaderService implements PublicationDataLoaderService {
 
     private Map<String, PublicationDataLoaderService> subLoaders = new HashMap<String, PublicationDataLoaderService>();
     
-    public Collection<? extends Object> load(Publication publication) throws PublicationException {
+    public Collection<? extends Object> load(Publication publication) throws OXException {
         return getSubLoader(publication.getModule()).load(publication);
     }
 
-    private PublicationDataLoaderService getSubLoader(String module) throws PublicationException {
+    private PublicationDataLoaderService getSubLoader(String module) throws OXException {
         if(!subLoaders.containsKey(module)) {
             throw PublicationErrorMessage.NoLoaderFound.create(module);
         }

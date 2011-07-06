@@ -56,7 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 
@@ -111,7 +111,7 @@ public class PublicationParserTest extends TestCase {
         
     }
     
-    public void testParse() throws JSONException, PublicationException, PublicationJSONException {
+    public void testParse() throws JSONException, OXException, PublicationJSONException {
         PublicationParser publicationParser = new PublicationParser(discovery);
         Publication publication = publicationParser.parse(object);
         

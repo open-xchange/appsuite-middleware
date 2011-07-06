@@ -50,6 +50,7 @@
 package com.openexchange.publish;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -57,15 +58,15 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface PublicationService {
     
-    public void create(Publication publication) throws PublicationException;
-    public void update(Publication publication) throws PublicationException;
-    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws PublicationException;
-    public Collection<Publication> getAllPublications(Context ctx) throws PublicationException;
-    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws PublicationException;
-    public boolean knows(Context ctx, int publicationId) throws PublicationException;
-    public Publication load(Context ctx, int publicationId) throws PublicationException;
-    public void delete(Publication publication) throws PublicationException;
-    public PublicationTarget getTarget() throws PublicationException;
+    public void create(Publication publication) throws OXException;
+    public void update(Publication publication) throws OXException;
+    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException;
+    public Collection<Publication> getAllPublications(Context ctx) throws OXException;
+    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws OXException;
+    public boolean knows(Context ctx, int publicationId) throws OXException;
+    public Publication load(Context ctx, int publicationId) throws OXException;
+    public void delete(Publication publication) throws OXException;
+    public PublicationTarget getTarget() throws OXException;
     
     
 }

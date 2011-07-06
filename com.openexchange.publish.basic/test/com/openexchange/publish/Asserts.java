@@ -56,6 +56,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Asserts}
@@ -64,19 +65,19 @@ import java.util.Set;
  *
  */
 public class Asserts {
-    public static void assertNotGettable(PublicationTargetDiscoveryService discovery, String id) throws PublicationException {
+    public static void assertNotGettable(PublicationTargetDiscoveryService discovery, String id) throws OXException {
         assertFalse("Did not expect to find "+id+" in discovery source", discovery.getTarget(id) != null);
     }
 
-    public static void assertGettable(PublicationTargetDiscoveryService discovery, String id) throws PublicationException {
+    public static void assertGettable(PublicationTargetDiscoveryService discovery, String id) throws OXException {
         assertNotNull("Could not find "+id+" in discovery source", discovery.getTarget(id));
     }
 
-    public static void assertKnows(PublicationTargetDiscoveryService discovery, String id) throws PublicationException {
+    public static void assertKnows(PublicationTargetDiscoveryService discovery, String id) throws OXException {
         assertTrue("Did not know: "+id, discovery.knows(id));
     }
 
-    public static void assertDoesNotKnow(PublicationTargetDiscoveryService discovery, String id) throws PublicationException {
+    public static void assertDoesNotKnow(PublicationTargetDiscoveryService discovery, String id) throws OXException {
         assertFalse("Did know: "+id, discovery.knows(id));
     }
 

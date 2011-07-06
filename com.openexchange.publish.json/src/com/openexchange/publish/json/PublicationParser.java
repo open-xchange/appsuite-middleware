@@ -59,7 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormContentParser;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.types.EntityMap;
@@ -86,10 +86,10 @@ public class PublicationParser {
      * @param object
      * @return
      * @throws JSONException
-     * @throws PublicationException
+     * @throws OXException
      * @throws PublicationJSONException 
      */
-    public Publication parse(JSONObject object) throws JSONException, PublicationException, PublicationJSONException {
+    public Publication parse(JSONObject object) throws JSONException, OXException, PublicationJSONException {
         Publication publication = new Publication();
         if(object.has(ID)) {
             publication.setId(object.getInt(ID));

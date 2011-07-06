@@ -53,12 +53,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.services.SimInfostoreFacade;
 
 
@@ -96,18 +96,18 @@ public class InfostoreDocumentLoaderTest extends TestCase {
     
         loader = new InfostoreDocumentLoader(infostoreFacade, null, null) {
             @Override
-            protected User loadUser(Context ctx, int userId) throws PublicationException {
+            protected User loadUser(Context ctx, int userId) throws OXException {
                 return null;
             }
             
             @Override
-            protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws PublicationException {
+            protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws OXException {
                 return null;
             }
         };
     }
     
-    public void testLoadDocument() throws PublicationException, IOException {
+    public void testLoadDocument() throws OXException, IOException {
         Collection<? extends Object> loaded = loader.load(publication);
         assertNotNull("Loaded was null!", loaded);
         assertEquals("Expected one document", 1, loaded.size());

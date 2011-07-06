@@ -49,6 +49,7 @@
 
 package com.openexchange.publish.helpers;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 
 
@@ -60,15 +61,15 @@ import com.openexchange.publish.Publication;
  */
 public class AllowEverything implements SecurityStrategy {
 
-    public boolean mayCreate(Publication publication) {
+    public boolean mayCreate(Publication publication) throws OXException {
         return true;
     }
 
-    public boolean mayDelete(Publication publication) {
+    public boolean mayDelete(Publication publication) throws OXException {
         return true;
     }
 
-    public boolean mayUpdate(Publication publication) {
+    public boolean mayUpdate(Publication publication) throws OXException {
         return true;
     }
 

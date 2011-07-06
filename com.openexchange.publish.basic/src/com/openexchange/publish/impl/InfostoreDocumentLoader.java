@@ -52,15 +52,13 @@ package com.openexchange.publish.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -89,7 +87,7 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
         this.userConfigs = userConfigService;
     }
 
-    public Collection<? extends Object> load(Publication publication) throws PublicationException {
+    public Collection<? extends Object> load(Publication publication) throws OXException {
         ArrayList<InputStream> documents = new ArrayList<InputStream>();
         try {
             InputStream document = infostore.getDocument(
@@ -100,24 +98,24 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
                 loadUserConfiguration(publication.getContext(), publication.getUserId()));
             documents.add(document);
         } catch (OXException e) {
-            throw new PublicationException(e);
+            throw new OXException(e);
         }
         return documents;
     }
 
-    protected User loadUser(Context ctx, int userId) throws PublicationException {
+    protected User loadUser(Context ctx, int userId) throws OXException {
         try {
             return users.getUser(userId, ctx);
         } catch (OXException e) {
-            throw new PublicationException(e);
+            throw new OXException(e);
         }
     }
 
-    protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws PublicationException {
+    protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws OXException {
         try {
             return userConfigs.getUserConfiguration(userId, ctx);
         } catch (OXException e) {
-            throw new PublicationException(e);
+            throw new OXException(e);
         }
     }
 

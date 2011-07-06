@@ -56,11 +56,11 @@ import java.util.Set;
 import junit.framework.TestCase;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.services.SimContactSQLInterface;
 import com.openexchange.session.Session;
 
@@ -110,7 +110,7 @@ public class ContactFolderLoaderTest extends TestCase {
         contactLoader = new ContactFolderLoader(contactSQLFactory);
     }
     
-    public void testLoadFolder() throws PublicationException {
+    public void testLoadFolder() throws OXException {
         final Collection<? extends Object> collection = contactLoader.load(publication);
         
         assertNotNull("Collection was null", collection);

@@ -76,7 +76,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -153,7 +153,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
     }
 
-    private Object listPublications(final JSONObject request, final ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
+    private Object listPublications(final JSONObject request, final ServerSession session) throws JSONException, OXException, PublicationJSONException {
         final JSONArray ids = request.getJSONArray(ResponseFields.DATA);
         final Context context = session.getContext();
         final List<Publication> publications = new ArrayList<Publication>(ids.length());
@@ -176,7 +176,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder);
     }
 
-    private Object loadAllPublications(final JSONObject request, final ServerSession session) throws PublicationJSONException, JSONException, PublicationException {
+    private Object loadAllPublications(final JSONObject request, final ServerSession session) throws PublicationJSONException, JSONException, OXException {
     	final Context context = session.getContext();  
     	final int userId = session.getUserId();
     	boolean containsFolderOrId = false;
@@ -261,7 +261,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return columns.split("\\s*,\\s*");
     }
     
-    private List<Publication> loadAllPublicationsForUser(final Context context, int userId, String module) throws PublicationException {
+    private List<Publication> loadAllPublicationsForUser(final Context context, int userId, String module) throws OXException {
     	final List<Publication> publications = new LinkedList<Publication>();
     	final Collection<PublicationTarget> targets = discovery.listTargets();
         
@@ -285,7 +285,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return publications;
     }
 
-    private List<Publication> loadAllPublicationsForEntity(final Context context, final String entityId, final String module) throws PublicationException {
+    private List<Publication> loadAllPublicationsForEntity(final Context context, final String entityId, final String module) throws OXException {
         final List<Publication> publications = new LinkedList<Publication>();
         final Collection<PublicationTarget> targetsForEntityType = discovery.getTargetsForEntityType(module);
         for (final PublicationTarget target : targetsForEntityType) {
@@ -349,7 +349,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return service.load(context, id);
     }
 
-    private Object deletePublication(final JSONObject request, final ServerSession session) throws PublicationException, JSONException {
+    private Object deletePublication(final JSONObject request, final ServerSession session) throws OXException, JSONException {
         final JSONArray ids = request.getJSONArray(ResponseFields.DATA);
         final Context context = session.getContext();
         for (int i = 0, size = ids.length(); i < size; i++) {
@@ -368,13 +368,13 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return L(1);
     }
 
-    private Object updatePublication(final JSONObject request, final ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
+    private Object updatePublication(final JSONObject request, final ServerSession session) throws JSONException, OXException, PublicationJSONException {
         final Publication publication = getPublication(request, session);
         publication.update();
         return L(1);
     }
 
-    private Object createPublication(final JSONObject request, final ServerSession session) throws PublicationException, PublicationJSONException, JSONException {
+    private Object createPublication(final JSONObject request, final ServerSession session) throws OXException, PublicationJSONException, JSONException {
         final Publication publication = getPublication(request, session);
         publication.setId(-1);
         publication.create();
@@ -401,7 +401,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return asJson;
     }
 
-    private Publication getPublication(final JSONObject request, final ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
+    private Publication getPublication(final JSONObject request, final ServerSession session) throws JSONException, OXException, PublicationJSONException {
         final JSONObject object = request.getJSONObject(ResponseFields.DATA);
         final Publication publication = new PublicationParser(discovery).parse(object);
         publication.setUserId(session.getUserId());

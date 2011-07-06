@@ -67,7 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
@@ -113,7 +113,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     @Override
-    public PublicationTarget getTarget() throws PublicationException {
+    public PublicationTarget getTarget() throws OXException {
         return target;
     }
 
@@ -166,14 +166,14 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     @Override
-    public void beforeCreate(Publication publication) throws PublicationException {
+    public void beforeCreate(Publication publication) throws OXException {
         super.beforeCreate(publication);
         publication.getConfiguration().remove(URL);
         addSecretIfNeeded(publication, null);
         loadTemplate(publication);
     }
 
-    public OXTemplate loadTemplate(Publication publication) throws PublicationException {
+    public OXTemplate loadTemplate(Publication publication) throws OXException {
         String templateName = (String) publication.getConfiguration().get(TEMPLATE);
         try {
             if (templateName == null || "".equals(templateName)) {
@@ -182,15 +182,15 @@ public class OXMFPublicationService extends AbstractPublicationService {
             ServerSessionAdapter serverSession = new ServerSessionAdapter(new PublicationSession(publication));
             return templateService.loadTemplate(templateName, defaultTemplateName, serverSession);
         } catch (OXException e) {
-            throw new PublicationException(e);
+            throw new OXException(e);
         } catch (TemplateException e) {
-            throw new PublicationException(e);
+            throw new OXException(e);
         }
 
     }
 
     @Override
-    public void beforeUpdate(Publication publication) throws PublicationException {
+    public void beforeUpdate(Publication publication) throws OXException {
         super.beforeUpdate(publication);
         Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
         addSecretIfNeeded(publication, oldPublication);
@@ -198,7 +198,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     @Override
-    public void modifyOutgoing(Publication publication) throws PublicationException {
+    public void modifyOutgoing(Publication publication) throws OXException {
         super.modifyOutgoing(publication);
 
         Map<String, Object> configuration = publication.getConfiguration();
@@ -231,7 +231,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     @Override
-    public void modifyIncoming(Publication publication) throws PublicationException {
+    public void modifyIncoming(Publication publication) throws OXException {
         String siteName = (String) publication.getConfiguration().get(SITE);
 
         if (siteName != null) {
@@ -279,7 +279,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         }
     }
 
-    public Publication getPublication(Context ctx, String site) throws PublicationException {
+    public Publication getPublication(Context ctx, String site) throws OXException {
         Map<String,Object> query = new HashMap<String, Object>();
         query.put(SITE, site);
 

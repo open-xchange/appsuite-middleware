@@ -8,8 +8,8 @@ import static com.openexchange.publish.Asserts.assertTargets;
 import java.util.Collection;
 import java.util.List;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationService;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
@@ -101,13 +101,13 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
         composite.addDiscoveryService(discovery2);
     }
     
-    public void testCompositeList() throws PublicationException {
+    public void testCompositeList() throws OXException {
         List<PublicationTarget> targets = composite.listTargets();
         
         assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2", "com.openexchange.publish.test3", "com.openexchange.publish.test4", "com.openexchange.publish.test5", "com.openexchange.publish.knowAll");
     }
     
-    public void testCompositeKnows() throws PublicationException {
+    public void testCompositeKnows() throws OXException {
         assertKnows(composite, "com.openexchange.publish.test1");
         assertKnows(composite, "com.openexchange.publish.test2");
         assertKnows(composite, "com.openexchange.publish.test3");
@@ -117,7 +117,7 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
         assertDoesNotKnow(composite, "com.openexchange.publish.unknown");
     }
     
-    public void testCompositeGet() throws PublicationException {
+    public void testCompositeGet() throws OXException {
         assertGettable(composite, "com.openexchange.publish.test1");
         assertGettable(composite, "com.openexchange.publish.test2");
         assertGettable(composite, "com.openexchange.publish.test3");
@@ -127,13 +127,13 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
         assertNotGettable(composite, "com.openexchange.publish.unknown");
     }
     
-    public void testGetTarget() throws PublicationException {
+    public void testGetTarget() throws OXException {
         PublicationTarget target = composite.getTarget(null, -1);
         assertNotNull(target);
         assertEquals("com.openexchange.publish.knowAll", target.getId());
     }
     
-    public void testGetResponsibleTargets() throws PublicationException {
+    public void testGetResponsibleTargets() throws OXException {
         Collection<PublicationTarget> targets = composite.getTargetsForEntityType("infostore");
         assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2", "com.openexchange.publish.test3", "com.openexchange.publish.test4", "com.openexchange.publish.test5");
 

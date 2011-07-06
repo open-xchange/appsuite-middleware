@@ -52,9 +52,9 @@ package com.openexchange.publish.impl;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
 
 
@@ -69,7 +69,7 @@ public class DummyStorage implements PublicationStorage {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationStorage#forgetPublication(com.openexchange.publish.Publication)
      */
-    public void forgetPublication(Publication publication) throws PublicationException {
+    public void forgetPublication(Publication publication) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -77,7 +77,7 @@ public class DummyStorage implements PublicationStorage {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationStorage#getPublication(com.openexchange.groupware.contexts.Context, int)
      */
-    public Publication getPublication(Context ctx, int publicationId) throws PublicationException {
+    public Publication getPublication(Context ctx, int publicationId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -85,7 +85,7 @@ public class DummyStorage implements PublicationStorage {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationStorage#getPublications(com.openexchange.groupware.contexts.Context, java.lang.String, int)
      */
-    public List<Publication> getPublications(Context ctx, String module, String entityId) throws PublicationException {
+    public List<Publication> getPublications(Context ctx, String module, String entityId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -93,7 +93,7 @@ public class DummyStorage implements PublicationStorage {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationStorage#getPublications(com.openexchange.groupware.contexts.Context, java.lang.String)
      */
-    public List<Publication> getPublications(Context ctx, String publicationTarget) throws PublicationException {
+    public List<Publication> getPublications(Context ctx, String publicationTarget) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -101,7 +101,7 @@ public class DummyStorage implements PublicationStorage {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationStorage#rememberPublication(com.openexchange.publish.Publication)
      */
-    public void rememberPublication(Publication publication) throws PublicationException {
+    public void rememberPublication(Publication publication) throws OXException {
         // TODO Auto-generated method stub
 
     }
@@ -109,12 +109,12 @@ public class DummyStorage implements PublicationStorage {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationStorage#search(com.openexchange.groupware.contexts.Context, java.lang.String, java.util.Map)
      */
-    public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws PublicationException {
+    public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public void updatePublication(Publication publication) throws PublicationException {
+    public void updatePublication(Publication publication) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -122,7 +122,7 @@ public class DummyStorage implements PublicationStorage {
     /* (non-Javadoc)
      * @see com.openexchange.publish.PublicationStorage#deletePublicationsOfUser(int, com.openexchange.groupware.contexts.Context)
      */
-    public void deletePublicationsOfUser(int userID, Context context) throws PublicationException {
+    public void deletePublicationsOfUser(int userID, Context context) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -135,13 +135,13 @@ public class DummyStorage implements PublicationStorage {
         
     }
 
-	public List<Publication> getPublicationsOfUser(Context ctx, int userId) throws PublicationException {
+	public List<Publication> getPublicationsOfUser(Context ctx, int userId) throws OXException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public List<Publication> getPublicationsOfUser(Context ctx, int userId,
-			String module) throws PublicationException {
+			String module) throws OXException {
 		// TODO Auto-generated method stub
 		return null;
 	}

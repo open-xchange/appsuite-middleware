@@ -59,8 +59,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.tools.CompositePublicationTargetDiscoveryService;
@@ -135,35 +135,35 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         return discovery;
     }
 
-    public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
+    public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTarget(context, publicationId);
     }
 
-    public PublicationTarget getTarget(String id) throws PublicationException {
+    public PublicationTarget getTarget(String id) throws OXException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTarget(id);
     }
 
-    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws PublicationException {
+    public Collection<PublicationTarget> getTargetsForEntityType(String module) throws OXException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.getTargetsForEntityType(module);
     }
 
-    public boolean knows(String id) throws PublicationException {
+    public boolean knows(String id) throws OXException {
         if(!grabbedAll) {
             grabAll();
         }
         return delegate.knows(id);
     }
 
-    public List<PublicationTarget> listTargets() throws PublicationException {
+    public List<PublicationTarget> listTargets() throws OXException {
         if(!grabbedAll) {
             grabAll();
         }

@@ -50,9 +50,9 @@
 package com.openexchange.publish.impl;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
 
 
@@ -69,7 +69,7 @@ public class EntityCleanUp {
         this.storage = storage;
     }
     
-    public void cleanUp(Context ctx, String module, String entityId) throws PublicationException {
+    public void cleanUp(Context ctx, String module, String entityId) throws OXException {
         List<Publication> publications = storage.getPublications(ctx, module, entityId);
         for (Publication publication : publications) {
             storage.forgetPublication(publication);

@@ -58,7 +58,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
@@ -84,11 +84,11 @@ public class OXMFPublicationServiceTest extends TestCase {
         publicationService = new OXMFPublicationService() {
 
             @Override
-            public Publication loadInternally(Context ctx, int publicationId) throws PublicationException {
+            public Publication loadInternally(Context ctx, int publicationId) throws OXException {
                 return oldPublication;
             }
             @Override
-            public Publication getPublication(Context ctx, String site) throws PublicationException {
+            public Publication getPublication(Context ctx, String site) throws OXException {
                 if(site.equals("existingSite")) {
                     Publication publication = new Publication();
                     publication.setId(23);
@@ -108,28 +108,28 @@ public class OXMFPublicationServiceTest extends TestCase {
         
     }
 
-    public void testModule() throws PublicationException {
+    public void testModule() throws OXException {
         PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
         assertEquals("Module differs", "bananas", target.getModule());
     }
     
-    public void testId() throws PublicationException {
+    public void testId() throws OXException {
         PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
         assertEquals("id differs", "com.openexchange.publish.microformats.contacts.online", target.getId());
     }
     
-    public void testDisplayNameOfTarget() throws PublicationException {
+    public void testDisplayNameOfTarget() throws OXException {
         PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
         assertEquals("Display Name differs", "Banana Publications!", target.getDisplayName());
     }
     
-    public void testModifyOutgoingShouldSetDisplayNameToSiteName() throws PublicationException{
+    public void testModifyOutgoingShouldSetDisplayNameToSiteName() throws OXException{
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("siteName","expected");
@@ -138,7 +138,7 @@ public class OXMFPublicationServiceTest extends TestCase {
     }
 
 
-    public void testFields() throws PublicationException {
+    public void testFields() throws OXException {
         PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
@@ -152,7 +152,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertNotNull(description);
     }
 
-    public void testAddSecretToConfigIfProtected() throws PublicationException {
+    public void testAddSecretToConfigIfProtected() throws OXException {
         Publication publication = new Publication();
         publication.getConfiguration().put("protected", true);
         publication.getConfiguration().put("siteName", "public");
@@ -162,7 +162,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertSecret(publication);
     }
 
-    public void testDontAddSecretToConfigIfNotProtected() throws PublicationException {
+    public void testDontAddSecretToConfigIfNotProtected() throws OXException {
         Publication publication = new Publication();
         publication.getConfiguration().put("protected", false);
         publication.getConfiguration().put("siteName", "public");
@@ -172,7 +172,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertNoSecret(publication);
     }
 
-    public void testAddSecretToConfigWhenProtectionChangesToOn() throws PublicationException {
+    public void testAddSecretToConfigWhenProtectionChangesToOn() throws OXException {
         oldPublication.getConfiguration().put("protected", false);
 
         Publication publication = new Publication();
@@ -184,7 +184,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertSecret(publication);
     }
 
-    public void testGenerateNewSecretOnlyIfProtectionStatusChanged() throws PublicationException {
+    public void testGenerateNewSecretOnlyIfProtectionStatusChanged() throws OXException {
         oldPublication.getConfiguration().put("protected", true);
         oldPublication.getConfiguration().put("secret", "172812951aefbda");
 
@@ -200,7 +200,7 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     }
 
-    public void testRemoveSecretFromConfigWhenProtectionChangesToOff() throws PublicationException {
+    public void testRemoveSecretFromConfigWhenProtectionChangesToOff() throws OXException {
         Publication publication = new Publication();
         publication.getConfiguration().put("protected", false);
         publication.getConfiguration().put("siteName", "public");
@@ -210,7 +210,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertSecretRemoved(publication);
     }
 
-    public void testRemoveSecretFromConfigExternally() throws PublicationException {
+    public void testRemoveSecretFromConfigExternally() throws OXException {
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("protected", true);
@@ -222,7 +222,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertTrue(publication.getConfiguration().get("secret") == null);
     }
 
-    public void testGenerateURL() throws PublicationException {
+    public void testGenerateURL() throws OXException {
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("siteName", "public");
@@ -241,7 +241,7 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     }
 
-    public void testUniqueSite() throws PublicationException {
+    public void testUniqueSite() throws OXException {
         Publication publication = new Publication();
         publication.setId(42);
         publication.setContext(new SimContext(1337));
@@ -250,13 +250,13 @@ public class OXMFPublicationServiceTest extends TestCase {
         try {
             publicationService.modifyIncoming(publication);
             fail("Could create double site");
-        } catch (PublicationException x) {
+        } catch (OXException x) {
             // Hooray
         }
 
     }
     
-    public void testSubmittingUnchangingSiteNameIsAccepted() throws PublicationException {
+    public void testSubmittingUnchangingSiteNameIsAccepted() throws OXException {
         Publication publication = new Publication();
         publication.setId(23);
         publication.setContext(new SimContext(1337));
@@ -264,7 +264,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         publicationService.modifyIncoming(publication);
     }
     
-    public void testNormalizedSiteName() throws PublicationException {
+    public void testNormalizedSiteName() throws OXException {
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("siteName","path/with//tooMany//slashes/");

@@ -50,7 +50,7 @@
 package com.openexchange.publish.helpers;
 
 import junit.framework.TestCase;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.impl.OCLPermission;
 
 
@@ -61,11 +61,11 @@ import com.openexchange.server.impl.OCLPermission;
  *
  */
 public class FolderSecurityStrategyTest extends TestCase {
-    public void testAllowForAdmin() throws AbstractOXException {
-        OCLPermission adminPermission = new OCLPermission();
+    public void testAllowForAdmin() throws OXException {
+        final OCLPermission adminPermission = new OCLPermission();
         adminPermission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 
-        TestableFolderSecurityStrategy strategy = new TestableFolderSecurityStrategy(adminPermission);
+        final TestableFolderSecurityStrategy strategy = new TestableFolderSecurityStrategy(adminPermission);
         
         assertTrue(strategy.mayCreate(null));
         assertTrue(strategy.mayUpdate(null));
@@ -74,11 +74,11 @@ public class FolderSecurityStrategyTest extends TestCase {
         
     }
     
-    public void testDenyForNonAdmin() throws AbstractOXException {
-        OCLPermission adminPermission = new OCLPermission();
+    public void testDenyForNonAdmin() throws OXException {
+        final OCLPermission adminPermission = new OCLPermission();
         adminPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 
-        TestableFolderSecurityStrategy strategy = new TestableFolderSecurityStrategy(adminPermission);
+        final TestableFolderSecurityStrategy strategy = new TestableFolderSecurityStrategy(adminPermission);
         
         assertFalse(strategy.mayCreate(null));
         assertFalse(strategy.mayUpdate(null));

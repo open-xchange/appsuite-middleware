@@ -96,7 +96,7 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -245,7 +245,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             publisher = target.getPublicationService();
         } catch (final OXException e) {
             throw new OXException(e);
-        } catch (final PublicationException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
@@ -281,7 +281,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.append(protocol).append("://").append(hostName).append(
                     path).toString()));
             }
-        } catch (final PublicationException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final OXException e) {
             throw new OXException(e);
@@ -552,7 +552,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of createLinksAttachment()
 
-    private String publishAttachmentAndGetPath(final MailPart attachment, final int folderId, final Context ctx, final List<PublicationAndInfostoreID> publications, final PublicationTarget target, final PublicationService publisher) throws OXException, TransactionException, PublicationException {
+    private String publishAttachmentAndGetPath(final MailPart attachment, final int folderId, final Context ctx, final List<PublicationAndInfostoreID> publications, final PublicationTarget target, final PublicationService publisher) throws OXException, TransactionException, OXException {
         /*
          * Create document meta data for current attachment
          */
@@ -656,7 +656,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         for (final PublicationAndInfostoreID publication : publications) {
             try {
                 publisher.delete(publication.publication);
-            } catch (final PublicationException e) {
+            } catch (final OXException e) {
                 LOG.error(
                     new StringBuilder("Publication with ID \"").append(publication.publication.getId()).append(" could not be roll-backed.").toString(),
                     e);
