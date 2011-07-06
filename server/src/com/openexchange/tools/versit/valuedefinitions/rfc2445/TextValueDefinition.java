@@ -95,7 +95,7 @@ public class TextValueDefinition extends ValueDefinition {
             final char c = str.charAt(i);
             switch (c) {
             case '\r':
-                if (i < length && str.charAt(i + 1) == '\n') {
+                if (i+1 < length && str.charAt(i + 1) == '\n') {
                     i++;
                 }
                 // no break;
