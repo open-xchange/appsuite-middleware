@@ -1,6 +1,6 @@
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -16,7 +16,7 @@ public class MailImportResult {
     private String id;
     private MailMessage mail;
     private boolean hasError;
-    private AbstractOXException exception;
+    private OXException exception;
     
     public MailImportResult() {
         super();
@@ -30,7 +30,7 @@ public class MailImportResult {
         return id;
     }
     
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
     
@@ -39,7 +39,7 @@ public class MailImportResult {
     }
 
     
-    public void setMail(MailMessage mail) {
+    public void setMail(final MailMessage mail) {
         this.mail = mail;
     }
 
@@ -51,11 +51,11 @@ public class MailImportResult {
         return hasError;
     }
     
-    public AbstractOXException getException() {
+    public OXException getException() {
         return exception;
     }
     
-    public void setException(AbstractOXException exception) {
+    public void setException(final OXException exception) {
         hasError = true;
         this.exception = exception;
     }
