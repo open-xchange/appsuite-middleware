@@ -71,7 +71,6 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -426,11 +425,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     results.add(fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
                 }
             }
-            try {
-                return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
-            } catch (final AbstractOXException e) {
-                throw new OXException(e);
-            }
+            return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
         }
         final FolderID id = new FolderID(folderId);
         return getFileAccess(id.getService(), id.getAccountId()).search(query, cols, id.getFolderId(), sort, order, start, end);
