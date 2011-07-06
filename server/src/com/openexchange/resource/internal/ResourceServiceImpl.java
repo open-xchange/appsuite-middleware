@@ -50,11 +50,10 @@
 package com.openexchange.resource.internal;
 
 import java.util.Date;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
 
@@ -88,55 +87,55 @@ public final class ResourceServiceImpl implements ResourceService {
         super();
     }
 
-    public void create(final User user, final Context ctx, final Resource resource) throws ResourceException {
+    public void create(final User user, final Context ctx, final Resource resource) throws OXException {
         new ResourceCreate(user, ctx, resource).perform();
     }
 
-    public void update(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws ResourceException {
+    public void update(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws OXException {
         new ResourceUpdate(user, ctx, resource, clientLastModified).perform();
     }
 
-    public void delete(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws ResourceException {
+    public void delete(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws OXException {
         new ResourceDelete(user, ctx, resource, clientLastModified).perform();
     }
 
-    public Resource getResource(final int resourceId, final Context context) throws ResourceException {
+    public Resource getResource(final int resourceId, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().getResource(resourceId, context);
         } catch (final OXException e) {
-            throw new ResourceException(e);
+            throw new OXException(e);
         }
     }
 
-    public Resource[] listModified(final Date modifiedSince, final Context context) throws ResourceException {
+    public Resource[] listModified(final Date modifiedSince, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().listModified(modifiedSince, context);
         } catch (final OXException e) {
-            throw new ResourceException(e);
+            throw new OXException(e);
         }
     }
     
-    public Resource[] listDeleted(final Date modifiedSince, final Context context) throws ResourceException {
+    public Resource[] listDeleted(final Date modifiedSince, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().listDeleted(modifiedSince, context);
         } catch (final OXException e) {
-            throw new ResourceException(e);
+            throw new OXException(e);
         }
     }
 
-    public Resource[] searchResources(final String pattern, final Context context) throws ResourceException {
+    public Resource[] searchResources(final String pattern, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().searchResources(pattern, context);
         } catch (final OXException e) {
-            throw new ResourceException(e);
+            throw new OXException(e);
         }
     }
 
-    public Resource[] searchResourcesByMail(final String pattern, final Context context) throws ResourceException {
+    public Resource[] searchResourcesByMail(final String pattern, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);
         } catch (final OXException e) {
-            throw new ResourceException(e);
+            throw new OXException(e);
         }
     }
 

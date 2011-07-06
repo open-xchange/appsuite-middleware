@@ -75,7 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -309,7 +309,7 @@ public class freebusy extends HttpServlet {
             }
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
-        } catch (ResourceException e) {
+        } catch (OXException e) {
             LOG.error("Resource '" + mailAddress + "' not found.");
         }
 

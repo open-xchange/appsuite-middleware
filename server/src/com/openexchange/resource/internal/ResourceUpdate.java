@@ -52,14 +52,11 @@ package com.openexchange.resource.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
@@ -102,12 +99,12 @@ public final class ResourceUpdate {
         storage = ResourceStorage.getInstance();
     }
 
-    private Resource getOrig() throws ResourceException {
+    private Resource getOrig() throws OXException {
         if (null == orig) {
             try {
                 orig = storage.getResource(resource.getIdentifier(), ctx);
             } catch (final OXException e) {
-                throw new ResourceException(e);
+                throw new OXException(e);
             }
         }
         return orig;
@@ -121,9 +118,9 @@ public final class ResourceUpdate {
      * <li>At last, the update is propagated to system (cache invalidation, etc.)</li>
      * </ol>
      * 
-     * @throws ResourceException If update fails
+     * @throws OXException If update fails
      */
-    void perform() throws ResourceException {
+    void perform() throws OXException {
         allow();
         check();
         update();
@@ -133,18 +130,18 @@ public final class ResourceUpdate {
     /**
      * Checks permission
      * 
-     * @throws ResourceException If permission is denied
+     * @throws OXException If permission is denied
      */
-    private void allow() throws ResourceException {
+    private void allow() throws OXException {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw new ResourceException(ResourceExceptionCode.PERMISSION, Integer.valueOf(ctx.getContextId()));
+                throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
             }
         } catch (final OXException e1) {
-            throw new ResourceException(e1);
+            throw new OXException(e1);
         }
         /*
          * TODO: Remove statements above and replace with commented call below
@@ -156,13 +153,13 @@ public final class ResourceUpdate {
      * Checks permission: Invoke {@link BundleAccessSecurityService#checkPermission(String[], String) checkPermission()} on
      * {@link BundleAccessSecurityService security service}
      * 
-     * @throws ResourceException If permission is not granted
+     * @throws OXException If permission is not granted
      */
-    // private void checkBySecurityService() throws ResourceException {
+    // private void checkBySecurityService() throws OXException {
     // final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
     // BundleAccessSecurityService.class);
     // if (securityService == null) {
-    // throw new ResourceException(new OXException(OXException.Code.SERVICE_UNAVAILABLE,
+    // throw new OXException(new OXException(OXException.Code.SERVICE_UNAVAILABLE,
     // BundleAccessSecurityService.class.getName()));
     // }
     // final Set<String> permissions = user.getAttributes().get("permission");
@@ -170,23 +167,23 @@ public final class ResourceUpdate {
     // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
     // .size()]), PATH);
     // } catch (final BundleAccessException e) {
-    // throw new ResourceException(e);
+    // throw new OXException(e);
     // }
     // }
     /**
      * This method performs all necessary checks before updating a resource.
      * 
-     * @throws ResourceException If a problem was detected during checks.
+     * @throws OXException If a problem was detected during checks.
      */
-    private void check() throws ResourceException {
+    private void check() throws OXException {
         if (null == resource) {
-            throw new ResourceException(ResourceExceptionCode.NULL);
+            throw ResourceExceptionCode.NULL.create();
         }
         /*
          * Check mandatory fields
          */
         if (!resource.isIdentifierSet() || -1 == resource.getIdentifier()) {
-            throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
+            throw ResourceExceptionCode.MANDATORY_FIELD.create();
         }
         /*
          * Check existence
@@ -196,7 +193,7 @@ public final class ResourceUpdate {
          * Check timestamp
          */
         if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
-            throw new ResourceException(ResourceExceptionCode.CONCURRENT_MODIFICATION);
+            throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create();
         }
         /*
          * Check values to update
@@ -204,56 +201,51 @@ public final class ResourceUpdate {
         try {
             if (resource.isSimpleNameSet()) {
                 if (isEmpty(resource.getSimpleName())) {
-                    throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
+                    throw ResourceExceptionCode.MANDATORY_FIELD.create();
                 }
                 if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
-                    throw new ResourceException(ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
+                    throw ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER.create(resource.getSimpleName());
                 }
                 final Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
                 if (resources.length > 1) {
-                    throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT, resource.getSimpleName());
+                    throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
                 } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-                    throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT, resource.getSimpleName());
+                    throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
                 }
             }
             if (resource.isMailSet()) {
                 if (isEmpty(resource.getMail())) {
-                    throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
+                    throw ResourceExceptionCode.MANDATORY_FIELD.create();
                 }
                 if (!ResourceTools.validateResourceEmail(resource.getMail())) {
-                    throw new ResourceException(ResourceExceptionCode.INVALID_RESOURCE_MAIL, resource.getMail());
+                    throw ResourceExceptionCode.INVALID_RESOURCE_MAIL.create(resource.getMail());
                 }
                 final Resource[] resources = storage.searchResourcesByMail(resource.getMail(), ctx);
                 if (resources.length > 1) {
-                    throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT_MAIL, resource.getMail());
+                    throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
                 } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-                    throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT_MAIL, resource.getMail());
+                    throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
                 }
             }
         } catch (final OXException e) {
-            throw new ResourceException(e);
+            throw new OXException(e);
         }
     }
 
     /**
      * Updates all data for the resource in database.
      * 
-     * @throws ResourceException
+     * @throws OXException
      */
-    private void update() throws ResourceException {
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new ResourceException(ResourceExceptionCode.NO_CONNECTION, e);
-        }
+    private void update() throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             update(con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
+            throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
                 con.setAutoCommit(true);
@@ -275,9 +267,9 @@ public final class ResourceUpdate {
      * This method calls the plain update methods.
      * 
      * @param con writable database connection in transaction or not.
-     * @throws ResourceException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    void update(final Connection con) throws ResourceException {
+    void update(final Connection con) throws OXException {
         /*
          * Fill missing values to obtain a completely filled resource
          */

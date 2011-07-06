@@ -52,17 +52,13 @@ package com.openexchange.resource.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
@@ -106,12 +102,12 @@ public final class ResourceDelete {
         storage = ResourceStorage.getInstance();
     }
 
-    private Resource getOrig() throws ResourceException {
+    private Resource getOrig() throws OXException {
         if (null == orig) {
             try {
                 orig = storage.getResource(resource.getIdentifier(), ctx);
             } catch (final OXException e) {
-                throw new ResourceException(e);
+                throw new OXException(e);
             }
         }
         return orig;
@@ -125,9 +121,9 @@ public final class ResourceDelete {
      * <li>At last, the delete is propagated to system (cache invalidation, etc.)</li>
      * </ol>
      * 
-     * @throws ResourceException If delete fails
+     * @throws OXException If delete fails
      */
-    void perform() throws ResourceException {
+    void perform() throws OXException {
         allow();
         check();
         delete();
@@ -137,18 +133,18 @@ public final class ResourceDelete {
     /**
      * Checks permission
      * 
-     * @throws ResourceException If permission is denied
+     * @throws OXException If permission is denied
      */
-    private void allow() throws ResourceException {
+    private void allow() throws OXException {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw new ResourceException(ResourceExceptionCode.PERMISSION, Integer.valueOf(ctx.getContextId()));
+                throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
             }
         } catch (final OXException e1) {
-            throw new ResourceException(e1);
+            throw new OXException(e1);
         }
         /*
          * TODO: Remove statements above and replace with commented call below
@@ -160,13 +156,13 @@ public final class ResourceDelete {
      * Checks permission: Invoke {@link BundleAccessSecurityService#checkPermission(String[], String) checkPermission()} on
      * {@link BundleAccessSecurityService security service}
      * 
-     * @throws ResourceException If permission is not granted
+     * @throws OXException If permission is not granted
      */
-    // private void checkBySecurityService() throws ResourceException {
+    // private void checkBySecurityService() throws OXException {
     // final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
     // BundleAccessSecurityService.class);
     // if (securityService == null) {
-    // throw new ResourceException(new OXException(OXException.Code.SERVICE_UNAVAILABLE,
+    // throw new OXException(new OXException(OXException.Code.SERVICE_UNAVAILABLE,
     // BundleAccessSecurityService.class.getName()));
     // }
     // final Set<String> permissions = user.getAttributes().get("permission");
@@ -174,23 +170,23 @@ public final class ResourceDelete {
     // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
     // .size()]), PATH);
     // } catch (final BundleAccessException e) {
-    // throw new ResourceException(e);
+    // throw new OXException(e);
     // }
     // }
     /**
      * This method performs all necessary checks before updating a resource.
      * 
-     * @throws ResourceException If a problem was detected during checks.
+     * @throws OXException If a problem was detected during checks.
      */
-    private void check() throws ResourceException {
+    private void check() throws OXException {
         if (null == resource) {
-            throw new ResourceException(ResourceExceptionCode.NULL);
+            throw ResourceExceptionCode.NULL.create();
         }
         /*
          * Check mandatory fields
          */
         if (!resource.isIdentifierSet() || -1 == resource.getIdentifier()) {
-            throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
+            throw ResourceExceptionCode.MANDATORY_FIELD.create();
         }
         /*
          * Check existence
@@ -200,22 +196,17 @@ public final class ResourceDelete {
          * Check timestamp
          */
         if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
-            throw new ResourceException(ResourceExceptionCode.CONCURRENT_MODIFICATION);
+            throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create();
         }
     }
 
     /**
      * Deletes all data for the resource in database.
      * 
-     * @throws ResourceException
+     * @throws OXException
      */
-    private void delete() throws ResourceException {
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new ResourceException(ResourceExceptionCode.NO_CONNECTION, e);
-        }
+    private void delete() throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             propagateDelete(con);
@@ -223,7 +214,7 @@ public final class ResourceDelete {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
+            throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
                 con.setAutoCommit(true);
@@ -234,7 +225,7 @@ public final class ResourceDelete {
         }
     }
 
-    private void propagateDelete(final Connection con) throws ResourceException {
+    private void propagateDelete(final Connection con) throws OXException {
         /*
          * Delete all references to resource
          */
@@ -242,7 +233,7 @@ public final class ResourceDelete {
         try {
             DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
         } catch (final OXException e) {
-            throw new ResourceException(e);
+            throw new OXException(e);
         }
     }
 
@@ -257,9 +248,9 @@ public final class ResourceDelete {
      * This method calls the plain delete methods.
      * 
      * @param con writable database connection in transaction or not.
-     * @throws ResourceException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    void delete(final Connection con) throws ResourceException {
+    void delete(final Connection con) throws OXException {
         storage.deleteResource(ctx, con, resource);
         /*
          * Put into delete table

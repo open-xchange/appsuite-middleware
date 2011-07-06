@@ -53,7 +53,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
+import com.openexchange.exception.OXException;
 
 /**
  *
@@ -66,10 +66,10 @@ public interface ResourceResolver {
      * @param resourceId unique resource identifier.
      * @param ctx Context.
      * @return the loaded resource.
-     * @throws ResourceException if loading the resource fails.
+     * @throws OXException if loading the resource fails.
      * @throws OXException if the resource service is not available.
      */
-    Resource load(final int resourceId, final Context ctx) throws ResourceException, OXException;
+    Resource load(final int resourceId, final Context ctx) throws OXException, OXException;
 
     /**
      * Find the resources with the given names.
@@ -77,6 +77,6 @@ public interface ResourceResolver {
      * @param ctx Context.
      * @return list of found resources.
      */
-    List<Resource> find(final List<String> names, final Context ctx) throws ResourceException, OXException;
+    List<Resource> find(final List<String> names, final Context ctx) throws OXException, OXException;
 
 }

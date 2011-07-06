@@ -51,16 +51,13 @@ package com.openexchange.resource.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
@@ -106,9 +103,9 @@ public final class ResourceCreate {
      * <li>At last, the insert is propagated to system (cache invalidation, etc.)</li>
      * </ol>
      * 
-     * @throws ResourceException If insert fails
+     * @throws OXException If insert fails
      */
-    void perform() throws ResourceException {
+    void perform() throws OXException {
         allow();
         check();
         insert();
@@ -118,18 +115,18 @@ public final class ResourceCreate {
     /**
      * Check permission
      * 
-     * @throws ResourceException If permission is not granted
+     * @throws OXException If permission is not granted
      */
-    private void allow() throws ResourceException {
+    private void allow() throws OXException {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw new ResourceException(ResourceExceptionCode.PERMISSION, Integer.valueOf(ctx.getContextId()));
+                throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
             }
         } catch (final OXException e1) {
-            throw new ResourceException(e1);
+            throw new OXException(e1);
         }
         /*
          * TODO: Remove statements above and replace with commented call below
@@ -141,13 +138,13 @@ public final class ResourceCreate {
      * Check permission: Invoke {@link BundleAccessSecurityService#checkPermission(String[], String) checkPermission()} on
      * {@link BundleAccessSecurityService security service}
      * 
-     * @throws ResourceException If permission is not granted
+     * @throws OXException If permission is not granted
      */
-    // private void checkBySecurityService() throws ResourceException {
+    // private void checkBySecurityService() throws OXException {
     // final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
     // BundleAccessSecurityService.class);
     // if (securityService == null) {
-    // throw new ResourceException(new OXException(OXException.Code.SERVICE_UNAVAILABLE,
+    // throw new OXException(new OXException(OXException.Code.SERVICE_UNAVAILABLE,
     // BundleAccessSecurityService.class.getName()));
     // }
     // final Set<String> permissions = user.getAttributes().get("permission");
@@ -155,45 +152,45 @@ public final class ResourceCreate {
     // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
     // .size()]), PATH);
     // } catch (final BundleAccessException e) {
-    // throw new ResourceException(e);
+    // throw new OXException(e);
     // }
     // }
     /**
      * This method performs all necessary checks before creating a resource.
      * 
-     * @throws ResourceException if a problem was detected during checks.
+     * @throws OXException if a problem was detected during checks.
      */
-    private void check() throws ResourceException {
+    private void check() throws OXException {
         if (null == resource) {
-            throw new ResourceException(ResourceExceptionCode.NULL);
+            throw ResourceExceptionCode.NULL.create();
         }
         /*
          * Check mandatory fields: identifier, displayName, and mail
          */
         if (isEmpty(resource.getSimpleName()) || isEmpty(resource.getDisplayName()) || isEmpty(resource.getMail())) {
-            throw new ResourceException(ResourceExceptionCode.MANDATORY_FIELD);
+            throw ResourceExceptionCode.MANDATORY_FIELD.create();
         }
         /*
          * Check for invalid values
          */
         if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
-            throw new ResourceException(ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
+            throw ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER.create(resource.getSimpleName());
         }
         if (!ResourceTools.validateResourceEmail(resource.getMail())) {
-            throw new ResourceException(ResourceExceptionCode.INVALID_RESOURCE_MAIL, resource.getMail());
+            throw ResourceExceptionCode.INVALID_RESOURCE_MAIL.create(resource.getMail());
         }
         /*
          * Check if another resource with the same textual identifier or email address exists in storage
          */
         try {
             if (storage.searchResources(resource.getSimpleName(), ctx).length > 0) {
-                throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT, resource.getSimpleName());
+                throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
             }
             if (storage.searchResourcesByMail(resource.getMail(), ctx).length > 0) {
-                throw new ResourceException(ResourceExceptionCode.RESOURCE_CONFLICT_MAIL, resource.getMail());
+                throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
             }
         } catch (final OXException e) {
-            throw new ResourceException(e);
+            throw new OXException(e);
         }
 
     }
@@ -201,22 +198,17 @@ public final class ResourceCreate {
     /**
      * Inserts all data for the resource into the database.
      * 
-     * @throws ResourceException
+     * @throws OXException
      */
-    private void insert() throws ResourceException {
-        final Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new ResourceException(ResourceExceptionCode.NO_CONNECTION, e);
-        }
+    private void insert() throws OXException {
+        final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             insert(con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
+            throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
                 con.setAutoCommit(true);
@@ -238,15 +230,15 @@ public final class ResourceCreate {
      * This method calls the plain insert methods.
      * 
      * @param con writable database connection in transaction or not.
-     * @throws ResourceException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    void insert(final Connection con) throws ResourceException {
+    void insert(final Connection con) throws OXException {
         try {
             final int id = IDGenerator.getId(ctx.getContextId(), Types.PRINCIPAL, con);
             resource.setIdentifier(id);
             storage.insertResource(ctx, con, resource);
         } catch (final SQLException e) {
-            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
+            throw ResourceExceptionCode.SQL_ERROR.create(e);
         }
     }
 

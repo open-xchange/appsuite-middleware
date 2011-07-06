@@ -50,6 +50,7 @@
 package com.openexchange.resource;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -66,9 +67,9 @@ public interface ResourceService {
      * @param resourceId The unique identifier of the resource to return.
      * @param context The context.
      * @return The data object of the resource.
-     * @throws ResourceException If the resource can't be found or an exception appears while reading it.
+     * @throws OXException If the resource can't be found or an exception appears while reading it.
      */
-    public Resource getResource(int resourceId, Context context) throws ResourceException;
+    public Resource getResource(int resourceId, Context context) throws OXException;
 
     /**
      * Searches all resources which identifier matches the given pattern.
@@ -76,9 +77,9 @@ public interface ResourceService {
      * @param pattern The identifier of all returned resources will match this pattern.
      * @param context The context.
      * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
-     * @throws ResourceException If an exception occurs while reading from the underlying persistent storage.
+     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
      */
-    public Resource[] searchResources(String pattern, Context context) throws ResourceException;
+    public Resource[] searchResources(String pattern, Context context) throws OXException;
 
     /**
      * Searches all resources which email address matches the given pattern.
@@ -86,9 +87,9 @@ public interface ResourceService {
      * @param pattern The email address pattern to search for
      * @param context The context
      * @return An array of {@link Resource resources} whose email address matches the given pattern.
-     * @throws ResourceException If searching for resources fails
+     * @throws OXException If searching for resources fails
      */
-    public abstract Resource[] searchResourcesByMail(String pattern, Context context) throws ResourceException;
+    public abstract Resource[] searchResourcesByMail(String pattern, Context context) throws OXException;
 
     /**
      * This method returns resources that have been modified since the given timestamp.
@@ -96,9 +97,9 @@ public interface ResourceService {
      * @param modifiedSince timestamp after that the resources have been modified.
      * @param context The context.
      * @return an array of resources.
-     * @throws ResourceException If an error occurs.
+     * @throws OXException If an error occurs.
      */
-    public abstract Resource[] listModified(Date modifiedSince, Context context) throws ResourceException;
+    public abstract Resource[] listModified(Date modifiedSince, Context context) throws OXException;
 
 
     /**
@@ -107,9 +108,9 @@ public interface ResourceService {
      * @param modifiedSince timestamp after that the resources have been modified.
      * @param context The context.
      * @return an array of resources.
-     * @throws ResourceException If an error occurs.
+     * @throws OXException If an error occurs.
      */
-    public abstract Resource[] listDeleted(Date modifiedSince, Context context) throws ResourceException;
+    public abstract Resource[] listDeleted(Date modifiedSince, Context context) throws OXException;
     
     /**
      * Creates a resource.
@@ -117,9 +118,9 @@ public interface ResourceService {
      * @param user The user in whose name the insertion takes place
      * @param ctx The context.
      * @param resource The resource to create.
-     * @throws ResourceException If resource insertion fails
+     * @throws OXException If resource insertion fails
      */
-    public void create(User user, Context ctx, Resource resource) throws ResourceException;
+    public void create(User user, Context ctx, Resource resource) throws OXException;
 
     /**
      * Updates a resource.
@@ -128,9 +129,9 @@ public interface ResourceService {
      * @param ctx The context.
      * @param resource The resource to update.
      * @param clientLastModified The client last-modified timestamp; may be <code>null</code> to omit timestamp comparison
-     * @throws ResourceException If resource update fails
+     * @throws OXException If resource update fails
      */
-    public void update(User user, Context ctx, Resource resource, Date clientLastModified) throws ResourceException;
+    public void update(User user, Context ctx, Resource resource, Date clientLastModified) throws OXException;
 
     /**
      * Deletes a resource.
@@ -139,7 +140,7 @@ public interface ResourceService {
      * @param ctx The context.
      * @param resource The resource to delete.
      * @param clientLastModified The client last-modified timestamp; may be <code>null</code> to omit timestamp comparison
-     * @throws ResourceException If resource deletion fails
+     * @throws OXException If resource deletion fails
      */
-    public void delete(User user, Context ctx, Resource resource, Date clientLastModified) throws ResourceException;
+    public void delete(User user, Context ctx, Resource resource, Date clientLastModified) throws OXException;
 }

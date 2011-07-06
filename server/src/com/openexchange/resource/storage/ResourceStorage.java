@@ -54,7 +54,7 @@ import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.ResourceGroup;
 
 /**
@@ -203,9 +203,9 @@ public abstract class ResourceStorage {
      * @param ctx The context.
      * @param con A writable database connection.
      * @param resource The resource to insert.
-     * @throws ResourceException If resource insertion fails.
+     * @throws OXException If resource insertion fails.
      */
-    public final void insertResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
+    public final void insertResource(final Context ctx, final Connection con, final Resource resource) throws OXException {
         insertResource(ctx, con, resource, StorageType.ACTIVE);
     }
 
@@ -216,9 +216,9 @@ public abstract class ResourceStorage {
      * @param con A writable database connection.
      * @param resource The resource to insert.
      * @param type Defines if group is inserted {@link StorageType#ACTIVE ACTIVE} or {@link StorageType#DELETED DELETED}.
-     * @throws ResourceException If resource insertion fails.
+     * @throws OXException If resource insertion fails.
      */
-    public abstract void insertResource(Context ctx, Connection con, Resource resource, StorageType type) throws ResourceException;
+    public abstract void insertResource(Context ctx, Connection con, Resource resource, StorageType type) throws OXException;
 
     /**
      * This method updates the resource in storage referenced by {@link Resource#getIdentifier() resource identifier}.
@@ -226,9 +226,9 @@ public abstract class ResourceStorage {
      * @param ctx The context.
      * @param con A writable database connection.
      * @param resource The resource to update.
-     * @throws ResourceException If resource update fails.
+     * @throws OXException If resource update fails.
      */
-    public abstract void updateResource(Context ctx, Connection con, Resource resource) throws ResourceException;
+    public abstract void updateResource(Context ctx, Connection con, Resource resource) throws OXException;
 
     /**
      * A convenience method that invokes {@link #deleteResourceById(Context, Connection, int)} with the latter parameter filled with
@@ -237,9 +237,9 @@ public abstract class ResourceStorage {
      * @param ctx The context
      * @param con A writable database connection.
      * @param resource The resource to delete
-     * @throws ResourceException If resource deletion fails.
+     * @throws OXException If resource deletion fails.
      */
-    public void deleteResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
+    public void deleteResource(final Context ctx, final Connection con, final Resource resource) throws OXException {
         deleteResourceById(ctx, con, resource.getIdentifier());
     }
 
@@ -249,7 +249,7 @@ public abstract class ResourceStorage {
      * @param ctx The context
      * @param con A writable database connection.
      * @param resourceId The ID of the resource to delete
-     * @throws ResourceException If resource deletion fails.
+     * @throws OXException If resource deletion fails.
      */
-    public abstract void deleteResourceById(Context ctx, Connection con, int resourceId) throws ResourceException;
+    public abstract void deleteResourceById(Context ctx, Connection con, int resourceId) throws OXException;
 }

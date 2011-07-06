@@ -58,13 +58,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.ResourceGroup;
 import com.openexchange.resource.storage.ResourceStorage;
@@ -456,7 +454,7 @@ public class RdbResourceStorage extends ResourceStorage {
     private static final String SQL_INSERT_RESOURCE = "INSERT INTO " + RPL_TABLE + " (cid,id,identifier,displayName,mail,available,description,lastModified) " + "VALUES (?,?,?,?,?,?,?,?)";
 
     @Override
-    public void insertResource(final Context ctx, final Connection con, final Resource resource, final StorageType type) throws ResourceException {
+    public void insertResource(final Context ctx, final Connection con, final Resource resource, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_INSERT_RESOURCE.replaceFirst(
@@ -483,7 +481,7 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.executeUpdate();
             resource.setLastModified(lastModified);
         } catch (final SQLException e) {
-            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
+            throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }
@@ -492,7 +490,7 @@ public class RdbResourceStorage extends ResourceStorage {
     private static final String SQL_UPDATE_RESOURCE = "UPDATE resource SET identifier = ?, displayName = ?, mail = ?, " + "available = ?, description = ?, lastModified = ? WHERE cid = ? AND id = ?";
 
     @Override
-    public void updateResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
+    public void updateResource(final Context ctx, final Connection con, final Resource resource) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_UPDATE_RESOURCE);
@@ -517,7 +515,7 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.executeUpdate();
             resource.setLastModified(lastModified);
         } catch (final SQLException e) {
-            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
+            throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }
@@ -526,7 +524,7 @@ public class RdbResourceStorage extends ResourceStorage {
     private static final String SQL_DELETE_RESOURCE = "DELETE FROM resource WHERE cid = ? AND id = ?";
 
     @Override
-    public void deleteResourceById(final Context ctx, final Connection con, final int resourceId) throws ResourceException {
+    public void deleteResourceById(final Context ctx, final Connection con, final int resourceId) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_DELETE_RESOURCE);
@@ -535,7 +533,7 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.setInt(pos++, resourceId); // id
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw new ResourceException(ResourceExceptionCode.SQL_ERROR, e);
+            throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }

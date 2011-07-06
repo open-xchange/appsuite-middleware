@@ -93,7 +93,7 @@ import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
+import com.openexchange.exception.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -139,7 +139,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 try {
                     final Resource resource = resourceResolver.load(res.getIdentifier(), ctx);
                     displayName = resource.getDisplayName();
-                } catch (final ResourceException e) {
+                } catch (final OXException e) {
                     throw new ConversionError(index, e);
                 } catch (final OXException e) {
                     throw new ConversionError(index, e);
@@ -320,7 +320,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         final List<Resource> resources;
         try {
             resources = resourceResolver.find(resourceNames, ctx);
-        } catch (final ResourceException e) {
+        } catch (final OXException e) {
             throw new ConversionError(index, e);
         } catch (final OXException e) {
             throw new ConversionError(index, e);

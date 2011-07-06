@@ -64,7 +64,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceWriter;
@@ -141,7 +141,7 @@ public class ResourceRequest {
             ResourceService resService = ResourceServiceImpl.getInstance();
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
-        } catch (final ResourceException exc) {
+        } catch (final OXException exc) {
             LOG.debug("Tried to find resources that were modified since "+lastModified, exc);
         }
 
@@ -190,7 +190,7 @@ public class ResourceRequest {
 
                 try {
                     r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
-                } catch (final ResourceException exc) {
+                } catch (final OXException exc) {
                     LOG.debug("resource not found try to find id in user table", exc);
                 }
 
@@ -226,7 +226,7 @@ public class ResourceRequest {
         com.openexchange.resource.Resource r = null;
         try {
             r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
-        } catch (final ResourceException exc) {
+        } catch (final OXException exc) {
             LOG.debug("resource not found try to find id in user table", exc);
         }
 
