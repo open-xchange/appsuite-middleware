@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.mdns.MDNSException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 import com.openexchange.mdns.MDNSServiceInfo;
@@ -139,7 +139,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
                 serviceInfo =
                     service.registerService(Constants.MDNS_SERVICE_ID, MessagingConfig.getInstance().getListenerPort(), new StringBuilder(
                         "open-xchange messaging service @").append(getHostName()).toString());
-            } catch (final MDNSException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -162,7 +162,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
             if (mdnsServiceRef.compareAndSet(mdnsService, null)) {
                 try {
                     mdnsService.unregisterService(serviceInfo);
-                } catch (final MDNSException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 serviceInfo = null;
@@ -197,7 +197,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
                         addrs.add(new InetSocketAddress(entry.getAddress(), entry.getPort()));
                     }
                     return addrs;
-                } catch (final MDNSException e) {
+                } catch (final OXException e) {
                     throw new MessagingServiceException(e);
                 }
             }

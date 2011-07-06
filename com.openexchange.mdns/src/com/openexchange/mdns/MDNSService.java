@@ -50,6 +50,7 @@
 package com.openexchange.mdns;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MDNSService} - The <a href="http://en.wikipedia.org/wiki/MDNS">mDNS</a> service.
@@ -64,9 +65,9 @@ public interface MDNSService {
      * 
      * @param serviceId The service identifier; such as <code>"openexchange.messaging.service"</code>.
      * @return A list containing all resolved services matching given service identifier.
-     * @throws MDNSException If listing fails
+     * @throws OXException If listing fails
      */
-    List<MDNSServiceEntry> listByService(String serviceId) throws MDNSException;
+    List<MDNSServiceEntry> listByService(String serviceId) throws OXException;
 
     /**
      * Registers a new service.
@@ -74,16 +75,16 @@ public interface MDNSService {
      * @param serviceId The service identifier; such as <code>"openexchange.messaging.service"</code>.
      * @param port The service port
      * @param info The service information; arbitrary text such as <code>"path=index.html"</code>
-     * @throws MDNSException If registration fails
+     * @throws OXException If registration fails
      */
-    MDNSServiceInfo registerService(String serviceId, int port, String info) throws MDNSException;
+    MDNSServiceInfo registerService(String serviceId, int port, String info) throws OXException;
 
     /**
      * Unregisters the service identifier by given service information.
      * 
      * @param serviceInfo The service information identifying the service
-     * @throws MDNSException If service cannot be unregistered
+     * @throws OXException If service cannot be unregistered
      */
-    void unregisterService(MDNSServiceInfo serviceInfo) throws MDNSException;
+    void unregisterService(MDNSServiceInfo serviceInfo) throws OXException;
 
 }

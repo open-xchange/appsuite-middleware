@@ -62,7 +62,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
-import com.openexchange.mdns.MDNSException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSExceptionCodes;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
@@ -93,9 +93,9 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
     /**
      * Initializes a new {@link MDNSServiceImpl}.
      * 
-     * @throws MDNSException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MDNSServiceImpl() throws MDNSException {
+    public MDNSServiceImpl() throws OXException {
         super();
         try {
             jmdns = JmDNS.create();
@@ -130,7 +130,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
-    public List<MDNSServiceEntry> listByService(final String serviceId) throws MDNSException {
+    public List<MDNSServiceEntry> listByService(final String serviceId) throws OXException {
         rlock.lock();
         try {
             final ConcurrentMap<UUID, MDNSServiceEntry> inner = map.get(serviceId);
@@ -143,7 +143,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
-    public MDNSServiceInfo registerService(final String serviceId, final int port, final String info) throws MDNSException {
+    public MDNSServiceInfo registerService(final String serviceId, final int port, final String info) throws OXException {
         wlock.lock();
         try {
             final UUID id = getIdentifierFor(serviceId);
@@ -163,7 +163,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         }
     }
 
-    public void unregisterService(final MDNSServiceInfo serviceInfo) throws MDNSException {
+    public void unregisterService(final MDNSServiceInfo serviceInfo) throws OXException {
         wlock.lock();
         try {
             final ServiceInfo sinfo = registeredServicesSet.remove(new Key(serviceInfo.getId(), serviceInfo.getServiceId()));

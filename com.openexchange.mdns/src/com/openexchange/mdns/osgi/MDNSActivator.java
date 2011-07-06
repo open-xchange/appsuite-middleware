@@ -55,10 +55,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.mdns.MDNSException;
 import com.openexchange.mdns.MDNSService;
-import com.openexchange.mdns.exception.MDNSExceptionFactory;
 import com.openexchange.mdns.internal.MDNSCommandProvider;
 import com.openexchange.mdns.internal.MDNSServiceImpl;
 
@@ -70,8 +67,6 @@ import com.openexchange.mdns.internal.MDNSServiceImpl;
 public final class MDNSActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MDNSActivator.class);
-
-    private ComponentRegistration componentRegistration;
 
     private List<ServiceRegistration> registrations;
 
@@ -86,14 +81,6 @@ public final class MDNSActivator implements BundleActivator {
 
     public void start(final BundleContext context) throws Exception {
         try {
-            /*
-             * Register component
-             */
-            componentRegistration = new ComponentRegistration(
-                context,
-                MDNSException.COMPONENT,
-                "com.openexchange.mdns",
-                MDNSExceptionFactory.getInstance());
             /*
              * Create mDNS service
              */
@@ -118,13 +105,6 @@ public final class MDNSActivator implements BundleActivator {
             if (service != null) {
                 service.close();
                 service = null;
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

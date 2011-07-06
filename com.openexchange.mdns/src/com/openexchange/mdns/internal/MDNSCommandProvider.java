@@ -52,7 +52,7 @@ package com.openexchange.mdns.internal;
 import java.util.List;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import com.openexchange.mdns.MDNSException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 
@@ -84,7 +84,7 @@ public final class MDNSCommandProvider implements CommandProvider {
         final List<MDNSServiceEntry> services;
         try {
             services = mdnsService.listByService(null == serviceId ? "openexchange.service.messaging" : serviceId);
-        } catch (final MDNSException e) {
+        } catch (final OXException e) {
             intp.print(sb.append("Error: ").append(e.getMessage()).toString());
             return null;
         }
