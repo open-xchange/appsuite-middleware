@@ -79,7 +79,6 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.database.provider.SimpleDBProvider;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -263,17 +262,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
         final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
         if (contactFolder.getModule() != FolderObject.CONTACT) {
-            throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId)));
+            throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId));
         }
         final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
         if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-            throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
         }
         if (!oclPerm.canReadAllObjects()) {
             if (oclPerm.canReadOwnObjects()) {
                 cs.setReadOnlyOwnFolder(userId);
             } else {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
             }
         }
 
@@ -298,12 +297,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         cs.setOrder(order.toString());
         cs.setSelect(cs.iFgetColsString(extendedCols).toString());
 
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
-        }
+        final Connection con = DBPool.pickup(ctx);
         final Contact[] contacts;
         ResultSet result = null;
         PreparedStatement stmt = null;
@@ -369,12 +363,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
         final String queryStr = query.toString();
         
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
-        }
+        final Connection con = DBPool.pickup(ctx);
         
         Contact[] contacts;
         ResultSet result = null;
@@ -491,14 +480,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             for (final int folderId : folders) {
                 final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
                 if (contactFolder.getModule() != FolderObject.CONTACT) {
-                    throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                    throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId));
                 }
                 final EffectivePermission oclPerm = oxfs.getFolderPermission(folderId, userId, userConfiguration);
                 if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                    throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
                 }
                 if (!oclPerm.canReadOwnObjects()) {
-                    throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
                 }
             }
             searchobject.setAllFolderSQLINString(cs.buildFolderSearch(userId, memberInGroups, folders, session));
@@ -533,12 +522,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         cs.setOrder(sqlOrder.toString());
         cs.setContactSearchObject(searchobject);
         cs.setSelect(cs.iFgetColsString(extendedCols).toString());
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
-        }
+        final Connection con = DBPool.pickup(ctx);
         final List<Contact> contacts = new ArrayList<Contact>(32);
         try {
             final Set<String> foundAddresses = new HashSet<String>();
@@ -629,19 +613,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if (" ".equals(orderDir)) {
             orderDir = " ASC ";
         }
-        Connection readcon = null;
-        try {
-            readcon = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
-        }
+        final Connection readcon = DBPool.pickup(ctx);
 
         final OXFolderAccess folderAccess = new OXFolderAccess(readcon, ctx);
 
         try {
             final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId));
             }
         } catch (final OXException e) {
             if (readcon != null) {
@@ -665,13 +644,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
             final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
             }
             if (!oclPerm.canReadAllObjects()) {
                 if (oclPerm.canReadOwnObjects()) {
                     cs.setReadOnlyOwnFolder(userId);
                 } else {
-                    throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
                 }
             }
 
@@ -721,7 +700,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
     public Contact getObjectById(final int objectId, final int fid) throws OXObjectNotFoundException, OXConflictException, OXException {
         if (objectId <= 0) {
-            throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectId), I(ctx.getContextId())));
+            throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectId), I(ctx.getContextId()));
         }
         final FolderObject contactFolder;
         try {
@@ -730,19 +709,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             throw new OXException(e);
         }
         if (contactFolder.getModule() != FolderObject.CONTACT) {
-            throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
+            throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId));
         }
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
-        }
+        final Connection con = DBPool.pickup(ctx);
         final Contact co;
         try {
             co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, userConfiguration, con);
             if (!performContactReadCheck(contactFolder, userId, co.getCreatedBy(), userConfiguration, con)) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId));
             }
             final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(
                 ctx,
@@ -775,19 +749,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             readCon = DBPool.pickup(ctx);
             final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(fid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId));
             }
             contacts = Contacts.getUsersById(userIds, userId, memberInGroups, ctx, userConfiguration, readCon);
             for (final Contact contact : contacts) {
                 if (contact.getParentFolderID() != fid) {
-                    throw new OXConflictException(ContactExceptionCodes.USER_OUTSIDE_GLOBAL.create(I(contact.getParentFolderID()), I(ctx.getContextId())));
+                    throw ContactExceptionCodes.USER_OUTSIDE_GLOBAL.create(I(contact.getParentFolderID()), I(ctx.getContextId()));
                 }
                 if (performReadCheck && !performSecurityReadCheck(fid, contact.getCreatedBy(), userId, session, readCon, ctx)) {
-                    throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId));
                 }
             }
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } finally {
             if (readCon != null) {
                 DBPool.closeReaderSilent(ctx, readCon);
@@ -802,18 +774,18 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if (userid > 0) {
             co = Contacts.getUserById(userid, userId, memberInGroups, ctx, userConfiguration, readCon);
         } else {
-            throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userId), I(ctx.getContextId())));
+            throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(userId), I(ctx.getContextId()));
         }
 
         final int folderId = co.getParentFolderID();
 
         final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
         if (contactFolder.getModule() != FolderObject.CONTACT) {
-            throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId)));
+            throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(ctx.getContextId()), I(userId));
         }
 
         if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, session, readCon, ctx)) {
-            throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId)));
+            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(ctx.getContextId()), I(userId));
         }
         return co;
     }
@@ -830,7 +802,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         try {
             final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId));
             }
         } catch (final OXException e) {
             if (readCon != null) {
@@ -846,13 +818,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
             final EffectivePermission oclPerm = folderAccess.getFolderPermission(folderId, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
             }
             if (!oclPerm.canReadAllObjects()) {
                 if (oclPerm.canReadOwnObjects()) {
                     cs.setReadOnlyOwnFolder(userId);
                 } else {
-                    throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
                 }
             }
 
@@ -923,9 +895,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (final SearchIteratorException e) {
             error = true;
             throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            error = true;
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final SQLException e) {
             error = true;
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -950,7 +919,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
     public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXPermissionException, OXConcurrentModificationException, OXException {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fuid) {
-            throw new OXPermissionException(ContactExceptionCodes.NO_USER_CONTACT_DELETE.create());
+            throw ContactExceptionCodes.NO_USER_CONTACT_DELETE.create();
         }
         Connection readcon = null;
         EffectivePermission oclPerm = null;
@@ -980,30 +949,28 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                     pflag = true;
                 }
             } else {
-                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(oid), I(ctx.getContextId())));
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(oid), I(ctx.getContextId()));
             }
 
             if ((client_date != null && client_date.getTime() >= 0) && (client_date.before(changing_date))) {
-                throw new OXConcurrentModificationException(ContactExceptionCodes.OBJECT_HAS_CHANGED.create(I(ctx.getContextId()), I(fuid), I(userId), I(oid)));
+                throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(I(ctx.getContextId()), I(fuid), I(userId), I(oid));
             }
             final OXFolderAccess folderAccess = new OXFolderAccess(readcon, ctx);
             final FolderObject contactFolder = folderAccess.getFolderObject(fuid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fuid), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fuid), I(ctx.getContextId()), I(userId));
             }
             if ((contactFolder.getType() != FolderObject.PRIVATE) && pflag) {
                 LOG.debug(new StringBuilder("Here is a contact in a non PRIVATE folder with a set private flag -> (cid=").append(
                     ctx.getContextId()).append(" fid=").append(fuid).append(" oid=").append(oid).append(')'));
             } else if ((contactFolder.getType() == FolderObject.PRIVATE) && pflag && created_from != userId) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId));
             }
 
             oclPerm = folderAccess.getFolderPermission(fuid, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw new OXPermissionException(ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId));
             }
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final OXObjectNotFoundException xe) {
             throw xe;
         } catch (final SQLException e) {
@@ -1036,19 +1003,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 Contacts.deleteContact(oid, ctx.getContextId(), writecon);
             } else {
                 if ((deletePermission < OCLPermission.DELETE_OWN_OBJECTS) || created_from != userId) {
-                    throw new OXPermissionException(ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId)));
+                    throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId));
                 }
                 // May delete own contact
                 Contacts.deleteContact(oid, ctx.getContextId(), writecon);
             }
             final EventClient ec = new EventClient(session);
             ec.delete(co);
-        } catch (final EventException e) {
-            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(fuid));
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw ContactExceptionCodes.INIT_CONNECTION_FROM_DBPOOL.create(e);
         } catch (final OXException e) {
             throw e;
         } finally {
@@ -1084,11 +1045,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             final int size = retval.size();
             if (object_id.length == 1 && size < object_id.length) {
                 // Throw error if single contact is requested
-                throw new OXObjectNotFoundException(ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(0), I(ctx.getContextId())));
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(0), I(ctx.getContextId()));
             }
             return new SearchIteratorDelegator<Contact>(retval.iterator(), size);
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         }
@@ -1118,13 +1079,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return tmp.toArray();
     }
 
-    private int addQueriedContacts(final int[] cols, final List<Contact> retval, final int[][] object_id) throws SQLException, AbstractOXException {
-        final Connection readcon;
-        try {
-            readcon = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+    private int addQueriedContacts(final int[] cols, final List<Contact> retval, final int[][] object_id) throws SQLException, OXException {
+        final Connection readcon = DBPool.pickup(ctx);
         boolean closeCon = true;
         try {
             /*
@@ -1219,7 +1175,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
 
             if (check && !performSecurityReadCheck(co.getParentFolderID(), co.getCreatedBy(), userId, session, con, ctx)) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(co.getParentFolderID()), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(co.getParentFolderID()), I(ctx.getContextId()), I(userId));
             }
             if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
                 final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(
@@ -1284,10 +1240,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
         private final boolean securecheck;
 
-        private final List<AbstractOXException> warnings;
+        private final List<OXException> warnings;
 
-        public ContactObjectIterator(final ResultSet rs, final Statement stmt, final int[] cols, final boolean securecheck, final Connection readcon) throws SearchIteratorException {
-            this.warnings = new ArrayList<AbstractOXException>(2);
+        public ContactObjectIterator(final ResultSet rs, final Statement stmt, final int[] cols, final boolean securecheck, final Connection readcon) throws OXException {
+            this.warnings = new ArrayList<OXException>(2);
             this.rs = rs;
             this.stmt = stmt;
             this.cols = cols;
@@ -1303,11 +1259,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                     }
                 }
             } catch (final SQLException e) {
-                throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e));
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } catch (final OXException e) {
-                throw new SearchIteratorException(e);
-            } catch (final OXConflictException e) {
-                throw new SearchIteratorException(e);
+                throw e;
             }
         }
 
@@ -1335,9 +1289,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                             pre = convertResultSet2ContactObject(rs, cols, false, readcon);
                         }
                     } catch (final OXException e) {
-                        throw new SearchIteratorException(e);
-                    } catch (final OXConflictException e) {
-                        throw new SearchIteratorException(e);
+                        throw e;
                     }
                 } else {
                     pre = null;
@@ -1348,7 +1300,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
                 return nexto;
             } catch (final SQLException e) {
-                throw new SearchIteratorException(ContactExceptionCodes.SQL_PROBLEM.create(e));
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             }
         }
 
@@ -1365,7 +1317,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
 
         public OXException[] getWarnings() {
-            return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+            return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
         public boolean hasWarnings() {
@@ -1428,14 +1380,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
             stmt.execute();
             
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
         } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
         } catch (final OXConcurrentModificationException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
@@ -1490,8 +1438,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             stmt.close();
             uuids.remove(UUID.fromString(contact.getUserField20()));
             return new LinkedList<UUID>(uuids);
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
         } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
@@ -1530,8 +1476,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 return ContactUnificationState.getByNumber(resultSet.getInt("state"));
             }
             return ContactUnificationState.UNDEFINED;
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
         } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
@@ -1568,8 +1512,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             final int fid = res.getInt("fid");
             final int id = res.getInt("intfield01");
             return getObjectById(id, fid);
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
         } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
@@ -1659,18 +1601,18 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         	try {
         		folderId = Integer.parseInt(folderStr);
         	} catch(final NumberFormatException e){
-        		throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(folderStr, I(ctx.getContextId()), I(userId)));            		
+        		throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(folderStr, I(ctx.getContextId()), I(userId));            		
         	}
             final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw new OXConflictException(ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folderId), I(ctx.getContextId()), I(userId));
             }
             final EffectivePermission oclPerm = oxfa.getFolderPermission(folderId, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
             }
             if (!oclPerm.canReadOwnObjects()) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId)));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(userId));
             }
             folders2[i++] = folderId;
         }
