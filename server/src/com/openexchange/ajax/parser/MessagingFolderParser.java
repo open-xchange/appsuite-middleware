@@ -51,7 +51,6 @@ package com.openexchange.ajax.parser;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.mail.MessagingException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -207,9 +206,9 @@ public final class MessagingFolderParser {
      * @param jsonObj The JSON object (source)
      * @param messagingFolder The messaging folder (target), which should be empty
      * @param session The session
-     * @throws MessagingException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final DefaultMessagingFolder messagingFolder, final Session session) throws MessagingException {
+    public static void parse(final JSONObject jsonObj, final DefaultMessagingFolder messagingFolder, final Session session) throws OXException {
         try {
             if (jsonObj.has(FolderFields.TITLE)) {
                 messagingFolder.setName(jsonObj.getString(FolderFields.TITLE));
