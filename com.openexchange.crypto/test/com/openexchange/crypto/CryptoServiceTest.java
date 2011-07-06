@@ -52,7 +52,7 @@ package com.openexchange.crypto;
 import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
 import junit.framework.TestCase;
 import com.openexchange.crypto.internal.CryptoServiceImpl;
-import com.openexchange.exceptions.StringComponent;
+import com.openexchange.exception.OXException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -73,13 +73,13 @@ public class CryptoServiceTest extends TestCase {
     
     protected final byte[] salt = new byte[] { 0x34, 0x11, 0x45, 0x03, 0x04, 0x05, 0x06, 0x43, 0x23, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0e };
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
-        CryptoErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.crypto");
-        CryptoErrorMessage.EXCEPTIONS.setComponent(new StringComponent("CRYPTO"));
         cryptoService = new CryptoServiceImpl();
     }
 
+    @Override
     public void tearDown() throws Exception {
         cryptoService = null;
         super.tearDown();
@@ -104,12 +104,12 @@ public class CryptoServiceTest extends TestCase {
     }
     
     public void testBadPassword() throws Exception {
-        String encrypted = cryptoService.encrypt(payload, password);
+        final String encrypted = cryptoService.encrypt(payload, password);
         try {
             cryptoService.decrypt(encrypted, badPassword);
             fail("Exception expected.");
-        } catch (CryptoException e) {
-            assertEquals("Wrong exception thrown.", BadPassword.getDetailNumber(), e.getDetailNumber());
+        } catch (final OXException e) {
+            assertTrue("Wrong exception thrown.", BadPassword.equals(e));
         }
     }
     
@@ -127,8 +127,8 @@ public class CryptoServiceTest extends TestCase {
         try {
             decryptedData = cryptoService.decrypt(encryptedData, password, true);
             fail("Exception expected.");
-        } catch (CryptoException e) {
-            assertEquals("Wrong exception thrown.", BadPassword.getDetailNumber(), e.getDetailNumber());
+        } catch (final OXException e) {
+            assertTrue("Wrong exception thrown.", BadPassword.equals(e));
         }
     }
 }

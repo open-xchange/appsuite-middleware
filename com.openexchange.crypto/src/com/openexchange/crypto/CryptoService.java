@@ -49,6 +49,8 @@
 
 package com.openexchange.crypto;
 
+import com.openexchange.exception.OXException;
+
 
 
 /**
@@ -62,9 +64,9 @@ public interface CryptoService {
      * @param data The data to be encrypted
      * @param password The password
      * @return The encrypted data as Base64 encoded string
-     * @throws CryptoException If encryption fails
+     * @throws OXException If encryption fails
      */
-    public String encrypt(String data, String password) throws CryptoException;
+    public String encrypt(String data, String password) throws OXException;
 
     /**
      * Decrypts specified encrypted data with given password.
@@ -72,9 +74,9 @@ public interface CryptoService {
      * @param encryptedData The Base64 encoded encrypted data
      * @param password The password
      * @return The decrypted data
-     * @throws CryptoException If decryption fails
+     * @throws OXException If decryption fails
      */
-    public String decrypt(String encryptedPayload, String password) throws CryptoException;
+    public String decrypt(String encryptedPayload, String password) throws OXException;
     
     /**
      * Encrypts specified data with given password.
@@ -84,9 +86,9 @@ public interface CryptoService {
      * @param useSalt Uses generated salt for encryption and stores the salt in the return value, if true uses internal salt constant
      *            otherwise.
      * @return EncryptedData object with the Base64 encoded and encrypted String and the used salt
-     * @throws CryptoException If encryption fails
+     * @throws OXException If encryption fails
      */
-    public EncryptedData encrypt(String data, String password, boolean useSalt) throws CryptoException;
+    public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException;
     
     /**
      * Decrypts specified encryptedt data with the given password.
@@ -95,7 +97,7 @@ public interface CryptoService {
      * @param password The password
      * @param useSalt use Salt from the given EncryptedData object if true
      * @return The decrypted data as String
-     * @throws CryptoException If decryption fails
+     * @throws OXException If decryption fails
      */
-    public String decrypt(EncryptedData data, String password, boolean useSalt) throws CryptoException;
+    public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException;
 }

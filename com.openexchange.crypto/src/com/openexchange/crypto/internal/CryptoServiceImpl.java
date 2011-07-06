@@ -62,9 +62,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
-import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.crypto.EncryptedData;
+import com.openexchange.exception.OXException;
 import de.rtner.security.auth.spi.PBKDF2Engine;
 import de.rtner.security.auth.spi.PBKDF2Parameters;
 
@@ -129,16 +129,16 @@ public class CryptoServiceImpl implements CryptoService {
      */
     private final byte[] SALT = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
-    public String encrypt(String data, String password) throws CryptoException {
+    public String encrypt(String data, String password) throws OXException {
         return encrypt(data, password, false).getData();
     }
 
-    public String decrypt(String encryptedData, String password) throws CryptoException {
+    public String decrypt(String encryptedData, String password) throws OXException {
         return decrypt(new EncryptedData(encryptedData, null), password, false);
         // return decrypt(encryptedData, generateSecretKey(password));
     }
 
-    public String decrypt(EncryptedData data, String password, boolean useSalt) throws CryptoException {
+    public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException {
         if (useSalt && data.getSalt() == null) {
             throw NoSalt.create();
         }
@@ -150,7 +150,7 @@ public class CryptoServiceImpl implements CryptoService {
         }
     }
 
-    public EncryptedData encrypt(String data, String password, boolean useSalt) throws CryptoException {
+    public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         if (useSalt) {
             byte[] salt = generateSalt();
             return new EncryptedData(encrypt(data, generateSecretKey(password, salt)), salt);
@@ -165,9 +165,9 @@ public class CryptoServiceImpl implements CryptoService {
      * @param data The data to encrypt
      * @param password The password
      * @return The encrypted data as Base64 encoded string
-     * @throws CryptoException
+     * @throws OXException
      */
-    private String encrypt(final String data, final Key password) throws CryptoException {
+    private String encrypt(final String data, final Key password) throws OXException {
         String retval = null;
         try {
             final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
@@ -207,9 +207,9 @@ public class CryptoServiceImpl implements CryptoService {
      * @param encryptedData The Base64 encoded encrypted data
      * @param key The Key
      * @return The decrypted data
-     * @throws CryptoException
+     * @throws OXException
      */
-    private String decrypt(final String encryptedData, final Key key) throws CryptoException {
+    private String decrypt(final String encryptedData, final Key key) throws OXException {
         String retval = null;
         Cipher cipher = null;
         final byte encrypted[];
@@ -259,9 +259,9 @@ public class CryptoServiceImpl implements CryptoService {
      * 
      * @param password The password string
      * @return A secret key generated from specified password string
-     * @throws CryptoException
+     * @throws OXException
      */
-    private SecretKey generateSecretKey(final String password, byte[] salt) throws CryptoException {
+    private SecretKey generateSecretKey(final String password, byte[] salt) throws OXException {
         PBKDF2Parameters params = new PBKDF2Parameters(KEY_ALGORITHM, CHARSET, salt, 1000);
         PBKDF2Engine engine = new PBKDF2Engine(params);
         byte[] key = engine.deriveKey(password, KEY_LENGTH);
@@ -269,7 +269,7 @@ public class CryptoServiceImpl implements CryptoService {
         return secretKey;
     }
 
-    private byte[] generateSalt() throws CryptoException {
+    private byte[] generateSalt() throws OXException {
         byte[] salt = null;
         try {
             SecureRandom rand = SecureRandom.getInstance(RANDOM_ALGORITHM);

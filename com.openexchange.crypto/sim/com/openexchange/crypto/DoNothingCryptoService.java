@@ -49,6 +49,8 @@
 
 package com.openexchange.crypto;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link DoNothingCryptoService}
@@ -57,20 +59,20 @@ package com.openexchange.crypto;
  */
 public class DoNothingCryptoService implements CryptoService {
 
-    public String decrypt(String encryptedPayload, String password) throws CryptoException {
+    public String decrypt(String encryptedPayload, String password) throws OXException {
         return encryptedPayload;
     }
 
 
-    public String decrypt(EncryptedData data, String password, boolean useSalt) throws CryptoException {
+    public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException {
         return data.toString();
     }
 
-    public String encrypt(String data, String password) throws CryptoException {
+    public String encrypt(String data, String password) throws OXException {
         return data;
     }
 
-    public EncryptedData encrypt(String data, String password, boolean useSalt) throws CryptoException {
+    public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         return null;
     }
 
