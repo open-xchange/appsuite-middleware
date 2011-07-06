@@ -176,15 +176,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             Contacts.performContactStorageInsert(co, userId, session, override);
             final EventClient ec = new EventClient(session);
             ec.create(co);
-        } catch (final EventException e) {
-            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXConflictException ce) {
-            LOG.debug("Unable to insert contact", ce);
-            throw ce;
-        } catch (final OXException e) {
-            LOG.debug("Problem while inserting contact.", e);
             throw new OXException(e);
         }
     }
@@ -196,24 +188,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             Contacts.performContactStorageUpdate(co, fid, d, userId, memberInGroups, ctx, userConfiguration);
             final EventClient ec = new EventClient(session);
             ec.modify(storageVersion, co, new OXFolderAccess(ctx).getFolderObject(co.getParentFolderID()));
-        } catch (final OXException ise) {
-            throw ise;
-        } catch (final EventException e) {
-            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
         } catch (final OXException e) {
-            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(co.getParentFolderID()));
-        } catch (final OXConcurrentModificationException cme) {
-            throw cme;
-        } catch (final OXConflictException ce) {
-            throw ce;
-        } catch (final OXObjectNotFoundException oonfee) {
-            throw oonfee;
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        } catch (final OXPermissionException e) {
             throw e;
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -223,20 +199,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             Contacts.performUserContactStorageUpdate(contact, lastModified, userId, memberInGroups, ctx, userConfiguration);
             final EventClient ec = new EventClient(session);
             ec.modify(storageVersion, contact, new OXFolderAccess(ctx).getFolderObject(contact.getParentFolderID()));
-        } catch (final EventException e) {
-            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(contact.getParentFolderID()));
-        } catch (final OXException e) {
-            throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(ctx.getContextId()), I(contact.getParentFolderID()));
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        } catch (final OXObjectNotFoundException e) {
-            throw e;
-        } catch (final OXPermissionException e) {
-            throw e;
-        } catch (final OXConflictException e) {
-            throw e;
-        } catch (final OXConcurrentModificationException e) {
-            throw e;
         } catch (final OXException e) {
             throw e;
         }
