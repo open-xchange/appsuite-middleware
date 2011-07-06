@@ -718,8 +718,6 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(storage.getDefaultMailAccount(userId, cid)));
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
             }
         }
         return (spamHandlerFound.booleanValue() && spamEnabled);

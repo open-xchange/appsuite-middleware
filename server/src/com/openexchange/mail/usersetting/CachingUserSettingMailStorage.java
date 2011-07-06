@@ -63,11 +63,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMail.Signature;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -263,9 +261,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-            throw UserConfigurationCodes.DBPOOL_ERROR.create(e);
         }
     }
 
@@ -336,7 +331,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                             usm.setNoSave(false);
                             try {
                                 cache.put(cache.newCacheKey(ctx.getContextId(), user), usm);
-                            } catch (final CacheException e) {
+                            } catch (final OXException e) {
                                 LOG.error("UserSettingMail could not be put into cache", e);
                             }
                         }
@@ -351,9 +346,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-            throw UserConfigurationCodes.DBPOOL_ERROR.create(e);
         }
     }
 
@@ -396,9 +388,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-            throw UserConfigurationCodes.DBPOOL_ERROR.create(e);
         }
     }
 
@@ -501,9 +490,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-            throw UserConfigurationCodes.DBPOOL_ERROR.create(e);
         }
     }
 
@@ -543,7 +529,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             cacheWriteLock.lock();
             try {
                 cache.clear();
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.error("UserSettingMail's cache could not be cleared", e);
             } finally {
                 cacheWriteLock.unlock();
@@ -565,7 +551,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             cacheWriteLock.lock();
             try {
                 cache.remove(cache.newCacheKey(ctx.getContextId(), user));
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.error("UserSettingMail could not be removed from cache", e);
             } finally {
                 cacheWriteLock.unlock();
