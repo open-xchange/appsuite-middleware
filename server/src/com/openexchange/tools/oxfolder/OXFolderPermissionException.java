@@ -73,7 +73,7 @@ public class OXFolderPermissionException extends OXPermissionException {
     }
 
     public OXFolderPermissionException(final OXFolderExceptionCode code, final Exception cause, final Object... messageArgs) {
-        super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), cause, messageArgs);
+        super(EnumComponent.FOLDER, CATEGORY_PERMISSION_DENIED, code.getNumber(), code.getMessage(), cause, messageArgs);
     }
 
 }

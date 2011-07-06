@@ -79,7 +79,7 @@ public final class BundleAccessException extends AbstractOXException {
 		/**
 		 * Access to bundle %1$s is not permitted
 		 */
-		ACCESS_DENIED("Access to bundle %1$s is not permitted", Category.PERMISSION, 1);
+		ACCESS_DENIED("Access to bundle %1$s is not permitted", CATEGORY_PERMISSION_DENIED, 1);
 
 		private final String message;
 

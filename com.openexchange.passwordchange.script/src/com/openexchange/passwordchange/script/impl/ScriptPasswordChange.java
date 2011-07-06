@@ -56,12 +56,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.services.SPWServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.user.UserService;
 
@@ -82,9 +81,8 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		super();
 	}
 
-	private String getShellCommand()
-			throws com.openexchange.server.OXException {
-		ConfigurationService configservice = SPWServiceRegistry
+	private String getShellCommand() throws OXException {
+		final ConfigurationService configservice = SPWServiceRegistry
 				.getServiceRegistry().getService(ConfigurationService.class,
 						true);
 		return configservice
@@ -97,7 +95,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		String shellscript_to_execute = null;
 		try {
 			shellscript_to_execute = getShellCommand();
-		} catch (OXException e1) {
+		} catch (final OXException e1) {
 			throw new OXException(e1);
 		}
 		User user = null;
@@ -109,11 +107,11 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 			user = userService.getUser(event.getSession().getUserId(), event.getContext());
 
 		}
-		String usern = user.getLoginInfo();
-		String oldpw = event.getOldPassword();
-		String newpw = event.getNewPassword();
-		String cid = event.getContext().getContextId()+"";
-		String userid = user.getId()+"";
+		final String usern = user.getLoginInfo();
+		final String oldpw = event.getOldPassword();
+		final String newpw = event.getNewPassword();
+		final String cid = event.getContext().getContextId()+"";
+		final String userid = user.getId()+"";
 		
 		/*
 		 * Update passwd via executing a shell script
@@ -127,7 +125,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		 *  4. newpwd - New user password
 		 */
 		
-		String[] cmd = new String[11];
+		final String[] cmd = new String[11];
 		cmd[0] = shellscript_to_execute; // the script, after that, the parameter 
 		cmd[1] = "--cid";
 		cmd[2] = cid;
@@ -143,41 +141,41 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		LOG.debug("Executing following command to change password: "+Arrays.toString(cmd));
 		
 		try {
-		    int ret = executePasswordUpdateShell(cmd);
+		    final int ret = executePasswordUpdateShell(cmd);
 		    if(ret!=0) {
 		        LOG.error("Passwordchange script returned exit code != 0, ret="+ret);
 		        switch(ret){
 		        case 1:
-		            throw new OXException(new PasswordException(PasswordException.Code.PASSWORD_FAILED," failed with return code "+ret+" "));
+		            throw PasswordExceptionCode.PASSWORD_FAILED.create(" failed with return code "+ret+" ");
 		        case 2:
-		            throw new OXException(new PasswordException(PasswordException.Code.PASSWORD_SHORT));
+		            throw PasswordExceptionCode.PASSWORD_SHORT.create();
 		        case 3:
-		            throw new OXException(new PasswordException(PasswordException.Code.PASSWORD_WEAK));
+		            throw PasswordExceptionCode.PASSWORD_WEAK.create();
 		        case 4:
-		            throw new OXException(new PasswordException(PasswordException.Code.PASSWORD_NOUSER));
+		            throw PasswordExceptionCode.PASSWORD_NOUSER.create();
 		        case 5:
-		            throw new OXException(new PasswordException(PasswordException.Code.LDAP_ERROR));
+		            throw PasswordExceptionCode.LDAP_ERROR.create();
 		        default:
-		            throw new OXException(new OXException(ServiceExceptionCode.IO_ERROR));
+		            throw ServiceExceptionCode.IO_ERROR.create();
 		        }
 		    }
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
 			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));			
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			LOG.fatal("Error while changing password for user "+usern+" in context "+cid+"\n",e);
 			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));			
 		}
 		
 	}
 
-	private int executePasswordUpdateShell(String[] cmd) throws IOException, InterruptedException {
+	private int executePasswordUpdateShell(final String[] cmd) throws IOException, InterruptedException {
 		
-		Runtime rt = Runtime.getRuntime();
-		Process proc = rt.exec(cmd);
-		InputStream stderr = proc.getInputStream();
-		InputStreamReader isr = new InputStreamReader(stderr);
-		BufferedReader br = new BufferedReader(isr);
+		final Runtime rt = Runtime.getRuntime();
+		final Process proc = rt.exec(cmd);
+		final InputStream stderr = proc.getInputStream();
+		final InputStreamReader isr = new InputStreamReader(stderr);
+		final BufferedReader br = new BufferedReader(isr);
 		String line = null;
 		
 		while ((line = br.readLine()) != null){

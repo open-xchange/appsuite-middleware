@@ -536,7 +536,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	}
 	
 	private boolean isPermissionException(final OXException x) {
-		return Category.PERMISSION.equals(x.getCategory());
+		return CATEGORY_PERMISSION_DENIED.equals(x.getCategory());
 	}
 
 	private void initDefaultFields(final FolderObject folder) throws WebdavProtocolException {

@@ -94,23 +94,23 @@ public final class POP3Exception extends OXException {
         /**
          * No access to mail folder %1$s
          */
-        NO_ACCESS("No access to mail folder %1$s", Category.PERMISSION, 2003),
+        NO_ACCESS("No access to mail folder %1$s", CATEGORY_PERMISSION_DENIED, 2003),
         /**
          * No lookup access to mail folder %1$s
          */
-        NO_LOOKUP_ACCESS("No lookup access to mail folder %1$s", Category.PERMISSION, 2004),
+        NO_LOOKUP_ACCESS("No lookup access to mail folder %1$s", CATEGORY_PERMISSION_DENIED, 2004),
         /**
          * No read access on mail folder %1$s
          */
-        NO_READ_ACCESS("No read access to mail folder %1$s", Category.PERMISSION, 2005),
+        NO_READ_ACCESS("No read access to mail folder %1$s", CATEGORY_PERMISSION_DENIED, 2005),
         /**
          * No delete access on mail folder %1$s
          */
-        NO_DELETE_ACCESS("No delete access to mail folder %1$s", Category.PERMISSION, 2006),
+        NO_DELETE_ACCESS("No delete access to mail folder %1$s", CATEGORY_PERMISSION_DENIED, 2006),
         /**
          * No insert access on mail folder %1$s
          */
-        NO_INSERT_ACCESS("No insert access to mail folder %1$s", Category.PERMISSION, 2007),
+        NO_INSERT_ACCESS("No insert access to mail folder %1$s", CATEGORY_PERMISSION_DENIED, 2007),
         /**
          * No create access on mail folder %1$s
          */
@@ -118,19 +118,19 @@ public final class POP3Exception extends OXException {
         /**
          * No administer access on mail folder %1$s
          */
-        NO_ADMINISTER_ACCESS("No administer access to mail folder %1$s", Category.PERMISSION, 2009),
+        NO_ADMINISTER_ACCESS("No administer access to mail folder %1$s", CATEGORY_PERMISSION_DENIED, 2009),
         /**
          * No write access to POP3 folder %1$s
          */
-        NO_WRITE_ACCESS("No write access to POP3 folder %1$s", Category.PERMISSION, 2010),
+        NO_WRITE_ACCESS("No write access to POP3 folder %1$s", CATEGORY_PERMISSION_DENIED, 2010),
         /**
          * No keep-seen access on mail folder %1$s
          */
-        NO_KEEP_SEEN_ACCESS("No keep-seen access to mail folder %1$s", Category.PERMISSION, 2011),
+        NO_KEEP_SEEN_ACCESS("No keep-seen access to mail folder %1$s", CATEGORY_PERMISSION_DENIED, 2011),
         /**
          * Folder %1$s does not allow subfolders.
          */
-        FOLDER_DOES_NOT_HOLD_FOLDERS("Folder %1$s does not allow subfolders.", Category.PERMISSION, 2012),
+        FOLDER_DOES_NOT_HOLD_FOLDERS("Folder %1$s does not allow subfolders.", CATEGORY_PERMISSION_DENIED, 2012),
         /**
          * Mail folder cannot be created/rename. Name must not contain character '%1$s'
          */
@@ -147,7 +147,7 @@ public final class POP3Exception extends OXException {
          * The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by
          * POP3 server. However, the folder has been created.
          */
-        NO_ADMINISTER_ACCESS_ON_INITIAL("The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by POP3 server. However, the folder has been created.", Category.PERMISSION, 2016),
+        NO_ADMINISTER_ACCESS_ON_INITIAL("The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by POP3 server. However, the folder has been created.", CATEGORY_PERMISSION_DENIED, 2016),
         /**
          * No admin permission specified for folder %1$s
          */
@@ -155,7 +155,7 @@ public final class POP3Exception extends OXException {
         /**
          * Default folder %1$s must not be updated
          */
-        NO_DEFAULT_FOLDER_UPDATE("Default folder %1$s cannot be updated", Category.PERMISSION, 2018),
+        NO_DEFAULT_FOLDER_UPDATE("Default folder %1$s cannot be updated", CATEGORY_PERMISSION_DENIED, 2018),
         /**
          * Deletion of folder %1$s failed
          */
@@ -175,11 +175,11 @@ public final class POP3Exception extends OXException {
         /**
          * Folder %1$s must not be deleted
          */
-        NO_FOLDER_DELETE("Folder %1$s cannot be deleted", Category.PERMISSION, 2023),
+        NO_FOLDER_DELETE("Folder %1$s cannot be deleted", CATEGORY_PERMISSION_DENIED, 2023),
         /**
          * Default folder %1$s must not be deleted
          */
-        NO_DEFAULT_FOLDER_DELETE("Default folder %1$s cannot be deleted", Category.PERMISSION, 2024),
+        NO_DEFAULT_FOLDER_DELETE("Default folder %1$s cannot be deleted", CATEGORY_PERMISSION_DENIED, 2024),
         /**
          * An I/O error occurred: %1$s
          */
@@ -215,7 +215,7 @@ public final class POP3Exception extends OXException {
         /**
          * Mail folder %1$s must not be moved to subsequent folder %2$s
          */
-        NO_MOVE_TO_SUBFLD("Mail folder %1$s must not be moved to subsequent folder %2$s", Category.PERMISSION, 2032),
+        NO_MOVE_TO_SUBFLD("Mail folder %1$s must not be moved to subsequent folder %2$s", CATEGORY_PERMISSION_DENIED, 2032),
         /**
          * Message could not be moved to trash folder
          */
@@ -243,7 +243,7 @@ public final class POP3Exception extends OXException {
         /**
          * Not allowed to open folder %1$s due to missing read access
          */
-        NO_FOLDER_OPEN("Not allowed to open folder %1$s due to missing read access", Category.PERMISSION, 2041),
+        NO_FOLDER_OPEN("Not allowed to open folder %1$s due to missing read access", CATEGORY_PERMISSION_DENIED, 2041),
         /**
          * The raw content's input stream of message %1$s in folder %2$s cannot be read
          */

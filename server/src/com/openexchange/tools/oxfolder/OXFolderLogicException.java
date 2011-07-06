@@ -68,7 +68,7 @@ public class OXFolderLogicException extends OXException {
     }
 
     public OXFolderLogicException(final OXFolderExceptionCode code, final Object... messageArgs) {
-        super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), null, messageArgs);
+        super(EnumComponent.FOLDER, CATEGORY_PERMISSION_DENIED, code.getNumber(), code.getMessage(), null, messageArgs);
     }
 
     public OXFolderLogicException(final OXFolderExceptionCode code, final String messagePrefix) {
@@ -76,14 +76,14 @@ public class OXFolderLogicException extends OXException {
     }
 
     public OXFolderLogicException(final OXFolderExceptionCode code, final String messagePrefix, final Object... messageArgs) {
-        super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), new StringBuilder().append(messagePrefix).append(
+        super(EnumComponent.FOLDER, CATEGORY_PERMISSION_DENIED, code.getNumber(), new StringBuilder().append(messagePrefix).append(
             code.getMessage()).toString(), null, messageArgs);
     }
 
     public OXFolderLogicException(final OXFolderExceptionCode code, final Exception cause, final boolean insertCauseMsg, final Object... messageArgs) {
         super(
             EnumComponent.FOLDER,
-            Category.PERMISSION,
+            CATEGORY_PERMISSION_DENIED,
             code.getNumber(),
             insertCauseMsg ? new StringBuilder().append(code.getMessage()).append(':').append(cause.getMessage()).toString() : code.getMessage(),
             cause,

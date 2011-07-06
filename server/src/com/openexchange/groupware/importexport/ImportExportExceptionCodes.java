@@ -100,7 +100,7 @@ import com.openexchange.groupware.importexport.internal.ImportExportExceptionFac
 public enum ImportExportExceptionCodes implements OXExceptionCode {
 
     /** Could not export the folder %1$s in the format %2$s. */
-    CANNOT_EXPORT(CANNOT_EXPORT_MSG, Category.PERMISSION, 100),
+    CANNOT_EXPORT(CANNOT_EXPORT_MSG, CATEGORY_PERMISSION_DENIED, 100),
     /** Could not load contacts */
     LOADING_CONTACTS_FAILED(LOADING_CONTACTS_FAILED_MSG, CATEGORY_SERVICE_DOWN, 102),
     /** Could not encode as UTF-8 */
@@ -122,9 +122,9 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     /** Can not import the format %2$s into folder %1$s. */
     CANNOT_IMPORT(CANNOT_IMPORT_MSG, CATEGORY_ERROR, 500),
     /** Module calendar not enabled for user, cannot import appointments. */
-    CALENDAR_DISABLED(CALENDAR_DISABLED_MSG, Category.PERMISSION, 507),
+    CALENDAR_DISABLED(CALENDAR_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 507),
     /** Module tasks not enabled for user, cannot import tasks. */
-    TASKS_DISABLED(TASKS_DISABLED_MSG, Category.PERMISSION, 508),
+    TASKS_DISABLED(TASKS_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 508),
     /** The necessary iCal parser service is missing. */
     ICAL_PARSER_SERVICE_MISSING(ICAL_PARSER_SERVICE_MISSING_MSG, CATEGORY_ERROR, 512),
     /** Failed importing appointment due to hard conflicting resource. */
@@ -134,7 +134,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     /** Could not recognize format of the following data: %s */
     UNKNOWN_VCARD_FORMAT(UNKNOWN_VCARD_FORMAT_MSG, CATEGORY_USER_INPUT, 605),
     /** Module contacts not enabled for user, cannot import contacts. */
-    CONTACTS_DISABLED(CONTACTS_DISABLED_MSG, Category.PERMISSION, 607),
+    CONTACTS_DISABLED(CONTACTS_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 607),
     /** No VCard to import found. */
     NO_VCARD_FOUND(NO_VCARD_FOUND_MSG, CATEGORY_USER_INPUT, 608),
     /** Problem while parsing the vcard, reason: %s */

@@ -64,7 +64,7 @@ import com.openexchange.groupware.links.internal.LinkExceptionFactory;
 public enum LinkExceptionCodes implements OXExceptionCode {
 
     /** Unable to access link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d */
-    NO_LINK_ACCESS_PERMISSION(NO_LINK_ACCESS_PERMISSION_MSG, Category.PERMISSION, 100),
+    NO_LINK_ACCESS_PERMISSION(NO_LINK_ACCESS_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 100),
     /** Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d */
     ALREADY_LINKED(ALREADY_LINKED_MSG, CATEGORY_USER_INPUT, 101),
     /** Invalid SQL Query: %s */

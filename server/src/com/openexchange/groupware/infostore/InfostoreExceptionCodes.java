@@ -102,17 +102,17 @@ public enum InfostoreExceptionCodes {
     /** The folder %d is not an Infostore folder */
     NOT_INFOSTORE_FOLDER(NOT_INFOSTORE_FOLDER_MSG, CATEGORY_ERROR, 302),
     /** You do not have sufficient read permissions to read objects in this folder. */
-    NO_READ_PERMISSION(NO_READ_PERMISSION_MSG, Category.PERMISSION, 400),
+    NO_READ_PERMISSION(NO_READ_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 400),
     /** You do not have sufficient permissions to create objects in this folder. */
-    NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG, Category.PERMISSION, 402),
+    NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 402),
     /** You are not allowed to update this item. */
-    NO_WRITE_PERMISSION(NO_WRITE_PERMISSION_MSG, Category.PERMISSION, 403),
+    NO_WRITE_PERMISSION(NO_WRITE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 403),
     /** You are not allowed to create objects in the target folder. */
-    NO_TARGET_CREATE_PERMISSION(NO_TARGET_CREATE_PERMISSION_MSG, Category.PERMISSION, 404),
+    NO_TARGET_CREATE_PERMISSION(NO_TARGET_CREATE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 404),
     /** Could not delete all objects. */
     NOT_ALL_DELETED(NOT_ALL_DELETED_MSG, Category.CONCURRENT_MODIFICATION, 405),
     /** You do not have sufficient permission to delete this version. */
-    NO_DELETE_PERMISSION_FOR_VERSION(NO_DELETE_PERMISSION_FOR_VERSION_MSG, Category.PERMISSION, 406),
+    NO_DELETE_PERMISSION_FOR_VERSION(NO_DELETE_PERMISSION_FOR_VERSION_MSG, CATEGORY_PERMISSION_DENIED, 406),
     /** Could not iterate result. */
     ITERATE_FAILED(ITERATE_FAILED_MSG, CATEGORY_ERROR, 413),
     /** This document is locked. */
@@ -120,13 +120,13 @@ public enum InfostoreExceptionCodes {
     /** You cannot unlock this document. */
     LOCKED_BY_ANOTHER(LOCKED_BY_ANOTHER_MSG, Category.CONCURRENT_MODIFICATION, 416),
     /** You need write permissions to unlock a document. */
-    WRITE_PERMS_FOR_UNLOCK_MISSING(WRITE_PERMS_FOR_UNLOCK_MISSING_MSG, Category.PERMISSION, 417),
+    WRITE_PERMS_FOR_UNLOCK_MISSING(WRITE_PERMS_FOR_UNLOCK_MISSING_MSG, CATEGORY_PERMISSION_DENIED, 417),
     /** You need write permissions to lock a document. */
-    WRITE_PERMS_FOR_LOCK_MISSING(WRITE_PERMS_FOR_LOCK_MISSING_MSG, Category.PERMISSION, 418),
+    WRITE_PERMS_FOR_LOCK_MISSING(WRITE_PERMS_FOR_LOCK_MISSING_MSG, CATEGORY_PERMISSION_DENIED, 418),
     /** Could not generate new ID. */
     NEW_ID_FAILED(NEW_ID_FAILED_MSG, CATEGORY_ERROR, 420),
     /** You are not allowed to delete objects in the source folder, so this document cannot be moved. */
-    NO_SOURCE_DELETE_PERMISSION(NO_SOURCE_DELETE_PERMISSION_MSG, Category.PERMISSION, 421),
+    NO_SOURCE_DELETE_PERMISSION(NO_SOURCE_DELETE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 421),
     /** The document you requested does not exist. */
     DOCUMENT_NOT_EXIST(DOCUMENT_NOT_EXISTS_MSG, CATEGORY_USER_INPUT, 438),
     /** Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s. */
@@ -134,7 +134,7 @@ public enum InfostoreExceptionCodes {
     /** Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s */
     NUMBER_OF_VERSIONS_FAILED(NUMBER_OF_VERSIONS_FAILED_MSG, CATEGORY_ERROR, 442),
     /** You do not have the permissions to delete at least one of the info items. */
-    NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, Category.PERMISSION, 445),
+    NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 445),
     /** Illegal argument: Document %d contains no file */
     DOCUMENT_CONTAINS_NO_FILE(DOCUMENT_CONTAINS_NO_FILE_MSG, CATEGORY_ERROR, 500),
     /** Folder %d has two subfolders named %s. The database for context %d is not consistent. */

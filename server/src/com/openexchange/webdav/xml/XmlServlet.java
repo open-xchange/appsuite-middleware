@@ -356,7 +356,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             LOG.error("doPropFind", exc);
             doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
         } catch (final AbstractOXException exc) {
-            if (AbstractOXException.Category.PERMISSION.equals(exc.getCategory())) {
+            if (AbstractOXException.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
             } else if (AbstractOXException.Category.CONCURRENT_MODIFICATION.equals(exc.getCategory())) {
                 LOG.error("doPropFind", exc);

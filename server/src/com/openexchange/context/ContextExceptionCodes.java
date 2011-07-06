@@ -62,7 +62,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public enum ContextExceptionCodes implements OXExceptionCode {
 
-    CONTEXT_DISABLED(CONTEXT_DISABLED_MSG, Category.PERMISSION, 100);
+    CONTEXT_DISABLED(CONTEXT_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 100);
 
     private String message;
     private Category category;

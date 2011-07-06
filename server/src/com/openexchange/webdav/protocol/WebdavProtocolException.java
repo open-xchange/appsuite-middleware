@@ -79,7 +79,7 @@ public class WebdavProtocolException extends WebdavException implements WebdavSt
         /**
          * No write permission.
          */
-        NO_WRITE_PERMISSION("No write permission.", Category.PERMISSION, 1003),
+        NO_WRITE_PERMISSION("No write permission.", CATEGORY_PERMISSION_DENIED, 1003),
         /**
          * File &quot;%1$s&quot; already exists
          */

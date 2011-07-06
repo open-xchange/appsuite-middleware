@@ -126,7 +126,7 @@ public class OXPermissionException extends OXException {
         /**
          * No folder permission.
          */
-        NoFolderPermission("No folder permission.", Category.PERMISSION, 2);
+        NoFolderPermission("No folder permission.", CATEGORY_PERMISSION_DENIED, 2);
 
         /**
          * Message of the exception.

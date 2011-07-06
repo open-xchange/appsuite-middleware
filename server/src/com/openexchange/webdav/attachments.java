@@ -239,7 +239,7 @@ public final class attachments extends OXServlet {
             exc.printStarterTrace();
             rollbackTransaction();
         } catch (final OXException exc) {
-            if (exc.getCategory() == Category.PERMISSION) {
+            if (exc.getCategory() == CATEGORY_PERMISSION_DENIED) {
                 LOG.debug(exc.getMessage(), exc);
             } else {
                 LOG.error(exc.getMessage(), exc);
