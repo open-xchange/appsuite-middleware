@@ -106,6 +106,11 @@ public class ConversionWarning extends OXException {
         this.index = index;
     }
 
+    public ConversionWarning(final int index, final OXException cause) {
+        super(cause);
+        this.index = index;
+    }
+
     private static boolean isDisplay(final Code code) {
         return code.getCategory().getLogLevel().implies(LogLevel.DEBUG);
     }
