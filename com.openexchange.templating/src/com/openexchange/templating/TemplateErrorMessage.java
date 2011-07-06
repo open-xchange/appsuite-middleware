@@ -49,9 +49,10 @@
 
 package com.openexchange.templating;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 public enum TemplateErrorMessage implements OXExceptionCode {
     
@@ -66,20 +67,22 @@ public enum TemplateErrorMessage implements OXExceptionCode {
     private String help;
     private String message;
     
-    public static final TemplateExceptionFactory EXCEPTIONS = new TemplateExceptionFactory();
-    
     private TemplateErrorMessage(final Category category, final int errorCode, final String help, final String message) {
         this.category = category;
         this.errorCode = errorCode;
         this.help = help;
         this.message = message;
     }
+
+    public String getPrefix() {
+        return "TMPL";
+    }
     
     public Category getCategory() {
         return category;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return errorCode;
     }
 
@@ -91,12 +94,38 @@ public enum TemplateErrorMessage implements OXExceptionCode {
         return message;
     }
     
-    public TemplateException create(final Throwable cause, final Object...args) {
-        return EXCEPTIONS.create(this,cause, args);
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
-    
-    public TemplateException create(final Object...args) {
-        return EXCEPTIONS.create(this,args);
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
 }

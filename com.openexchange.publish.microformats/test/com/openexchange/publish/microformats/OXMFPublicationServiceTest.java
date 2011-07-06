@@ -60,7 +60,7 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
-import com.openexchange.templating.TemplateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -283,27 +283,27 @@ public class OXMFPublicationServiceTest extends TestCase {
     
     private static final class FindEverythingTemplateService implements TemplateService {
 
-        public OXTemplate loadTemplate(final String templateName) throws TemplateException {
+        public OXTemplate loadTemplate(final String templateName) throws OXException {
             return null;
         }
 
-        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session) throws TemplateException {
+        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session) throws OXException {
             return null;
         }
 
-        public List<String> getBasicTemplateNames(final String...filter) throws TemplateException {
+        public List<String> getBasicTemplateNames(final String...filter) throws OXException {
             return new ArrayList<String>(0);
         }
 
-        public List<String> getTemplateNames(final ServerSession session, final String...filter) throws TemplateException {
+        public List<String> getTemplateNames(final ServerSession session, final String...filter) throws OXException {
             return new ArrayList<String>(0);
         }
 
-        public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws TemplateException {
+        public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
             return null;
         }
 
-        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session, final OXTemplateExceptionHandler exceptionHandler) throws TemplateException {
+        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
             return null;
         }
     }

@@ -50,6 +50,7 @@
 package com.openexchange.templating;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -58,15 +59,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface TemplateService {
 
-    public OXTemplate loadTemplate(String templateName) throws TemplateException;
+    public OXTemplate loadTemplate(String templateName) throws OXException;
     
-    public OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws TemplateException;
+    public OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws OXException;
     
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException;
+    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws OXException;
     
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, OXTemplateExceptionHandler exceptionHandler) throws TemplateException;
+    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, OXTemplateExceptionHandler exceptionHandler) throws OXException;
     
-    public List<String> getBasicTemplateNames(String...filter) throws TemplateException;
+    public List<String> getBasicTemplateNames(String...filter) throws OXException;
     
-    public List<String> getTemplateNames(ServerSession session, String... filter) throws TemplateException;
+    public List<String> getTemplateNames(ServerSession session, String... filter) throws OXException;
 }

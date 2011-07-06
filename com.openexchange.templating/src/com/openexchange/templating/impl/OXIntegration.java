@@ -63,7 +63,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -90,23 +90,23 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
 
     private static final String TEMPLATE_FOLDER_NAME = "OXMF Templates";
     
-    private InfostoreFacade infostore;
+    private final InfostoreFacade infostore;
 
-    public OXIntegration(InfostoreFacade infostore) {
+    public OXIntegration(final InfostoreFacade infostore) {
         this.infostore = infostore;
     }
     
-    public FolderObject createPrivateTemplateFolder(ServerSession session) throws AbstractOXException {
-        OXFolderManager manager = OXFolderManager.getInstance(session);
-        OXFolderAccess access = getFolderAccess(session);
+    public FolderObject createPrivateTemplateFolder(final ServerSession session) throws OXException {
+        final OXFolderManager manager = OXFolderManager.getInstance(session);
+        final OXFolderAccess access = getFolderAccess(session);
         
-        FolderObject parent = access.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
+        final FolderObject parent = access.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
         
-        FolderObject fo = new FolderObject();
+        final FolderObject fo = new FolderObject();
         fo.setParentFolderID(parent.getObjectID());
         fo.setFolderName(TEMPLATE_FOLDER_NAME);
         
-        OCLPermission adminPermission = new OCLPermission();
+        final OCLPermission adminPermission = new OCLPermission();
         adminPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         adminPermission.setFolderAdmin(true);
         adminPermission.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
@@ -119,72 +119,72 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         return manager.createFolder(fo, true, System.currentTimeMillis());
     }
 
-    public FolderObject getGlobalTemplateFolder(ServerSession session) throws AbstractOXException {
+    public FolderObject getGlobalTemplateFolder(final ServerSession session) throws OXException {
         return findTemplatesSubfolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, getFolderAccess(session), session.getContext());
     }
 
-    public FolderObject getPrivateTemplateFolder(ServerSession session) throws AbstractOXException {
-        OXFolderAccess access = getFolderAccess(session);
-        FolderObject privateInfostoreFolder = access.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
+    public FolderObject getPrivateTemplateFolder(final ServerSession session) throws OXException {
+        final OXFolderAccess access = getFolderAccess(session);
+        final FolderObject privateInfostoreFolder = access.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
         return findTemplatesSubfolder(privateInfostoreFolder, access, session.getContext());
     }
 
-    private OXFolderAccess getFolderAccess(ServerSession session) {
+    private OXFolderAccess getFolderAccess(final ServerSession session) {
         return new OXFolderAccess(session.getContext());
     }
 
-    private FolderObject findTemplatesSubfolder(int folderId, OXFolderAccess access, Context ctx) throws AbstractOXException {
-        FolderObject folderObject = access.getFolderObject(folderId);
+    private FolderObject findTemplatesSubfolder(final int folderId, final OXFolderAccess access, final Context ctx) throws OXException {
+        final FolderObject folderObject = access.getFolderObject(folderId);
         return findTemplatesSubfolder(folderObject, access, ctx);
     }
 
-    private FolderObject findTemplatesSubfolder(FolderObject folderObject, OXFolderAccess access, Context ctx) throws AbstractOXException {
+    private FolderObject findTemplatesSubfolder(final FolderObject folderObject, final OXFolderAccess access, final Context ctx) throws OXException {
         try {
-            for(int id : folderObject.getSubfolderIds(true, ctx)) {
-                FolderObject child = access.getFolderObject(id);
+            for(final int id : folderObject.getSubfolderIds(true, ctx)) {
+                final FolderObject child = access.getFolderObject(id);
                 if(child.getFolderName().equals(TEMPLATE_FOLDER_NAME)) {
                     return child;
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw TemplateErrorMessage.SQLException.create(e);
         }
         return null;
     }
 
-    public String findTemplateInFolder(ServerSession session, FolderObject folder, String name) throws AbstractOXException {
-        SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
+    public String findTemplateInFolder(final ServerSession session, final FolderObject folder, final String name) throws OXException {
+        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
         BufferedReader reader = null;
         try {
-            DocumentMetadataMatcher matcher = new DocumentMetadataMatcher(name);
+            final DocumentMetadataMatcher matcher = new DocumentMetadataMatcher(name);
             while(iterator.hasNext() && !matcher.hasPerfectMatch()) {
                 matcher.propose(iterator.next());
             }
-            DocumentMetadata metadata = matcher.getBestMatch();
+            final DocumentMetadata metadata = matcher.getBestMatch();
             
             if(metadata == null) {
                 return null;
             }
             
-            InputStream is = infostore.getDocument(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserConfiguration());
+            final InputStream is = infostore.getDocument(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserConfiguration());
             
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            StringBuilder builder = new StringBuilder();
+            final StringBuilder builder = new StringBuilder();
             String line = null;
             while((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
             }
             return builder.toString();
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.fatal(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
             throw TemplateErrorMessage.IOException.create(e);
         } finally {
             if(reader != null) {
                 try {
                     reader.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
             }
             if(iterator != null){
@@ -194,8 +194,8 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         return null;
     }
 
-    public void storeTemplateInFolder(ServerSession session, FolderObject folder, String name, String templateText) throws AbstractOXException {
-        DocumentMetadata metadata = new DocumentMetadataImpl();
+    public void storeTemplateInFolder(final ServerSession session, final FolderObject folder, final String name, final String templateText) throws OXException {
+        final DocumentMetadata metadata = new DocumentMetadataImpl();
         metadata.setFileName(name);
         metadata.setTitle(name);
         metadata.setFolderId(folder.getObjectID());
@@ -204,18 +204,18 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         
         try {
             infostore.saveDocument(metadata, new ByteArrayInputStream(templateText.getBytes("UTF-8")), InfostoreFacade.NEW, session);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.fatal(e.getMessage(), e);
         }
     }
 
-    public List<String> getNames(ServerSession session, FolderObject folder, String ... filter) throws AbstractOXException {
-    	HashSet<String> sieve = new HashSet<String>(Arrays.asList(filter));
+    public List<String> getNames(final ServerSession session, final FolderObject folder, final String ... filter) throws OXException {
+    	final HashSet<String> sieve = new HashSet<String>(Arrays.asList(filter));
     	
-        SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.FILENAME_LITERAL, Metadata.CATEGORIES_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
-        List<String> names = new ArrayList<String>(30);
+        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.FILENAME_LITERAL, Metadata.CATEGORIES_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
+        final List<String> names = new ArrayList<String>(30);
         while(iterator.hasNext()) {
-            DocumentMetadata doc = iterator.next();
+            final DocumentMetadata doc = iterator.next();
             Set<String> categories = null;
             
             if(doc.getCategories() != null && doc.getCategories().length() > 0){

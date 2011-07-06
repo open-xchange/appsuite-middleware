@@ -50,8 +50,8 @@
 package com.openexchange.templating;
 
 import java.io.Writer;
+import com.openexchange.exception.OXException;
 import freemarker.core.Environment;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 
@@ -72,13 +72,13 @@ public class TemplateExceptionHandlerWrapper implements TemplateExceptionHandler
     /** 
      * {@inheritDoc}
      */
-    public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
-        final com.openexchange.templating.TemplateException exception = TemplateErrorMessage.UnderlyingException.create(te);
+    public void handleTemplateException(final freemarker.template.TemplateException te, final Environment env, final Writer out) throws freemarker.template.TemplateException {
+        final OXException exception = TemplateErrorMessage.UnderlyingException.create(te);
         
         try {
             exceptionHandler.handleTemplateException(exception, out);
-        } catch (com.openexchange.templating.TemplateException e) {
-            throw new TemplateException(e, env);
+        } catch (final OXException e) {
+            throw new freemarker.template.TemplateException(e, env);
         }
     }
 

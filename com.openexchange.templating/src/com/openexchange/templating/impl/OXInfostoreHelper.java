@@ -50,7 +50,7 @@
 package com.openexchange.templating.impl;
 
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  */
 public interface OXInfostoreHelper {
-    public String findTemplateInFolder(ServerSession session, FolderObject folder, String name) throws AbstractOXException;
-    public void storeTemplateInFolder(ServerSession session, FolderObject folder, String name, String templateText) throws AbstractOXException;
-    public List<String> getNames(ServerSession session, FolderObject folder, String... filter) throws AbstractOXException;
+    public String findTemplateInFolder(ServerSession session, FolderObject folder, String name) throws OXException;
+    public void storeTemplateInFolder(ServerSession session, FolderObject folder, String name, String templateText) throws OXException;
+    public List<String> getNames(ServerSession session, FolderObject folder, String... filter) throws OXException;
 }

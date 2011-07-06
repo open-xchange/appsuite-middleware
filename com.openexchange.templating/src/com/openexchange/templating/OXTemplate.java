@@ -50,6 +50,7 @@
 package com.openexchange.templating;
 
 import java.io.Writer;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -64,6 +65,6 @@ public interface OXTemplate {
         SERVER, USER;
     }
     
-    public void process(Object rootObject, Writer writer) throws TemplateException;
+    public void process(Object rootObject, Writer writer) throws OXException;
     public TemplateLevel getLevel();
 }

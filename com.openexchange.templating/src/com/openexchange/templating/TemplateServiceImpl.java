@@ -74,7 +74,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.templating.impl.OXFolderHelper;
@@ -99,7 +99,7 @@ public class TemplateServiceImpl implements TemplateService {
 
 	private static final Log LOG = LogFactory.getLog(TemplateServiceImpl.class);
 
-    private ConfigurationService config;
+    private final ConfigurationService config;
 
     private OXFolderHelper folders;
 
@@ -107,40 +107,40 @@ public class TemplateServiceImpl implements TemplateService {
     
     private TemplateExceptionHandler exceptionHandler;
 
-    public TemplateServiceImpl(ConfigurationService config) {
+    public TemplateServiceImpl(final ConfigurationService config) {
         this.config = config;
         exceptionHandler = null;
     }
 
-    public OXTemplateImpl loadTemplate(String templateName) throws TemplateException {
-        String templatePath = config.getProperty(PATH_PROPERTY);
+    public OXTemplateImpl loadTemplate(final String templateName) throws OXException {
+        final String templatePath = config.getProperty(PATH_PROPERTY);
         if (templatePath == null) {
             return null;
         }
 
-        OXTemplateImpl retval = new OXTemplateImpl();
+        final OXTemplateImpl retval = new OXTemplateImpl();
         retval.setLevel(TemplateLevel.SERVER);
         retval.setTemplate(loadTemplate(templatePath, templateName));
         return retval;
 
     }
 
-    protected Template loadTemplate(String templatePath, String templateName) throws TemplateException {
-        File path = new File(templatePath);
+    protected Template loadTemplate(final String templatePath, final String templateName) throws OXException {
+        final File path = new File(templatePath);
         if (!path.exists() || !path.isDirectory() || !path.canRead()) {
             return null;
         }
 
         Template retval = null;
         try {
-            TemplateLoader templateLoader = new FileTemplateLoader(path);
-            Configuration config = new Configuration();
+            final TemplateLoader templateLoader = new FileTemplateLoader(path);
+            final Configuration config = new Configuration();
             config.setTemplateLoader(templateLoader);
             if (exceptionHandler != null) {
                 config.setTemplateExceptionHandler(exceptionHandler);
             }
             retval = config.getTemplate(templateName);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw IOException.create(e);
         }
         if (retval == null) {
@@ -149,7 +149,7 @@ public class TemplateServiceImpl implements TemplateService {
         return retval;
     }
 
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException {
+    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session) throws OXException {
         if (isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
             return loadTemplate(defaultTemplateName);
         }
@@ -164,12 +164,12 @@ public class TemplateServiceImpl implements TemplateService {
             }
             String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
 
-            Configuration config = new Configuration();
+            final Configuration config = new Configuration();
             if (exceptionHandler != null) {
                 config.setTemplateExceptionHandler(exceptionHandler);
             }
             if (templateText != null) {
-                OXTemplateImpl template = new OXTemplateImpl();
+                final OXTemplateImpl template = new OXTemplateImpl();
                 template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                 template.setLevel(TemplateLevel.USER);
                 return template;
@@ -186,7 +186,7 @@ public class TemplateServiceImpl implements TemplateService {
                 
                 if (existsInFilesystem(templateName)) {
                     templateText = loadFromFileSystem(templateName);
-                    OXTemplateImpl template = new OXTemplateImpl();
+                    final OXTemplateImpl template = new OXTemplateImpl();
                     template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                     template.setLevel(TemplateLevel.SERVER);
                     return template;
@@ -199,90 +199,88 @@ public class TemplateServiceImpl implements TemplateService {
                 }
                 infostore.storeTemplateInFolder(session, privateFolder, templateName, templateText);
             }
-            OXTemplateImpl template = new OXTemplateImpl();
+            final OXTemplateImpl template = new OXTemplateImpl();
             template.setTemplate(new Template(templateName, new StringReader(templateText), config));
             template.setLevel(TemplateLevel.USER);
             return template;
-        } catch (AbstractOXException e) {
-            throw new TemplateException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw IOException.create(e);
         }
     }
 
-    private boolean isUserTemplatingEnabled(ServerSession session) {
+    private boolean isUserTemplatingEnabled(final ServerSession session) {
         return "true".equalsIgnoreCase(config.getProperty(USER_TEMPLATING_PROPERTY, "true")) && session.getUserConfiguration().hasInfostore();
     }
 
-    private boolean isEmpty(String templateName) {
+    private boolean isEmpty(final String templateName) {
         return templateName == null || "".equals(templateName);
     }
     
-    protected boolean existsInFilesystem(String templateName) {
-        File templateFile = getTemplateFile(templateName);
+    protected boolean existsInFilesystem(final String templateName) {
+        final File templateFile = getTemplateFile(templateName);
         if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
             return false;
         }
         return true;
     }
 
-    protected String loadFromFileSystem(String defaultTemplateName) throws TemplateException {
-        File templateFile = getTemplateFile(defaultTemplateName);
+    protected String loadFromFileSystem(final String defaultTemplateName) throws OXException {
+        final File templateFile = getTemplateFile(defaultTemplateName);
         if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
             return "Unfilled Template.";
         }
         BufferedReader reader = null;
         try {
-            StringBuilder builder = new StringBuilder();
+            final StringBuilder builder = new StringBuilder();
             reader = new BufferedReader(new FileReader(templateFile));
             String line = null;
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append("\n");
             }
             return builder.toString();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw IOException.create(e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     // IGNORE
                 }
             }
         }
     }
 
-    private File getTemplateFile(String defaultTemplateName) {
+    private File getTemplateFile(final String defaultTemplateName) {
         return new File(config.getProperty(PATH_PROPERTY), defaultTemplateName);
     }
 
-    public void setOXFolderHelper(OXFolderHelper helper) {
+    public void setOXFolderHelper(final OXFolderHelper helper) {
         this.folders = helper;
     }
 
-    public void setInfostoreHelper(OXInfostoreHelper helper) {
+    public void setInfostoreHelper(final OXInfostoreHelper helper) {
         this.infostore = helper;
     }
 
-    public List<String> getBasicTemplateNames(String...filter) {
-        String templatePath = config.getProperty(PATH_PROPERTY);
-        File templateDir = new File(templatePath);
+    public List<String> getBasicTemplateNames(final String...filter) {
+        final String templatePath = config.getProperty(PATH_PROPERTY);
+        final File templateDir = new File(templatePath);
         if (!templateDir.isDirectory() || !templateDir.exists()) {
             return new ArrayList<String>(0);
         }
         
-        Set<String> sieve = new HashSet<String>(Arrays.asList(filter));
+        final Set<String> sieve = new HashSet<String>(Arrays.asList(filter));
         
-        Map<String, Set<String>> tagMap = getTagMap(templateDir);
+        final Map<String, Set<String>> tagMap = getTagMap(templateDir);
         
-        File[] files = templateDir.listFiles();
+        final File[] files = templateDir.listFiles();
         if (files == null) {
             return new ArrayList<String>(0);
         }
-        Set<String> names = new HashSet<String>();
-        Set<String> defaults = new HashSet<String>();
-        for (File file : files) {
+        final Set<String> names = new HashSet<String>();
+        final Set<String> defaults = new HashSet<String>();
+        for (final File file : files) {
             Set<String> tags = tagMap.get(file.getName());
             if (tags == null) {
                 tags = Collections.emptySet();
@@ -296,8 +294,8 @@ public class TemplateServiceImpl implements TemplateService {
                 
             }
         }
-        List<String> a = new ArrayList(defaults);
-        List<String> b = new ArrayList(names);
+        final List<String> a = new ArrayList(defaults);
+        final List<String> b = new ArrayList(names);
         Collections.sort(a);
         Collections.sort(b);
         a.addAll(b);
@@ -305,49 +303,49 @@ public class TemplateServiceImpl implements TemplateService {
         return a;
     }
 
-    private Map<String, Set<String>> getTagMap(File templateDir) {
-    	String absolutePath = templateDir.getAbsolutePath();
+    private Map<String, Set<String>> getTagMap(final File templateDir) {
+    	final String absolutePath = templateDir.getAbsolutePath();
     	
 		if(cachedTags.containsKey(absolutePath)){
     		return cachedTags.get(absolutePath);
 		}
 		
-    	File[] files = templateDir.listFiles(new FileFilter(){
-			public boolean accept(File pathname) {
+    	final File[] files = templateDir.listFiles(new FileFilter(){
+			public boolean accept(final File pathname) {
 				return pathname.getName().endsWith(".properties")
 				&& pathname.canRead() && pathname.isFile();
 			}
 		});
     	if(files == null){
-    		Map<String, Set<String>> emptyMap = Collections.emptyMap();
+    		final Map<String, Set<String>> emptyMap = Collections.emptyMap();
 			cachedTags.put(absolutePath, emptyMap);
     		return emptyMap;
     	}
     	
-        HashMap<String, Set<String>> tagMap = new HashMap<String, Set<String>>();
-    	for (File file : files) {
-    		Properties index = new Properties();
+        final HashMap<String, Set<String>> tagMap = new HashMap<String, Set<String>>();
+    	for (final File file : files) {
+    		final Properties index = new Properties();
     		InputStream inStream = null;
     		try {
 				inStream = new FileInputStream(file);
 				index.load(inStream);
-				Set<Entry<Object, Object>> entrySet = index.entrySet();
+				final Set<Entry<Object, Object>> entrySet = index.entrySet();
 				
-				for (Entry<Object, Object> entry : entrySet) {
-					String filename = (String) entry.getKey();
-					String[] categoriesArr = ((String) entry.getValue()).split("\\s*,\\s*");
-					HashSet<String> categories = new HashSet<String>(Arrays.asList(categoriesArr));
+				for (final Entry<Object, Object> entry : entrySet) {
+					final String filename = (String) entry.getKey();
+					final String[] categoriesArr = ((String) entry.getValue()).split("\\s*,\\s*");
+					final HashSet<String> categories = new HashSet<String>(Arrays.asList(categoriesArr));
 					tagMap.put(filename, categories);
 				}
-			} catch (FileNotFoundException e) {
+			} catch (final FileNotFoundException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error(e.getMessage(), e);
 			} finally {
 				if (inStream != null) {
 					try {
 						inStream.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 					}
 				}
 			}
@@ -357,19 +355,19 @@ public class TemplateServiceImpl implements TemplateService {
 
 	}
 
-	public List<String> getTemplateNames(ServerSession session,
-			String... filter) throws TemplateException {
+	public List<String> getTemplateNames(final ServerSession session,
+			String... filter) throws OXException {
 		if(filter == null) {
 			filter = new String[0];
 		}
-        Set<String> names = new HashSet<String>();
+        final Set<String> names = new HashSet<String>();
         if (!isUserTemplatingEnabled(session)) {
             return getBasicTemplateNames(filter);
         }
 
         try {
-            FolderObject globalTemplateFolder = folders.getGlobalTemplateFolder(session);
-            FolderObject privateTemplateFolder = folders.getPrivateTemplateFolder(session);
+            final FolderObject globalTemplateFolder = folders.getGlobalTemplateFolder(session);
+            final FolderObject privateTemplateFolder = folders.getPrivateTemplateFolder(session);
 
             if (globalTemplateFolder != null) {
                 names.addAll(infostore.getNames(session, globalTemplateFolder, filter));
@@ -378,28 +376,28 @@ public class TemplateServiceImpl implements TemplateService {
                 names.addAll(infostore.getNames(session, privateTemplateFolder, filter));
             }
 
-        } catch (AbstractOXException e) {
-            throw new TemplateException(e);
+        } catch (final OXException e) {
+            throw e;
         }
-        List<String> basicTemplateNames = getBasicTemplateNames(filter);
-        ArrayList<String> userTemplates = new ArrayList<String>(names);
+        final List<String> basicTemplateNames = getBasicTemplateNames(filter);
+        final ArrayList<String> userTemplates = new ArrayList<String>(names);
         Collections.sort(userTemplates);
         basicTemplateNames.addAll(userTemplates);
         return basicTemplateNames;
 	}
 
-    public OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws TemplateException {
+    public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
              
         return loadTemplate(templateName);
     }
 
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session, OXTemplateExceptionHandler exceptionHandler) throws TemplateException {
+    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
         setExceptionHandler(exceptionHandler);   
         return loadTemplate(templateName, defaultTemplateName, session);
     }
 	
-    private void setExceptionHandler(OXTemplateExceptionHandler exceptionHandler) {
-        TemplateExceptionHandler wrapper = new TemplateExceptionHandlerWrapper(exceptionHandler);
+    private void setExceptionHandler(final OXTemplateExceptionHandler exceptionHandler) {
+        final TemplateExceptionHandler wrapper = new TemplateExceptionHandlerWrapper(exceptionHandler);
         this.exceptionHandler = wrapper;
     }
 

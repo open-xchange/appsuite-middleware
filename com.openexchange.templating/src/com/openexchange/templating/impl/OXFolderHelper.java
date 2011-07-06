@@ -49,7 +49,7 @@
 
 package com.openexchange.templating.impl;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  */
 public interface OXFolderHelper {
-    public FolderObject getPrivateTemplateFolder(ServerSession session) throws AbstractOXException;
-    public FolderObject getGlobalTemplateFolder(ServerSession session) throws AbstractOXException;
-    public FolderObject createPrivateTemplateFolder(ServerSession session) throws AbstractOXException;
+    public FolderObject getPrivateTemplateFolder(ServerSession session) throws OXException;
+    public FolderObject getGlobalTemplateFolder(ServerSession session) throws OXException;
+    public FolderObject createPrivateTemplateFolder(ServerSession session) throws OXException;
 }

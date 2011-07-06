@@ -51,6 +51,7 @@ package com.openexchange.templating;
 
 import java.io.IOException;
 import java.io.Writer;
+import com.openexchange.exception.OXException;
 import freemarker.template.Template;
 
 /**
@@ -65,16 +66,16 @@ public class OXTemplateImpl implements OXTemplate{
         return template;
     }
 
-    public void setTemplate(Template template) {
+    public void setTemplate(final Template template) {
         this.template = template;
     }
 
-    public void process(Object rootObject, Writer writer) throws TemplateException {
+    public void process(final Object rootObject, final Writer writer) throws OXException {
         try {
             template.process(rootObject, writer);
-        } catch (freemarker.template.TemplateException e) {
+        } catch (final freemarker.template.TemplateException e) {
             throw TemplateErrorMessage.UnderlyingException.create(e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw TemplateErrorMessage.IOException.create(e);
         }
     }
@@ -83,7 +84,7 @@ public class OXTemplateImpl implements OXTemplate{
         return level;
     }
     
-    public void setLevel(TemplateLevel level) {
+    public void setLevel(final TemplateLevel level) {
         this.level = level;
     }
 

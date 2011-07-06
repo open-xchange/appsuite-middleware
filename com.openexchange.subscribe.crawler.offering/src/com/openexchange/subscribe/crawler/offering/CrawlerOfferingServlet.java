@@ -73,7 +73,7 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateException;
+import com.openexchange.exception.OXException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -166,7 +166,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
             LOG.error(e.getMessage(), e);
             resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final TemplateException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -218,7 +218,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
         }
     }
 
-    private void fillListTemplate(final OXTemplate template, final HttpServletRequest req, final HttpServletResponse resp) throws TemplateException, IOException {
+    private void fillListTemplate(final OXTemplate template, final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
         final List<Map<String, String>> links = new ArrayList<Map<String, String>>();
 
         sources.getSources();
@@ -235,7 +235,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
         template.process(values, resp.getWriter());
     }
 
-    private void fillSourceTemplate(final OXTemplate template, final HttpServletRequest req, final HttpServletResponse resp) throws TemplateException, IOException {
+    private void fillSourceTemplate(final OXTemplate template, final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
         final List<Map<String, String>> elements = new ArrayList<Map<String, String>>();
 
         final String sourceName = req.getParameter("crawler");
@@ -262,7 +262,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
         template.process(values, resp.getWriter());
     }
 
-    private void fillResultTemplate(final OXTemplate template, final Collection<?> content, final String types, final HttpServletResponse resp) throws TemplateException, IOException {
+    private void fillResultTemplate(final OXTemplate template, final Collection<?> content, final String types, final HttpServletResponse resp) throws OXException, IOException {
         final Map<String, Object> values = new HashMap<String, Object>();
         values.put("utils", new ContactTemplateUtils());
         values.put(types, content);

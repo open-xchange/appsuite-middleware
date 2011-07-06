@@ -50,6 +50,7 @@
 package com.openexchange.templating;
 
 import java.io.Writer;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -59,11 +60,11 @@ import java.io.Writer;
  */
 public interface OXTemplateExceptionHandler {
 
-    void handleTemplateException(TemplateException te, Writer out) throws TemplateException;    
+    void handleTemplateException(OXException te, Writer out) throws OXException;    
     
     OXTemplateExceptionHandler RETHROW_HANDLER = new OXTemplateExceptionHandler() {
         
-        public void handleTemplateException(TemplateException te, Writer out) throws TemplateException {
+        public void handleTemplateException(OXException te, Writer out) throws OXException {
             throw te;            
         }
     };
