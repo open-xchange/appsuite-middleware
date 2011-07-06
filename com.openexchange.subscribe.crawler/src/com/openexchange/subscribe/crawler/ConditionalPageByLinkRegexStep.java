@@ -54,8 +54,8 @@ import java.net.MalformedURLException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 
 
 /**

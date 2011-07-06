@@ -73,10 +73,11 @@ import com.google.gdata.data.extensions.Im;
 import com.google.gdata.data.extensions.Organization;
 import com.google.gdata.data.extensions.PhoneNumber;
 import com.google.gdata.data.extensions.StructuredPostalAddress;
-import com.google.gdata.util.OXException;
+import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.util.ServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
@@ -138,10 +139,12 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                     }
                     if (entry.hasOrganizations()) {
                         for (final Organization o : entry.getOrganizations()) {
-                            if (o.hasOrgName())
+                            if (o.hasOrgName()) {
                                 contact.setCompany(o.getOrgName().getValue());
-                            if (o.hasOrgJobDescription())
+                            }
+                            if (o.hasOrgJobDescription()) {
                                 contact.setTitle(o.getOrgJobDescription().getValue());
+                            }
                         }
                     }
 
@@ -290,9 +293,12 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         } catch (final InvalidCredentialsException e) {
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
-        } catch (final OXException e) {
+        } catch (final AuthenticationException e) {
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+        } catch (final ServiceException e) {
             LOG.error(e);
+            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }
 

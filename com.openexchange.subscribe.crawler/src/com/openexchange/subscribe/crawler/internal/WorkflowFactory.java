@@ -52,8 +52,8 @@ package com.openexchange.subscribe.crawler.internal;
 import java.io.File;
 import java.io.FileNotFoundException;
 import org.ho.yaml.Yaml;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.Workflow;
 
 /**

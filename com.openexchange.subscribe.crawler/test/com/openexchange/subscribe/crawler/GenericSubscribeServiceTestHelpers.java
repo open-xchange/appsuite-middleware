@@ -57,10 +57,10 @@ import java.util.HashMap;
 import junit.framework.TestCase;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 

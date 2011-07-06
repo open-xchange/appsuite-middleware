@@ -52,8 +52,8 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 

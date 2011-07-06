@@ -65,10 +65,11 @@ import com.google.gdata.data.calendar.CalendarEventEntry;
 import com.google.gdata.data.calendar.CalendarEventFeed;
 import com.google.gdata.data.extensions.When;
 import com.google.gdata.util.AuthenticationException;
-import com.google.gdata.util.OXException;
+import com.google.gdata.util.ServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.exception.OXException;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
@@ -88,23 +89,23 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
      * @see com.openexchange.subscribe.crawler.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
-    public void execute(WebClient webClient) throws OXException {
+    public void execute(final WebClient webClient) throws OXException {
         // Create a CalenderService and authenticate
-        CalendarService myService = new CalendarService("com.openexchange");
+        final CalendarService myService = new CalendarService("com.openexchange");
         try {
             myService.setUserCredentials(username, password);
-            URL feedUrl = new URL("http://www.google.com/calendar/feeds/" + username + "/private/full");
-            CalendarEventFeed myFeed = myService.getFeed(feedUrl, CalendarEventFeed.class);
-            ArrayList events = new ArrayList<CalendarDataObject>();
+            final URL feedUrl = new URL("http://www.google.com/calendar/feeds/" + username + "/private/full");
+            final CalendarEventFeed myFeed = myService.getFeed(feedUrl, CalendarEventFeed.class);
+            final ArrayList events = new ArrayList<CalendarDataObject>();
 
             for (int i = 0; i < myFeed.getEntries().size(); i++) {
-                CalendarEventEntry googleEvent = myFeed.getEntries().get(i);
-                CalendarDataObject oxEvent = new CalendarDataObject();
+                final CalendarEventEntry googleEvent = myFeed.getEntries().get(i);
+                final CalendarDataObject oxEvent = new CalendarDataObject();
 
                 // map the attributes from Google-CalendarEventEntry to OX-CalendarDataObject
                 oxEvent.setTimezone(myFeed.getTimeZone().getValue());
                 oxEvent.setTitle(googleEvent.getTitle().getPlainText());
-                for (When when : googleEvent.getTimes()) {
+                for (final When when : googleEvent.getTimes()) {
                     oxEvent.setStartDate(new Date(when.getStartTime().getValue()));
                     oxEvent.setEndDate(new Date(when.getEndTime().getValue()));
                 }
@@ -122,52 +123,54 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
             }
             executedSuccessfully = true;
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
-        } catch (AuthenticationException e) {
+        } catch (final AuthenticationException e) {
             e.printStackTrace();
-        } catch (OXException e) {
-            e.printStackTrace();
+        } catch (final ServiceException e) {
+            LOG.error(e);
+            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }
 
     }
 
-    private void handleRecurrence(CalendarEventEntry googleEvent, CalendarDataObject oxEvent) {
+    private void handleRecurrence(final CalendarEventEntry googleEvent, final CalendarDataObject oxEvent) {
         try {
-            String fullString = googleEvent.getRecurrence().getValue();
-            Pattern recurrencePattern = Pattern.compile("(RRULE[^\\n]*)");
-            Matcher recurrenceMatcher = recurrencePattern.matcher(fullString);
+            final String fullString = googleEvent.getRecurrence().getValue();
+            final Pattern recurrencePattern = Pattern.compile("(RRULE[^\\n]*)");
+            final Matcher recurrenceMatcher = recurrencePattern.matcher(fullString);
             Date startDate = null;
             if (recurrenceMatcher.find()) {
                 // Start- and End-Date information needs to be gained differently for series, it is not contained in the event
                 // itself as for non-series-events
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-                Pattern startDatePattern = Pattern.compile("DTSTART[^:]*:(.*)");
-                Matcher startDateMatcher = startDatePattern.matcher(fullString);
+                final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                final Pattern startDatePattern = Pattern.compile("DTSTART[^:]*:(.*)");
+                final Matcher startDateMatcher = startDatePattern.matcher(fullString);
                 if (startDateMatcher.find()) {
                     String startDateString = startDateMatcher.group(1);
                     startDateString = startDateString.replace("T", "");
                     startDate = sdf.parse(startDateString);
                     oxEvent.setStartDate(startDate);
                 }
-                Pattern endDatePattern = Pattern.compile("DTEND[^:]*:(.*)");
-                Matcher endDateMatcher = endDatePattern.matcher(fullString);
+                final Pattern endDatePattern = Pattern.compile("DTEND[^:]*:(.*)");
+                final Matcher endDateMatcher = endDatePattern.matcher(fullString);
                 if (endDateMatcher.find()) {
                     String endDateString = endDateMatcher.group(1);
                     endDateString = endDateString.replace("T", "");
-                    Date endDate = sdf.parse(endDateString);
+                    final Date endDate = sdf.parse(endDateString);
                     oxEvent.setEndDate(endDate);
                 }
-                String recurrenceLine = recurrenceMatcher.group(1);
+                final String recurrenceLine = recurrenceMatcher.group(1);
                 LOG.debug("Event title : " + oxEvent.getTitle());
                 LOG.debug("Start Date : " + oxEvent.getStartDate());
                 LOG.debug("End   Date : " + oxEvent.getEndDate());
                 LOG.debug(recurrenceLine);
                 // Frequency information will be set here
-                Pattern frequencyPattern = Pattern.compile("FREQ=([^;]*);");
-                Matcher frequencyMatcher = frequencyPattern.matcher(recurrenceLine);
+                final Pattern frequencyPattern = Pattern.compile("FREQ=([^;]*);");
+                final Matcher frequencyMatcher = frequencyPattern.matcher(recurrenceLine);
                 if (frequencyMatcher.find()) {
-                    String freq = frequencyMatcher.group(1);
+                    final String freq = frequencyMatcher.group(1);
                     if (freq.equals("DAILY")) {
                         oxEvent.setRecurrenceType(Appointment.DAILY);
                         LOG.debug("Frequence : " + freq);
@@ -189,36 +192,37 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                     }
                 }
                 // WeekDay information will be set here
-                Pattern weekDayPattern = Pattern.compile("BYDAY=([A-Z]{2})");
-                Matcher weekDayMatcher = weekDayPattern.matcher(recurrenceLine);
+                final Pattern weekDayPattern = Pattern.compile("BYDAY=([A-Z]{2})");
+                final Matcher weekDayMatcher = weekDayPattern.matcher(recurrenceLine);
                 if (weekDayMatcher.find()) {
-                    String weekDay = weekDayMatcher.group(1);
+                    final String weekDay = weekDayMatcher.group(1);
                     LOG.debug("Weekday : " + weekDay);
-                    if (weekDay.equals("MO"))
+                    if (weekDay.equals("MO")) {
                         oxEvent.setDays(CalendarDataObject.MONDAY);
-                    else if (weekDay.equals("TU"))
+                    } else if (weekDay.equals("TU")) {
                         oxEvent.setDays(CalendarDataObject.TUESDAY);
-                    else if (weekDay.equals("WE"))
+                    } else if (weekDay.equals("WE")) {
                         oxEvent.setDays(CalendarDataObject.WEDNESDAY);
-                    else if (weekDay.equals("TH"))
+                    } else if (weekDay.equals("TH")) {
                         oxEvent.setDays(CalendarDataObject.THURSDAY);
-                    else if (weekDay.equals("FR"))
+                    } else if (weekDay.equals("FR")) {
                         oxEvent.setDays(CalendarDataObject.FRIDAY);
-                    else if (weekDay.equals("SA"))
+                    } else if (weekDay.equals("SA")) {
                         oxEvent.setDays(CalendarDataObject.SATURDAY);
-                    else if (weekDay.equals("SU"))
+                    } else if (weekDay.equals("SU")) {
                         oxEvent.setDays(CalendarDataObject.SUNDAY);
+                    }
                 }
                 // MonthDay information will be set here
-                Pattern monthDayPattern = Pattern.compile("BYMONTHDAY=([0-9]{2})");
-                Matcher monthDayMatcher = monthDayPattern.matcher(recurrenceLine);
+                final Pattern monthDayPattern = Pattern.compile("BYMONTHDAY=([0-9]{2})");
+                final Matcher monthDayMatcher = monthDayPattern.matcher(recurrenceLine);
                 if (monthDayMatcher.find()) {
                     oxEvent.setDayInMonth(Integer.parseInt(monthDayMatcher.group(1)));
                     LOG.debug("MonthDay : " + Integer.parseInt(monthDayMatcher.group(1)));
                 }
                 // interval information will be set here (e.g. "every X days/weeks/months/years")
-                Pattern intervalPattern = Pattern.compile("INTERVAL=([0-9]{1})");
-                Matcher intervalMatcher = intervalPattern.matcher(recurrenceLine);
+                final Pattern intervalPattern = Pattern.compile("INTERVAL=([0-9]{1})");
+                final Matcher intervalMatcher = intervalPattern.matcher(recurrenceLine);
                 if (intervalMatcher.find()) {
                     oxEvent.setInterval(Integer.parseInt(intervalMatcher.group(1)));
                     LOG.debug("Interval : " + Integer.parseInt(intervalMatcher.group(1)));
@@ -228,19 +232,19 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                     LOG.debug("Interval : 1");
                 }
                 // if the series has an end it will be set here
-                Pattern untilPattern = Pattern.compile("UNTIL=([0-9]{4})([0-9]{2})([0-9]{2})");
-                Matcher untilMatcher = untilPattern.matcher(recurrenceLine);
+                final Pattern untilPattern = Pattern.compile("UNTIL=([0-9]{4})([0-9]{2})([0-9]{2})");
+                final Matcher untilMatcher = untilPattern.matcher(recurrenceLine);
                 if (untilMatcher.find()) {
-                    String untilYear = untilMatcher.group(1);
-                    String untilMonth = untilMatcher.group(2);
-                    String untilDay = untilMatcher.group(3);
-                    SimpleDateFormat untilDateFormat = new SimpleDateFormat("yyyyMMdd");
-                    Date untilDate = untilDateFormat.parse(untilYear + untilMonth + untilDay);
+                    final String untilYear = untilMatcher.group(1);
+                    final String untilMonth = untilMatcher.group(2);
+                    final String untilDay = untilMatcher.group(3);
+                    final SimpleDateFormat untilDateFormat = new SimpleDateFormat("yyyyMMdd");
+                    final Date untilDate = untilDateFormat.parse(untilYear + untilMonth + untilDay);
                     oxEvent.setUntil(untilDate);
                     LOG.debug("Until-Date : " + untilDate);
                 }
             }
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             LOG.error(e.getMessage());
         }
     }
@@ -249,11 +253,11 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
         return "";
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 

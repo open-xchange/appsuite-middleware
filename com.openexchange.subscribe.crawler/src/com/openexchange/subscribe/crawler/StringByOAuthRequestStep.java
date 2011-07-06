@@ -62,7 +62,7 @@ import java.util.regex.Pattern;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
-import net.oauth.OXException;
+import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.client.OAuthClient;
@@ -102,12 +102,12 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     
     private Page loginPage;
     
-    private SingleConnectionPool connectionPool = new SingleConnectionPool();
+    private final SingleConnectionPool connectionPool = new SingleConnectionPool();
     
     public StringByOAuthRequestStep() {
     }
 
-    public StringByOAuthRequestStep(String username, String password, String consumerSecret, String consumerKey, String requestUrl, String authorizationUrl, String accessUrl, String callbackUrl, String nameOfUserField, String nameOfPasswordField, String apiRequest) {
+    public StringByOAuthRequestStep(final String username, final String password, final String consumerSecret, final String consumerKey, final String requestUrl, final String authorizationUrl, final String accessUrl, final String callbackUrl, final String nameOfUserField, final String nameOfPasswordField, final String apiRequest) {
         this.username = username;
         this.password = password;
         this.consumerSecret = consumerSecret;
@@ -126,11 +126,11 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
-    public void execute(WebClient webClient) throws OXException {
+    public void execute(final WebClient webClient) throws OXException {
         
         try {
             // Request the OAuth token
-            OAuthClient client = new OAuthClient(new HttpClient4(connectionPool));
+            final OAuthClient client = new OAuthClient(new HttpClient4(connectionPool));
             try {
                 oAuthAccessor = createOAuthAccessor();
                 client.getRequestToken(oAuthAccessor);
@@ -138,13 +138,13 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 tokenSecret = oAuthAccessor.tokenSecret;
 
                 LOG.info("Successfully requested OAuth token");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e);
-            } catch (OXException e) {
+            } catch (final URISyntaxException e) {
                 LOG.error(e);
-            } catch (URISyntaxException e) {
+            } catch (final NullPointerException e) {
                 LOG.error(e);
-            } catch (NullPointerException e) {
+            } catch (final OAuthException e) {
                 LOG.error(e);
             }
 
@@ -152,24 +152,24 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
             String verifier = "";
             try {
                 oAuthAccessor = createOAuthAccessor();
-                Properties paramProps = new Properties();
+                final Properties paramProps = new Properties();
                 paramProps.setProperty("application_name", "Open-Xchange Contact Aggregator");
                 paramProps.setProperty("oauth_token", requestToken);
-                OAuthMessage response = sendRequest(paramProps, oAuthAccessor.consumer.serviceProvider.userAuthorizationURL);
+                final OAuthMessage response = sendRequest(paramProps, oAuthAccessor.consumer.serviceProvider.userAuthorizationURL);
                 LOG.info("Successfully requested authorization-url: "+response.URL);   
 
                 // Fill out form / confirm the access otherwise
-                LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
+                final LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
                 authorizeStep.execute(webClient);
                 loginPage = authorizeStep.getLoginPage();
-                HtmlPage pageWithVerifier = authorizeStep.getOutput();
-                String pageString2 = pageWithVerifier.getWebResponse().getContentAsString();
+                final HtmlPage pageWithVerifier = authorizeStep.getOutput();
+                final String pageString2 = pageWithVerifier.getWebResponse().getContentAsString();
                 LOG.debug("Page contains the verifier : " + pageString2.contains("access-code")); 
                 LOG.debug("Cookie-Problem : " + pageString2.contains("Please make sure you have cookies"));
                 
                 // get the verifier
-                Pattern pattern = Pattern.compile("access-code\">([0-9]*)<");
-                Matcher matcher = pattern.matcher(pageString2);
+                final Pattern pattern = Pattern.compile("access-code\">([0-9]*)<");
+                final Matcher matcher = pattern.matcher(pageString2);
                 if (matcher.find() && matcher.groupCount() == 1){
                     verifier = matcher.group(1);
                     LOG.info("Request authorized, verifier found.");
@@ -178,49 +178,49 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 }
                 LOG.debug("This is the verifier : " + verifier);
                 //openPageInBrowser(pageWithVerifier);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e);
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 LOG.error(e);
-            } catch (OXException e) {
+            } catch (final OAuthException e) {
                 LOG.error(e);
             }
 
             
             // Access and confirm using the verifier
             try {
-                Properties paramProps = new Properties();
+                final Properties paramProps = new Properties();
                 paramProps.setProperty("oauth_token", requestToken);
                 //not in OAuth-Spec and maybe specific to linkedin
                 paramProps.setProperty("oauth_verifier", verifier);
-                OAuthMessage response = sendRequest(paramProps, accessUrl);
+                final OAuthMessage response = sendRequest(paramProps, accessUrl);
                 accessToken = response.getParameter("oauth_token");
                 tokenSecret = response.getParameter("oauth_token_secret");
                 LOG.info("Accessed and conformed using the verifier");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e);
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 LOG.error(e);
-            } catch (OXException e) {
+            } catch (final OAuthException e) {
                 LOG.error(e);
             }
             
             // Execute an API-Request (fully logged in now)        
             try {
-                Properties paramProps = new Properties();
+                final Properties paramProps = new Properties();
                 paramProps.setProperty("oauth_token", accessToken);
 
-                OAuthMessage response = sendRequest(paramProps, apiRequest);
-                String result = response.readBodyAsString();
+                final OAuthMessage response = sendRequest(paramProps, apiRequest);
+                final String result = response.readBodyAsString();
                 LOG.info("Successfully executed an API-Request");
                 executedSuccessfully = true;
                 LOG.debug("This is the result of the whole operation : " + result);
                 output = result;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e);
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 LOG.error(e);
-            } catch (OXException e) {
+            } catch (final OAuthException e) {
                 LOG.error(e);
             }
             
@@ -242,7 +242,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
      * (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setPassword(java.lang.String)
      */
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -250,27 +250,27 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
      * (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setUsername(java.lang.String)
      */
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
     private OAuthAccessor createOAuthAccessor() {
-        OAuthServiceProvider provider = new OAuthServiceProvider(requestUrl, authorizationUrl, accessUrl);
-        OAuthConsumer consumer = new OAuthConsumer(callbackUrl, consumerKey, consumerSecret, provider);
+        final OAuthServiceProvider provider = new OAuthServiceProvider(requestUrl, authorizationUrl, accessUrl);
+        final OAuthConsumer consumer = new OAuthConsumer(callbackUrl, consumerKey, consumerSecret, provider);
         return new OAuthAccessor(consumer);
     }
 
-    private OAuthMessage sendRequest(Map map, String url) throws IOException, URISyntaxException, OXException {
-        List<Map.Entry> params = new ArrayList<Map.Entry>();
-        Iterator it = map.entrySet().iterator();
+    private OAuthMessage sendRequest(final Map map, final String url) throws IOException, URISyntaxException, OAuthException {
+        final List<Map.Entry> params = new ArrayList<Map.Entry>();
+        final Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry p = (Map.Entry) it.next();
+            final Map.Entry p = (Map.Entry) it.next();
             params.add(new OAuth.Parameter((String) p.getKey(), (String) p.getValue()));
         }
-        OAuthAccessor accessor = createOAuthAccessor();
+        final OAuthAccessor accessor = createOAuthAccessor();
         accessor.tokenSecret = tokenSecret;
 
-        OAuthClient client = new OAuthClient(new HttpClient4(connectionPool));
+        final OAuthClient client = new OAuthClient(new HttpClient4(connectionPool));
         return client.invoke(accessor, "GET", url, params);
     }
 
@@ -278,7 +278,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return consumerSecret;
     }
 
-    public void setConsumerSecret(String consumerSecret) {
+    public void setConsumerSecret(final String consumerSecret) {
         this.consumerSecret = consumerSecret;
     }
 
@@ -286,7 +286,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return consumerKey;
     }
 
-    public void setConsumerKey(String consumerKey) {
+    public void setConsumerKey(final String consumerKey) {
         this.consumerKey = consumerKey;
     }
 
@@ -294,7 +294,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return requestUrl;
     }
 
-    public void setRequestUrl(String requestUrl) {
+    public void setRequestUrl(final String requestUrl) {
         this.requestUrl = requestUrl;
     }
 
@@ -302,7 +302,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return authorizationUrl;
     }
 
-    public void setAuthorizationUrl(String authorizationUrl) {
+    public void setAuthorizationUrl(final String authorizationUrl) {
         this.authorizationUrl = authorizationUrl;
     }
 
@@ -310,7 +310,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return accessUrl;
     }
 
-    public void setAccessUrl(String accessUrl) {
+    public void setAccessUrl(final String accessUrl) {
         this.accessUrl = accessUrl;
     }
 
@@ -318,7 +318,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return callbackUrl;
     }
 
-    public void setCallbackUrl(String callbackUrl) {
+    public void setCallbackUrl(final String callbackUrl) {
         this.callbackUrl = callbackUrl;
     }
 
@@ -326,7 +326,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return requestToken;
     }
 
-    public void setRequestToken(String requestToken) {
+    public void setRequestToken(final String requestToken) {
         this.requestToken = requestToken;
     }
 
@@ -334,7 +334,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return tokenSecret;
     }
 
-    public void setTokenSecret(String tokenSecret) {
+    public void setTokenSecret(final String tokenSecret) {
         this.tokenSecret = tokenSecret;
     }
 
@@ -352,7 +352,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     }
 
     
-    public void setNameOfUserField(String nameOfUserField) {
+    public void setNameOfUserField(final String nameOfUserField) {
         this.nameOfUserField = nameOfUserField;
     }
 
@@ -362,7 +362,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     }
 
     
-    public void setNameOfPasswordField(String nameOfPasswordField) {
+    public void setNameOfPasswordField(final String nameOfPasswordField) {
         this.nameOfPasswordField = nameOfPasswordField;
     }
 
@@ -372,7 +372,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     }
 
     
-    public void setApiRequest(String apiRequest) {
+    public void setApiRequest(final String apiRequest) {
         this.apiRequest = apiRequest;
     }
 
@@ -385,14 +385,14 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
         private DefaultHttpClient client;
 
-        public HttpClient getHttpClient(URL server) {
+        public HttpClient getHttpClient(final URL server) {
             if(client != null) {
                 return client;
             }
             client = new DefaultHttpClient();
-            ClientConnectionManager mgr = client.getConnectionManager();
+            final ClientConnectionManager mgr = client.getConnectionManager();
             if (!(mgr instanceof ThreadSafeClientConnManager)) {
-                HttpParams params = client.getParams();
+                final HttpParams params = client.getParams();
                 client = new DefaultHttpClient(new ThreadSafeClientConnManager(params, mgr.getSchemeRegistry()), params);
             }
             
