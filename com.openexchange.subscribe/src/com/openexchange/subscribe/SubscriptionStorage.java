@@ -51,6 +51,7 @@ package com.openexchange.subscribe;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -58,21 +59,21 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface SubscriptionStorage {
 
-    public void rememberSubscription(Subscription subscription) throws SubscriptionException;
+    public void rememberSubscription(Subscription subscription) throws OXException;
 
-    public void forgetSubscription(Subscription subscription) throws SubscriptionException;
+    public void forgetSubscription(Subscription subscription) throws OXException;
 
-    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws SubscriptionException;
+    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws OXException;
 
-    public Subscription getSubscription(Context ctx, int id) throws SubscriptionException;
+    public Subscription getSubscription(Context ctx, int id) throws OXException;
 
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws SubscriptionException;
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws OXException;
 
-    public void updateSubscription(Subscription subscription) throws SubscriptionException;
+    public void updateSubscription(Subscription subscription) throws OXException;
 
-    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws SubscriptionException;
+    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws OXException;
 
-    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws SubscriptionException;
+    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws OXException;
     
-    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws SubscriptionException;
+    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws OXException;
 }

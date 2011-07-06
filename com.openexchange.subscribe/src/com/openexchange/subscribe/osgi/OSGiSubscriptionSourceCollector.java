@@ -55,7 +55,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceCollector;
@@ -69,11 +69,11 @@ import com.openexchange.subscribe.SubscriptionSourceCollector;
  */
 public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector implements ServiceTrackerCustomizer {
 
-    private ServiceTracker tracker;
-    private BundleContext context;
+    private final ServiceTracker tracker;
+    private final BundleContext context;
     private boolean grabbedAll;
 
-    public OSGiSubscriptionSourceCollector(BundleContext context) throws InvalidSyntaxException {
+    public OSGiSubscriptionSourceCollector(final BundleContext context) throws InvalidSyntaxException {
         this.context = context;
         this.tracker = new ServiceTracker(context,SubscribeService.class.getName(), this);
         tracker.open();
@@ -84,14 +84,14 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
             return;
         }
         try {
-            ServiceReference[] serviceReferences = context.getAllServiceReferences(SubscribeService.class.getName(), null);
+            final ServiceReference[] serviceReferences = context.getAllServiceReferences(SubscribeService.class.getName(), null);
             if(serviceReferences != null) {
-                for (ServiceReference reference : serviceReferences) {
+                for (final ServiceReference reference : serviceReferences) {
                     addingService(reference);
                 }
             }
             grabbedAll = true;
-        } catch (InvalidSyntaxException x) {
+        } catch (final InvalidSyntaxException x) {
             // IGNORE, we didn't specify a filter, so won't happen
         }
     }
@@ -100,40 +100,40 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
         this.tracker.close();
     }
     
-    public Object addingService(ServiceReference reference) {
-        SubscribeService subscribeService = (SubscribeService) context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final SubscribeService subscribeService = (SubscribeService) context.getService(reference);
         addSubscribeService(subscribeService);
         return subscribeService;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // IGNORE
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         removeSubscribeService(((SubscribeService) service).getSubscriptionSource().getId());
     }
 
     @Override
-    public SubscriptionSource getSource(com.openexchange.groupware.contexts.Context context, int subscriptionId) throws AbstractOXException {
+    public SubscriptionSource getSource(final com.openexchange.groupware.contexts.Context context, final int subscriptionId) throws OXException {
         grabAll();
         return super.getSource(context, subscriptionId);
     }
 
     @Override
-    public SubscriptionSource getSource(String identifier) {
+    public SubscriptionSource getSource(final String identifier) {
         grabAll();
         return super.getSource(identifier);
     }
 
     @Override
-    public List<SubscriptionSource> getSources(int folderModule) {
+    public List<SubscriptionSource> getSources(final int folderModule) {
         grabAll();
         return super.getSources(folderModule);
     }
 
     @Override
-    public boolean knowsSource(String identifier) {
+    public boolean knowsSource(final String identifier) {
         grabAll();
         return super.knowsSource(identifier);
     }

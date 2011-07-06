@@ -50,7 +50,7 @@
 package com.openexchange.subscribe.internal;
 
 import java.util.Collection;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 
@@ -65,18 +65,18 @@ public interface FolderUpdaterStrategy<T> {
 
     boolean handles(FolderObject folder);
 
-    Object startSession(TargetFolderDefinition target) throws AbstractOXException;
+    Object startSession(TargetFolderDefinition target) throws OXException;
 
-    Collection<T> getData(TargetFolderDefinition target, Object session) throws AbstractOXException;
+    Collection<T> getData(TargetFolderDefinition target, Object session) throws OXException;
 
-    void update(T original, T update, Object session) throws AbstractOXException;
+    void update(T original, T update, Object session) throws OXException;
 
-    void save(T newElement, Object session) throws AbstractOXException;
+    void save(T newElement, Object session) throws OXException;
 
-    int calculateSimilarityScore(T original, T candidate, Object session) throws AbstractOXException;
+    int calculateSimilarityScore(T original, T candidate, Object session) throws OXException;
 
-    int getThreshold(Object session) throws AbstractOXException;
+    int getThreshold(Object session) throws OXException;
 
-    void closeSession(Object session) throws AbstractOXException;
+    void closeSession(Object session) throws OXException;
 
 }

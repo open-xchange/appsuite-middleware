@@ -54,14 +54,12 @@ import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.schema.Tables.subscriptions;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
-import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
 
@@ -72,23 +70,23 @@ import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
  */
 public class SubscriptionUserDeleteListenerTest extends AbstractSubscriptionSQLStorageTest {
 
-    public void testShouldDeleteSubscriptionOnDeletionOfUser() throws SubscriptionException, DBPoolingException, OXException, SQLException {
-        Connection writeConnection = getDBProvider().getWriteConnection(ctx);
+    public void testShouldDeleteSubscriptionOnDeletionOfUser() throws OXException, OXException, SQLException {
+        final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
 
-        SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener() {
+        final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener() {
             @Override
-            protected SubscriptionStorage getStorage(Connection writeCon) {
+            protected SubscriptionStorage getStorage(final Connection writeCon) {
                 return storage;
             }
         };
 
-        MockUser user = new MockUser(userId);
+        final MockUser user = new MockUser(userId);
 
         storage.rememberSubscription(subscription);
-        DeleteEvent event = new DeleteEvent(user, userId, DeleteEvent.TYPE_USER, ctx);
+        final DeleteEvent event = new DeleteEvent(user, userId, DeleteEvent.TYPE_USER, ctx);
         listener.deletePerformed(event, null, writeConnection);
 
-        SELECT select = new SELECT(ASTERISK).FROM(subscriptions).WHERE(
+        final SELECT select = new SELECT(ASTERISK).FROM(subscriptions).WHERE(
             new EQUALS("cid", I(ctx.getContextId())).AND(new EQUALS("user_id", I(userId))));
         assertNoResult(new StatementBuilder().buildCommand(select));
     }

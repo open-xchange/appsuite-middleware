@@ -57,7 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -80,11 +80,11 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
     private static final int[] COMPARISON_COLUMNS = {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.UID, Appointment.NOTE, Appointment.LAST_MODIFIED, Appointment.SEQUENCE };
 
-    public int calculateSimilarityScore(CalendarDataObject original, CalendarDataObject candidate, Object session) throws AbstractOXException {
+    public int calculateSimilarityScore(final CalendarDataObject original, final CalendarDataObject candidate, final Object session) throws OXException {
         int score = 0;
         // A score of 10 is sufficient for a match        
         // If the UID is the same we can assume it is the same event. Please note the UID is assumed to have been saved with contextid and folder-id as prefix here
-        String candidatesUID = getPrefixForUID(original) + candidate.getUid();
+        final String candidatesUID = getPrefixForUID(original) + candidate.getUid();
         if ((isset(original.getUid()) || isset(candidate.getUid())) && eq(original.getUid(), candidatesUID)) {
             score += 10;
         }
@@ -104,11 +104,11 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         return score;
     }
 
-    private boolean isset(String s) {
+    private boolean isset(final String s) {
         return s == null || s.length() > 0;
     }
 
-    protected boolean eq(Object o1, Object o2) {
+    protected boolean eq(final Object o1, final Object o2) {
         if (o1 == null || o2 == null) {
             return false;
         } else {
@@ -116,62 +116,62 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         }
     }
 
-    public void closeSession(Object session) throws AbstractOXException {
+    public void closeSession(final Object session) throws OXException {
 
     }
 
-    public Collection<CalendarDataObject> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
-        CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
+    public Collection<CalendarDataObject> getData(final TargetFolderDefinition target, final Object session) throws OXException {
+        final CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
 
-        int folderId = target.getFolderIdAsInt();
+        final int folderId = target.getFolderIdAsInt();
         // get all the appointments, from the beginning of time (1970) till the end of time
-        Date startDate = new Date(0);
-        Date endDate = new Date(Long.MAX_VALUE);
+        final Date startDate = new Date(0);
+        final Date endDate = new Date(Long.MAX_VALUE);
         SearchIterator<Appointment> appointmentsInFolder;
-        List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
+        final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
         try {
             appointmentsInFolder = calendarSql.getAppointmentsBetweenInFolder(folderId, COMPARISON_COLUMNS, startDate, endDate, 0, Order.ASCENDING);
 
             while (appointmentsInFolder.hasNext()) {
                 retval.add((CalendarDataObject) appointmentsInFolder.next());
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             e.printStackTrace();
         }
 
         return retval;
     }
 
-    public int getThreshold(Object session) throws AbstractOXException {
+    public int getThreshold(final Object session) throws OXException {
         return 9;
     }
 
-    public boolean handles(FolderObject folder) {
+    public boolean handles(final FolderObject folder) {
         return folder.getModule() == FolderObject.CALENDAR;
     }
 
-    public void save(CalendarDataObject newElement, Object session) throws AbstractOXException {
-        CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
-        TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
+    public void save(final CalendarDataObject newElement, final Object session) throws OXException {
+        final CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
+        final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
         newElement.setContext(target.getContext());
         addPrefixToUID(newElement);  
         calendarSql.insertAppointmentObject(newElement);
     }
 
-    private Object getFromSession(int key, Object session) {
+    private Object getFromSession(final int key, final Object session) {
         return ((Map<Integer, Object>) session).get(key);
     }
 
-    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
-        Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
+    public Object startSession(final TargetFolderDefinition target) throws OXException {
+        final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         userInfo.put(SQL_INTERFACE, new CalendarSql(new TargetFolderSession(target)));
         userInfo.put(TARGET, target);
         return userInfo;
     }
 
-    public void update(CalendarDataObject original, CalendarDataObject update, Object session) throws AbstractOXException {
-        CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
+    public void update(final CalendarDataObject original, final CalendarDataObject update, final Object session) throws OXException {
+        final CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
 
         update.setParentFolderID(original.getParentFolderID());
         update.setObjectID(original.getObjectID());
@@ -182,11 +182,11 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         calendarSql.updateAppointmentObject(update, original.getParentFolderID(), original.getLastModified());
     }
     
-    private void addPrefixToUID (CalendarDataObject cdo){        
+    private void addPrefixToUID (final CalendarDataObject cdo){        
                 cdo.setUid(getPrefixForUID(cdo) + cdo.getUid());            
     }
 
-    private String getPrefixForUID (CalendarDataObject cdo){
+    private String getPrefixForUID (final CalendarDataObject cdo){
         if (null != cdo.getUid()){
             if (! cdo.getUid().equals("")){
                     return Integer.toString(cdo.getContextID() + cdo.getParentFolderID());

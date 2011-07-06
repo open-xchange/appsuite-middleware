@@ -55,7 +55,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoveryService;
 
@@ -68,16 +68,16 @@ import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoverySer
  */
 public class CompositeSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private List<SubscriptionSourceDiscoveryService> services = new ArrayList<SubscriptionSourceDiscoveryService>();
+    private final List<SubscriptionSourceDiscoveryService> services = new ArrayList<SubscriptionSourceDiscoveryService>();
     
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscriptionSourceDiscoveryService#getSource(java.lang.String)
      */
-    public SubscriptionSource getSource(String identifier) {
+    public SubscriptionSource getSource(final String identifier) {
         SubscriptionSource current = null;
-        for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
+        for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
             if(subDiscoverer.knowsSource(identifier)) {
-                SubscriptionSource source = subDiscoverer.getSource(identifier);
+                final SubscriptionSource source = subDiscoverer.getSource(identifier);
                 if(current == null || current.getPriority() < source.getPriority()) {
                     current = source;
                 }
@@ -86,21 +86,21 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         return current;
     }
 
-    public List<SubscriptionSource> getSources(int folderModule) {
-        Map<String, SubscriptionSource> allSources = new HashMap<String, SubscriptionSource>();
-        for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
-            List<SubscriptionSource> sources = subDiscoverer.getSources(folderModule);
-            for (SubscriptionSource subscriptionSource : sources) {
-                SubscriptionSource previousSource = allSources.get(subscriptionSource.getId());
+    public List<SubscriptionSource> getSources(final int folderModule) {
+        final Map<String, SubscriptionSource> allSources = new HashMap<String, SubscriptionSource>();
+        for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
+            final List<SubscriptionSource> sources = subDiscoverer.getSources(folderModule);
+            for (final SubscriptionSource subscriptionSource : sources) {
+                final SubscriptionSource previousSource = allSources.get(subscriptionSource.getId());
                 if(previousSource == null || previousSource.getPriority() < subscriptionSource.getPriority()) {
                     allSources.put(subscriptionSource.getId(), subscriptionSource);
                 }
             }
         }
-        List<SubscriptionSource> sources = new ArrayList<SubscriptionSource>(allSources.values());
+        final List<SubscriptionSource> sources = new ArrayList<SubscriptionSource>(allSources.values());
         Collections.sort(sources, new Comparator<SubscriptionSource>() {
 
-            public int compare(SubscriptionSource o1, SubscriptionSource o2) {
+            public int compare(final SubscriptionSource o1, final SubscriptionSource o2) {
                 if(o1.getDisplayName() != null && o2.getDisplayName() != null) {
                     return o1.getDisplayName().compareTo(o2.getDisplayName());
                 } else {
@@ -116,8 +116,8 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         return getSources(-1);
     }
 
-    public boolean knowsSource(String identifier) {
-        for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
+    public boolean knowsSource(final String identifier) {
+        for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
             if(subDiscoverer.knowsSource(identifier)) {
                 return true;
             }
@@ -125,17 +125,17 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         return false;
     }
     
-    public void addSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
+    public void addSubscriptionSourceDiscoveryService(final SubscriptionSourceDiscoveryService service) {
         services.add(service);
     }
     
-    public void removeSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
+    public void removeSubscriptionSourceDiscoveryService(final SubscriptionSourceDiscoveryService service) {
         services.remove(service);
     }
 
-    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
-        for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
-            SubscriptionSource source = subDiscoverer.getSource(context, subscriptionId);
+    public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
+        for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
+            final SubscriptionSource source = subDiscoverer.getSource(context, subscriptionId);
             if(source != null) {
                 return source;
             }
@@ -147,7 +147,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         services.clear();
     }
 
-    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+    public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return new FilteredSubscriptionSourceDiscoveryService(user, context, this);
     }
 

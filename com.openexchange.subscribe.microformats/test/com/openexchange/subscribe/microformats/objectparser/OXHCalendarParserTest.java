@@ -56,7 +56,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import junit.framework.TestCase;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -133,7 +133,7 @@ public class OXHCalendarParserTest extends TestCase {
         "</div>";
     }
     
-    public void testShouldParseWhenStartingWithVEvent() throws SubscriptionException, ParseException{
+    public void testShouldParseWhenStartingWithVEvent() throws OXException, ParseException{
         String html = "<span class=\"vevent\">"+
             "<span class=\"summary\">The microformats.org site was launched</span>"+
             "on <span class=\"dtstart\">2005-06-20</span>"+ 
@@ -149,7 +149,7 @@ public class OXHCalendarParserTest extends TestCase {
         assertEquals("Date should match", OXHCalendarParser.parseDate("2005-06-20"), app.getStartDate());
     }
     
-    public void testShouldParseWhenHavingNestedVCalendarAndVEvent() throws SubscriptionException{
+    public void testShouldParseWhenHavingNestedVCalendarAndVEvent() throws OXException{
         String html = "<div class=\"vCalendar\">"
             +fullAppointment
             +fullAppointment.replaceFirst("hcalendar-My-hCalendar-event", "hcalendar-My-other-hCalendar-event")

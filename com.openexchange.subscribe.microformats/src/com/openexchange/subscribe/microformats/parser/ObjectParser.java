@@ -51,7 +51,7 @@ package com.openexchange.subscribe.microformats.parser;
 
 import java.io.Reader;
 import java.util.Collection;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -61,5 +61,5 @@ import com.openexchange.subscribe.SubscriptionException;
  *
  */
 public interface ObjectParser<T> {
-    public Collection<T> parse(Reader html) throws SubscriptionException;
+    public Collection<T> parse(Reader html) throws OXException;
 }

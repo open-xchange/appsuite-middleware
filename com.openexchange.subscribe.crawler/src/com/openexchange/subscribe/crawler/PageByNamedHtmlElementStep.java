@@ -57,7 +57,7 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 
@@ -89,7 +89,7 @@ public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
     }
 
     @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) throws OXException {
         final List<HtmlElement> list = input.getHtmlElementsByName(buttonName);
         for (final HtmlElement el : list){
             try {

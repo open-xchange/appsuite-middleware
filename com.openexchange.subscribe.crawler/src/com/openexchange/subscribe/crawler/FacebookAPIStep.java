@@ -68,7 +68,7 @@ import com.facebook.api.schema.UsersGetInfoResponse;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 import com.openexchange.tools.versit.converter.ConverterException;
@@ -96,7 +96,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
     }
 
     @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) throws OXException {
         output = new Contact[0];
         final ArrayList<Contact> contactObjects = new ArrayList<Contact>();
 

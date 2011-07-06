@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.CompositeSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -72,16 +72,16 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  */
 public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerCustomizer, SubscriptionSourceDiscoveryService {
 
-    private BundleContext context;
-    private ServiceTracker tracker;
-    private List<ServiceReference> references = new ArrayList<ServiceReference>();
+    private final BundleContext context;
+    private final ServiceTracker tracker;
+    private final List<ServiceReference> references = new ArrayList<ServiceReference>();
     
-    private CompositeSubscriptionSourceDiscoveryService delegate = new CompositeSubscriptionSourceDiscoveryService();
+    private final CompositeSubscriptionSourceDiscoveryService delegate = new CompositeSubscriptionSourceDiscoveryService();
     
     
-    private Set<SubscriptionSourceDiscoveryService> blacklist = new HashSet<SubscriptionSourceDiscoveryService>();
+    private final Set<SubscriptionSourceDiscoveryService> blacklist = new HashSet<SubscriptionSourceDiscoveryService>();
     
-    public OSGiSubscriptionSourceDiscoveryCollector(BundleContext context) {
+    public OSGiSubscriptionSourceDiscoveryCollector(final BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), this);
         tracker.open();
@@ -89,14 +89,14 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     
     public void close() {
         delegate.clear();
-        for(ServiceReference reference : references) {
+        for(final ServiceReference reference : references) {
             context.ungetService(reference);
         }
         tracker.close();
     }
     
-    public Object addingService(ServiceReference reference) {
-        SubscriptionSourceDiscoveryService service = (SubscriptionSourceDiscoveryService) context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final SubscriptionSourceDiscoveryService service = (SubscriptionSourceDiscoveryService) context.getService(reference);
         if(blacklist.contains(service) || service.getClass() == getClass()) {
             context.ungetService(reference);
             return service;
@@ -105,22 +105,22 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
         return service;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
 
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         delegate.removeSubscriptionSourceDiscoveryService((SubscriptionSourceDiscoveryService) service);
         references.remove(reference);
         context.ungetService(reference);
     }
     
   
-    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
+    public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         return delegate.getSource(context, subscriptionId);
     }
 
-    public SubscriptionSource getSource(String identifier) {
+    public SubscriptionSource getSource(final String identifier) {
         return delegate.getSource(identifier);
     }
 
@@ -128,23 +128,23 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
         return delegate.getSources();
     }
 
-    public List<SubscriptionSource> getSources(int folderModule) {
+    public List<SubscriptionSource> getSources(final int folderModule) {
         return delegate.getSources(folderModule);
     }
 
-    public boolean knowsSource(String identifier) {
+    public boolean knowsSource(final String identifier) {
         return delegate.knowsSource(identifier);
     }
     
-    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+    public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return delegate.filter(user, context);
     }
 
-    public void addSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
+    public void addSubscriptionSourceDiscoveryService(final SubscriptionSourceDiscoveryService service) {
         delegate.addSubscriptionSourceDiscoveryService(service);
     }
 
-    public void removeSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
+    public void removeSubscriptionSourceDiscoveryService(final SubscriptionSourceDiscoveryService service) {
         delegate.removeSubscriptionSourceDiscoveryService(service);
     }
     

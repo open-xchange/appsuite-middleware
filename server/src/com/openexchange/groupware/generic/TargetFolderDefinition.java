@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.generic;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -71,7 +71,7 @@ public class TargetFolderDefinition {
         
     }
     
-    public TargetFolderDefinition(String folderId, int userId, Context context) {
+    public TargetFolderDefinition(final String folderId, final int userId, final Context context) {
         this.folderId = folderId;
         this.userId = userId;
         this.context = context;
@@ -82,21 +82,21 @@ public class TargetFolderDefinition {
         return folderId;
     }
 
-    public int getFolderIdAsInt() throws AbstractOXException {
+    public int getFolderIdAsInt() throws OXException {
         int retval = -1;
         try {
             retval = Integer.parseInt(folderId);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw AjaxExceptionCodes.InvalidParameterValue.create( folderId);
         }
         return retval;
     }
 
-    public void setFolderId(String folderId) {
+    public void setFolderId(final String folderId) {
         this.folderId = folderId;
     }
 
-    public void setFolderId(int folderId) {
+    public void setFolderId(final int folderId) {
         setFolderId(String.valueOf(folderId));
     }
     
@@ -108,7 +108,7 @@ public class TargetFolderDefinition {
         return context;
     }
 
-    public void setContext(Context context) {
+    public void setContext(final Context context) {
         this.context = context;
     }
 
@@ -116,7 +116,7 @@ public class TargetFolderDefinition {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(final int userId) {
         this.userId = userId;
     }
 

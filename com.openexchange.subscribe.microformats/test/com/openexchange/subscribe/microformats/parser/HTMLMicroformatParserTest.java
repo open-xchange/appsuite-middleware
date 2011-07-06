@@ -51,7 +51,7 @@ package com.openexchange.subscribe.microformats.parser;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -61,7 +61,7 @@ import com.openexchange.subscribe.SubscriptionException;
  *
  */
 public class HTMLMicroformatParserTest extends ParserTest {
-    public void testIncorrectXML() throws SubscriptionException {
+    public void testIncorrectXML() throws OXException {
         String text = "<html><head><meta attr=\"value\"></head><body><div class=\"ox_contact\"><span class=\"ox_givenName\">Bla</span>&</div>";
         List<Map<String, String>> result = parse(text);
     
@@ -72,7 +72,7 @@ public class HTMLMicroformatParserTest extends ParserTest {
         assertEquals("Bla", first.get("ox_givenName"));
     }
 
-    protected List<Map<String, String>> parse(String text) throws SubscriptionException {
+    protected List<Map<String, String>> parse(String text) throws OXException {
         HTMLMicroformatParser microformatParser = new HTMLMicroformatParser();
         microformatParser.addContainerElement("ox_contact");
         microformatParser.addAttributePrefix("ox_");

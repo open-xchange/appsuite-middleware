@@ -56,7 +56,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.exception.OXException;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.facebook.FacebookSubscribeService;
 
 
@@ -78,7 +78,7 @@ public class FacebookSubscriptionsOAuthAccountDeleteListener implements OAuthAcc
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         try {
             fbService.deleteAllUsingOAuthAccount(getContext(cid), id);
-        } catch (SubscriptionException e) {
+        } catch (OXException e) {
             throw new OXException(e);
         }
     }

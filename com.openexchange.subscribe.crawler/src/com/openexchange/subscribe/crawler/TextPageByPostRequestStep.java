@@ -60,7 +60,7 @@ import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 
@@ -87,7 +87,7 @@ public class TextPageByPostRequestStep extends AbstractStep<TextPage, String> {
     }
     
     @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) throws OXException {
         try {
             WebRequestSettings requestSettings = new WebRequestSettings(new URL(url), HttpMethod.POST);
 

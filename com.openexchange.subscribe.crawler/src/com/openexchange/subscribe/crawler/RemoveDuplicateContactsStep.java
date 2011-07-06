@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 
@@ -74,7 +74,7 @@ public class RemoveDuplicateContactsStep extends AbstractStep<Contact[], Contact
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
-    public void execute(WebClient webClient) throws SubscriptionException {
+    public void execute(WebClient webClient) throws OXException {
         ArrayList<Contact> outputList = new ArrayList<Contact>();
         for (Contact contact : input){
             String hash = getUniqueHash(contact);

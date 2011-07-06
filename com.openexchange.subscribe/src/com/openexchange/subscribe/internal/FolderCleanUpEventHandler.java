@@ -61,11 +61,10 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionStorage;
 
 
@@ -117,7 +116,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
             for (final Subscription subscription : subscriptions) {
                 storage.forgetSubscription(subscription);
             }
-        } catch (final SubscriptionException e) {
+        } catch (final OXException e) {
             LOG.error("Could not delete all dependent subscriptions: " + e.getMessage(), e);
         }
 

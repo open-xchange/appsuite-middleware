@@ -61,7 +61,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 
@@ -82,7 +82,7 @@ public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
         
     }
     
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) throws OXException {
         HtmlForm theForm = null;
         for (final HtmlForm form : input.getForms()) {
             Pattern pattern = Pattern.compile(actionOfForm);

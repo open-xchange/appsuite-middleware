@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 import com.openexchange.subscribe.crawler.internal.Mappings;
@@ -95,7 +95,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
-    public void execute(WebClient webClient) throws SubscriptionException {
+    public void execute(WebClient webClient) throws OXException {
         final List<Contact> contactObjects = new ArrayList<Contact>();
             try {
                 final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());                

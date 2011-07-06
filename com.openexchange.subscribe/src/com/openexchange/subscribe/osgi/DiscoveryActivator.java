@@ -62,7 +62,6 @@ import com.openexchange.context.osgi.WhiteboardContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
@@ -75,7 +74,6 @@ import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.database.SubscriptionUserDeleteListener;
@@ -105,8 +103,6 @@ public class DiscoveryActivator implements BundleActivator {
 
     private WhiteboardContextService contextService;
 
-    private ComponentRegistration componentRegistration;
-
     private WhiteboardGenericConfigurationStorageService genconfStorage;
 
     private Whiteboard whiteboard;
@@ -133,9 +129,6 @@ public class DiscoveryActivator implements BundleActivator {
 
         FolderFieldActivator.DISCOVERY = discoveryCollector;
 
-        componentRegistration =
-            new ComponentRegistration(context, "SUB", "com.openexchange.subscribe", SubscriptionErrorMessage.EXCEPTIONS);
-
         final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
@@ -161,13 +154,13 @@ public class DiscoveryActivator implements BundleActivator {
         AbstractSubscribeService.CRYPTO = whiteboard.getService(CryptoService.class);
         AbstractSubscribeService.FOLDERS = folders;
         
-        SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
+        final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
         listener.setStorageService(genconfStorage);
         listener.setDiscoveryService(discoveryCollector);
         
         context.registerService(DeleteListener.class.getName(), listener, null);        
         
-        SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
+        final SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
         context.registerService(SecretConsistencyCheck.class.getName(), secretHandling, null);
         context.registerService(SecretMigrator.class.getName(), secretHandling, null);
         
@@ -178,8 +171,6 @@ public class DiscoveryActivator implements BundleActivator {
         whiteboard = null;
         genconfStorage.close();
         genconfStorage = null;
-        componentRegistration.unregister();
-        componentRegistration = null;
         collector.close();
         collector = null;
         contextService.close();

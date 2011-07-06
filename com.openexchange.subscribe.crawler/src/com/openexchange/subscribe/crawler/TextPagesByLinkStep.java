@@ -58,7 +58,7 @@ import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
@@ -86,7 +86,7 @@ public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{
     }
 
     @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) throws OXException {
         try {
 
             int tempOffset = 0;

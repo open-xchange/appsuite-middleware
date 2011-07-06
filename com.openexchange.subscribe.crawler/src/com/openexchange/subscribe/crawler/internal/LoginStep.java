@@ -50,7 +50,7 @@
 package com.openexchange.subscribe.crawler.internal;
 
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link LoginStep}
@@ -59,7 +59,7 @@ import com.openexchange.subscribe.SubscriptionException;
  */
 public interface LoginStep{
 
-    public void execute(WebClient webClient) throws SubscriptionException;
+    public void execute(WebClient webClient) throws OXException;
 
     public void setUsername(String username);
 

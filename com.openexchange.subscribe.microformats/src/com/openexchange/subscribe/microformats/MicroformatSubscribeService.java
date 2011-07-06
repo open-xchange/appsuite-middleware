@@ -60,7 +60,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.datasources.OXMFDataSource;
 import com.openexchange.subscribe.microformats.parser.ObjectParser;
@@ -87,12 +87,12 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     private List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
 
-    public Collection getContent(Subscription subscription) throws SubscriptionException {
+    public Collection getContent(Subscription subscription) throws OXException {
         Reader htmlData = mfSource.getData(subscription);
         return getContent(htmlData);
     }
 
-    public Collection getContent(Reader htmlData) throws SubscriptionException {
+    public Collection getContent(Reader htmlData) throws OXException {
         String data = null;
 
         if (!objectParsers.isEmpty()) {
@@ -117,7 +117,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         objectParsers.add(parser);
     }
 
-    private String read(Reader htmlData) throws SubscriptionException {
+    private String read(Reader htmlData) throws OXException {
         StringBuilder builder = new StringBuilder();
         BufferedReader reader = null;
         try {
@@ -201,7 +201,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
-    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
+    public void modifyOutgoing(Subscription subscription) throws OXException {
         subscription.setDisplayName(getDisplayName(subscription));
     }
 

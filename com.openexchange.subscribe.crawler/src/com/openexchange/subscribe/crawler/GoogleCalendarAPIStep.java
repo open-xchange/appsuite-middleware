@@ -68,7 +68,7 @@ import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
@@ -88,7 +88,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
      * @see com.openexchange.subscribe.crawler.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
-    public void execute(WebClient webClient) throws SubscriptionException {
+    public void execute(WebClient webClient) throws OXException {
         // Create a CalenderService and authenticate
         CalendarService myService = new CalendarService("com.openexchange");
         try {

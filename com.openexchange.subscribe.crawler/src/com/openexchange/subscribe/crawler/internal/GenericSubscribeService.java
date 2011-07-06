@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.crawler.Workflow;
 import com.openexchange.subscribe.crawler.osgi.Activator;
@@ -114,7 +114,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         return folderModule == this.module;
     }
 
-    public Collection getContent(final Subscription subscription) throws SubscriptionException {
+    public Collection getContent(final Subscription subscription) throws OXException {
 
         final Workflow workflow = getWorkflow();
         workflow.setSubscription(subscription);
@@ -138,7 +138,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         Workflow workflow = new Workflow();
         try {
             workflow = WorkflowFactory.createWorkflowByString(workflowString);
-        } catch (final SubscriptionException e) {
+        } catch (final OXException e) {
         }
         workflow.setActivator(activator);
         
@@ -146,14 +146,14 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
-    public void modifyIncoming(final Subscription subscription) throws SubscriptionException {
+    public void modifyIncoming(final Subscription subscription) throws OXException {
         super.modifyIncoming(subscription);
         final Map<String, Object> configuration = subscription.getConfiguration();
         encrypt(subscription.getSecret(), configuration, PASSWORD);
     }
 
     @Override
-    public void modifyOutgoing(final Subscription subscription) throws SubscriptionException {
+    public void modifyOutgoing(final Subscription subscription) throws OXException {
         super.modifyOutgoing(subscription);
         final Map<String, Object> configuration = subscription.getConfiguration();
         decrypt(subscription.getSecret(), configuration, PASSWORD);

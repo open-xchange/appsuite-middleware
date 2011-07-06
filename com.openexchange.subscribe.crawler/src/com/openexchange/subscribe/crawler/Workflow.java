@@ -67,7 +67,7 @@ import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.HasLoginPage;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 import com.openexchange.subscribe.crawler.internal.LogoutStep;
@@ -112,7 +112,7 @@ public class Workflow {
     }
 
     // Convenience method for setting username and password after the workflow was created
-    public Object[] execute(final String username, final String password) throws SubscriptionException {
+    public Object[] execute(final String username, final String password) throws OXException {
         for (final Step currentStep : steps) {
             if (debuggingEnabled) {
                 currentStep.setDebuggingEnabled(true);
@@ -129,7 +129,7 @@ public class Workflow {
         return execute();
     }
 
-    public Object[] execute() throws SubscriptionException {
+    public Object[] execute() throws OXException {
 
         // emulate a specific browser
         BrowserVersion browser = BrowserVersion.FIREFOX_3;

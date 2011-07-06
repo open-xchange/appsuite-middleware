@@ -55,9 +55,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
@@ -79,7 +77,7 @@ public class SubscriptionUserDeleteListener implements DeleteListener {
             return;
         try {
             getStorage(writeCon).deleteAllSubscriptionsForUser(event.getId(), event.getContext());
-        } catch (SubscriptionException e) {
+        } catch (OXException e) {
             throw new OXException(e);
         }
     }

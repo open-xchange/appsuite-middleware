@@ -57,7 +57,7 @@ import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
@@ -75,7 +75,7 @@ public class PageByUrlAndParameterStep extends AbstractStep<Page, String> {
 
     }
 
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) throws OXException {
         try {
             LOG.debug("Page to call : " + url + input);
             output = webClient.getPage(url + input);

@@ -54,9 +54,8 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -78,42 +77,44 @@ public class ContactHandler {
      * @throws OXException
      * @throws OXException
      */
-    protected void storeContacts(Session session, int folderId, Collection<Contact> updatedContacts) throws AbstractOXException{
+    protected void storeContacts(final Session session, final int folderId, final Collection<Contact> updatedContacts) throws OXException{
        
         
-        RdbContactSQLImpl storage = new RdbContactSQLImpl(session);
+        final RdbContactSQLImpl storage = new RdbContactSQLImpl(session);
         
-        for(Contact updatedContact: updatedContacts){
-            SearchIterator<Contact> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, null, Contact.ALL_COLUMNS);
+        for(final Contact updatedContact: updatedContacts){
+            final SearchIterator<Contact> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, null, Contact.ALL_COLUMNS);
             boolean foundMatch = false;
             while( existingContacts.hasNext() && ! foundMatch ){
                 Contact existingContact = null;
                 try {
                     existingContact = existingContacts.next();
-                } catch (SearchIteratorException e) {
+                } catch (final SearchIteratorException e) {
                     e.printStackTrace();
                 }
-                if( existingContact == null)
+                if( existingContact == null) {
                     continue;
+                }
                 if( isSame(existingContact, updatedContact)){
                     foundMatch = true;
                     updatedContact.setObjectID( existingContact.getObjectID() );
                     storage.updateContactObject(updatedContact,folderId, new Date() );
                 }
             }
-            if(foundMatch)
+            if(foundMatch) {
                 continue;
+            }
             updatedContact.setParentFolderID( folderId );
             try {
                 storage.insertContactObject(updatedContact);
-            } catch (AbstractOXException x) {
+            } catch (final OXException x) {
                 LOG.error(x.getMessage(), x);
             }
         }
     }
     
 
-    protected boolean isSame(Contact first, Contact second){
+    protected boolean isSame(final Contact first, final Contact second){
         if(first.containsGivenName()) {
             if(!first.getGivenName().equals(second.getGivenName())) {
                 return false;

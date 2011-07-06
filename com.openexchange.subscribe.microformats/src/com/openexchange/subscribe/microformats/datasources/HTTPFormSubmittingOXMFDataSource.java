@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 import com.openexchange.subscribe.microformats.parser.OXMFForm;
@@ -75,7 +75,7 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
     
     private static final Log LOG = LogFactory.getLog(HTTPFormSubmittingOXMFDataSource.class);
 
-    public Reader getData(Subscription subscription) throws SubscriptionException {
+    public Reader getData(Subscription subscription) throws OXException {
         if(!ExternalSubscriptionSource.class.isInstance(subscription.getSource())) {
             throw OXMFSubscriptionErrorMessage.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES.create();
         }

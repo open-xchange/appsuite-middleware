@@ -55,7 +55,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
 /**
@@ -69,7 +69,7 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
 
     private static final Log LOG = LogFactory.getLog(HTTPOXMFDataSource.class);
 
-    public Reader getData(Subscription subscription) throws SubscriptionException {
+    public Reader getData(Subscription subscription) throws OXException {
         String site = (String)subscription.getConfiguration().get(URL);
 
         try {

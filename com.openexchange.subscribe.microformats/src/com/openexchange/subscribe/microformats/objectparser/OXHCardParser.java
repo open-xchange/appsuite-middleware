@@ -59,7 +59,7 @@ import org.microformats.hCard.HCard;
 import org.microformats.hCard.HCardParser;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.parser.ObjectParser;
 import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTransformer;
 
@@ -69,7 +69,7 @@ import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTr
  */
 public class OXHCardParser implements ObjectParser<Contact>{
 
-    public List<Contact> parse(Reader html) throws SubscriptionException {
+    public List<Contact> parse(Reader html) throws OXException {
         BufferedReader bufferedReader = new BufferedReader(html);
         String line;
         StringBuffer buffy = new StringBuffer();
@@ -78,7 +78,7 @@ public class OXHCardParser implements ObjectParser<Contact>{
                 buffy.append(line);
             }
         } catch (IOException e) {
-            //throw new SubscriptionException(SubscriptionErrorMessage.ParsingError, e);
+            //throw new OXException(SubscriptionErrorMessage.ParsingError, e);
         }
         return parse(buffy.toString());
     }

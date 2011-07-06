@@ -68,7 +68,7 @@ import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import com.gargoylesoftware.htmlunit.WebResponseImpl;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
@@ -94,7 +94,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
         this.regex = regex;
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
+    public void execute(WebClient webClient) throws OXException {
         MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
         final HttpClient httpClient = new HttpClient(manager);
 

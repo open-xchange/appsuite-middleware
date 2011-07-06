@@ -52,7 +52,7 @@ package com.openexchange.subscribe.internal;
 import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
@@ -66,40 +66,40 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
  */
 public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> {
     
-    private Log LOG = LogFactory.getLog(StrategyFolderUpdaterService.class);
+    private final Log LOG = LogFactory.getLog(StrategyFolderUpdaterService.class);
     
-    private FolderUpdaterStrategy<T> strategy;
+    private final FolderUpdaterStrategy<T> strategy;
     
     // a normal updater overwrites existing objects
     private boolean usesMultipleStrategy = false;
 
-    public StrategyFolderUpdaterService(FolderUpdaterStrategy<T> strategy) {
+    public StrategyFolderUpdaterService(final FolderUpdaterStrategy<T> strategy) {
         this.strategy = strategy;
     }
     
-    public StrategyFolderUpdaterService(FolderUpdaterStrategy<T> strategy, boolean usesMultipleStrategy) {
+    public StrategyFolderUpdaterService(final FolderUpdaterStrategy<T> strategy, final boolean usesMultipleStrategy) {
         this.strategy = strategy;
         this.usesMultipleStrategy = usesMultipleStrategy;
     }
  
-    public boolean handles(FolderObject folder) {
+    public boolean handles(final FolderObject folder) {
         return strategy.handles(folder);
     }
 
-    public void save(Collection<T> data, TargetFolderDefinition target) throws AbstractOXException {
-        Object session = strategy.startSession(target);
+    public void save(final Collection<T> data, final TargetFolderDefinition target) throws OXException {
+        final Object session = strategy.startSession(target);
         
-        Collection<T> dataInFolder = strategy.getData(target, session);
+        final Collection<T> dataInFolder = strategy.getData(target, session);
         
-        for(T element : data) {
+        for(final T element : data) {
             try {
-                T bestMatch = findBestMatch(element, dataInFolder, session);
+                final T bestMatch = findBestMatch(element, dataInFolder, session);
                 if(bestMatch == null) {
                     strategy.save(element, session);
                 } else {
                     strategy.update(bestMatch, element, session);
                 }
-            } catch (AbstractOXException x) {
+            } catch (final OXException x) {
                 LOG.error(x.getMessage(), x);
             }
         }
@@ -107,19 +107,20 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
         strategy.closeSession(session);
     }
 
-    private T findBestMatch(T element, Collection<T> dataInFolder, Object session) throws AbstractOXException {
+    private T findBestMatch(final T element, final Collection<T> dataInFolder, final Object session) throws OXException {
         // USM for the poor
         int maxScore = -1;
         T maxElement = null;
-        for(T elementInFolder : dataInFolder) {
-            int currentScore = strategy.calculateSimilarityScore(elementInFolder, element, session);
+        for(final T elementInFolder : dataInFolder) {
+            final int currentScore = strategy.calculateSimilarityScore(elementInFolder, element, session);
             if(currentScore > maxScore) {
                 maxElement = elementInFolder;
                 maxScore = currentScore;
             }
         }
-        if(maxScore > strategy.getThreshold(session))
+        if(maxScore > strategy.getThreshold(session)) {
             return maxElement;
+        }
        return null;
     }
 

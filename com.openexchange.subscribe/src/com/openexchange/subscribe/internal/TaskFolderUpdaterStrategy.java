@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
@@ -78,7 +78,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
     private static final int[] COMPARISON_COLUMNS = {
         Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE, Task.START_DATE, Task.END_DATE, Task.UID, Task.NOTE, Task.LAST_MODIFIED, Task.SEQUENCE };
 
-    public int calculateSimilarityScore(Task original, Task candidate, Object session) throws AbstractOXException {
+    public int calculateSimilarityScore(final Task original, final Task candidate, final Object session) throws OXException {
         int score = 0;
         // A score of 10 is sufficient for a match
         if ((isset(original.getUid()) || isset(candidate.getUid())) && eq(original.getUid(), candidate.getUid())) {
@@ -100,11 +100,11 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         return score;
     }
 
-    private boolean isset(String s) {
+    private boolean isset(final String s) {
         return s == null || s.length() > 0;
     }
 
-    protected boolean eq(Object o1, Object o2) {
+    protected boolean eq(final Object o1, final Object o2) {
         if (o1 == null || o2 == null) {
             return false;
         } else {
@@ -112,20 +112,20 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         }
     }
 
-    public void closeSession(Object session) throws AbstractOXException {
+    public void closeSession(final Object session) throws OXException {
 
     }
 
-    public Collection<Task> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
-        TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
+    public Collection<Task> getData(final TargetFolderDefinition target, final Object session) throws OXException {
+        final TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
 
-        int folderId = target.getFolderIdAsInt();
+        final int folderId = target.getFolderIdAsInt();
         SearchIterator<Task> tasksInFolder;
-        List<Task> retval = new ArrayList<Task>();
+        final List<Task> retval = new ArrayList<Task>();
         int[] columns = Task.ALL_COLUMNS;
         
         // filter out LAST_MODIFIED_UTC as it is a virtual column and will not work
-        ArrayList<Integer> filteredColumns = new ArrayList<Integer>();
+        final ArrayList<Integer> filteredColumns = new ArrayList<Integer>();
         for (int i = 0; i<columns.length; i++){
             if (columns[i] != Task.LAST_MODIFIED_UTC){
                 filteredColumns.add(columns[i]);
@@ -133,47 +133,47 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         }
         columns = new int[filteredColumns.size()];
         int counter = 0;
-        for (Integer integer : filteredColumns){
+        for (final Integer integer : filteredColumns){
             columns[counter] = integer;
             counter++;
         }
         
         tasksInFolder = taskSql.getTaskList(folderId, 0, Integer.MAX_VALUE, 0, Order.ASCENDING, columns);
         while (tasksInFolder.hasNext()) {
-            retval.add((Task) tasksInFolder.next());
+            retval.add(tasksInFolder.next());
         }
 
         return retval;
     }
 
-    public int getThreshold(Object session) throws AbstractOXException {
+    public int getThreshold(final Object session) throws OXException {
         return 9;
     }
 
-    public boolean handles(FolderObject folder) {
+    public boolean handles(final FolderObject folder) {
         return folder.getModule() == FolderObject.TASK;
     }
 
-    public void save(Task newElement, Object session) throws AbstractOXException {
-        TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
-        TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
+    public void save(final Task newElement, final Object session) throws OXException {
+        final TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
+        final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
         taskSql.insertTaskObject(newElement);
     }
 
-    private Object getFromSession(int key, Object session) {
+    private Object getFromSession(final int key, final Object session) {
         return ((Map<Integer, Object>) session).get(key);
     }
 
-    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
-        Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
+    public Object startSession(final TargetFolderDefinition target) throws OXException {
+        final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         userInfo.put(SQL_INTERFACE, new TasksSQLImpl(new TargetFolderSession(target)));
         userInfo.put(TARGET, target);
         return userInfo;
     }
 
-    public void update(Task original, Task update, Object session) throws AbstractOXException {
-        TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
+    public void update(final Task original, final Task update, final Object session) throws OXException {
+        final TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
 
         update.setParentFolderID(original.getParentFolderID());
         update.setObjectID(original.getObjectID());

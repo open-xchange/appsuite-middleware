@@ -60,7 +60,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 import com.openexchange.subscribe.crawler.internal.Mappings;
@@ -113,7 +113,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     }
 
     @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) throws OXException {
         final List<Contact> contactObjects = new ArrayList<Contact>();
         // final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
         HtmlPage debugPage = null;

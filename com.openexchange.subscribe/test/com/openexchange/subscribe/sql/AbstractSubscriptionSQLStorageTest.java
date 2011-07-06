@@ -61,7 +61,6 @@ import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
-import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
@@ -72,7 +71,6 @@ import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.tools.SQLTools;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.tools.sql.SQLTestCase;
@@ -98,39 +96,37 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
 
     protected long lastUpdate;
 
+    @Override
     public void setUp() throws Exception {
-        SubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe");
-        SubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("SUBS"));
-
         loadProperties();
         super.setUp();
 
         // First
-        FormElement formElementLogin = new FormElement();
+        final FormElement formElementLogin = new FormElement();
         formElementLogin.setName("login");
         formElementLogin.setDisplayName("Login");
         formElementLogin.setMandatory(true);
         formElementLogin.setWidget(FormElement.Widget.INPUT);
         formElementLogin.setDefaultValue("default login");
 
-        FormElement formElementPassword = new FormElement();
+        final FormElement formElementPassword = new FormElement();
         formElementPassword.setName("password");
         formElementPassword.setDisplayName("Password");
         formElementPassword.setMandatory(true);
         formElementPassword.setWidget(FormElement.Widget.PASSWORD);
 
-        DynamicFormDescription formDescription = new DynamicFormDescription();
+        final DynamicFormDescription formDescription = new DynamicFormDescription();
         formDescription.addFormElement(formElementLogin);
         formDescription.addFormElement(formElementPassword);
 
-        SubscriptionSource subscriptionSource = new SubscriptionSource();
+        final SubscriptionSource subscriptionSource = new SubscriptionSource();
         subscriptionSource.setId("com.openexchange.subscribe.test.basic");
         subscriptionSource.setDisplayName("Basic Subscription for Tests");
         subscriptionSource.setIcon("http://path/to/icon");
         subscriptionSource.setFormDescription(formDescription);
         subscriptionSource.setFolderModule(FolderObject.CONTACT);
 
-        Map<String, Object> configuration = new HashMap<String, Object>();
+        final Map<String, Object> configuration = new HashMap<String, Object>();
         configuration.put("login", "user_a");
         configuration.put("password", "password_a");
 
@@ -145,31 +141,31 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscription.setEnabled(true);
         
         // Second
-        FormElement formElementLogin2 = new FormElement();
+        final FormElement formElementLogin2 = new FormElement();
         formElementLogin2.setName("login2");
         formElementLogin2.setDisplayName("Login2");
         formElementLogin2.setMandatory(true);
         formElementLogin2.setWidget(FormElement.Widget.INPUT);
         formElementLogin2.setDefaultValue("default login2");
 
-        FormElement formElementPassword2 = new FormElement();
+        final FormElement formElementPassword2 = new FormElement();
         formElementPassword2.setName("password2");
         formElementPassword2.setDisplayName("Password2");
         formElementPassword2.setMandatory(true);
         formElementPassword2.setWidget(FormElement.Widget.PASSWORD);
 
-        DynamicFormDescription formDescription2 = new DynamicFormDescription();
+        final DynamicFormDescription formDescription2 = new DynamicFormDescription();
         formDescription2.addFormElement(formElementLogin2);
         formDescription2.addFormElement(formElementPassword2);
 
-        SubscriptionSource subscriptionSource2 = new SubscriptionSource();
+        final SubscriptionSource subscriptionSource2 = new SubscriptionSource();
         subscriptionSource2.setId("com.openexchange.subscribe.test.basic2");
         subscriptionSource2.setDisplayName("Basic Subscription for Tests2");
         subscriptionSource2.setIcon("http://path/to/icon2");
         subscriptionSource2.setFormDescription(formDescription2);
         subscriptionSource2.setFolderModule(FolderObject.CONTACT);
 
-        Map<String, Object> configuration2 = new HashMap<String, Object>();
+        final Map<String, Object> configuration2 = new HashMap<String, Object>();
         configuration2.put("login", "user_a2");
         configuration2.put("password", "password_a2");
 
@@ -183,26 +179,27 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscription2.setConfiguration(configuration2);
         subscription2.setEnabled(false);
 
-        SimSubscriptionSourceDiscoveryService discoveryService = new SimSubscriptionSourceDiscoveryService();
+        final SimSubscriptionSourceDiscoveryService discoveryService = new SimSubscriptionSourceDiscoveryService();
         discoveryService.addSource(subscriptionSource);
         discoveryService.addSource(subscriptionSource2);
         storage = new SubscriptionSQLStorage(getDBProvider(), new SimConfigurationStorageService(), discoveryService);
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (subscriptionsToDelete.size() > 0) {
-            for (int delId : subscriptionsToDelete) {
-                Subscription subscriptionToDelete = new Subscription();
+            for (final int delId : subscriptionsToDelete) {
+                final Subscription subscriptionToDelete = new Subscription();
                 subscriptionToDelete.setId(delId);
                 subscriptionToDelete.setContext(ctx);
                 storage.forgetSubscription(subscriptionToDelete);
             }
 
-            DELETE delete = new DELETE().FROM(subscriptions).WHERE(
+            final DELETE delete = new DELETE().FROM(subscriptions).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new IN("id", SQLTools.createLIST(subscriptionsToDelete.size(), PLACEHOLDER))));
 
-            Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-            List<Integer> values = new ArrayList<Integer>();
+            final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
+            final List<Integer> values = new ArrayList<Integer>();
             values.add(I(ctx.getContextId()));
             values.addAll(subscriptionsToDelete);
             new StatementBuilder().executeStatement(writeConnection, delete, values);
@@ -213,18 +210,18 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         super.tearDown();
     }
 
-    protected void clearFolder(String folderId) throws Exception {
-        Connection writeConnection = getDBProvider().getWriteConnection(ctx);
+    protected void clearFolder(final String folderId) throws Exception {
+        final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
 
-        DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("folder_id", PLACEHOLDER));
-        List<Object> values = new ArrayList<Object>();
+        final DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("folder_id", PLACEHOLDER));
+        final List<Object> values = new ArrayList<Object>();
         values.add(folderId);
         new StatementBuilder().executeStatement(writeConnection, delete, values);
 
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
 
-    protected void assertEquals(Subscription expected, Subscription actual) {
+    protected void assertEquals(final Subscription expected, final Subscription actual) {
         if (expected != null) {
             assertNotNull(actual);
         }
@@ -242,7 +239,7 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         assertEquals(expected.isEnabled(), actual.isEnabled());
     }
 
-    protected void assertEquals(SubscriptionSource expected, SubscriptionSource actual) {
+    protected void assertEquals(final SubscriptionSource expected, final SubscriptionSource actual) {
         if (expected != null) {
             assertNotNull(actual);
         }
@@ -257,11 +254,11 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getFormDescription(), actual.getFormDescription());
     }
 
-    protected void assertEquals(DynamicFormDescription expected, DynamicFormDescription actual) {
+    protected void assertEquals(final DynamicFormDescription expected, final DynamicFormDescription actual) {
         assertEquals("Form Element size does notg match", expected.getFormElements().size(), actual.getFormElements().size());
-        for (FormElement formElementExpected : expected.getFormElements()) {
+        for (final FormElement formElementExpected : expected.getFormElements()) {
             boolean found = false;
-            for (FormElement formElementActual : actual.getFormElements()) {
+            for (final FormElement formElementActual : actual.getFormElements()) {
                 if (formElementExpected.getName().equals(formElementActual.getName())) {
                     found = true;
                     assertEquals(formElementExpected, formElementActual);
@@ -273,7 +270,7 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         }
     }
 
-    protected void assertEquals(FormElement expected, FormElement actual) {
+    protected void assertEquals(final FormElement expected, final FormElement actual) {
         if (expected != null) {
             assertNotNull(actual);
         }

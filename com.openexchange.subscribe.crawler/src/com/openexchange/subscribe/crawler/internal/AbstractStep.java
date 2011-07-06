@@ -57,7 +57,7 @@ import java.io.Writer;
 import java.lang.reflect.TypeVariable;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.Workflow;
 
 public abstract class AbstractStep<O,I> implements Step<O,I>{
@@ -102,7 +102,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         this.description = description;
     }
 
-    public abstract void execute(WebClient webClient) throws SubscriptionException;
+    public abstract void execute(WebClient webClient) throws OXException;
 
     public Class inputType() {
         return input.getClass();

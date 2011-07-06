@@ -51,7 +51,7 @@ package com.openexchange.subscribe.crawler.internal;
 
 import java.lang.reflect.TypeVariable;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.Workflow;
 
 /**
@@ -67,7 +67,7 @@ public interface Step<O, I>{
 
     Exception getException();
 
-    void execute(WebClient webClient) throws SubscriptionException;
+    void execute(WebClient webClient) throws OXException;
 
     Class inputType();
 

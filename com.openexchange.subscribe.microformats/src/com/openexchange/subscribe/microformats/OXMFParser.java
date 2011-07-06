@@ -53,7 +53,7 @@ package com.openexchange.subscribe.microformats;
 import java.io.Reader;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link OXMFParser} - Parses a given HTML content into container elements.
@@ -86,17 +86,17 @@ public interface OXMFParser {
      * 
      * @param html The HTML content to parse
      * @return A list of maps each map backing container element's name-value-pairs
-     * @throws SubscriptionException If parsing the HTML content fails
+     * @throws OXException If parsing the HTML content fails
      */
-    public List<Map<String, String>> parse(final String html) throws SubscriptionException;
+    public List<Map<String, String>> parse(final String html) throws OXException;
 
     /**
      * Parses passed HTML content. Each container element's name-value-pairs are backed by a map. Each map is contained in list.
      * 
      * @param html The reader providing HTML content to parse
      * @return A list of maps each map backing container element's name-value-pairs
-     * @throws SubscriptionException If parsing the HTML content fails
+     * @throws OXException If parsing the HTML content fails
      */
-    public List<Map<String, String>> parse(final Reader html) throws SubscriptionException;
+    public List<Map<String, String>> parse(final Reader html) throws OXException;
 
 }

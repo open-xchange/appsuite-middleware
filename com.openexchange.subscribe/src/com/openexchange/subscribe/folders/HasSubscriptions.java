@@ -53,7 +53,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.secret.SecretService;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -91,7 +91,7 @@ public class HasSubscriptions implements AdditionalFolderField {
         }
         try {
             final List<SubscriptionSource> sources = discovery.filter(session.getUserId(), session.getContextId()).getSources(folder.getModule());
-            SecretService secretService = SubscriptionServiceRegistry.getInstance().getService(SecretService.class);
+            final SecretService secretService = SubscriptionServiceRegistry.getInstance().getService(SecretService.class);
             
             for (final SubscriptionSource subscriptionSource : sources) {
                 String fn = folder.getFullName();
@@ -107,7 +107,7 @@ public class HasSubscriptions implements AdditionalFolderField {
                     return Boolean.TRUE;
                 }
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
 

@@ -76,7 +76,7 @@ import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.google.gdata.util.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
@@ -100,7 +100,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
     }
 
     @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) throws OXException {
 
         final List<Contact> contacts = new ArrayList<Contact>();
 

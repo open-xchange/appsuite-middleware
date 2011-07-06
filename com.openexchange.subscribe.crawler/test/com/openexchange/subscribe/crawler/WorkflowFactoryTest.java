@@ -51,7 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import junit.framework.TestCase;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.WorkflowFactory;
 
 /**
@@ -64,7 +64,7 @@ public class WorkflowFactoryTest extends TestCase {
         try {
             workflow = WorkflowFactory.createWorkflow("test-resources/InvalidWorkflow.yml");
             fail("Exception expected");
-        } catch (SubscriptionException e) {
+        } catch (OXException e) {
             assertEquals("Wrong exception", SubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());
         }
     }

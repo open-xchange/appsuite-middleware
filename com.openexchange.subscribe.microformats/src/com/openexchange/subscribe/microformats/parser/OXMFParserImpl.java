@@ -64,7 +64,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.OXMFParser;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
@@ -123,11 +123,11 @@ public final class OXMFParserImpl implements OXMFParser {
         attributePrefixes.add(prefix);
     }
 
-    public List<Map<String, String>> parse(final String html) throws SubscriptionException {
+    public List<Map<String, String>> parse(final String html) throws OXException {
         return parse(new StringReader(html));
     }
 
-    public List<Map<String, String>> parse(final Reader html) throws SubscriptionException {
+    public List<Map<String, String>> parse(final Reader html) throws OXException {
         /*
          * Create XMLStreamReader instance
          */

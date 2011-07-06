@@ -53,7 +53,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import org.ho.yaml.Yaml;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.Workflow;
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.subscribe.crawler.Workflow;
  */
 public class WorkflowFactory {
 
-    public static Workflow createWorkflow(final String filename) throws SubscriptionException {
+    public static Workflow createWorkflow(final String filename) throws OXException {
 
         Workflow workflow = null;
         try {
@@ -75,7 +75,7 @@ public class WorkflowFactory {
         return workflow;
     }
 
-    public static Workflow createWorkflowByString(final String string) throws SubscriptionException {
+    public static Workflow createWorkflowByString(final String string) throws OXException {
 
         Workflow workflow = null;
 
@@ -85,7 +85,7 @@ public class WorkflowFactory {
         return workflow;
     }
 
-    private static void checkSanity(final Workflow workflow) throws SubscriptionException {
+    private static void checkSanity(final Workflow workflow) throws OXException {
         Step previousStep = null;
         for (final Step currentStep : workflow.getSteps()) {
             if (previousStep != null) {                

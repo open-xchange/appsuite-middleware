@@ -64,12 +64,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -80,7 +78,6 @@ import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
 
@@ -90,24 +87,24 @@ import com.openexchange.subscribe.SubscriptionStorage;
  */
 public class SubscriptionSQLStorage implements SubscriptionStorage {
 
-    private DBProvider dbProvider;
-    private DBTransactionPolicy txPolicy;
+    private final DBProvider dbProvider;
+    private final DBTransactionPolicy txPolicy;
 
-    private GenericConfigurationStorageService storageService;
+    private final GenericConfigurationStorageService storageService;
 
-    private SubscriptionSourceDiscoveryService discoveryService;
+    private final SubscriptionSourceDiscoveryService discoveryService;
 
-    public SubscriptionSQLStorage(DBProvider dbProvider, GenericConfigurationStorageService storageService, SubscriptionSourceDiscoveryService discoveryService) {
+    public SubscriptionSQLStorage(final DBProvider dbProvider, final GenericConfigurationStorageService storageService, final SubscriptionSourceDiscoveryService discoveryService) {
         this(dbProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS, storageService, discoveryService);
     }   
-    public SubscriptionSQLStorage(DBProvider dbProvider, DBTransactionPolicy txPolicy, GenericConfigurationStorageService storageService, SubscriptionSourceDiscoveryService discoveryService) {
+    public SubscriptionSQLStorage(final DBProvider dbProvider, final DBTransactionPolicy txPolicy, final GenericConfigurationStorageService storageService, final SubscriptionSourceDiscoveryService discoveryService) {
         this.dbProvider = dbProvider;
         this.txPolicy = txPolicy;
         this.storageService = storageService;
         this.discoveryService = discoveryService;
     }
 
-    public void forgetSubscription(Subscription subscription) throws SubscriptionException {
+    public void forgetSubscription(final Subscription subscription) throws OXException {
         if (!exist(subscription.getId(), subscription.getContext())) {
             return;
         }
@@ -118,16 +115,16 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             txPolicy.setAutoCommit(writeConnection, false);
             delete(subscription, writeConnection);
             txPolicy.commit(writeConnection);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (AbstractOXException e) {
-            throw new SubscriptionException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             if (writeConnection != null) {
                 try {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw SQLException.create(e);
                 } finally {
                     dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
@@ -136,7 +133,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
-    public Subscription getSubscription(Context ctx, int id) throws SubscriptionException {
+    public Subscription getSubscription(final Context ctx, final int id) throws OXException {
         Subscription retval = null;
 
         Connection readConnection = null;
@@ -144,31 +141,31 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "enabled")
+            final SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "enabled")
             .FROM(subscriptions)
             .WHERE(
                 new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
-            List<Object> values = new ArrayList<Object>();
+            final List<Object> values = new ArrayList<Object>();
             values.add(I(id));
             values.add(I(ctx.getContextId()));
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
-            List<Subscription> subscriptions = parseResultSet(resultSet, ctx, readConnection);
+            final List<Subscription> subscriptions = parseResultSet(resultSet, ctx, readConnection);
             if (subscriptions.size() != 0) {
                 retval = subscriptions.get(0);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (AbstractOXException e) {
-            throw new SubscriptionException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -178,7 +175,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws SubscriptionException {
+    public List<Subscription> getSubscriptions(final Context ctx, final String folderId) throws OXException {
         List<Subscription> retval = null;
 
         Connection readConnection = null;
@@ -186,29 +183,29 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            SELECT select = new 
+            final SELECT select = new 
                 SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "enabled")
                 .FROM(subscriptions)
                 .WHERE(
                     new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("folder_id", PLACEHOLDER)));
 
-            List<Object> values = new ArrayList<Object>();
+            final List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
             values.add(folderId);
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (AbstractOXException e) {
-            throw new SubscriptionException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -219,7 +216,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
     }
     
 
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId)  throws SubscriptionException {
+    public List<Subscription> getSubscriptionsOfUser(final Context ctx, final int userId)  throws OXException {
         List<Subscription> retval = null;
 
         Connection readConnection = null;
@@ -227,27 +224,27 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            SELECT select = new SELECT("*")
+            final SELECT select = new SELECT("*")
             .FROM(subscriptions)
             .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
-            List<Object> values = new ArrayList<Object>();
+            final List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
             values.add(I(userId));
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (AbstractOXException e) {
-            throw new SubscriptionException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -257,7 +254,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    public void rememberSubscription(Subscription subscription) throws SubscriptionException {
+    public void rememberSubscription(final Subscription subscription) throws OXException {
         if (subscription.getId() > 0) {
             throw IDGiven.create();
         }
@@ -266,19 +263,19 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
-            int id = save(subscription, writeConnection);
+            final int id = save(subscription, writeConnection);
             subscription.setId(id);
             txPolicy.commit(writeConnection);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (AbstractOXException e) {
-            throw new SubscriptionException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             if (writeConnection != null) {
                 try {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw SQLException.create(e);
                 } finally {
                     dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
@@ -287,7 +284,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
-    public void updateSubscription(Subscription subscription) throws SubscriptionException {
+    public void updateSubscription(final Subscription subscription) throws OXException {
         if (!exist(subscription.getId(), subscription.getContext())) {
             throw SubscriptionNotFound.create();
         }
@@ -298,16 +295,16 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             txPolicy.setAutoCommit(writeConnection, false);
             update(subscription, writeConnection);
             txPolicy.commit(writeConnection);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (AbstractOXException e) {
-            throw new SubscriptionException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             if (writeConnection != null) {
                 try {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw SQLException.create(e);
                 } finally {
                     dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
@@ -316,10 +313,10 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
-    private void delete(Subscription subscription, Connection writeConnection) throws SQLException, OXException, SubscriptionException {
-        DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
+    private void delete(final Subscription subscription, final Connection writeConnection) throws SQLException, OXException, OXException {
+        final DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
-        List<Object> values = new ArrayList<Object>();
+        final List<Object> values = new ArrayList<Object>();
         values.add(I(subscription.getId()));
         values.add(I(subscription.getContext().getContextId()));
 
@@ -328,16 +325,16 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         storageService.delete(writeConnection, subscription.getContext(), getConfigurationId(subscription));
     }
 
-    private int save(Subscription subscription, Connection writeConnection) throws OXException, SQLException {
-        int configId = storageService.save(writeConnection, subscription.getContext(), subscription.getConfiguration());
+    private int save(final Subscription subscription, final Connection writeConnection) throws OXException, SQLException {
+        final int configId = storageService.save(writeConnection, subscription.getContext(), subscription.getConfiguration());
 
-        int id = IDGenerator.getId(subscription.getContext().getContextId(), Types.SUBSCRIPTION, writeConnection);
+        final int id = IDGenerator.getId(subscription.getContext().getContextId(), Types.SUBSCRIPTION, writeConnection);
 
-        INSERT insert = new INSERT().INTO(subscriptions).SET("id", PLACEHOLDER).SET("cid", PLACEHOLDER).SET("user_id", PLACEHOLDER).SET(
+        final INSERT insert = new INSERT().INTO(subscriptions).SET("id", PLACEHOLDER).SET("cid", PLACEHOLDER).SET("user_id", PLACEHOLDER).SET(
             "configuration_id",
             PLACEHOLDER).SET("source_id", PLACEHOLDER).SET("folder_id", PLACEHOLDER).SET("last_update", PLACEHOLDER).SET("enabled", PLACEHOLDER);
 
-        List<Object> values = new ArrayList<Object>();
+        final List<Object> values = new ArrayList<Object>();
         values.add(I(id));
         values.add(I(subscription.getContext().getContextId()));
         values.add(I(subscription.getUserId()));
@@ -351,14 +348,14 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return id;
     }
 
-    private void update(Subscription subscription, Connection writeConnection) throws SubscriptionException, OXException, SQLException {
+    private void update(final Subscription subscription, final Connection writeConnection) throws OXException, OXException, SQLException {
         if (subscription.getConfiguration() != null) {
-            int configId = getConfigurationId(subscription);
+            final int configId = getConfigurationId(subscription);
             storageService.update(writeConnection, subscription.getContext(), configId, subscription.getConfiguration());
         }
 
-        UPDATE update = new UPDATE(subscriptions);
-        List<Object> values = new ArrayList<Object>();
+        final UPDATE update = new UPDATE(subscriptions);
+        final List<Object> values = new ArrayList<Object>();
 
         if (subscription.containsUserId()) {
             update.SET("user_id", PLACEHOLDER);
@@ -390,7 +387,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
-    private int getConfigurationId(Subscription subscription) throws SubscriptionException {
+    private int getConfigurationId(final Subscription subscription) throws OXException {
         int retval = 0;
         Connection readConection = null;
         ResultSet resultSet = null;
@@ -398,13 +395,13 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         try {
             readConection = dbProvider.getReadConnection(subscription.getContext());
 
-            SELECT select = new 
+            final SELECT select = new 
                 SELECT("configuration_id")
                 .FROM(subscriptions)
                 .WHERE(
                     new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
-            List<Object> values = new ArrayList<Object>();
+            final List<Object> values = new ArrayList<Object>();
             values.add(I(subscription.getContext().getContextId()));
             values.add(I(subscription.getId()));
 
@@ -414,16 +411,16 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             if (resultSet.next()) {
                 retval = resultSet.getInt("configuration_id");
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (AbstractOXException e) {
-            throw new SubscriptionException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(subscription.getContext(), readConection);
@@ -432,10 +429,10 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    private List<Subscription> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws OXException, SQLException {
-        List<Subscription> retval = new ArrayList<Subscription>();
+    private List<Subscription> parseResultSet(final ResultSet resultSet, final Context ctx, final Connection readConnection) throws OXException, SQLException {
+        final List<Subscription> retval = new ArrayList<Subscription>();
         while (resultSet.next()) {
-            Subscription subscription = new Subscription();
+            final Subscription subscription = new Subscription();
             subscription.setContext(ctx);
             subscription.setFolderId(resultSet.getString("folder_id"));
             subscription.setId(resultSet.getInt("id"));
@@ -443,7 +440,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             subscription.setUserId(resultSet.getInt("user_id"));
             subscription.setEnabled(resultSet.getBoolean("enabled"));
             
-            Map<String, Object> content = new HashMap<String, Object>();
+            final Map<String, Object> content = new HashMap<String, Object>();
             storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);
 
             subscription.setConfiguration(content);
@@ -454,7 +451,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    private boolean exist(int id, Context ctx) throws SubscriptionException {
+    private boolean exist(final int id, final Context ctx) throws OXException {
         boolean retval = false;
 
         Connection readConnection = null;
@@ -462,29 +459,29 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            SELECT select = new 
+            final SELECT select = new 
                 SELECT("id")
                 .FROM(subscriptions)
                 .WHERE(
                     new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
-            List<Object> values = new ArrayList<Object>();
+            final List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
             values.add(I(id));
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = resultSet.next();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (AbstractOXException e) {
-            throw new SubscriptionException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -494,57 +491,53 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws SubscriptionException {
+    public void deleteAllSubscriptionsForUser(final int userId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
 
-            List<Subscription> subs = getSubscriptionsOfUser(ctx, userId);
-            for(Subscription sub: subs){
+            final List<Subscription> subs = getSubscriptionsOfUser(ctx, userId);
+            for(final Subscription sub: subs){
                 delete(sub, writeConnection);
             }
             txPolicy.commit(writeConnection);
-        } catch (OXException e) {
+        } catch (final OXException e) {
+            throw e;
+        } catch (final SQLException e) {
             throw SQLException.create(e);
-        } catch (SQLException e) {
-            throw SQLException.create(e);
-        } catch (DBPoolingException e) {
-            throw new SubscriptionException(e);
         } finally {
             try {
                 if(writeConnection != null) {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             }
             dbProvider.releaseWriteConnection(ctx, writeConnection);
         }
     }
 
-    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws SubscriptionException {
+    public void deleteAllSubscriptionsInContext(final int contextId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
-            DELETE delete = new 
+            final DELETE delete = new 
                 DELETE()
                 .FROM(subscriptions)
                 .WHERE(new EQUALS("cid", PLACEHOLDER));
 
-            List<Object> values = new ArrayList<Object>();
+            final List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
 
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             storageService.delete(writeConnection, ctx);
             txPolicy.commit(writeConnection);
-        } catch (DBPoolingException e) {
-            throw new SubscriptionException(e);
-        } catch (SQLException e) {
-            throw SQLException.create(e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
+            throw e;
+        } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
@@ -552,38 +545,36 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             }
             dbProvider.releaseWriteConnection(ctx, writeConnection);
         }
     }
 
-    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws SubscriptionException {
+    public void deleteAllSubscriptionsWhereConfigMatches(final Map<String, Object> query, final String sourceId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
-            DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("source_id", PLACEHOLDER)).AND(new EQUALS("configuration_id", PLACEHOLDER)));
-            List<Object> values = new ArrayList<Object>(Arrays.asList(null, null, null));
+            final DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("source_id", PLACEHOLDER)).AND(new EQUALS("configuration_id", PLACEHOLDER)));
+            final List<Object> values = new ArrayList<Object>(Arrays.asList(null, null, null));
             values.set(0, ctx.getContextId());
             values.set(1, sourceId);
             
-            List<Integer> configIds = storageService.search(ctx, query);
-            for (Integer configId : configIds) {
+            final List<Integer> configIds = storageService.search(ctx, query);
+            for (final Integer configId : configIds) {
                 values.set(2, configId);
-                int deleted = new StatementBuilder().executeStatement(writeConnection, delete, values);
+                final int deleted = new StatementBuilder().executeStatement(writeConnection, delete, values);
                 if(deleted == 1) {
                     // Delete the generic configuration only if the source_id matched
                     storageService.delete(writeConnection, ctx, configId);
                 }
             }
             txPolicy.commit(writeConnection);
-        } catch (OXException e) {
-            throw new SubscriptionException(e);
-        } catch (DBPoolingException e) {
-            throw new SubscriptionException(e);
-        } catch (SQLException e) {
+        } catch (final OXException e) {
+            throw e;
+        } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
@@ -591,7 +582,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw SQLException.create(e);
             }
             dbProvider.releaseWriteConnection(ctx, writeConnection);

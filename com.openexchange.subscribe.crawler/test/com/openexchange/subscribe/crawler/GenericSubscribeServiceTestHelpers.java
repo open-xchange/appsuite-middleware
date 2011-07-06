@@ -60,7 +60,7 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
@@ -137,7 +137,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         Contact[] contacts = new Contact[0];
         try {
             contacts = (Contact[]) testWorkflow.execute(username, password);
-        } catch (final SubscriptionException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
         }
         assertTrue("There are no contacts for crawler : " + crawler.getDisplayName(), contacts.length != 0);
@@ -195,7 +195,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         Appointment[] events = new Appointment[0];
         try {
             events = (Appointment[])testWorkflow.execute(username, password);
-        } catch (final SubscriptionException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
         }
         assertTrue("There are no events for crawler : " + crawler.getDisplayName(), events.length != 0);
@@ -233,7 +233,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         Task[] tasks = new Task[0];
         try {
             tasks = (Task[])testWorkflow.execute(username, password);
-        } catch (final SubscriptionException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
         }
         assertTrue("There are no tasks for crawler : " + crawler.getDisplayName(), tasks.length != 0);

@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.external.ExternalSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
@@ -133,7 +133,7 @@ public class ExternalSourcesActivator extends DeferredActivator {
                     for (ExternalSubscriptionSourceDiscoveryService service : services) {
                         try {
                             service.refresh();
-                        } catch (SubscriptionException x) {
+                        } catch (OXException x) {
                             LOG.error(x.getMessage(),x);
                         }
                     }

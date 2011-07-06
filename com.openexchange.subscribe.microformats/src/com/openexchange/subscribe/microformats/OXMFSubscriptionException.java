@@ -51,7 +51,7 @@ package com.openexchange.subscribe.microformats;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -60,7 +60,7 @@ import com.openexchange.subscribe.SubscriptionException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OXMFSubscriptionException extends SubscriptionException {
+public class OXMFSubscriptionException extends OXException {
 
     /**
      * Initializes a new {@link OXMFSubscriptionException}.

@@ -52,7 +52,7 @@ package com.openexchange.subscribe.osgi.tools;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -65,9 +65,9 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 public class WhiteboardSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
     
     
-    private ServiceTracker tracker;
+    private final ServiceTracker tracker;
 
-    public WhiteboardSubscriptionSourceDiscoveryService(BundleContext context) {
+    public WhiteboardSubscriptionSourceDiscoveryService(final BundleContext context) {
         this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), null);
         tracker.open();
     }
@@ -76,11 +76,11 @@ public class WhiteboardSubscriptionSourceDiscoveryService implements Subscriptio
         tracker.close();
     }
 
-    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
+    public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         return getDelegate().getSource(context, subscriptionId);
     }
 
-    public SubscriptionSource getSource(String identifier) {
+    public SubscriptionSource getSource(final String identifier) {
         return getDelegate().getSource(identifier);
     }
 
@@ -88,15 +88,15 @@ public class WhiteboardSubscriptionSourceDiscoveryService implements Subscriptio
         return getDelegate().getSources();
     }
 
-    public List<SubscriptionSource> getSources(int folderModule) {
+    public List<SubscriptionSource> getSources(final int folderModule) {
         return getDelegate().getSources(folderModule);
     }
 
-    public boolean knowsSource(String identifier) {
+    public boolean knowsSource(final String identifier) {
         return getDelegate().knowsSource(identifier);
     }
     
-    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+    public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return getDelegate().filter(user, context);
     }
     

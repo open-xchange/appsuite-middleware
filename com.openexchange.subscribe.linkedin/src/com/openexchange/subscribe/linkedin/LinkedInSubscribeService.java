@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.linkedin.osgi.Activator;
 
@@ -95,7 +95,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
         source.setFormDescription(form);
     }
 
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException {
+    public Collection<?> getContent(Subscription subscription) throws OXException {
         return activator.getLinkedInService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
 
@@ -108,7 +108,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
+    public void modifyIncoming(Subscription subscription) throws OXException {
         super.modifyIncoming(subscription);
         Integer accountId = (Integer) subscription.getConfiguration().get("account");
         if(accountId != null) {
@@ -117,7 +117,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
     }
     
     @Override
-    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
+    public void modifyOutgoing(Subscription subscription) throws OXException {
         String accountId = (String) subscription.getConfiguration().get("account");
         if (null != accountId){
             Integer accountIdInt = Integer.parseInt(accountId);
@@ -136,7 +136,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
         super.modifyOutgoing(subscription);
     }
     
-    public void deleteAllUsingOAuthAccount(Context context, int id) throws SubscriptionException {
+    public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
         Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", String.valueOf(id));
         removeWhereConfigMatches(context, query);

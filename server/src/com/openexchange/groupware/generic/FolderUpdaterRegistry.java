@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.generic;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FolderUpdaterRegistry}
@@ -61,6 +61,6 @@ public interface FolderUpdaterRegistry {
     /**
      * @param subscription
      */
-    FolderUpdaterService getFolderUpdater(TargetFolderDefinition target) throws AbstractOXException;
+    FolderUpdaterService getFolderUpdater(TargetFolderDefinition target) throws OXException;
 
 }

@@ -60,9 +60,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionHandler;
@@ -77,7 +77,7 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
         super();
     }
     
-    public MicroformatContactParser(SubscribeService service){
+    public MicroformatContactParser(final SubscribeService service){
         this.service = service;
     }
  
@@ -87,13 +87,13 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
      * @return
      * @throws IOException
      */
-    protected String readSubscription(Subscription subscription) throws IOException{
+    protected String readSubscription(final Subscription subscription) throws IOException{
         BufferedReader buffy = null;
-        StringBuilder bob = new StringBuilder();
+        final StringBuilder bob = new StringBuilder();
                
         try {
-            URL url = new URL(""); //new URL(subscription.getUrl());
-            URLConnection connection = url.openConnection();
+            final URL url = new URL(""); //new URL(subscription.getUrl());
+            final URLConnection connection = url.openConnection();
             buffy = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
             String line = buffy.readLine();
             while (line != null){
@@ -112,40 +112,37 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.parser.SubscriptionHandler#handleSubscription(com.openexchange.subscribe.Subscription)
      */
-    public void handleSubscription(Subscription subscription) throws AbstractOXException{
+    public void handleSubscription(final Subscription subscription) throws AbstractOXException{
         try {
-            String website = readSubscription(subscription);
+            final String website = readSubscription(subscription);
             
             parse( website );
             
             storeContacts(new TargetFolderSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
             
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
     }
 
-    public void parse(String text) {
+    public void parse(final String text) {
         XMLReader xmlReader = null;
         try {
-            AbstractMicroformatSAXHandler handler = new MicroformatContactSAXHandler();
+            final AbstractMicroformatSAXHandler handler = new MicroformatContactSAXHandler();
             xmlReader = XMLReaderFactory.createXMLReader();
             xmlReader.setContentHandler( handler );
             xmlReader.setErrorHandler( handler );
             xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes()) ) );
             contacts = handler.getObjects();
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

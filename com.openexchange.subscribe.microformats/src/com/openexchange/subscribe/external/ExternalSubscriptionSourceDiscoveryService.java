@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceCollector;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -123,7 +123,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         return null;
     }
     
-    public void refresh() throws SubscriptionException {
+    public void refresh() throws OXException {
         try {
             List<ExternalSubscriptionSource> listing = grabListing();
             SubscriptionSourceCollector sources = new SubscriptionSourceCollector();
@@ -134,10 +134,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
                 }
             }
             this.sources = sources;
-        } catch (SubscriptionException x) {
+        } catch (OXException x) {
             throw x;
         } catch (AbstractOXException x) {
-            throw new SubscriptionException(x);
+            throw new OXException(x);
         }
     }
 

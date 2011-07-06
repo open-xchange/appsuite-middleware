@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -87,9 +87,9 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
 
-    public int calculateSimilarityScore(Contact original, Contact candidate, Object session) {
+    public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) {
         int score = 0;
-        int threshold = getThreshold(session);
+        final int threshold = getThreshold(session);
         
         // For the sake of simplicity we assume that equal names mean equal contacts
         // TODO: This needs to be diversified in the form of "unique-in-context" later (if there is only one "Max Mustermann" in a folder it
@@ -128,43 +128,44 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
      * @param candidate
      * @return
      */
-    private boolean hasEqualContent(Contact original, Contact candidate) {
-        for(int fieldNumber: Contact.ALL_COLUMNS){
+    private boolean hasEqualContent(final Contact original, final Contact candidate) {
+        for(final int fieldNumber: Contact.ALL_COLUMNS){
             if(original.get(fieldNumber) == null){
                 if(candidate.get(fieldNumber) != null){
                     return false;
                 }
             } else {
                 if(candidate.get(fieldNumber) != null){
-                    if(! original.get(fieldNumber).equals(candidate.get(fieldNumber)))
+                    if(! original.get(fieldNumber).equals(candidate.get(fieldNumber))) {
                         return false;
+                    }
                 }
             }
         }
         return false;
     }
 
-    private boolean isset(String s) {
+    private boolean isset(final String s) {
         return s == null || s.length() > 0;
     }
 
-    protected boolean eq(Object o1, Object o2) {
+    protected boolean eq(final Object o1, final Object o2) {
         if (o1 == null || o2 == null) {
             return false;
         }
         return o1.equals(o2);
     }
 
-    public void closeSession(Object session) {
+    public void closeSession(final Object session) {
 
     }
 
-    public Collection<Contact> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
-        OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
+    public Collection<Contact> getData(final TargetFolderDefinition target, final Object session) throws OXException {
+        final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
 
-        int folderId = target.getFolderIdAsInt();
-        int numberOfContacts = contacts.getNumberOfContacts(folderId);
-        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(
+        final int folderId = target.getFolderIdAsInt();
+        final int numberOfContacts = contacts.getNumberOfContacts(folderId);
+        final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(
             folderId,
             0,
             numberOfContacts,
@@ -172,24 +173,24 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             Order.ASCENDING,
             null,
             COMPARISON_COLUMNS);
-        List<Contact> retval = new ArrayList<Contact>();
+        final List<Contact> retval = new ArrayList<Contact>();
         while (contactsInFolder.hasNext()) {
             retval.add(contactsInFolder.next());
         }
         return retval;
     }
 
-    public int getThreshold(Object session) {
+    public int getThreshold(final Object session) {
         return 9;
     }
 
-    public boolean handles(FolderObject folder) {
+    public boolean handles(final FolderObject folder) {
         return folder.getModule() == FolderObject.CONTACT;
     }
 
-    public void save(Contact newElement, Object session) throws AbstractOXException {
-        OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
-        TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
+    public void save(final Contact newElement, final Object session) throws OXException {
+        final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
+        final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
 
         // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
@@ -198,19 +199,19 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         contacts.forceInsertContactObject(newElement);
     }
 
-    private Object getFromSession(int key, Object session) {
+    private Object getFromSession(final int key, final Object session) {
         return ((Map<Integer, Object>) session).get(key);
     }
 
-    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
-        Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
+    public Object startSession(final TargetFolderDefinition target) throws OXException {
+        final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         userInfo.put(SQL_INTERFACE, new RdbContactSQLImpl(new TargetFolderSession(target)));
         userInfo.put(TARGET, target);
         return userInfo;
     }
 
-    public void update(Contact original, Contact update, Object session) throws AbstractOXException {
-        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
+    public void update(final Contact original, final Contact update, final Object session) throws OXException {
+        final RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
 
         update.setParentFolderID(original.getParentFolderID());
         update.setObjectID(original.getObjectID());

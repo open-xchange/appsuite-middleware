@@ -74,7 +74,7 @@ import java.util.TimeZone;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 
 
@@ -106,7 +106,7 @@ public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransf
     }};
     
     
-    public List<? extends Object> transform(List<Map<String, String>> list) throws SubscriptionException {
+    public List<? extends Object> transform(List<Map<String, String>> list) throws OXException {
         List<DocumentMetadataHolder> documents = new ArrayList<DocumentMetadataHolder>(list.size());
         
         for(Map<String, String> attributes : list) {

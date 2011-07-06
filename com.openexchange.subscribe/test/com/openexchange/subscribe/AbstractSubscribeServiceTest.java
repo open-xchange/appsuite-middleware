@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
 import com.openexchange.crypto.SimCryptoService;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.crypto.SimCryptoService;
  *
  */
 public class AbstractSubscribeServiceTest extends TestCase {
-    public void testEncryptPasswords() throws SubscriptionException {
+    public void testEncryptPasswords() throws OXException {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("p1","password1");
         map.put("p2","password2");
@@ -76,7 +77,7 @@ public class AbstractSubscribeServiceTest extends TestCase {
         
     }
     
-    public void testDecryptPasswords() throws SubscriptionException {
+    public void testDecryptPasswords() throws OXException {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("p1","password1");
         map.put("p2","password2");

@@ -55,7 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.OXMFParser;
 
 
@@ -85,12 +85,12 @@ public class SimOXMFParser implements OXMFParser {
         containerElements.add(containerElement);
     }
 
-    public List<Map<String, String>> parse(String html) throws SubscriptionException {
+    public List<Map<String, String>> parse(String html) throws OXException {
         this.html  = html;
         return data;
     }
     
-    public List<Map<String, String>> parse(Reader html) throws SubscriptionException {
+    public List<Map<String, String>> parse(Reader html) throws OXException {
         this.html  = readAll(html);
         return data;
     }

@@ -51,7 +51,7 @@ package com.openexchange.subscribe.microformats.parser;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -72,7 +72,7 @@ public class OXMFParserImplTest extends ParserTest {
     }
 
     @Override
-    protected List<Map<String, String>> parse(String text) throws SubscriptionException {
+    protected List<Map<String, String>> parse(String text) throws OXException {
         return parser.parse(text);
     }
 

@@ -54,10 +54,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -75,22 +74,22 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
     public static ConfigViewFactory CONFIG_VIEW_FACTORY;
     
     public SubscriptionSourceDiscoveryService delegate = null;
-    private ConfigView config;
+    private final ConfigView config;
     
-    public FilteredSubscriptionSourceDiscoveryService(int user, int context, SubscriptionSourceDiscoveryService delegate) throws OXException {
+    public FilteredSubscriptionSourceDiscoveryService(final int user, final int context, final SubscriptionSourceDiscoveryService delegate) throws OXException {
         this.config = CONFIG_VIEW_FACTORY.getView(user, context);
         this.delegate = delegate;
     }
     
-    public SubscriptionSource getSource(String identifier) {
+    public SubscriptionSource getSource(final String identifier) {
         if (accepts(identifier)) {
             return delegate.getSource(identifier);
         }
         return null;
     }
 
-    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
-        SubscriptionSource source = delegate.getSource(context, subscriptionId);
+    public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
+        final SubscriptionSource source = delegate.getSource(context, subscriptionId);
         
         return filter(source);
     }
@@ -100,38 +99,38 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
     }
 
 
-    public List<SubscriptionSource> getSources(int folderModule) {
+    public List<SubscriptionSource> getSources(final int folderModule) {
         return filter(delegate.getSources(folderModule));
     }
 
-    public boolean knowsSource(String identifier) {
+    public boolean knowsSource(final String identifier) {
         return accepts(identifier) ? delegate.knowsSource(identifier) : false;
     }
     
-    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+    public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return delegate.filter(user, context);
     }
     
-    protected boolean accepts(String identifier) {
+    protected boolean accepts(final String identifier) {
         try {
-            ComposedConfigProperty<Boolean> property = config.property(identifier, boolean.class);
+            final ComposedConfigProperty<Boolean> property = config.property(identifier, boolean.class);
             if(property.isDefined()) {
                 return property.get();
             }
             return false;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return false;
         }
     }
     
-    protected SubscriptionSource filter(SubscriptionSource source) {
+    protected SubscriptionSource filter(final SubscriptionSource source) {
         return accepts(source.getId()) ? source : null;
     }
     
-    protected List<SubscriptionSource> filter(List<SubscriptionSource> sources) {
-        List<SubscriptionSource> filtered = new ArrayList<SubscriptionSource>(sources.size());
-        for (SubscriptionSource subscriptionSource : sources) {
+    protected List<SubscriptionSource> filter(final List<SubscriptionSource> sources) {
+        final List<SubscriptionSource> filtered = new ArrayList<SubscriptionSource>(sources.size());
+        for (final SubscriptionSource subscriptionSource : sources) {
             if (accepts(subscriptionSource.getId())) {
                 filtered.add(subscriptionSource);
             }

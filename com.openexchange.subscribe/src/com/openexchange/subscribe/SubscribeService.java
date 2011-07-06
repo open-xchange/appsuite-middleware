@@ -50,7 +50,7 @@
 package com.openexchange.subscribe;
 
 import java.util.Collection;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -63,24 +63,24 @@ public interface SubscribeService {
     
     public boolean handles(int folderModule);
     
-    public void subscribe(Subscription subscription) throws AbstractOXException;
+    public void subscribe(Subscription subscription) throws OXException;
 
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws AbstractOXException;
+    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws OXException;
     
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException;
+    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException;
 
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws AbstractOXException;
+    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws OXException;
     
-    public void unsubscribe(Subscription subscription) throws AbstractOXException;
+    public void unsubscribe(Subscription subscription) throws OXException;
 
-    public void update(Subscription subscription) throws AbstractOXException;
+    public void update(Subscription subscription) throws OXException;
 
-    public Collection<?> getContent(Subscription subscription) throws SubscriptionException;
+    public Collection<?> getContent(Subscription subscription) throws OXException;
 
-    public boolean knows(Context context, int subscriptionId) throws AbstractOXException;
+    public boolean knows(Context context, int subscriptionId) throws OXException;
 
-    public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException;
+    public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws OXException;
 
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws SubscriptionException;
+    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
     
 }

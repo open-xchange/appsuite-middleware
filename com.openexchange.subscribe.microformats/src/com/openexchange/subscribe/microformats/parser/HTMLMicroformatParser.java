@@ -65,7 +65,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.OXMFParser;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
@@ -90,11 +90,11 @@ public class HTMLMicroformatParser implements OXMFParser {
         containerClasses.add(containerElement);
     }
 
-    public List<Map<String, String>> parse(String html) throws SubscriptionException {
+    public List<Map<String, String>> parse(String html) throws OXException {
         return parse(new StringReader(html));
     }
 
-    public List<Map<String, String>> parse(Reader html) throws SubscriptionException {
+    public List<Map<String, String>> parse(Reader html) throws OXException {
         DOMParser parser = new DOMParser();
         ArrayList<Map<String, String>> container = new ArrayList<Map<String, String>>();
         try {

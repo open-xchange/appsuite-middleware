@@ -52,6 +52,7 @@ package com.openexchange.subscribe;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -155,7 +156,7 @@ public class SimSubscribeService implements SubscribeService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#checkSecretCanDecryptPasswords(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String)
      */
-    public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws SubscriptionException {
+    public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -163,7 +164,7 @@ public class SimSubscribeService implements SubscribeService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#migrateSecret(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String, java.lang.String)
      */
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws SubscriptionException {
+    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException {
         // TODO Auto-generated method stub
         
     }

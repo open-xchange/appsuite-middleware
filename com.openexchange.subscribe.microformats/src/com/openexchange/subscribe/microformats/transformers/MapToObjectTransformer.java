@@ -51,7 +51,7 @@ package com.openexchange.subscribe.microformats.transformers;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -64,5 +64,5 @@ public interface MapToObjectTransformer {
     
     
     
-    public List<? extends Object> transform(List<Map<String, String>> list) throws SubscriptionException;
+    public List<? extends Object> transform(List<Map<String, String>> list) throws OXException;
 }

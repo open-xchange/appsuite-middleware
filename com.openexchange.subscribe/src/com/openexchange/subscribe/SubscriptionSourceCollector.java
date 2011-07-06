@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoveryService;
 
@@ -69,19 +69,19 @@ import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoverySer
  */
 public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryService {
 
-    private Map<String, SubscribeService> services = new HashMap<String, SubscribeService>();
-    private Map<String, SortedSet<SubscribeService>> shelvedServices = new HashMap<String, SortedSet<SubscribeService>>();
+    private final Map<String, SubscribeService> services = new HashMap<String, SubscribeService>();
+    private final Map<String, SortedSet<SubscribeService>> shelvedServices = new HashMap<String, SortedSet<SubscribeService>>();
     
-    public SubscriptionSource getSource(String identifier) {
+    public SubscriptionSource getSource(final String identifier) {
         if(!services.containsKey(identifier)) {
             return null;
         }
         return services.get(identifier).getSubscriptionSource();
     }
 
-    public List<SubscriptionSource> getSources(int folderModule) {
-        List<SubscriptionSource> sources = new LinkedList<SubscriptionSource>();
-        for(SubscribeService subscriber : services.values()) {
+    public List<SubscriptionSource> getSources(final int folderModule) {
+        final List<SubscriptionSource> sources = new LinkedList<SubscriptionSource>();
+        for(final SubscribeService subscriber : services.values()) {
             if(folderModule == -1 || subscriber.handles(folderModule)) {
                 sources.add(subscriber.getSubscriptionSource());
             }
@@ -93,16 +93,16 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         return getSources(-1);
     }
 
-    public boolean knowsSource(String identifier) {
+    public boolean knowsSource(final String identifier) {
         return services.containsKey(identifier);
     }
     
-    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+    public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return new FilteredSubscriptionSourceDiscoveryService(user, context, this);
     }
 
-    public void addSubscribeService(SubscribeService service) {
-        SubscribeService oldService = services.get(service.getSubscriptionSource().getId());
+    public void addSubscribeService(final SubscribeService service) {
+        final SubscribeService oldService = services.get(service.getSubscriptionSource().getId());
         if(oldService != null) {
             if(oldService.getSubscriptionSource().getPriority() < service.getSubscriptionSource().getPriority()) {
                 shelfService(oldService);
@@ -117,13 +117,13 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
     }
 
     // FIXME: This is not unique anymore
-    public void removeSubscribeService(String identifier) {
+    public void removeSubscribeService(final String identifier) {
         services.remove(identifier);        
         resurrectFromShelf(identifier);
     }
     
-    public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
-        for(SubscribeService source : services.values()) {
+    public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
+        for(final SubscribeService source : services.values()) {
             if(source.knows(context, subscriptionId)) {
                 return source.getSubscriptionSource();
             }
@@ -132,13 +132,13 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
     }
     
 
-    private void shelfService(SubscribeService service) {
-        String identifier = service.getSubscriptionSource().getId();
+    private void shelfService(final SubscribeService service) {
+        final String identifier = service.getSubscriptionSource().getId();
         SortedSet<SubscribeService> set = shelvedServices.get(identifier);
         if(set == null) {
             set = new TreeSet<SubscribeService>(new Comparator<SubscribeService>(){
 
-                public int compare(SubscribeService o1, SubscribeService o2) {
+                public int compare(final SubscribeService o1, final SubscribeService o2) {
                     return o1.getSubscriptionSource().getPriority() - o2.getSubscriptionSource().getPriority();
                 }
                 
@@ -148,8 +148,8 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         set.add(service);
     }
 
-    private void resurrectFromShelf(String identifier) {
-        SortedSet<SubscribeService> set = shelvedServices.get(identifier);
+    private void resurrectFromShelf(final String identifier) {
+        final SortedSet<SubscribeService> set = shelvedServices.get(identifier);
         if(set != null && ! set.isEmpty()) {
             services.put(identifier, set.first());
             set.remove(set.first());
