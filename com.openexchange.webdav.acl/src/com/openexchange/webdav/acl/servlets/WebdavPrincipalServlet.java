@@ -55,8 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.authentication.LoginException;
-import com.openexchange.groupware.contexts.impl.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.http.Tools;
@@ -148,7 +147,7 @@ public class WebdavPrincipalServlet extends OXServlet {
         ServerSession session;
         try {
             session = new ServerSessionAdapter(getSession(req));
-        } catch (final OXException exc) {
+        } catch (final com.openexchange.exception.OXException exc) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
@@ -165,7 +164,7 @@ public class WebdavPrincipalServlet extends OXServlet {
         removeCookie(req, resp);
         try {
             LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final LoginException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
