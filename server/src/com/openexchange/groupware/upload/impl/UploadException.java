@@ -138,7 +138,7 @@ public class UploadException extends OXException {
         public final String getMessage() {
             return message;
         }
-        
+
         public boolean equals(final OXException e) {
             return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
         }
@@ -179,7 +179,8 @@ public class UploadException extends OXException {
                     new UploadException(
                         getNumber(),
                         Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                        cause, new Object[0]);
+                        cause,
+                        new Object[0]);
                 ret.setLogMessage(getMessage(), args);
             }
             ret.addCategory(category);
@@ -189,16 +190,10 @@ public class UploadException extends OXException {
     }
 
     private String action;
-    
-    
-    
 
     public UploadException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
         super(code, displayMessage, cause, displayArgs);
     }
-
-
-
 
     public String getAction() {
         return action;
