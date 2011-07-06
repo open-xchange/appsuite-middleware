@@ -49,11 +49,8 @@
 
 package com.openexchange.passcrypt;
 
-import com.openexchange.authentication.LoginException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserAttributeAccess;
@@ -88,33 +85,27 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
         }
     }
 
-    public void handleLogin(final LoginResult login) throws LoginException {
-        try {
+    public void handleLogin(final LoginResult login) throws OXException {
+        /*
+         * Crypt & store password to support digest authentication mechanisms which require to look-up a user's password by a certain
+         * user identifier (login)
+         */
+        final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class);
+        final String password = login.getSession().getPassword();
+        if (null != cryptoService && null != password) {
+            final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
+            final User user = login.getUser();
             /*
-             * Crypt & store password to support digest authentication mechanisms which require to look-up a user's password by a certain
-             * user identifier (login)
+             * Previous pass-crypt
              */
-            final CryptoService cryptoService = PasscryptServiceRegistry.getServiceRegistry().getService(CryptoService.class);
-            final String password = login.getSession().getPassword();
-            if (null != cryptoService && null != password) {
-                final UserAttributeAccess attributeAccess = UserAttributeAccess.getDefaultInstance();
-                final User user = login.getUser();
-                /*
-                 * Previous pass-crypt
-                 */
-                final String prevPassCrypt = attributeAccess.getAttribute(PASSCRYPT, user, null);
-                /*
-                 * New pass-crypt
-                 */
-                final String newPassCrypt = cryptoService.encrypt(password, key);
-                if (null == prevPassCrypt || !prevPassCrypt.equals(newPassCrypt)) {
-                    attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, user, login.getContext());
-                }
+            final String prevPassCrypt = attributeAccess.getAttribute(PASSCRYPT, user, null);
+            /*
+             * New pass-crypt
+             */
+            final String newPassCrypt = cryptoService.encrypt(password, key);
+            if (null == prevPassCrypt || !prevPassCrypt.equals(newPassCrypt)) {
+                attributeAccess.setAttribute(PASSCRYPT, newPassCrypt, user, login.getContext());
             }
-        } catch (final OXException e) {
-            throw new LoginException(e);
-        } catch (final OXException e) {
-            throw new LoginException(e);
         }
     }
 
