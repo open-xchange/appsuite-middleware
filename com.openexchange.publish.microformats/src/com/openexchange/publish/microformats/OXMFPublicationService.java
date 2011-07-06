@@ -61,13 +61,12 @@ import java.util.Map;
 import java.util.Random;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.OXException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
@@ -95,11 +94,11 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private static final String TEMPLATE = "template";
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     private String rootURL;
 
-    private PublicationTarget target;
+    private final PublicationTarget target;
 
     private TemplateService templateService;
 
@@ -118,8 +117,8 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     private PublicationTarget buildTarget() {
-        DynamicFormDescription form = new DynamicFormDescription();
-        DynamicFormDescription withoutInfostore = new DynamicFormDescription();
+        final DynamicFormDescription form = new DynamicFormDescription();
+        final DynamicFormDescription withoutInfostore = new DynamicFormDescription();
         
         form.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
         withoutInfostore.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
@@ -136,7 +135,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         withoutInfostore.add(FormElement.link(URL, FORM_LABEL_LINK, false, null));
 
         
-        PublicationTarget target = new OptionalTemplatingTarget(withoutInfostore);
+        final PublicationTarget target = new OptionalTemplatingTarget(withoutInfostore);
 
         target.setFormDescription(form);
         target.setPublicationService(this);
@@ -144,7 +143,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         return target;
     }
 
-    public void setRootURL(String string) {
+    public void setRootURL(final String string) {
         rootURL = string;
     }
 
@@ -152,58 +151,58 @@ public class OXMFPublicationService extends AbstractPublicationService {
         return rootURL;
     }
 
-    public void setFolderType(String string) {
+    public void setFolderType(final String string) {
     	templateChooser.setOption("only", "publish,"+string);
         target.setModule(string);
     }
 
-    public void setTargetId(String targetId) {
+    public void setTargetId(final String targetId) {
         target.setId(targetId);
     }
 
-    public void setTargetDisplayName(String string) {
+    public void setTargetDisplayName(final String string) {
         target.setDisplayName(string);
     }
 
     @Override
-    public void beforeCreate(Publication publication) throws OXException {
+    public void beforeCreate(final Publication publication) throws OXException {
         super.beforeCreate(publication);
         publication.getConfiguration().remove(URL);
         addSecretIfNeeded(publication, null);
         loadTemplate(publication);
     }
 
-    public OXTemplate loadTemplate(Publication publication) throws OXException {
-        String templateName = (String) publication.getConfiguration().get(TEMPLATE);
+    public OXTemplate loadTemplate(final Publication publication) throws OXException {
+        final String templateName = (String) publication.getConfiguration().get(TEMPLATE);
         try {
             if (templateName == null || "".equals(templateName)) {
                 return templateService.loadTemplate(defaultTemplateName);
             }
-            ServerSessionAdapter serverSession = new ServerSessionAdapter(new PublicationSession(publication));
+            final ServerSessionAdapter serverSession = new ServerSessionAdapter(new PublicationSession(publication));
             return templateService.loadTemplate(templateName, defaultTemplateName, serverSession);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
-        } catch (TemplateException e) {
+        } catch (final TemplateException e) {
             throw new OXException(e);
         }
 
     }
 
     @Override
-    public void beforeUpdate(Publication publication) throws OXException {
+    public void beforeUpdate(final Publication publication) throws OXException {
         super.beforeUpdate(publication);
-        Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
+        final Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
         addSecretIfNeeded(publication, oldPublication);
         removeSecretIfNeeded(publication);
     }
 
     @Override
-    public void modifyOutgoing(Publication publication) throws OXException {
+    public void modifyOutgoing(final Publication publication) throws OXException {
         super.modifyOutgoing(publication);
 
-        Map<String, Object> configuration = publication.getConfiguration();
+        final Map<String, Object> configuration = publication.getConfiguration();
 
-        StringBuilder urlBuilder = new StringBuilder(rootURL);
+        final StringBuilder urlBuilder = new StringBuilder(rootURL);
         urlBuilder.append('/').append(publication.getContext().getContextId()).append('/').append(configuration.get(SITE));
 
         if (configuration.containsKey(SECRET)) {
@@ -217,26 +216,26 @@ public class OXMFPublicationService extends AbstractPublicationService {
         publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
     }
 
-    protected String normalizeSiteName(String siteName) {
-        String[] path = siteName.split("/");
-        List<String> normalized = new ArrayList<String>(path.length);
+    protected String normalizeSiteName(final String siteName) {
+        final String[] path = siteName.split("/");
+        final List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
             if (!path[i].equals("")) {
                 normalized.add(path[i]);
             }
         }
 
-        String site = Strings.join(normalized, "/");
+        final String site = Strings.join(normalized, "/");
         return site;
     }
 
     @Override
-    public void modifyIncoming(Publication publication) throws OXException {
+    public void modifyIncoming(final Publication publication) throws OXException {
         String siteName = (String) publication.getConfiguration().get(SITE);
 
         if (siteName != null) {
             siteName = normalizeSiteName(siteName);
-            Publication oldPub = getPublication(publication.getContext(), siteName);
+            final Publication oldPub = getPublication(publication.getContext(), siteName);
             if (oldPub != null && oldPub.getId() != publication.getId()) {
                 throw uniquenessConstraintViolation(SITE, siteName);
             }
@@ -244,23 +243,23 @@ public class OXMFPublicationService extends AbstractPublicationService {
         }
     }
 
-    private boolean needsSecret(Publication publication) {
-        Map<String, Object> configuration = publication.getConfiguration();
+    private boolean needsSecret(final Publication publication) {
+        final Map<String, Object> configuration = publication.getConfiguration();
         return configuration.containsKey(PROTECTED) && ((Boolean) configuration.get(PROTECTED)).booleanValue();
     }
 
-    private void removeSecretIfNeeded(Publication publication) {
+    private void removeSecretIfNeeded(final Publication publication) {
         if (mustRemoveSecret(publication)) {
             publication.getConfiguration().put(SECRET, null);
         }
     }
 
-    private boolean mustRemoveSecret(Publication publication) {
-        Map<String, Object> configuration = publication.getConfiguration();
+    private boolean mustRemoveSecret(final Publication publication) {
+        final Map<String, Object> configuration = publication.getConfiguration();
         return configuration.containsKey(PROTECTED) && !((Boolean) configuration.get(PROTECTED)).booleanValue();
     }
 
-    private void addSecretIfNeeded(Publication publication, Publication oldPublication) {
+    private void addSecretIfNeeded(final Publication publication, final Publication oldPublication) {
         if (needsSecret(publication)) {
 
             String secret = null;
@@ -268,8 +267,8 @@ public class OXMFPublicationService extends AbstractPublicationService {
                 secret = (String) oldPublication.getConfiguration().get(SECRET);
             }
             if (secret == null) {
-                long l1 = random.nextLong();
-                long l2 = random.nextLong();
+                final long l1 = random.nextLong();
+                final long l2 = random.nextLong();
 
                 secret = Long.toHexString(l1) + Long.toHexString(l2);
             }
@@ -279,11 +278,11 @@ public class OXMFPublicationService extends AbstractPublicationService {
         }
     }
 
-    public Publication getPublication(Context ctx, String site) throws OXException {
-        Map<String,Object> query = new HashMap<String, Object>();
+    public Publication getPublication(final Context ctx, final String site) throws OXException {
+        final Map<String,Object> query = new HashMap<String, Object>();
         query.put(SITE, site);
 
-        Collection<Publication> result = getStorage().search(ctx, getTarget().getId(), query);
+        final Collection<Publication> result = getStorage().search(ctx, getTarget().getId(), query);
         if (result.isEmpty()) {
             return null;
         }
@@ -291,12 +290,12 @@ public class OXMFPublicationService extends AbstractPublicationService {
         return result.iterator().next();
     }
 
-    public void setDefaultTemplateName(String defaultTemplateName) {
+    public void setDefaultTemplateName(final String defaultTemplateName) {
         this.defaultTemplateName = defaultTemplateName;
     }
 
 
-    public void setTemplateService(TemplateService templateService) {
+    public void setTemplateService(final TemplateService templateService) {
         this.templateService = templateService;
     }
 
@@ -307,13 +306,13 @@ public class OXMFPublicationService extends AbstractPublicationService {
     
     private static final class OptionalTemplatingTarget extends PublicationTarget implements UserSpecificPublicationTarget {
 
-        private DynamicFormDescription withoutInfostore;
+        private final DynamicFormDescription withoutInfostore;
 
-        public OptionalTemplatingTarget(DynamicFormDescription withoutInfostore) {
+        public OptionalTemplatingTarget(final DynamicFormDescription withoutInfostore) {
             this.withoutInfostore = withoutInfostore;
         }
         
-        public DynamicFormDescription getUserSpecificDescription(User user, UserConfiguration configuration) {
+        public DynamicFormDescription getUserSpecificDescription(final User user, final UserConfiguration configuration) {
             if (configuration.hasInfostore()) {
                 return getFormDescription();
             }

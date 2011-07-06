@@ -63,9 +63,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.userconf.UserConfigurationService;
 
