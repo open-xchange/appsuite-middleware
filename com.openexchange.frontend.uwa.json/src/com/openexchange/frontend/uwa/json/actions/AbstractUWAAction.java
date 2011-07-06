@@ -52,12 +52,12 @@ package com.openexchange.frontend.uwa.json.actions;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
 import com.openexchange.frontend.uwa.json.UWAWidgetParser;
 import com.openexchange.frontend.uwa.json.UWAWidgetWriter;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.modules.json.ModelParser;
 import com.openexchange.modules.json.actions.AbstractActionPrototype;
 import com.openexchange.modules.json.actions.RequestPrototype;
@@ -79,11 +79,11 @@ public abstract class AbstractUWAAction extends AbstractActionPrototype<UWAWidge
     }
 
     @Override
-    protected AJAXRequestResult perform(RequestPrototype<UWAWidget> req) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult perform(RequestPrototype<UWAWidget> req) throws JSONException, OXException {
         return perform((UWAWidgetRequest)req, factory.getService(req.getSession().getUserId(), req.getSession().getContextId()));
     }
     
-    protected abstract AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws AbstractOXException, JSONException;
+    protected abstract AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException;
     
     @Override
     protected UWAWidgetRequest createRequest(AJAXRequestData request, ModelParser<UWAWidget> modelParser, ServerSession session) {

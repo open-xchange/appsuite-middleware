@@ -51,10 +51,10 @@ package com.openexchange.frontend.uwa.json.actions;
 
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -69,7 +69,7 @@ public class CreateAction extends AbstractUWAAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException {
         UWAWidget widget = req.getBody();
         widgets.create(widget);
         return result(widget);

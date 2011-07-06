@@ -52,10 +52,10 @@ package com.openexchange.frontend.uwa.json.actions;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -70,7 +70,7 @@ public class AllAction extends AbstractUWAAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException {
         List<UWAWidget> all = widgets.all();
         return result(all);
     }

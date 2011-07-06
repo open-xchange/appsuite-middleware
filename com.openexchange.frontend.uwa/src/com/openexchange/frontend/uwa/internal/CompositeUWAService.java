@@ -67,7 +67,6 @@ import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidget.Field;
 import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
 import com.openexchange.frontend.uwa.UWAWidgetService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Tools;
@@ -89,17 +88,17 @@ public class CompositeUWAService implements UWAWidgetService {
 
     private PositionSQLStorage positions = null;
 
-    private IDGeneratorService idGenerator;
+    private final IDGeneratorService idGenerator;
 
-    private int ctxId;
+    private final int ctxId;
 
-    public CompositeUWAService(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator, int userId, int ctxId) throws OXException, OXException {
+    public CompositeUWAService(final DatabaseService dbService, final ConfigViewFactory configViews, final ConfigurationService config, final IDGeneratorService idGenerator, final int userId, final int ctxId) throws OXException, OXException {
         userScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
         contextScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
         positions = new PositionSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
 
-        ConfigView view = configViews.getView(userId, ctxId);
-        String filename = view.get("com.openexchange.frontend.uwa.widgetFile", String.class);
+        final ConfigView view = configViews.getView(userId, ctxId);
+        final String filename = view.get("com.openexchange.frontend.uwa.widgetFile", String.class);
         Map<String, Map<String, Object>> configValues = null;
         if (filename != null) {
             configValues = ensureType(config.getYaml(filename));
@@ -114,11 +113,11 @@ public class CompositeUWAService implements UWAWidgetService {
     }
     
 
-    private Map<String, Map<String, Object>> ensureType(Object yaml) throws OXException {
+    private Map<String, Map<String, Object>> ensureType(final Object yaml) throws OXException {
         if (Map.class.isInstance(yaml)) {
-            for(Map.Entry<Object, Object> entry : ((Map<Object, Object>) yaml).entrySet()) {
-                Object key = entry.getKey();
-                Object value = entry.getValue();
+            for(final Map.Entry<Object, Object> entry : ((Map<Object, Object>) yaml).entrySet()) {
+                final Object key = entry.getKey();
+                final Object value = entry.getValue();
                 if(!Map.class.isInstance(value)) {
                     throw UWAWidgetExceptionCodes.INVALID_CONFIGURATION.create();
                 }
@@ -134,32 +133,32 @@ public class CompositeUWAService implements UWAWidgetService {
 
     public List<UWAWidget> all() throws OXException {
         try {
-            List<UWAWidget> userWidgets = userScope.load();
+            final List<UWAWidget> userWidgets = userScope.load();
             Tools.set(userWidgets, UWAWidget.Field.PROTECTED, false);
 
-            List<UWAWidget> contextWidgets = contextScope.load();
+            final List<UWAWidget> contextWidgets = contextScope.load();
             Tools.set(contextWidgets, UWAWidget.Field.PROTECTED, true);
 
-            List<UWAWidget> serverWidgets = serverScope.list();
+            final List<UWAWidget> serverWidgets = serverScope.list();
             Tools.set(serverWidgets, UWAWidget.Field.PROTECTED, true);
 
-            List<UWAWidget> positionInformation = positions.load();
+            final List<UWAWidget> positionInformation = positions.load();
 
-            List<UWAWidget> all = new ArrayList<UWAWidget>(userWidgets.size() + contextWidgets.size() + serverWidgets.size());
+            final List<UWAWidget> all = new ArrayList<UWAWidget>(userWidgets.size() + contextWidgets.size() + serverWidgets.size());
 
             all.addAll(scope("user", userWidgets));
             all.addAll(scope("context", contextWidgets));
             all.addAll(scope("server", serverWidgets));
 
-            Map<String, UWAWidget> positionMap = new HashMap<String, UWAWidget>();
-            for (UWAWidget widget : positionInformation) {
+            final Map<String, UWAWidget> positionMap = new HashMap<String, UWAWidget>();
+            for (final UWAWidget widget : positionInformation) {
                 positionMap.put(widget.getId(), widget);
             }
 
-            for (UWAWidget widget : all) {
-                UWAWidget position = positionMap.get(widget.getId());
+            for (final UWAWidget widget : all) {
+                final UWAWidget position = positionMap.get(widget.getId());
                 if(position != null) {
-                    for (Field field : POSITION_FIELDS) {
+                    for (final Field field : POSITION_FIELDS) {
                         widget.set(field, position.get(field));
                     }
                 }
@@ -167,28 +166,28 @@ public class CompositeUWAService implements UWAWidgetService {
             
             return all;
 
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
 
-    private List<UWAWidget> scope(String scope, List<UWAWidget> widgets) {
-        for (UWAWidget widget : widgets) {
+    private List<UWAWidget> scope(final String scope, final List<UWAWidget> widgets) {
+        for (final UWAWidget widget : widgets) {
             scope(scope, widget);
         }
         return widgets;
     }
 
-    private void scope(String scope, UWAWidget widget) {
+    private void scope(final String scope, final UWAWidget widget) {
         widget.setId(IDMangler.mangle(scope, widget.getId()));
     }
 
-    public void create(UWAWidget widget) throws OXException {
+    public void create(final UWAWidget widget) throws OXException {
         try {
-            int dbId = idGenerator.getId("uwaWidget", ctxId);
-            String id = IDMangler.mangle("user", ""+dbId);
+            final int dbId = idGenerator.getId("uwaWidget", ctxId);
+            final String id = IDMangler.mangle("user", ""+dbId);
             
             widget.setId(String.valueOf(dbId));
             userScope.create(widget);
@@ -196,36 +195,36 @@ public class CompositeUWAService implements UWAWidgetService {
             widget.setId(id);
             positions.create(widget);
             
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         }
         
     }
 
-    public void delete(String id) throws OXException {
+    public void delete(final String id) throws OXException {
         if (isProtected(id)) {
             throw UWAWidgetExceptionCodes.PROTECTED.create(id);
         }
         
         try {
-            List<String> components = IDMangler.unmangle(id);
+            final List<String> components = IDMangler.unmangle(id);
             
             userScope.delete(components.get(1));
             positions.delete(id);
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             throw new OXException(x);
         }
         
     }
 
-    public UWAWidget get(String id) throws OXException {
-        List<String> components = IDMangler.unmangle(id);
-        String scope = components.get(0);
-        String unscopedId = components.get(1);
+    public UWAWidget get(final String id) throws OXException {
+        final List<String> components = IDMangler.unmangle(id);
+        final String scope = components.get(0);
+        final String unscopedId = components.get(1);
 
         UWAWidget widget = null;
         if (scope.equals("server")) {
@@ -233,9 +232,9 @@ public class CompositeUWAService implements UWAWidgetService {
         } else {
             try {
                 widget = userScope.load(unscopedId);
-            } catch (SQLException x) {
+            } catch (final SQLException x) {
                 throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-            } catch (AbstractOXException x) {
+            } catch (final OXException x) {
                 throw new OXException(x);
             }
             if (widget == null) {
@@ -246,22 +245,22 @@ public class CompositeUWAService implements UWAWidgetService {
         widget.setId(id);
 
         try {
-            UWAWidget position = positions.load(id);
+            final UWAWidget position = positions.load(id);
             if (position != null) {
-                for (Field field : POSITION_FIELDS) {
+                for (final Field field : POSITION_FIELDS) {
                     widget.set(field, position.get(field));
                 }
             }
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             throw new OXException(x);
         }
 
         return widget;
     }
 
-    public void update(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws OXException {
+    public void update(final UWAWidget widget, final List<? extends Attribute<UWAWidget>> modified) throws OXException {
         if (isProtected(widget.getId())) {
             if (!onlyPositionFields(modified)) {
                 throw UWAWidgetExceptionCodes.PROTECTED.create(widget.getId());
@@ -272,51 +271,51 @@ public class CompositeUWAService implements UWAWidgetService {
         }
     }
 
-    private void regularUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws OXException {
-        String id = widget.getId();
-        String dbId = IDMangler.unmangle(id).get(1);
+    private void regularUpdate(final UWAWidget widget, final List<? extends Attribute<UWAWidget>> modified) throws OXException {
+        final String id = widget.getId();
+        final String dbId = IDMangler.unmangle(id).get(1);
         try {
             widget.setId(dbId);
             userScope.update(widget, modified);
-        } catch (DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         }
         widget.setId(id);
         positionUpdate(widget, modified);
     }
 
-    private void positionUpdate(UWAWidget widget, List<? extends Attribute<UWAWidget>> modified) throws OXException {
+    private void positionUpdate(final UWAWidget widget, final List<? extends Attribute<UWAWidget>> modified) throws OXException {
         try {
             if (positions.exists(widget.getId())) {
                 positions.update(widget, modified);
             } else {
                 positions.create(widget);
             }
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         }
     }
 
-    private boolean onlyPositionFields(List<? extends Attribute<UWAWidget>> modified) {
-        Set<Attribute<UWAWidget>> fieldSet = new HashSet<Attribute<UWAWidget>>(modified);
+    private boolean onlyPositionFields(final List<? extends Attribute<UWAWidget>> modified) {
+        final Set<Attribute<UWAWidget>> fieldSet = new HashSet<Attribute<UWAWidget>>(modified);
         fieldSet.removeAll(POSITION_FIELDS);
         fieldSet.remove(Field.ID);
         return fieldSet.isEmpty();
     }
 
-    private boolean isProtected(String scopedId) throws OXException {
-        List<String> components = IDMangler.unmangle(scopedId);
-        String scope = components.get(0);
+    private boolean isProtected(final String scopedId) throws OXException {
+        final List<String> components = IDMangler.unmangle(scopedId);
+        final String scope = components.get(0);
 
         try {
             return !(scope.equals("user") && userScope.isUserWidget(components.get(1)));
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

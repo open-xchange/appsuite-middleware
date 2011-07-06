@@ -51,9 +51,9 @@ package com.openexchange.frontend.uwa.json.actions;
 
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -72,7 +72,7 @@ public class DeleteAction extends AbstractUWAAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException {
         req.require("id");
         widgets.delete(req.getParameter("id"));
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;

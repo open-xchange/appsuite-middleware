@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.modules.model.Metadata;
 import com.openexchange.modules.storage.sql.engines.ResultSetHandler;
 import com.openexchange.sql.grammar.NOTNULL;
@@ -69,18 +68,18 @@ import com.openexchange.sql.grammar.SELECT;
  */
 public class UserWidgetSQLStorage extends WidgetSQLStorage {
 
-    public UserWidgetSQLStorage(Metadata<UWAWidget> metadata, DatabaseService dbService, int userId, int ctxId) {
+    public UserWidgetSQLStorage(final Metadata<UWAWidget> metadata, final DatabaseService dbService, final int userId, final int ctxId) {
         super(metadata, dbService, userId, ctxId);
     }
     
-    public boolean isUserWidget(String id) throws SQLException, AbstractOXException {
-        Predicate predicate = builder.matchOne().AND(new NOTNULL("user"));
+    public boolean isUserWidget(final String id) throws SQLException, OXException {
+        final Predicate predicate = builder.matchOne().AND(new NOTNULL("user"));
         
         
-        SELECT select = new SELECT("id").FROM(metadata.getName()).WHERE(predicate);
+        final SELECT select = new SELECT("id").FROM(metadata.getName()).WHERE(predicate);
         return executeQuery(select, primaryKey(id), new ResultSetHandler<Boolean>() {
 
-            public Boolean handle(ResultSet rs) throws SQLException, OXException {
+            public Boolean handle(final ResultSet rs) throws SQLException, OXException {
                 return rs.next();
             }
             

@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.modules.json.ModelParser;
 import com.openexchange.modules.json.ModelWriter;
 import com.openexchange.modules.model.Model;
@@ -71,41 +70,41 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractActionPrototype<T extends Model<T>> implements AJAXActionService{
 
-    private ModelParser<T> parser;
-    private ModelWriter<T> writer;
+    private final ModelParser<T> parser;
+    private final ModelWriter<T> writer;
    
-    public AbstractActionPrototype(ModelParser<T> parser, ModelWriter<T> writer) {
+    public AbstractActionPrototype(final ModelParser<T> parser, final ModelWriter<T> writer) {
         super();
         this.parser = parser;
         this.writer = writer;
     }
 
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        RequestPrototype<T> req = createRequest(request, parser, session);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final RequestPrototype<T> req = createRequest(request, parser, session);
         try {
             return perform(req);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create( e.getMessage(), e);
         }
     }
 
 
-    protected abstract AJAXRequestResult perform(RequestPrototype<T> req) throws AbstractOXException, JSONException;
+    protected abstract AJAXRequestResult perform(RequestPrototype<T> req) throws JSONException, OXException;
 
 
-    protected RequestPrototype<T> createRequest(AJAXRequestData request, ModelParser<T> modelParser, ServerSession session) {
+    protected RequestPrototype<T> createRequest(final AJAXRequestData request, final ModelParser<T> modelParser, final ServerSession session) {
         return new RequestPrototype<T>(request, modelParser, session);
     }
     
-    protected AJAXRequestResult result(T thing) throws JSONException {
+    protected AJAXRequestResult result(final T thing) throws JSONException {
         return new AJAXRequestResult(writer.write(thing));
     }
     
-    protected AJAXRequestResult result(List<T> things) throws JSONException {
-        JSONArray array = new JSONArray();
+    protected AJAXRequestResult result(final List<T> things) throws JSONException {
+        final JSONArray array = new JSONArray();
 
-        for (T thing : things) {
+        for (final T thing : things) {
             array.put(writer.write(thing));
         }
         
