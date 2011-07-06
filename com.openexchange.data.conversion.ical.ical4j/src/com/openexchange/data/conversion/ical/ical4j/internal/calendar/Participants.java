@@ -88,12 +88,10 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
-import com.openexchange.exception.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -139,8 +137,6 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 try {
                     final Resource resource = resourceResolver.load(res.getIdentifier(), ctx);
                     displayName = resource.getDisplayName();
-                } catch (final OXException e) {
-                    throw new ConversionError(index, e);
                 } catch (final OXException e) {
                     throw new ConversionError(index, e);
                 }
@@ -213,8 +209,6 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 address = user.getMail();
             } catch (final OXException e) {
                 throw new ConversionError(index, e);
-            } catch (final OXException e) {
-                throw new ConversionError(index, e);
             }
         }
         return address;
@@ -255,8 +249,6 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             users = userResolver.findUsers(new ArrayList<String>(mails.keySet()), ctx);
         } catch (final OXException e) {
             throw new ConversionError(index, e);
-        } catch (final OXException e) {
-            throw new ConversionError(index, e);
         }
 
         for(final User user : users) {
@@ -264,7 +256,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             ICalParticipant icalP = null;
             for (final String alias: user.getAliases()) {
             	String toRemove = null;
-            	for(String mail: mails.keySet()){
+            	for(final String mail: mails.keySet()){
             		if(mail.equalsIgnoreCase(alias)){
             			icalP = mails.get(mail);
             			toRemove = mail;
@@ -276,12 +268,15 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     break;
                 }
             }
-            if (icalP == null)
+            if (icalP == null) {
                 LOG.warn("Should not be possible to find a user ("+user.getMail()+") by their alias and then be unable to remove that alias  from list");
-            if (icalP.message != null)
+            }
+            if (icalP.message != null) {
                 up.setConfirmMessage(icalP.message);
-            if (icalP.status != -1)
+            }
+            if (icalP.status != -1) {
                 up.setConfirm(icalP.status);
+            }
             
             cObj.addParticipant(up);
         }
@@ -293,13 +288,16 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
             final ICalParticipant icalP = mails.get(mail);
             
-            if (icalP.message != null)
+            if (icalP.message != null) {
                 external.setMessage(icalP.message);
-            if (icalP.status != -1)
+            }
+            if (icalP.status != -1) {
                 external.setConfirm(icalP.status);
+            }
             
-            if (comment != null)
+            if (comment != null) {
                 external.setMessage(comment);
+            }
             
             cObj.addParticipant(external);
             confirmableParticipants.add(external);
@@ -320,8 +318,6 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         final List<Resource> resources;
         try {
             resources = resourceResolver.find(resourceNames, ctx);
-        } catch (final OXException e) {
-            throw new ConversionError(index, e);
         } catch (final OXException e) {
             throw new ConversionError(index, e);
         }
