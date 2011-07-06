@@ -52,6 +52,7 @@ package com.openexchange.file.storage.rdb.internal;
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.CacheKey;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.session.Session;
 

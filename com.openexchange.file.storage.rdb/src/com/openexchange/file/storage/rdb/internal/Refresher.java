@@ -54,12 +54,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.cache.OXCachingException;
-import com.openexchange.cache.OXCachingException.Code;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link Refresher} - A copy of <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>'s Refresher class.
@@ -101,7 +99,7 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
         this.regionName = regionName;
     }
 
-    private Cache getCache() throws CacheException {
+    private Cache getCache() throws OXException {
         final CacheService service = FileStorageRdbServiceRegistry.getServiceRegistry().getService(CacheService.class);
         if (null == service) {
             return null;
@@ -109,7 +107,7 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
         return service.getCache(regionName);
     }
 
-    protected void cache(final T obj) throws CacheException {
+    protected void cache(final T obj) throws OXException {
         final Cache cache = getCache();
         if (null != cache) {
             cache.put(key, obj);
@@ -119,9 +117,9 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
      * 
-     * @throws AbstractOXException if loading or putting into cache fails.
+     * @throws OXException if loading or putting into cache fails.
      */
-    protected T refresh() throws AbstractOXException {
+    protected T refresh() throws OXException {
         final Cache cache = getCache();
         if (null == cache) {
             return factory.load();
@@ -138,8 +136,8 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
                 cond = lock.newCondition();
                 try {
                     cache.putSafe(key, (Serializable) cond);
-                } catch (final CacheException e) {
-                    throw new OXCachingException(Code.FAILED_PUT, e);
+                } catch (final OXException e) {
+                    throw e;
                 }
             } else if (tmp instanceof Condition) {
                 // I have to wait for another thread to load the object.
@@ -169,7 +167,7 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
         if (null != cond) {
             try {
                 retval = factory.load();
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 cache.remove(key);
                 throw e;
             }
@@ -177,8 +175,8 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
             try {
                 cache.put(key, retval);
                 cond.signalAll();
-            } catch (final CacheException e) {
-                throw new OXCachingException(Code.FAILED_PUT, e);
+            } catch (final OXException e) {
+                throw e;
             } finally {
                 lock.unlock();
             }

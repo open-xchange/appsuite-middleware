@@ -59,10 +59,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -137,12 +137,8 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
     private void invalidateFileStorageAccount(final String serviceId, final int id, final int user, final int cid) throws OXException {
         final CacheService cacheService = serviceRegistry.getService(CacheService.class);
         if (null != cacheService) {
-            try {
-                final Cache cache = cacheService.getCache(REGION_NAME);
-                cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
-            } catch (final CacheException e) {
-                throw new OXException(e);
-            }
+            final Cache cache = cacheService.getCache(REGION_NAME);
+            cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
         }
     }
 
@@ -167,11 +163,8 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
                 id,
                 session.getUserId(),
                 session.getContextId()), delegatee), REGION_NAME);
-        } catch (final AbstractOXException e) {
-            if (e instanceof OXException) {
-                throw (OXException) e;
-            }
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 

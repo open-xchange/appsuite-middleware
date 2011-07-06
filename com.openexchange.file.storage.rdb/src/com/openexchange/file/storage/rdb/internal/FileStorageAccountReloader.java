@@ -50,9 +50,9 @@
 package com.openexchange.file.storage.rdb.internal;
 
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link FileStorageAccountReloader}
@@ -72,9 +72,9 @@ public final class FileStorageAccountReloader extends Refresher<FileStorageAccou
     /**
      * Initializes a new {@link FileStorageAccountReloader}.
      * 
-     * @throws AbstractOXException If initial load of the object fails.
+     * @throws OXException If initial load of the object fails.
      */
-    public FileStorageAccountReloader(final FileStorageFactory<FileStorageAccount> factory, final String regionName) throws AbstractOXException {
+    public FileStorageAccountReloader(final FileStorageFactory<FileStorageAccount> factory, final String regionName) throws OXException {
         super(factory, regionName);
         delegate = refresh();
     }
@@ -85,7 +85,7 @@ public final class FileStorageAccountReloader extends Refresher<FileStorageAccou
     private void updateDelegate() throws RuntimeException {
         try {
             delegate = refresh();
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }

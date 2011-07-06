@@ -51,7 +51,7 @@ package com.openexchange.file.storage.rdb.internal;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FileStorageFactory} - A copy of <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>'s OXObjectFactory class.
@@ -69,9 +69,9 @@ public interface FileStorageFactory<T> {
 
     /**
      * @return the object loaded from the database that will be put into cache if the object life timeout removed it.
-     * @throws AbstractOXException if loading the object fails.
+     * @throws OXException if loading the object fails.
      */
-    T load() throws AbstractOXException;
+    T load() throws OXException;
 
     /**
      * @return the single lock for the single cache object.

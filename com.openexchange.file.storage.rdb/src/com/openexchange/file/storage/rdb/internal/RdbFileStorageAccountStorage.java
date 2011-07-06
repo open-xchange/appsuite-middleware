@@ -63,10 +63,9 @@ import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
@@ -74,9 +73,7 @@ import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -130,7 +127,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         final Connection rc;
         try {
             rc = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;
@@ -202,7 +199,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         final Connection rc;
         try {
             rc = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         List<FileStorageAccount> accounts;
@@ -264,7 +261,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         final Connection rc;
         try {
             rc = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         TIntArrayList accounts;
@@ -306,7 +303,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -353,9 +350,6 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
-        } catch (final OXException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
-            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -393,7 +387,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -423,9 +417,6 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
-        } catch (final OXException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
-            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -451,7 +442,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -503,9 +494,6 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
-        } catch (final OXException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
-            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -617,7 +605,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
