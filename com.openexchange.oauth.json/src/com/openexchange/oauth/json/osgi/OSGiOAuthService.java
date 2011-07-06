@@ -51,13 +51,12 @@ package com.openexchange.oauth.json.osgi;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.server.OXException;
 
 /**
  * {@link OSGiOAuthService}

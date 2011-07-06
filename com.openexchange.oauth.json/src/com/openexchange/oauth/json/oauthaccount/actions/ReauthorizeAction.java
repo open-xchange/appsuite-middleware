@@ -52,7 +52,7 @@ package com.openexchange.oauth.json.oauthaccount.actions;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */

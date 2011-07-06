@@ -55,7 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
@@ -80,7 +80,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
              * Parse parameters

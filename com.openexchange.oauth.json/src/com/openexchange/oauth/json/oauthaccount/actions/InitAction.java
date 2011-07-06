@@ -58,7 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
@@ -86,7 +86,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             final String accountId = request.getParameter("id");
             if (null == accountId) {
@@ -106,7 +106,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
     
     //FIXME: Refactor this. These methods are pretty similar. DRY
 
-    private AJAXRequestResult createCallbackAction(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+    private AJAXRequestResult createCallbackAction(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
         final OAuthService oAuthService = getOAuthService();
         /*
          * Parse parameters
@@ -159,7 +159,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         return new AJAXRequestResult(jsonInteraction);
     }
 
-    private AJAXRequestResult reauthorizeCallbackAction(final String accountId, final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+    private AJAXRequestResult reauthorizeCallbackAction(final String accountId, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
         final OAuthService oAuthService = getOAuthService();
         /*
          * Get account by identifier

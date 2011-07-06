@@ -51,13 +51,12 @@ package com.openexchange.oauth.json.oauthaccount;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.json.service.ServiceRegistry;
-import com.openexchange.server.OXException;
 
 /**
  * Parses the JSON representation of an OAuth account.

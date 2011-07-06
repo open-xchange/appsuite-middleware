@@ -59,7 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -114,7 +113,7 @@ public final class AccountMultipleHandler implements MultipleHandler {
 
     public Collection<OXException> getWarnings() {
         if (null == result) {
-            return Collections.<AbstractOXException> emptySet();
+            return Collections.<OXException> emptySet();
         }
         return result.getWarnings();
     }
