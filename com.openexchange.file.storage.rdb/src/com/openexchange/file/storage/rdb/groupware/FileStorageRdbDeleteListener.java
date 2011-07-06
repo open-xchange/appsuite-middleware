@@ -56,7 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
@@ -119,13 +119,13 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
                 final Context context = event.getContext();
                 class GenConfDelete implements TIntProcedure {
 
-                    GenericConfigStorageException genConfError;
+                    OXException genConfError;
 
                     public boolean execute(final int confId) {
                         try {
                             genericConfStorageService.delete(writeCon, context, confId);
                             return true;
-                        } catch (final GenericConfigStorageException e) {
+                        } catch (final OXException e) {
                             genConfError = e;
                             return false;
                         }
@@ -144,7 +144,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());

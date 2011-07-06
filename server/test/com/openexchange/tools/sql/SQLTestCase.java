@@ -65,8 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import junit.framework.TestCase;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
 
 /**
@@ -79,6 +79,7 @@ public abstract class SQLTestCase extends TestCase {
     private ConfigurableDBProvider dbProvider;
     protected Properties properties;
 
+    @Override
     public void setUp() throws Exception {
         loadProperties();
         dbProvider = new ConfigurableDBProvider();
@@ -93,7 +94,7 @@ public abstract class SQLTestCase extends TestCase {
     }
 
     protected void loadProperties() throws IOException {
-        String filename = System.getProperty("com.openexchange.test.sql.properties", "testconf/sql.properties");
+        final String filename = System.getProperty("com.openexchange.test.sql.properties", "testconf/sql.properties");
         properties = new Properties();
         InputStream input = null;
         try {
@@ -122,7 +123,7 @@ public abstract class SQLTestCase extends TestCase {
         return properties.getProperty("url");
     }
 
-    public void assertResult(String sql) throws DBPoolingException, SQLException {
+    public void assertResult(final String sql) throws OXException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -145,7 +146,7 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
 
-    public void assertNoResult(String sql) throws DBPoolingException, SQLException {
+    public void assertNoResult(final String sql) throws OXException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -168,15 +169,15 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
 
-    public void exec(String sql, Object...substitutes) throws DBPoolingException, SQLException {
+    public void exec(final String sql, final Object...substitutes) throws SQLException, OXException {
         exec(sql, Arrays.asList(substitutes));
     }
     
-    public void exec(String sql) throws DBPoolingException, SQLException {
+    public void exec(final String sql) throws SQLException, OXException {
         exec(sql, new ArrayList<Object>(0));
     }
     
-    public void exec(String sql, List<Object> substitues) throws SQLException, DBPoolingException {
+    public void exec(final String sql, final List<Object> substitues) throws SQLException, OXException {
         Connection con = null;
         PreparedStatement stmt = null;
 
@@ -184,7 +185,7 @@ public abstract class SQLTestCase extends TestCase {
             con = getDBProvider().getReadConnection(null);
             stmt = con.prepareStatement(sql);
             int index = 1;
-            for(Object attr : substitues) {
+            for(final Object attr : substitues) {
                 stmt.setObject(index++, attr);
             }
             stmt.execute();
@@ -198,23 +199,23 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
     
-    public List<Map<String, Object>> query(String sql) throws DBPoolingException, SQLException {
+    public List<Map<String, Object>> query(final String sql) throws SQLException, OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         
-        List<Map<String, Object>> results = new LinkedList<Map<String, Object>>();
+        final List<Map<String, Object>> results = new LinkedList<Map<String, Object>>();
         
         try {
             con = getDBProvider().getReadConnection(null);
             stmt = con.prepareStatement(sql);
             rs = stmt.executeQuery();
-            ResultSetMetaData metaData = rs.getMetaData();
+            final ResultSetMetaData metaData = rs.getMetaData();
             while(rs.next()) {
-                Map<String, Object> row = new HashMap<String, Object>();
+                final Map<String, Object> row = new HashMap<String, Object>();
                 for(int i = 1; i <= metaData.getColumnCount(); i++) {
-                    String key = metaData.getColumnName(i);
-                    Object value = rs.getObject(i);
+                    final String key = metaData.getColumnName(i);
+                    final Object value = rs.getObject(i);
                     row.put(key, value);
                 }
                 results.add(row);
@@ -234,25 +235,25 @@ public abstract class SQLTestCase extends TestCase {
         return results;
     }
     
-    protected void copyTableStructure(String origName, String newName) throws DBPoolingException, SQLException {
-        Map<String, Object> createTableRow = query("SHOW CREATE TABLE "+origName).get(0);
+    protected void copyTableStructure(final String origName, final String newName) throws OXException, SQLException {
+        final Map<String, Object> createTableRow = query("SHOW CREATE TABLE "+origName).get(0);
         String createStatement = (String) createTableRow.get("Create Table");
         createStatement = createStatement.replaceAll(origName, newName);
         exec(createStatement);
     }
     
-    protected void dropTable(String tableName) throws DBPoolingException, SQLException {
+    protected void dropTable(final String tableName) throws OXException, SQLException {
         exec("DROP TABLE IF EXISTS "+tableName);
     }
     
-    protected void insert(String tableName, Object...attrs) throws DBPoolingException, SQLException {
-        StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
-        StringBuilder questionMarks = new StringBuilder();
+    protected void insert(final String tableName, final Object...attrs) throws OXException, SQLException {
+        final StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
+        final StringBuilder questionMarks = new StringBuilder();
         
         String key = null;
-        List<Object> values = new ArrayList<Object>();
+        final List<Object> values = new ArrayList<Object>();
         
-        for(Object attr : attrs) {
+        for(final Object attr : attrs) {
             if(key == null) {
                 key = (String) attr;
                 builder.append(key).append(", ");
@@ -271,10 +272,10 @@ public abstract class SQLTestCase extends TestCase {
     }
 
     
-    protected void assertEntry(String tableName, Object...attrs) throws DBPoolingException, SQLException {
-        StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
+    protected void assertEntry(final String tableName, final Object...attrs) throws OXException, SQLException {
+        final StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
         String key = null;
-        for(Object object : attrs) {
+        for(final Object object : attrs) {
             if(key == null) {
                 key = (String) object;
             } else {

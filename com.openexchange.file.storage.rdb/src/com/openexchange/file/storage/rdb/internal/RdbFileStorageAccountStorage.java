@@ -65,7 +65,7 @@ import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -183,7 +183,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             return account;
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -239,7 +239,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             return accounts;
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -353,7 +353,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new OXException(e);
         } catch (final SQLException e) {
@@ -423,7 +423,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new OXException(e);
         } catch (final SQLException e) {
@@ -503,7 +503,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw e;
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new OXException(e);
         } catch (final SQLException e) {
@@ -586,7 +586,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                     }
                 }
             }
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final CryptoException e) {
             return false;
@@ -660,7 +660,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
                 }
                 genericConfStorageService.update(ctx, confId, update);
             }
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final CryptoException e) {
             throw new OXException(e);

@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.contexts.Context;
 
@@ -82,47 +82,47 @@ public class WhiteboardGenericConfigurationStorageService implements GenericConf
         return (GenericConfigurationStorageService) tracker.getService();
     }
     
-    public void delete(Context ctx, int id) throws GenericConfigStorageException {
+    public void delete(Context ctx, int id) throws OXException {
         getDelegate().delete(ctx, id);
     }
 
-    public void delete(Connection con, Context ctx, int id) throws GenericConfigStorageException {
+    public void delete(Connection con, Context ctx, int id) throws OXException {
         getDelegate().delete(con, ctx, id);
     }
 
-    public void delete(Connection writeConnection, Context ctx) throws GenericConfigStorageException {
+    public void delete(Connection writeConnection, Context ctx) throws OXException {
         getDelegate().delete(writeConnection, ctx);
     }
 
-    public void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void fill(Context ctx, int id, Map<String, Object> content) throws OXException {
         getDelegate().fill(ctx, id, content);
     }
 
-    public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
         getDelegate().fill(con, ctx, id, content);
     }
 
-    public int save(Connection con, Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
+    public int save(Connection con, Context ctx, Map<String, Object> content) throws OXException {
         return getDelegate().save(con, ctx, content);
     }
 
-    public int save(Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
+    public int save(Context ctx, Map<String, Object> content) throws OXException {
         return getDelegate().save(ctx, content);
     }
 
-    public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
         getDelegate().update(con, ctx, id, content);
     }
 
-    public void update(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void update(Context ctx, int id, Map<String, Object> content) throws OXException {
         getDelegate().update(ctx, id, content);
     }
 
-    public List<Integer> search(Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+    public List<Integer> search(Context ctx, Map<String, Object> query) throws OXException {
         return getDelegate().search(ctx, query);
     }
 
-    public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+    public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws OXException {
         return getDelegate().search(con, ctx, query);
     }
 

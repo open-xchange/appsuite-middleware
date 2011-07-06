@@ -65,7 +65,7 @@ import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.OXException;
@@ -184,7 +184,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             return modifier.modifyOutgoing(account);
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -240,7 +240,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             return accounts;
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -352,7 +352,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             stmt.executeUpdate();
             wc.commit(); // COMMIT
             return genericConfId;
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new MessagingException(e);
         } catch (final SQLException e) {
@@ -420,7 +420,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             stmt.setInt(pos, accountId);
             stmt.executeUpdate();
             wc.commit(); // COMMIT
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new MessagingException(e);
         } catch (final SQLException e) {
@@ -497,7 +497,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 stmt.executeUpdate();
             }
             wc.commit(); // COMMIT
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new MessagingException(e);
         } catch (final SQLException e) {
@@ -581,7 +581,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                     }
                 }
             }
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final CryptoException e) {
             return "Messaging dynamic configuration with id "+confId+" could not be decrypted";
@@ -655,7 +655,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 }
                 genericConfStorageService.update(ctx, confId, update);
             }
-        } catch (final GenericConfigStorageException e) {
+        } catch (final OXException e) {
             throw new MessagingException(e);
         } catch (final CryptoException e) {
             throw new MessagingException(e);

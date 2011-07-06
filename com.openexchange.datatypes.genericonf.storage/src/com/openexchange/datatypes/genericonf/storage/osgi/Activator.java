@@ -54,12 +54,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.osgiservice.WhiteboardDBProvider;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.datatypes.genericonf.storage.impl.ClearGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.delete.DeleteListener;
 
 public class Activator implements BundleActivator {
@@ -70,12 +68,8 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration createTablesServiceRegistration;
 
-    private ComponentRegistration componentRegistration;
-
-    public void start(BundleContext context) throws Exception {
-        componentRegistration = new ComponentRegistration(context, "com.openexchange.datatypes.genericonf.storage", "GCF", GenericConfigStorageErrorMessage.EXCEPTIONS);
-        
-        MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
+    public void start(final BundleContext context) throws Exception {
+        final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
         mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
         clearTablesServiceRegistration = context.registerService(DeleteListener.class.getName(), new ClearGenConfTables(), null);
         createTablesServiceRegistration = context.registerService(CreateTableService.class.getName(), new CreateGenConfTables(), null);
@@ -85,11 +79,10 @@ public class Activator implements BundleActivator {
             null);
     }
 
-    public void stop(BundleContext context) throws Exception{
+    public void stop(final BundleContext context) throws Exception{
         serviceRegistration.unregister();
         createTablesServiceRegistration.unregister();
         clearTablesServiceRegistration.unregister();
-        componentRegistration.unregister();
     }
 
 }

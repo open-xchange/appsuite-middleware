@@ -67,7 +67,7 @@ import java.util.Map;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
@@ -316,7 +316,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
     }
 
-    private void delete(Subscription subscription, Connection writeConnection) throws SQLException, GenericConfigStorageException, SubscriptionException {
+    private void delete(Subscription subscription, Connection writeConnection) throws SQLException, OXException, SubscriptionException {
         DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
         List<Object> values = new ArrayList<Object>();
@@ -328,7 +328,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         storageService.delete(writeConnection, subscription.getContext(), getConfigurationId(subscription));
     }
 
-    private int save(Subscription subscription, Connection writeConnection) throws GenericConfigStorageException, SQLException {
+    private int save(Subscription subscription, Connection writeConnection) throws OXException, SQLException {
         int configId = storageService.save(writeConnection, subscription.getContext(), subscription.getConfiguration());
 
         int id = IDGenerator.getId(subscription.getContext().getContextId(), Types.SUBSCRIPTION, writeConnection);
@@ -351,7 +351,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return id;
     }
 
-    private void update(Subscription subscription, Connection writeConnection) throws SubscriptionException, GenericConfigStorageException, SQLException {
+    private void update(Subscription subscription, Connection writeConnection) throws SubscriptionException, OXException, SQLException {
         if (subscription.getConfiguration() != null) {
             int configId = getConfigurationId(subscription);
             storageService.update(writeConnection, subscription.getContext(), configId, subscription.getConfiguration());
@@ -432,7 +432,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
-    private List<Subscription> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws GenericConfigStorageException, SQLException {
+    private List<Subscription> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws OXException, SQLException {
         List<Subscription> retval = new ArrayList<Subscription>();
         while (resultSet.next()) {
             Subscription subscription = new Subscription();
@@ -505,7 +505,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 delete(sub, writeConnection);
             }
             txPolicy.commit(writeConnection);
-        } catch (GenericConfigStorageException e) {
+        } catch (OXException e) {
             throw SQLException.create(e);
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -544,7 +544,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             throw new SubscriptionException(e);
         } catch (SQLException e) {
             throw SQLException.create(e);
-        } catch (GenericConfigStorageException e) {
+        } catch (OXException e) {
             throw SQLException.create(e);
         } finally {
             try {
@@ -579,7 +579,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 }
             }
             txPolicy.commit(writeConnection);
-        } catch (GenericConfigStorageException e) {
+        } catch (OXException e) {
             throw new SubscriptionException(e);
         } catch (DBPoolingException e) {
             throw new SubscriptionException(e);

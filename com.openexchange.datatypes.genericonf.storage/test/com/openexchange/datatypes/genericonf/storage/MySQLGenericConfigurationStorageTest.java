@@ -53,10 +53,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
-import com.openexchange.exceptions.StringComponent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.tools.sql.SQLTestCase;
@@ -70,17 +69,16 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     private MySQLGenericConfigurationStorage storage = null;
 
+    @Override
     public void setUp() throws Exception {
-        GenericConfigStorageErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.genericonf.storage");
-        GenericConfigStorageErrorMessage.EXCEPTIONS.setComponent(new StringComponent("GCS"));
-
         loadProperties();
         super.setUp();
         storage = new MySQLGenericConfigurationStorage();
-        DBProvider provider = getDBProvider();
+        final DBProvider provider = getDBProvider();
         storage.setDBProvider(provider);
     }
 
+    @Override
     public void tearDown() throws Exception {
         exec("DELETE FROM genconf_attributes_strings");
         exec("DELETE FROM genconf_attributes_bools");
@@ -88,16 +86,16 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         super.tearDown();
     }
 
-    public void testSaveDynamicConfiguration() throws GenericConfigStorageException, DBPoolingException, SQLException {
-        Map<String, Object> content = new HashMap<String, Object>();
+    public void testSaveDynamicConfiguration() throws OXException, SQLException {
+        final Map<String, Object> content = new HashMap<String, Object>();
         content.put("login", "loginname");
         content.put("otherValue", "other");
         content.put("booleanValue", true);
 
 
-        int contextId = 1;
-        Context ctx = new SimContext(contextId);
-        int id = storage.save(ctx, content);
+        final int contextId = 1;
+        final Context ctx = new SimContext(contextId);
+        final int id = storage.save(ctx, content);
 
         assertTrue("Id should not be 0", id > 0);
 
@@ -107,15 +105,15 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
-    public void testLoadDynamicConfiguration() throws DBPoolingException, SQLException, GenericConfigStorageException {
+    public void testLoadDynamicConfiguration() throws SQLException, OXException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'booleanField', 1)");
 
-        Map<String, Object> content = new HashMap<String, Object>();
+        final Map<String, Object> content = new HashMap<String, Object>();
 
-        int contextId = 1002;
-        Context ctx = new SimContext(contextId);
+        final int contextId = 1002;
+        final Context ctx = new SimContext(contextId);
 
         storage.fill(ctx, 1001, content);
 
@@ -129,7 +127,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
-    public void testUpdateDynamicConfiguration() throws DBPoolingException, SQLException, GenericConfigStorageException {
+    public void testUpdateDynamicConfiguration() throws SQLException, OXException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
@@ -138,7 +136,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'otherBool', 0)");
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'thirdBool', 0)");
 
-        Map<String, Object> content = new HashMap<String, Object>();
+        final Map<String, Object> content = new HashMap<String, Object>();
         
 
         content.put("field", "updatedValue");
@@ -149,9 +147,9 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         content.put("fourthBool", true);
         content.put("thirdBool", null); // Will be removed
         
-        int id = 1001;
-        int contextId = 1002;
-        Context ctx = new SimContext(contextId);
+        final int id = 1001;
+        final int contextId = 1002;
+        final Context ctx = new SimContext(contextId);
 
         storage.update(ctx, id, content);
 
@@ -167,7 +165,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
-    public void testDeleteDynamicConfiguration() throws DBPoolingException, SQLException, GenericConfigStorageException {
+    public void testDeleteDynamicConfiguration() throws SQLException, OXException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
@@ -181,9 +179,9 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1004,'otherBoolID', 1)");
 
         
-        int id = 1001;
-        int contextId = 1002;
-        Context ctx = new SimContext(contextId);
+        final int id = 1001;
+        final int contextId = 1002;
+        final Context ctx = new SimContext(contextId);
 
         storage.delete(ctx, id);
 
@@ -195,7 +193,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
     
-    public void testSearchDynamicConfiguration() throws DBPoolingException, SQLException, GenericConfigStorageException {
+    public void testSearchDynamicConfiguration() throws SQLException, OXException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
@@ -209,7 +207,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1004,'otherBoolID', 1)");
 
         
-        Map<String, Object> query = new HashMap<String, Object>();
+        final Map<String, Object> query = new HashMap<String, Object>();
         query.put("field", "value");
         
         List<Integer> ids = storage.search(new SimContext(1002), query);

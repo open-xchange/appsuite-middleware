@@ -60,11 +60,10 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -80,25 +79,26 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
     
     private DBProvider provider;
 
-    public void setDBProvider(DBProvider provider) {
+    public void setDBProvider(final DBProvider provider) {
         this.provider = provider;
     }
 
-    public int save(Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
+    public int save(final Context ctx, final Map<String, Object> content) throws OXException {
         return save(null, ctx, content);
     }
     
-    public int save(Connection con, final Context ctx, final Map<String, Object> content) throws GenericConfigStorageException {
+    public int save(final Connection con, final Context ctx, final Map<String, Object> content) throws OXException {
         return ((Integer) write(con, ctx, new TX() {
 
+            @Override
             public Object perform() throws SQLException {
-                Connection con = getConnection();
+                final Connection con = getConnection();
 
-                InsertIterator insertIterator = new InsertIterator();
+                final InsertIterator insertIterator = new InsertIterator();
                 insertIterator.prepareStatements(this);
                 
-                int id = IDGenerator.getId(ctx, Types.GENERIC_CONFIGURATION, con);
-                int cid = ctx.getContextId();
+                final int id = IDGenerator.getId(ctx, Types.GENERIC_CONFIGURATION, con);
+                final int cid = ctx.getContextId();
                 insertIterator.setIds(cid, id);
 
                 Tools.iterate(content, insertIterator);
@@ -110,59 +110,54 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         })).intValue();
     }
 
-    private Object write(Connection con, Context ctx, TX tx) throws GenericConfigStorageException {
+    private Object write(final Connection con, final Context ctx, final TX tx) throws OXException {
         Connection writeCon = con;
-        boolean connectionHandling = con == null;
+        final boolean connectionHandling = con == null;
         try {
             if(connectionHandling) {
                 writeCon = provider.getWriteConnection(ctx);
                 writeCon.setAutoCommit(false);
             }
             tx.setConnection(writeCon);
-            Object retval = tx.perform();
+            final Object retval = tx.perform();
             if(connectionHandling) {
                 writeCon.commit();
             }
             return retval;
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             try {
                 if(connectionHandling) {
                     writeCon.rollback();
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
             }
             LOG.error(x.getMessage(), x);
-            GenericConfigStorageErrorMessage.SQLException.throwException(x, x.getMessage());
-            return null;
-        } catch (DBPoolingException e) {
-            throw new GenericConfigStorageException(e);
+            throw GenericConfigStorageErrorMessage.SQLException.create(x, x.getMessage());
         } finally {
             tx.close();
             if(connectionHandling) {
                 try {
                     writeCon.setAutoCommit(true);
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                 }
                 provider.releaseWriteConnection(ctx, writeCon);
             }
         }
     }
     
-    public void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void fill(final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         fill(null, ctx, id, content);
     }
 
-    public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void fill(final Connection con, final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         Connection readCon = con;
-        boolean connectionHandling = con == null;
+        final boolean connectionHandling = con == null;
         try {
             if(connectionHandling) {
                 readCon = provider.getReadConnection(ctx);
             }
             loadValues(readCon, ctx, id, content, "genconf_attributes_strings");
             loadValues(readCon, ctx, id, content, "genconf_attributes_bools");
-        } catch (DBPoolingException e) {
-            throw new GenericConfigStorageException(e);
         } finally {
             if(connectionHandling) {
                 provider.releaseReadConnection(ctx, readCon);
@@ -170,7 +165,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         }
     }
 
-    private void loadValues(Connection readCon, Context ctx, int id, Map<String, Object> content, String tablename) throws GenericConfigStorageException {
+    private void loadValues(final Connection readCon, final Context ctx, final int id, final Map<String, Object> content, final String tablename) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
@@ -181,43 +176,44 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             stmt.setInt(2, id);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                String name = rs.getString("name");
-                Object value = rs.getObject("value");
+                final String name = rs.getString("name");
+                final Object value = rs.getObject("value");
                 
                 content.put(name, value);
             }
-        } catch (SQLException x) {
-            GenericConfigStorageErrorMessage.SQLException.throwException(x, stmt.toString());
+        } catch (final SQLException x) {
+            throw GenericConfigStorageErrorMessage.SQLException.create(x, null == stmt ? x.getMessage() : stmt.toString());
         } finally {
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                 }
 
             }
             if (rs != null) {
                 try {
                     rs.close();
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                 }
             }
         }
     }
     
    
-    public void update(final Context ctx, final int id, final Map<String, Object> content) throws GenericConfigStorageException {
+    public void update(final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         update(null, ctx, id, content);
     }
     
-    public void update(Connection con, final Context ctx, final int id, final Map<String, Object> content) throws GenericConfigStorageException {
+    public void update(final Connection con, final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         final Map<String, Object> original = new HashMap<String, Object>();
         fill(con, ctx, id, original);
 
         write(con, ctx, new TX() {
 
+            @Override
             public Object perform() throws SQLException {
-                UpdateIterator updateIterator = new UpdateIterator();
+                final UpdateIterator updateIterator = new UpdateIterator();
                 try {
                     updateIterator.prepareStatements(this);
                     updateIterator.setIds(ctx.getContextId(), id);
@@ -235,11 +231,11 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     }
 
-    public void delete(final Context ctx, final int id) throws GenericConfigStorageException {
+    public void delete(final Context ctx, final int id) throws OXException {
         delete(null, ctx, id);
     }
     
-    public void delete(Connection con, final Context ctx, final int id) throws GenericConfigStorageException {
+    public void delete(final Connection con, final Context ctx, final int id) throws OXException {
 
         write(con, ctx, new TX() {
 
@@ -250,7 +246,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 return null;
             }
             
-            private void clearTable(String tablename) throws SQLException {
+            private void clearTable(final String tablename) throws SQLException {
                 PreparedStatement delete = null;
                 delete = prepare("DELETE FROM "+tablename+" WHERE cid = ? AND id = ?");
                 delete.setInt(1, ctx.getContextId());
@@ -263,7 +259,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     }
 
-    public void delete(Connection con, final Context ctx) throws GenericConfigStorageException {
+    public void delete(final Connection con, final Context ctx) throws OXException {
 
         write(con, ctx, new TX() {
 
@@ -274,7 +270,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 return null;
             }
             
-            private void clearTable(String tablename) throws SQLException {
+            private void clearTable(final String tablename) throws SQLException {
                 PreparedStatement delete = null;
                 delete = prepare("DELETE FROM "+tablename+" WHERE cid = ?");
                 delete.setInt(1, ctx.getContextId());
@@ -285,16 +281,16 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     }
 
-    public List<Integer> search(Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+    public List<Integer> search(final Context ctx, final Map<String, Object> query) throws OXException {
         return search(null, ctx, query);
     }
     
-    public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
-        boolean handleOwnConnections = con == null;
+    public List<Integer> search(Connection con, final Context ctx, final Map<String, Object> query) throws OXException {
+        final boolean handleOwnConnections = con == null;
             
-        LinkedList<Integer> list = new LinkedList<Integer>();
-        StringBuilder builder = new StringBuilder("SELECT DISTINCT p.id FROM ");
-        SearchIterator whereIterator = new SearchIterator();
+        final LinkedList<Integer> list = new LinkedList<Integer>();
+        final StringBuilder builder = new StringBuilder("SELECT DISTINCT p.id FROM ");
+        final SearchIterator whereIterator = new SearchIterator();
         Tools.iterate(query, whereIterator);
         
         
@@ -318,22 +314,20 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 list.add(I(rs.getInt(1)));
             }
             
-        } catch (DBPoolingException e) {
-            throw new GenericConfigStorageException(e);
-        } catch (SQLException e) {
-            GenericConfigStorageErrorMessage.SQLException.throwException(e, stmt.toString());
+        } catch (final SQLException e) {
+            throw GenericConfigStorageErrorMessage.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
         } finally {
             if(stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                     // Ignore
                 }
             }
             if(rs != null) {
                 try {
                     rs.close(); 
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                     // Ignore
                 }
             }

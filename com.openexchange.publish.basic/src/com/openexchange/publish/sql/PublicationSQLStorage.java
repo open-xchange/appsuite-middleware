@@ -67,7 +67,7 @@ import java.util.Map;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
+import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
@@ -395,7 +395,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             txPolicy.setAutoCommit(writeConnection, false);
             deleteWhereUserID(userID, context, writeConnection);
             txPolicy.commit(writeConnection);
-        } catch (GenericConfigStorageException e) {
+        } catch (OXException e) {
             throw new PublicationException(e);
         } catch (PublicationException e){
             throw e;
@@ -417,7 +417,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             throw SQLException.create(e);
         } catch (DBPoolingException e) {
             throw new PublicationException(e);
-        } catch (GenericConfigStorageException e) {
+        } catch (OXException e) {
             throw new PublicationException(e);
         } finally {
             tryToClose(ctx, writeConnection);
@@ -439,7 +439,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
     }
 
-    private void deleteWhereUserID(int userid, Context context, Connection writeConnection) throws SQLException, GenericConfigStorageException, PublicationException {
+    private void deleteWhereUserID(int userid, Context context, Connection writeConnection) throws SQLException, OXException, PublicationException {
         List<Publication> publicated = getPublicationsOfUser(context, userid);
         for(Publication pub: publicated){
             delete(pub,writeConnection);
@@ -447,7 +447,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
     }
     
-    private void deleteWhereContextID(int contextId, Context ctx, Connection writeConnection) throws SQLException, GenericConfigStorageException {
+    private void deleteWhereContextID(int contextId, Context ctx, Connection writeConnection) throws SQLException, OXException {
         DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER));
 
         List<Object> values = new ArrayList<Object>();
@@ -458,7 +458,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         storageService.delete(writeConnection, ctx);
     }
 
-    private void delete(Publication publication, Connection writeConnection) throws SQLException, GenericConfigStorageException, PublicationException {
+    private void delete(Publication publication, Connection writeConnection) throws SQLException, OXException, PublicationException {
         DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
         List<Object> values = new ArrayList<Object>();
@@ -470,7 +470,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         storageService.delete(writeConnection, publication.getContext(), getConfigurationId(publication));
     }
 
-    private int save(Publication publication, Connection writeConnection) throws GenericConfigStorageException, SQLException {
+    private int save(Publication publication, Connection writeConnection) throws OXException, SQLException {
         int configId = storageService.save(writeConnection, publication.getContext(), publication.getConfiguration());
 
         int id = IDGenerator.getId(publication.getContext(), Types.PUBLICATION, writeConnection);
@@ -493,7 +493,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         return id;
     }
 
-    private void update(Publication publication, Connection writeConnection) throws PublicationException, GenericConfigStorageException, SQLException {
+    private void update(Publication publication, Connection writeConnection) throws PublicationException, OXException, SQLException {
         if (publication.getConfiguration() != null) {
             int configId = getConfigurationId(publication);
             storageService.update(writeConnection, publication.getContext(), configId, publication.getConfiguration());
@@ -533,7 +533,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         }
     }
 
-    private List<Publication> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws SQLException, GenericConfigStorageException, PublicationException {
+    private List<Publication> parseResultSet(ResultSet resultSet, Context ctx, Connection readConnection) throws SQLException, OXException, PublicationException {
         List<Publication> retval = new ArrayList<Publication>();
 
         while (resultSet.next()) {

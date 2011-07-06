@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -67,57 +68,57 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
 
     public Map<Integer, Map<String, Object>> entries = new HashMap<Integer, Map<String, Object>>();
 
-    public void delete(Context ctx, int id) throws GenericConfigStorageException {
+    public void delete(Context ctx, int id) throws OXException {
         entries.remove(id);
     }
 
-    public void delete(Connection con, Context ctx, int id) throws GenericConfigStorageException {
+    public void delete(Connection con, Context ctx, int id) throws OXException {
         entries.remove(id);
     }
     
-    public void delete(Connection writeConnection, Context ctx) throws GenericConfigStorageException {
+    public void delete(Connection writeConnection, Context ctx) throws OXException {
         entries.clear();   
     }
 
-    public void fill(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void fill(Context ctx, int id, Map<String, Object> content) throws OXException {
         if (!entries.containsKey(id)) {
             return;
         }
         content.putAll(entries.get(id));
     }
 
-    public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
         if (!entries.containsKey(id)) {
             return;
         }
         content.putAll(entries.get(id));
     }
 
-    public int save(Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
+    public int save(Context ctx, Map<String, Object> content) throws OXException {
         int id = currentId++;
         entries.put(id, content);
         return id;
     }
 
-    public int save(Connection con, Context ctx, Map<String, Object> content) throws GenericConfigStorageException {
+    public int save(Connection con, Context ctx, Map<String, Object> content) throws OXException {
         int id = currentId++;
         entries.put(id, content);
         return id;
     }
 
-    public void update(Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void update(Context ctx, int id, Map<String, Object> content) throws OXException {
         entries.put(id, content);
     }
 
-    public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws GenericConfigStorageException {
+    public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
         entries.put(id, content);
     }
 
-    public List<Integer> search(Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+    public List<Integer> search(Context ctx, Map<String, Object> query) throws OXException {
         return search(query);
     }
 
-    public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws GenericConfigStorageException {
+    public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws OXException {
         return search(query);
     }
     
