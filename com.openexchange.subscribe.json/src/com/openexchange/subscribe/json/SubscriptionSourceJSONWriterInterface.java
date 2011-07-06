@@ -52,6 +52,7 @@ package com.openexchange.subscribe.json;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 
 public interface SubscriptionSourceJSONWriterInterface {
@@ -74,8 +75,8 @@ public interface SubscriptionSourceJSONWriterInterface {
 
     public static final String MODULE = "module";
 
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException;
+    public JSONObject writeJSON(SubscriptionSource source) throws OXException;
 
-    public JSONArray writeJSONArray(List<SubscriptionSource> sourceList, String[] fields) throws SubscriptionJSONException;
+    public JSONArray writeJSONArray(List<SubscriptionSource> sourceList, String[] fields) throws OXException;
 
 }

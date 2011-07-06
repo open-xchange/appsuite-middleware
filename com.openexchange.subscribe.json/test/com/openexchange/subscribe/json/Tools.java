@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.json;
 
-import com.openexchange.exceptions.StringComponent;
 
 
 /**
@@ -64,8 +63,7 @@ public class Tools {
      * 
      */
     public static void initExceptionFactory() {
-        SubscriptionJSONErrorMessages.FACTORY.setApplicationId("com.openexchange.subscribe");
-        SubscriptionJSONErrorMessages.FACTORY.setComponent(new StringComponent("SUBH"));
+        // Nope
     }
 
 }

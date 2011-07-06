@@ -62,7 +62,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nTranslator;
@@ -98,23 +97,23 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
     }
 
     public Collection<OXException> getWarnings() {
-        return Collections.<AbstractOXException> emptySet();
+        return Collections.<OXException> emptySet();
     }
 
     public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws JSONException, OXException {
         try {
             if(null == action) {
-                MISSING_PARAMETER.throwException("action");
+                MISSING_PARAMETER.create("action");
                 return null;
             } else if(action.equals("listSources") || action.equals("all")) {
                 return listSources(request, session);
             } else if (action.equals("getSource") || action.equals("get")) {
                 return getSource(request, session);
             } else {
-                UNKNOWN_ACTION.throwException(action);
+                UNKNOWN_ACTION.create(action);
                 return null;
             }
-        } catch (final AbstractOXException x) {
+        } catch (final OXException x) {
             throw x;
         } catch (final JSONException x) {
             throw x;
@@ -123,7 +122,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         }
     }
 
-    protected JSONValue listSources(final JSONObject req, final ServerSession session) throws AbstractOXException  {
+    protected JSONValue listSources(final JSONObject req, final ServerSession session) throws OXException  {
         final int module = getModule(req);
         final List<SubscriptionSource> sources = getDiscovery(session).getSources(module);
         final String[] columns = getColumns(req);
@@ -131,7 +130,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         return json;
     }
 
-    private Translator createTranslator(ServerSession session) {
+    private Translator createTranslator(final ServerSession session) {
         final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
         return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }
@@ -144,10 +143,10 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         return columns.split("\\s*,\\s*");
     }
 
-    protected JSONValue getSource(final JSONObject req, final ServerSession session) throws AbstractOXException, JSONException {
+    protected JSONValue getSource(final JSONObject req, final ServerSession session) throws OXException, JSONException {
         final String identifier = req.getString("id");
         if(identifier == null) {
-            MISSING_PARAMETER.throwException("id");
+            MISSING_PARAMETER.create("id");
         }
         final SubscriptionSource source = getDiscovery(session).getSource(identifier);
         final JSONObject data = new SubscriptionSourceJSONWriter(createTranslator(session)).writeJSON(source);
@@ -171,7 +170,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         return -1;
     }
     
-    protected SubscriptionSourceDiscoveryService getDiscovery(ServerSession session) throws AbstractOXException {
+    protected SubscriptionSourceDiscoveryService getDiscovery(final ServerSession session) throws OXException {
         return discoverer.filter(session.getUserId(), session.getContextId());
     }
 }

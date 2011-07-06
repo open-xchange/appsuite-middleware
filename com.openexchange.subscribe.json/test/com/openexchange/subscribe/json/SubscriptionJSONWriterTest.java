@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -94,7 +95,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         
     }
 
-    public void testWriteAsObject() throws JSONException, SubscriptionJSONException {
+    public void testWriteAsObject() throws JSONException, OXException {
 
         JSONObject object = new SubscriptionJSONWriter().write(subscription, form, null);
 
@@ -114,7 +115,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         assertValidates(assertion, object);
     }
 
-    public void testWriteArray() throws SubscriptionJSONException {
+    public void testWriteArray() throws OXException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "source", "displayName", "enabled" };
         specialCols.put("com.openexchange.subscribe.test1", new String[] { "username" });
@@ -132,7 +133,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         assertValidates(assertion, array);
     }
 
-    public void testWriteArrayWithUnusedSource() throws SubscriptionJSONException {
+    public void testWriteArrayWithUnusedSource() throws OXException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "source" };
         specialCols.put("com.openexchange.subscribe.test2", new String[] { "username", "field1", "field2" });
@@ -165,7 +166,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
                 specialCols,
                 Arrays.asList("com.openexchange.subscribe.test2"), form);
             fail("Expected Exception");
-        } catch (SubscriptionJSONException x) {
+        } catch (OXException x) {
             
         }
         //TODO: Then what?

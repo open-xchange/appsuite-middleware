@@ -49,10 +49,10 @@
 
 package com.openexchange.subscribe.json;
 
-import static com.openexchange.groupware.AbstractOXException.CATEGORY_ERROR;
-import static com.openexchange.groupware.AbstractOXException.CATEGORY_USER_INPUT;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 
 /**
@@ -63,19 +63,19 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
-    MISSING_PARAMETER(SubscriptionSourceMultipleHandler.CLASS_ID*100+1, "Missing parameter %s", "", CODE_ERROR),
-    UNKNOWN_ACTION(SubscriptionSourceMultipleHandler.CLASS_ID*100+2, "Unknown Action: %s", "", CODE_ERROR),
+    MISSING_PARAMETER(SubscriptionSourceMultipleHandler.CLASS_ID*100+1, "Missing parameter %s", "", CATEGORY_ERROR),
+    UNKNOWN_ACTION(SubscriptionSourceMultipleHandler.CLASS_ID*100+2, "Unknown Action: %s", "", CATEGORY_ERROR),
     
-    JSONEXCEPTION(SubscriptionSourceJSONWriter.CLASS_ID*100+1, "Got JSONException", "", CODE_ERROR),
-    MISSING_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+2, "Missing Field(s): %s", "", CODE_ERROR),
-    MISSING_FORM_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+3, "Missing Form Field(s): %s", "", CODE_ERROR),
+    JSONEXCEPTION(SubscriptionSourceJSONWriter.CLASS_ID*100+1, "Got JSONException", "", CATEGORY_ERROR),
+    MISSING_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+2, "Missing Field(s): %s", "", CATEGORY_ERROR),
+    MISSING_FORM_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+3, "Missing Form Field(s): %s", "", CATEGORY_ERROR),
     
-    THROWABLE(SubscriptionSourceMultipleHandler.CLASS_ID*100+3, "Got Exception %s", "", CODE_ERROR),
-    UNKNOWN_COLUMN(SubscriptionJSONWriter.CLASS_ID*100+1,"Unknown column: %s", "Please ask only for columns the server knows", USER_INPUT),
+    THROWABLE(SubscriptionSourceMultipleHandler.CLASS_ID*100+3, "Got Exception %s", "", CATEGORY_ERROR),
+    UNKNOWN_COLUMN(SubscriptionJSONWriter.CLASS_ID*100+1,"Unknown column: %s", "Please ask only for columns the server knows", CATEGORY_USER_INPUT),
     
     ;
     
-    private AbstractOXException.Category category;
+    private Category category;
 
     private String help;
 
@@ -83,19 +83,21 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
     private int errorCode;
     
-    public static final SubscriptionJSONExceptions FACTORY = new SubscriptionJSONExceptions();
-    
     /**
      * Initializes a new {@link SubscriptionJSONErrorMessages}.
      */
-    private SubscriptionJSONErrorMessages(final int errorCode, final String message, final String help, final AbstractOXException.Category category) {
+    private SubscriptionJSONErrorMessages(final int errorCode, final String message, final String help, final Category category) {
         this.category = category;
         this.help = help;
         this.message = message;
         this.errorCode = errorCode;
     }
+
+    public String getPrefix() {
+        return "SUBH";
+    }
     
-    public int getDetailNumber() {
+    public int getNumber() {
         return errorCode;
     }
 
@@ -107,20 +109,42 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
         return help;
     }
 
-    public AbstractOXException.Category getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public SubscriptionJSONException createException(final Throwable cause, final Object...args) {
-        return FACTORY.create(this, cause, args);
-    }
-    
-    public void throwException(final Throwable cause, final Object... args) throws SubscriptionJSONException {
-        throw FACTORY.create(this, cause, args);
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
-    public void throwException(final Object... args) throws SubscriptionJSONException {
-        throwException(null, args);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
 }

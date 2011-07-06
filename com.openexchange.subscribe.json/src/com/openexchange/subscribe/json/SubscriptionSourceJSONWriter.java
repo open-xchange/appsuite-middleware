@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.Translator;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -73,31 +74,31 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
 
     private final Translator translator;
 
-    private FormDescriptionWriter formWriter;
+    private final FormDescriptionWriter formWriter;
 
-    public SubscriptionSourceJSONWriter(Translator translator) {
+    public SubscriptionSourceJSONWriter(final Translator translator) {
         super();
         this.translator = translator;
         formWriter = new FormDescriptionWriter(translator);
         
     }
 
-    public JSONObject writeJSON(SubscriptionSource source) throws SubscriptionJSONException {
+    public JSONObject writeJSON(final SubscriptionSource source) throws OXException {
         validate(source);
         JSONObject retval = null;
         try {
             retval = parse(source);
-        } catch (JSONException e) {
-            JSONEXCEPTION.throwException(e);
+        } catch (final JSONException e) {
+            JSONEXCEPTION.create(e);
         }
         return retval;
     }
 
-    public JSONArray writeJSONArray(List<SubscriptionSource> sourceList, String[] fields) throws SubscriptionJSONException {
-        JSONArray retval = new JSONArray();
-        for (SubscriptionSource source : sourceList) {
-            JSONArray row = new JSONArray();
-            for(String field : fields) {
+    public JSONArray writeJSONArray(final List<SubscriptionSource> sourceList, final String[] fields) throws OXException {
+        final JSONArray retval = new JSONArray();
+        for (final SubscriptionSource source : sourceList) {
+            final JSONArray row = new JSONArray();
+            for(final String field : fields) {
                 if(ID.equals(field)) {
                     row.put(source.getId());
                 } else if (DISPLAY_NAME.equals(field)) {
@@ -107,13 +108,13 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
                 } else if (FORM_DESCRIPTION.equals(field)) {
                     try {
                         row.put(formWriter.write(source.getFormDescription()));
-                    } catch (JSONException e) {
-                        JSONEXCEPTION.throwException(e);
+                    } catch (final JSONException e) {
+                        JSONEXCEPTION.create(e);
                     }
                 } else if (MODULE.equals(field)) {
                     row.put(getModuleAsString(source));
                 } else {
-                    SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.throwException(field);
+                    SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(field);
                 }
             }
             retval.put(row);
@@ -121,8 +122,8 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         return retval;
     }
 
-    private JSONObject parse(SubscriptionSource source) throws JSONException {
-        JSONObject retval = new JSONObject();
+    private JSONObject parse(final SubscriptionSource source) throws JSONException {
+        final JSONObject retval = new JSONObject();
 
         retval.put(ID, source.getId());
         retval.put(DISPLAY_NAME, source.getDisplayName());
@@ -135,8 +136,8 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         return retval;
     }
 
-    private String getModuleAsString(SubscriptionSource source) {
-        int module = source.getFolderModule();
+    private String getModuleAsString(final SubscriptionSource source) {
+        final int module = source.getFolderModule();
         switch(module) {
         case FolderObject.CONTACT : return "contacts";
         case FolderObject.CALENDAR : return "calendar";
@@ -147,8 +148,8 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
     }
 
 
-    private void validate(SubscriptionSource source) throws SubscriptionJSONException {
-        List<String> missingFields = new ArrayList<String>();
+    private void validate(final SubscriptionSource source) throws OXException {
+        final List<String> missingFields = new ArrayList<String>();
         if (source.getId() == null) {
             missingFields.add(ID);
         }
@@ -159,12 +160,12 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
             missingFields.add(FORM_DESCRIPTION);
         }
         if (missingFields.size() > 0) {
-            MISSING_FIELD.throwException(buildStringList(missingFields,", "));
+            MISSING_FIELD.create(buildStringList(missingFields,", "));
         }
 
-        for (Iterator<FormElement> iter = source.getFormDescription().iterator(); iter.hasNext();) {
-            FormElement element = iter.next();
-            List<String> missingFormFields = new ArrayList<String>();
+        for (final Iterator<FormElement> iter = source.getFormDescription().iterator(); iter.hasNext();) {
+            final FormElement element = iter.next();
+            final List<String> missingFormFields = new ArrayList<String>();
             if (element.getName() == null) {
                 missingFormFields.add(NAME);
             }
@@ -176,14 +177,14 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
             }
             // TODO: check for mandatory field "mandatory"
             if (missingFormFields.size() > 0) {
-                MISSING_FORM_FIELD.throwException(buildStringList(missingFormFields, ", "));
+                MISSING_FORM_FIELD.create(buildStringList(missingFormFields, ", "));
             }
         }
     }
 
-    private String buildStringList(List<String> strings, String delimiter) {
-        StringBuilder sb = new StringBuilder();
-        for (Iterator<String> iter = strings.iterator(); iter.hasNext();) {
+    private String buildStringList(final List<String> strings, final String delimiter) {
+        final StringBuilder sb = new StringBuilder();
+        for (final Iterator<String> iter = strings.iterator(); iter.hasNext();) {
             sb.append(iter.next());
             if (iter.hasNext()) {
                 sb.append(delimiter);

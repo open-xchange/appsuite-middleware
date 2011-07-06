@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.json;
 
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.THROWABLE;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -59,8 +60,8 @@ import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.THRO
  *
  */
 public class MultipleHandlerTools {
-    public static SubscriptionJSONException wrapThrowable(Throwable t) {
-        return THROWABLE.createException(t, t.getMessage());
+    public static OXException wrapThrowable(final Throwable t) {
+        return THROWABLE.create(t, t.getMessage());
     }
        
 }

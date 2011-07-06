@@ -58,6 +58,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.ValueWriterSwitch;
+import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.Subscription;
 
 /**
@@ -83,8 +84,8 @@ public class SubscriptionJSONWriter {
     
     private static final String ENABLED = "enabled";
 
-    public JSONObject write(Subscription subscription, DynamicFormDescription form, String urlPrefix) throws JSONException, SubscriptionJSONException {
-        JSONObject object = new JSONObject();
+    public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix) throws JSONException, OXException {
+        final JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
         object.put(ENABLED, subscription.isEnabled());
@@ -94,40 +95,40 @@ public class SubscriptionJSONWriter {
         return object;
     }
 
-    private void writeConfiguration(JSONObject object, String id, Map<String, Object> configuration, DynamicFormDescription form, String urlPrefix) throws JSONException, SubscriptionJSONException {
-        JSONObject config = formContentWriter.write(form, configuration, urlPrefix);
+    private void writeConfiguration(final JSONObject object, final String id, final Map<String, Object> configuration, final DynamicFormDescription form, final String urlPrefix) throws JSONException, OXException {
+        final JSONObject config = formContentWriter.write(form, configuration, urlPrefix);
         object.put(id, config);
     }
 
-    public JSONArray writeArray(Subscription subscription, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) throws SubscriptionJSONException {
-        JSONArray array = new JSONArray();
+    public JSONArray writeArray(final Subscription subscription, final String[] basicCols, final Map<String, String[]> specialCols, final List<String> specialsList, final DynamicFormDescription form) throws OXException {
+        final JSONArray array = new JSONArray();
         writeBasicCols(array, subscription, basicCols);
-        for (String identifier : specialsList) {
+        for (final String identifier : specialsList) {
             writeSpecialCols(array, subscription, specialCols.get(identifier), identifier, form);
         }
         return array;
     }
 
-    private void writeSpecialCols(JSONArray array, Subscription subscription, String[] strings, String externalId, DynamicFormDescription form) throws SubscriptionJSONException {
+    private void writeSpecialCols(final JSONArray array, final Subscription subscription, final String[] strings, final String externalId, final DynamicFormDescription form) throws OXException {
         if (strings == null) {
             return;
         }
-        boolean writeNulls = !subscription.getSource().getId().equals(externalId);
-        Map<String, Object> configuration = subscription.getConfiguration();
-        for (String col : strings) {
+        final boolean writeNulls = !subscription.getSource().getId().equals(externalId);
+        final Map<String, Object> configuration = subscription.getConfiguration();
+        for (final String col : strings) {
             if (writeNulls) {
                 array.put(JSONObject.NULL);
             } else {
                 Object value = configuration.get(col);
-                FormElement field = form.getField(col);
+                final FormElement field = form.getField(col);
                 value = field.doSwitch(valueWrite, value);
                 array.put(value);
             }
         }
     }
 
-    private void writeBasicCols(JSONArray array, Subscription subscription, String[] basicCols) throws SubscriptionJSONException {
-        for (String basicCol : basicCols) {
+    private void writeBasicCols(final JSONArray array, final Subscription subscription, final String[] basicCols) throws OXException {
+        for (final String basicCol : basicCols) {
             if (ID.equals(basicCol)) {
                 array.put(subscription.getId());
             } else if (FOLDER.equals(basicCol)) {
@@ -139,7 +140,7 @@ public class SubscriptionJSONWriter {
             } else if (ENABLED.equals(basicCol)) {
                 array.put(subscription.isEnabled());
             } else {
-                SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.throwException(basicCol);
+                SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(basicCol);
             }
         }
     }

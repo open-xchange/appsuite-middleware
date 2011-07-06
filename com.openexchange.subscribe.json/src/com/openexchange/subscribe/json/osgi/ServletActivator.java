@@ -53,12 +53,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
 import com.openexchange.subscribe.json.SubscriptionMultipleFactory;
 import com.openexchange.subscribe.json.SubscriptionServlet;
 import com.openexchange.subscribe.json.SubscriptionSourceMultipleFactory;
@@ -77,11 +75,9 @@ public class ServletActivator extends DeferredActivator {
 
     private static final String SUBSCRIPTION_SOURCES_ALIAS = "ajax/subscriptionSources";
 
-    private List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
+    private final List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
 
     private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class };
-
-    private ComponentRegistration componentRegistration;
 
     private WhiteboardSubscriptionSourceDiscoveryService discoverer;
 
@@ -105,7 +101,7 @@ public class ServletActivator extends DeferredActivator {
         try {
             servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionSourcesServlet(), SUBSCRIPTION_SOURCES_ALIAS));
             servletRegistrations.add(new SessionServletRegistration(context, new SubscriptionServlet(), SUBSCRIPTION_ALIAS));
-            for (SessionServletRegistration reg : servletRegistrations) {
+            for (final SessionServletRegistration reg : servletRegistrations) {
                 reg.open();
             }
             LOG.info("Registered Servlets for Subscriptions");
@@ -115,7 +111,7 @@ public class ServletActivator extends DeferredActivator {
     }
 
     private void deregisterServlets() {
-        for (SessionServletRegistration reg : servletRegistrations) {
+        for (final SessionServletRegistration reg : servletRegistrations) {
             reg.close();
         }
         LOG.info("Deregistered Servlets for Subscriptions");
@@ -129,25 +125,20 @@ public class ServletActivator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         discoverer = new WhiteboardSubscriptionSourceDiscoveryService(context);
-        componentRegistration = new ComponentRegistration(
-            context,
-            "SUBH",
-            "com.openexchange.subscribe.json",
-            SubscriptionJSONErrorMessages.FACTORY);
 
         registerServlets();
         createMultipleHandler();
     }
 
     private void createMultipleHandler() {
-        SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
+        final SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
 
-        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(
+        final SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(
             discoverer,
             subscriptionExecutionService,
             secretService = new WhiteboardSecretService(context));
         secretService.open();
-        SubscriptionSourceMultipleFactory subscriptionSourcesFactory = new SubscriptionSourceMultipleFactory(discoverer);
+        final SubscriptionSourceMultipleFactory subscriptionSourcesFactory = new SubscriptionSourceMultipleFactory(discoverer);
 
         SubscriptionServlet.setFactory(subscriptionsFactory);
         SubscriptionSourcesServlet.setFactory(subscriptionSourcesFactory);
@@ -164,7 +155,6 @@ public class ServletActivator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         deregisterServlets();
         discoverer.close();
-        componentRegistration.unregister();
         destroyMultipleHandler();
     }
 

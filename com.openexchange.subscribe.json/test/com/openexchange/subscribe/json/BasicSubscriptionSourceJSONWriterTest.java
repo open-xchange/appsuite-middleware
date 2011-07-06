@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.FormElement.Widget;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.Translator;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -174,7 +175,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         try {
             parser.writeJSONArray(sourceList, new String[]{"id", "unkownColumn"});
             fail("Unknown column was accepted");
-        } catch (SubscriptionJSONException x) {
+        } catch (OXException x) {
             // Exception is expected
         }
     }
@@ -226,7 +227,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         try {
             parser.writeJSON(source);
             fail("ParseException expected");
-        } catch (SubscriptionJSONException e) {
+        } catch (OXException e) {
             // expected
         }
     }
