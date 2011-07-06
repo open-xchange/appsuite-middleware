@@ -148,7 +148,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
                 }
                 throw new OXFolderException(
                     OXFolderExceptionCode.NOT_VISIBLE,
-                    Category.USER_CONFIGURATION,
+                    CATEGORY_PERMISSION_DENIED,
                     Integer.valueOf(folder.getObjectID()),
                     getUserName(session, user),
                     Integer.valueOf(ctx.getContextId()));

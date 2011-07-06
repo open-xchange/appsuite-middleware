@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  *
  */
 public enum PublicationJSONErrorMessage implements OXExceptionCode {
-    THROWABLE(Category.INTERNAL_ERROR, 1, "Please try again later.", "An unexpected error occurred: %s"),
+    THROWABLE(CATEGORY_ERROR, 1, "Please try again later.", "An unexpected error occurred: %s"),
     MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, "Please correct the client program", "Missing value for parameter %s"),
     UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, "Please correct the client program","Unknown Action: %s"),
     UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, "Please use only entity modules known to the server", "Unknown entity module: %s"),

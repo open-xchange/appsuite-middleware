@@ -186,7 +186,7 @@ public class Folder extends SessionServlet {
         final String message = cause.getMessage();
         return new AbstractOXException(
             EnumComponent.FOLDER,
-            Category.INTERNAL_ERROR,
+            CATEGORY_ERROR,
             9999,
             null == message ? "[Not available]" : message,
             cause);
@@ -837,7 +837,7 @@ public class Folder extends SessionServlet {
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXException e) {
-                            if (e.getDetailNumber() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
+                            if (e.getDetailNumber() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public calendar folders due to user configuration
                                  */
@@ -868,7 +868,7 @@ public class Folder extends SessionServlet {
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXException e) {
-                            if (OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() == e.getDetailNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
+                            if (OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() == e.getDetailNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public contact folders due to user configuration
                                  */
@@ -899,7 +899,7 @@ public class Folder extends SessionServlet {
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXException e) {
-                            if (e.getDetailNumber() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
+                            if (e.getDetailNumber() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public task folders due to user configuration
                                  */
@@ -2320,7 +2320,7 @@ public class Folder extends SessionServlet {
             }
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+            if (!e.getCategory().equals(CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
         } catch (final AbstractOXException e) {

@@ -306,7 +306,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     }
                     throw new OXFolderException(
                         OXFolderExceptionCode.NOT_VISIBLE,
-                        Category.USER_CONFIGURATION,
+                        CATEGORY_PERMISSION_DENIED,
                         Integer.valueOf(parentFolderID),
                         getUserName(session),
                         Integer.valueOf(ctx.getContextId()));
@@ -321,7 +321,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     }
                     throw new OXFolderException(
                         OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION,
-                        Category.USER_CONFIGURATION,
+                        CATEGORY_PERMISSION_DENIED,
                         getUserName(session),
                         getFolderName(parentFolderID, ctx),
                         Integer.valueOf(ctx.getContextId()));
@@ -359,7 +359,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     }
                     throw new OXFolderException(
                         OXFolderExceptionCode.NOT_VISIBLE,
-                        Category.USER_CONFIGURATION,
+                        CATEGORY_PERMISSION_DENIED,
                         Integer.valueOf(folderobject.getObjectID()),
                         getUserName(session),
                         Integer.valueOf(ctx.getContextId()));
@@ -374,7 +374,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     }
                     throw new OXFolderException(
                         OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                        Category.USER_CONFIGURATION,
+                        CATEGORY_PERMISSION_DENIED,
                         getUserName(session),
                         getFolderName(folderobject),
                         Integer.valueOf(ctx.getContextId()));
@@ -454,7 +454,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 }
                 throw new OXFolderException(
                     OXFolderExceptionCode.NOT_VISIBLE,
-                    Category.USER_CONFIGURATION,
+                    CATEGORY_PERMISSION_DENIED,
                     Integer.valueOf(folderId),
                     getUserName(session),
                     Integer.valueOf(ctx.getContextId()));
@@ -469,7 +469,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 }
                 throw new OXFolderException(
                     OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                    Category.USER_CONFIGURATION,
+                    CATEGORY_PERMISSION_DENIED,
                     getUserName(session),
                     getFolderName(folderobject),
                     Integer.valueOf(ctx.getContextId()));
@@ -829,7 +829,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                         getUserName(session, user),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                throw OXFolderExceptionCode.NOT_VISIBLE.create(Category.USER_CONFIGURATION, Integer.valueOf(objectID), getUserName(
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(CATEGORY_PERMISSION_DENIED, Integer.valueOf(objectID), getUserName(
                     session,
                     user), Integer.valueOf(ctx.getContextId()));
             }

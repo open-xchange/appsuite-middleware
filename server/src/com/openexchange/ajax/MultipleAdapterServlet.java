@@ -126,7 +126,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     }
 
     private AbstractOXException wrap(final Throwable t) {
-        final AbstractOXException x = new AbstractOXException(EnumComponent.NONE, Category.INTERNAL_ERROR, 1, "Caught Exception: %s", t);
+        final AbstractOXException x = new AbstractOXException(EnumComponent.NONE, CATEGORY_ERROR, 1, "Caught Exception: %s", t);
         x.setMessageArgs(t.getMessage());
         return x;
     }

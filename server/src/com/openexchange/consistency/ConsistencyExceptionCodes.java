@@ -62,7 +62,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public enum ConsistencyExceptionCodes implements OXExceptionCode {
     /** Error communicating with mbean in server: %s */
-    COMMUNICATION_PROBLEM(COMMUNICATION_PROBLEM_MSG, Category.INTERNAL_ERROR, 1),
+    COMMUNICATION_PROBLEM(COMMUNICATION_PROBLEM_MSG, CATEGORY_ERROR, 1),
     /** Registration of consistency MBean failed. */
     REGISTRATION_FAILED(REGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 2),
     /** Unregistration of consistency MBean failed. */

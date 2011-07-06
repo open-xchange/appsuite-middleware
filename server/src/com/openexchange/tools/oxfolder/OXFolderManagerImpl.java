@@ -272,12 +272,12 @@ final class OXFolderManagerImpl extends OXFolderManager {
                         OXFolderUtility.getFolderName(parentFolder),
                         Integer.valueOf(ctx.getContextId()));
                     if (p.getUnderlyingPermission().canCreateSubfolders()) {
-                        fe.setCategory(Category.USER_CONFIGURATION);
+                        fe.setCategory(CATEGORY_PERMISSION_DENIED);
                     }
                     throw fe;
                 }
                 if (!userConfig.hasModuleAccess(folderObj.getModule())) {
-                    throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                    throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
                         user.getId(),
                         ctx), OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
                 }
@@ -532,7 +532,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
                 throw new OXFolderException(
                     OXFolderExceptionCode.NOT_VISIBLE,
-                    Category.USER_CONFIGURATION,
+                    CATEGORY_PERMISSION_DENIED,
                     Integer.valueOf(fo.getObjectID()),
                     OXFolderUtility.getUserName(session, user),
                     Integer.valueOf(ctx.getContextId()));
@@ -548,7 +548,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                                 OXFolderUtility.getFolderName(fo),
                                 Integer.valueOf(ctx.getContextId()));
                         }
-                        throw OXFolderExceptionCode.NO_RENAME_ACCESS.create(Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                        throw OXFolderExceptionCode.NO_RENAME_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
                             session,
                             user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
                     }
@@ -561,7 +561,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                                 OXFolderUtility.getFolderName(fo),
                                 Integer.valueOf(ctx.getContextId()));
                         }
-                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
                             session,
                             user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
                     }
@@ -1350,7 +1350,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
                 throw new OXFolderException(
                     OXFolderExceptionCode.NOT_VISIBLE,
-                    Category.USER_CONFIGURATION,
+                    CATEGORY_PERMISSION_DENIED,
                     Integer.valueOf(fo.getObjectID()),
                     OXFolderUtility.getUserName(user.getId(), ctx),
                     Integer.valueOf(ctx.getContextId()));
@@ -1433,7 +1433,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
                 throw new OXFolderException(
                     OXFolderExceptionCode.NOT_VISIBLE,
-                    Category.USER_CONFIGURATION,
+                    CATEGORY_PERMISSION_DENIED,
                     Integer.valueOf(fo.getObjectID()),
                     OXFolderUtility.getUserName(user.getId(), ctx),
                     Integer.valueOf(ctx.getContextId()));
@@ -1446,7 +1446,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                         OXFolderUtility.getFolderName(fo),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(Category.USER_CONFIGURATION, OXFolderUtility.getUserName(
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
                     user.getId(),
                     ctx), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
             }
@@ -1906,12 +1906,12 @@ final class OXFolderManagerImpl extends OXFolderManager {
             if (initParent == folderID) {
                 throw new OXFolderException(
                     OXFolderExceptionCode.NOT_VISIBLE,
-                    Category.USER_CONFIGURATION,
+                    CATEGORY_PERMISSION_DENIED,
                     Integer.valueOf(folderID),
                     OXFolderUtility.getUserName(userId, ctx),
                     Integer.valueOf(ctx.getContextId()));
             }
-            throw OXFolderExceptionCode.HIDDEN_FOLDER_ON_DELETION.create(Category.USER_CONFIGURATION, OXFolderUtility.getFolderName(
+            throw OXFolderExceptionCode.HIDDEN_FOLDER_ON_DELETION.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getFolderName(
                 initParent,
                 ctx), Integer.valueOf(ctx.getContextId()), OXFolderUtility.getUserName(userId, ctx));
         }
@@ -1925,7 +1925,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             }
             throw new OXFolderException(
                 OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                Category.USER_CONFIGURATION,
+                CATEGORY_PERMISSION_DENIED,
                 OXFolderUtility.getUserName(userId, ctx),
                 OXFolderUtility.getFolderName(folderID, ctx),
                 Integer.valueOf(ctx.getContextId()));

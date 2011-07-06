@@ -62,11 +62,11 @@ import com.openexchange.groupware.AbstractOXException.Category;
 public enum AuthorizationExceptionCodes implements OXExceptionCode {
 
     /** User is deactivated */
-    USER_DISABLED(USER_DISABLED_MSG, Category.USER_CONFIGURATION, 1),
+    USER_DISABLED(USER_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 1),
     /** Unknown error */
     UNKNOWN(UNKNOWN_MSG, CATEGORY_ERROR, 2),
     /** Password expired */
-    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.USER_CONFIGURATION, 3);
+    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, CATEGORY_PERMISSION_DENIED, 3);
 
     private String message;
     private Category category;

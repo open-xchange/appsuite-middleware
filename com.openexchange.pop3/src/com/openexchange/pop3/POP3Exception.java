@@ -49,9 +49,12 @@
 
 package com.openexchange.pop3;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 
 /**
  * {@link POP3Exception} - Indicates a POP3 error.
@@ -65,7 +68,7 @@ public final class POP3Exception extends OXException {
      */
     private static final long serialVersionUID = -8226676160145457046L;
 
-    public static enum Code {
+    public static enum Code implements OXExceptionCode {
 
         /**
          * Missing parameter in mail connection: %1$s
@@ -90,7 +93,7 @@ public final class POP3Exception extends OXException {
         /**
          * User %1$s has no mail module access due to user configuration
          */
-        NO_MAIL_MODULE_ACCESS("User %1$s has no mail module access due to user configuration", Category.USER_CONFIGURATION, 2003),
+        NO_MAIL_MODULE_ACCESS("User %1$s has no mail module access due to user configuration", CATEGORY_PERMISSION_DENIED, 2003),
         /**
          * No access to mail folder %1$s
          */
@@ -187,7 +190,7 @@ public final class POP3Exception extends OXException {
         /**
          * Flag %1$s could not be changed due to following reason: %2$s
          */
-        FLAG_FAILED("Flag %1$s could not be changed due to following reason: %2$s", Category.INTERNAL_ERROR, 2025),
+        FLAG_FAILED("Flag %1$s could not be changed due to following reason: %2$s", CATEGORY_ERROR, 2025),
         /**
          * Folder %1$s does not hold messages and is therefore not selectable
          */
@@ -219,7 +222,7 @@ public final class POP3Exception extends OXException {
         /**
          * Message could not be moved to trash folder
          */
-        MOVE_ON_DELETE_FAILED("Message could not be moved to trash folder", Category.EXTERNAL_RESOURCE_FULL, 2034),
+        MOVE_ON_DELETE_FAILED("Message could not be moved to trash folder", CATEGORY_CAPACITY, 2034),
         /**
          * Missing %1$s folder in mail move operation
          */
@@ -239,7 +242,7 @@ public final class POP3Exception extends OXException {
         /**
          * Message(s) %1$s in folder %2$s could not be deleted due to following error: %3$s
          */
-        UID_EXPUNGE_FAILED("Message(s) %1$s in folder %2$s could not be deleted due to following error: %3$s", Category.INTERNAL_ERROR, 2039),
+        UID_EXPUNGE_FAILED("Message(s) %1$s in folder %2$s could not be deleted due to following error: %3$s", CATEGORY_ERROR, 2039),
         /**
          * Not allowed to open folder %1$s due to missing read access
          */
@@ -271,19 +274,19 @@ public final class POP3Exception extends OXException {
         /**
          * A protocol exception occurred during execution of an POP3 request: %1$s
          */
-        PROTOCOL_ERROR("A protocol exception occurred during execution of an POP3 request: %1$s", Category.INTERNAL_ERROR, 2047),
+        PROTOCOL_ERROR("A protocol exception occurred during execution of an POP3 request: %1$s", CATEGORY_ERROR, 2047),
         /**
          * Mail folder could not be found: %1$s.
          */
-        FOLDER_NOT_FOUND(OXException.Code.FOLDER_NOT_FOUND),
+        FOLDER_NOT_FOUND(MIMEMailExceptionCode.FOLDER_NOT_FOUND),
         /**
          * An attempt was made to open a read-only folder with read-write: %1$s
          */
-        READ_ONLY_FOLDER(OXException.Code.READ_ONLY_FOLDER),
+        READ_ONLY_FOLDER(MIMEMailExceptionCode.READ_ONLY_FOLDER),
         /**
          * Connection was refused or timed out while attempting to connect to remote server %1$s for user %2$s.
          */
-        CONNECT_ERROR(OXException.Code.CONNECT_ERROR),
+        CONNECT_ERROR(MIMEMailExceptionCode.CONNECT_ERROR),
         /**
          * POP3 does not support to move folders.
          */
@@ -389,23 +392,33 @@ public final class POP3Exception extends OXException {
         private final int detailNumber;
 
         private final Category category;
+        
+        private final String prefix;
 
         private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.detailNumber = detailNumber;
             this.category = category;
+            prefix = POP3Provider.PROTOCOL_POP3.getName();
         }
 
         private Code(final MailExceptionCode code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();
+            prefix = code.getPrefix();
         }
-
-        private Code(final OXException.SettingExceptionCodes code) {
+        
+        private Code(final MIMEMailExceptionCode code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();
+            prefix = code.getPrefix();
+        }
+
+        
+        public String getPrefix() {
+            return prefix;
         }
 
         public Category getCategory() {

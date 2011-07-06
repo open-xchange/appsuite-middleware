@@ -253,7 +253,7 @@ public class SyncServlet extends PermissionServlet {
 			}
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			if (!e.getCategory().equals(CATEGORY_PERMISSION_DENIED)) {
 				response.setException(e);
 			}
 		} catch (final AbstractOXException e) {
@@ -297,7 +297,7 @@ public class SyncServlet extends PermissionServlet {
 	}
 
 	private static final AbstractOXException getWrappingOXException(final Throwable cause) {
-		return new AbstractOXException(EnumComponent.SYNCML, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
+		return new AbstractOXException(EnumComponent.SYNCML, CATEGORY_ERROR, 9999, cause.getMessage(), cause);
 	}
 
 	private static final String checkStringParam(final HttpServletRequest req, final String paramName)

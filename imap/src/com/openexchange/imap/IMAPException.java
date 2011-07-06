@@ -352,7 +352,7 @@ public final class IMAPException extends OXException {
         }
         
         public String getPrefix() {
-            return "MSG";
+            return imapCode.getPrefix();
         }
 
         public Category getCategory() {
@@ -850,6 +850,8 @@ public final class IMAPException extends OXException {
         private final IMAPCode extend;
 
         private final int detailNumber;
+        
+        private final String prefix;
 
         private final Category category;
 
@@ -858,6 +860,7 @@ public final class IMAPException extends OXException {
             extend = null;
             this.detailNumber = detailNumber;
             this.category = category;
+            prefix = IMAPProvider.PROTOCOL_IMAP.getName();
         }
 
         private IMAPCode(final String message, final IMAPCode extend) {
@@ -865,6 +868,7 @@ public final class IMAPException extends OXException {
             this.extend = extend;
             detailNumber = extend.detailNumber;
             category = extend.category;
+            prefix = extend.prefix;
         }
 
         private IMAPCode(final MailExceptionCode code, final IMAPCode extend) {
@@ -872,13 +876,15 @@ public final class IMAPException extends OXException {
             this.extend = extend;
             detailNumber = code.getNumber();
             category = code.getCategory();
+            prefix = code.getPrefix();
         }
 
-        private IMAPCode(final OXExceptionCode code, final IMAPCode extend) {
+        private IMAPCode(final MIMEMailExceptionCode code, final IMAPCode extend) {
             message = code.getMessage();
             this.extend = extend;
             detailNumber = code.getNumber();
             category = code.getCategory();
+            prefix = code.getPrefix();
         }
 
         public Category getCategory() {
@@ -891,6 +897,10 @@ public final class IMAPException extends OXException {
 
         public String getMessage() {
             return message;
+        }
+        
+        public String getPrefix() {
+            return prefix;
         }
 
         private static final Map<IMAPCode, IMAPCode> EXT_MAP;

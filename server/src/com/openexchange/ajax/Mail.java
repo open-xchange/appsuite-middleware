@@ -232,7 +232,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         final String message = cause.getMessage();
         return new AbstractOXException(
             EnumComponent.MAIL,
-            Category.INTERNAL_ERROR,
+            CATEGORY_ERROR,
             9999,
             null == message ? "[Not available]" : message,
             cause);
@@ -571,7 +571,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+            if (!e.getCategory().equals(CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
         } catch (final AbstractOXException e) {
