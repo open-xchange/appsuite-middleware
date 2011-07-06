@@ -59,21 +59,26 @@ import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
  */
 public final class UploadSizeExceededException extends UploadException {
 
+    /**
+     * No instance.
+     */
+    private UploadSizeExceededException(final int code, final String displayMessage, final Throwable cause, final Object[] displayArgs) {
+        super(code, displayMessage, cause, displayArgs);
+    }
+
     private static final long serialVersionUID = -6166524953168225923L;
 
     /**
-     * Initializes a new {@link UploadSizeExceededException}
+     * Initializes a new {@link UploadException} for exceeded upload size.
      * 
      * @param size The actual size in bytes
      * @param maxSize The max. allowed size in bytes
      * @param humanReadable <code>true</code> to convert bytes to a human readable string; otherwise <code>false</code>
      */
-    public UploadSizeExceededException(final long size, final long maxSize, final boolean humanReadable) {
-        super(
-            UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
-            null,
+    public static UploadException create(final long size, final long maxSize, final boolean humanReadable) {
+        return UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.create(
             humanReadable ? getSize(size, 2, false, true) : Long.valueOf(size),
-            humanReadable ? getSize(maxSize, 2, false, true) : Long.valueOf(maxSize));
+            humanReadable ? getSize(maxSize, 2, false, true) : Long.valueOf(maxSize)).setAction(null);
     }
 
 }

@@ -134,8 +134,7 @@ public final class AJAXFile extends PermissionServlet {
             actionGet(req, resp);
         } else {
             final Response response = new Response();
-            response.setException(new UploadException(
-                UploadException.UploadCode.UNKNOWN_ACTION_VALUE,
+            response.setException(UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(
                 null,
                 action == null ? STR_NULL : action));
             try {
@@ -193,7 +192,7 @@ public final class AJAXFile extends PermissionServlet {
         try {
             final String id = req.getParameter(PARAMETER_ID);
             if (id == null || id.length() == 0) {
-                throw new UploadException(UploadException.UploadCode.MISSING_PARAM, ACTION_GET, PARAMETER_ID);
+                throw UploadException.UploadCode.MISSING_PARAM.create(ACTION_GET, PARAMETER_ID);
             }
             /*
              * Check if user agent is internet explorer
@@ -307,11 +306,11 @@ public final class AJAXFile extends PermissionServlet {
                  */
                 final String moduleParam = req.getParameter(PARAMETER_MODULE);
                 if (moduleParam == null) {
-                    throw new UploadException(UploadException.UploadCode.MISSING_PARAM, null, PARAMETER_MODULE);
+                    throw UploadException.UploadCode.MISSING_PARAM.create(null, PARAMETER_MODULE);
                 }
                 final String fileTypeFilter = req.getParameter(PARAMETER_TYPE);
                 if (fileTypeFilter == null) {
-                    throw new UploadException(UploadException.UploadCode.MISSING_PARAM, null, PARAMETER_TYPE);
+                    throw UploadException.UploadCode.MISSING_PARAM.create(null, PARAMETER_TYPE);
                 }
                 final ServerSession sessionObj = getSessionObject(req);
                 final UploadQuotaChecker checker =
@@ -327,7 +326,7 @@ public final class AJAXFile extends PermissionServlet {
                     throw new UploadException(e, null);
                 }
                 if (!ACTION_NEW.equalsIgnoreCase(action)) {
-                    throw new UploadException(UploadException.UploadCode.INVALID_ACTION_VALUE, action, action);
+                    throw UploadException.UploadCode.INVALID_ACTION_VALUE.create(action, action);
                 }
                 /*
                  * Process upload
@@ -351,8 +350,7 @@ public final class AJAXFile extends PermissionServlet {
                             // Check file item's content type
                             final ContentType ct = new ContentType(fileItem.getContentType());
                             if (!checkFileType(fileTypeFilter, ct)) {
-                                throw new UploadException(
-                                    UploadException.UploadCode.INVALID_FILE_TYPE,
+                                throw UploadException.UploadCode.INVALID_FILE_TYPE.create(
                                     action == null ? STR_NULL : action,
                                     fileItem.getContentType(),
                                     fileTypeFilter);

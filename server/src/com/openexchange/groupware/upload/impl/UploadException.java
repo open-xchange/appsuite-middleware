@@ -53,7 +53,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
-import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
@@ -65,6 +64,9 @@ public class UploadException extends OXException {
 
     private static final long serialVersionUID = 8590042770250274015L;
 
+    /**
+     * The upload error code enumeration.
+     */
     public static enum UploadCode implements OXExceptionCode {
         /**
          * File upload failed: %1$s
@@ -144,32 +146,32 @@ public class UploadException extends OXException {
         }
 
         /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
          * 
-         * @return The newly created {@link OXException} instance
+         * @return The newly created {@link UploadException} instance
          */
-        public OXException create() {
-            return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        public UploadException create() {
+            return create(new Object[0]);
         }
 
         /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
          * 
          * @param args The message arguments in case of printf-style message
-         * @return The newly created {@link OXException} instance
+         * @return The newly created {@link UploadException} instance
          */
-        public OXException create(final Object... args) {
-            return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        public UploadException create(final Object... args) {
+            return create(null, args);
         }
 
         /**
-         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
          * 
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
-         * @return The newly created {@link OXException} instance
+         * @return The newly created {@link UploadException} instance
          */
-        public OXException create(final Throwable cause, final Object... args) {
+        public UploadException create(final Throwable cause, final Object... args) {
             final Category category = getCategory();
             final UploadException ret;
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
@@ -191,10 +193,34 @@ public class UploadException extends OXException {
 
     private String action;
 
-    public UploadException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
+    /**
+     * Initializes a new {@link UploadException}.
+     * 
+     * @param code The code
+     * @param displayMessage The display message
+     * @param cause The cause
+     * @param displayArgs The arguments for display message
+     */
+    protected UploadException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
         super(code, displayMessage, cause, displayArgs);
     }
 
+    /**
+     * Sets the action string.
+     * 
+     * @param action The action string
+     * @return This exception with action string applied
+     */
+    public UploadException setAction(final String action) {
+        this.action = action;
+        return this;
+    }
+
+    /**
+     * Gets the action string.
+     * 
+     * @return The action string
+     */
     public String getAction() {
         return action;
     }

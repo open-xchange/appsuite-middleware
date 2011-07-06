@@ -87,7 +87,7 @@ public abstract class UploadQuotaChecker {
         if (module == FolderObject.MAIL) {
             return new MailUploadQuotaChecker(session, ctx);
         }
-        throw new UploadException(UploadException.UploadCode.UNKNOWN_MODULE, null, Integer.valueOf(module));
+        throw UploadException.UploadCode.UNKNOWN_MODULE.create(null, Integer.valueOf(module));
     }
 
 }
