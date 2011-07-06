@@ -54,7 +54,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.services.MonitoringServiceRegistry;
 import com.openexchange.server.Initialization;
@@ -99,7 +99,7 @@ public final class MonitoringInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (started.get()) {
             LOG.error(MonitoringInit.class.getName() + " already started");
             return;
@@ -128,7 +128,7 @@ public final class MonitoringInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.get()) {
             LOG.error(MonitoringInit.class.getName() + " has not been started");
             return;
