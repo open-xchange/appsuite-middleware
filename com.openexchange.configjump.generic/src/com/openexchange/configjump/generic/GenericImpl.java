@@ -54,10 +54,10 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ConfigJumpExceptionCode;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.Replacements;
+import com.openexchange.exception.OXException;
 
 /**
  * Generic implementation of a config jump. Replaces some tags in the URL of
@@ -78,7 +78,7 @@ public class GenericImpl implements ConfigJumpService {
     /**
      * {@inheritDoc}
      */
-    public URL getLink(final Replacements values) throws ConfigJumpException {
+    public URL getLink(final Replacements values) throws OXException {
         final String username = values.getUsername();
         final String password = values.getPassword();
         String replacedUrl = url.replace("%u", username);
