@@ -76,7 +76,6 @@ import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -318,9 +317,6 @@ public class InfostoreRequest extends CommonRequest {
         } catch (final OXException x) {
             handle(x);
             return true;
-        } catch (final SearchIteratorException x) {
-            handle(x);
-            return true;
         } catch (final NumberFormatException x) {
             handle(x);
             return true;
@@ -363,7 +359,7 @@ public class InfostoreRequest extends CommonRequest {
         return ids;
     }
 
-    protected void doSortedSearch(final SimpleRequest req) throws JSONException, AbstractOXException {
+    protected void doSortedSearch(final SimpleRequest req) throws JSONException, OXException {
         Metadata[] cols = null;
 
         try {
@@ -483,7 +479,7 @@ public class InfostoreRequest extends CommonRequest {
 
     // Actions
 
-    protected void list(final int[] ids, final Metadata[] cols, final String timeZoneId) throws AbstractOXException {
+    protected void list(final int[] ids, final Metadata[] cols, final String timeZoneId) throws OXException {
         final InfostoreFacade infostore = getInfostore();
         TimedResult<DocumentMetadata> result = null;
         SearchIterator<DocumentMetadata> iter = null;
@@ -503,7 +499,11 @@ public class InfostoreRequest extends CommonRequest {
 
         } finally {
             if (iter != null) {
-                iter.close();
+                try {
+                    iter.close();
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
     }
@@ -579,7 +579,7 @@ public class InfostoreRequest extends CommonRequest {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -592,7 +592,7 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final String timeZoneId, final int leftHandLimit, final int rightHandLimit)
-            throws AbstractOXException {
+            throws OXException {
         /**
          * System.out.println("ALL: "+System.currentTimeMillis());
          * System.out.println("---------all-------------");
@@ -631,7 +631,7 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir, final String timeZoneId)
-            throws AbstractOXException {
+            throws OXException {
         final InfostoreFacade infostore = getInfostore();
         TimedResult<DocumentMetadata> result = null;
         SearchIterator<DocumentMetadata> iter = null;
@@ -694,8 +694,6 @@ public class InfostoreRequest extends CommonRequest {
             public boolean hasNext() throws OXException{
                 try {
                     scrollToNext();
-                } catch (final SearchIteratorException e) {
-                    se = e;
                 } catch (final OXException e) {
                     oxe = e;
                 }
@@ -722,7 +720,7 @@ public class InfostoreRequest extends CommonRequest {
                 return nextResult;
             }
 
-            private void scrollToNext() throws AbstractOXException {
+            private void scrollToNext() throws OXException {
                 while(iter.hasNext()) {
                     next = iter.next();
                     if(next.getVersion() != 0) {
@@ -741,7 +739,7 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir,
-            final long timestamp, final boolean ignoreDelete, final String timeZoneId) throws AbstractOXException {
+            final long timestamp, final boolean ignoreDelete, final String timeZoneId) throws OXException {
         final InfostoreFacade infostore = getInfostore(folderId);
         Delta<DocumentMetadata> delta = null;
 

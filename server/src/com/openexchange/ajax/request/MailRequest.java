@@ -58,15 +58,14 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public final class MailRequest {
@@ -108,9 +107,9 @@ public final class MailRequest {
      * @param jsonObject - the instance of <code>{@link JSONObject}</code> keeping request's data
      * @param mailInterface - the instance of <code>{@link MailServletInterface}</code> to access mail module
      */
-    public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface) throws AbstractOXException, JSONException {
+    public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
         if (!session.getUserConfiguration().hasWebMail()) {
-            throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "mail");
+            throw AjaxExceptionCodes.NoPermissionForModule.create("mail");
         }
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
             MAIL_SERVLET.actionGetAllMails(session, writer, jsonObject, mailInterface);

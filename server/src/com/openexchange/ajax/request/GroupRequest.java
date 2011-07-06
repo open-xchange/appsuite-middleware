@@ -64,17 +64,13 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.GroupWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.Group.Field;
-import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -98,7 +94,7 @@ public class GroupRequest {
 
     private static final String MODULE_GROUP = "group";
 
-    public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
+    public Object action(final String action, final JSONObject jsonObject) throws OXException, JSONException {
         JSONValue retval = null;
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
             retval = actionList(jsonObject);
@@ -132,10 +128,10 @@ public class GroupRequest {
     }
 
 
-    public JSONValue actionUpdates(JSONObject jsonObject) throws JSONException, OXException, OXException, OXException {
+    public JSONValue actionUpdates(final JSONObject jsonObject) throws JSONException, OXException {
         timestamp = new Date(0);
         final GroupStorage groupStorage = GroupStorage.getInstance();
-        Date modifiedSince = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
+        final Date modifiedSince = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
         
         final Group[] modifiedGroups = groupStorage.listModifiedGroups(modifiedSince, session.getContext());
         final Group[] deletedGroups = groupStorage.listDeletedGroups(modifiedSince, session.getContext());
@@ -144,20 +140,20 @@ public class GroupRequest {
         final JSONArray deleted= new JSONArray();
         
         long lm = 0;
-        for(Group group: modifiedGroups){
-            JSONObject temp = new JSONObject();
+        for(final Group group: modifiedGroups){
+            final JSONObject temp = new JSONObject();
             groupWriter.writeGroup(group, temp);
             modified.put(temp);
             lm = group.getLastModified().getTime() > lm ? group.getLastModified().getTime() : lm;
         }
-        for(Group group: deletedGroups){
-            JSONObject temp = new JSONObject();
+        for(final Group group: deletedGroups){
+            final JSONObject temp = new JSONObject();
             groupWriter.writeGroup(group, temp);
             deleted.put(temp);
             lm = group.getLastModified().getTime() > lm ? group.getLastModified().getTime() : lm;
         }
         timestamp = new Date(lm);
-        JSONObject retVal = new JSONObject();
+        final JSONObject retVal = new JSONObject();
         
         retVal.put("new", modified);
         retVal.put("modified", modified);
@@ -166,7 +162,7 @@ public class GroupRequest {
         return retVal;
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXException, OXException, OXException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXException {
         final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
         timestamp = new Date(0);
         Date lastModified = null;
@@ -199,7 +195,7 @@ public class GroupRequest {
         return retval;
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXException, OXException, OXException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
 
         String searchpattern = null;
@@ -228,15 +224,15 @@ public class GroupRequest {
         return jsonResponseArray;
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException, OXException, OXException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
         
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         boolean loadMembers = false;
-        List<Field> fields = new LinkedList<Field>();
-        for(int column: columns){
-        	Field field = Group.Field.getByColumnNumber(column);
+        final List<Field> fields = new LinkedList<Field>();
+        for(final int column: columns){
+        	final Field field = Group.Field.getByColumnNumber(column);
         	if(field == Group.Field.MEMBERS){
         		loadMembers = true;
         	}
