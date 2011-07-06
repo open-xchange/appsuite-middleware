@@ -58,13 +58,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.twitter.TwitterMessagingException;
 import com.openexchange.messaging.twitter.TwitterMessagingService;
 import com.openexchange.messaging.twitter.TwitterOAuthAccountDeleteListener;
-import com.openexchange.messaging.twitter.exception.TwitterMessagingExceptionFactory;
 import com.openexchange.messaging.twitter.session.TwitterEventHandler;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
@@ -87,8 +84,6 @@ public final class TwitterMessagingActivator extends DeferredActivator {
     private List<ServiceTracker> trackers;
 
     private List<ServiceRegistration> registrations;
-
-    private ComponentRegistration componentRegistration;
 
     private WhiteboardSecretService secretService;
 
@@ -143,15 +138,6 @@ public final class TwitterMessagingActivator extends DeferredActivator {
                 registry.addService(SecretService.class, secretService);
             }
             /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    TwitterMessagingException.TWITTER_MSG_COMPONENT,
-                    "com.openexchange.messaging.twitter",
-                    TwitterMessagingExceptionFactory.getInstance());
-            /*
              * Trackers
              */
             trackers = new ArrayList<ServiceTracker>();
@@ -180,10 +166,6 @@ public final class TwitterMessagingActivator extends DeferredActivator {
         try {
             if(secretService != null) {
                 secretService.close();
-            }
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
             if (null != trackers) {
                 while (!trackers.isEmpty()) {

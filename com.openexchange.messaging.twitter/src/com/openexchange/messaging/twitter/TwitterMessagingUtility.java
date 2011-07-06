@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.twitter;
 
-import com.openexchange.messaging.MessagingContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 
@@ -73,9 +73,9 @@ public final class TwitterMessagingUtility {
      * 
      * @param message The message
      * @return The typed content
-     * @throws MessagingException If message's content is of given type
+     * @throws OXException If message's content is of given type
      */
-    public static <C extends MessagingContent> C checkContent(final Class<C> clazz, final MessagingMessage message) throws MessagingException {
+    public static <C extends MessagingContent> C checkContent(final Class<C> clazz, final MessagingMessage message) throws OXException {
         final MessagingContent content = message.getContent();
         if (!(clazz.isInstance(content))) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.toString());

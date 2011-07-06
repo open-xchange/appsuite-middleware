@@ -51,21 +51,18 @@ package com.openexchange.messaging.twitter;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.TwitterAccess;
-import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterService;
 
 
@@ -91,9 +88,9 @@ public abstract class AbstractTwitterMessagingAccess {
     /**
      * Initializes a new {@link AbstractTwitterMessagingAccess}.
      * 
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    protected AbstractTwitterMessagingAccess(final MessagingAccount account, final Session session) throws MessagingException {
+    protected AbstractTwitterMessagingAccess(final MessagingAccount account, final Session session) throws OXException {
         super();
         this.session = session;
         this.account = account;
@@ -102,7 +99,7 @@ public abstract class AbstractTwitterMessagingAccess {
             secret = TwitterMessagingServiceRegistry.getServiceRegistry().getService(SecretService.class, true).getSecret(session);
 
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
         final int contextId = session.getContextId();
         final int userId = session.getUserId();
@@ -163,12 +160,8 @@ public abstract class AbstractTwitterMessagingAccess {
                     tmp = newTwitterAccess;
                     testOAuthTwitterAccess(tmp);
                 }
-            } catch (final TwitterException e) {
-                throw new MessagingException(e);
             } catch (final OXException e) {
-                throw new MessagingException(e);
-            } catch (final OXException e) {
-                throw new MessagingException(e);
+                throw e;
             }
         }
         twitterAccess = tmp;
@@ -188,7 +181,7 @@ public abstract class AbstractTwitterMessagingAccess {
             paging.setCount(1);
             newTwitterAccess.getFriendsTimeline(paging);
             return true;
-        } catch (final TwitterException e) {
+        } catch (final OXException e) {
             final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(AbstractTwitterMessagingAccess.class);
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -208,7 +201,7 @@ public abstract class AbstractTwitterMessagingAccess {
             paging.count(1);
             twitterAccess.getFriendsTimeline(paging);
             return true;
-        } catch (final TwitterException e) {
+        } catch (final OXException e) {
             return false;
         }
     }

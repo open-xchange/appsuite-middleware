@@ -49,10 +49,11 @@
 
 package com.openexchange.messaging.twitter;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link TwitterMessagingExceptionMessages} - Exception messages for {@link TwitterMessagingException} that needs to be translated.
+ * {@link TwitterMessagingExceptionMessages} - Exception messages that needs to be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16

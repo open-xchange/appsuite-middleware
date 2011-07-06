@@ -59,12 +59,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
@@ -161,11 +161,11 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
         }
     }
 
-    public void writeTo(final OutputStream os) throws IOException, MessagingException {
+    public void writeTo(final OutputStream os) throws IOException, OXException {
         // Nothing to do
     }
 
-    public long getSize() throws MessagingException {
+    public long getSize() throws OXException {
         return size;
     }
 
@@ -177,7 +177,7 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
         return headers;
     }
 
-    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+    public MessagingHeader getFirstHeader(final String name) throws OXException {
         final Collection<MessagingHeader> collection = getHeader(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
@@ -186,23 +186,23 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
         return headers.get(name);
     }
 
-    public String getFileName() throws MessagingException {
+    public String getFileName() throws OXException {
         return null;
     }
 
-    public String getDisposition() throws MessagingException {
+    public String getDisposition() throws OXException {
         return CONTENT_DISPOSITION.getDisposition();
     }
 
-    public ContentType getContentType() throws MessagingException {
+    public ContentType getContentType() throws OXException {
         return contentType;
     }
 
-    public MessagingContent getContent() throws MessagingException {
+    public MessagingContent getContent() throws OXException {
         return content;
     }
 
-    public MultipartContent getParent() throws MessagingException {
+    public MultipartContent getParent() throws OXException {
         return parent;
     }
 

@@ -56,9 +56,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
@@ -136,7 +136,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         long sz = -1;
         try {
             sz = multipartContent.get(0).getSize() + multipartContent.get(1).getSize();
-        } catch (final MessagingException e) {
+        } catch (final OXException e) {
             // Cannot occur
             org.apache.commons.logging.LogFactory.getLog(TwitterMessagingMessage.class).error(e.getMessage(), e);
         }
@@ -165,19 +165,19 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         return Collections.emptyList();
     }
 
-    public MessagingContent getContent() throws MessagingException {
+    public MessagingContent getContent() throws OXException {
         return content;
     }
 
-    public String getDisposition() throws MessagingException {
+    public String getDisposition() throws OXException {
         return MessagingPart.INLINE;
     }
 
-    public String getFileName() throws MessagingException {
+    public String getFileName() throws OXException {
         return null;
     }
 
-    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+    public MessagingHeader getFirstHeader(final String name) throws OXException {
         final Collection<MessagingHeader> collection = getHeader(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
@@ -195,7 +195,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         return null;
     }
 
-    public void writeTo(final OutputStream os) throws IOException, MessagingException {
+    public void writeTo(final OutputStream os) throws IOException, OXException {
         // TODO Auto-generated method stub
     }
 
@@ -207,7 +207,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         return 0;
     }
 
-    public ContentType getContentType() throws MessagingException {
+    public ContentType getContentType() throws OXException {
         return CONTENT_TYPE;
     }
 
@@ -227,7 +227,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         return picture;
     }
 
-    public String getUrl() throws MessagingException {
+    public String getUrl() throws OXException {
         return null;
     }
 

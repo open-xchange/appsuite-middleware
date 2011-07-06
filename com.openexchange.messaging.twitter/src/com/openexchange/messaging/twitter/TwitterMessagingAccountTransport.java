@@ -52,15 +52,14 @@ package com.openexchange.messaging.twitter;
 import static com.openexchange.messaging.twitter.TwitterMessagingUtility.checkContent;
 import static com.openexchange.messaging.twitter.TwitterMessagingUtility.parseUnsignedLong;
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.session.Session;
-import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterExceptionCodes;
 
 /**
@@ -73,13 +72,13 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
     /**
      * Initializes a new {@link TwitterMessagingAccountTransport}.
      * 
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public TwitterMessagingAccountTransport(final MessagingAccount account, final Session session) throws MessagingException {
+    public TwitterMessagingAccountTransport(final MessagingAccount account, final Session session) throws OXException {
         super(account, session);
     }
 
-    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         final String messageType;
         {
             final MessagingHeader header = message.getFirstHeader(MessagingHeader.KnownHeader.MESSAGE_TYPE.toString());
@@ -100,8 +99,8 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
                     throw TwitterExceptionCodes.MISSING_PROPERTY.create(MessagingHeader.KnownHeader.TO.toString());
                 }
                 twitterAccess.sendDirectMessage(screenName, content.toString());
-            } catch (final TwitterException e) {
-                throw new MessagingException(e);
+            } catch (final OXException e) {
+                throw e;
             }
         } else if (TwitterConstants.TYPE_RETWEET.equalsIgnoreCase(messageType)) {
             /*
@@ -119,8 +118,8 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
                 } else {
                     twitterAccess.updateStatus(content.toString());
                 }
-            } catch (final TwitterException e) {
-                throw new MessagingException(e);
+            } catch (final OXException e) {
+                throw e;
             }
 
         } else {
@@ -130,8 +129,8 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
             try {
                 final StringContent content = checkContent(StringContent.class, message);
                 twitterAccess.updateStatus(content.toString());
-            } catch (final TwitterException e) {
-                throw new MessagingException(e);
+            } catch (final OXException e) {
+                throw e;
             }
         }
     }
@@ -140,7 +139,7 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
         connected = false;
     }
 
-    public void connect() throws MessagingException {
+    public void connect() throws OXException {
         connected = true;
     }
 

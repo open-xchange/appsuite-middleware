@@ -49,9 +49,9 @@
 
 package com.openexchange.messaging.twitter;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingMessageAccess;
@@ -71,9 +71,9 @@ public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagin
     /**
      * Initializes a new {@link TwitterMessagingAccountAccess}.
      * 
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public TwitterMessagingAccountAccess(final MessagingAccount account, final Session session) throws MessagingException {
+    public TwitterMessagingAccountAccess(final MessagingAccount account, final Session session) throws OXException {
         super(account, session);
     }
 
@@ -81,14 +81,14 @@ public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagin
         return account.getId();
     }
 
-    public MessagingFolderAccess getFolderAccess() throws MessagingException {
+    public MessagingFolderAccess getFolderAccess() throws OXException {
         if (null == folderAccess) {
             folderAccess = new TwitterMessagingFolderAccess(account, session);
         }
         return folderAccess;
     }
 
-    public MessagingMessageAccess getMessageAccess() throws MessagingException {
+    public MessagingMessageAccess getMessageAccess() throws OXException {
         if (null == messageAccess) {
             messageAccess = new TwitterMessagingMessageAccess(twitterAccess, account, session);
         }
@@ -99,7 +99,7 @@ public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagin
         connected = false;
     }
 
-    public void connect() throws MessagingException {
+    public void connect() throws OXException {
         connected = true;
     }
 
@@ -107,7 +107,7 @@ public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagin
         return connected;
     }
 
-    public MessagingFolder getRootFolder() throws MessagingException {
+    public MessagingFolder getRootFolder() throws OXException {
         return getFolderAccess().getRootFolder();
     }
 
