@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.crypto.CryptoException;
+import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.AbstractOXException;
@@ -174,7 +174,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 String encrypted;
                 try {
                     encrypted = CRYPTO.encrypt(toEncrypt, secret);
-                } catch (CryptoException e) {
+                } catch (OXException e) {
                     throw new SubscriptionException(e);
                 }
                 map.put(key, encrypted);
@@ -195,7 +195,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 String decrypted;
                 try {
                     decrypted = CRYPTO.decrypt(toDecrypt, secret);
-                } catch (CryptoException e) {
+                } catch (OXException e) {
                     // Fail silently
                     decrypted = null;
                 }
@@ -220,7 +220,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                         CRYPTO.decrypt(password, secret);
                     }
                 }
-            } catch (CryptoException x) {
+            } catch (OXException x) {
                 return "Could not decode subscription passwords for subscription: "+subscription.getId()+" : "+subscription.getDisplayName();
             }
         }
@@ -245,13 +245,13 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                             try {
                                 // If we can already decrypt with the new secret, we're done with this entry
                                 CRYPTO.decrypt(password, newSecret);
-                            } catch (CryptoException x) {
+                            } catch (OXException x) {
                                 // Alright, this one needs migration
                                 String transcriptedPassword = CRYPTO.encrypt(CRYPTO.decrypt(password, oldSecret), newSecret);
                                 update.put(passwordField, transcriptedPassword);
                                 save = true;
                             }
-                        } catch (CryptoException e) {
+                        } catch (OXException e) {
                             throw new SubscriptionException(e);
                         }
                     }

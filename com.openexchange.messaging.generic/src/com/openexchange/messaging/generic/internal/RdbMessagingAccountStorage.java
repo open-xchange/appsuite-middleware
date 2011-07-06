@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -167,7 +166,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                             try {
                                 final String decrypted = decrypt(toDecrypt, session);
                                 configuration.put(passwordElementName, decrypted);
-                            } catch (final CryptoException x) {
+                            } catch (final OXException x) {
                                 // Must not be fatal
                                 configuration.put(passwordElementName, "");
                                 // Supply a (probably false) password anyway.
@@ -364,13 +363,13 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
     }
 
-    private String encrypt(final String toCrypt, final Session session) throws OXException, CryptoException {
+    private String encrypt(final String toCrypt, final Session session) throws OXException, OXException {
         final CryptoService cryptoService = getService(CryptoService.class);
         final SecretService secretService = getService(SecretService.class);
         return cryptoService.encrypt(toCrypt, secretService.getSecret(session));
     }
 
-    private String decrypt(final String toDecrypt, final Session session) throws OXException, CryptoException {
+    private String decrypt(final String toDecrypt, final Session session) throws OXException, OXException {
         final CryptoService cryptoService = getService(CryptoService.class);
         final SecretService secretService = getService(SecretService.class);
         return cryptoService.decrypt(toDecrypt, secretService.getSecret(session));
@@ -578,9 +577,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 }
             }
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final CryptoException e) {
-            return "Messaging dynamic configuration with id "+confId+" could not be decrypted";
+            throw e;
         }
         return null;
     }
@@ -642,7 +639,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                         try {
                             // Try using the new secret. Maybe this account doesn't need the migration
                             cryptoService.decrypt(encrypted, newSecret);
-                        } catch (final CryptoException x) {
+                        } catch (final OXException x) {
                             // Needs migration
                             final String transcripted = cryptoService.encrypt(cryptoService.decrypt(encrypted, oldSecret), newSecret);
                             update.put(field, transcripted);
@@ -652,9 +649,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 genericConfStorageService.update(ctx, confId, update);
             }
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final CryptoException e) {
-            throw new OXException(e);
+            throw e;
         }
     }
 }

@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoException;
+import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -328,7 +328,7 @@ public final class DigestUtility {
             throw new WebdavException(e);
         } catch (final OXException e) {
             throw new WebdavException(e);
-        } catch (final CryptoException e) {
+        } catch (final OXException e) {
             throw new WebdavException(e);
         }
     }

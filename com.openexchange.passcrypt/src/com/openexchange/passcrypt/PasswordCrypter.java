@@ -51,7 +51,7 @@ package com.openexchange.passcrypt;
 
 import com.openexchange.authentication.LoginException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoException;
+import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException;
@@ -113,7 +113,7 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
             }
         } catch (final OXException e) {
             throw new LoginException(e);
-        } catch (final CryptoException e) {
+        } catch (final OXException e) {
             throw new LoginException(e);
         }
     }

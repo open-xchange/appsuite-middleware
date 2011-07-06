@@ -81,7 +81,7 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoException;
+import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -748,7 +748,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             return cryptoService.encrypt(toEncrypt, password);
         } catch (final OXException e) {
             throw new OXException(e);
-        } catch (final CryptoException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -762,7 +762,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
             return cryptoService.decrypt(toDecrypt, password);
         } catch (final OXException e) {
             throw new OXException(e);
-        } catch (final CryptoException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
         }
