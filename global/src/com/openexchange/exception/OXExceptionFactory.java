@@ -113,7 +113,7 @@ public class OXExceptionFactory {
                 new OXException(
                     code.getNumber(),
                     Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                    new Object[0]).setLogMessage(code.getMessage(), args);
+                    cause, new Object[0]).setLogMessage(code.getMessage(), args);
         }
         return ret.addCategory(category).setPrefix(code.getPrefix());
     }

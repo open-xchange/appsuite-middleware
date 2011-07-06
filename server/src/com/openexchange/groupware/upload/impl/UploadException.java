@@ -55,8 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link UploadException} - Indicates an error during an upload.
@@ -66,8 +64,6 @@ import com.openexchange.groupware.EnumComponent;
 public class UploadException extends OXException {
 
     private static final long serialVersionUID = 8590042770250274015L;
-
-    private final String action;
 
     public static enum UploadCode implements OXExceptionCode {
         /**
@@ -174,43 +170,35 @@ public class UploadException extends OXException {
          * @return The newly created {@link OXException} instance
          */
         public OXException create(final Throwable cause, final Object... args) {
-            final Category category = code.getCategory();
-            final OXException ret;
+            final Category category = getCategory();
+            final UploadException ret;
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
-                ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
+                ret = new UploadException(getNumber(), getMessage(), cause, args);
             } else {
                 ret =
-                    new OXException(
-                        code.getNumber(),
+                    new UploadException(
+                        getNumber(),
                         Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                        new Object[0]).setLogMessage(code.getMessage(), args);
+                        cause, new Object[0]);
+                ret.setLogMessage(getMessage(), args);
             }
-            return ret.addCategory(category).setPrefix(code.getPrefix());
+            ret.addCategory(category);
+            ret.setPrefix(getPrefix());
+            return ret;
         }
     }
 
-    public UploadException(final AbstractOXException cause, final String action) {
-        super(cause);
-        this.action = action;
+    private String action;
+    
+    
+    
+
+    public UploadException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
+        super(code, displayMessage, cause, displayArgs);
     }
 
-    public UploadException(final UploadCode uploadCode, final String action, final Throwable cause) {
-        super(EnumComponent.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, cause);
-        super.setMessageArgs(cause.getMessage());
-        this.action = action;
-    }
 
-    public UploadException(final UploadCode uploadCode, final String action, final Object... messageArgs) {
-        super(EnumComponent.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, null);
-        super.setMessageArgs(messageArgs);
-        this.action = action;
-    }
 
-    public UploadException(final UploadCode uploadCode, final String action) {
-        super(EnumComponent.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, null);
-        super.setMessageArgs(new Object[0]);
-        this.action = action;
-    }
 
     public String getAction() {
         return action;
