@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.cache.SessionCache;
@@ -80,7 +80,7 @@ public class SessiondInit implements Initialization {
         return singleton;
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (started.get()) {
             LOG.error(SessiondInit.class.getName() + " started");
             return;

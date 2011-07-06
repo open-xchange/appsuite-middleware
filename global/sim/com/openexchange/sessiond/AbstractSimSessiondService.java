@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -64,7 +65,7 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#addSession(com.openexchange.sessiond.AddSessionParameter)
      */
-    public String addSession(AddSessionParameter parameterObject) throws SessiondException {
+    public String addSession(AddSessionParameter parameterObject) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -72,7 +73,7 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#changeSessionPassword(java.lang.String, java.lang.String)
      */
-    public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException {
+    public void changeSessionPassword(String sessionId, String newPassword) throws OXException {
         // TODO Auto-generated method stub
         
     }

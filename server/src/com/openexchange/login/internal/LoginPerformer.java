@@ -60,16 +60,12 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
-import com.openexchange.authorization.AuthorizationException;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -81,7 +77,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -113,9 +108,9 @@ public final class LoginPerformer {
      * 
      * @param request The login request
      * @return The login providing login information
-     * @throws LoginException If login fails
+     * @throws OXException If login fails
      */
-    public LoginResult doLogin(final LoginRequest request) throws LoginException {
+    public LoginResult doLogin(final LoginRequest request) throws OXException {
         return doLogin(request, Collections.<String, Object> emptyMap());
     }
 
@@ -124,9 +119,9 @@ public final class LoginPerformer {
      * 
      * @param request The login request
      * @return The login providing login information
-     * @throws LoginException If login fails
+     * @throws OXException If login fails
      */
-    public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws LoginException {
+    public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
@@ -140,7 +135,7 @@ public final class LoginPerformer {
             final AuthorizationService authService = Authorization.getService();
             if (null == authService) {
                 // FIXME: what todo??
-                final OXException e = new OXException(ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED);
+                final OXException e = ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
                 LOG.error("unable to find AuthorizationService", e);
                 throw e;
             }
@@ -155,28 +150,13 @@ public final class LoginPerformer {
             triggerLoginHandlers(retval);
         } catch (final OXException e) {
             logLoginRequest(request, retval);
-            throw LoginExceptionCodes.COMMUNICATION.create(e);
-        } catch (final LoginException e) {
-            logLoginRequest(request, retval);
             throw e;
-        } catch (final OXException e) {
-            logLoginRequest(request, retval);
-            throw new LoginException(e);
-        } catch (final OXException e) {
-            logLoginRequest(request, retval);
-            throw new LoginException(e);
-        } catch (final SessiondException e) {
-            logLoginRequest(request, retval);
-            throw new LoginException(e);
-        } catch (final AuthorizationException e) {
-            logLoginRequest(request, retval);
-            throw new LoginException(e);
         }
         logLoginRequest(request, retval);
         return retval;
     }
 
-    private void checkClient(final LoginRequest request, final User user, final Context ctx) throws LoginException {
+    private void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
         try {
             final String client = request.getClient();
             /*
@@ -192,10 +172,8 @@ public final class LoginPerformer {
                     throw LoginExceptionCodes.CLIENT_DENIED.create(client);
                 }
             }
-        } catch (final LoginException e) {
+        } catch (final OXException e) {
             throw e;
-        } catch (final AbstractOXException e) {
-            throw new LoginException(e);
         }
     }
 
@@ -291,7 +269,7 @@ public final class LoginPerformer {
                     public Object call() {
                         try {
                             handler.handleLogin(login);
-                        } catch (final LoginException e) {
+                        } catch (final OXException e) {
                             logError(e);
                         }
                         return null;
@@ -307,7 +285,7 @@ public final class LoginPerformer {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 try {
                     it.next().handleLogout(logout);
-                } catch (final LoginException e) {
+                } catch (final OXException e) {
                     logError(e);
                 }
             }
@@ -318,7 +296,7 @@ public final class LoginPerformer {
                     public Object call() {
                         try {
                             handler.handleLogout(logout);
-                        } catch (final LoginException e) {
+                        } catch (final OXException e) {
                             logError(e);
                         }
                         return null;
@@ -401,7 +379,7 @@ public final class LoginPerformer {
         try {
             return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
         } catch (final OXException x) {
-            throw new LoginException(x);
+            throw x;
         }
     }
 }

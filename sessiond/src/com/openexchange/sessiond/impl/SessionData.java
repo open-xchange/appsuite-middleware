@@ -64,10 +64,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -94,7 +94,7 @@ final class SessionData {
     private final LinkedList<Map<String, SessionControl>> longTermList;
     private final Lock longTermLock = new ReentrantLock();
 
-    SessionData(long containerCount, int maxSessions, long randomTokenTimeout, long longTermContainerCount, boolean autoLogin) {
+    SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
         super();
         this.maxSessions = maxSessions;
         this.randomTokenTimeout = randomTokenTimeout;
@@ -146,8 +146,8 @@ final class SessionData {
             if (autoLogin) {
                 longTermLock.lock();
                 try {
-                    Map<String, SessionControl> first = longTermList.getFirst();
-                    for (SessionControl control : retval) {
+                    final Map<String, SessionControl> first = longTermList.getFirst();
+                    for (final SessionControl control : retval) {
                         first.put(control.getSession().getSessionID(), control);
                     }
                 } finally {
@@ -164,7 +164,7 @@ final class SessionData {
         longTermLock.lock();
         try {
             longTermList.addFirst(new HashMap<String, SessionControl>());
-            List<SessionControl> retval = new ArrayList<SessionControl>();
+            final List<SessionControl> retval = new ArrayList<SessionControl>();
             retval.addAll(longTermList.removeLast().values());
             return retval;
         } finally {
@@ -193,9 +193,9 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
-            for (Map<String, SessionControl> longTermMap : longTermList) {
-                for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
+                for (final SessionControl control : longTermMap.values()) {
+                    final Session session = control.getSession();
                     if (session.getContextId() == context.getContextId() && session.getUserId() == userId) {
                         return true;
                     }
@@ -223,11 +223,11 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
-            for (Map<String, SessionControl> longTerm : longTermList) {
-                Iterator<SessionControl> iter = longTerm.values().iterator();
+            for (final Map<String, SessionControl> longTerm : longTermList) {
+                final Iterator<SessionControl> iter = longTerm.values().iterator();
                 while (iter.hasNext()) {
-                    SessionControl control = iter.next();
-                    Session session = control.getSession();
+                    final SessionControl control = iter.next();
+                    final Session session = control.getSession();
                     if (session.getContextId() == contextId && session.getUserId() == userId) {
                         iter.remove();
                         retval.add(control);
@@ -253,9 +253,9 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
-            for (Map<String, SessionControl> longTermMap : longTermList) {
-                for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
+                for (final SessionControl control : longTermMap.values()) {
+                    final Session session = control.getSession();
                     if (session.getContextId() == contextId && session.getUserId() == userId) {
                         retval.add(control);
                     }
@@ -280,9 +280,9 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
-            for (Map<String, SessionControl> longTermMap : longTermList) {
-                for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
+                for (final SessionControl control : longTermMap.values()) {
+                    final Session session = control.getSession();
                     if (session.getContextId() == context.getContextId() && session.getUserId() == userId) {
                         count++;
                     }
@@ -294,7 +294,7 @@ final class SessionData {
         return count;
     }
 
-    void checkAuthId(final String login, final String authId) throws SessiondException {
+    void checkAuthId(final String login, final String authId) throws OXException {
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -309,8 +309,8 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
-            for (Map<String, SessionControl> longTermMap : longTermList) {
-                for (SessionControl control : longTermMap.values()) {
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
+                for (final SessionControl control : longTermMap.values()) {
                     if (null != authId && authId.equals(control.getSession().getAuthId())) {
                         throw SessionExceptionCodes.DUPLICATE_AUTHID.create(control.getSession().getLogin(), login);
                     }
@@ -321,7 +321,7 @@ final class SessionData {
         }
     }
 
-    SessionControl addSession(final SessionImpl session, final boolean noLimit) throws SessiondException {
+    SessionControl addSession(final SessionImpl session, final boolean noLimit) throws OXException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
@@ -351,7 +351,7 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
-            for (Map<String, SessionControl> longTermMap : longTermList) {
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
                 count += longTermMap.size();
             }
         } finally {
@@ -386,7 +386,7 @@ final class SessionData {
         }
         longTermLock.lock();
         try {
-            for (Map<String, SessionControl> longTermMap : longTermList) {
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
                 if (longTermMap.containsKey(sessionId)) {
                     control = longTermMap.get(sessionId);
                     scheduleTask2MoveSession2FirstContainer(sessionId, true);
@@ -413,7 +413,7 @@ final class SessionData {
         final SessionControl sessionControl = getSession(sessionId);
         final SessionImpl session = sessionControl.getSession();
         if (!randomToken.equals(session.getRandomToken())) {
-            SessiondException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
+            final OXException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
             LOG.error(e.getMessage(), e);
             return null;
         }
@@ -428,7 +428,7 @@ final class SessionData {
         // A write access
         wlock.lock();
         try {
-            for (SessionContainer container : sessionList) {
+            for (final SessionContainer container : sessionList) {
                 if (container.containsSessionId(sessionId)) {
                     final SessionControl sessionControl = container.removeSessionById(sessionId);
                     final Session session = sessionControl.getSession();
@@ -462,10 +462,10 @@ final class SessionData {
     }
 
     List<SessionControl> getLongTermSessions() {
-        List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new ArrayList<SessionControl>();
         longTermLock.lock();
         try {
-            for (Map<String, SessionControl> longTermMap : longTermList) {
+            for (final Map<String, SessionControl> longTermMap : longTermList) {
                 retval.addAll(longTermMap.values());
             }
         } finally {
@@ -494,7 +494,7 @@ final class SessionData {
                     LOG.warn("Was not able to move the session " + sessionId + " into the most actual container.");
                 }
             }
-        } catch (SessiondException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
             wlock.unlock();
@@ -509,7 +509,7 @@ final class SessionData {
         try {
             boolean movedSession = false;
             for (int i = 0; i < longTermList.size() && !movedSession; i++) {
-                Map<String, SessionControl> longTermMap = longTermList.get(i);
+                final Map<String, SessionControl> longTermMap = longTermList.get(i);
                 control = longTermMap.remove(sessionId);
                 if (null == control) {
                     continue;
@@ -525,7 +525,7 @@ final class SessionData {
                     LOG.warn("Was not able to move the session into the most actual container.");
                 }
             }
-        } catch (SessiondException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
             longTermLock.unlock();
@@ -537,7 +537,7 @@ final class SessionData {
         }
     }
 
-    void removeRandomToken(String randomToken) {
+    void removeRandomToken(final String randomToken) {
         wlock.lock();
         try {
             randoms.remove(randomToken);
@@ -563,7 +563,7 @@ final class SessionData {
         threadPoolService = null; 
     }
 
-    private void scheduleTask2MoveSession2FirstContainer(final String sessionId, boolean longTerm) {
+    private void scheduleTask2MoveSession2FirstContainer(final String sessionId, final boolean longTerm) {
         final Move2FirstContainerTask task;
         tasksLock.lock();
         try {
@@ -594,7 +594,7 @@ final class SessionData {
     private void unscheduleTask2MoveSession2FirstContainer(final String sessionId) {
         tasksLock.lock();
         try {
-            Move2FirstContainerTask task = tasks.remove(sessionId);
+            final Move2FirstContainerTask task = tasks.remove(sessionId);
             if (null != task) {
                 task.deactivate();
             }
@@ -609,7 +609,7 @@ final class SessionData {
         private final boolean longTerm;
         private boolean deactivated = false;
 
-        Move2FirstContainerTask(final String sessionId, boolean longTerm) {
+        Move2FirstContainerTask(final String sessionId, final boolean longTerm) {
             super();
             this.sessionId = sessionId;
             this.longTerm = longTerm;
@@ -640,18 +640,18 @@ final class SessionData {
     }
 
     public void removeTimerService() {
-        for (ScheduledTimerTask timerTask : removers.values()) {
+        for (final ScheduledTimerTask timerTask : removers.values()) {
             timerTask.cancel();
         }
         timerService = null;
     }
 
-    private void scheduleRandomTokenRemover(String randomToken) {
-        RandomTokenRemover remover = new RandomTokenRemover(randomToken);
+    private void scheduleRandomTokenRemover(final String randomToken) {
+        final RandomTokenRemover remover = new RandomTokenRemover(randomToken);
         if (null == timerService) {
             remover.run();
         } else {
-            ScheduledTimerTask timerTask = timerService.schedule(remover, randomTokenTimeout, TimeUnit.MILLISECONDS);
+            final ScheduledTimerTask timerTask = timerService.schedule(remover, randomTokenTimeout, TimeUnit.MILLISECONDS);
             removers.put(randomToken, timerTask);
         }
     }
@@ -660,7 +660,7 @@ final class SessionData {
 
         private final String randomToken;
 
-        RandomTokenRemover(String randomToken) {
+        RandomTokenRemover(final String randomToken) {
             super();
             this.randomToken = randomToken;
         }
@@ -669,7 +669,7 @@ final class SessionData {
             try {
                 removers.remove(randomToken);
                 removeRandomToken(randomToken);
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 LOG.error(t.getMessage(), t);
             }
         }

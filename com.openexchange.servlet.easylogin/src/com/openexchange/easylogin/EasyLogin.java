@@ -66,7 +66,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.login.HashCalculator;
-import com.openexchange.authentication.LoginException;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
@@ -121,7 +121,7 @@ public class EasyLogin extends HttpServlet {
     }
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         passwordParam = config.getInitParameter("com.openexchange.easylogin.passwordPara");
         if (null == passwordParam) {
@@ -160,7 +160,7 @@ public class EasyLogin extends HttpServlet {
             LOG.info("Defaulting to client " + defaultClient);
         }
 
-        String autologinDefaultS = config.getInitParameter("com.openexchange.easylogin.autologin.default");
+        final String autologinDefaultS = config.getInitParameter("com.openexchange.easylogin.autologin.default");
         if (null == autologinDefaultS) {
             LOG.error("No default for autologin param defined. Assuming false");
             autologinDefault = false;
@@ -180,7 +180,7 @@ public class EasyLogin extends HttpServlet {
             doGetEnabled = false;
             LOG.error("Could not find doGetEnabled in configuration file, using default: " + doGetEnabled);
         } else {
-            String value = config.getInitParameter("com.openexchange.easylogin.doGetEnabled").trim();
+            final String value = config.getInitParameter("com.openexchange.easylogin.doGetEnabled").trim();
             doGetEnabled = Boolean.parseBoolean(value);
             LOG.info("Set doGetEnabled to " + doGetEnabled);
         }
@@ -189,7 +189,7 @@ public class EasyLogin extends HttpServlet {
             popupOnError = true;
             LOG.error("Could not find popUpOnError in properties-file, using default: " + popupOnError);
         } else {
-            String value = config.getInitParameter("com.openexchange.easylogin.popUpOnError").trim();
+            final String value = config.getInitParameter("com.openexchange.easylogin.popUpOnError").trim();
             popupOnError = Boolean.parseBoolean(value);
             LOG.info("Set popUpOnError to " + popupOnError);
         }
@@ -197,7 +197,7 @@ public class EasyLogin extends HttpServlet {
             allowInsecure = false;
             LOG.error("Could not find allowInsecure in configuration file, using default: " + allowInsecure);
         } else {
-            String value = config.getInitParameter("com.openexchange.easylogin.allowInsecureTransmission").trim();
+            final String value = config.getInitParameter("com.openexchange.easylogin.allowInsecureTransmission").trim();
             allowInsecure = Boolean.parseBoolean(value);
             LOG.info("Set allowInsecure to " + allowInsecure);
         }
@@ -205,8 +205,8 @@ public class EasyLogin extends HttpServlet {
             errorPageTemplate = ERROR_PAGE_TEMPLATE;
             LOG.error("No errorPage-template was specified, using default.");
         } else {
-            String templateFileLocation = config.getInitParameter("com.openexchange.easylogin.errorPageTemplate");
-            File templateFile = new File(templateFileLocation);
+            final String templateFileLocation = config.getInitParameter("com.openexchange.easylogin.errorPageTemplate");
+            final File templateFile = new File(templateFileLocation);
             if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()) {
                 errorPageTemplate = getFileContents(templateFile);
                 LOG.info("Found an error page template at " + templateFileLocation);
@@ -270,7 +270,7 @@ public class EasyLogin extends HttpServlet {
         doJavaLogin(req, resp, authID, login, password);
     }
 
-    private String getAuthID(HttpServletRequest req) {
+    private String getAuthID(final HttpServletRequest req) {
         String authID = req.getParameter(AUTH_ID_PARAMETER);
         if (authID == null || req.getParameter(AUTH_ID_PARAMETER).trim().length() == 0) {
             authID = UUIDs.getUnformattedString(UUID.randomUUID());
@@ -280,7 +280,7 @@ public class EasyLogin extends HttpServlet {
         return authID;
     }
 
-    private String getParameter(HttpServletRequest req, String param) {
+    private String getParameter(final HttpServletRequest req, final String param) {
         String login = req.getParameter(param);
         if (null != login && login.trim().length() == 0) {
             login = null;
@@ -288,7 +288,7 @@ public class EasyLogin extends HttpServlet {
         return login;
     }
 
-    private void doJavaLogin(final HttpServletRequest req, HttpServletResponse resp, final String authID, final String login, final String password) throws IOException {
+    private void doJavaLogin(final HttpServletRequest req, final HttpServletResponse resp, final String authID, final String login, final String password) throws IOException {
         final LoginResult result;
         final String client = getClient(req);
         final Map<String, List<String>> headers = copyHeaders(req);
@@ -340,9 +340,9 @@ public class EasyLogin extends HttpServlet {
                     return headers;
                 }
             });
-        } catch (LoginException e) {
+        } catch (final OXException e) {
             LOG.error("IP: " + req.getRemoteAddr() + ", Login: " + login + ", AuthID: " + authID + ", Login failed.", e);
-            String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
+            final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
             resp.getWriter().write(errorPage);
             return;
         }
@@ -350,7 +350,7 @@ public class EasyLogin extends HttpServlet {
         // send redirect if login worked
         LOG.info("IP: " + req.getRemoteAddr() + ", Login: " + login + ", AuthID: " + authID + ", Login successful. Redirecting.");
         // JSESSIONID cookie gets automatically set by AJP connector on this response. Browser should reuse it for request to login servlet.
-        StringBuilder sb = new StringBuilder(ajaxRoot);
+        final StringBuilder sb = new StringBuilder(ajaxRoot);
         sb.append("/login?action=redirect&random=");
         sb.append(session.getRandomToken());
         String uiWebPath = getParameter(req, UI_WEB_PATH_PARAMETER);
@@ -366,7 +366,7 @@ public class EasyLogin extends HttpServlet {
             sb.append(uiWebPath);
         }
         // Store needed?
-        String autologinS = getParameter(req, autologinParam);
+        final String autologinS = getParameter(req, autologinParam);
         boolean store = autologinDefault;
         if (autologinS != null) {
             store = Boolean.parseBoolean(autologinS);
@@ -381,7 +381,7 @@ public class EasyLogin extends HttpServlet {
         resp.sendRedirect(sb.toString());
     }
 
-    private String getClient(HttpServletRequest req) {
+    private String getClient(final HttpServletRequest req) {
         String retval = getParameter(req, clientParam);
         if (retval == null) {
             retval = defaultClient;
@@ -389,10 +389,10 @@ public class EasyLogin extends HttpServlet {
         return retval;
     }
 
-    static public String getFileContents(File file) {
-        StringBuilder stringBuilder = new StringBuilder();
+    static public String getFileContents(final File file) {
+        final StringBuilder stringBuilder = new StringBuilder();
         try {
-            BufferedReader input = new BufferedReader(new FileReader(file));
+            final BufferedReader input = new BufferedReader(new FileReader(file));
             try {
                 String line = null;
                 while ((line = input.readLine()) != null) {
@@ -402,7 +402,7 @@ public class EasyLogin extends HttpServlet {
             } finally {
                 input.close();
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
         return stringBuilder.toString();

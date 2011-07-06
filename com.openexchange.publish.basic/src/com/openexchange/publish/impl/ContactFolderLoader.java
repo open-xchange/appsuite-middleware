@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
@@ -93,13 +92,13 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
             final int numberOfContacts = contacts.getNumberOfContacts(folderId);
             final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, Order.ASCENDING, null, Contact.ALL_COLUMNS);
             while(contactsInFolder.hasNext()) {
-                Contact next = contactsInFolder.next();
+                final Contact next = contactsInFolder.next();
                 if(!next.getMarkAsDistribtuionlist()) {
                     list.add(next);
                 }
             }
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         // FIXME add sorting
         return list;

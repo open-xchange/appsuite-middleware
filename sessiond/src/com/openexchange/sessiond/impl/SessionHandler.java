@@ -62,12 +62,11 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.objects.CachedSession;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -124,7 +123,7 @@ public final class SessionHandler {
         if (initialized.compareAndSet(false, true)) {
             try {
                 sessionIdGenerator = SessionIdGenerator.getInstance();
-            } catch (final SessiondException exc) {
+            } catch (final OXException exc) {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
             noLimit = (newConfig.getMaxSessions() == 0);
@@ -145,8 +144,6 @@ public final class SessionHandler {
             for (final SessionControl sessionControl : retval) {
                 try {
                     SessionCache.getInstance().putCachedSessionForRemoteRemoval(sessionControl.getSession().createCachedSession());
-                } catch (final CacheException e) {
-                    LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
                 } catch (final OXException e) {
                     LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
                 }
@@ -180,9 +177,9 @@ public final class SessionHandler {
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @return The session ID associated with newly created session
-     * @throws SessiondException If creating a new session fails
+     * @throws OXException If creating a new session fails
      */
-    protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login, final String authId, final String hash, final String client) throws SessiondException {
+    protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
         checkMaxSessPerUser(userId, context);
         checkAuthId(login, authId);
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
@@ -198,7 +195,7 @@ public final class SessionHandler {
         return sessionId;
     }
 
-    private static void checkMaxSessPerUser(final int userId, final Context context) throws SessiondException {
+    private static void checkMaxSessPerUser(final int userId, final Context context) throws OXException {
         final int maxSessPerUser = config.getMaxSessionsPerUser();
         if (maxSessPerUser > 0) {
             final int count = sessionData.getNumOfUserSessions(userId, context);
@@ -208,7 +205,7 @@ public final class SessionHandler {
         }
     }
 
-    private static void checkAuthId(final String login, final String authId) throws SessiondException {
+    private static void checkAuthId(final String login, final String authId) throws OXException {
         sessionData.checkAuthId(login, authId);
     }
 
@@ -246,9 +243,9 @@ public final class SessionHandler {
      * 
      * @param sessionid The session ID
      * @param newPassword The new password
-     * @throws SessiondException If changing the password fails
+     * @throws OXException If changing the password fails
      */
-    protected static void changeSessionPassword(final String sessionid, final String newPassword) throws SessiondException {
+    protected static void changeSessionPassword(final String sessionid, final String newPassword) throws OXException {
         if (DEBUG) {
             LOG.debug(new StringBuilder("changeSessionPassword <").append(sessionid).append('>').toString());
         }
@@ -302,8 +299,6 @@ public final class SessionHandler {
                     return null;
                 }
             }
-        } catch (final CacheException e) {
-            LOG.error("Unable to look-up session cache", e);
         } catch (final OXException e) {
             LOG.error("Unable to look-up session cache", e);
         }
@@ -333,10 +328,6 @@ public final class SessionHandler {
                     return sessionData.addSession(new SessionImpl(cachedSession), noLimit);
                 }
             }
-        } catch (final CacheException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final SessiondException e) {
-            LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }

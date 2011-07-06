@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -67,18 +68,18 @@ public interface SessiondService {
      * 
      * @param parameterObject The parameter object describing the session to create
      * @return The session identifier of the newly created session as a <code>String</code>
-     * @throws SessiondException If creating the session fails
+     * @throws OXException If creating the session fails
      */
-    public String addSession(AddSessionParameter parameterObject) throws SessiondException;
+    public String addSession(AddSessionParameter parameterObject) throws OXException;
 
     /**
      * Replaces the currently stored password in session identified through given session identifier with specified <code>newPassword</code>.
      * 
      * @param sessionId The session identifier
      * @param newPassword The new password to apply
-     * @throws SessiondException If new password cannot be applied or corresponding session does not exist or is expired
+     * @throws OXException If new password cannot be applied or corresponding session does not exist or is expired
      */
-    public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException;
+    public void changeSessionPassword(String sessionId, String newPassword) throws OXException;
 
     /**
      * Refreshes the time stamp of the session with the given session identifier.

@@ -52,10 +52,9 @@ package com.openexchange.sessiond.cache;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessionCacheConfiguration} - Configures the session cache
@@ -84,7 +83,7 @@ public final class SessionCacheConfiguration implements Initialization {
         return instance;
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         final ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
         if (null == configurationService) {
             throw SessionExceptionCodes.SESSIOND_CONFIG_EXCEPTION.create();
@@ -94,7 +93,7 @@ public final class SessionCacheConfiguration implements Initialization {
             /*
              * Not found
              */
-            final SessiondException e = SessionExceptionCodes.MISSING_PROPERTY.create("com.openexchange.sessiond.sessionCacheConfig");
+            final OXException e = SessionExceptionCodes.MISSING_PROPERTY.create("com.openexchange.sessiond.sessionCacheConfig");
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new StringBuilder(128).append("Cannot setup lateral session cache: ").append(e.getMessage()).toString(), e);
             }
@@ -107,8 +106,8 @@ public final class SessionCacheConfiguration implements Initialization {
         if (null != cacheService) {
             try {
                 cacheService.loadConfiguration(cacheConfigFile.trim());
-            } catch (final CacheException e) {
-                throw new SessiondException(e);
+            } catch (final OXException e) {
+                throw e;
             }
         }
     }
@@ -119,7 +118,7 @@ public final class SessionCacheConfiguration implements Initialization {
             try {
                 cacheService.freeCache(SessionCache.LATERAL_REGION_NAME);
                 cacheService.freeCache(SessionCache.REGION_NAME);
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

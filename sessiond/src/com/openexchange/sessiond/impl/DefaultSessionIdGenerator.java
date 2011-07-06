@@ -53,8 +53,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.UUID;
+import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link DefaultSessionIdGenerator} - The default session ID generator.
@@ -65,12 +65,12 @@ import com.openexchange.sessiond.SessiondException;
 public final class DefaultSessionIdGenerator extends SessionIdGenerator {
 
     @Override
-    public String createSessionId(final String userId, final String data) throws SessiondException {
+    public String createSessionId(final String userId, final String data) throws OXException {
         return getUniqueId(userId, data);
     }
 
     @Override
-    public String createSecretId(final String userId, final String data) throws SessiondException {
+    public String createSecretId(final String userId, final String data) throws OXException {
         return getUniqueId(userId, data);
     }
 
@@ -81,7 +81,7 @@ public final class DefaultSessionIdGenerator extends SessionIdGenerator {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    private static String getUniqueId(final String userId, final String data) throws SessiondException {
+    private static String getUniqueId(final String userId, final String data) throws OXException {
         try {
             final StringBuilder builder = new StringBuilder(32);
             final byte[] digest;

@@ -73,7 +73,6 @@ import com.openexchange.publish.helpers.SecurityStrategy;
 import com.openexchange.publish.interfaces.UserSpecificPublicationTarget;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.exception.OXException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -181,9 +180,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
             final ServerSessionAdapter serverSession = new ServerSessionAdapter(new PublicationSession(publication));
             return templateService.loadTemplate(templateName, defaultTemplateName, serverSession);
         } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         }
 
     }

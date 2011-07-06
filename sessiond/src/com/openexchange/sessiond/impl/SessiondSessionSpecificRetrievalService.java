@@ -51,11 +51,11 @@ package com.openexchange.sessiond.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionScopedContainer;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.event.SessiondEventListener;
 
 /**
@@ -131,7 +131,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         }
     }
 
-    public void handleError(SessiondException error) {
+    public void handleError(OXException error) {
         // IGNORE
     }
 

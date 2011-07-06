@@ -62,10 +62,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessiondEventHandler} - A convenience SessionD {@link EventHandler event handler} which delegates incoming events to registered
@@ -170,7 +170,7 @@ public final class SessiondEventHandler implements EventHandler {
                 listener.handleSessionReactivation(session);
             }
         } else {
-            final SessiondException error = SessionExceptionCodes.UNKNOWN_EVENT_TOPIC.create(topic == null ? "null" : topic);
+            final OXException error = SessionExceptionCodes.UNKNOWN_EVENT_TOPIC.create(topic == null ? "null" : topic);
             for (final SessiondEventListener listener : listeners) {
                 listener.handleError(error);
             }

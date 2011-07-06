@@ -60,9 +60,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
@@ -72,7 +71,6 @@ import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 import com.openexchange.sessiond.event.SessiondEventHandler;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
-import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
@@ -126,7 +124,7 @@ public final class SessiondActivator extends DeferredActivator {
         if (CacheService.class.equals(clazz)) {
             try {
                 SessionCacheConfiguration.getInstance().start();
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -160,8 +158,8 @@ public final class SessiondActivator extends DeferredActivator {
             }
             
             
-            SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
-            SessiondEventHandler eventHandler = new SessiondEventHandler();
+            final SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
+            final SessiondEventHandler eventHandler = new SessiondEventHandler();
             eventHandler.addListener(retrievalService);
             
             eventHandlerRegistration = eventHandler.registerSessiondEventHandler(context);
@@ -204,7 +202,7 @@ public final class SessiondActivator extends DeferredActivator {
             try {
                 for (final SessionControl sessionControl : sessions) {
                     if (null != sessionControl) {
-                        SessionCache.getInstance().putCachedSession(((SessionImpl) (sessionControl.getSession())).createCachedSession());
+                        SessionCache.getInstance().putCachedSession((sessionControl.getSession()).createCachedSession());
                     }
                 }
                 if (LOG.isInfoEnabled()) {

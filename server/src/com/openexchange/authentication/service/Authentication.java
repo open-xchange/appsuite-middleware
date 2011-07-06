@@ -52,11 +52,11 @@ package com.openexchange.authentication.service;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.security.auth.login.LoginException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.server.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -88,7 +88,7 @@ public final class Authentication {
      * @throws OXException if the authentication service is not available.
      */
     public static Authenticated login(final String login, final String pass)
-        throws LoginException, OXException {
+        throws OXException {
         return login(login, pass, Collections.<String, Object> emptyMap());
     }
 
@@ -104,7 +104,7 @@ public final class Authentication {
      * @throws OXException if the authentication service is not available.
      */
     public static Authenticated login(final String login, final String pass, final Map<String, Object> properties)
-        throws LoginException, OXException {
+        throws OXException {
         final AuthenticationService auth = SERVICE_REF.get();
         if (null == auth) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());

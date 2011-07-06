@@ -49,8 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessionIdGenerator} - The session ID generator
@@ -81,7 +81,7 @@ public abstract class SessionIdGenerator {
      * @return an instance implementing the group storage interface.
      * @throws OXException if the instance can't be created.
      */
-    public static SessionIdGenerator getInstance() throws SessiondException {
+    public static SessionIdGenerator getInstance() throws OXException {
         try {
             return getImplementingClass().getConstructor().newInstance();
         } catch (final Exception exc) {
@@ -110,9 +110,9 @@ public abstract class SessionIdGenerator {
         implementingClassName = implementClassName;
     }
 
-    public abstract String createSessionId(String userId, String data) throws SessiondException;
+    public abstract String createSessionId(String userId, String data) throws OXException;
 
-    public abstract String createSecretId(String userId, String data) throws SessiondException;
+    public abstract String createSecretId(String userId, String data) throws OXException;
 
-    public abstract String createRandomId() throws SessiondException;
+    public abstract String createRandomId() throws OXException;
 }

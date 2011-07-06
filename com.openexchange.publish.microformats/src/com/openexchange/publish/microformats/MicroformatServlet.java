@@ -68,7 +68,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
@@ -163,7 +162,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         contacts = service;
     }
     
-    public static void setHtmlService(HTMLService htmlService2) {
+    public static void setHtmlService(final HTMLService htmlService2) {
         htmlService = htmlService2;
     }
 
@@ -225,7 +224,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             }
             
             final OXTemplate template = publisher.loadTemplate(publication);
-            StringWriter htmlWriter = new StringWriter();
+            final StringWriter htmlWriter = new StringWriter();
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
             if(isUsingWhitelisting(template.getLevel())){
@@ -234,9 +233,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             }
             resp.getWriter().write(html);
             
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             LOG.error(x.getMessage(), x);
-            resp.getWriter().println("Publishing failed. Please try again later. Exception ID: "+x.getExceptionID());
+            resp.getWriter().println("Publishing failed. Please try again later. Exception ID: "+x.getExceptionId());
             
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -244,15 +243,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         }
     }
 
-    private boolean isUsingWhitelisting(TemplateLevel templateLevel) {
-    	String globalWhitelisting = configService.getProperty(USE_WHITELISTING_PROPERTY_NAME, "false"); 
+    private boolean isUsingWhitelisting(final TemplateLevel templateLevel) {
+    	final String globalWhitelisting = configService.getProperty(USE_WHITELISTING_PROPERTY_NAME, "false"); 
     	
     	if (Boolean.parseBoolean(globalWhitelisting)) {
     	    return true;
     	}
     	
-    	String[] strings = globalWhitelisting.split("\\s*,\\s*");
-    	for (String string : strings) {
+    	final String[] strings = globalWhitelisting.split("\\s*,\\s*");
+    	for (final String string : strings) {
             if (templateLevel.name().toLowerCase().equals(string.toLowerCase())) {
                 return true;
             }

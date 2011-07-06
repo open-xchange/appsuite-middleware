@@ -57,9 +57,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessionContainer} - A thread-safe container for {@link Session} objects wrapped by a {@link SessionControl} object.
@@ -159,7 +159,7 @@ final class SessionContainer {
      * @param session The session to put
      * @return The wrapping {@link SessionControl session control}.
      */
-    SessionControl put(final SessionImpl session) throws SessiondException {
+    SessionControl put(final SessionImpl session) throws OXException {
         final String sessionId = session.getSessionID();
         // Add session
         SessionControl sessionControl;
@@ -172,13 +172,13 @@ final class SessionContainer {
                 if (null == sessionControl) {
                     sessionControl = newSessionControl;
                 } else {
-                    String login1 = sessionControl.getSession().getLogin();
-                    String login2 = session.getLogin();
+                    final String login1 = sessionControl.getSession().getLogin();
+                    final String login2 = session.getLogin();
                     throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
                 }
             } else {
-                String login1 = sessionControl.getSession().getLogin();
-                String login2 = session.getLogin();
+                final String login1 = sessionControl.getSession().getLogin();
+                final String login2 = session.getLogin();
                 throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
             }
         } finally {
@@ -202,15 +202,15 @@ final class SessionContainer {
      * Puts specified {@link SessionControl} object into this container
      * 
      * @param sessionControl The session control to put
-     * @throws SessiondException 
+     * @throws OXException 
      */
-    void putSessionControl(final SessionControl sessionControl) throws SessiondException {
+    void putSessionControl(final SessionControl sessionControl) throws OXException {
         final Session session = sessionControl.getSession();
         final String sessionId = session.getSessionID();
-        SessionControl oldSessionControl = sessionIdMap.putIfAbsent(sessionId, sessionControl);
+        final SessionControl oldSessionControl = sessionIdMap.putIfAbsent(sessionId, sessionControl);
         if (null != oldSessionControl) {
-            String login1 = oldSessionControl.getSession().getLogin();
-            String login2 = sessionControl.getSession().getLogin();
+            final String login1 = oldSessionControl.getSession().getLogin();
+            final String login2 = sessionControl.getSession().getLogin();
             throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
         }
         final UserKey key = new UserKey(session.getUserId(), session.getContextId());

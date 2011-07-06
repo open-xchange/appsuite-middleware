@@ -48,6 +48,7 @@
  */
 package com.openexchange.authorization;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -57,6 +58,6 @@ import com.openexchange.groupware.ldap.User;
  */
 public interface AuthorizationService {
     
-    public void authorizeUser(final Context ctx, final User user) throws AuthorizationException;
+    public void authorizeUser(final Context ctx, final User user) throws OXException;
     
 }

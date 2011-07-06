@@ -57,10 +57,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -80,11 +80,11 @@ public class SessiondServiceImpl implements SessiondService {
         migrateLock = new ReentrantLock();
     }
 
-    public String addSession(final AddSessionParameter param) throws SessiondException {
+    public String addSession(final AddSessionParameter param) throws OXException {
         return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient());
     }
 
-    public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {
+    public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         SessionHandler.changeSessionPassword(sessionId, newPassword);
     }
 

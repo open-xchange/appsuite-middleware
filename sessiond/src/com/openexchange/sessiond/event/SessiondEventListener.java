@@ -50,8 +50,8 @@
 package com.openexchange.sessiond.event;
 
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondException;
 
 /**
  * {@link SessiondEventListener} - The listener for sessiond events.
@@ -79,7 +79,7 @@ public interface SessiondEventListener {
      * 
      * @param error The error
      */
-    public void handleError(SessiondException error);
+    public void handleError(OXException error);
 
     /**
      * Implementations should remove all temporary data for those sessions because they are not used for a longer time frame and are now
