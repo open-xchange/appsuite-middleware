@@ -70,7 +70,8 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  */
 public final class StorageUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StorageUtility.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StorageUtility.class));
 
     /*
      * Public constants
@@ -251,9 +252,7 @@ public final class StorageUtility {
         if (isSpamEnabled) {
             if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    final OXException e = new OXException(
-                        MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME,
-                        UserSettingMail.STD_CONFIRMED_SPAM);
+                    final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_CONFIRMED_SPAM);
                     LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_SPAM), e);
                 }
                 names[INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
@@ -262,9 +261,7 @@ public final class StorageUtility {
             }
             if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
                 if (LOG.isWarnEnabled()) {
-                    final OXException e = new OXException(
-                        MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME,
-                        UserSettingMail.STD_CONFIRMED_HAM);
+                    final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(UserSettingMail.STD_CONFIRMED_HAM);
                     LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_HAM), e);
                 }
                 names[INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;

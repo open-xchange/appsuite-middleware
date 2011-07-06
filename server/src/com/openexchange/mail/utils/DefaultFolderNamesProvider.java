@@ -98,15 +98,9 @@ public final class DefaultFolderNamesProvider {
         if (MailAccount.DEFAULT_ID == accountId) {
             fallbackProvider = DEFAULT_PROVIDER;
         } else {
-            try {
-                final MailAccountStorageService storageService =
-                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-                fallbackProvider = new DefaultAccountProvider(storageService.getDefaultMailAccount(user, cid));
-            } catch (final OXException e) {
-                throw new OXException(e);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            fallbackProvider = new DefaultAccountProvider(storageService.getDefaultMailAccount(user, cid));
         }
     }
 
