@@ -54,7 +54,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
@@ -144,7 +144,7 @@ public final class ManagementActivator extends DeferredActivator {
         getServiceRegistry().clearRegistry();
     }
 
-    private void startInternal() throws AbstractOXException {
+    private void startInternal() throws OXException {
         ManagementInit.getInstance().start();
         /*
          * Register management service
@@ -152,7 +152,7 @@ public final class ManagementActivator extends DeferredActivator {
         serviceRegistration = context.registerService(ManagementService.class.getCanonicalName(), ManagementAgentImpl.getInstance(), null);
     }
 
-    private void stopInternal() throws AbstractOXException {
+    private void stopInternal() throws OXException {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             serviceRegistration = null;

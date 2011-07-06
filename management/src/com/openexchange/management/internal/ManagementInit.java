@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceExceptionCode;
 
@@ -89,7 +89,7 @@ public final class ManagementInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (started.get()) {
             LOG.error(ManagementInit.class.getName() + " already started");
             return;
@@ -133,7 +133,7 @@ public final class ManagementInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.get()) {
             LOG.error(ManagementInit.class.getName() + " has not been started");
             return;

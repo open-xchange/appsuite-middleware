@@ -65,7 +65,7 @@ import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
@@ -181,7 +181,7 @@ public final class CacheActivator extends DeferredActivator {
                 LOG.error(e.getMessage(), e);
             } catch (final NotCompliantMBeanException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (final ManagementException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -191,7 +191,7 @@ public final class CacheActivator extends DeferredActivator {
         if (objectName != null) {
             try {
                 management.unregisterMBean(objectName);
-            } catch (final ManagementException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 objectName = null;

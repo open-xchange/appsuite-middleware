@@ -60,7 +60,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBean;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBeanImpl;
@@ -113,7 +113,7 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
                 LOG.error(e);
             } catch (NotCompliantMBeanException e) {
                 LOG.error(e);
-            } catch (ManagementException e) {
+            } catch (OXException e) {
                 LOG.error(e);
             } catch (NullPointerException e) {
                 LOG.error(e);
@@ -134,7 +134,7 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
             if (service instanceof ManagementService) {                
                 try {
                     managementService.unregisterMBean("CrawlerUpdateMBeanImpl");
-                } catch (ManagementException e) {
+                } catch (OXException e) {
                     LOG.error(e);
                 }
                 managementService = null;

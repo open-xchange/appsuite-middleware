@@ -56,7 +56,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXServiceURL;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
+import com.openexchange.management.ManagementExceptionCode;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -127,7 +128,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                     jmxURL).append("\n").toString());
             }
             running.set(true);
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -141,7 +142,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
             while (!objectNames.isEmpty()) {
                 unregisterMBean(objectNames.pop());
             }
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         removeConnectorServer(jmxURL);
@@ -166,48 +167,48 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
     }
 
     @Override
-    public void registerMBean(final String name, final Object mbean) throws ManagementException {
+    public void registerMBean(final String name, final Object mbean) throws OXException {
         if (!running.get()) {
-            throw new ManagementException(ManagementException.Code.NOT_RUNNING);
+            throw ManagementExceptionCode.NOT_RUNNING.create();
         }
         final ObjectName objectName;
         try {
             objectName = new ObjectName(name);
         } catch (final MalformedObjectNameException e) {
-            throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
+            throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
         super.registerMBean(objectName, mbean);
         objectNames.push(objectName);
     }
 
     @Override
-    public void registerMBean(final ObjectName objectName, final Object mbean) throws ManagementException {
+    public void registerMBean(final ObjectName objectName, final Object mbean) throws OXException {
         if (!running.get()) {
-            throw new ManagementException(ManagementException.Code.NOT_RUNNING);
+            throw ManagementExceptionCode.NOT_RUNNING.create();
         }
         super.registerMBean(objectName, mbean);
         objectNames.push(objectName);
     }
 
     @Override
-    public void unregisterMBean(final String name) throws ManagementException {
+    public void unregisterMBean(final String name) throws OXException {
         if (!running.get()) {
-            throw new ManagementException(ManagementException.Code.NOT_RUNNING);
+            throw ManagementExceptionCode.NOT_RUNNING.create();
         }
         final ObjectName objectName;
         try {
             objectName = new ObjectName(name);
         } catch (final MalformedObjectNameException e) {
-            throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
+            throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
         super.unregisterMBean(objectName);
         objectNames.remove(objectName);
     }
 
     @Override
-    public void unregisterMBean(final ObjectName objectName) throws ManagementException {
+    public void unregisterMBean(final ObjectName objectName) throws OXException {
         if (!running.get()) {
-            throw new ManagementException(ManagementException.Code.NOT_RUNNING);
+            throw ManagementExceptionCode.NOT_RUNNING.create();
         }
         super.unregisterMBean(objectName);
         objectNames.remove(objectName);

@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.update.tools;
 
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 
@@ -76,7 +76,7 @@ public final class UpdateTaskMBeanInit implements Initialization {
     public void start() {
         try {
             managementService.registerMBean(Constants.OBJECT_NAME, new UpdateTaskMBean());
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -84,7 +84,7 @@ public final class UpdateTaskMBeanInit implements Initialization {
     public void stop() {
         try {
             managementService.unregisterMBean(Constants.OBJECT_NAME);
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }

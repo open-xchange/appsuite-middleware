@@ -56,7 +56,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -103,7 +103,7 @@ public final class Management {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -120,7 +120,7 @@ public final class Management {
             if (null != overview) {
                 managementService.registerMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"), overview);
             }
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
@@ -143,7 +143,7 @@ public final class Management {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -156,7 +156,7 @@ public final class Management {
             managementService.unregisterMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"));
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);

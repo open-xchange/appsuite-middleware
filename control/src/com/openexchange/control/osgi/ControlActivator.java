@@ -58,7 +58,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.control.internal.GeneralControl;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -164,7 +164,7 @@ public final class ControlActivator implements BundleActivator {
             } catch (final MalformedObjectNameException e) {
                 logger.error("Control MBean registration failed.", e);
                 bundleContext.ungetService(reference);
-            } catch (final ManagementException e) {
+            } catch (final OXException e) {
                 logger.error("Control MBean registration failed.", e);
                 bundleContext.ungetService(reference);
             } catch (final NullPointerException e) {
@@ -185,7 +185,7 @@ public final class ControlActivator implements BundleActivator {
                     logger.info("Control MBean successfully unregistered.");
                 } catch (final MalformedObjectNameException e) {
                     logger.error("Control MBean unregistration failed.", e);
-                } catch (final ManagementException e) {
+                } catch (final OXException e) {
                     logger.error("Control MBean unregistration failed.", e);
                 } catch (final NullPointerException e) {
                     logger.error("Control MBean unregistration failed.", e);

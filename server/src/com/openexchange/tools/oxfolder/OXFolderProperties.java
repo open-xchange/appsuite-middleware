@@ -76,7 +76,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
@@ -452,7 +452,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             LOG.error(e.getMessage(), e);
         } catch (final NotCompliantMBeanException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ManagementException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         return null;
@@ -468,7 +468,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         if (objectName != null) {
             try {
                 managementService.unregisterMBean(objectName);
-            } catch (final ManagementException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

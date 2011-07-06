@@ -57,7 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.sessiond.SessiondMBean;
 import com.openexchange.sessiond.impl.SessiondMBeanImpl;
@@ -104,7 +104,7 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer {
                 LOG.error(e.getMessage(), e);
             } catch (final NotCompliantMBeanException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (final ManagementException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -114,7 +114,7 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer {
         if (objectName != null) {
             try {
                 management.unregisterMBean(objectName);
-            } catch (final ManagementException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 objectName = null;

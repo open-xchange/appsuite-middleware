@@ -50,6 +50,7 @@
 package com.openexchange.management;
 
 import javax.management.ObjectName;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ManagementService}
@@ -63,23 +64,23 @@ public interface ManagementService {
      * 
      * @param objectName The bean's object name
      * @param mbean The bean to register
-     * @throws ManagementException If registration fails
+     * @throws OXException If registration fails
      */
-    public void registerMBean(ObjectName objectName, Object mbean) throws ManagementException;
+    public void registerMBean(ObjectName objectName, Object mbean) throws OXException;
 
     /**
      * Unregisters the MBean corresponding to given name
      * 
      * @param name The bean name
-     * @throws ManagementException If bean cannot be unregistered
+     * @throws OXException If bean cannot be unregistered
      */
-    public void unregisterMBean(String name) throws ManagementException;
+    public void unregisterMBean(String name) throws OXException;
 
     /**
      * Unregisters the MBean corresponding to given object name
      * 
      * @param objectName The bean's object name
-     * @throws ManagementException If bean cannot be unregistered
+     * @throws OXException If bean cannot be unregistered
      */
-    public void unregisterMBean(ObjectName objectName) throws ManagementException;
+    public void unregisterMBean(ObjectName objectName) throws OXException;
 }

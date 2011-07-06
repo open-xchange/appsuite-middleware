@@ -60,7 +60,7 @@ import com.openexchange.consistency.ConsistencyException;
 import com.openexchange.consistency.ConsistencyExceptionCodes;
 import com.openexchange.consistency.MBeanNamer;
 import com.openexchange.consistency.OsgiOXConsistency;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -87,7 +87,7 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer {
             name = MBeanNamer.getName();
             LOG.info("Registering consistency MBean under name: " + name);
             managementService.registerMBean(name, new OsgiOXConsistency());
-        } catch (ManagementException e) {
+        } catch (OXException e) {
             ConsistencyException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
         } catch (MalformedObjectNameException e) {
@@ -109,7 +109,7 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer {
         LOG.info("Unregistering consistency MBean with name " + name);
         try {
             managementService.unregisterMBean(name);
-        } catch (ManagementException e) {
+        } catch (OXException e) {
             ConsistencyException e1 = ConsistencyExceptionCodes.UNREGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
         }

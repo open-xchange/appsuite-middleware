@@ -89,7 +89,8 @@ import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
+import com.openexchange.management.ManagementExceptionCode;
 
 /**
  * {@link AbstractAgent} - An abstract JMX agent
@@ -232,13 +233,13 @@ public abstract class AbstractAgent {
      * 
      * @param name The MBeans's object name as a string
      * @param mbean The MBean object
-     * @throws ManagementException If registering the MBean to MBeanServer fails
+     * @throws OXException If registering the MBean to MBeanServer fails
      */
-    public void registerMBean(final String name, final Object mbean) throws ManagementException {
+    public void registerMBean(final String name, final Object mbean) throws OXException {
         try {
             registerMBean(new ObjectName(name), mbean);
         } catch (final MalformedObjectNameException e) {
-            throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
+            throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
     }
 
@@ -246,13 +247,13 @@ public abstract class AbstractAgent {
      * Unregister the MBean identified through specified object name as a string.
      * 
      * @param name The MBean's object name as a string
-     * @throws ManagementException If unregistering the MBean fails
+     * @throws OXException If unregistering the MBean fails
      */
-    public void unregisterMBean(final String name) throws ManagementException {
+    public void unregisterMBean(final String name) throws OXException {
         try {
             unregisterMBean(new ObjectName(name));
         } catch (final MalformedObjectNameException e) {
-            throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
+            throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
     }
 
@@ -261,9 +262,9 @@ public abstract class AbstractAgent {
      * 
      * @param objectName The MBean's object name
      * @param mbean The MBean object
-     * @throws ManagementException If registering the MBean to MBeanServer fails
+     * @throws OXException If registering the MBean to MBeanServer fails
      */
-    public void registerMBean(final ObjectName objectName, final Object mbean) throws ManagementException {
+    public void registerMBean(final ObjectName objectName, final Object mbean) throws OXException {
         if (mbs.isRegistered(objectName)) {
             LOG.warn(objectName.getCanonicalName() + " already registered");
             return;
@@ -271,11 +272,11 @@ public abstract class AbstractAgent {
         try {
             mbs.registerMBean(mbean, objectName);
         } catch (final InstanceAlreadyExistsException e) {
-            throw new ManagementException(ManagementException.Code.ALREADY_EXISTS, e, mbean.getClass().getName());
+            throw ManagementExceptionCode.ALREADY_EXISTS.create(e, mbean.getClass().getName());
         } catch (final MBeanRegistrationException e) {
-            throw new ManagementException(ManagementException.Code.MBEAN_REGISTRATION, e, mbean.getClass().getName());
+            throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, mbean.getClass().getName());
         } catch (final NotCompliantMBeanException e) {
-            throw new ManagementException(ManagementException.Code.NOT_COMPLIANT_MBEAN, e, mbean.getClass().getName());
+            throw ManagementExceptionCode.NOT_COMPLIANT_MBEAN.create(e, mbean.getClass().getName());
         }
         LOG.debug(objectName.getCanonicalName() + " registered");
     }
@@ -284,16 +285,16 @@ public abstract class AbstractAgent {
      * Unregister the MBean identified through specified object name.
      * 
      * @param objectName The MBean's object name
-     * @throws ManagementException If unregistering the MBean fails
+     * @throws OXException If unregistering the MBean fails
      */
-    public void unregisterMBean(final ObjectName objectName) throws ManagementException {
+    public void unregisterMBean(final ObjectName objectName) throws OXException {
         if (mbs.isRegistered(objectName)) {
             try {
                 mbs.unregisterMBean(objectName);
             } catch (final InstanceNotFoundException e) {
-                throw new ManagementException(ManagementException.Code.NOT_FOUND, e, objectName);
+                throw ManagementExceptionCode.NOT_FOUND.create(e, objectName);
             } catch (final MBeanRegistrationException e) {
-                throw new ManagementException(ManagementException.Code.MBEAN_REGISTRATION, e, objectName);
+                throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, objectName);
             }
             LOG.debug(objectName.getCanonicalName() + " unregistered");
         }
@@ -304,9 +305,9 @@ public abstract class AbstractAgent {
      * 
      * @param objectName The MBean's object name
      * @param attributeName The observed attribute
-     * @throws ManagementException If adding the MBean to {@link GaugeMonitor} fails
+     * @throws OXException If adding the MBean to {@link GaugeMonitor} fails
      */
-    public final void addObservedMBean(final ObjectName objectName, final String attributeName) throws ManagementException {
+    public final void addObservedMBean(final ObjectName objectName, final String attributeName) throws OXException {
         GaugeMonitor gm = gaugeMonitorRef.get();
         while (gm == null) {
             final GaugeMonitor newgm = new GaugeMonitor();
@@ -323,13 +324,13 @@ public abstract class AbstractAgent {
                 try {
                     mbs.registerMBean(gm, new ObjectName("Services:type=GaugeMonitor"));
                 } catch (final InstanceAlreadyExistsException e) {
-                    throw new ManagementException(ManagementException.Code.ALREADY_EXISTS, e, gm.getClass().getName());
+                    throw ManagementExceptionCode.ALREADY_EXISTS.create(e, gm.getClass().getName());
                 } catch (final MBeanRegistrationException e) {
-                    throw new ManagementException(ManagementException.Code.MBEAN_REGISTRATION, e, gm.getClass().getName());
+                    throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, gm.getClass().getName());
                 } catch (final NotCompliantMBeanException e) {
-                    throw new ManagementException(ManagementException.Code.NOT_COMPLIANT_MBEAN, e, gm.getClass().getName());
+                    throw ManagementExceptionCode.NOT_COMPLIANT_MBEAN.create(e, gm.getClass().getName());
                 } catch (final MalformedObjectNameException e) {
-                    throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, "Services:type=GaugeMonitor");
+                    throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, "Services:type=GaugeMonitor");
                 }
                 gm.start();
             } else {
@@ -344,7 +345,7 @@ public abstract class AbstractAgent {
      * Removes the observed MBean identified by specified object name from the {@link GaugeMonitor}
      * 
      * @param objectName The MBean's object name
-     * @throws ManagementException If removing the MBean from {@link GaugeMonitor} fails
+     * @throws OXException If removing the MBean from {@link GaugeMonitor} fails
      */
     public final void removeObservedMBean(final ObjectName objectName) {
         final GaugeMonitor gm = gaugeMonitorRef.get();
@@ -358,9 +359,9 @@ public abstract class AbstractAgent {
      * 
      * @param port The port on which the RMI registry should listen on
      * @param bindAddr The bind address for created sockets by RMI registry
-     * @throws ManagementException If RMI registry cannot be created
+     * @throws OXException If RMI registry cannot be created
      */
-    protected final void addRMIRegistry(final int port, final String bindAddr) throws ManagementException {
+    protected final void addRMIRegistry(final int port, final String bindAddr) throws OXException {
         Registry registry = null;
         try {
             if (initialized.compareAndSet(false, true)) {
@@ -387,9 +388,9 @@ public abstract class AbstractAgent {
                     bindAddr).toString());
             }
         } catch (final UnknownHostException e) {
-            throw new ManagementException(ManagementException.Code.UNKNOWN_HOST_ERROR, e, e.getMessage());
+            throw ManagementExceptionCode.UNKNOWN_HOST_ERROR.create(e, e.getMessage());
         } catch (final RemoteException e) {
-            throw new ManagementException(ManagementException.Code.REMOTE_ERROR, e, e.getMessage());
+            throw ManagementExceptionCode.REMOTE_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -415,17 +416,17 @@ public abstract class AbstractAgent {
      * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
      * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
      * @return The {@link JMXServiceURL} to which the connector is bound
-     * @throws ManagementException If connector cannot be added
+     * @throws OXException If connector cannot be added
      */
-    protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword) throws ManagementException {
+    protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword) throws OXException {
         final JMXServiceURL url;
         try {
             url = new JMXServiceURL(urlstr);
         } catch (final MalformedURLException e) {
-            throw new ManagementException(ManagementException.Code.MALFORMED_URL, e, urlstr);
+            throw ManagementExceptionCode.MALFORMED_URL.create(e, urlstr);
         }
         if (connectors.containsKey(url)) {
-            throw new ManagementException(ManagementException.Code.JMX_URL_ALREADY_BOUND, urlstr);
+            throw ManagementExceptionCode.JMX_URL_ALREADY_BOUND.create(urlstr);
         }
         try {
             final Map<String, Object> environment;
@@ -447,7 +448,7 @@ public abstract class AbstractAgent {
             }
             return url;
         } catch (final IOException e) {
-            throw new ManagementException(ManagementException.Code.IO_ERROR, e, e.getMessage());
+            throw ManagementExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
