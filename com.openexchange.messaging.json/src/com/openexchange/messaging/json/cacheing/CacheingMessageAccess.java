@@ -57,9 +57,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.caching.Cache;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
@@ -97,23 +97,23 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         groupNamePrefix = new StringBuilder(session.getContextId()).append('/').append(folderPrefix).append('/').toString();
     }
 
-    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws OXException {
         return delegate.getAttachment(folder, messageId, sectionId);
     }
 
-    public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
+    public void appendMessages(final String folder, final MessagingMessage[] messages) throws OXException {
         delegate.appendMessages(folder, messages);
     }
 
-    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
+    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         return delegate.copyMessages(sourceFolder, destFolder, messageIds, fast);
     }
 
-    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws MessagingException {
+    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws OXException {
         delegate.deleteMessages(folder, messageIds, hardDelete);
     }
 
-    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws MessagingException {
+    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws OXException {
         clear(folder);
         return remember(delegate.getAllMessages(folder, indexRange, sortField, order, addDefaultFields(fields)));
     }
@@ -131,7 +131,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return allFields.toArray(new MessagingField[allFields.size()]);
     }
 
-    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
+    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
         MessagingMessage msg = get(folder, id);
         if (msg != null) {
             return msg;
@@ -143,7 +143,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return remember(msg);
     }
 
-    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws OXException {
         final Map<String, MessagingMessage> allMessages = new HashMap<String, MessagingMessage>(messageIds.length);
         final List<String> idsToLoad = new ArrayList<String>(messageIds.length);
 
@@ -175,7 +175,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return remember(messages);
     }
 
-    private List<MessagingMessage> remember(final List<MessagingMessage> messages) throws MessagingException {
+    private List<MessagingMessage> remember(final List<MessagingMessage> messages) throws OXException {
         for (final MessagingMessage messagingMessage : messages) {
             if (null != messagingMessage) {
                 remember(messagingMessage);
@@ -184,27 +184,27 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return messages;
     }
 
-    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
+    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         return delegate.moveMessages(sourceFolder, destFolder, messageIds, fast);
     }
 
-    public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
+    public MessagingMessage perform(final MessagingMessage message, final String action) throws OXException {
         return delegate.perform(message, action);
     }
 
-    public MessagingMessage perform(final String folder, final String id, final String action) throws MessagingException {
+    public MessagingMessage perform(final String folder, final String id, final String action) throws OXException {
         return delegate.perform(folder, id, action);
     }
 
-    public MessagingMessage perform(final String action) throws MessagingException {
+    public MessagingMessage perform(final String action) throws OXException {
         return delegate.perform(action);
     }
 
-    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws OXException {
         return delegate.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
     }
 
-    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
+    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws OXException {
         delegate.updateMessage(message, fields);
     }
 
@@ -212,7 +212,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return (MessagingMessage) cache.getFromGroup(id, getGroupName(folder));
     }
 
-    protected MessagingMessage remember(final MessagingMessage message) throws MessagingException {
+    protected MessagingMessage remember(final MessagingMessage message) throws OXException {
         final String groupName = getGroupName(message.getFolder());
         final String key = message.getId();
 
@@ -220,8 +220,8 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
             if (key != null) {
                 cache.putInGroup(key, groupName, message);
             }
-        } catch (final CacheException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
 
         return message;
@@ -236,7 +236,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return new StringBuilder(groupNamePrefix).append(folderId).toString();
     }
 
-    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
         return delegate.resolveContent(folder, id, referenceId);
     }
 

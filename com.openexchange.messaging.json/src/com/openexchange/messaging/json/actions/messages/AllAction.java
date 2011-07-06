@@ -54,7 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingField;
@@ -100,7 +100,7 @@ public class AllAction extends AbstractMessagingAction {
     }
 
     @Override
-    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws JSONException, OXException {
 
         final MessagingMessageAccess access = req.getMessageAccess(session.getUserId(), session.getContextId());
 

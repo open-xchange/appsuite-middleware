@@ -51,9 +51,9 @@ package com.openexchange.messaging.json;
 
 import java.io.IOException;
 import org.json.JSONException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 
 
 /**
@@ -74,10 +74,10 @@ public interface MessagingContentParser {
      * Determine whether this parser can handle the given JSON representation of a messaging content. Will usually orient
      * itself along the (already parsed) content type in the given message.
      */
-    public boolean handles(MessagingBodyPart message, Object content) throws MessagingException;
+    public boolean handles(MessagingBodyPart message, Object content) throws OXException;
 
     /**
      * Turns the given content into a messaging content.
      */
-    public MessagingContent parse(MessagingBodyPart message, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException;
+    public MessagingContent parse(MessagingBodyPart message, Object content, MessagingInputStreamRegistry registry) throws JSONException, OXException, IOException;
 }

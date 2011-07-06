@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
  */
 public class MessagingRequestDataTest extends TestCase {
     
-    public void testParsesLongFolderForm() throws MessagingException {
+    public void testParsesLongFolderForm() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
         final String folder="some/folder";
@@ -97,13 +97,13 @@ public class MessagingRequestDataTest extends TestCase {
         try {
             final MessagingFolderAddress addr = messagingRequest.getLongFolder();
             fail("Should have failed parsing account number");
-        } catch (final MessagingException e) {
+        } catch (final OXException e) {
             // SUCCESS
         }
         
     }
     
-    public void testFallsBackToFolderForMissingMessagingServiceAndAccountIDAndFolderAndID() throws MessagingException {
+    public void testFallsBackToFolderForMissingMessagingServiceAndAccountIDAndFolderAndID() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
         final String folder="some/folder";
@@ -121,7 +121,7 @@ public class MessagingRequestDataTest extends TestCase {
         
     }
     
-    public void testAssemblesLongFolder() throws MessagingException {
+    public void testAssemblesLongFolder() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
         final String folder="some/folder";

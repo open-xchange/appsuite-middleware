@@ -85,11 +85,11 @@ public interface MessagingHeaderWriter {
     /**
      * Writes the JSON key for the given entry
      */
-    String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException;
+    String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException;
 
     /**
      * Writes the JSON value for the given entry
      */
-    Object writeValue(Entry<String, Collection<MessagingHeader>> entry, ServerSession session) throws JSONException, MessagingException;
+    Object writeValue(Entry<String, Collection<MessagingHeader>> entry, ServerSession session) throws JSONException, OXException;
 
 }

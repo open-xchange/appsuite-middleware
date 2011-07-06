@@ -51,8 +51,8 @@ package com.openexchange.messaging.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import com.openexchange.messaging.MessagingContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingContent;
 
 
 /**
@@ -71,9 +71,9 @@ public interface MessagingContentDumper {
     /**
      * @param content
      * @param outputStream
-     * @throws MessagingException 
+     * @throws OXException 
      * @throws IOException 
      */
-    void dump(MessagingContent content, OutputStream outputStream) throws MessagingException, IOException;
+    void dump(MessagingContent content, OutputStream outputStream) throws OXException, IOException;
 
 }

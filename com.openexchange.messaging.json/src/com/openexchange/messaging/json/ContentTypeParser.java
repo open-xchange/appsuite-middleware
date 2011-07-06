@@ -88,7 +88,7 @@ public class ContentTypeParser implements MessagingHeaderParser {
         return MimeContentType.getContentTypeName().equalsIgnoreCase(key);
     }
 
-    public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, MessagingException {
+    public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, OXException {
         if (JSONObject.class.isInstance(value)) {
             parseObject(headers, (JSONObject) value);
         } else if (String.class.isInstance(value)) {
@@ -96,12 +96,12 @@ public class ContentTypeParser implements MessagingHeaderParser {
         }
     }
 
-    private void parseString(final Map<String, Collection<MessagingHeader>> headers, final String value) throws MessagingException {
+    private void parseString(final Map<String, Collection<MessagingHeader>> headers, final String value) throws OXException {
         final MimeContentType contentType = new MimeContentType(value);
         headers.put(MimeContentType.getContentTypeName(), Arrays.asList((MessagingHeader) contentType));
     }
 
-    private void parseObject(final Map<String, Collection<MessagingHeader>> headers, final JSONObject value) throws MessagingException, JSONException {
+    private void parseObject(final Map<String, Collection<MessagingHeader>> headers, final JSONObject value) throws OXException, JSONException {
         final MimeContentType contentType = new MimeContentType();
         final JSONObject jsonCType = value;
         contentType.setBaseType(jsonCType.getString("type"));

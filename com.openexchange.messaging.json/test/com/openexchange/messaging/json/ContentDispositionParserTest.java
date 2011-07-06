@@ -55,8 +55,8 @@ import java.util.Map;
 import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 
@@ -67,7 +67,7 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContentDispositionParserTest extends TestCase {
-    public void testParseComplex() throws JSONException, MessagingException {
+    public void testParseComplex() throws JSONException, OXException {
         final ContentDispositionParser parser = new ContentDispositionParser();
         
         assertTrue(parser.handles("content-disposition", null));
@@ -98,7 +98,7 @@ public class ContentDispositionParserTest extends TestCase {
     }
     
     
-    public void testParseBasic() throws MessagingException, JSONException {
+    public void testParseBasic() throws OXException, JSONException {
         final ContentDispositionParser parser = new ContentDispositionParser();
         
         final String stringCDisp = "attachment;filename=foo.dat";

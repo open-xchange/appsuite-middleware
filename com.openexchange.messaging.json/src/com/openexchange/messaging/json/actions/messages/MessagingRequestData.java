@@ -59,10 +59,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.caching.Cache;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
@@ -110,7 +110,7 @@ public class MessagingRequestData {
         this(request, session, registry, parser, null);
     }
 
-    public MessagingMessageAccess getMessageAccess(final String messagingService, final int account, final int user, final int cid) throws MessagingException {
+    public MessagingMessageAccess getMessageAccess(final String messagingService, final int account, final int user, final int cid) throws OXException {
         final MessagingAccountAccess access = registry.getMessagingService(messagingService, user, cid).getAccountAccess(account, session);
         if (!access.isConnected()) {
             access.connect();
@@ -129,9 +129,9 @@ public class MessagingRequestData {
      * @param user 
      * @param cid 
      * 
-     * @throws MessagingException If parameters 'messagingService' or 'account' are missing
+     * @throws OXException If parameters 'messagingService' or 'account' are missing
      */
-    public MessagingMessageAccess getMessageAccess(final int user, final int cid) throws MessagingException {
+    public MessagingMessageAccess getMessageAccess(final int user, final int cid) throws OXException {
         if (messageAccess != null) {
             return messageAccess;
         }
@@ -139,7 +139,7 @@ public class MessagingRequestData {
         return messageAccess = wrap(access, getMessagingServiceId(), getAccountID());
     }
 
-    public MessagingAccountAccess getAccountAccess(final int user, final int cid) throws MessagingException {
+    public MessagingAccountAccess getAccountAccess(final int user, final int cid) throws OXException {
         if (accountAccess != null) {
             return accountAccess;
         }
@@ -153,7 +153,7 @@ public class MessagingRequestData {
         return accountAccess;
     }
 
-    public String getMessagingServiceId() throws MessagingException {
+    public String getMessagingServiceId() throws OXException {
         if (hasLongFolder()) {
             return getLongFolder().getMessagingService();
         } else {
@@ -165,14 +165,14 @@ public class MessagingRequestData {
         }
     }
 
-    private void missingParameter(final String string) throws MessagingException {
+    private void missingParameter(final String string) throws OXException {
         throw MessagingExceptionCodes.MISSING_PARAMETER.create(string);
     }
 
     /**
-     * Tries to retrieve the value of a given parameter, failing with a MessagingException if the parameter was not sent.
+     * Tries to retrieve the value of a given parameter, failing with a OXException if the parameter was not sent.
      */
-    public String requireParameter(final String string) throws MessagingException {
+    public String requireParameter(final String string) throws OXException {
         final String parameter = request.getParameter(string);
         if (parameter == null) {
             missingParameter(string);
@@ -183,9 +183,9 @@ public class MessagingRequestData {
     /**
      * Reads and parses the 'account' parameter.
      * 
-     * @throws MessagingException - When the 'account' parameter was not set or is not a valid integer.
+     * @throws OXException - When the 'account' parameter was not set or is not a valid integer.
      */
-    public int getAccountID() throws MessagingException {
+    public int getAccountID() throws OXException {
         if (!isset("account") && hasLongFolder()) {
             return getLongFolder().getAccount();
         }
@@ -201,9 +201,9 @@ public class MessagingRequestData {
     /**
      * Reads the 'folder' parameter, failing when it is not set.
      * 
-     * @throws MessagingException - When the 'folder' parameter is not set.
+     * @throws OXException - When the 'folder' parameter is not set.
      */
-    public String getFolderId() throws MessagingException {
+    public String getFolderId() throws OXException {
         if (hasLongFolder()) {
             return getLongFolder().getFolder();
         }
@@ -215,9 +215,9 @@ public class MessagingRequestData {
      * separated list of MessagingField names.
      * 
      * @return An array of MessagingFields corresponding to the comma-separated list given in the 'columns' parameter.
-     * @throws MessagingException - When the 'columns' parameter was not set or contains an illegal value.
+     * @throws OXException - When the 'columns' parameter was not set or contains an illegal value.
      */
-    public MessagingField[] getColumns() throws MessagingException {
+    public MessagingField[] getColumns() throws OXException {
         final String parameter = requireParameter("columns");
         if (parameter == null) {
             return new MessagingField[0];
@@ -237,9 +237,9 @@ public class MessagingRequestData {
      * Retrieves and parses the 'sort' parameter, turning it into a MessagingField. Returns <code>null</code> when 'sort' is unset. Fails
      * when 'sort' contains an unknown MessagingField.
      * 
-     * @throws MessagingException - When the 'sort' parameter contains an illegal value.
+     * @throws OXException - When the 'sort' parameter contains an illegal value.
      */
-    public MessagingField getSort() throws MessagingException {
+    public MessagingField getSort() throws OXException {
         final String parameter = request.getParameter("sort");
         if (parameter == null) {
             return null;
@@ -255,9 +255,9 @@ public class MessagingRequestData {
      * Retrieves and parses the 'order' parameter. Returns <code>null</code> when 'order' is not set. Fails when 'order' contains neither
      * 'desc' and 'asc'. Matches case-insensitively.
      * 
-     * @throws MessagingException - When 'order' contains an illegal value.
+     * @throws OXException - When 'order' contains an illegal value.
      */
-    public OrderDirection getOrder() throws MessagingException {
+    public OrderDirection getOrder() throws OXException {
         final String parameter = request.getParameter("order");
         if (parameter == null) {
             return null;
@@ -272,9 +272,9 @@ public class MessagingRequestData {
     /**
      * Retrieves the given 'id' parameter. Fails when the 'id' parameter is unset.
      * 
-     * @throws MessagingException - When the 'id' parameter is unset.
+     * @throws OXException - When the 'id' parameter is unset.
      */
-    public String getId() throws MessagingException {
+    public String getId() throws OXException {
         return requireParameter("id");
     }
 
@@ -282,9 +282,9 @@ public class MessagingRequestData {
      * Retrieves and parses the 'peek' parameter. Returns 'false' when 'peek' is not set. Fails when 'peek' contains neither 'true' nor
      * 'false'. Matches case insensitively.
      * 
-     * @throws MessagingException - When 'peek' contains an illegal value.
+     * @throws OXException - When 'peek' contains an illegal value.
      */
-    public boolean getPeek() throws MessagingException {
+    public boolean getPeek() throws OXException {
         final String parameter = request.getParameter("peek");
         if (parameter == null) {
             return false;
@@ -302,13 +302,13 @@ public class MessagingRequestData {
      * Retrieves the 'messageAction' parameter. Fails when 'messageAction' was not set.
      * 
      * @return
-     * @throws MessagingException - When 'messageAction' was not set.
+     * @throws OXException - When 'messageAction' was not set.
      */
-    public String getMessageAction() throws MessagingException {
+    public String getMessageAction() throws OXException {
         return requireParameter("messageAction");
     }
 
-    public MessagingMessage getMessage() throws MessagingException, JSONException, IOException {
+    public MessagingMessage getMessage() throws OXException, JSONException, IOException {
         final Object data = request.getData();
         if (data == null) {
             return null;
@@ -337,16 +337,16 @@ public class MessagingRequestData {
      * @param user 
      * @param cid 
      */
-    public MessagingAccountTransport getTransport(final int user, final int cid) throws MessagingException {
+    public MessagingAccountTransport getTransport(final int user, final int cid) throws OXException {
         return registry.getMessagingService(getMessagingServiceId(), user, cid).getAccountTransport(getAccountID(), session);
     }
 
     /**
      * Retrieves and parses the 'recipients' parameter. May return null, if no recipients were set.
      * 
-     * @throws MessagingException
+     * @throws OXException
      */
-    public Collection<MessagingAddressHeader> getRecipients() throws MessagingException {
+    public Collection<MessagingAddressHeader> getRecipients() throws OXException {
         final String parameter = request.getParameter("recipients");
         if (parameter == null) {
             return null;
@@ -357,9 +357,9 @@ public class MessagingRequestData {
     /**
      * Tries to either parse the folder in its long form or assemble it from the content
      * 
-     * @throws MessagingException
+     * @throws OXException
      */
-    public MessagingFolderAddress getLongFolder() throws MessagingException {
+    public MessagingFolderAddress getLongFolder() throws OXException {
         if (hasLongFolder()) {
             return MessagingFolderAddress.parse(request.getParameter("folder"));
         } else if (isset("messagingService", "account", "folder")) {
@@ -372,11 +372,11 @@ public class MessagingRequestData {
         return null;
     }
 
-    private boolean hasLongFolder() throws MessagingException {
+    private boolean hasLongFolder() throws OXException {
         return isset("folder") && MessagingFolderAddress.matches(request.getParameter("folder"));
     }
 
-    public List<MessageAddress> getMessageAddresses() throws JSONException, MessagingException {
+    public List<MessageAddress> getMessageAddresses() throws JSONException, OXException {
         final Object data = request.getData();
         if (data == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
@@ -396,7 +396,7 @@ public class MessagingRequestData {
         return addresses;
     }
 
-    public String getAccountAddress() throws MessagingException {
+    public String getAccountAddress() throws OXException {
         return getMessagingServiceId() + "://" + getAccountID();
     }
 
@@ -413,7 +413,7 @@ public class MessagingRequestData {
         }
     }
 
-    public String getReferenceId() throws MessagingException {
+    public String getReferenceId() throws OXException {
         return requireParameter("referenceId");
     }
 

@@ -54,7 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -78,7 +78,7 @@ public class AllAction extends AbstractMessagingServiceAction {
     }
 
     @Override
-    public AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+    public AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
         final List<MessagingService> services = registry.getAllServices(session.getUserId(), session.getContextId());
         if (services.isEmpty()) {
             return new AJAXRequestResult(new JSONArray());

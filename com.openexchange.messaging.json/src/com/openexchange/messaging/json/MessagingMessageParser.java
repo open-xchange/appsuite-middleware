@@ -64,10 +64,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ByteArrayContent;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
@@ -120,7 +120,7 @@ public class MessagingMessageParser {
     /**
      * Parses the JSON representation of a messaging message. References to binaries are resolved using the attached registry.
      */
-    public MessagingMessage parse(final JSONObject messageJSON, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
+    public MessagingMessage parse(final JSONObject messageJSON, final MessagingInputStreamRegistry registry) throws JSONException, OXException, IOException {
 
         final MimeMessagingMessage message = new MimeMessagingMessage();
 
@@ -161,7 +161,7 @@ public class MessagingMessageParser {
         return message;
     }
 
-    protected void setValues(final MimeMessagingBodyPart message, final MessagingInputStreamRegistry registry, final JSONObject messageJSON) throws JSONException, MessagingException, IOException {
+    protected void setValues(final MimeMessagingBodyPart message, final MessagingInputStreamRegistry registry, final JSONObject messageJSON) throws JSONException, OXException, IOException {
 
         if (messageJSON.has("id")) {
             message.setSectionId(messageJSON.getString("id"));
@@ -217,7 +217,7 @@ public class MessagingMessageParser {
         contentParsers.remove(parser);
     }
 
-    private void setHeaders(final JSONObject object, final MimeMessagingBodyPart message) throws JSONException, MessagingException {
+    private void setHeaders(final JSONObject object, final MimeMessagingBodyPart message) throws JSONException, OXException {
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         for (final String key : object.keySet()) {
             final Object value = object.get(key);
@@ -243,7 +243,7 @@ public class MessagingMessageParser {
         message.setAllHeaders(headers);
     }
 
-    private void setContent(final Object content, final MessagingInputStreamRegistry registry, final MimeMessagingBodyPart message) throws MessagingException, JSONException, IOException {
+    private void setContent(final Object content, final MessagingInputStreamRegistry registry, final MimeMessagingBodyPart message) throws OXException, JSONException, IOException {
         MessagingContentParser candidate = null;
         int ranking = 0;
 
@@ -297,14 +297,14 @@ public class MessagingMessageParser {
             return 0;
         }
 
-        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws MessagingException {
+        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
             if (null != partlyParsedMessage.getContentType()) {
                 return partlyParsedMessage.getContentType().getPrimaryType().equals("text");
             }
             return false;
         }
 
-        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException {
+        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, OXException {
             return new StringContent((String) content);
         }
     }
@@ -319,7 +319,7 @@ public class MessagingMessageParser {
             return 0;
         }
 
-        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws MessagingException {
+        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
             if (null != partlyParsedMessage.getContentType()) {
                 final String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
                 return !primaryType.equals("text") && !primaryType.equals("multipart");
@@ -327,7 +327,7 @@ public class MessagingMessageParser {
             return false;
         }
 
-        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
+        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, OXException, IOException {
             if (String.class.isInstance(content)) {
                 final byte[] decoded = Base64.decode((String) content);
                 return new ByteArrayContent(decoded);
@@ -374,7 +374,7 @@ public class MessagingMessageParser {
             return 0;
         }
 
-        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws MessagingException {
+        public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
             if (null != partlyParsedMessage.getContentType()) {
                 final String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
                 return primaryType.equals("multipart");
@@ -382,7 +382,7 @@ public class MessagingMessageParser {
             return false;
         }
 
-        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
+        public MessagingContent parse(final MessagingBodyPart partlyParsedMessage, final Object content, final MessagingInputStreamRegistry registry) throws JSONException, OXException, IOException {
 
             final MimeMultipartContent multipartContent = new MimeMultipartContent();
             final JSONArray multipartJSON = (JSONArray) content;

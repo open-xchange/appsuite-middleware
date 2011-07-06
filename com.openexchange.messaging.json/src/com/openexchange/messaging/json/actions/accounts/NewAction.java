@@ -53,7 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -72,7 +72,7 @@ public class NewAction extends AbstractMessagingAccountAction {
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
         final MessagingAccount account = parser.parse((JSONObject) request.getData(), session.getUserId(), session.getContextId());
         final int id = account.getMessagingService().getAccountManager().addAccount(account, session);
         return new AJAXRequestResult(id);

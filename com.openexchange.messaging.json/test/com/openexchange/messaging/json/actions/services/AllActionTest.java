@@ -52,7 +52,6 @@ package com.openexchange.messaging.json.actions.services;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
@@ -65,7 +64,7 @@ import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 public class AllActionTest extends TestCase {
 
     // Success Case
-    public void testSuccess() throws AbstractOXException {
+    public void testSuccess() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimMessagingService messagingService = new SimMessagingService();
@@ -90,9 +89,9 @@ public class AllActionTest extends TestCase {
 
     // Error Cases
 
-    public void testMessagingException() throws AbstractOXException {
+    public void testOXException() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
-        registry.setException(new MessagingException(null, -1, null, null));
+        registry.setException(new OXException());
 
         final SimMessagingService messagingService = new SimMessagingService();
         messagingService.setId("com.openexchange.test");
@@ -105,7 +104,7 @@ public class AllActionTest extends TestCase {
             final AJAXRequestResult result = action.perform(null, null);
             fail("Should not swallow exceptions");
             assertNull(result);
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             // Success
         }
     }

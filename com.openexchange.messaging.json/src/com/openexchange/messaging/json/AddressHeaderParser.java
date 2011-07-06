@@ -93,7 +93,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         return WHITELIST.contains(key);
     }
 
-    public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, MessagingException {
+    public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, OXException {
         final ArrayList<MessagingHeader> list = new ArrayList<MessagingHeader>();
         
         if(JSONArray.class.isInstance(value)) {
@@ -108,7 +108,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         headers.put(key, list);
     }
 
-    private void parse(final String key, final Object value, final ArrayList<MessagingHeader> list) throws MessagingException {
+    private void parse(final String key, final Object value, final ArrayList<MessagingHeader> list) throws OXException {
         if(JSONObject.class.isInstance(value)) {
             list.add(parseObject(key, (JSONObject) value));
         } else if (String.class.isInstance(value)) {
@@ -116,7 +116,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         }
     }
 
-    private MessagingHeader parseString(final String key, final String value) throws MessagingException {
+    private MessagingHeader parseString(final String key, final String value) throws OXException {
         return MimeAddressMessagingHeader.parseRFC822(key, value).iterator().next();
     }
 

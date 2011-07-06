@@ -61,6 +61,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.json.Enabled;
@@ -188,9 +189,9 @@ public class Activator extends DeferredActivator {
 
     /**
      * @return
-     * @throws CacheException
+     * @throws OXException
      */
-    private Cache getCache() throws CacheException {
+    private Cache getCache() throws OXException {
         final String regionName = "com.openexchange.messaging.json.messageCache";
         if (!cacheConfigured) {
             cacheConfigured = true;

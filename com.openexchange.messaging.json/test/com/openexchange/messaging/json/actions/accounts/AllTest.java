@@ -53,7 +53,6 @@ import junit.framework.TestCase;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingAccount;
@@ -115,7 +114,7 @@ public class AllTest extends TestCase {
     }
     
     // Success Cases
-    public void testListAllForACertainMessagingService() throws AbstractOXException {
+    public void testListAllForACertainMessagingService() throws OXException {
         
         final AllAction action = new AllAction(registry);
         
@@ -137,7 +136,7 @@ public class AllTest extends TestCase {
         
     }
     
-    public void testListAll() throws AbstractOXException {
+    public void testListAll() throws OXException {
         final AllAction action = new AllAction(registry);
         
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -158,8 +157,8 @@ public class AllTest extends TestCase {
     }
     
     // Error Cases
-    public void testExceptionInMessagingRegistry() throws AbstractOXException {
-        registry.setException(new MessagingException(null, -1, null, null));
+    public void testExceptionInMessagingRegistry() throws OXException {
+        registry.setException(new OXException());
         final AllAction action = new AllAction(registry);
         
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -169,15 +168,15 @@ public class AllTest extends TestCase {
         try {
             final AJAXRequestResult result = action.perform(requestData, session);
             fail("Should not swallow exceptions");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             //SUCCESS
         }
         
         
     }
     
-    public void testExceptionInMessagingAccountManager() throws AbstractOXException {
-        ((SimAccountManager) registry.getAllServices(-1, -1).get(0).getAccountManager()).setException(new MessagingException(null, -1, null, null));
+    public void testExceptionInMessagingAccountManager() throws OXException {
+        ((SimAccountManager) registry.getAllServices(-1, -1).get(0).getAccountManager()).setException(new OXException());
         final AllAction action = new AllAction(registry);
         
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -187,7 +186,7 @@ public class AllTest extends TestCase {
         try {
             final AJAXRequestResult result = action.perform(requestData, session);
             fail("Should not swallow exceptions");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             //SUCCESS
         }
     }

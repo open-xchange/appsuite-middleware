@@ -54,9 +54,8 @@ import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.SimMessageAccess;
@@ -74,18 +73,18 @@ public abstract class AbstractMessagingActionTest extends TestCase {
     
     protected MessagingServiceRegistry registry = TestRegistryBuilder.buildTestRegistry();
 
-    protected AJAXRequestResult perform(final AJAXRequestData req) throws AbstractOXException {
+    protected AJAXRequestResult perform(final AJAXRequestData req) throws OXException {
         final SimServerSession session = new SimServerSession(null, null, null);
         return getAction().perform(req, session);
     }
 
-    protected void assertFails(final AJAXRequestData requestData) throws AbstractOXException {
+    protected void assertFails(final AJAXRequestData requestData) throws OXException {
         final AbstractMessagingAction action = getAction();
         final SimServerSession session = new SimServerSession(null, null, null);
         try {
             final AJAXRequestResult result = action.perform(requestData, session);
             fail("Should have thrown exception");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             // SUCCESS
         }
 
@@ -104,7 +103,7 @@ public abstract class AbstractMessagingActionTest extends TestCase {
         assertEquals(Arrays.asList((String[]) object), Arrays.asList(ids));
     }
 
-    protected Call getMessagingAccessCall(final String serviceId, final int accountId) throws MessagingException {
+    protected Call getMessagingAccessCall(final String serviceId, final int accountId) throws OXException {
         final MessagingService service = registry.getMessagingService(serviceId, -1, -1);
         final MessagingAccountAccess accountAccess = service.getAccountAccess(accountId, null);
         final SimMessageAccess messageAccess = (SimMessageAccess) accountAccess.getMessageAccess();

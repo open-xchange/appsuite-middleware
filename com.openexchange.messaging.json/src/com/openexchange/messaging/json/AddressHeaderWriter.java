@@ -58,8 +58,8 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
@@ -99,11 +99,11 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         return WHITELIST.contains(name.toLowerCase(Locale.US));
     }
 
-    public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+    public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
         return entry.getKey();
     }
 
-    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
+    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
         final JSONArray addresses = new JSONArray();
         for (final MessagingHeader address : entry.getValue()) {
             final JSONObject object = new JSONObject();
@@ -118,7 +118,7 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         return addresses;
     }
 
-    private MessagingAddressHeader toMessagingAddress(final MessagingHeader address) throws MessagingException {
+    private MessagingAddressHeader toMessagingAddress(final MessagingHeader address) throws OXException {
         if(MessagingAddressHeader.class.isInstance(address)) {
             return (MessagingAddressHeader) address;
         }

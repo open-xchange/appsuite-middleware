@@ -52,7 +52,7 @@ package com.openexchange.messaging.json.actions.messages;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
@@ -90,7 +90,7 @@ public class GetAction extends AbstractMessagingAction {
 
 
     @Override
-    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws JSONException, OXException {
         
         final MessagingMessageAccess messageAccess = req.getMessageAccess(session.getUserId(), session.getContextId());
         final MessagingMessage message = messageAccess.getMessage(req.getFolderId(), req.getId(), req.getPeek());

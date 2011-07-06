@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
@@ -72,7 +71,7 @@ import com.openexchange.tools.session.SimServerSession;
 public class NewTest extends TestCase {
     // Success Case
     
-    public void testCreate() throws JSONException, AbstractOXException {
+    public void testCreate() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -111,9 +110,9 @@ public class NewTest extends TestCase {
     
     // Error Cases
     
-    public void testMessagingExceptionFromRegistry() throws JSONException, AbstractOXException {
+    public void testOXExceptionFromRegistry() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
-        registry.setException(new MessagingException(null, -1, null, null));
+        registry.setException(new OXException());
         
         final SimAccountManager accManager = new SimAccountManager();
         final SimMessagingService service = new SimMessagingService();
@@ -138,17 +137,17 @@ public class NewTest extends TestCase {
         try {
             final AJAXRequestResult result = action.perform(request, session);
             fail("Should not swallow exceptions");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             // SUCCESS
         }
         
     }
     
-    public void testMessagingExceptionFromAccManager() throws JSONException, AbstractOXException {
+    public void testOXExceptionFromAccManager() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         
         final SimAccountManager accManager = new SimAccountManager();
-        accManager.setException(new MessagingException(null, -1, null, null));
+        accManager.setException(new OXException());
         
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
@@ -172,7 +171,7 @@ public class NewTest extends TestCase {
         try {
             final AJAXRequestResult result = action.perform(request, session);
             fail("Should not swallow exceptions");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             // SUCCESS
         }
         

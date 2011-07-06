@@ -55,9 +55,9 @@ import java.util.Collection;
 import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.ContentDisposition;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeContentDisposition;
@@ -69,7 +69,7 @@ import com.openexchange.messaging.generic.internet.MimeContentDisposition;
  */
 public class ContentDispositionWriterTest extends TestCase{
 
-    public void testWriteContentType() throws MessagingException, JSONException {
+    public void testWriteContentType() throws OXException, JSONException {
         final ContentDisposition contentDisp = new MimeContentDisposition();
         contentDisp.setDisposition(ContentDisposition.ATTACHMENT);
         contentDisp.setFilenameParameter("foo.dat");
@@ -98,7 +98,7 @@ public class ContentDispositionWriterTest extends TestCase{
         
     }
     
-    public void testWriteBasicHeader() throws MessagingException, JSONException {
+    public void testWriteBasicHeader() throws OXException, JSONException {
         final MessagingHeader contentDisp = new StringMessageHeader("Content-Disposition", ContentDisposition.ATTACHMENT+";filename=foo.dat");
 
         final ContentDispositionWriter writer = new ContentDispositionWriter();

@@ -62,7 +62,7 @@ public class MessageAddress {
     private final String id;
 
 
-    public MessageAddress(final String longFolder, final String id) throws MessagingException {
+    public MessageAddress(final String longFolder, final String id) throws OXException {
         folder = MessagingFolderAddress.parse(longFolder);
         this.id = id;
     }

@@ -53,8 +53,8 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 
 /**

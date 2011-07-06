@@ -54,7 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -79,7 +79,7 @@ public class UpdatesAction extends AbstractMessagingAction {
 
 
     @Override
-    protected AJAXRequestResult doIt(final MessagingRequestData messagingRequestData, final ServerSession session) throws AbstractOXException, JSONException, IOException {
+    protected AJAXRequestResult doIt(final MessagingRequestData messagingRequestData, final ServerSession session) throws JSONException, IOException, OXException {
         return new AJAXRequestResult(new JSONArray());
     }
 

@@ -53,7 +53,7 @@ import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -80,7 +80,7 @@ public class SendAction extends AbstractMessagingAction {
 
 
     @Override
-    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException, IOException {
+    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws JSONException, IOException, OXException {
         final MessagingMessage message = req.getMessage();
         if(message == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");

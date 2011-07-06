@@ -65,14 +65,14 @@ import org.apache.commons.codec.binary.Base64InputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.DateMessagingHeader;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingHeader.HeaderType;
@@ -139,11 +139,11 @@ public class MessagingMessageWriter {
             return entry.getValue().size() > 1;
         }
 
-        public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+        public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
             return entry.getKey();
         }
 
-        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
+        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
             final JSONArray array = new JSONArray();
             for (final MessagingHeader header : entry.getValue()) {
                 array.put(getHeaderValue(header, session));
@@ -166,11 +166,11 @@ public class MessagingMessageWriter {
             return entry.getValue().size() <= 1;
         }
 
-        public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+        public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
             return entry.getKey();
         }
 
-        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
+        public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
             final Collection<MessagingHeader> collection = entry.getValue();
             if (null == collection || collection.isEmpty()) {
                 return ""; // Empty string
@@ -236,7 +236,7 @@ public class MessagingMessageWriter {
             return BinaryContent.class.isInstance(content);
         }
 
-        public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws MessagingException {
+        public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException {
             final BinaryContent binContent = (BinaryContent) content;
             final InputStream is = new BufferedInputStream(new Base64InputStream(binContent.getData(), true, -1, null));
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
@@ -246,7 +246,7 @@ public class MessagingMessageWriter {
                     baos.write(i);
                 }
             } catch (final IOException e) {
-                throw new MessagingException(Category.INTERNAL_ERROR, -1, e.getMessage(), e);
+                throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } finally {
                 try {
                     is.close();
@@ -282,7 +282,7 @@ public class MessagingMessageWriter {
             return MultipartContent.class.isInstance(content);
         }
 
-        public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws MessagingException, JSONException {
+        public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException, JSONException {
             final MultipartContent multipart = (MultipartContent) content;
             final JSONArray array = new JSONArray();
             for (int i = 0, size = multipart.getCount(); i < size; i++) {
@@ -345,9 +345,9 @@ public class MessagingMessageWriter {
      * @param mode The display mode
      * @return The resulting JSON object
      * @throws JSONException If a JSON error occurs
-     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If a messaging error occurs
      */
-    JSONObject write(final MessagingPart part, final ServerSession session, final DisplayMode mode) throws JSONException, MessagingException {
+    JSONObject write(final MessagingPart part, final ServerSession session, final DisplayMode mode) throws JSONException, OXException {
         final JSONObject messageJSON = new JSONObject();
 
         messageJSON.putOpt("sectionId", part.getSectionId());
@@ -391,10 +391,10 @@ public class MessagingMessageWriter {
      * @param headers The headers
      * @param session The session
      * @return The resulting JSON representation
-     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If a messaging error occurs
      * @throws JSONException If a JSON error occurs
      */
-    JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers, final ServerSession session) throws MessagingException, JSONException {
+    JSONObject writeHeaders(final Map<String, Collection<MessagingHeader>> headers, final ServerSession session) throws OXException, JSONException {
         final JSONObject headerJSON = new JSONObject();
         for (final Map.Entry<String, Collection<MessagingHeader>> entry : headers.entrySet()) {
             final MessagingHeaderWriter writer = getHeaderWriter(entry);
@@ -456,7 +456,7 @@ public class MessagingMessageWriter {
      * 
      * @param string
      */
-    public JSONObject write(final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode) throws JSONException, MessagingException {
+    public JSONObject write(final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode) throws JSONException, OXException {
         final JSONObject messageJSON = write(message, session, mode);
 
         {
@@ -550,7 +550,7 @@ public class MessagingMessageWriter {
 
     private static interface JSONFieldHandler {
         
-        Object handle(Object value, MessagingMessage message, String folderPrefix, ServerSession session, DisplayMode mode, MessagingMessageWriter messageWriter) throws MessagingException, JSONException;
+        Object handle(Object value, MessagingMessage message, String folderPrefix, ServerSession session, DisplayMode mode, MessagingMessageWriter messageWriter) throws OXException, JSONException;
     }
 
     private static final EnumMap<MessagingField, JSONFieldHandler> JSON_FIELD_HANDLERS;
@@ -559,13 +559,13 @@ public class MessagingMessageWriter {
         final EnumMap<MessagingField, JSONFieldHandler> map = new EnumMap<MessagingField, JSONFieldHandler>(MessagingField.class);
         map.put(MessagingField.HEADERS, new JSONFieldHandler() {
             
-            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return messageWriter.writeHeaders(message.getHeaders(), session);
             }
         });
         map.put(MessagingField.BODY, new JSONFieldHandler() {
             
-            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 final MessagingContent content = (MessagingContent) value;
                 final MessagingContentWriter writer = messageWriter.optContentWriter(message, content);
                 if (writer != null) {
@@ -576,7 +576,7 @@ public class MessagingMessageWriter {
         });
         map.put(MessagingField.FOLDER_ID, new JSONFieldHandler() {
             
-            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return new StringBuilder(folderPrefix).append('/').append(value).toString();
             }
         });
@@ -585,7 +585,7 @@ public class MessagingMessageWriter {
          */
         final JSONFieldHandler dateHandler = new JSONFieldHandler() {
             
-            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 final long date = ((Long) value).longValue();
                 if (date < 0) {
                     return null;
@@ -600,7 +600,7 @@ public class MessagingMessageWriter {
          */
         final JSONFieldHandler unsignedNumberHandler = new JSONFieldHandler() {
             
-            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws MessagingException, JSONException {
+            public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return ((Number) value).intValue() < 0 ? null : value;
             }
         };
@@ -619,7 +619,7 @@ public class MessagingMessageWriter {
      * 
      * @param folderPrefix
      */
-    public JSONArray writeFields(final MessagingMessage message, final MessagingField[] fields, final String folderPrefix, final ServerSession session, final DisplayMode mode) throws MessagingException, JSONException {
+    public JSONArray writeFields(final MessagingMessage message, final MessagingField[] fields, final String folderPrefix, final ServerSession session, final DisplayMode mode) throws OXException, JSONException {
         final JSONArray fieldJSON = new JSONArray();
 
         final MessagingMessageGetSwitch switcher = new MessagingMessageGetSwitch();

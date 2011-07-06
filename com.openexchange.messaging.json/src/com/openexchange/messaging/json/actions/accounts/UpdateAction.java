@@ -53,7 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -74,7 +74,7 @@ public class UpdateAction extends AbstractMessagingAccountAction {
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
 
         final JSONObject data = (JSONObject) request.getData();
         if(!data.has("id")) {

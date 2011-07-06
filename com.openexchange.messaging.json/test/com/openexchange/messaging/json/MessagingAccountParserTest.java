@@ -54,8 +54,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 
@@ -67,7 +67,7 @@ import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingAccountParserTest extends TestCase {
-    public void testParse() throws JSONException, MessagingException {
+    public void testParse() throws JSONException, OXException {
 
         final SimMessagingService messagingService = new SimMessagingService();
         
@@ -97,7 +97,7 @@ public class MessagingAccountParserTest extends TestCase {
         assertEquals("My nice input value", account.getConfiguration().get("inputField"));
     }
     
-    public void testMandatoryFieldsOnly() throws MessagingException, JSONException {
+    public void testMandatoryFieldsOnly() throws OXException, JSONException {
         final SimMessagingService messagingService = new SimMessagingService();
         
         final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
@@ -122,7 +122,7 @@ public class MessagingAccountParserTest extends TestCase {
     }
     
     public void testUnknownMessagingService() throws JSONException {
-        final MessagingException exception = new MessagingException(null, 0, null, null);
+        final OXException exception = new OXException();
         final SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
         serviceRegistry.setException(exception);
         
@@ -131,7 +131,7 @@ public class MessagingAccountParserTest extends TestCase {
             accountJSON.put("messagingService", "com.openexchange.twitter");
             final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
             fail("Should have failed with exception from message service lookup");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             assertSame(exception, x);
         }
     }

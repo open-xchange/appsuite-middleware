@@ -54,8 +54,8 @@ import static com.openexchange.messaging.json.MessagingAccountConstants.MESSAGIN
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormContentParser;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccount;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -74,7 +74,7 @@ public class MessagingAccountParser {
         registry = serviceRegistry;
     }
 
-    public MessagingAccount parse(final JSONObject accountJSON, int userId, int contextId) throws MessagingException, JSONException {
+    public MessagingAccount parse(final JSONObject accountJSON, int userId, int contextId) throws OXException, JSONException {
         final DefaultMessagingAccount account = new DefaultMessagingAccount();
         
         account.setId(accountJSON.optInt(ID));

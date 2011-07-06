@@ -51,9 +51,8 @@ package com.openexchange.messaging.json.actions.accounts;
 
 import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
@@ -68,7 +67,7 @@ import com.openexchange.tools.session.SimServerSession;
 public class DeleteTest extends TestCase {
     // Success Case
     
-    public void testDelete() throws AbstractOXException {
+    public void testDelete() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -94,7 +93,7 @@ public class DeleteTest extends TestCase {
     
     // Error Cases
     
-    public void testMissingParameterID() throws AbstractOXException {
+    public void testMissingParameterID() throws OXException {
         
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -106,12 +105,12 @@ public class DeleteTest extends TestCase {
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             //SUCCESS
         }
     }
     
-    public void testMissingParameterMessagingService() throws AbstractOXException {
+    public void testMissingParameterMessagingService() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         
@@ -122,12 +121,12 @@ public class DeleteTest extends TestCase {
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             //SUCCESS
         }
     }
     
-    public void testNumberFormatExceptionInID() throws AbstractOXException {
+    public void testNumberFormatExceptionInID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -139,15 +138,15 @@ public class DeleteTest extends TestCase {
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             //SUCCESS
         }
 
     }
     
-    public void testMessagingExceptionInRegistry() throws AbstractOXException {
+    public void testOXExceptionInRegistry() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
-        registry.setException(new MessagingException(null, -1, null, null));
+        registry.setException(new OXException());
         
         final SimAccountManager accManager = new SimAccountManager();
         final SimMessagingService service = new SimMessagingService();
@@ -166,17 +165,17 @@ public class DeleteTest extends TestCase {
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             //SUCCESS
         }
         
     }
     
-    public void testMessagingExceptionInAccountManager() throws AbstractOXException {
+    public void testOXExceptionInAccountManager() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
-        accManager.setException(new MessagingException(null, -1, null, null));
+        accManager.setException(new OXException());
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
         
@@ -193,7 +192,7 @@ public class DeleteTest extends TestCase {
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             //SUCCESS
         }
         

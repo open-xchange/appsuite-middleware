@@ -54,8 +54,8 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.messaging.ContentType;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.tools.session.ServerSession;
@@ -84,11 +84,11 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
         return "content-type".equalsIgnoreCase(entry.getKey());
     }
 
-    public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
+    public String writeKey(final Entry<String, Collection<MessagingHeader>> entry) throws JSONException, OXException {
         return "Content-Type";
     }
 
-    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, MessagingException {
+    public Object writeValue(final Entry<String, Collection<MessagingHeader>> entry, final ServerSession session) throws JSONException, OXException {
         final ContentType cType = toCType(entry.getValue().iterator().next());
         final JSONObject jsonCType = new JSONObject();
         /*
@@ -114,7 +114,7 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
         return jsonCType;
     }
 
-    private ContentType toCType(final MessagingHeader header) throws MessagingException {
+    private ContentType toCType(final MessagingHeader header) throws OXException {
         if(ContentType.class.isInstance(header)) {
             return (ContentType) header;
         }

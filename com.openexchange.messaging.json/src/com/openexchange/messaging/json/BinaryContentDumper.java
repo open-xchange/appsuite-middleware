@@ -54,9 +54,9 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 
 
 /**
@@ -66,7 +66,7 @@ import com.openexchange.exception.OXException;
  */
 public class BinaryContentDumper implements MessagingContentDumper {
 
-    public void dump(final MessagingContent content, final OutputStream outputStream) throws MessagingException, IOException {
+    public void dump(final MessagingContent content, final OutputStream outputStream) throws OXException, IOException {
         final BinaryContent binContent = (BinaryContent) content;
         final InputStream inputStream = binContent.getData();
         

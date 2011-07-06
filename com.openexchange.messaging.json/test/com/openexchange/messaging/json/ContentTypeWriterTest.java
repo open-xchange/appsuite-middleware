@@ -55,9 +55,9 @@ import java.util.Collection;
 import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.ContentType;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
@@ -69,7 +69,7 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
  */
 public class ContentTypeWriterTest extends TestCase{
 
-    public void testWriteContentType() throws MessagingException, JSONException {
+    public void testWriteContentType() throws OXException, JSONException {
         final ContentType contentType = new MimeContentType();
         contentType.setPrimaryType("text");
         contentType.setSubType("plain");
@@ -101,7 +101,7 @@ public class ContentTypeWriterTest extends TestCase{
         
     }
     
-    public void testWriteBasicHeader() throws MessagingException, JSONException {
+    public void testWriteBasicHeader() throws OXException, JSONException {
         final MessagingHeader contentType = new StringMessageHeader("Content-Type", "text/plain;charset=UTF-8;name=something.txt");
 
         final ContentTypeWriter writer = new ContentTypeWriter();

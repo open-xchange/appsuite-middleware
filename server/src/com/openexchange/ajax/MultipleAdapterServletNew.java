@@ -72,7 +72,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -80,7 +80,6 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -177,11 +176,11 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             final AJAXRequestResult result = factory.createActionService(action).perform(data, session);
             response.setData(result.getResultObject());
             response.setTimestamp(result.getTimestamp());
-            final Collection<AbstractOXException> warnings = result.getWarnings();
+            final Collection<OXException> warnings = result.getWarnings();
             if (null != warnings && !warnings.isEmpty()) {
                 response.setWarning(warnings.iterator().next());
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
@@ -213,9 +212,9 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      * @param req The HTTP request object
      * @param resp The HTTP response object
      * @return <code>true</code> if operation completed successfully and therefore usual JSON handling must be omitted; otherwise <code>false</code> to fall-back to usual JSON handling
-     * @throws AbstractOXException 
+     * @throws OXException 
      */
-    protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
+    protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, OXException {
         return false;
     }
     
@@ -227,12 +226,11 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      * @param req The HTTP request object
      * @param resp The HTTP response object
      * @return <code>true</code> if operation completed successfully and therefore usual JSON handling must be omitted; otherwise <code>false</code> to fall-back to usual JSON handling
-     * @throws AbstractOXException 
-     * @throws ServletException 
      * @throws IOException 
-     * @throws AbstractOXException 
+     * @throws ServletException 
+     * @throws OXException
      */
-    protected boolean handleIndividually(final String action, final AJAXRequestData data, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
+    protected boolean handleIndividually(final String action, final AJAXRequestData data, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, OXException {
         return false;
     }
 

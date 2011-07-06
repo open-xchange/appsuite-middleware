@@ -57,8 +57,8 @@ import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.json.JSONAssertion;
 import com.openexchange.exception.OXException;
+import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
@@ -94,7 +94,7 @@ public class AddressHeaderWriterTest extends TestCase {
 
     }
 
-    public void testWrite() throws MessagingException, JSONException {
+    public void testWrite() throws OXException, JSONException {
         final MimeAddressMessagingHeader header = MimeAddressMessagingHeader.valueOfPlain("To", "Clark Kent", "clark.kent@dailyplanet.com");
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();
@@ -111,7 +111,7 @@ public class AddressHeaderWriterTest extends TestCase {
         assertValidates(assertion, headerJSON.getJSONObject(0));
     }
 
-    public void testWriteFromAsSingleObject() throws MessagingException, JSONException {
+    public void testWriteFromAsSingleObject() throws OXException, JSONException {
         final MimeAddressMessagingHeader header = MimeAddressMessagingHeader.valueOfPlain("From", "Clark Kent", "clark.kent@dailyplanet.com");
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();
@@ -125,7 +125,7 @@ public class AddressHeaderWriterTest extends TestCase {
         assertValidates(assertion, headerJSON);
     }
 
-    public void testWriteBasic() throws MessagingException, JSONException {
+    public void testWriteBasic() throws OXException, JSONException {
         final MessagingHeader header = new StringMessageHeader("To", "Clark Kent <clark.kent@dailyplanet.com>");
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();

@@ -55,10 +55,10 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.caching.Cache;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 

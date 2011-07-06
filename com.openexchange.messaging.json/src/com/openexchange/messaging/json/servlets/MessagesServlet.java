@@ -59,9 +59,8 @@ import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.messaging.MessagingContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.json.BinaryContentDumper;
 import com.openexchange.messaging.json.MessagingContentDumper;
@@ -98,7 +97,7 @@ public class MessagesServlet extends MultipleAdapterServletNew {
     }
     
     @Override
-    protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, AbstractOXException {
+    protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, OXException {
         if(RESOLVE.equals(action)) {
             final ServerSession session = getSessionObject(req);
             final AJAXRequestData requestData = parseRequest(req, false, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
@@ -117,7 +116,7 @@ public class MessagesServlet extends MultipleAdapterServletNew {
                 }
                 
                 
-            } catch (final MessagingException e) {
+            } catch (final OXException e) {
                 throw new ServletException(e);
             }
             

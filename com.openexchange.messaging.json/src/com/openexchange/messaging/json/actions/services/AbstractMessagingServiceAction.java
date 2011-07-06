@@ -54,7 +54,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nTranslator;
 import com.openexchange.i18n.Translator;
@@ -88,7 +87,7 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
         }
     }
 
-    protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException;
+    protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException;
 
     protected final MessagingServiceWriter getWriter(final ServerSession session) {
         final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());

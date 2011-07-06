@@ -73,7 +73,7 @@ public interface MessagingHeaderParser {
     /**
      * Parses the header and adds it to the given map. 
      */
-    public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) throws JSONException, MessagingException;
+    public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) throws JSONException, OXException;
     
     /**
      * If more than one parser feels responsible for a given header, the one with the highest ranking wins.

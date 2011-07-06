@@ -58,8 +58,8 @@ import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingHeader;
 
 
@@ -92,7 +92,7 @@ public class AddressHeaderParserTest extends TestCase {
         }
     }
     
-    public void testParseComplex() throws JSONException, MessagingException {
+    public void testParseComplex() throws JSONException, OXException {
         final JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
         
         final AddressHeaderParser parser = new AddressHeaderParser();
@@ -113,7 +113,7 @@ public class AddressHeaderParserTest extends TestCase {
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
     }
     
-    public void testParseSimple() throws MessagingException, JSONException {
+    public void testParseSimple() throws OXException, JSONException {
         
         final AddressHeaderParser parser = new AddressHeaderParser();
         
@@ -133,7 +133,7 @@ public class AddressHeaderParserTest extends TestCase {
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
     }
     
-    public void testParseList() throws MessagingException, JSONException {
+    public void testParseList() throws OXException, JSONException {
         final JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
         
         final JSONArray array = new JSONArray("['Lois Lane <lois.lane@dailyplanet.com>']");

@@ -53,7 +53,7 @@ import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -91,7 +91,7 @@ public class PerformAction extends AbstractMessagingAction {
 
 
     @Override
-    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws AbstractOXException, JSONException, IOException {
+    protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws JSONException, IOException, OXException {
         final MessagingMessage input = req.getMessage();
         MessagingMessage output = null;
         

@@ -63,7 +63,7 @@ public class MessagingFolderAddress {
         return folderId.contains("://");
     }
 
-    public static MessagingFolderAddress parse(final String folderId) throws MessagingException {
+    public static MessagingFolderAddress parse(final String folderId) throws OXException {
         final MessagingFolderAddress address = new MessagingFolderAddress();
         int state = 0;
         final StringBuilder builder = new StringBuilder();
@@ -140,7 +140,7 @@ public class MessagingFolderAddress {
         return account;
     }
 
-    public void setAccount(final String account) throws MessagingException {
+    public void setAccount(final String account) throws OXException {
         try {
             this.account = Integer.parseInt(account);
         } catch (final NumberFormatException x) {

@@ -62,5 +62,5 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingInputStreamRegistry {
-    public InputStream get(Object id) throws MessagingException, IOException;
+    public InputStream get(Object id) throws OXException, IOException;
 }

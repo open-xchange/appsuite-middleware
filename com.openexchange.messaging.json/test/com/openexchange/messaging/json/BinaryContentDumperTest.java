@@ -54,8 +54,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import junit.framework.TestCase;
-import com.openexchange.messaging.BinaryContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.BinaryContent;
 
 /**
  * {@link BinaryContentDumperTest}
@@ -67,7 +67,7 @@ public class BinaryContentDumperTest extends TestCase {
     public void testHandles() {
         assertTrue(new BinaryContentDumper().handles(new BinaryContent() {
 
-            public InputStream getData() throws MessagingException {
+            public InputStream getData() throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
@@ -75,7 +75,7 @@ public class BinaryContentDumperTest extends TestCase {
         }));
     }
 
-    public void testDump() throws MessagingException, IOException {
+    public void testDump() throws OXException, IOException {
         final InputStream is = new ByteArrayInputStream("Hello World".getBytes("UTF-8"));
         final BinaryContent content = getBinaryContent(is);
         
@@ -90,7 +90,7 @@ public class BinaryContentDumperTest extends TestCase {
     private BinaryContent getBinaryContent(final InputStream is) {
         return new BinaryContent() {
 
-            public InputStream getData() throws MessagingException {
+            public InputStream getData() throws OXException {
                 return is;
             }
 

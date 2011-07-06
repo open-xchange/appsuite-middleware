@@ -51,9 +51,9 @@ package com.openexchange.messaging.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.ReferenceContent;
 import com.openexchange.tools.session.ServerSession;
@@ -79,7 +79,7 @@ public class ReferenceContentRenderer implements MessagingContentWriter {
         return ReferenceContent.class.isInstance(content);
     }
 
-    public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws MessagingException, JSONException {
+    public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException, JSONException {
         final ReferenceContent refContent = (ReferenceContent) content;
         final JSONObject object = new JSONObject();
         object.put(REF, refContent.getId());

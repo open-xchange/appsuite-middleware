@@ -54,7 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.SimMessageAccess.Call;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -69,7 +69,7 @@ public class ListTest extends AbstractMessagingActionTest {
 
     // Success Cases
     
-    public void testList() throws JSONException, AbstractOXException {
+    public void testList() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("columns", "id, subject");
         
@@ -99,7 +99,7 @@ public class ListTest extends AbstractMessagingActionTest {
     
     // Error Cases
     
-    public void testInvalidBody() throws AbstractOXException, JSONException {
+    public void testInvalidBody() throws OXException, JSONException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -111,7 +111,7 @@ public class ListTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
     
-    public void testMissingBody() throws JSONException, AbstractOXException {
+    public void testMissingBody() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -121,7 +121,7 @@ public class ListTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
     
-    public void testMissingServiceID() throws JSONException, AbstractOXException {
+    public void testMissingServiceID() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
@@ -133,7 +133,7 @@ public class ListTest extends AbstractMessagingActionTest {
 
     }
     
-    public void testMissingFolderID() throws JSONException, AbstractOXException {
+    public void testMissingFolderID() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
@@ -144,7 +144,7 @@ public class ListTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
     
-    public void testMissingAccountID() throws JSONException, AbstractOXException {
+    public void testMissingAccountID() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -156,7 +156,7 @@ public class ListTest extends AbstractMessagingActionTest {
 
     }
     
-    public void testMissingColumns() throws JSONException, AbstractOXException {
+    public void testMissingColumns() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -168,7 +168,7 @@ public class ListTest extends AbstractMessagingActionTest {
 
     }
     
-    public void testUnknownColumn() throws JSONException, AbstractOXException {
+    public void testUnknownColumn() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
