@@ -53,11 +53,9 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
@@ -82,12 +80,7 @@ public class DeleteReminder {
     }
 
     public void perform() throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, true);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.get(ctx, true);
         try {
             con.setAutoCommit(false);
             delete(con);
@@ -107,7 +100,7 @@ public class DeleteReminder {
         try {
             STORAGE.deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
             TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(ctx, con, reminder.getTargetId(), reminder.getUser());
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
