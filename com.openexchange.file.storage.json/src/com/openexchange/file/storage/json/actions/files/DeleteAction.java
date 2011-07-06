@@ -51,8 +51,8 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -63,12 +63,12 @@ import com.openexchange.groupware.AbstractOXException;
 public class DeleteAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireBody().require(Param.TIMESTAMP);
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp());
+        final List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp());
         
         return result(conflicting, request);
     }

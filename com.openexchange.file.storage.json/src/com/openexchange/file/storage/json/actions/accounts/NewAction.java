@@ -53,9 +53,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -72,7 +72,7 @@ public class NewAction extends AbstractFileStorageAccountAction {
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
         final FileStorageAccount account = parser.parse((JSONObject) request.getData());
         final String id = account.getFileStorageService().getAccountManager().addAccount(account, session);
         return new AJAXRequestResult(id);

@@ -446,7 +446,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
         final long size = uploadFile.getSize();
         if (size > maxSize) {
-            throw new UploadSizeExceededException(size, maxSize, true);
+            throw UploadSizeExceededException.create(size, maxSize, true);
         }
     }
 

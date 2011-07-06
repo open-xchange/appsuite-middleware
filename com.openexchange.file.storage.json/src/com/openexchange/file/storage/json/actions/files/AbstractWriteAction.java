@@ -50,7 +50,7 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractWriteAction}
@@ -60,23 +60,23 @@ import com.openexchange.groupware.AbstractOXException;
 public abstract class AbstractWriteAction extends AbstractFileAction {
 
     @Override
-    protected void before(AJAXInfostoreRequest req) throws AbstractOXException {
+    protected void before(final AJAXInfostoreRequest req) throws OXException {
         super.before(req);
         req.getFileAccess().startTransaction();
     }
     
     @Override
-    protected void success(AJAXInfostoreRequest req, AJAXRequestResult result) throws AbstractOXException {
+    protected void success(final AJAXInfostoreRequest req, final AJAXRequestResult result) throws OXException {
         req.getFileAccess().commit();
     }
     
     @Override
-    protected void failure(AJAXInfostoreRequest req, Throwable throwable) throws AbstractOXException {
+    protected void failure(final AJAXInfostoreRequest req, final Throwable throwable) throws OXException {
         req.getFileAccess().rollback();
     }
     
     @Override
-    protected void after(AJAXInfostoreRequest req) throws AbstractOXException {
+    protected void after(final AJAXInfostoreRequest req) throws OXException {
         req.getFileAccess().finish();
         super.after(req);
     }

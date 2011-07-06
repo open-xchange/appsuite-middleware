@@ -62,7 +62,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.FileMetadataWriter;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -97,7 +96,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
 
         String name;
 
-        private Param(String name) {
+        private Param(final String name) {
             this.name = name;
         }
 
@@ -110,14 +109,14 @@ public abstract class AbstractFileAction implements AJAXActionService {
         return fileWriter;
     }
 
-    public abstract AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException;
+    public abstract AJAXRequestResult handle(InfostoreRequest request) throws OXException;
 
-    public AJAXRequestResult result(TimedResult<File> documents, InfostoreRequest request) throws AbstractOXException {
-        SearchIterator<File> results = documents.results();
+    public AJAXRequestResult result(final TimedResult<File> documents, final InfostoreRequest request) throws OXException {
+        final SearchIterator<File> results = documents.results();
         return results(results, documents.sequenceNumber() , request);
     }
 
-    protected AJAXRequestResult results(SearchIterator<File> results, long timestamp, InfostoreRequest request) throws AbstractOXException {
+    protected AJAXRequestResult results(final SearchIterator<File> results, final long timestamp, final InfostoreRequest request) throws OXException {
         try {
             return new AJAXRequestResult(results, new Date(timestamp), "infostore");
         } finally {
@@ -126,15 +125,15 @@ public abstract class AbstractFileAction implements AJAXActionService {
     
     }
 
-    public AJAXRequestResult result(Delta<File> delta, InfostoreRequest request) throws AbstractOXException {
-        SearchIterator<File> results = delta.results();
+    public AJAXRequestResult result(final Delta<File> delta, final InfostoreRequest request) throws OXException {
+        final SearchIterator<File> results = delta.results();
         JSONArray array = null;
         try {
             array = getWriter().write(results, request.getColumns(), request.getTimezone());
         } finally {
             results.close();
         }
-        SearchIterator<File> deleted = delta.getDeleted();
+        final SearchIterator<File> deleted = delta.getDeleted();
         try {
             while (deleted.hasNext()) {
                 array.put(deleted.next().getId());
@@ -146,21 +145,21 @@ public abstract class AbstractFileAction implements AJAXActionService {
         return new AJAXRequestResult(array, new Date(delta.sequenceNumber()));
     }
 
-    public AJAXRequestResult result(File file, InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult result(final File file, final InfostoreRequest request) throws OXException {
         return new AJAXRequestResult(file, new Date(file.getSequenceNumber()), "infostore");
     }
 
 
-    public AJAXRequestResult result(List<String> ids, InfostoreRequest request) throws AbstractOXException {
-        JSONArray array = new JSONArray();
+    public AJAXRequestResult result(final List<String> ids, final InfostoreRequest request) throws OXException {
+        final JSONArray array = new JSONArray();
         try {
-            for (String id : ids) {
-                JSONObject object = new JSONObject();
+            for (final String id : ids) {
+                final JSONObject object = new JSONObject();
                 object.put("id", id);
                 object.put("folder", request.getFolderForID(id));
                 array.put(object);
             }
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSONError.create( x.getMessage());
         }
 
@@ -168,30 +167,30 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
     
     
-    public AJAXRequestResult result(int[] versions, long sequenceNumber, InfostoreRequest request) throws AbstractOXException {
-        JSONArray array = new JSONArray();
-        for (int i : versions) {
+    public AJAXRequestResult result(final int[] versions, final long sequenceNumber, final InfostoreRequest request) throws OXException {
+        final JSONArray array = new JSONArray();
+        for (final int i : versions) {
             array.put(i);
         }
         
         return new AJAXRequestResult(array, new Date(sequenceNumber));
     }
     
-    public AJAXRequestResult success(long sequenceNumber) {
+    public AJAXRequestResult success(final long sequenceNumber) {
         return new AJAXRequestResult(true, new Date(sequenceNumber));
     }
     
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        AJAXInfostoreRequest req = new AJAXInfostoreRequest(request, session);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final AJAXInfostoreRequest req = new AJAXInfostoreRequest(request, session);
         try {
             before(req);
-            AJAXRequestResult result = handle(req);
+            final AJAXRequestResult result = handle(req);
             success(req, result);
             return result;
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             failure(req,x);
             throw x;
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             failure(req,t);
             LOG.error(t.getMessage(), t);
             throw AjaxExceptionCodes.UnexpectedError.create( t.getMessage());
@@ -205,22 +204,22 @@ public abstract class AbstractFileAction implements AJAXActionService {
         }
     }
 
-    protected void after(AJAXInfostoreRequest req) throws AbstractOXException{
+    protected void after(final AJAXInfostoreRequest req) throws OXException{
         req.getFileAccess().finish();
     }
 
    
-    protected void failure(AJAXInfostoreRequest req, Throwable throwable) throws AbstractOXException{
+    protected void failure(final AJAXInfostoreRequest req, final Throwable throwable) throws OXException{
         
     }
 
     
-    protected void success(AJAXInfostoreRequest req, AJAXRequestResult result) throws AbstractOXException{
+    protected void success(final AJAXInfostoreRequest req, final AJAXRequestResult result) throws OXException{
         
     }
 
    
-    protected void before(AJAXInfostoreRequest req) throws AbstractOXException {
+    protected void before(final AJAXInfostoreRequest req) throws OXException {
         
     }
 

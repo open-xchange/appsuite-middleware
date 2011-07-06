@@ -52,10 +52,10 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -68,30 +68,30 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class RevertAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        TimedResult<File> versions = fileAccess.getVersions(request.getId());
-        List<Integer> versionNumbers = new ArrayList<Integer>(10);
+        final TimedResult<File> versions = fileAccess.getVersions(request.getId());
+        final List<Integer> versionNumbers = new ArrayList<Integer>(10);
         
-        SearchIterator<File> results = versions.results();
+        final SearchIterator<File> results = versions.results();
         while(results.hasNext()) {
-            int version = results.next().getVersion();
+            final int version = results.next().getVersion();
             if(version != 0){
                 versionNumbers.add(version);
             }
         }
         
-        int[] toDelete = new int[versionNumbers.size()];
+        final int[] toDelete = new int[versionNumbers.size()];
         for(int i = 0; i < toDelete.length; i++) {
             toDelete[i] = versionNumbers.get(i);
         }
         
         fileAccess.removeVersion(request.getId(), toDelete);
         
-        File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
+        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
         
         return success(fileMetadata.getSequenceNumber());
     }

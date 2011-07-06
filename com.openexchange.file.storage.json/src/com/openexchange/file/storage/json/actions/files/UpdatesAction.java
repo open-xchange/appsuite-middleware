@@ -50,10 +50,10 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Delta;
 
 /**
@@ -64,13 +64,13 @@ import com.openexchange.groupware.results.Delta;
 public class UpdatesAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.FOLDER_ID, Param.COLUMNS);
 
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        long timestamp = request.getTimestamp();
-        Delta<File> delta = fileAccess.getDelta(
+        final long timestamp = request.getTimestamp();
+        final Delta<File> delta = fileAccess.getDelta(
             request.getFolderId(),
             timestamp == FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER ? FileStorageFileAccess.DISTANT_PAST : timestamp,
             request.getColumns(),

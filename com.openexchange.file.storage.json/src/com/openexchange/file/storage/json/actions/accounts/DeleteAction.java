@@ -53,12 +53,12 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -80,7 +80,7 @@ public class DeleteAction extends AbstractFileStorageAccountAction {
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
         final List<String> missingParameters = request.getMissingParameters(FileStorageAccountConstants.FILE_STORAGE_SERVICE, FileStorageAccountConstants.ID);
         if(!missingParameters.isEmpty()) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());

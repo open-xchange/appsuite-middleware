@@ -50,9 +50,9 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -63,12 +63,12 @@ import com.openexchange.groupware.AbstractOXException;
 public class DetachAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireBody().require(Param.TIMESTAMP, Param.ID);
         
-        int[] conflicted = request.getFileAccess().removeVersion(request.getId(), request.getVersions());
+        final int[] conflicted = request.getFileAccess().removeVersion(request.getId(), request.getVersions());
         
-        File file = request.getFileAccess().getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
+        final File file = request.getFileAccess().getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
         
         return result(conflicted, file.getSequenceNumber(), request);
     }

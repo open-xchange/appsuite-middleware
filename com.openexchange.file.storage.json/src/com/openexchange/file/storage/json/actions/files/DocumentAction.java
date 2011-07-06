@@ -54,9 +54,9 @@ import java.io.InputStream;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Action;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -67,16 +67,16 @@ import com.openexchange.groupware.AbstractOXException;
 @Action(defaultFormat="file")
 public class DocumentAction extends AbstractFileAction {
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
         
-        InputStream documentData = new BufferedInputStream(fileAccess.getDocument(request.getId(), request.getVersion()));
+        final InputStream documentData = new BufferedInputStream(fileAccess.getDocument(request.getId(), request.getVersion()));
         
-        FileHolder fileHolder = new FileHolder(documentData, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+        final FileHolder fileHolder = new FileHolder(documentData, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
         
         
         return new AJAXRequestResult(fileHolder, "file");

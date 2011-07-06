@@ -50,10 +50,10 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -64,13 +64,13 @@ import com.openexchange.groupware.AbstractOXException;
 public class LockAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
         fileAccess.lock(request.getId(), request.getDiff());
-        File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
+        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
         
         return success(fileMetadata.getSequenceNumber());
     }

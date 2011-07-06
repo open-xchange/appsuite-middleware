@@ -58,7 +58,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.json.FileStorageAccountParser;
 import com.openexchange.file.storage.json.FileStorageAccountWriter;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -90,6 +89,6 @@ public abstract class AbstractFileStorageAccountAction implements AJAXActionServ
         }
     }
 
-    protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException;
+    protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException;
 
 }

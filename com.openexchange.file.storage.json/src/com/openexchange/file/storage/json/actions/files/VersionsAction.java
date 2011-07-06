@@ -56,7 +56,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -69,21 +68,21 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class VersionsAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        List<Field> columns = new ArrayList<File.Field>(request.getColumns());
+        final List<Field> columns = new ArrayList<File.Field>(request.getColumns());
         if(!columns.contains(File.Field.VERSION)) {
             columns.add(File.Field.VERSION);
         }
-        TimedResult<File> versions = fileAccess.getVersions(request.getId(), columns, request.getSortingField(), request.getSortingOrder());
+        final TimedResult<File> versions = fileAccess.getVersions(request.getId(), columns, request.getSortingField(), request.getSortingOrder());
         
         return result( skipVersion0( versions ), request);
     }
 
-    private TimedResult<File> skipVersion0(final TimedResult<File> versions) throws AbstractOXException {
+    private TimedResult<File> skipVersion0(final TimedResult<File> versions) throws OXException {
         
         return new TimedResult<File>() {
 
@@ -91,7 +90,7 @@ public class VersionsAction extends AbstractFileAction {
                 return new FilteringSearchIterator<File>(versions.results()) {
 
                     @Override
-                    public boolean accept(File thing) throws AbstractOXException {
+                    public boolean accept(final File thing) throws OXException {
                         return thing.getVersion() != 0;
                     }
 

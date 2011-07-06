@@ -50,9 +50,9 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
@@ -63,12 +63,12 @@ import com.openexchange.groupware.AbstractOXException;
 public class GetAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
         
         return result(fileMetadata, request);
     }

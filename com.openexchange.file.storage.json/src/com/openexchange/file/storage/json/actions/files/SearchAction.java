@@ -50,9 +50,9 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -63,16 +63,13 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class SearchAction extends AbstractFileAction {
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.json.actions.files.AbstractFileAction#handle(com.openexchange.file.storage.json.actions.files.InfostoreRequest)
-     */
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.COLUMNS);
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        SearchIterator<File> results = fileAccess.search(request.getSearchQuery(), request.getColumns(), request.getSearchFolderId(), request.getSortingField(), request.getSortingOrder(), request.getStart(), request.getEnd());
+        final SearchIterator<File> results = fileAccess.search(request.getSearchQuery(), request.getColumns(), request.getSearchFolderId(), request.getSortingField(), request.getSortingOrder(), request.getStart(), request.getEnd());
         
         return results(results, 0l, request);
     }

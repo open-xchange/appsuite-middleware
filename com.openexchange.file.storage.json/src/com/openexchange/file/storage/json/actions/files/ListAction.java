@@ -52,10 +52,10 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.FilteringTimedResult;
 import com.openexchange.groupware.results.TimedResult;
 
@@ -68,10 +68,10 @@ import com.openexchange.groupware.results.TimedResult;
 public class ListAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireBody();
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
         List<Field> columns = request.getColumns();
         boolean copy = false;
@@ -93,11 +93,11 @@ public class ListAction extends AbstractFileAction {
         
         // This is too complicated. We'd rather have layers below here aggressively check folders.
         
-        TimedResult<File> documents = new FilteringTimedResult<File>(fileAccess.getDocuments(request.getIds(), columns)) {
+        final TimedResult<File> documents = new FilteringTimedResult<File>(fileAccess.getDocuments(request.getIds(), columns)) {
             private int threshhold = 0;
             
             @Override
-            protected boolean accept(File thing) throws AbstractOXException {
+            protected boolean accept(final File thing) throws OXException {
                 int i = threshhold;
                 while(i < ids.size()) {
                     if(ids.get(i).equals(thing.getId())) {
@@ -106,7 +106,7 @@ public class ListAction extends AbstractFileAction {
                     }
                     i++;
                 }
-                String folderForID = request.getFolderAt(i);
+                final String folderForID = request.getFolderAt(i);
                 return folderForID.equals(thing.getFolderId());
             }
             

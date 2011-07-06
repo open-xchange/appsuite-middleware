@@ -50,9 +50,9 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -63,12 +63,12 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class UpdateAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireFileMetadata().require(Param.TIMESTAMP);
 
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        File file = request.getFile();
+        final File file = request.getFile();
         if(file.getId() == null) {
             throw AjaxExceptionCodes.InvalidParameterValue.create( "Request Body", "Missing field 'id'");
         }

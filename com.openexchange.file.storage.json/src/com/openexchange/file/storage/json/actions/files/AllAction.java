@@ -51,9 +51,9 @@ package com.openexchange.file.storage.json.actions.files;
 
 import static com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param.FOLDER_ID;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.TimedResult;
 
 
@@ -64,12 +64,13 @@ import com.openexchange.groupware.results.TimedResult;
  */
 public class AllAction extends AbstractFileAction {
 
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    @Override
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(FOLDER_ID);
         
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         
-        TimedResult<File> documents = fileAccess.getDocuments(request.getFolderId(), request.getColumns(), request.getSortingField(), request.getSortingOrder());
+        final TimedResult<File> documents = fileAccess.getDocuments(request.getFolderId(), request.getColumns(), request.getSortingField(), request.getSortingOrder());
         
         return result( documents, request );
     }

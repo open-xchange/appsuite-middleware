@@ -53,13 +53,13 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.meta.FileFieldSet;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
 public class SaveAsAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws AbstractOXException {
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.FOLDER_ID, Param.ATTACHED_ID, Param.MODULE, Param.ATTACHMENT).requireFileMetadata();
 
         final int folderId = Integer.parseInt(request.getFolderId());
@@ -85,10 +85,10 @@ public class SaveAsAction extends AbstractWriteAction {
         final File file = request.getFile();
         final List<Field> sentColumns = request.getSentColumns();
 
-        AttachmentBase attachments = request.getAttachmentBase();
-        IDBasedFileAccess fileAccess = request.getFileAccess();
+        final AttachmentBase attachments = request.getAttachmentBase();
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        ServerSession session = request.getSession();
+        final ServerSession session = request.getSession();
 
         final AttachmentMetadata att = attachments.getAttachment(
             folderId,
@@ -104,7 +104,7 @@ public class SaveAsAction extends AbstractWriteAction {
 
         File.Field.forAllFields(new AbstractFileFieldHandler() {
 
-            public Object handle(Field field, Object... args) {
+            public Object handle(final Field field, final Object... args) {
 
                 if (sentColumns.contains(field)) {
                     return null; // SKIP
@@ -112,7 +112,7 @@ public class SaveAsAction extends AbstractWriteAction {
 
                 // Otherwise copy from attachment
 
-                AttachmentField matchingAttachmentField = getMatchingAttachmentField(field);
+                final AttachmentField matchingAttachmentField = getMatchingAttachmentField(field);
                 if (matchingAttachmentField == null) {
                     return null; // Not a field to copy
                 }
@@ -126,7 +126,7 @@ public class SaveAsAction extends AbstractWriteAction {
         });
 
         file.setId(FileStorageFileAccess.NEW);
-        InputStream fileData = attachments.getAttachedFile(
+        final InputStream fileData = attachments.getAttachedFile(
             folderId,
             attachedId,
             moduleId,
@@ -140,7 +140,7 @@ public class SaveAsAction extends AbstractWriteAction {
         return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
     }
 
-    protected AttachmentField getMatchingAttachmentField(File.Field fileField) {
+    protected AttachmentField getMatchingAttachmentField(final File.Field fileField) {
         switch(fileField) {
         case FILENAME : return AttachmentField.FILENAME_LITERAL;
         case FILE_SIZE : return AttachmentField.FILE_SIZE_LITERAL;
