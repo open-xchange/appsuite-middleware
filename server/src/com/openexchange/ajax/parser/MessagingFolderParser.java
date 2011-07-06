@@ -51,6 +51,7 @@ package com.openexchange.ajax.parser;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.mail.MessagingException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,17 +60,14 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.DefaultMessagingPermission;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -112,9 +110,9 @@ public final class MessagingFolderParser {
          * Parses from given JSON object.
          * 
          * @param folderJsonObject The JSON object containing folder data
-         * @throws MessagingException If parsing folder fails
+         * @throws OXException If parsing folder fails
          */
-        public void parse(final JSONObject folderJsonObject) throws MessagingException {
+        public void parse(final JSONObject folderJsonObject) throws OXException {
             try {
 
                 if (folderJsonObject.hasAndNotNull(FolderFields.ID)) {
@@ -161,9 +159,9 @@ public final class MessagingFolderParser {
          * 
          * @param permissionsAsJSON The JSON array containing permissions data
          * @return The parsed permissions
-         * @throws MessagingException If parsing permissions fails
+         * @throws OXException If parsing permissions fails
          */
-        public static Permission[] parsePermission(final JSONArray permissionsAsJSON) throws MessagingException {
+        public static Permission[] parsePermission(final JSONArray permissionsAsJSON) throws OXException {
             try {
                 final int numberOfPermissions = permissionsAsJSON.length();
                 final Permission[] perms = new Permission[numberOfPermissions];
@@ -220,8 +218,8 @@ public final class MessagingFolderParser {
                 try {
                     final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(jsonObj.getString(FolderChildFields.FOLDER_ID));
                     messagingFolder.setParentId(mfi.getFullname());
-                } catch (final FolderException e) {
-                    throw new MessagingException(e);
+                } catch (final OXException e) {
+                    throw e;
                 }
             }
             if (jsonObj.has(FolderFields.MODULE) && !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(AJAXServlet.MODULE_MESSAGING)) {
@@ -256,7 +254,7 @@ public final class MessagingFolderParser {
                             try {
                                 entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
                             } catch (final OXException e1) {
-                                throw new MessagingException(e1);
+                                throw e1;
                             }
                         }
                         final MessagingPermission dmp = DefaultMessagingPermission.newInstance();
@@ -279,7 +277,7 @@ public final class MessagingFolderParser {
         } catch (final JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw e;
         }
     }
 
