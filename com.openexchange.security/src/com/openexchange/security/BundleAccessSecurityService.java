@@ -50,6 +50,7 @@
 package com.openexchange.security;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.security.permission.BundleAccessPermission;
 import com.openexchange.security.permission.BundleAccessPermissionCollection;
 
@@ -73,10 +74,10 @@ public interface BundleAccessSecurityService {
 	 *            The paths of permitted bundles such as "a.b.*", or "*".
 	 * @param desiredPath
 	 *            The desired path such as "a.b.c"
-	 * @exception BundleAccessException
+	 * @exception OXException
 	 *                If bundle access is not permitted
 	 */
-	public void checkPermission(Collection<String> paths, String desiredPath) throws BundleAccessException;
+	public void checkPermission(Collection<String> paths, String desiredPath) throws OXException;
 
 	/**
 	 * Checks if the specified desired path is covered by given paths.
@@ -90,10 +91,10 @@ public interface BundleAccessSecurityService {
 	 *            The paths of permitted bundles such as "a.b.*", or "*".
 	 * @param desiredPath
 	 *            The desired path such as "a.b.c"
-	 * @exception BundleAccessException
+	 * @exception OXException
 	 *                If bundle access is not permitted
 	 */
-	public void checkPermission(String[] paths, String desiredPath) throws BundleAccessException;
+	public void checkPermission(String[] paths, String desiredPath) throws OXException;
 
 	/**
 	 * Checks if the specified permission is implied by given permissions
@@ -102,11 +103,11 @@ public interface BundleAccessSecurityService {
 	 *            A collection of permissions
 	 * @param desiredPermission
 	 *            The desired permission
-	 * @throws BundleAccessException
+	 * @throws OXException
 	 *             If bundle access is not permitted
 	 * @throws NullPointerException
 	 *             If permissions is <code>null</code>
 	 */
 	public void checkPermission(BundleAccessPermissionCollection permissions, BundleAccessPermission desiredPermission)
-			throws BundleAccessException;
+			throws OXException;
 }

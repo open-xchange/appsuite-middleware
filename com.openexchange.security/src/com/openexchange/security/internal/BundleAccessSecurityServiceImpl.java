@@ -50,7 +50,8 @@
 package com.openexchange.security.internal;
 
 import java.util.Collection;
-import com.openexchange.security.BundleAccessException;
+import com.openexchange.exception.OXException;
+import com.openexchange.security.BundleAccessExceptionCode;
 import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.security.permission.BundleAccessPermission;
 import com.openexchange.security.permission.BundleAccessPermissionCollection;
@@ -71,7 +72,7 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 		super();
 	}
 
-	public void checkPermission(final Collection<String> paths, final String desiredPath) throws BundleAccessException {
+	public void checkPermission(final Collection<String> paths, final String desiredPath) throws OXException {
 		if (desiredPath == null || desiredPath.length() == 0) {
 			throw new IllegalArgumentException("desiredPath is null");
 		}
@@ -79,7 +80,7 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 			/*
 			 * Obviously desired path is not covered by paths
 			 */
-			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, desiredPath);
+			throw BundleAccessExceptionCode.ACCESS_DENIED.create(desiredPath);
 		}
 		final BundleAccessPermission p = new BundleAccessPermission(desiredPath);
 		final BundleAccessPermissionCollection collection = (BundleAccessPermissionCollection) p
@@ -90,7 +91,7 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 		checkPermission(collection, p);
 	}
 
-	public void checkPermission(final String[] paths, final String desiredPath) throws BundleAccessException {
+	public void checkPermission(final String[] paths, final String desiredPath) throws OXException {
 		if (desiredPath == null || desiredPath.length() == 0) {
 			throw new IllegalArgumentException("desiredPath is null");
 		}
@@ -98,7 +99,7 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 			/*
 			 * Obviously desired path is not covered by paths
 			 */
-			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, desiredPath);
+			throw BundleAccessExceptionCode.ACCESS_DENIED.create(desiredPath);
 		}
 		final BundleAccessPermission p = new BundleAccessPermission(desiredPath);
 		final BundleAccessPermissionCollection collection = (BundleAccessPermissionCollection) p
@@ -110,9 +111,9 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 	}
 
 	public void checkPermission(final BundleAccessPermissionCollection permissions,
-			final BundleAccessPermission desiredPermission) throws BundleAccessException {
+			final BundleAccessPermission desiredPermission) throws OXException {
 		if (!permissions.implies(desiredPermission)) {
-			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, desiredPermission.getName());
+			throw BundleAccessExceptionCode.ACCESS_DENIED.create(desiredPermission.getName());
 		}
 	}
 
