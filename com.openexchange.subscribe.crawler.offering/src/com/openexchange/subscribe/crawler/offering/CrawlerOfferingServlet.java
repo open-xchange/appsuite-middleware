@@ -64,6 +64,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
@@ -104,24 +105,24 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     private static final String INFOSTORE_TEMPLATE = "offering_infostore.tmpl";
 
-    public static void setSources(SubscriptionSourceDiscoveryService service) {
+    public static void setSources(final SubscriptionSourceDiscoveryService service) {
         sources = service;
     }
 
-    public static void setTemplateService(TemplateService service) {
+    public static void setTemplateService(final TemplateService service) {
         templateService = service;
     }
 
-    public static void setConfigService(ConfigurationService service) {
+    public static void setConfigService(final ConfigurationService service) {
         configService = service;
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         if (!auth(req)) {
             resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
         } else {
-            String parameter = req.getParameter("action");
+            final String parameter = req.getParameter("action");
             if (parameter.equals("list")) {
                 doList(req, resp);
             } else if (parameter.equals("source")) {
@@ -131,47 +132,51 @@ public class CrawlerOfferingServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         if(!auth(req)) {
             resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        String sourceName = req.getParameter("crawler");
-        SubscriptionSource source = sources.getSource(sourceName);
+        final String sourceName = req.getParameter("crawler");
+        final SubscriptionSource source = sources.getSource(sourceName);
         if(source == null) {
             sourceNotFound(resp, sourceName);
             return;
         }
-        Map<String, Object> parameters = collectParameters(req, source);
+        final Map<String, Object> parameters = collectParameters(req, source);
 
-        Subscription subscription = new Subscription();
+        final Subscription subscription = new Subscription();
         subscription.setSource(source);
         subscription.setConfiguration(parameters);
 
         try {
             resp.setContentType("text/html;charset=UTF-8");
 
-            Collection<?> content = source.getSubscribeService().getContent(subscription);
+            final Collection<?> content = source.getSubscribeService().getContent(subscription);
 
             switch (source.getFolderModule()) {
             case FolderObject.CONTACT:
-                OXTemplate template = templateService.loadTemplate(CONTACTS_TEMPLATE);
+                final OXTemplate template = templateService.loadTemplate(CONTACTS_TEMPLATE);
                 fillResultTemplate(template, content, "contacts", resp);
                 break;
             case FolderObject.INFOSTORE:
                 break;
             }
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            resp.setContentType("text/html;charset=UTF-8");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (final TemplateException e) {
             LOG.error(e.getMessage(), e);
             resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
-    private Map<String, Object> collectParameters(HttpServletRequest req, SubscriptionSource source) {
-        Map<String, Object> retval = new HashMap<String, Object>();
+    private Map<String, Object> collectParameters(final HttpServletRequest req, final SubscriptionSource source) {
+        final Map<String, Object> retval = new HashMap<String, Object>();
 
-        for (FormElement element : source.getFormDescription()) {
+        for (final FormElement element : source.getFormDescription()) {
             switch (element.getWidget()) {
             case INPUT:
             case TEXT:
@@ -180,7 +185,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
                 retval.put(element.getName(), req.getParameter(element.getName()));
                 break;
             case CHECKBOX:
-                Boolean value = Boolean.valueOf(req.getParameter(element.getName()));
+                final Boolean value = Boolean.valueOf(req.getParameter(element.getName()));
                 retval.put(element.getName(), value);
                 break;
             }
@@ -189,66 +194,66 @@ public class CrawlerOfferingServlet extends HttpServlet {
         return retval;
     }
 
-    private void doList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void doList(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            OXTemplate template = templateService.loadTemplate(LIST_TEMPLATE);
+            final OXTemplate template = templateService.loadTemplate(LIST_TEMPLATE);
             resp.setContentType("text/html;charset=UTF-8");
             fillListTemplate(template, req, resp);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
-    private void doSource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void doSource(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            OXTemplate template = templateService.loadTemplate(SOURCE_TEMPLATE);
+            final OXTemplate template = templateService.loadTemplate(SOURCE_TEMPLATE);
             resp.setContentType("text/html;charset=UTF-8");
             fillSourceTemplate(template, req, resp);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
-    private void fillListTemplate(OXTemplate template, HttpServletRequest req, HttpServletResponse resp) throws TemplateException, IOException {
-        List<Map<String, String>> links = new ArrayList<Map<String, String>>();
+    private void fillListTemplate(final OXTemplate template, final HttpServletRequest req, final HttpServletResponse resp) throws TemplateException, IOException {
+        final List<Map<String, String>> links = new ArrayList<Map<String, String>>();
 
         sources.getSources();
-        for (SubscriptionSource source : sources.getSources()) {
-            Map<String, String> link = new HashMap<String, String>();
+        for (final SubscriptionSource source : sources.getSources()) {
+            final Map<String, String> link = new HashMap<String, String>();
             link.put("link", getProtocol(req) + req.getServerName() + "/publications/crawler?action=source&crawler=" + source.getId());
             link.put("name", source.getDisplayName());
             links.add(link);
         }
 
-        Map<String, Object> values = new HashMap<String, Object>();
+        final Map<String, Object> values = new HashMap<String, Object>();
         values.put("LINKS", links);
 
         template.process(values, resp.getWriter());
     }
 
-    private void fillSourceTemplate(OXTemplate template, HttpServletRequest req, HttpServletResponse resp) throws TemplateException, IOException {
-        List<Map<String, String>> elements = new ArrayList<Map<String, String>>();
+    private void fillSourceTemplate(final OXTemplate template, final HttpServletRequest req, final HttpServletResponse resp) throws TemplateException, IOException {
+        final List<Map<String, String>> elements = new ArrayList<Map<String, String>>();
 
-        String sourceName = req.getParameter("crawler");
-        SubscriptionSource source = sources.getSource(sourceName);
+        final String sourceName = req.getParameter("crawler");
+        final SubscriptionSource source = sources.getSource(sourceName);
         if(source == null) {
             sourceNotFound(resp, sourceName);
         }
-        DynamicFormDescription formDescription = source.getFormDescription();
+        final DynamicFormDescription formDescription = source.getFormDescription();
 
-        for (FormElement element : formDescription) {
-            Map<String, String> e = new HashMap<String, String>();
+        for (final FormElement element : formDescription) {
+            final Map<String, String> e = new HashMap<String, String>();
             e.put("id", element.getName());
             e.put("displayName", element.getDisplayName());
             e.put("type", element.getWidget().getKeyword());
             elements.add(e);
         }
 
-        Map<String, Object> values = new HashMap<String, Object>();
+        final Map<String, Object> values = new HashMap<String, Object>();
         values.put("ELEMENTS", elements);
         values.put("ACTION", getProtocol(req) + req.getServerName() + "/publications/crawler?action=crawl&crawler=" + source.getId());
         values.put("SOURCE", source);
@@ -257,23 +262,23 @@ public class CrawlerOfferingServlet extends HttpServlet {
         template.process(values, resp.getWriter());
     }
 
-    private void fillResultTemplate(OXTemplate template, Collection<?> content, String types, HttpServletResponse resp) throws TemplateException, IOException {
-        Map<String, Object> values = new HashMap<String, Object>();
+    private void fillResultTemplate(final OXTemplate template, final Collection<?> content, final String types, final HttpServletResponse resp) throws TemplateException, IOException {
+        final Map<String, Object> values = new HashMap<String, Object>();
         values.put("utils", new ContactTemplateUtils());
         values.put(types, content);
         template.process(values, resp.getWriter());
     }
 
-    private String getProtocol(HttpServletRequest req) {
+    private String getProtocol(final HttpServletRequest req) {
         return Tools.getProtocol(req);
     }
 
-    private boolean auth(HttpServletRequest req) {
-        Authentication authentication = new Whitelist(configService);
+    private boolean auth(final HttpServletRequest req) {
+        final Authentication authentication = new Whitelist(configService);
         return authentication.auth(req);
     }
     
-    private void sourceNotFound(HttpServletResponse res, String sourceName) throws IOException {
+    private void sourceNotFound(final HttpServletResponse res, final String sourceName) throws IOException {
         res.setStatus(HttpServletResponse.SC_NOT_FOUND);
         res.getWriter().println("Source "+sourceName+" was not found on this server.");
     }
