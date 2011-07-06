@@ -65,7 +65,6 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
-import com.openexchange.folder.FolderException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -673,8 +672,6 @@ public class EventClient {
                 addFolderToAffectedMap(retval, folder);
             } catch (final OXException e) {
                 throw e;
-            } catch (final OXException e) {
-                throw new OXException(e);
             }
         }
         return retval;
@@ -707,10 +704,6 @@ public class EventClient {
                     addFolderToAffectedMap(retval, folder);
                 } catch (final OXException e) {
                     throw e;
-                } catch (final FolderException e) {
-                    throw new OXException(e);
-                } catch (final OXException e) {
-                    throw new OXException(e);
                 }
             }
         }

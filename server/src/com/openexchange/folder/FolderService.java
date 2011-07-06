@@ -49,6 +49,7 @@
 
 package com.openexchange.folder;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.EffectivePermission;
 
@@ -65,9 +66,9 @@ public interface FolderService {
      * @param folderId The folder ID
      * @param contextId The context ID
      * @return The folder object
-     * @throws FolderException If folder cannot be returned
+     * @throws OXException If folder cannot be returned
      */
-    public FolderObject getFolderObject(int folderId, int contextId) throws FolderException;
+    public FolderObject getFolderObject(int folderId, int contextId) throws OXException;
 
     /**
      * Determines specified user's effective permission on the folder matching given folder ID.
@@ -76,8 +77,8 @@ public interface FolderService {
      * @param userId The user ID
      * @param contextId The context ID
      * @return The user's effective permission
-     * @throws FolderException If effective permission cannot be determined
+     * @throws OXException If effective permission cannot be determined
      */
-    public EffectivePermission getFolderPermission(int folderId, int userId, int contextId) throws FolderException;
+    public EffectivePermission getFolderPermission(int folderId, int userId, int contextId) throws OXException;
 
 }

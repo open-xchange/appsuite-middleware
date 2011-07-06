@@ -73,7 +73,7 @@ public final class FolderServiceImpl implements FolderService {
         super();
     }
 
-    public FolderObject getFolderObject(final int folderId, final int contextId) throws FolderException {
+    public FolderObject getFolderObject(final int folderId, final int contextId) throws OXException {
         try {
             return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
         } catch (final OXException e) {
@@ -83,7 +83,7 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws FolderException {
+    public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws OXException {
         try {
             final Context ctx = ContextStorage.getStorageContext(contextId);
             return new OXFolderAccess(ctx).getFolderPermission(

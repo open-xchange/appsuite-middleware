@@ -49,14 +49,14 @@
 
 package com.openexchange.folder;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FolderException} - Indicates folder errors.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderException extends AbstractOXException {
+public final class FolderException extends OXException {
 
     private static final long serialVersionUID = 1486457731666283810L;
 
@@ -65,7 +65,7 @@ public final class FolderException extends AbstractOXException {
      * 
      * @param cause the cause of the exception.
      */
-    public FolderException(final AbstractOXException cause) {
+    public FolderException(final OXException cause) {
         super(cause);
     }
 }
