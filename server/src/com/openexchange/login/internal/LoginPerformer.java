@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
@@ -375,11 +374,7 @@ public final class LoginPerformer {
         LOG.info(sb.toString());
     }
 
-    public Session lookupSession(final String sessionId) throws LoginException {
-        try {
-            return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
-        } catch (final OXException x) {
-            throw x;
-        }
+    public Session lookupSession(final String sessionId) throws OXException {
+        return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
     }
 }
