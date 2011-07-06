@@ -57,11 +57,11 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
-import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ConfigJumpExceptionCode;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.ICookie;
 import com.openexchange.configjump.Replacements;
+import com.openexchange.exception.OXException;
 
 /**
  * Implements the config jump to the user admin interface for OXExpress.
@@ -82,7 +82,7 @@ public class ExpressImpl implements ConfigJumpService {
     /**
      * {@inheritDoc}
      */
-    public URL getLink(final Replacements values) throws ConfigJumpException {
+    public URL getLink(final Replacements values) throws OXException {
 //        final String url = props.getProperty("URL");
 //        if (null == url) {
 //            throw new ConfigJumpException(new ConfigurationException(
@@ -99,12 +99,12 @@ public class ExpressImpl implements ConfigJumpService {
         try {
             urlInst = new URL(url);
             newUrlInst = new URL(protocol, host, port, urlInst.getPath());
-        } catch (MalformedURLException e1) {
+        } catch (final MalformedURLException e1) {
             throw ConfigJumpExceptionCode.MALFORMED_URL.create(e1);
         }
         final HttpClient httpClient = new HttpClient();
         final HttpState state = httpClient.getState();
-        for (ICookie cookie : cookies) {
+        for (final ICookie cookie : cookies) {
             state.addCookie(new Cookie(urlInst.getHost(), cookie.getName(),
                 cookie.getValue(), urlInst.getPath(), -1, false));
         }
@@ -118,9 +118,8 @@ public class ExpressImpl implements ConfigJumpService {
             final String session = post.getResponseBodyAsString();
             return new URL(newUrlInst.toExternalForm() + ";jsessionid="
                 + session);
-        } catch (IOException e) {
-            throw new ConfigJumpException(ConfigJumpExceptionCode
-                .COMMUNICATION, e);
+        } catch (final IOException e) {
+            throw ConfigJumpExceptionCode.COMMUNICATION.create(e);
         }
     }
 
