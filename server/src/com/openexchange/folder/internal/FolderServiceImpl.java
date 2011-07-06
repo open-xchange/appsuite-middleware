@@ -50,7 +50,6 @@
 package com.openexchange.folder.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.folder.FolderException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -74,27 +73,15 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     public FolderObject getFolderObject(final int folderId, final int contextId) throws OXException {
-        try {
-            return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
-        } catch (final OXException e) {
-            throw new FolderException(e);
-        } catch (final OXException e) {
-            throw new FolderException(e);
-        }
+        return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
     }
 
     public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws OXException {
-        try {
-            final Context ctx = ContextStorage.getStorageContext(contextId);
-            return new OXFolderAccess(ctx).getFolderPermission(
-                folderId,
-                userId,
-                UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx));
-        } catch (final OXException e) {
-            throw new FolderException(e);
-        } catch (final OXException e) {
-            throw new FolderException(e);
-        }
+        final Context ctx = ContextStorage.getStorageContext(contextId);
+        return new OXFolderAccess(ctx).getFolderPermission(
+            folderId,
+            userId,
+            UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx));
     }
 
 }

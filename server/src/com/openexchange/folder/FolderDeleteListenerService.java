@@ -49,6 +49,7 @@
 
 package com.openexchange.folder;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -66,8 +67,8 @@ public interface FolderDeleteListenerService {
      * 
      * @param folderId The ID of the folder which is going to be deleted
      * @param context The folder's context
-     * @throws FolderException If handling the folder delete event by this listener fails
+     * @throws OXException If handling the folder delete event by this listener fails
      */
-    public void onFolderDelete(int folderId, Context context) throws FolderException;
+    public void onFolderDelete(int folderId, Context context) throws OXException;
 
 }
