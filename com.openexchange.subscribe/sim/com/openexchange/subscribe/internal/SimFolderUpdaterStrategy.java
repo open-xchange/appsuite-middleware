@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 
@@ -70,33 +70,33 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
 
     private Set<String> dataSet;
     
-    private Set<String> savedElements = new HashSet<String>();
-    private Map<String, String> updatedElements = new HashMap<String, String>();
+    private final Set<String> savedElements = new HashSet<String>();
+    private final Map<String, String> updatedElements = new HashMap<String, String>();
     
-    public boolean handles(FolderObject folder) {
+    public boolean handles(final FolderObject folder) {
         return true;
     }
 
-    public void setDataSet(String...data) {
+    public void setDataSet(final String...data) {
         dataSet = new HashSet<String>(Arrays.asList(data));
     }
 
-    public boolean wasUpdated(String orig, String update) {
+    public boolean wasUpdated(final String orig, final String update) {
         if(!updatedElements.containsKey(orig)) {
             return false;
         }
         return updatedElements.get(orig).equals(update);
     }
 
-    public boolean wasCreated(String string) {
+    public boolean wasCreated(final String string) {
         return savedElements.contains(string);
     }
 
-    public int calculateSimilarityScore(String original, String candidate, Object session) throws AbstractOXException {
+    public int calculateSimilarityScore(final String original, final String candidate, final Object session) throws OXException {
         int counter = 0;
         for (int i = 0, size = Math.min(original.length(), candidate.length()); i < size; i++) {
-            int cO = original.charAt(i);
-            int cC = candidate.charAt(i);
+            final int cO = original.charAt(i);
+            final int cC = candidate.charAt(i);
             if(cO == cC) {
                 counter++;
             } else {
@@ -106,27 +106,27 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
         return counter;
     }
 
-    public void closeSession(Object session) throws AbstractOXException {
+    public void closeSession(final Object session) throws OXException {
         
     }
 
-    public Collection<String> getData(TargetFolderDefinition target, Object session) throws AbstractOXException {
+    public Collection<String> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         return dataSet;
     }
 
-    public int getThreshold(Object session) throws AbstractOXException {
+    public int getThreshold(final Object session) throws OXException {
         return 3;
     }
 
-    public void save(String newElement, Object session) throws AbstractOXException {
+    public void save(final String newElement, final Object session) throws OXException {
         savedElements.add(newElement);
     }
 
-    public Object startSession(TargetFolderDefinition target) throws AbstractOXException {
+    public Object startSession(final TargetFolderDefinition target) throws OXException {
         return null;
     }
 
-    public void update(String original, String update, Object session) throws AbstractOXException {
+    public void update(final String original, final String update, final Object session) throws OXException {
         updatedElements.put(original, update);
     }
 

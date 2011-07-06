@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -64,34 +64,34 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class SimSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private Map<String, SubscriptionSource> sources = new HashMap<String, SubscriptionSource>();
+    private final Map<String, SubscriptionSource> sources = new HashMap<String, SubscriptionSource>();
 
-    private List<String> loadedSources = new LinkedList<String>();
+    private final List<String> loadedSources = new LinkedList<String>();
 
     private String lookupIdentifier;
 
-    public SubscriptionSource getSource(String identifier) {
+    public SubscriptionSource getSource(final String identifier) {
         loadedSources.add(identifier);
         return sources.get(identifier);
     }
 
-    public List<SubscriptionSource> getSources(int folderModule) {
+    public List<SubscriptionSource> getSources(final int folderModule) {
         return new ArrayList<SubscriptionSource>(sources.values());
     }
 
-    public boolean knowsSource(String identifier) {
+    public boolean knowsSource(final String identifier) {
         return sources.containsKey(identifier);
     }
 
-    public void addSource(SubscriptionSource source) {
+    public void addSource(final SubscriptionSource source) {
         sources.put(source.getId(), source);
     }
 
-    public SubscriptionSource getSource(Context context, int subscriptionId) {
+    public SubscriptionSource getSource(final Context context, final int subscriptionId) {
         return getSource(lookupIdentifier);
     }
 
-    public void setLookupIdentifier(String lookupIdentifier) {
+    public void setLookupIdentifier(final String lookupIdentifier) {
         this.lookupIdentifier = lookupIdentifier;
     }
 
@@ -107,7 +107,7 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
         return getSources(-1);
     }
 
-    public SubscriptionSourceDiscoveryService filter(int user, int context) throws AbstractOXException {
+    public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return this;
     }
 

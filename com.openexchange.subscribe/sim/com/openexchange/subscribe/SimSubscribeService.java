@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -76,7 +75,7 @@ public class SimSubscribeService implements SubscribeService {
         return subscription;
     }
 
-    public void setSubscription(Subscription subscription) {
+    public void setSubscription(final Subscription subscription) {
         this.subscription = subscription;
     }
 
@@ -84,41 +83,41 @@ public class SimSubscribeService implements SubscribeService {
         return source;
     }
 
-    public void setSubscriptionSource(SubscriptionSource source) {
+    public void setSubscriptionSource(final SubscriptionSource source) {
         this.source = source;
 
     }
 
-    public boolean handles(int folderModule) {
+    public boolean handles(final int folderModule) {
         return true;
     }
 
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) {
+    public Collection<Subscription> loadSubscriptions(final Context context, final String folderId, final String secret) {
         return subscriptionIds;
     }
 
-    public Collection<Subscription> loadForUser(Context context, int userId) {
+    public Collection<Subscription> loadForUser(final Context context, final int userId) {
         return null;
     }
 
-    public void subscribe(Subscription subscription) {
+    public void subscribe(final Subscription subscription) {
 
     }
 
-    public void unsubscribe(Subscription subscription) {
+    public void unsubscribe(final Subscription subscription) {
 
     }
 
-    public void update(Subscription subscription) {
+    public void update(final Subscription subscription) {
 
     }
 
-    public Collection getContent(Subscription subscription) {
+    public Collection getContent(final Subscription subscription) {
         return content;
     }
 
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) {
-        Subscription subscriptionIdMemo = new Subscription();
+    public Subscription loadSubscription(final Context context, final int subscriptionId, final String secret) {
+        final Subscription subscriptionIdMemo = new Subscription();
         subscriptionIdMemo.setContext(context);
         subscriptionIdMemo.setId(subscriptionId);
         subscriptionIds.add(subscriptionIdMemo);
@@ -133,22 +132,22 @@ public class SimSubscribeService implements SubscribeService {
         subscriptionIds.clear();
     }
 
-    public void setContent(Collection content) {
+    public void setContent(final Collection content) {
         this.content = content;
     }
     
-    public boolean knows(Context context, int subscriptionId) {
+    public boolean knows(final Context context, final int subscriptionId) {
         return true;
     }
     
-    public void setSubscriptions(List<Subscription> subscriptions){
+    public void setSubscriptions(final List<Subscription> subscriptions){
         this.subscriptionIds = subscriptions;
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#loadSubscriptions(com.openexchange.groupware.contexts.Context, int, java.lang.String)
      */
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws AbstractOXException {
+    public Collection<Subscription> loadSubscriptions(final Context context, final int userId, final String secret) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -156,7 +155,7 @@ public class SimSubscribeService implements SubscribeService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#checkSecretCanDecryptPasswords(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String)
      */
-    public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws OXException {
+    public String checkSecretCanDecryptPasswords(final Context context, final User user, final String secret) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -164,7 +163,7 @@ public class SimSubscribeService implements SubscribeService {
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#migrateSecret(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String, java.lang.String)
      */
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException {
+    public void migrateSecret(final Context context, final User user, final String oldSecret, final String newSecret) throws OXException {
         // TODO Auto-generated method stub
         
     }
