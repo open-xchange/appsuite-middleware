@@ -55,12 +55,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,7 +80,7 @@ public final class UpdateAction extends AbstractFolderAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -93,7 +93,7 @@ public final class UpdateAction extends AbstractFolderAction {
         }
         final String id = request.getParameter("id");
         if (null == id) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
         final Date timestamp;
         {
@@ -104,7 +104,7 @@ public final class UpdateAction extends AbstractFolderAction {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
                 } catch (final NumberFormatException e) {
-                    throw AjaxExceptionCodes.InvalidParameterValue.create( "timestamp", timestampStr);
+                    throw AjaxExceptionCodes.InvalidParameterValue.create("timestamp", timestampStr);
                 }
             }
         }

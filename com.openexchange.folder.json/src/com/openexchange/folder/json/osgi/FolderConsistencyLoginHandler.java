@@ -49,18 +49,16 @@
 
 package com.openexchange.folder.json.osgi;
 
-import com.openexchange.authentication.LoginException;
-import com.openexchange.folder.json.services.ServiceRegistry;
+import javax.security.auth.login.LoginException;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.server.OXException;
-
 
 /**
  * {@link FolderConsistencyLoginHandler}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderConsistencyLoginHandler implements LoginHandlerService {

@@ -273,7 +273,7 @@ public final class ParsedFolder implements Folder {
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
         // No-op
     }
-    
+
     public boolean isVirtual() {
         return false;
     }

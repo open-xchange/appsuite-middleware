@@ -51,10 +51,9 @@ package com.openexchange.folder.json.parser;
 
 import com.openexchange.folderstorage.Permission;
 
-
 /**
  * {@link ParsedPermission} - A parsed permission.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ParsedPermission implements Permission {

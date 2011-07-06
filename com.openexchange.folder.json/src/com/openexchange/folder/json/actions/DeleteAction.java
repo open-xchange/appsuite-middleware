@@ -57,11 +57,10 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,7 +80,7 @@ public final class DeleteAction extends AbstractFolderAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -101,7 +100,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
                 } catch (final NumberFormatException e) {
-                    throw AjaxExceptionCodes.InvalidParameterValue.create( "timestamp", timestampStr);
+                    throw AjaxExceptionCodes.InvalidParameterValue.create("timestamp", timestampStr);
                 }
             }
         }
@@ -116,7 +115,7 @@ public final class DeleteAction extends AbstractFolderAction {
         try {
             final JSONArray responseArray = new JSONArray();
             final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-            final List<AbstractOXException> warnings = new LinkedList<AbstractOXException>();
+            final List<OXException> warnings = new LinkedList<OXException>();
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
@@ -134,7 +133,7 @@ public final class DeleteAction extends AbstractFolderAction {
              */
             return new AJAXRequestResult(responseArray).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
         }
     }
 

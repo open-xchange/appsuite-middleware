@@ -52,7 +52,7 @@ package com.openexchange.folder.json.actions;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,7 +71,7 @@ public final class RootAction extends AbstractFolderAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final ListAction listAction = (ListAction) FolderActionFactory.getInstance().createActionService(ListAction.ACTION);
         request.putParameter("parent", "0");
         return listAction.perform(request, session);

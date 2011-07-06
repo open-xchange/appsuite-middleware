@@ -52,15 +52,14 @@ package com.openexchange.folder.json.parser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link FolderParser} - Parses a folder from JSON data.
@@ -101,16 +100,15 @@ public final class FolderParser {
 
             if (folderJsonObject.hasAndNotNull(FolderField.MODULE.getName())) {
                 try {
-                    final ContentTypeDiscoveryService discoveryService = ServiceRegistry.getInstance().getService(
-                        ContentTypeDiscoveryService.class,
-                        true);
+                    final ContentTypeDiscoveryService discoveryService =
+                        ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class, true);
                     final String contentTypeString = folderJsonObject.getString(FolderField.MODULE.getName());
                     final ContentType contentType = discoveryService.getByString(contentTypeString);
                     if (null == contentType) {
                         throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentTypeString);
                     }
                     folder.setContentType(contentType);
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     throw new FolderException(e);
                 }
             }

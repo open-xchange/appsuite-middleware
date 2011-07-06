@@ -60,7 +60,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.actions.FolderActionFactory;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -74,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class FolderMultipleHandler implements MultipleHandler {
 
     private AJAXRequestResult result;
-    
+
     /**
      * Initializes a new {@link FolderMultipleHandler}.
      */
@@ -85,7 +84,7 @@ public final class FolderMultipleHandler implements MultipleHandler {
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = FolderActionFactory.getInstance().createActionService(action);
         if (null == actionService) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UnknownAction.create(action);
         }
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
@@ -113,9 +112,9 @@ public final class FolderMultipleHandler implements MultipleHandler {
         result = null;
     }
 
-    public Collection<AbstractOXException> getWarnings() {
+    public Collection<OXException> getWarnings() {
         if (null == result) {
-            return Collections.<AbstractOXException> emptySet();
+            return Collections.<OXException> emptySet();
         }
         return result.getWarnings();
     }

@@ -56,13 +56,14 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.OXException;
+import com.openexchange.groupware.OXException.Category;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+ com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ClearAction} - Maps the action to a CLEAR action.
@@ -80,7 +81,7 @@ public final class ClearAction extends AbstractFolderAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -100,18 +101,18 @@ public final class ClearAction extends AbstractFolderAction {
          * Delete
          */
         try {
-            final List<AbstractOXException> warnings = new LinkedList<AbstractOXException>();
+            final List<OXException> warnings = new LinkedList<OXException>();
             final JSONArray responseArray = new JSONArray();
             final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
                     folderService.clearFolder(treeId, folderId, session);
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ClearAction.class);
                     log.error(e.getMessage(), e);
                     responseArray.put(folderId);
-                    e.setCategory(Category.WARNING);
+                    e.addCategory(com.openexchange.exception.Category.CATEGORY_WARNING);
                     warnings.add(e);
                 }
             }

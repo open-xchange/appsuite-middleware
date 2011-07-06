@@ -59,6 +59,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -71,7 +72,6 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -91,7 +91,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -104,7 +104,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         }
         final ContentType contentType = parseContentTypeParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, request);
         if (null == contentType) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_CONTENT_TYPE);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_CONTENT_TYPE);
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;
@@ -130,7 +130,9 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PrivateType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put("mailRootFolders", mailRootFolders));
+                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
+                    "mailRootFolders",
+                    mailRootFolders));
         /*
          * Get all shared folders
          */
@@ -205,7 +207,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
             /*
              * Gather possible warnings
              */
-            final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(4);
+            final List<OXException> warnings = new ArrayList<OXException>(4);
             warnings.addAll(privateResp.getWarnings());
             warnings.addAll(publicResp.getWarnings());
             warnings.addAll(sharedResp.getWarnings());
@@ -214,7 +216,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
              */
             return new AJAXRequestResult(ret, 0 == lastModified ? null : new Date(lastModified)).addWarnings(warnings);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
         }
     }
 

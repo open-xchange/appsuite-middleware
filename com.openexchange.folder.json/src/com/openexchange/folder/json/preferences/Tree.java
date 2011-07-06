@@ -53,28 +53,28 @@ import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
  * Preferences tree item to allow the user to configure what folder tree he wants to use.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Tree implements PreferencesItemService {
 
     private static final String PROPERTY_NAME = "com.openexchange.folder.tree";
+
     private static final String NAME = "tree";
 
     public Tree() {
@@ -87,6 +87,7 @@ public class Tree implements PreferencesItemService {
 
     public IValueHandler getSharedValue() {
         return new IValueHandler() {
+
             public int getId() {
                 return NO_ID;
             }

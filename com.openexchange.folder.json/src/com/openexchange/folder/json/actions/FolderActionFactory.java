@@ -80,7 +80,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(final String action) throws OXException {
         final AJAXActionService retval = actions.get(action);
         if (null == retval) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
+            throw AjaxExceptionCodes.UnknownAction.create(action);
         }
         return retval;
     }

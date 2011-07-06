@@ -54,6 +54,7 @@ import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -63,7 +64,6 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -83,7 +83,7 @@ public final class ListAction extends AbstractFolderAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -96,7 +96,7 @@ public final class ListAction extends AbstractFolderAction {
         }
         final String parentId = request.getParameter("parent");
         if (null == parentId) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "parent");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("parent");
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;
@@ -111,8 +111,12 @@ public final class ListAction extends AbstractFolderAction {
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final FolderResponse<UserizedFolder[]> subfoldersResponse =
-            folderService.getSubfolders(treeId, parentId, all, session, new FolderServiceDecorator().setTimeZone(
-                Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
+            folderService.getSubfolders(
+                treeId,
+                parentId,
+                all,
+                session,
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
         /*
          * Determine max. last-modified time stamp
          */

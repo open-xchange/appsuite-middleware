@@ -55,6 +55,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.Tools;
@@ -66,7 +67,6 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,7 +86,7 @@ public final class UpdatesAction extends AbstractFolderAction {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -101,12 +101,12 @@ public final class UpdatesAction extends AbstractFolderAction {
         {
             final String timestampStr = request.getParameter("timestamp");
             if (null == timestampStr) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( "timestamp");
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("timestamp");
             }
             try {
                 timestamp = new Date(Long.parseLong(timestampStr));
             } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.InvalidParameterValue.create( "timestamp", timestampStr);
+                throw AjaxExceptionCodes.InvalidParameterValue.create("timestamp", timestampStr);
             }
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
@@ -166,7 +166,7 @@ public final class UpdatesAction extends AbstractFolderAction {
                 resultArray.put(jsonArray2.getJSONArray(i).get(0));
             }
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
         }
         /*
          * Return appropriate result

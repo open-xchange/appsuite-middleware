@@ -61,7 +61,6 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
@@ -249,12 +248,14 @@ public final class FolderWriter {
                 final int bits = folder.getBits();
                 if (bits < 0) {
                     final Permission obj = folder.getOwnPermission();
-                    jsonPutter.put(FolderField.OWN_RIGHTS.getName(), null == obj ? JSONObject.NULL : Integer.valueOf(createPermissionBits(
-                        obj.getFolderPermission(),
-                        obj.getReadPermission(),
-                        obj.getWritePermission(),
-                        obj.getDeletePermission(),
-                        obj.isAdmin()))); 
+                    jsonPutter.put(
+                        FolderField.OWN_RIGHTS.getName(),
+                        null == obj ? JSONObject.NULL : Integer.valueOf(createPermissionBits(
+                            obj.getFolderPermission(),
+                            obj.getReadPermission(),
+                            obj.getWritePermission(),
+                            obj.getDeletePermission(),
+                            obj.isAdmin())));
                 } else {
                     jsonPutter.put(FolderField.OWN_RIGHTS.getName(), Integer.valueOf(bits));
                 }
@@ -604,7 +605,8 @@ public final class FolderWriter {
      */
 
     private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6) {
-        { //Unnamed Block.
+
+        { // Unnamed Block.
             put(Permission.MAX_PERMISSION, MAX_PERMISSION);
             put(MAX_PERMISSION, MAX_PERMISSION);
             put(0, 0);
@@ -631,7 +633,7 @@ public final class FolderWriter {
     static int createPermissionBits(final int fp, final int rp, final int wp, final int dp, final boolean adminFlag) {
         int retval = 0;
         int i = 4;
-        retval += (adminFlag ? 1 : 0) << (i-- * 7)/*Number of bits to be shifted*/;
+        retval += (adminFlag ? 1 : 0) << (i-- * 7)/* Number of bits to be shifted */;
         retval += MAPPING.get(dp) << (i-- * 7);
         retval += MAPPING.get(wp) << (i-- * 7);
         retval += MAPPING.get(rp) << (i-- * 7);
