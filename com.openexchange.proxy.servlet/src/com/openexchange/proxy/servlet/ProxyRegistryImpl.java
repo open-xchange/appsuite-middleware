@@ -57,12 +57,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.proxy.ProxyException;
+import com.openexchange.exception.OXException;
 import com.openexchange.proxy.ProxyExceptionCodes;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.proxy.servlet.services.ServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -93,7 +92,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
         registry = new ConcurrentHashMap<String, ConcurrentMap<UUID, ProxyRegistrationEntry>>();
     }
 
-    public URI register(final ProxyRegistration registration) throws ProxyException {
+    public URI register(final ProxyRegistration registration) throws OXException {
         final String sessionId = registration.getSessionId();
         /*
          * Check session identifier
@@ -104,7 +103,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
                 throw ProxyExceptionCodes.INVALID_SESSION_ID.create(sessionId);
             }
         } catch (final OXException e) {
-            throw new ProxyException(e);
+            throw new OXException(e);
         }
         /*
          * Register in appropriate map

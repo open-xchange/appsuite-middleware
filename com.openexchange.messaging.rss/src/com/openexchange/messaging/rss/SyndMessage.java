@@ -75,7 +75,7 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 import com.openexchange.proxy.ImageContentTypeRestriction;
-import com.openexchange.proxy.ProxyException;
+import com.openexchange.exception.OXException;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.session.Session;
@@ -296,7 +296,7 @@ public class SyndMessage implements MessagingMessage {
                      */
                     org.apache.commons.logging.LogFactory.getLog(SyndMessage.class).warn("Not a valid image URL. Replacing image URL skipped.", e);
                     picUrl = null;
-                } catch (final ProxyException e) {
+                } catch (final OXException e) {
                     /*
                      * Not a valid URL
                      */

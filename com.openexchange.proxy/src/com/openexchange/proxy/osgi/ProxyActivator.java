@@ -51,9 +51,6 @@ package com.openexchange.proxy.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.proxy.ProxyException;
-import com.openexchange.proxy.exception.ProxyExceptionFactory;
 
 /**
  * {@link ProxyActivator}
@@ -62,23 +59,12 @@ import com.openexchange.proxy.exception.ProxyExceptionFactory;
  */
 public class ProxyActivator implements BundleActivator {
 
-    private ComponentRegistration componentRegistration;
-
 	public void start(final BundleContext context) throws Exception {
 	    final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class);
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.proxy");
             }
-            /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    ProxyException.COMPONENT,
-                    "com.openexchange.proxy",
-                    ProxyExceptionFactory.getInstance());
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.proxy: " + e.getMessage(), e);
             throw e;
@@ -90,13 +76,6 @@ public class ProxyActivator implements BundleActivator {
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.proxy");
-            }
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
             }
         } catch (final Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.proxy: " + e.getMessage(), e);

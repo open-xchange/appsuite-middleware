@@ -74,7 +74,7 @@ import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.proxy.ImageContentTypeRestriction;
-import com.openexchange.proxy.ProxyException;
+import com.openexchange.exception.OXException;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 
@@ -203,7 +203,7 @@ public final class HTMLServiceImpl implements HTMLService {
             } catch (final MalformedURLException e) {
                 LOG.warn("Invalid URL found in \"img\" tag: " + imgTag, e);
                 sb.append(srcMatcher.group());
-            } catch (final ProxyException e) {
+            } catch (final OXException e) {
                 LOG.warn("Proxy registration failed for \"img\" tag: " + imgTag, e);
                 sb.append(srcMatcher.group());
             } catch (final Exception e) {

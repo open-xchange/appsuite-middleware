@@ -49,10 +49,11 @@
 
 package com.openexchange.proxy;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link ProxyExceptionMessages} - Exception messages for {@link ProxyException} that must be translated.
+ * {@link ProxyExceptionMessages} - Exception messages for {@link OXException} that must be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
