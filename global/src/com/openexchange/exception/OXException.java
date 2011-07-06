@@ -142,7 +142,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
-        problematics = new ArrayList<ProblematicAttribute>(2);
+        problematics = new LinkedList<ProblematicAttribute>();
     }
 
     /**
@@ -159,26 +159,28 @@ public class OXException extends Exception implements OXExceptionConstants {
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
-        problematics = new ArrayList<ProblematicAttribute>(2);
+        problematics = new LinkedList<ProblematicAttribute>();
     }
 
     /**
-     * Initializes a default {@link OXException}.
+     * Initializes a {@link OXException} cloned from specified {@link OXException}.
      * 
-     * @param cause The cause
-     * @deprecated Consider this useless wrapping instance!
+     * @param cloneMe The <code>OXException</code> instance to clone
      */
-    @Deprecated
-    public OXException(final OXException cause) {
-        super(cause);
-        code = CODE_DEFAULT;
-        count = COUNTER.incrementAndGet();
-        properties = new HashMap<String, String>(8);
-        categories = new LinkedList<Category>();
-        displayMessage = OXExceptionStrings.MESSAGE;
-        logMessage = null;
-        displayArgs = MESSAGE_ARGS_EMPTY;
-        problematics = new ArrayList<ProblematicAttribute>(2);
+    public OXException(final OXException cloneMe) {
+        super();
+        this.count = cloneMe.count;
+        this.code = cloneMe.code;
+        this.categories = null == cloneMe.categories ? new LinkedList<Category>() : new ArrayList<Category>(cloneMe.categories);
+        this.displayArgs = cloneMe.displayArgs;
+        this.displayMessage = cloneMe.displayMessage;
+        this.exceptionId = cloneMe.exceptionId;
+        this.logMessage = cloneMe.logMessage;
+        this.prefix = cloneMe.prefix;
+        this.problematics =
+            null == cloneMe.problematics ? new LinkedList<ProblematicAttribute>() : new ArrayList<ProblematicAttribute>(
+                cloneMe.problematics);
+        this.properties = null == cloneMe.properties ? new HashMap<String, String>(8) : new HashMap<String, String>(cloneMe.properties);
     }
 
     /**
@@ -194,7 +196,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.code = code;
         this.displayMessage = OXExceptionStrings.MESSAGE;
         this.displayArgs = MESSAGE_ARGS_EMPTY;
-        problematics = new ArrayList<ProblematicAttribute>(2);
+        problematics = new LinkedList<ProblematicAttribute>();
     }
 
     /**
@@ -212,7 +214,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
-        problematics = new ArrayList<ProblematicAttribute>(2);
+        problematics = new LinkedList<ProblematicAttribute>();
     }
 
     /**
@@ -231,7 +233,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
-        problematics = new ArrayList<ProblematicAttribute>(2);
+        problematics = new ArrayList<ProblematicAttribute>(1);
     }
 
     /**
