@@ -49,7 +49,7 @@
 
 package com.openexchange.api2;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.session.Session;
 
@@ -68,7 +68,7 @@ public interface ContactInterfaceFactory {
      * @param folderId The folder ID
      * @param session The session
      * @return An appropriate {@link ContactInterface} instance
-     * @throws AbstractOXException If instantiation of {@link ContactInterface} instance fails
+     * @throws OXException If instantiation of {@link ContactInterface} instance fails
      */
-    public ContactInterface create(int folderId, Session session) throws AbstractOXException;
+    public ContactInterface create(int folderId, Session session) throws OXException;
 }

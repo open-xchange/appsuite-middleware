@@ -57,7 +57,6 @@ import junit.framework.TestCase;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
@@ -101,7 +100,7 @@ public class ContactFolderLoaderTest extends TestCase {
             
         contactSQLFactory = new ContactInterfaceFactory() {
 
-            public ContactSQLInterface create(final int folderId, final Session session) throws AbstractOXException {
+            public ContactSQLInterface create(final int folderId, final Session session) throws OXException {
                 return contacts;
             }
             

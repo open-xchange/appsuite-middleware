@@ -66,13 +66,12 @@ import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ContactInterfaceFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
@@ -113,7 +112,7 @@ public final class AllAction extends AbstractUserAction {
             AJAXServlet.PARAMETER_SESSION,
             AJAXServlet.PARAMETER_ACTION)));
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
              * Parse parameters
@@ -196,7 +195,7 @@ public final class AllAction extends AbstractUserAction {
                 } else {
                     // Order by user field
                     final List<User> allUsers = new ArrayList<User>();
-                    for (User user : userService.getUser(session.getContext())) {
+                    for (final User user : userService.getUser(session.getContext())) {
                         allUsers.add(user);
                     }
                     Collections.sort(allUsers, Comparators.getComparator(
@@ -209,7 +208,7 @@ public final class AllAction extends AbstractUserAction {
                         rhl = allUsers.size();
                     }
                     users = allUsers.subList(lhl, rhl).toArray(new User[rhl - lhl]);
-                    int[] userIds = new int[users.length];
+                    final int[] userIds = new int[users.length];
                     for (int i = 0; i < users.length; i++) {
                         userIds[i] = users[i].getId();
                     }
@@ -218,7 +217,7 @@ public final class AllAction extends AbstractUserAction {
             } else {
                 // No sorting required
                 final List<User> allUsers = new ArrayList<User>();
-                for (User user : userService.getUser(session.getContext())) {
+                for (final User user : userService.getUser(session.getContext())) {
                     allUsers.add(user);
                 }
                 final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
@@ -227,7 +226,7 @@ public final class AllAction extends AbstractUserAction {
                     rhl = allUsers.size();
                 }
                 users = allUsers.subList(lhl, rhl).toArray(new User[rhl - lhl]);
-                int[] userIds = new int[users.length];
+                final int[] userIds = new int[users.length];
                 for (int i = 0; i < users.length; i++) {
                     userIds[i] = users[i].getId();
                 }

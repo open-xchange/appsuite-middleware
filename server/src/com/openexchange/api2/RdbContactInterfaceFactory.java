@@ -49,7 +49,7 @@
 
 package com.openexchange.api2;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
  */
 public class RdbContactInterfaceFactory implements ContactInterfaceFactory {
 
-    public ContactInterface create(final int folderId, final Session session) throws AbstractOXException {
+    public ContactInterface create(final int folderId, final Session session) throws OXException {
         return ServerServiceRegistry.getInstance().getService(
             ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);
     }
