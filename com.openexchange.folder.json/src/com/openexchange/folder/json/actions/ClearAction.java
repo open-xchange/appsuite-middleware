@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.folder.json.actions;
 
-
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -61,11 +60,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
- com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link ClearAction} - Maps the action to a CLEAR action.
- * 
+ * {@link ClearAction}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ClearAction extends AbstractFolderAction {
