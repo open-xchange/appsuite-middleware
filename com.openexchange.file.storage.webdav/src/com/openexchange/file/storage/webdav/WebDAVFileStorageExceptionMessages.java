@@ -49,15 +49,16 @@
 
 package com.openexchange.file.storage.webdav;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link WebDAVOXExceptionMessages} - Exception messages for {@link WebDAVOXException} that needs to be translated.
+ * {@link WebDAVOXExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class WebDAVOXExceptionMessages implements LocalizableStrings {
+public final class WebDAVFileStorageExceptionMessages implements LocalizableStrings {
 
     // An error occurred: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
@@ -96,9 +97,9 @@ public final class WebDAVOXExceptionMessages implements LocalizableStrings {
     public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
 
     /**
-     * Initializes a new {@link WebDAVOXExceptionMessages}.
+     * Initializes a new {@link WebDAVFileStorageExceptionMessages}.
      */
-    private WebDAVOXExceptionMessages() {
+    private WebDAVFileStorageExceptionMessages() {
         super();
     }
 

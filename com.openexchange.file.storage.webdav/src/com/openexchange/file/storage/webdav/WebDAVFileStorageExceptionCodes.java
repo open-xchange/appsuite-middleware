@@ -49,66 +49,67 @@
 
 package com.openexchange.file.storage.webdav;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.file.storage.webdav.exception.WebDAVOXExceptionFactory;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link WebDAVFileStorageExceptionCodes} - Enumeration of all {@link WebDAVOXException}s.
+ * {@link WebDAVFileStorageExceptionCodes} - Enumeration of all {@link OXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
+public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(WebDAVOXExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(WebDAVFileStorageExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * A HTTP error occurred: %1$s
      */
-    HTTP_ERROR(WebDAVOXExceptionMessages.HTTP_ERROR_MSG, Category.CODE_ERROR, 2),
+    HTTP_ERROR(WebDAVFileStorageExceptionMessages.HTTP_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * A DAV error occurred: %1$s
      */
-    DAV_ERROR(WebDAVOXExceptionMessages.DAV_ERROR_MSG, Category.CODE_ERROR, 3),
+    DAV_ERROR(WebDAVFileStorageExceptionMessages.DAV_ERROR_MSG, CATEGORY_ERROR, 3),
     /**
      * The resource is not a directory: %1$s
      */
-    NOT_A_FOLDER(WebDAVOXExceptionMessages.NOT_A_FOLDER_MSG, Category.CODE_ERROR, 4),
+    NOT_A_FOLDER(WebDAVFileStorageExceptionMessages.NOT_A_FOLDER_MSG, CATEGORY_ERROR, 4),
     /**
      * Invalid property "%1$s". Should be "%2$s", but is not.
      */
-    INVALID_PROPERTY(WebDAVOXExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 5),
+    INVALID_PROPERTY(WebDAVFileStorageExceptionMessages.INVALID_PROPERTY_MSG, CATEGORY_ERROR, 5),
     /**
      * Invalid date property: %1$s
      */
-    INVALID_DATE_PROPERTY(WebDAVOXExceptionMessages.INVALID_DATE_PROPERTY_MSG, Category.CODE_ERROR, 6),
+    INVALID_DATE_PROPERTY(WebDAVFileStorageExceptionMessages.INVALID_DATE_PROPERTY_MSG, CATEGORY_ERROR, 6),
     /**
      * Directory "%1$s" must not be deleted.
      */
-    DELETE_DENIED(WebDAVOXExceptionMessages.DELETE_DENIED_MSG, Category.CODE_ERROR, 7),
+    DELETE_DENIED(WebDAVFileStorageExceptionMessages.DELETE_DENIED_MSG, CATEGORY_ERROR, 7),
     /**
      * Directory "%1$s" must not be updated.
      */
-    UPDATE_DENIED(WebDAVOXExceptionMessages.UPDATE_DENIED_MSG, Category.CODE_ERROR, 8),
+    UPDATE_DENIED(WebDAVFileStorageExceptionMessages.UPDATE_DENIED_MSG, CATEGORY_ERROR, 8),
     /**
      * Invalid or missing credentials to access WebDAV server "%1$s".
      */
-    INVALID_CREDS(WebDAVOXExceptionMessages.INVALID_CREDS_MSG, Category.CODE_ERROR, 9),
+    INVALID_CREDS(WebDAVFileStorageExceptionMessages.INVALID_CREDS_MSG, CATEGORY_ERROR, 9),
     /**
      * The resource is not a file: %1$s
      */
-    NOT_A_FILE(WebDAVOXExceptionMessages.NOT_A_FILE_MSG, Category.CODE_ERROR, 10),
+    NOT_A_FILE(WebDAVFileStorageExceptionMessages.NOT_A_FILE_MSG, CATEGORY_ERROR, 10),
     /**
      * Versioning not supported by WebDAV.
      */
-    VERSIONING_NOT_SUPPORTED(WebDAVOXExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 11),
+    VERSIONING_NOT_SUPPORTED(WebDAVFileStorageExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, CATEGORY_ERROR, 11),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(WebDAVOXExceptionMessages.MISSING_FILE_NAME_MSG, Category.CODE_ERROR, 12);
+    MISSING_FILE_NAME(WebDAVFileStorageExceptionMessages.MISSING_FILE_NAME_MSG, CATEGORY_ERROR, 12);
     
 
     private final Category category;
@@ -122,6 +123,10 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
         this.detailNumber = detailNumber;
         this.category = category;
     }
+    
+    public String getPrefix() {
+        return "WEBDAV_FILE_STORAGE";
+    }
 
     public Category getCategory() {
         return category;
@@ -131,32 +136,41 @@ public enum WebDAVFileStorageExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance
      */
-    public WebDAVOXException create(final Object... messageArgs) {
-        return WebDAVOXExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new messaging exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public WebDAVOXException create(final Throwable cause, final Object... messageArgs) {
-        return WebDAVOXExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

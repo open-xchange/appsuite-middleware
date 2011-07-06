@@ -56,13 +56,13 @@ import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.services.WebDAVFileStorageServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -71,8 +71,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageService implements FileStorageService {
-
-    private static final int MISSING_MANAGER_DETAIL_NUMBER = FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.getDetailNumber();
 
     /**
      * Creates a new WebDAV file storage service.
@@ -110,15 +108,13 @@ public final class WebDAVFileStorageService implements FileStorageService {
                 WebDAVFileStorageServiceRegistry.getServiceRegistry().getService(FileStorageAccountManagerLookupService.class, true).getAccountManagerFor(
                     this);
         } catch (final OXException e) {
-            if (!OXException.COMPONENT.equals(e.getComponent()) || MISSING_MANAGER_DETAIL_NUMBER != e.getDetailNumber()) {
+            if (!FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.equals(e)) {
                 throw e;
             }
             /*
              * Retry
              */
             throw e;
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

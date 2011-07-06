@@ -58,6 +58,7 @@ import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.w3c.dom.Element;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 
 /**
@@ -80,9 +81,9 @@ public final class WebDAVFileStorageResourceUtil {
      * @param davPropertyName The DAV property name
      * @param propertySet The property set
      * @return The string
-     * @throws WebDAVOXException If string cannot be parsed
+     * @throws OXException If string cannot be parsed
      */
-    public static String parseStringProperty(final DavPropertyName davPropertyName, final DavPropertySet propertySet) throws WebDAVOXException {
+    public static String parseStringProperty(final DavPropertyName davPropertyName, final DavPropertySet propertySet) throws OXException {
         try {
             @SuppressWarnings("unchecked") final DavProperty<String> stringProperty =
                 (DavProperty<String>) propertySet.get(davPropertyName);
@@ -103,9 +104,9 @@ public final class WebDAVFileStorageResourceUtil {
      * @param name The property name
      * @param propertySet The property set
      * @return The string
-     * @throws WebDAVOXException If string cannot be parsed
+     * @throws OXException If string cannot be parsed
      */
-    public static String parseStringProperty(final String name, final DavPropertySet propertySet) throws WebDAVOXException {
+    public static String parseStringProperty(final String name, final DavPropertySet propertySet) throws OXException {
         try {
             @SuppressWarnings("unchecked") final DavProperty<String> stringProperty = (DavProperty<String>) propertySet.get(name);
             if (null == stringProperty) {
@@ -125,9 +126,9 @@ public final class WebDAVFileStorageResourceUtil {
      * @param name The property name
      * @param propertySet The property set
      * @return The integer
-     * @throws WebDAVOXException If integer cannot be parsed
+     * @throws OXException If integer cannot be parsed
      */
-    public static int parseIntProperty(final String name, final DavPropertySet propertySet) throws WebDAVOXException {
+    public static int parseIntProperty(final String name, final DavPropertySet propertySet) throws OXException {
         try {
             @SuppressWarnings("unchecked") final DavProperty<String> intProperty = (DavProperty<String>) propertySet.get(name);
             if (null == intProperty) {
@@ -171,9 +172,9 @@ public final class WebDAVFileStorageResourceUtil {
      * @param name The property name
      * @param propertySet The property set
      * @return The date
-     * @throws WebDAVOXException If date cannot be parsed
+     * @throws OXException If date cannot be parsed
      */
-    public static Date parseDateProperty(final String name, final DavPropertySet propertySet) throws WebDAVOXException {
+    public static Date parseDateProperty(final String name, final DavPropertySet propertySet) throws OXException {
         try {
             final String datePropertyValue = parseStringProperty(name, propertySet);
             if (null == datePropertyValue) {

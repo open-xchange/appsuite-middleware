@@ -89,6 +89,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.transaction.TransactionConstants;
 import org.apache.jackrabbit.webdav.transaction.TransactionInfo;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
@@ -235,7 +236,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return DavMethods.DAV_LOCK == code || DavMethods.DAV_UNLOCK == code;
     }
 
-    public void startTransaction() throws TransactionException {
+    public void startTransaction() throws OXException {
         if (null != transactionToken) {
             /*
              * Transaction already started
@@ -277,15 +278,15 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(lockMethod);
             }
         } catch (final HttpException e) {
-            throw new TransactionException(WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage()));
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new TransactionException(FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage()));
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw new TransactionException(WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage()));
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         }
     }
 
-    public void commit() throws TransactionException {
+    public void commit() throws OXException {
         if (null == transactionToken) {
             /*
              * Transaction not started
@@ -307,15 +308,15 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(method);
             }
         } catch (final HttpException e) {
-            throw new TransactionException(WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage()));
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new TransactionException(FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage()));
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw new TransactionException(WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage()));
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         }
     }
 
-    public void rollback() throws TransactionException {
+    public void rollback() throws OXException {
         if (null == transactionToken) {
             /*
              * Transaction not started
@@ -337,11 +338,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(method);
             }
         } catch (final HttpException e) {
-            throw new TransactionException(WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage()));
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new TransactionException(FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage()));
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw new TransactionException(WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage()));
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -611,7 +612,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 throw (OXException) e;
             }
             if (e instanceof AbstractOXException) {
-                throw new OXException((AbstractOXException) e);
+                throw new OXException(e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -713,7 +714,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             if (e instanceof AbstractOXException) {
-                throw new OXException((AbstractOXException) e);
+                throw new OXException(e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -898,7 +899,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 throw (OXException) e;
             }
             if (e instanceof AbstractOXException) {
-                throw new OXException((AbstractOXException) e);
+                throw new OXException(e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
