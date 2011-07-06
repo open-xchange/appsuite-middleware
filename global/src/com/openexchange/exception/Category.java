@@ -153,7 +153,7 @@ public interface Category extends Comparable<Category> {
     };
 
     /**
-     * The default category for a try-again issue using debug šeg level.
+     * The default category for a try-again issue using debug log level.
      */
     public static final Category CATEGORY_TRY_AGAIN = new Category() {
 

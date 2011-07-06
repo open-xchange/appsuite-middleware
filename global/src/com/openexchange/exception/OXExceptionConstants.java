@@ -49,6 +49,7 @@
 
 package com.openexchange.exception;
 
+
 /**
  * {@link OXExceptionConstants} - Provides access to constants for <a href="http://www.open-xchange.com">Open-Xchange</a> exceptions.
  * 
@@ -84,6 +85,51 @@ public interface OXExceptionConstants {
      * The default category for an invalid user input.
      */
     public static final Category CATEGORY_USER_INPUT = Category.CATEGORY_USER_INPUT;
+
+    /**
+     * The default category for a configuration issue (e.g. missing required property).
+     */
+    public static final Category CATEGORY_CONFIGURATION = Category.CATEGORY_CONFIGURATION;
+
+    /**
+     * The default category for a permission-denied issue using debug log level.
+     */
+    public static final Category CATEGORY_PERMISSION_DENIED = Category.CATEGORY_PERMISSION_DENIED;
+
+    /**
+     * The default category for a try-again issue using debug log level.
+     */
+    public static final Category CATEGORY_TRY_AGAIN = Category.CATEGORY_TRY_AGAIN;
+
+    /**
+     * The default category for a connectivity issue (e.g. broken/lost TCP connection) using debug log level.
+     */
+    public static final Category CATEGORY_CONNECTIVITY = Category.CATEGORY_CONNECTIVITY;
+
+    /**
+     * The default category for a missing service or system (e.g. database) using debug log level.
+     */
+    public static final Category CATEGORY_SERVICE_DOWN = Category.CATEGORY_SERVICE_DOWN;
+
+    /**
+     * The default category for truncated data using error log level.
+     */
+    public static final Category CATEGORY_TRUNCATED = Category.CATEGORY_TRUNCATED;
+
+    /**
+     * The default category for conflicting data using debug log level.
+     */
+    public static final Category CATEGORY_CONFLICT = Category.CATEGORY_CONFLICT;
+
+    /**
+     * The default category for if a 3rd party system reported capacity restrictions (e.g. quota).
+     */
+    public static final Category CATEGORY_CAPACITY = Category.CATEGORY_CAPACITY;
+
+    /**
+     * The default category for a warning displayed to user.
+     */
+    public static final Category CATEGORY_WARNING = Category.CATEGORY_WARNING;
 
     /*-
      * ------------------------------- Constants for prefixes -----------------------------------

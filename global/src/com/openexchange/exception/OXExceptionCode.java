@@ -55,7 +55,7 @@ package com.openexchange.exception;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OXExceptionCode {
+public interface OXExceptionCode extends OXExceptionConstants {
 
     /**
      * Checks if specified {@link OXException}'s attributes matches this code's ones.
