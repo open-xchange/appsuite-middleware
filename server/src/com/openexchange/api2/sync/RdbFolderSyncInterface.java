@@ -54,11 +54,7 @@ import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.sql.SQLException;
 import java.util.Date;
-import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -70,8 +66,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 /**
  * RdbFolderSyncInterface
@@ -117,32 +111,32 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
     public int clearFolder(final FolderObject folder, final Date clientLastModified) throws OXException {
         try {
             if (folder.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
-                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(getUserName(session, user),
+                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(
+                    getUserName(session, user),
                     getFolderName(folder),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!folder.exists(ctx)) {
-                throw new OXFolderNotFoundException(folder.getObjectID(), ctx);
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folder.getObjectID(), ctx.getContextId());
             }
             if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folder.getObjectID()).after(clientLastModified)) {
-                throw new OXConcurrentModificationException(
-                    EnumComponent.FOLDER,
-                    OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION,
-                    new Object[0]);
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folder.getObjectID(), ctx.getContextId());
             }
             final EffectivePermission effectivePerm = folder.getEffectiveUserPermission(userId, userConfiguration);
             if (!effectivePerm.hasModuleAccess(folder.getModule())) {
-                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(getUserName(session, user),
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
+                    getUserName(session, user),
                     folderModule2String(folder.getModule()),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderVisible()) {
                 if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folder.getObjectID()), getUserName(
-                        session,
-                        user), Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(
+                        Integer.valueOf(folder.getObjectID()),
+                        getUserName(session, user),
+                        Integer.valueOf(ctx.getContextId()));
                 }
-                throw OXFolderExceptionCode.NOT_VISIBLE.create(CATEGORY_PERMISSION_DENIED,
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(
                     Integer.valueOf(folder.getObjectID()),
                     getUserName(session, user),
                     Integer.valueOf(ctx.getContextId()));
@@ -150,8 +144,6 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folder, false, lastModified);
             return folder.getObjectID();
-        } catch (final DBPoolingException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
