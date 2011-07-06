@@ -69,6 +69,10 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
      * The action "%1$s" is disabled due to server configuration
      */
     DisabledAction("The action \"%1$s\" is disabled due to server configuration", Category.CATEGORY_PERMISSION_DENIED, 15),
+    /**
+     * No permission for module: %s.
+     */
+    NoPermissionForModule("No permission for module: %1$s.", Category.CATEGORY_PERMISSION_DENIED, 16),
     ;
     
     /**

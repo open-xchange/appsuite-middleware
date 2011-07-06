@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.links;
 
+import com.openexchange.i18n.LocalizableStrings;
+
 /**
  * {@link LinkExceptionMessages}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LinkExceptionMessages {
+public class LinkExceptionMessages implements LocalizableStrings {
 
     public static final String NO_LINK_ACCESS_PERMISSION_MSG = "Unable to access link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d";
 

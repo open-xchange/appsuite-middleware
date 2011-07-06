@@ -65,7 +65,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -309,7 +308,7 @@ public class Links {
     }
 
     public static void performLinkStorage(final LinkObject l, final int user, final int[] group, final Session so,
-            final Connection writecon) throws LinkException, OXException {
+            final Connection writecon) throws OXException {
 
         final Context ct = ContextStorage.getStorageContext(so.getContextId());
 
@@ -340,8 +339,6 @@ public class Links {
                     I(l.getSecondFolder()),
                     I(so.getContextId()));
             }
-        } catch (final DBPoolingException e) {
-            throw new LinkException(e);
         } catch (final SQLException e) {
             throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
@@ -369,7 +366,7 @@ public class Links {
         }
     }
 
-    public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folderId, final int user, final int[] group, final Session so, final Connection readcon) throws LinkException, OXException {
+    public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folderId, final int user, final int[] group, final Session so, final Connection readcon) throws OXException {
         final List<LinkObject> tmp = new ArrayList<LinkObject>();
         Statement stmt = null;
         ResultSet rs = null;
@@ -397,7 +394,7 @@ public class Links {
 
     public static int[][] deleteLinkFromObject(final int id, final int type, final int folder, final int[][] data,
             final int user, final int[] group, final Session so, final Connection readcon, final Connection writecon)
-            throws OXException, LinkException {
+            throws OXException {
         Statement stmt = null;
         Statement del = null;
         ResultSet rs = null;
@@ -447,7 +444,7 @@ public class Links {
                             lms.iFDeleteLinkFromObject(del, second, id, type, folder, loadid, loadfolder, loadtype, so
                                     .getContextId());
                             cnt++;
-                        } catch (final LinkException e) {
+                        } catch (final OXException e) {
                             LOG.error("Unable to delete Link!", e);
                             resp.add(new int[] { loadid, loadtype, loadfolder });
                         }
@@ -469,7 +466,7 @@ public class Links {
         return resp.toArray(new int[resp.size()][]);
     }
 
-    public static void deleteAllObjectLinks(final int id, final int type, final int cid, final Connection writecon) throws LinkException {
+    public static void deleteAllObjectLinks(final int id, final int type, final int cid, final Connection writecon) throws OXException {
         // TODO RIGHTS CHECK on onject id and fid!
         /*
          * this right check is realy not requiered because this method only
@@ -501,7 +498,7 @@ public class Links {
      * @param writecon A connection with write capability
      * @throws OXException If deleting all folder links fails
      */
-    public static void deleteAllFolderLinks(final int folderId, final int cid, final Connection writecon) throws LinkException {
+    public static void deleteAllFolderLinks(final int folderId, final int cid, final Connection writecon) throws OXException {
         final LinksSql lms = new LinksMySql();
         PreparedStatement stmt = null;
         try {
@@ -518,7 +515,7 @@ public class Links {
         }
     }
 
-    public static LinkObject[] getAllLinksByObjectID(final int id, final int type, final int user, final int[] group, final Session so, final Connection readcon) throws LinkException, OXException {
+    public static LinkObject[] getAllLinksByObjectID(final int id, final int type, final int user, final int[] group, final Session so, final Connection readcon) throws OXException {
         final List<LinkObject> tmp = new ArrayList<LinkObject>();
         Statement stmt = null;
         ResultSet rs = null;

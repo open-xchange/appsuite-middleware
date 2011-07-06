@@ -75,7 +75,6 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
@@ -363,8 +362,6 @@ public class AttachmentRequest extends CommonRequest {
             return true;
         } catch (final JSONException e) {
             handle(e);
-        } catch (final AbstractOXException e) {
-            handle(e);
         } catch (final OXException e) {
             handle(e);
         }
@@ -470,14 +467,14 @@ public class AttachmentRequest extends CommonRequest {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final AbstractOXException e1) {
+                } catch (final OXException e1) {
                     LOG.error(e1.getMessage(), e1);
                 }
             }
             if (iter2 != null) {
                 try {
                     iter2.close();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -519,7 +516,7 @@ public class AttachmentRequest extends CommonRequest {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -595,7 +592,7 @@ public class AttachmentRequest extends CommonRequest {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }

@@ -76,18 +76,14 @@ import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.FinalContactInterface;
-import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
@@ -98,7 +94,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
@@ -110,9 +105,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -166,7 +159,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, OXException, AbstractOXException, OXException {
+    public JSONValue action(final String action, final JSONObject jsonObject) throws JSONException, OXException {
         if (!session.getUserConfiguration().hasContact()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
         }
@@ -212,10 +205,10 @@ public class ContactRequest {
 
 
 
-	public JSONValue actionGetByUuid(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+	public JSONValue actionGetByUuid(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         
-        Contact contactObj = getFinalContact(contactInterface, jsonObj);
+        final Contact contactObj = getFinalContact(contactInterface, jsonObj);
         
         final TimeZone tz;
         final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
@@ -231,53 +224,53 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONValue actionGetAssociation(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    public JSONValue actionGetAssociation(final JSONObject jsonObject) throws JSONException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
-        Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
+        final Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
         
-        ContactUnificationState association = contactInterface.getAssociationBetween(twoContacts[0], twoContacts[1]);
-        JSONObject ret = new JSONObject().put("state", association.getNumber());
+        final ContactUnificationState association = contactInterface.getAssociationBetween(twoContacts[0], twoContacts[1]);
+        final JSONObject ret = new JSONObject().put("state", association.getNumber());
         return ret;
     }
 
-    private JSONValue actionGetAssociated(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    private JSONValue actionGetAssociated(final JSONObject jsonObject) throws JSONException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
-        Contact contact  = getFinalContact(contactInterface, jsonObject);
+        final Contact contact  = getFinalContact(contactInterface, jsonObject);
         
         final TimeZone tz;
         final String timeZoneId = DataParser.parseString(jsonObject, AJAXServlet.PARAMETER_TIMEZONE);
         tz = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
         
-        List<UUID> associatedContacts = contactInterface.getAssociatedContacts(contact);
+        final List<UUID> associatedContacts = contactInterface.getAssociatedContacts(contact);
         
-        JSONArray ret = new JSONArray();
+        final JSONArray ret = new JSONArray();
         
-        for(UUID associate: associatedContacts){
+        for(final UUID associate: associatedContacts){
             ret.put(associate.toString());
         }
         
         return ret;
     }
 
-    private JSONValue actionDissociate(JSONObject jsonObject) throws OXMandatoryFieldException, OXException, OXException, OXException {
+    private JSONValue actionDissociate(final JSONObject jsonObject) throws OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
-        Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
+        final Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
         
         contactInterface.separateTwoContacts(twoContacts[0], twoContacts[1]);
         
         return null;
     }
 
-    private JSONValue actionAssociate(JSONObject jsonObject) throws OXMandatoryFieldException, OXException, OXException, OXException {
+    private JSONValue actionAssociate(final JSONObject jsonObject) throws OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
-        Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
+        final Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
         
         contactInterface.associateTwoContacts(twoContacts[0], twoContacts[1]);
         
         return null;
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws JSONException, OXException {
 
         final Contact contactObj = new Contact();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
@@ -301,7 +294,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, OXException, OXException, OXException {
+    public JSONObject actionUpdate(final JSONObject jsonObj) throws JSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -323,7 +316,7 @@ public class ContactRequest {
         return new JSONObject();
     }
 
-    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
@@ -397,7 +390,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
@@ -413,7 +406,7 @@ public class ContactRequest {
         return new JSONArray();
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
 
         Date lastModified = null;
@@ -512,7 +505,7 @@ public class ContactRequest {
         }
     }
 
-    public JSONArray actionListUser(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXException {
+    public JSONArray actionListUser(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
 
         final JSONArray jsonResponseArray = new JSONArray();
@@ -555,7 +548,7 @@ public class ContactRequest {
         return jsonResponseArray;
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
@@ -628,7 +621,7 @@ public class ContactRequest {
         return helper.toNativeArray();
     }
 
-    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    public JSONObject actionGet(final JSONObject jsonObj) throws JSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         final TimeZone timeZone;
@@ -654,7 +647,7 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionGetUser(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    public JSONObject actionGetUser(final JSONObject jsonObj) throws JSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final TimeZone timeZone;
         {
@@ -680,13 +673,13 @@ public class ContactRequest {
         return jsonResponseObject;
     }
 
-    public JSONArray actionTermSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionTermSearch(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
 
-    	String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
-    	int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-    	int[] columnsToLoad = removeVirtual(columns);
-        int[] internalColumns = checkLastModified(columnsToLoad);
+    	final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
+    	final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+    	final int[] columnsToLoad = removeVirtual(columns);
+        final int[] internalColumns = checkLastModified(columnsToLoad);
 
         final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
         final TimeZone timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
@@ -695,11 +688,11 @@ public class ContactRequest {
         final String collation = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_COLLATION);
         
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
-        JSONArray filterContent = jData.getJSONArray("filter");
-        SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
+        final JSONArray filterContent = jData.getJSONArray("filter");
+        final SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
         
-        ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchTerm, orderBy, order, collation, internalColumns);
+        final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
+        final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchTerm, orderBy, order, collation, internalColumns);
         
         final JSONArray jsonResponseArray = new JSONArray();
         try {
@@ -724,7 +717,7 @@ public class ContactRequest {
         return jsonResponseArray;    
     }
     
-    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
@@ -819,7 +812,7 @@ public class ContactRequest {
         return jsonResponseArray;
     }
 
-    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, AbstractOXException, OXException, OXException {
+    public JSONObject actionCopy(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
 
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
@@ -870,19 +863,10 @@ public class ContactRequest {
         /*
          * Get all
          */
-        Connection readCon;
-        try {
-            readCon = Database.get(ctx, false);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        Connection readCon = Database.get(ctx, false);
         final LinkObject[] links;
         try {
             links = Links.getAllLinksFromObject(origObjectId, Types.CONTACT, origFolderId, user.getId(), user.getGroups(), session, readCon);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (LinkException e) {
-            throw new ContactException(e);
         } finally {
             Database.back(ctx, false, readCon);
             readCon = null;
@@ -893,12 +877,7 @@ public class ContactRequest {
         /*
          * Copy
          */
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(ctx, true);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(ctx, true);
         try {
             for (final LinkObject link : links) {
                 final LinkObject copy;
@@ -926,16 +905,12 @@ public class ContactRequest {
                 }
                 Links.performLinkStorage(copy, user.getId(), user.getGroups(), session, writeCon);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (LinkException e) {
-            throw new ContactException(e);
         } finally {
             Database.back(ctx, true, writeCon);
         }
     }
 
-    private static void copyAttachments(final int folderId, Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws AbstractOXException {
+    private static void copyAttachments(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
         /*
          * Copy attachments
          */
@@ -1020,21 +995,21 @@ public class ContactRequest {
         return (FinalContactInterface) contactInterfaceTemp;
     }
     
-    protected Contact[] getTwoFinalContacts(FinalContactInterface contactInterface, JSONObject jsonObject) throws OXException, OXException, OXException{
-        UUID uuid1 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID1.getName());
-        UUID uuid2 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID2.getName());
+    protected Contact[] getTwoFinalContacts(final FinalContactInterface contactInterface, final JSONObject jsonObject) throws OXException, OXException, OXException{
+        final UUID uuid1 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID1.getName());
+        final UUID uuid2 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID2.getName());
         Contact c1, c2;
         if( uuid1 == null){
-            int fid1 = DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_FOLDER_ID1.getName());
-            int id1 =  DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_CONTACT_ID1.getName());
+            final int fid1 = DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_FOLDER_ID1.getName());
+            final int id1 =  DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_CONTACT_ID1.getName());
             c1 = contactInterface.getObjectById(id1, fid1);
 
         } else {
             c1 = contactInterface.getContactByUUID(uuid1);
         } 
         if( uuid2 == null){
-            int fid2 = DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_FOLDER_ID2.getName());
-            int id2 =  DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_CONTACT_ID2.getName());
+            final int fid2 = DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_FOLDER_ID2.getName());
+            final int id2 =  DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_CONTACT_ID2.getName());
             c2 = contactInterface.getObjectById(id2, fid2);
         } else {
             c2 = contactInterface.getContactByUUID(uuid2);
@@ -1042,12 +1017,12 @@ public class ContactRequest {
         return new Contact[]{c1,c2};
     }
     
-    protected Contact getFinalContact(FinalContactInterface contactInterface, JSONObject jsonObject) throws OXException, OXException, OXException{
-        UUID uuid = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID.getName());
+    protected Contact getFinalContact(final FinalContactInterface contactInterface, final JSONObject jsonObject) throws OXException, OXException, OXException{
+        final UUID uuid = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID.getName());
         Contact c;
         if( uuid == null){
-            int fid = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_FOLDERID);
-            int id =  DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
+            final int fid = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_FOLDERID);
+            final int id =  DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
             c = contactInterface.getObjectById(id, fid);
 
         } else {

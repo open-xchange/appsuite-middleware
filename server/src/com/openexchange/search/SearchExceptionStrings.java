@@ -49,7 +49,7 @@
 
 package com.openexchange.search;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link SearchExceptionStrings} - The search exception strings.

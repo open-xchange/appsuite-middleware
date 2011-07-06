@@ -79,13 +79,10 @@ import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -111,9 +108,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -174,9 +169,9 @@ public class AppointmentRequest extends CalendarRequest {
         return timestamp;
     }
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws  JSONException, AbstractOXException{
+    public JSONValue action(final String action, final JSONObject jsonObject) throws  JSONException, OXException{
         if (!session.getUserConfiguration().hasCalendar()) {
-            throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "calendar");
+            throw AjaxExceptionCodes.NoPermissionForModule.create("calendar");
         }
         if (AJAXServlet.ACTION_CONFIRM.equalsIgnoreCase(action)) {
             return actionConfirm(jsonObject);
@@ -223,7 +218,7 @@ public class AppointmentRequest extends CalendarRequest {
         return json;
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, OXException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         final TimeZone timeZone;
         {
@@ -267,7 +262,7 @@ public class AppointmentRequest extends CalendarRequest {
     }
 
     
-	public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, OXException, OXException {
+	public JSONObject actionUpdate(final JSONObject jsonObj) throws JSONException, OXException {
         final int objectId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -311,7 +306,7 @@ public class AppointmentRequest extends CalendarRequest {
         return jsonResponseObj;
     }
 
-    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -484,7 +479,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
@@ -515,7 +510,7 @@ public class AppointmentRequest extends CalendarRequest {
         return new JSONArray();
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
 
         Date lastModified = null;
@@ -540,7 +535,7 @@ public class AppointmentRequest extends CalendarRequest {
             JSONObject jObject = null;
             try {
                 jObject = jData.getJSONObject(a);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jData.toString());
             }            
             
@@ -693,7 +688,7 @@ public class AppointmentRequest extends CalendarRequest {
     }
    
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException,AbstractOXException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException,OXException {
         timestamp = new Date(0);
 
         SearchIterator<Appointment> it = null;
@@ -744,7 +739,7 @@ public class AppointmentRequest extends CalendarRequest {
             if (showAppointmentInAllFolders) {
                 it = appointmentsql.getAppointmentsBetween(user.getId(), start, end, _appointmentFields, orderBy, orderDir);
             } else {
-                boolean old = appointmentsql.getIncludePrivateAppointments();
+                final boolean old = appointmentsql.getIncludePrivateAppointments();
                 appointmentsql.setIncludePrivateAppointments(showPrivateAppointments);
                 it = appointmentsql.getAppointmentsBetweenInFolder(folderId, _appointmentFields, start, end, orderBy, orderDir);
                 appointmentsql.setIncludePrivateAppointments(old);
@@ -767,7 +762,7 @@ public class AppointmentRequest extends CalendarRequest {
                             
                             switch (folderType) {
                             case FolderObject.PRIVATE:
-                                for (UserParticipant u : appointment.getUsers()) {
+                                for (final UserParticipant u : appointment.getUsers()) {
                                     if (u.getIdentifier() == user.getId() && u.getAlarmMinutes() > -1) {
                                         appointment.setAlarm(u.getAlarmMinutes());
                                         break;
@@ -776,7 +771,7 @@ public class AppointmentRequest extends CalendarRequest {
                                 break;
 
                             case FolderObject.SHARED:
-                                for (UserParticipant u : appointment.getUsers()) {
+                                for (final UserParticipant u : appointment.getUsers()) {
                                     if (u.getIdentifier() == owner && u.getAlarmMinutes() > -1) {
                                         appointment.setAlarm(u.getAlarmMinutes());
                                         break;
@@ -784,7 +779,7 @@ public class AppointmentRequest extends CalendarRequest {
                                 }               
                                 break;
                             }
-                        } catch (OXException e) {
+                        } catch (final OXException e) {
                             LOG.error("An error occurred during filling an appointment with alarm information.", e);
                         }                        
                     }                  
@@ -890,7 +885,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXException, OXException, OXException {
+    public JSONObject actionGet(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = null;
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -905,8 +900,9 @@ public class AppointmentRequest extends CalendarRequest {
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         try {
             final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
-            if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy())
+            if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy()) {
                 anonymize(appointmentobject);
+            }
                 
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 
@@ -989,7 +985,7 @@ public class AppointmentRequest extends CalendarRequest {
         return jsonResponseArray;
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         timestamp = new Date(0);
@@ -1011,7 +1007,7 @@ public class AppointmentRequest extends CalendarRequest {
         final Order orderDir = OrderFields.parse(orderDirString);
         
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
-        SearchIterator<Appointment> it = appointmentsql.searchAppointments(searchObj, orderBy, orderDir, _appointmentFields);
+        final SearchIterator<Appointment> it = appointmentsql.searchAppointments(searchObj, orderBy, orderDir, _appointmentFields);
 
         final JSONArray jsonResponseArray = new JSONArray();
 
@@ -1059,7 +1055,7 @@ public class AppointmentRequest extends CalendarRequest {
     }
     
 
-    public JSONArray actionNewAppointmentsSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionNewAppointmentsSearch(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         
@@ -1178,7 +1174,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONArray actionFreeBusy(final JSONObject jsonObj) throws JSONException,AbstractOXException {
+    public JSONArray actionFreeBusy(final JSONObject jsonObj) throws JSONException,OXException {
         final int userId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int type = DataParser.checkInt(jsonObj, "type");
         final TimeZone timeZone;
@@ -1321,7 +1317,7 @@ public class AppointmentRequest extends CalendarRequest {
         return new Date(utcTime - timeZone.getOffset(utcTime));
     }
     
-    private void anonymize(Appointment anonymized){
+    private void anonymize(final Appointment anonymized){
         //TODO: Solve dependency problem and use AnonymizingIterator#anonymize instead
         anonymized.setTitle("Private");
         anonymized.removeAlarm();
