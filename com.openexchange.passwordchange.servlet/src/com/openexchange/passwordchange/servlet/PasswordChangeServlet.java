@@ -62,10 +62,9 @@ import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
@@ -101,7 +100,7 @@ public final class PasswordChangeServlet extends SessionServlet {
         Tools.disableCaching(resp);
         try {
             actionGet(req, resp);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("PasswordChangeServlet.doGet()", e);
             final Response response = new Response();
             response.setException(e);
@@ -126,7 +125,7 @@ public final class PasswordChangeServlet extends SessionServlet {
         Tools.disableCaching(resp);
         try {
             actionPut(req, resp);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("PasswordChangeServlet.doPut()", e);
             final Response response = new Response();
             response.setException(e);
@@ -142,8 +141,8 @@ public final class PasswordChangeServlet extends SessionServlet {
         } catch (final JSONException e) {
             LOG.error("PasswordChangeServlet.doPut()", e);
             final Response response = new Response();
-            response.setException(new PasswordChangeServletException(
-                PasswordChangeServletException.Code.JSON_ERROR,
+            response.setException(
+                PasswordChangeServletExceptionCode.JSON_ERROR.create(
                 e,
                 e.getMessage()));
             final PrintWriter writer = resp.getWriter();
@@ -158,19 +157,19 @@ public final class PasswordChangeServlet extends SessionServlet {
         }
     }
 
-    private void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws PasswordChangeServletException, JSONException, IOException {
+    private void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
         final String actionStr = checkStringParam(req, PARAMETER_ACTION);
         if (actionStr.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
             actionPutUpdate(req, resp);
         } else {
-            throw new PasswordChangeServletException(PasswordChangeServletException.Code.UNSUPPORTED_ACTION, actionStr, "PUT");
+            throw PasswordChangeServletExceptionCode.UNSUPPORTED_ACTION.create(actionStr, "PUT");
         }
     }
 
-    private void actionGet(final HttpServletRequest req, final HttpServletResponse resp) throws PasswordChangeServletException {
+    private void actionGet(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final String actionStr = checkStringParam(req, PARAMETER_ACTION);
-        throw new PasswordChangeServletException(PasswordChangeServletException.Code.UNSUPPORTED_ACTION, actionStr, "GET");
+        throw PasswordChangeServletExceptionCode.UNSUPPORTED_ACTION.create(actionStr, "GET");
     }
 
     private void actionPutUpdate(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
@@ -185,25 +184,23 @@ public final class PasswordChangeServlet extends SessionServlet {
              */
             final JSONObject requestObject = new JSONObject(getBody(req));
             if (!requestObject.has(PARAM_NEW_PASSWORD) || requestObject.isNull(PARAM_NEW_PASSWORD)) {
-                throw new PasswordChangeServletException(PasswordChangeServletException.Code.MISSING_PARAM, PARAM_NEW_PASSWORD);
+                throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(PARAM_NEW_PASSWORD);
             }
             if (!requestObject.has(PARAM_OLD_PASSWORD) || requestObject.isNull(PARAM_OLD_PASSWORD)) {
-                throw new PasswordChangeServletException(PasswordChangeServletException.Code.MISSING_PARAM, PARAM_OLD_PASSWORD);
+                throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(PARAM_OLD_PASSWORD);
             }
             /*
              * Perform password change
              */
             final PasswordChangeService passwordChangeService = getServiceRegistry().getService(PasswordChangeService.class);
             if (passwordChangeService == null) {
-                throw new PasswordChangeServletException(new OXException(
-                    ServiceExceptionCode.SERVICE_UNAVAILABLE,
-                    PasswordChangeService.class.getName()));
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(
+                    PasswordChangeService.class.getName());
             }
             final ContextService contextService = getServiceRegistry().getService(ContextService.class);
             if (contextService == null) {
-                throw new PasswordChangeServletException(new OXException(
-                    ServiceExceptionCode.SERVICE_UNAVAILABLE,
-                    ContextService.class.getName()));
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(
+                    ContextService.class.getName());
             }
             passwordChangeService.perform(new PasswordChangeEvent(
                 session,
@@ -211,7 +208,7 @@ public final class PasswordChangeServlet extends SessionServlet {
                 requestObject.getString(PARAM_NEW_PASSWORD),
                 requestObject.getString(PARAM_OLD_PASSWORD)));
 
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
@@ -223,10 +220,10 @@ public final class PasswordChangeServlet extends SessionServlet {
         ResponseWriter.write(response, resp.getWriter());
     }
 
-    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws PasswordChangeServletException {
+    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {
         final String paramVal = req.getParameter(paramName);
         if ((paramVal == null) || (paramVal.length() == 0) || "null".equals(paramVal)) {
-            throw new PasswordChangeServletException(PasswordChangeServletException.Code.MISSING_PARAM, paramName);
+            throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramName);
         }
         return paramVal;
     }
