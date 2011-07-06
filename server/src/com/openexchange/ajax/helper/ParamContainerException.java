@@ -49,8 +49,7 @@
 
 package com.openexchange.ajax.helper;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 
 /**
  * ParamContainerException
@@ -58,80 +57,6 @@ import com.openexchange.groupware.EnumComponent;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class ParamContainerException extends AbstractOXException {
-
-	public static enum Code {
-
-		/**
-		 * Bad value %1$s in parameter %2$s
-		 */
-		BAD_PARAM_VALUE("Bad value %1$s in parameter %2$s", Category.USER_INPUT, 1),
-		/**
-		 * Missing parameter %1$s
-		 */
-		MISSING_PARAMETER("Missing parameter %1$s", Category.CODE_ERROR, 2);
-
-		/**
-		 * Message of the exception.
-		 */
-		private final String message;
-
-		/**
-		 * Category of the exception.
-		 */
-		private final Category category;
-
-		/**
-		 * Detail number of the exception.
-		 */
-		private final int detailNumber;
-
-		/**
-		 * Default constructor.
-		 * 
-		 * @param message
-		 *            message.
-		 * @param category
-		 *            category.
-		 * @param detailNumber
-		 *            detail number.
-		 */
-		private Code(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.category = category;
-			this.detailNumber = detailNumber;
-		}
-
-		public int getNumber() {
-			return detailNumber;
-		}
-
-		public String getMessage() {
-			return message;
-		}
-
-		public Category getCategory() {
-			return category;
-		}
-	}
-
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = -7151582012313508929L;
-
-	/**
-	 * @param component
-	 * @param category
-	 * @param number
-	 * @param message
-	 * @param cause
-	 * @param messageArgs
-	 */
-	public ParamContainerException(final EnumComponent component, final Category category, final int number,
-			final String message, final Throwable cause, final Object... messageArgs) {
-		super(component, category, number, message, cause);
-		super.setMessageArgs(messageArgs);
-	}
+public class ParamContainerException extends OXException {
 
 }
