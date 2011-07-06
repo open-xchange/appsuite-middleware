@@ -59,11 +59,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
-import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.field.DistributionListField;
 import com.openexchange.user.json.field.UserField;
@@ -176,12 +175,12 @@ public final class UserParser {
             return contact;
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
-        } catch (final ContactException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
 
-    private static void parseDistributionList(final Contact oxobject, final JSONObject jsonobject) throws JSONException, ContactException {
+    private static void parseDistributionList(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXException {
         final JSONArray jdistributionlist = jsonobject.getJSONArray(ContactFields.DISTRIBUTIONLIST);
         final DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jdistributionlist.length()];
         for (int a = 0; a < jdistributionlist.length(); a++) {

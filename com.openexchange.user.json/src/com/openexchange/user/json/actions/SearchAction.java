@@ -67,7 +67,7 @@ import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.container.Contact;
@@ -75,9 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -116,7 +114,7 @@ public final class SearchAction extends AbstractUserAction {
             AJAXServlet.PARAMETER_SESSION,
             AJAXServlet.PARAMETER_ACTION)));
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
              * Parse parameters
