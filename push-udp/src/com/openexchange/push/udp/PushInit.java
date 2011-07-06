@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.server.Initialization;
 
@@ -103,7 +103,7 @@ public class PushInit implements Initialization {
         return SINGLETON;
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error("Duplicate push initialization.");
             return;
@@ -119,7 +119,7 @@ public class PushInit implements Initialization {
         }
 
         if (config == null) {
-            throw new PushUDPException(PushUDPException.Code.MISSING_CONFIG);
+            throw PushUDPExceptionCode.MISSING_CONFIG.create();
         }
         channels = new PushChannels(config);
         output = new PushOutputQueue(config, channels);

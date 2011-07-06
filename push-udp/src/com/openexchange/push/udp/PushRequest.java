@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.EventException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link PushRequest}
@@ -197,9 +198,9 @@ public class PushRequest {
                 PushOutputQueue.addRemoteHostObject(remoteHostObject);
                 break;
             default:
-                throw new PushUDPException(PushUDPException.Code.INVALID_TYPE, null, Integer.valueOf(type));
+                throw PushUDPExceptionCode.INVALID_TYPE.create(null, Integer.valueOf(type));
             }
-        } catch (final PushUDPException e) {
+        } catch (final OXException e) {
             LOG.error("PushRequest: " + e, e);
         } catch (final UnknownHostException e) {
             LOG.error("PushRequest: Remote host registration failed: " + e.getMessage(), e);
@@ -215,9 +216,9 @@ public class PushRequest {
      * 
      * @param datagramPacket The datagram packet
      * @return The datagram packet's arguments
-     * @throws PushUDPException If datagram packet's magic bytes or its length are invalid
+     * @throws OXException If datagram packet's magic bytes or its length are invalid
      */
-    private String[] getArgsFromPacket(final DatagramPacket datagramPacket) throws PushUDPException {
+    private String[] getArgsFromPacket(final DatagramPacket datagramPacket) throws OXException {
         final byte[] b = new byte[datagramPacket.getLength()];
         System.arraycopy(datagramPacket.getData(), 0, b, 0, b.length);
         final String data = new String(b);
@@ -234,7 +235,7 @@ public class PushRequest {
 
         final int magic = parseMagic(s, pos++);
         if (magic != MAGIC) {
-            throw new PushUDPException(PushUDPException.Code.INVALID_MAGIC, null, s[pos - 1]);
+            throw PushUDPExceptionCode.INVALID_MAGIC.create(null, s[pos - 1]);
         }
 
         final int length = parseLength(s, pos++);
@@ -243,82 +244,82 @@ public class PushRequest {
             /*
              * Strange datagram package
              */
-            throw new PushUDPException(PushUDPException.Code.MISSING_PAYLOAD);
+            throw PushUDPExceptionCode.MISSING_PAYLOAD.create();
         }
         final byte[] bData = new byte[length];
         System.arraycopy(b, currentLength, bData, 0, length);
         return PATTERN_SPLIT.split(new String(bData), 0);
     }
 
-    private int parseMagic(final String[] s, final int pos) throws PushUDPException {
+    private int parseMagic(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
         } catch (final NumberFormatException e) {
             // Not a number...
-            throw new PushUDPException(PushUDPException.Code.MAGIC_NAN, e, s[pos]);
+            throw PushUDPExceptionCode.MAGIC_NAN.create(e, s[pos]);
         }
     }
 
-    private int parseType(final String[] s, final int pos) throws PushUDPException {
+    private int parseType(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
         } catch (final NumberFormatException e) {
             // Not a number...
-            throw new PushUDPException(PushUDPException.Code.TYPE_NAN, e, s[pos]);
+            throw PushUDPExceptionCode.TYPE_NAN.create(e, s[pos]);
         }
     }
 
-    private int parseLength(final String[] s, final int pos) throws PushUDPException {
+    private int parseLength(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
         } catch (final NumberFormatException e) {
             // Not a number...
-            throw new PushUDPException(PushUDPException.Code.LENGTH_NAN, e, s[pos]);
+            throw PushUDPExceptionCode.LENGTH_NAN.create(e, s[pos]);
         }
     }
 
-    private int parseUserId(final String[] s, final int pos) throws PushUDPException {
+    private int parseUserId(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
         } catch (final NumberFormatException e) {
             // Not a number...
-            throw new PushUDPException(PushUDPException.Code.USER_ID_NAN, e, s[pos]);
+            throw PushUDPExceptionCode.USER_ID_NAN.create(e, s[pos]);
         }
     }
 
-    private int parseContextId(final String[] s, final int pos) throws PushUDPException {
+    private int parseContextId(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
         } catch (final NumberFormatException e) {
             // Not a number...
-            throw new PushUDPException(PushUDPException.Code.CONTEXT_ID_NAN, e, s[pos]);
+            throw PushUDPExceptionCode.CONTEXT_ID_NAN.create(e, s[pos]);
         }
     }
 
-    private int parseFolderId(final String[] s, final int pos) throws PushUDPException {
+    private int parseFolderId(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
         } catch (final NumberFormatException e) {
             // Not a number...
-            throw new PushUDPException(PushUDPException.Code.FOLDER_ID_NAN, e, s[pos]);
+            throw PushUDPExceptionCode.FOLDER_ID_NAN.create(e, s[pos]);
         }
     }
 
-    private int parseModule(final String[] s, final int pos) throws PushUDPException {
+    private int parseModule(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
         } catch (final NumberFormatException e) {
             // Not a number...
-            throw new PushUDPException(PushUDPException.Code.MODULE_NAN, e, s[pos]);
+            throw PushUDPExceptionCode.MODULE_NAN.create(e, s[pos]);
         }
     }
 
-    private int parsePort(final String[] s, final int pos) throws PushUDPException {
+    private int parsePort(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
         } catch (final NumberFormatException e) {
             // Not a number...
-            throw new PushUDPException(PushUDPException.Code.PORT_NAN, e, s[pos]);
+            throw PushUDPExceptionCode.PORT_NAN.create(e, s[pos]);
         }
     }
 
@@ -351,7 +352,7 @@ public class PushRequest {
         return Boolean.parseBoolean(parseString(s, pos));
     }
 
-    private int[] convertString2UserIDArray(final String s) throws PushUDPException {
+    private int[] convertString2UserIDArray(final String s) throws OXException {
         final String tmp[] = s.split(",");
         final int i[] = new int[tmp.length];
         try {
@@ -359,7 +360,7 @@ public class PushRequest {
                 i[a] = Integer.parseInt(tmp[a]);
             }
         } catch (final NumberFormatException e) {
-            throw new PushUDPException(PushUDPException.Code.INVALID_USER_IDS, e, Arrays.toString(tmp));
+            throw PushUDPExceptionCode.INVALID_USER_IDS.create(e, Arrays.toString(tmp));
         }
 
         return i;

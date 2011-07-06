@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
  com.openexchange.context,
  com.openexchange.event,
+ com.openexchange.exception,
  com.openexchange.folder,
  com.openexchange.group,
  com.openexchange.groupware,

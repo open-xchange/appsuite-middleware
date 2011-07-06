@@ -64,11 +64,11 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 
