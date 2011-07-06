@@ -59,7 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.sso.action.SSOActionFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -113,7 +112,7 @@ public final class SSOMultipleHandler implements MultipleHandler {
     }
 
     public Collection<OXException> getWarnings() {
-        return Collections.<AbstractOXException> emptySet();
+        return Collections.<OXException> emptySet();
     }
 
 }
