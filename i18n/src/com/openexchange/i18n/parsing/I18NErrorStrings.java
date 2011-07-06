@@ -49,7 +49,7 @@
 
 package com.openexchange.i18n.parsing;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

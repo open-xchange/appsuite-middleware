@@ -61,7 +61,7 @@ import java.util.List;
 import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.i18n.parsing.I18NException;
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.parsing.POParser;
 import com.openexchange.i18n.parsing.Translations;
 
@@ -96,7 +96,7 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
                 list.add(translations);
             } catch (final FileNotFoundException e) {
                 LOG.error("File disappeared?", e);
-            } catch (final I18NException e) {
+            } catch (final OXException e) {
                 LOG.error("Could not parse po file: ", e);
             } finally {
                 if (null != input) {

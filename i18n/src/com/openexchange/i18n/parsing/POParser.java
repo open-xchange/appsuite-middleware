@@ -51,6 +51,7 @@ package com.openexchange.i18n.parsing;
 
 import java.io.InputStream;
 import java.util.Properties;
+import com.openexchange.exception.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -63,7 +64,7 @@ public class POParser {
         super();
     }
 
-    public Translations parse(final InputStream stream, final String filename) throws I18NException {
+    public Translations parse(final InputStream stream, final String filename) throws OXException {
         final Translations translations = new Translations();
 
         final POTokenStream tokens = new POTokenStream(stream, filename);
@@ -104,7 +105,7 @@ public class POParser {
         tokens.setCharset(charset);
     }
 
-    private void readTranslation(final Translations translations, final POTokenStream tokens) throws I18NException {
+    private void readTranslation(final Translations translations, final POTokenStream tokens) throws OXException {
         tokens.consume(POToken.MSGID);
         final StringBuilder key = new StringBuilder((String) tokens.consume(POToken.TEXT).getData());
         collectTexts(tokens, key);
@@ -134,13 +135,13 @@ public class POParser {
         }
     }
 
-    private void skipContexts(final POTokenStream tokens) throws I18NException {
+    private void skipContexts(final POTokenStream tokens) throws OXException {
         while (tokens.lookahead(POToken.MSGCTXT)) {
             tokens.consume(POToken.MSGCTXT);
         }
     }
 
-    private void collectTexts(final POTokenStream tokens, final StringBuilder builder) throws I18NException {
+    private void collectTexts(final POTokenStream tokens, final StringBuilder builder) throws OXException {
         while (tokens.lookahead(POToken.TEXT)) {
             final Object data = tokens.consume(POToken.TEXT).getData();
             if (builder != null) {

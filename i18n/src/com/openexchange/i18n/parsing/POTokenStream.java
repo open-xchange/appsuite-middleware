@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import com.openexchange.exception.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -72,7 +73,7 @@ final class POTokenStream {
 
     private int line;
 
-    public POTokenStream(final InputStream stream, final String filename) throws I18NException {
+    public POTokenStream(final InputStream stream, final String filename) throws OXException {
         super();
         this.stream = stream;
         charset = Charset.defaultCharset();
@@ -89,21 +90,20 @@ final class POTokenStream {
         return nextToken == token;
     }
 
-    public POElement consume(final POToken token) throws I18NException {
+    public POElement consume(final POToken token) throws OXException {
         if (lookahead(token)) {
             final POElement element = nextElement;
             initNextToken();
             return element;
         }
-        I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME.throwException(
+        throw I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME.create(
             nextToken.name().toLowerCase(),
             filename,
             Integer.valueOf(line),
             "[" + token.name().toLowerCase() + "]");
-        return null; // Never reached
     }
 
-    private void initNextToken() throws I18NException {
+    private void initNextToken() throws OXException {
         byte c = read();
         while (Character.isWhitespace(c)) {
             c = read();
@@ -127,7 +127,7 @@ final class POTokenStream {
             while ((c = read()) != -1 && c != '\n') {
                 baos.write(c);
             }
-            I18NErrorMessages.UNEXPECTED_TOKEN.throwException(
+            throw I18NErrorMessages.UNEXPECTED_TOKEN.create(
                 toString(baos.toByteArray()),
                 filename,
                 Integer.valueOf(line - 1),
@@ -135,7 +135,7 @@ final class POTokenStream {
         }
     }
 
-    private byte read() throws I18NException {
+    private byte read() throws OXException {
         try {
             final byte b = (byte) stream.read();
             if ('\n' == b) {
@@ -143,12 +143,11 @@ final class POTokenStream {
             }
             return b;
         } catch (final IOException e) {
-            I18NErrorMessages.IO_EXCEPTION.throwException(e, filename);
+            throw I18NErrorMessages.IO_EXCEPTION.create(e, filename);
         }
-        return -1;
     }
 
-    private void comment() throws I18NException {
+    private void comment() throws OXException {
         /*
          * StringBuilder data = new StringBuilder(); int c = -1; while((c = read()) != '\n') { data.append((char) c); } nextToken =
          * POToken.COMMENT; element(data.toString());
@@ -181,7 +180,7 @@ final class POTokenStream {
         return sb.toString();
     }
 
-    private void string() throws I18NException {
+    private void string() throws OXException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte c = read();
         byte last = 0;
@@ -202,7 +201,7 @@ final class POTokenStream {
         element(null);
     }
 
-    private void msgIdOrMsgStr() throws I18NException {
+    private void msgIdOrMsgStr() throws OXException {
         expect('s', 'g');
         switch (read()) {
         case 'i':
@@ -255,7 +254,7 @@ final class POTokenStream {
         element(null);
     }
 
-    private void msgStrToken(final String number) throws I18NException {
+    private void msgStrToken(final String number) throws OXException {
         nextToken = POToken.MSGSTR;
         try {
             if (number == null) {
@@ -264,7 +263,7 @@ final class POTokenStream {
                 element(Integer.valueOf(number));
             }
         } catch (final NumberFormatException x) {
-            I18NErrorMessages.EXPECTED_NUMBER.throwException(number, filename, Integer.valueOf(line));
+            throw I18NErrorMessages.EXPECTED_NUMBER.create(number, filename, Integer.valueOf(line));
         }
     }
 
@@ -277,11 +276,11 @@ final class POTokenStream {
         nextElement = new POElement(nextToken, data);
     }
 
-    private void expect(final char... characters) throws I18NException {
+    private void expect(final char... characters) throws OXException {
         for (final char c : characters) {
             final byte readC = read();
             if (readC != c) {
-                I18NErrorMessages.MALFORMED_TOKEN.throwException("" + (char) readC, "" + c, filename, Integer.valueOf(line));
+                throw I18NErrorMessages.MALFORMED_TOKEN.create("" + (char) readC, "" + c, filename, Integer.valueOf(line));
             }
         }
     }
