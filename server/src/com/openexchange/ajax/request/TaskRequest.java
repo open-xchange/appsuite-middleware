@@ -75,7 +75,6 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -88,10 +87,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 public class TaskRequest extends CalendarRequest {
@@ -130,7 +126,7 @@ public class TaskRequest extends CalendarRequest {
         Task.COLOR_LABEL
     };
 
-    public TaskRequest(ServerSession session) {
+    public TaskRequest(final ServerSession session) {
         super();
         this.session = session;
         this.timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
@@ -140,11 +136,11 @@ public class TaskRequest extends CalendarRequest {
         return timestamp;
     }
 
-    public JSONValue action(String action, JSONObject json) throws JSONException, AbstractOXException {
+    public JSONValue action(final String action, final JSONObject json) throws JSONException, OXException {
         if (!session.getUserConfiguration().hasTask()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
         }
-        String sTimeZone = DataParser.parseString(json, AJAXServlet.PARAMETER_TIMEZONE);
+        final String sTimeZone = DataParser.parseString(json, AJAXServlet.PARAMETER_TIMEZONE);
         if (null != sTimeZone) {
             timeZone = getTimeZone(sTimeZone);
         }
@@ -216,7 +212,7 @@ public class TaskRequest extends CalendarRequest {
         return new JSONObject();
     }
 
-    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
@@ -284,7 +280,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXException, OXException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXException {
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
         final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
@@ -296,7 +292,7 @@ public class TaskRequest extends CalendarRequest {
         return new JSONArray();
     }
 
-    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
 
         Date lastModified = null;
@@ -343,7 +339,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
@@ -410,12 +406,12 @@ public class TaskRequest extends CalendarRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionConfirm(JSONObject json) throws OXMandatoryFieldException, OXException, OXException, OXException, JSONException {
-        JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
-        Task task = new Task();
+    public JSONObject actionConfirm(final JSONObject json) throws OXMandatoryFieldException, OXException, OXException, OXException, JSONException {
+        final JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
+        final Task task = new Task();
         new TaskParser(timeZone).parse(task, data);
-        TasksSQLInterface taskSql = new TasksSQLImpl(session);
-        int taskIdFromParameter = DataParser.parseInt(json, AJAXServlet.PARAMETER_ID);
+        final TasksSQLInterface taskSql = new TasksSQLImpl(session);
+        final int taskIdFromParameter = DataParser.parseInt(json, AJAXServlet.PARAMETER_ID);
         final int taskId;
         if (DataParser.NO_INT == taskIdFromParameter) {
             if (!task.containsObjectID()) {
@@ -429,7 +425,7 @@ public class TaskRequest extends CalendarRequest {
         return new JSONObject();
     }
 
-    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, AbstractOXException {
+    public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);

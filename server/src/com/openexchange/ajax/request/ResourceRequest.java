@@ -60,11 +60,10 @@ import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.Resource;
-import com.openexchange.exception.OXException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceWriter;
@@ -100,7 +99,7 @@ public class ResourceRequest {
 
     private static final String MODULE_RESOURCE = "resource";
 
-    public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException,
+    public Object action(final String action, final JSONObject jsonObject) throws OXException,
             JSONException {
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
             return actionList(jsonObject);
@@ -133,12 +132,12 @@ public class ResourceRequest {
         }
     }
 
-    private JSONValue actionUpdates(final JSONObject jsonObj)  throws AbstractOXException, JSONException {
+    private JSONValue actionUpdates(final JSONObject jsonObj)  throws OXException, JSONException {
         final Date lastModified = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         Resource[] updatedResources = null;
         Resource[] deletedResources = null;
         try {
-            ResourceService resService = ResourceServiceImpl.getInstance();
+            final ResourceService resService = ResourceServiceImpl.getInstance();
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
         } catch (final OXException exc) {
@@ -148,25 +147,27 @@ public class ResourceRequest {
         final JSONArray modified = new JSONArray();
         long lm = 0;
         if(updatedResources != null){
-            for(Resource res: updatedResources){
-                if(res.getLastModified().getTime() > lm)
+            for(final Resource res: updatedResources){
+                if(res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
+                }
                 modified.put(ResourceWriter.writeResource(res));
             }
         }
         
         final JSONArray deleted = new JSONArray();
         if(deletedResources != null){
-            for(Resource res: deletedResources){
-                if(res.getLastModified().getTime() > lm)
+            for(final Resource res: deletedResources){
+                if(res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
+                }
                 
                 deleted.put(ResourceWriter.writeResource(res));
             }
         }
         timestamp = new Date(lm);
 
-        JSONObject retVal = new JSONObject();
+        final JSONObject retVal = new JSONObject();
         retVal.put("modified", modified);
         retVal.put("new", modified);
         retVal.put("deleted", deleted);
@@ -174,7 +175,7 @@ public class ResourceRequest {
         return retVal;
     }
 
-    private JSONArray actionList(final JSONObject jsonObj) throws AbstractOXException, JSONException {
+    private JSONArray actionList(final JSONObject jsonObj) throws OXException, JSONException {
         final JSONArray jsonResponseArray = new JSONArray();
 
         UserStorage userStorage = null;
@@ -221,7 +222,7 @@ public class ResourceRequest {
         return jsonResponseArray;
     }
 
-    private JSONObject actionGet(final JSONObject jsonObj) throws AbstractOXException, JSONException {
+    private JSONObject actionGet(final JSONObject jsonObj) throws OXException, JSONException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         com.openexchange.resource.Resource r = null;
         try {
@@ -243,7 +244,7 @@ public class ResourceRequest {
         return com.openexchange.resource.json.ResourceWriter.writeResource(r);
     }
 
-    private JSONArray actionSearch(final JSONObject jsonObj) throws AbstractOXException,
+    private JSONArray actionSearch(final JSONObject jsonObj) throws OXException,
             JSONException {
         final ResourceService resourceService = ResourceServiceImpl.getInstance();
         if (null == resourceService) {
@@ -287,10 +288,10 @@ public class ResourceRequest {
      * Performs an all request
      *
      * @return A JSON array of all available resources' IDs
-     * @throws AbstractOXException
+     * @throws OXException
      *             If all resources cannot be retrieved from resource storage
      */
-    private JSONArray actionAll() throws AbstractOXException {
+    private JSONArray actionAll() throws OXException {
         final JSONArray jsonResponseArray = new JSONArray();
 
         final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(

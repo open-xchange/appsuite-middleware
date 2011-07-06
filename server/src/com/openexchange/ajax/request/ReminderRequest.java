@@ -69,8 +69,6 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -80,7 +78,6 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -89,9 +86,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -145,7 +140,7 @@ public final class ReminderRequest {
      * @throws OXException If an AJAX error occurs
      * @throws OXException If a JSON error occurs
      */
-    public JSONValue action(final String action, final JSONObject jsonObject) throws JSONException, AbstractOXException{
+    public JSONValue action(final String action, final JSONObject jsonObject) throws JSONException, OXException{
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
             return actionDelete(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
@@ -181,18 +176,16 @@ public final class ReminderRequest {
             }
         } catch (final OXException oxe) {
             LOG.debug(oxe.getMessage(), oxe);
-            if (oxe.getComponent().equals(EnumComponent.REMINDER) && oxe.getDetailNumber() == 9) {
+            if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                 jsonArray.put(id);
                 return jsonArray;
             }
             throw oxe;
-        } catch (final AbstractOXException exc) {
-            throw new OXException(exc);
         }
         return jsonArray;
     }
 
-    private JSONArray actionUpdates(final JSONObject jsonObject) throws JSONException, AbstractOXException {
+    private JSONArray actionUpdates(final JSONObject jsonObject) throws JSONException, OXException {
         timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
         final TimeZone timeZone;
         {
@@ -234,8 +227,8 @@ public final class ReminderRequest {
             }
 
             return jsonResponseArray;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             if (null != it) {
                 it.close();
@@ -344,8 +337,8 @@ public final class ReminderRequest {
                 it.close();
             }
             return jsonResponseArray;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 

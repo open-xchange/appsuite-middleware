@@ -56,10 +56,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -75,7 +74,7 @@ public class QuotaRequest {
 
     private QuotaFileStorage qfs;
 
-    private AbstractOXException fsException;
+    private OXException fsException;
 
     private final ServerSession session;
 
@@ -89,7 +88,7 @@ public class QuotaRequest {
         try {
             final Context ctx = session.getContext();
             this.qfs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             this.fsException = e;
         }
         this.session = session;
@@ -100,10 +99,10 @@ public class QuotaRequest {
      * 
      * @param action The action to perform
      * @return The result
-     * @throws AbstractOXException If action fails
+     * @throws OXException If action fails
      * @throws JSONException If a JSON error occurs
      */
-    public JSONValue action(final String action) throws AbstractOXException, JSONException {
+    public JSONValue action(final String action) throws OXException, JSONException {
         if (AJAXServlet.ACTION_GET.equals(action)) {
             return filestore();
         } else if ("filestore".equals(action)) {
@@ -114,7 +113,7 @@ public class QuotaRequest {
         throw AjaxExceptionCodes.UnknownAction.create( action);
     }
 
-    private JSONObject filestore() throws AbstractOXException, JSONException {
+    private JSONObject filestore() throws OXException, JSONException {
         if (fsException != null) {
             throw fsException;
         }
@@ -138,7 +137,7 @@ public class QuotaRequest {
                 quotaInfo = mi.getQuotas(new int[] {
                     MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
             } catch (final OXException e) {
-                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(e.getMessage(), e);
                     }
