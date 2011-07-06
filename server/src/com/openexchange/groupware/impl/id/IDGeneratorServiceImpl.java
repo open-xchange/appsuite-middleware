@@ -55,7 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.id.IDException;
 import com.openexchange.id.IDExceptionCodes;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.tools.sql.DBUtils;
@@ -107,15 +106,13 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         }
     }
 
-    private static Connection getWritableNonAutoCommitConnection(final int contextId) throws IDException {
+    private static Connection getWritableNonAutoCommitConnection(final int contextId) throws OXException {
         try {
             final Connection con = Database.get(contextId, true);
             con.setAutoCommit(false); // BEGIN
             return con;
         } catch (final SQLException e) {
             throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new IDException(e);
         }
     }
 
