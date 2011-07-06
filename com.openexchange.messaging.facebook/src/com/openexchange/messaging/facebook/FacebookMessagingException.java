@@ -49,18 +49,18 @@
 
 package com.openexchange.messaging.facebook;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link FacebookMessagingException} - A facebook messaging exception
+ * {@link FacebookOXException} - A facebook messaging exception
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class FacebookMessagingException extends MessagingException {
+public class FacebookOXException extends OXException {
 
     private static final long serialVersionUID = -3554129943396182447L;
 
@@ -79,54 +79,54 @@ public class FacebookMessagingException extends MessagingException {
     };
 
     /**
-     * Initializes a new {@link FacebookMessagingException}.
+     * Initializes a new {@link FacebookOXException}.
      * 
      * @param cause The cause
      */
-    public FacebookMessagingException(final AbstractOXException cause) {
+    public FacebookOXException(final AbstractOXException cause) {
         super(cause);
     }
 
     /**
-     * Initializes a new {@link FacebookMessagingException}.
+     * Initializes a new {@link FacebookOXException}.
      * 
      * @param message The message
      * @param cause The cause
      */
-    public FacebookMessagingException(final String message, final AbstractOXException cause) {
+    public FacebookOXException(final String message, final AbstractOXException cause) {
         super(FACEBOOK_COMPONENT, message, cause);
     }
 
     /**
-     * Initializes a new {@link FacebookMessagingException}.
+     * Initializes a new {@link FacebookOXException}.
      * 
      * @param category The category
      * @param detailNumber The detail number
      * @param message The message
      * @param cause The cause
      */
-    public FacebookMessagingException(final Category category, final int detailNumber, final String message, final Throwable cause) {
+    public FacebookOXException(final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(FACEBOOK_COMPONENT, category, detailNumber, message, cause);
     }
 
     /**
-     * Initializes a new {@link FacebookMessagingException}.
+     * Initializes a new {@link FacebookOXException}.
      * 
      * @param message The message
      * @param cause The cause
      */
-    public FacebookMessagingException(final ErrorMessage message, final Throwable cause) {
+    public FacebookOXException(final ErrorMessage message, final Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Initializes a new {@link FacebookMessagingException}.
+     * Initializes a new {@link FacebookOXException}.
      * 
      * @param message The message
      * @param cause The cause
      * @param messageArguments The message arguments
      */
-    public FacebookMessagingException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
+    public FacebookOXException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
         super(message, cause);
         setMessageArgs(messageArguments);
     }

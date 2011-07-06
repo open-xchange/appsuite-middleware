@@ -67,12 +67,12 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingPart;
@@ -117,7 +117,7 @@ public class MimeMessagingPart implements MessagingPart {
         public InputStream getInputStream() throws IOException {
             try {
                 return binaryContent.getData();
-            } catch (final MessagingException e) {
+            } catch (final OXException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof IOException) {
                     throw (IOException) cause;
@@ -154,9 +154,9 @@ public class MimeMessagingPart implements MessagingPart {
          * 
          * @param header The header to convert to a {@link MessagingHeader} instance
          * @param collection The collection to add to
-         * @throws MessagingException If adding header fails
+         * @throws OXException If adding header fails
          */
-        void handleHeader(Header header, Collection<MessagingHeader> collection) throws MessagingException;
+        void handleHeader(Header header, Collection<MessagingHeader> collection) throws OXException;
     } // End of HeaderHandler interface
 
     /**
@@ -171,14 +171,14 @@ public class MimeMessagingPart implements MessagingPart {
             this.name = name;
         }
 
-        public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+        public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws OXException {
             try {
                 collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-            } catch (final MessagingException e) {
+            } catch (final OXException e) {
                 /*
                  * Could not be parsed to a RFC822 address
                  */
-                if (MessagingExceptionCodes.ADDRESS_ERROR.getDetailNumber() != e.getDetailNumber()) {
+                if (!MessagingExceptionCodes.ADDRESS_ERROR.equals(e)) {
                     throw e;
                 }
             }
@@ -197,7 +197,7 @@ public class MimeMessagingPart implements MessagingPart {
 
         m.put(HeaderName.valueOf(MimeContentDisposition.getContentDispositionName()), new HeaderHandler() {
 
-            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeContentDisposition(header.getValue()));
             }
         });
@@ -206,7 +206,7 @@ public class MimeMessagingPart implements MessagingPart {
 
             private final String name = MessagingHeader.KnownHeader.DATE.toString();
 
-            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws OXException {
                 collection.add(new MimeDateMessagingHeader(name, header.getValue()));
             }
         });
@@ -299,7 +299,7 @@ public class MimeMessagingPart implements MessagingPart {
         size = -1L;
     }
 
-    public MessagingContent getContent() throws MessagingException {
+    public MessagingContent getContent() throws OXException {
         MessagingContent tmp = cachedContent;
         if (null == tmp) {
             // No need for synchronization
@@ -309,7 +309,7 @@ public class MimeMessagingPart implements MessagingPart {
             ContentType contentType = null;
             try {
                 contentType = getContentType();
-            } catch (final MessagingException e) {
+            } catch (final OXException e) {
                 if (DEBUG) {
                     LOG.debug("Content-Type header could not be requested.", e);
                 }
@@ -372,7 +372,7 @@ public class MimeMessagingPart implements MessagingPart {
         }
     }
 
-    public ContentType getContentType() throws MessagingException {
+    public ContentType getContentType() throws OXException {
         if (!b_cachedContentType) {
             ContentType tmp = cachedContentType;
             if (null == tmp) {
@@ -394,7 +394,7 @@ public class MimeMessagingPart implements MessagingPart {
         return cachedContentType;
     }
 
-    public String getDisposition() throws MessagingException {
+    public String getDisposition() throws OXException {
         try {
             return part.getDisposition();
         } catch (final javax.mail.MessagingException e) {
@@ -402,7 +402,7 @@ public class MimeMessagingPart implements MessagingPart {
         }
     }
 
-    public String getFileName() throws MessagingException {
+    public String getFileName() throws OXException {
         try {
             return part.getFileName();
         } catch (final javax.mail.MessagingException e) {
@@ -410,20 +410,20 @@ public class MimeMessagingPart implements MessagingPart {
         }
     }
 
-    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+    public MessagingHeader getFirstHeader(final String name) throws OXException {
         final Collection<MessagingHeader> collection = getHeader(name);
         return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
     }
 
-    public Collection<MessagingHeader> getHeader(final String name) throws MessagingException {
+    public Collection<MessagingHeader> getHeader(final String name) throws OXException {
         try {
             return getHeaders().get(name);
-        } catch (final MessagingException e) {
+        } catch (final OXException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
 
-    public Map<String, Collection<MessagingHeader>> getHeaders() throws MessagingException {
+    public Map<String, Collection<MessagingHeader>> getHeaders() throws OXException {
         Map<String, Collection<MessagingHeader>> tmp = headers;
         if (null == tmp) {
             // No synchronization
@@ -480,7 +480,7 @@ public class MimeMessagingPart implements MessagingPart {
         this.sectionId = sectionId;
     }
 
-    public long getSize() throws MessagingException {
+    public long getSize() throws OXException {
         if (size < 0) {
             /*
              * Determine part's size
@@ -503,7 +503,7 @@ public class MimeMessagingPart implements MessagingPart {
         this.size = size <= 0 ? -1L : size;
     }
 
-    public void writeTo(final OutputStream os) throws IOException, MessagingException {
+    public void writeTo(final OutputStream os) throws IOException, OXException {
         try {
             part.writeTo(os);
         } catch (final javax.mail.MessagingException e) {
@@ -515,9 +515,9 @@ public class MimeMessagingPart implements MessagingPart {
      * Adds given header collection to the existing headers of this messaging part.
      * 
      * @param headers The headers to add
-     * @throws MessagingException If adding headers fails
+     * @throws OXException If adding headers fails
      */
-    public void addAllHeaders(final Map<String, Collection<MessagingHeader>> headers) throws MessagingException {
+    public void addAllHeaders(final Map<String, Collection<MessagingHeader>> headers) throws OXException {
         /*
          * Add headers
          */
@@ -536,9 +536,9 @@ public class MimeMessagingPart implements MessagingPart {
      * 
      * @param headerName The header name
      * @param headerValue The header value
-     * @throws MessagingException If adding header fails
+     * @throws OXException If adding header fails
      */
-    public void addHeader(final String headerName, final String headerValue) throws MessagingException {
+    public void addHeader(final String headerName, final String headerValue) throws OXException {
         try {
             part.addHeader(headerName, headerValue);
             headers = null;
@@ -555,9 +555,9 @@ public class MimeMessagingPart implements MessagingPart {
      * Adds specified header value to the existing values for the associated header name.
      * 
      * @param header The header to add
-     * @throws MessagingException If adding header fails
+     * @throws OXException If adding header fails
      */
-    public void addHeader(final MessagingHeader header) throws MessagingException {
+    public void addHeader(final MessagingHeader header) throws OXException {
         try {
             part.addHeader(header.getName(), header.getValue());
             headers = null;
@@ -574,9 +574,9 @@ public class MimeMessagingPart implements MessagingPart {
      * Remove all headers associated with specified name.
      * 
      * @param headerName The header name
-     * @throws MessagingException If header removal fails
+     * @throws OXException If header removal fails
      */
-    public void removeHeader(final String headerName) throws MessagingException {
+    public void removeHeader(final String headerName) throws OXException {
         try {
             part.removeHeader(headerName);
             headers = null;
@@ -593,9 +593,9 @@ public class MimeMessagingPart implements MessagingPart {
      * Sets the given multipart as this part's content.
      * 
      * @param mp The multipart
-     * @throws MessagingException If multipart cannot be set as content
+     * @throws OXException If multipart cannot be set as content
      */
-    public void setContent(final MimeMultipartContent mp) throws MessagingException {
+    public void setContent(final MimeMultipartContent mp) throws OXException {
         try {
             part.setContent(mp.mimeMultipart);
             part.setHeader(H_CONTENT_TYPE.toString(), mp.mimeMultipart.getContentType());
@@ -615,9 +615,9 @@ public class MimeMessagingPart implements MessagingPart {
      * 
      * @param content The content
      * @param type The content type
-     * @throws MessagingException If content cannot be applied
+     * @throws OXException If content cannot be applied
      */
-    public void setContent(final MessagingContent content, final String type) throws MessagingException {
+    public void setContent(final MessagingContent content, final String type) throws OXException {
         try {
             if (content instanceof MimeMessagingMessage) {
                 part.setContent(((MimeMessagingMessage) content).mimeMessage, type);
@@ -655,9 +655,9 @@ public class MimeMessagingPart implements MessagingPart {
      * Set the disposition of this part.
      * 
      * @param disposition The disposition to set
-     * @throws MessagingException If setting disposition fails
+     * @throws OXException If setting disposition fails
      */
-    public void setDisposition(final String disposition) throws MessagingException {
+    public void setDisposition(final String disposition) throws OXException {
         try {
             part.setDisposition(disposition);
             headers = null;
@@ -672,9 +672,9 @@ public class MimeMessagingPart implements MessagingPart {
      * Sets this part's file name.
      * 
      * @param filename The file name
-     * @throws MessagingException If setting file name fails
+     * @throws OXException If setting file name fails
      */
-    public void setFileName(final String filename) throws MessagingException {
+    public void setFileName(final String filename) throws OXException {
         try {
             part.setFileName(filename);
             headers = null;
@@ -689,9 +689,9 @@ public class MimeMessagingPart implements MessagingPart {
      * Sets given header collection to this messaging part.
      * 
      * @param headers The headers to set
-     * @throws MessagingException If setting headers fails
+     * @throws OXException If setting headers fails
      */
-    public void setAllHeaders(final Map<String, Collection<MessagingHeader>> headers) throws MessagingException {
+    public void setAllHeaders(final Map<String, Collection<MessagingHeader>> headers) throws OXException {
         /*
          * Drop all existing headers
          */
@@ -722,9 +722,9 @@ public class MimeMessagingPart implements MessagingPart {
      * 
      * @param headerName The header name
      * @param headerValue The header value
-     * @throws MessagingException If setting header fails
+     * @throws OXException If setting header fails
      */
-    public void setHeader(final String headerName, final String headerValue) throws MessagingException {
+    public void setHeader(final String headerName, final String headerValue) throws OXException {
         try {
             part.setHeader(headerName, headerValue);
             headers = null;
@@ -741,9 +741,9 @@ public class MimeMessagingPart implements MessagingPart {
      * Set the value for this header name. Replaces all existing header values associated with header name.
      * 
      * @param header The header to set
-     * @throws MessagingException If setting header fails
+     * @throws OXException If setting header fails
      */
-    public void setHeader(final MessagingHeader header) throws MessagingException {
+    public void setHeader(final MessagingHeader header) throws OXException {
         try {
             part.setHeader(header.getName(), header.getValue());
             headers = null;
@@ -767,10 +767,10 @@ public class MimeMessagingPart implements MessagingPart {
      * If the charset is already known, use the <code>setText</code> method that takes the charset parameter.
      * 
      * @param text The text content to set
-     * @throws MessagingException If text cannot be applied
+     * @throws OXException If text cannot be applied
      * @see #setText(String text, String charset)
      */
-    public void setText(final String text) throws MessagingException {
+    public void setText(final String text) throws OXException {
         setText(text, null);
     }
 
@@ -780,9 +780,9 @@ public class MimeMessagingPart implements MessagingPart {
      * 
      * @param text The text content to set
      * @param charset The charset to use for the text
-     * @throws MessagingException If text cannot be applied
+     * @throws OXException If text cannot be applied
      */
-    public void setText(final String text, final String charset) throws MessagingException {
+    public void setText(final String text, final String charset) throws OXException {
         setText(text, charset, "plain");
     }
 
@@ -794,9 +794,9 @@ public class MimeMessagingPart implements MessagingPart {
      * @param text The text content to set
      * @param charset The charset to use for the text
      * @param subtype The MIME subtype to use (e.g., "html")
-     * @throws MessagingException If text cannot be applied
+     * @throws OXException If text cannot be applied
      */
-    public void setText(final String text, final String charset, final String subtype) throws MessagingException {
+    public void setText(final String text, final String charset, final String subtype) throws OXException {
         try {
             part.setText(text, charset, subtype);
             headers = null;

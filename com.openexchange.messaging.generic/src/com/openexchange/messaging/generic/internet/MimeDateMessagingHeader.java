@@ -52,8 +52,8 @@ package com.openexchange.messaging.generic.internet;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import com.openexchange.messaging.DateMessagingHeader;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.DateMessagingHeader;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.generic.Utility;
 
@@ -93,9 +93,9 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
      * @param name The name
      * @param formattedDate The formatted date as per RFC822 pattern
      *            (&quot;EEE,&nbsp;d&nbsp;MMM&nbsp;yyyy&nbsp;HH:mm:ss&nbsp;'XXXXX'&nbsp;(z)&quot;)
-     * @throws MessagingException If parsing specified formatted date fails
+     * @throws OXException If parsing specified formatted date fails
      */
-    public MimeDateMessagingHeader(final String name, final String formattedDate) throws MessagingException {
+    public MimeDateMessagingHeader(final String name, final String formattedDate) throws OXException {
         super();
         this.name = name;
         value = formattedDate;

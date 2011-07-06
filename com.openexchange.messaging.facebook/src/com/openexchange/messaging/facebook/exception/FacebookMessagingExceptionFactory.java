@@ -51,16 +51,16 @@ package com.openexchange.messaging.facebook.exception;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
+import com.openexchange.messaging.facebook.FacebookOXException;
 
 /**
- * {@link FacebookMessagingExceptionFactory} - Factory for creating {@link FacebookMessagingException}.
+ * {@link FacebookMessagingExceptionFactory} - Factory for creating {@link FacebookOXException}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class FacebookMessagingExceptionFactory extends Exceptions<FacebookMessagingException> {
+public final class FacebookMessagingExceptionFactory extends Exceptions<FacebookOXException> {
 
     private static final FacebookMessagingExceptionFactory SINGLETON = new FacebookMessagingExceptionFactory();
 
@@ -82,8 +82,8 @@ public final class FacebookMessagingExceptionFactory extends Exceptions<Facebook
      * {@inheritDoc}
      */
     @Override
-    protected FacebookMessagingException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
-        return new FacebookMessagingException(message, cause, args);
+    protected FacebookOXException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        return new FacebookOXException(message, cause, args);
     }
 
     /**

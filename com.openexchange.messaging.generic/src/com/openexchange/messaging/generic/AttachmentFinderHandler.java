@@ -78,28 +78,28 @@ public final class AttachmentFinderHandler implements MessageHandler {
         this.sequenceId = sequenceId;
     }
 
-    public boolean handleColorLabel(final int colorLabel) throws MessagingException {
+    public boolean handleColorLabel(final int colorLabel) throws OXException {
         return true;
     }
 
-    public boolean handleHeaders(final Map<String, Collection<MessagingHeader>> headers) throws MessagingException {
+    public boolean handleHeaders(final Map<String, Collection<MessagingHeader>> headers) throws OXException {
         return true;
     }
 
-    public void handleMessageEnd(final MessagingMessage message) throws MessagingException {
+    public void handleMessageEnd(final MessagingMessage message) throws OXException {
         // Nothing to do
     }
 
-    public boolean handleMultipart(final MultipartContent multipart) throws MessagingException {
+    public boolean handleMultipart(final MultipartContent multipart) throws OXException {
         return true;
     }
 
-    public boolean handleNestedMessage(final MessagingMessage message) throws MessagingException {
+    public boolean handleNestedMessage(final MessagingMessage message) throws OXException {
         new MessageParser().parseMessage(message, this);
         return (null == messagingPart);
     }
 
-    public boolean handlePart(final MessagingPart part, final boolean isInline) throws MessagingException {
+    public boolean handlePart(final MessagingPart part, final boolean isInline) throws OXException {
         if (sequenceId.equals(part.getSectionId())) {
             messagingPart = part;
             return false;
@@ -107,15 +107,15 @@ public final class AttachmentFinderHandler implements MessageHandler {
         return true;
     }
 
-    public boolean handleReceivedDate(final long receivedDate) throws MessagingException {
+    public boolean handleReceivedDate(final long receivedDate) throws OXException {
         return true;
     }
 
-    public boolean handleSystemFlags(final int flags) throws MessagingException {
+    public boolean handleSystemFlags(final int flags) throws OXException {
         return true;
     }
 
-    public boolean handleUserFlags(final Collection<String> userFlags) throws MessagingException {
+    public boolean handleUserFlags(final Collection<String> userFlags) throws OXException {
         return true;
     }
 

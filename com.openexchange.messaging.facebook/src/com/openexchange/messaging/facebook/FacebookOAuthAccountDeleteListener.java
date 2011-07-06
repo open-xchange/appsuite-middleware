@@ -58,8 +58,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 

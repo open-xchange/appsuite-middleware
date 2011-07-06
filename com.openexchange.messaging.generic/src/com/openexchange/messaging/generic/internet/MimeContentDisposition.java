@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentDisposition;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.generic.internal.ParameterizedHeader;
 
 /**
@@ -92,18 +91,18 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      * Initializes a new {@link MimeContentDisposition}
      * 
      * @param contentDisp The content disposition
-     * @throws MessagingException If content disposition cannot be parsed
+     * @throws OXException If content disposition cannot be parsed
      */
-    public MimeContentDisposition(final String contentDisp) throws MessagingException {
+    public MimeContentDisposition(final String contentDisp) throws OXException {
         super(toContentDisposition(contentDisp));
         cdo = (com.openexchange.mail.mime.ContentDisposition) delegate;
     }
 
-    private static com.openexchange.mail.mime.ContentDisposition toContentDisposition(final String contentDisposition) throws MessagingException {
+    private static com.openexchange.mail.mime.ContentDisposition toContentDisposition(final String contentDisposition) throws OXException {
         try {
             return new com.openexchange.mail.mime.ContentDisposition(contentDisposition);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         }
     }
 
@@ -203,11 +202,11 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     /**
      * Sets Content-Disposition
      */
-    public void setContentDisposition(final String contentDisp) throws MessagingException {
+    public void setContentDisposition(final String contentDisp) throws OXException {
         try {
             cdo.setContentDisposition(contentDisp);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         }
     }
 

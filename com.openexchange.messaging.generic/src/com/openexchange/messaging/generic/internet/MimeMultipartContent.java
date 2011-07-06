@@ -52,8 +52,8 @@ package com.openexchange.messaging.generic.internet;
 import javax.mail.BodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
-import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MultipartContent;
 
@@ -120,7 +120,7 @@ public class MimeMultipartContent implements MultipartContent {
         this.mimeMultipart = mimeMultipart;
     }
 
-    public MessagingBodyPart get(final int index) throws MessagingException {
+    public MessagingBodyPart get(final int index) throws OXException {
         try {
             final MimeMessagingBodyPart bodyPart = new MimeMessagingBodyPart((MimePart) mimeMultipart.getBodyPart(index), this);
             bodyPart.setSectionId(sectionId == null ? Integer.toString(index + 1) : new StringBuilder(8).append(sectionId).append('.').append(
@@ -131,7 +131,7 @@ public class MimeMultipartContent implements MultipartContent {
         }
     }
 
-    public int getCount() throws MessagingException {
+    public int getCount() throws OXException {
         try {
             return mimeMultipart.getCount();
         } catch (final javax.mail.MessagingException e) {
@@ -143,9 +143,9 @@ public class MimeMultipartContent implements MultipartContent {
      * Adds a part to the multipart. The part is appended to the list of existing parts.
      * 
      * @param part The part to be appended
-     * @throws MessagingException If part cannot be appended
+     * @throws OXException If part cannot be appended
      */
-    public void addBodyPart(final MimeMessagingBodyPart part) throws MessagingException {
+    public void addBodyPart(final MimeMessagingBodyPart part) throws OXException {
         try {
             mimeMultipart.addBodyPart((BodyPart) part.part);
             part.setParent(this);
@@ -160,9 +160,9 @@ public class MimeMultipartContent implements MultipartContent {
      * 
      * @param part The part to be inserted
      * @param index The index where to insert the part
-     * @exception MessagingException If part cannot be inserted
+     * @exception OXException If part cannot be inserted
      */
-    public void addBodyPart(final MimeMessagingBodyPart part, final int index) throws MessagingException {
+    public void addBodyPart(final MimeMessagingBodyPart part, final int index) throws OXException {
         try {
             mimeMultipart.addBodyPart((BodyPart) part.part, index);
             part.setParent(this);
@@ -176,9 +176,9 @@ public class MimeMultipartContent implements MultipartContent {
      * 
      * @param part The part to remove
      * @return <code>true</code> if part removed, <code>false</code> otherwise
-     * @exception MessagingException If removing part fails
+     * @exception OXException If removing part fails
      */
-    public boolean removeBodyPart(final MimeMessagingBodyPart part) throws MessagingException {
+    public boolean removeBodyPart(final MimeMessagingBodyPart part) throws OXException {
         try {
             return mimeMultipart.removeBodyPart((BodyPart) part.part);
         } catch (final javax.mail.MessagingException e) {
@@ -190,9 +190,9 @@ public class MimeMultipartContent implements MultipartContent {
      * Remove the part at specified location (starting from 0). Shifts all the parts after the removed part down one.
      * 
      * @param index Index of the part to remove
-     * @exception MessagingException If removing part fails
+     * @exception OXException If removing part fails
      */
-    public void removeBodyPart(final int index) throws MessagingException {
+    public void removeBodyPart(final int index) throws OXException {
         try {
             mimeMultipart.removeBodyPart(index);
         } catch (final javax.mail.MessagingException e) {

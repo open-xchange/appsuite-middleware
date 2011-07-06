@@ -54,7 +54,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionFactory;
 
 /**
- * {@link FacebookMessagingExceptionCodes} - Enumeration of all {@link FacebookMessagingException}s.
+ * {@link FacebookMessagingExceptionCodes} - Enumeration of all {@link FacebookOXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -168,7 +168,7 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
      * @param messageArgs The message arguments
      * @return A new twitter exception
      */
-    public FacebookMessagingException create(final Object... messageArgs) {
+    public FacebookOXException create(final Object... messageArgs) {
         return FacebookMessagingExceptionFactory.getInstance().create(this, messageArgs);
     }
 
@@ -179,7 +179,7 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
      * @param messageArgs The message arguments
      * @return A new twitter exception
      */
-    public FacebookMessagingException create(final Throwable cause, final Object... messageArgs) {
+    public FacebookOXException create(final Throwable cause, final Object... messageArgs) {
         return FacebookMessagingExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
 }

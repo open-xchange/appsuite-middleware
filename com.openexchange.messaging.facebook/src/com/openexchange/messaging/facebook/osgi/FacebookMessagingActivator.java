@@ -66,9 +66,9 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
-import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingService;
 import com.openexchange.messaging.facebook.FacebookOAuthAccountDeleteListener;
+import com.openexchange.messaging.facebook.FacebookOXException;
 import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionFactory;
 import com.openexchange.messaging.facebook.session.FacebookEventHandler;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
@@ -162,7 +162,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
             componentRegistration =
                 new ComponentRegistration(
                     context,
-                    FacebookMessagingException.FACEBOOK_COMPONENT,
+                    FacebookOXException.FACEBOOK_COMPONENT,
                     "com.openexchange.messaging.facebook",
                     FacebookMessagingExceptionFactory.getInstance());
 

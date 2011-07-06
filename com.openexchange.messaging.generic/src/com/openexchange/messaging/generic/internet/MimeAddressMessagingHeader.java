@@ -55,9 +55,9 @@ import java.util.Collection;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.messaging.MessagingAddressHeader;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 
 /**
@@ -74,9 +74,9 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
      * @param name The header name
      * @param addressList The comma-separated sequence of addresses
      * @return The parsed address headers
-     * @throws MessagingException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static Collection<MimeAddressMessagingHeader> parseRFC822(final String name, final String addressList) throws MessagingException {
+    public static Collection<MimeAddressMessagingHeader> parseRFC822(final String name, final String addressList) throws OXException {
         try {
             final InternetAddress[] internetAddresses = QuotedInternetAddress.parse(addressList);
             final List<MimeAddressMessagingHeader> retval = new ArrayList<MimeAddressMessagingHeader>(internetAddresses.length);
@@ -97,9 +97,9 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
      * @param name The header name
      * @param address The address in RFC822 format
      * @return A new {@link MimeAddressMessagingHeader} interpreted in RFC822 format
-     * @throws MessagingException If specified address cannot be parsed
+     * @throws OXException If specified address cannot be parsed
      */
-    public static MimeAddressMessagingHeader valueOfRFC822(final String name, final String address) throws MessagingException {
+    public static MimeAddressMessagingHeader valueOfRFC822(final String name, final String address) throws OXException {
         try {
             return new MimeAddressMessagingHeader(name, new QuotedInternetAddress(address));
         } catch (final AddressException e) {
@@ -189,7 +189,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         return internetAddress.getAddress();
     }
 
-    public void setAddress(final String address) throws MessagingException {
+    public void setAddress(final String address) throws OXException {
         if (null == address) {
             final IllegalArgumentException e = new IllegalArgumentException("Address is null.");
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

@@ -61,8 +61,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
+import com.openexchange.messaging.facebook.FacebookOXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -116,9 +116,9 @@ public final class FacebookDOMParser {
      * 
      * @param xmlReponse The XML-formatted FQL query response
      * @return The parsed list of elements
-     * @throws FacebookMessagingException If parsing fails
+     * @throws FacebookOXException If parsing fails
      */
-    public static List<Element> parseXMLResponse(final String xmlReponse) throws FacebookMessagingException {
+    public static List<Element> parseXMLResponse(final String xmlReponse) throws FacebookOXException {
         try {
             /*
              * Parse to DOM document

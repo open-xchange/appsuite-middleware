@@ -73,45 +73,45 @@ public interface MessageHandler {
      * 
      * @param headers The message headers
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
-     * @throws MessagingException If handling headers fails
+     * @throws OXException If handling headers fails
      */
-    boolean handleHeaders(Map<String, Collection<MessagingHeader>> headers) throws MessagingException;
+    boolean handleHeaders(Map<String, Collection<MessagingHeader>> headers) throws OXException;
 
     /**
      * Handles specified color label.
      * 
      * @param colorLabel The message's color label
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
-     * @throws MessagingException If handling color label fails
+     * @throws OXException If handling color label fails
      */
-    boolean handleColorLabel(int colorLabel) throws MessagingException;
+    boolean handleColorLabel(int colorLabel) throws OXException;
 
     /**
      * Handles message's system flags (//SEEN, //ANSWERED, ...).
      * 
      * @param flags The message's system flags
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
-     * @throws MessagingException If handling system flags fails
+     * @throws OXException If handling system flags fails
      */
-    boolean handleSystemFlags(int flags) throws MessagingException;
+    boolean handleSystemFlags(int flags) throws OXException;
 
     /**
      * Handle message's user flags.
      * 
      * @param userFlags The message's user flags
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
-     * @throws MessagingException If handling user flags fails
+     * @throws OXException If handling user flags fails
      */
-    boolean handleUserFlags(Collection<String> userFlags) throws MessagingException;
+    boolean handleUserFlags(Collection<String> userFlags) throws OXException;
 
     /**
      * Handle message's received date.
      * 
      * @param receivedDate The received date's number of milliseconds since January 1, 1970, 00:00:00 GMT
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
-     * @throws MessagingException If handling received date fails
+     * @throws OXException If handling received date fails
      */
-    boolean handleReceivedDate(long receivedDate) throws MessagingException;
+    boolean handleReceivedDate(long receivedDate) throws OXException;
 
     /**
      * Handles specified messaging part.
@@ -119,34 +119,34 @@ public interface MessageHandler {
      * @param part The messaging part
      * @param isInline <code>true</code> if part is considered to be inline; otherwise <code>false</code>
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
-     * @throws MessagingException If handling part fails
+     * @throws OXException If handling part fails
      */
-    boolean handlePart(MessagingPart part, boolean isInline) throws MessagingException;
+    boolean handlePart(MessagingPart part, boolean isInline) throws OXException;
 
     /**
      * Handles specified multipart content.
      * 
      * @param multipart The multipart content
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
-     * @throws MessagingException If handling multipart fails
+     * @throws OXException If handling multipart fails
      */
-    boolean handleMultipart(MultipartContent multipart) throws MessagingException;
+    boolean handleMultipart(MultipartContent multipart) throws OXException;
 
     /**
      * Handles a nested message (<code>message/rfc822</code>)
      * 
      * @param message The nested message
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
-     * @throws MessagingException If handling nested message fails
+     * @throws OXException If handling nested message fails
      */
-    boolean handleNestedMessage(MessagingMessage message) throws MessagingException;
+    boolean handleNestedMessage(MessagingMessage message) throws OXException;
 
     /**
      * Performs some optional finishing operations
      * 
      * @param message The message whose end has been reached
-     * @throws MessagingException If handling message end fails
+     * @throws OXException If handling message end fails
      */
-    void handleMessageEnd(MessagingMessage message) throws MessagingException;
+    void handleMessageEnd(MessagingMessage message) throws OXException;
 
 }

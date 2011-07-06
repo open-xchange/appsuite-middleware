@@ -50,8 +50,8 @@
 package com.openexchange.messaging.generic.internet;
 
 import javax.mail.internet.MimePart;
-import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MultipartContent;
 
 /**
@@ -104,7 +104,7 @@ public class MimeMessagingBodyPart extends MimeMessagingPart implements Messagin
         this.parent = parent;
     }
 
-    public MultipartContent getParent() throws MessagingException {
+    public MultipartContent getParent() throws OXException {
         return parent;
     }
 

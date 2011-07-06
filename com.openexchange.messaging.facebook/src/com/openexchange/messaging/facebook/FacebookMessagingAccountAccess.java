@@ -49,9 +49,9 @@
 
 package com.openexchange.messaging.facebook;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingMessageAccess;
@@ -80,9 +80,9 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
      * 
      * @param messagingAccount The facebook account
      * @param session The session
-     * @throws FacebookMessagingException If initialization fails
+     * @throws FacebookOXException If initialization fails
      */
-    public FacebookMessagingAccountAccess(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
+    public FacebookMessagingAccountAccess(final MessagingAccount messagingAccount, final Session session) throws FacebookOXException {
         super(messagingAccount, session);
     }
 
@@ -90,7 +90,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
         return messagingAccount.getId();
     }
 
-    public MessagingFolderAccess getFolderAccess() throws MessagingException {
+    public MessagingFolderAccess getFolderAccess() throws OXException {
         FacebookMessagingFolderAccess tmp = folderAccess;
         if (null == tmp) {
             folderAccess = tmp = new FacebookMessagingFolderAccess(facebookOAuthInfo, messagingAccount, session);
@@ -98,7 +98,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
         return tmp;
     }
 
-    public MessagingMessageAccess getMessageAccess() throws MessagingException {
+    public MessagingMessageAccess getMessageAccess() throws OXException {
         FacebookMessagingMessageAccess tmp = messageAccess;
         if (null == tmp) {
             messageAccess = tmp = new FacebookMessagingMessageAccess(facebookOAuthInfo, messagingAccount, session);
@@ -106,7 +106,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
         return tmp;
     }
 
-    public MessagingFolder getRootFolder() throws MessagingException {
+    public MessagingFolder getRootFolder() throws OXException {
         connect();
         return getFolderAccess().getRootFolder();
     }

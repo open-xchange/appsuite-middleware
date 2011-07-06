@@ -55,8 +55,8 @@ import java.io.InputStream;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.messaging.BinaryContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -83,9 +83,9 @@ public class MimeBinaryContent implements BinaryContent {
      * Initializes a new {@link MimeBinaryContent}.
      * 
      * @param inputStream The binary content as an input stream; gets closed
-     * @throws MessagingException If an I/O error occurs
+     * @throws OXException If an I/O error occurs
      */
-    public MimeBinaryContent(final InputStream inputStream) throws MessagingException {
+    public MimeBinaryContent(final InputStream inputStream) throws OXException {
         super();
         part = null;
         try {
@@ -131,7 +131,7 @@ public class MimeBinaryContent implements BinaryContent {
         cachedContent = null;
     }
 
-    public InputStream getData() throws MessagingException {
+    public InputStream getData() throws OXException {
         return getBodyPartInputStream();
     }
 
@@ -140,9 +140,9 @@ public class MimeBinaryContent implements BinaryContent {
      * is invoked.
      * 
      * @return The either decoded or raw input stream
-     * @throws MessagingException If neither input stream nor raw input stream can be returned
+     * @throws OXException If neither input stream nor raw input stream can be returned
      */
-    private InputStream getBodyPartInputStream() throws MessagingException {
+    private InputStream getBodyPartInputStream() throws OXException {
         if (cachedContent != null) {
             return new UnsynchronizedByteArrayInputStream(cachedContent);
         }

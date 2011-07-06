@@ -75,7 +75,7 @@ public final class FacebookFQLPageParser {
 
     private interface ItemHandler {
 
-        void handleItem(Node item, FacebookPage page) throws MessagingException;
+        void handleItem(Node item, FacebookPage page) throws OXException;
     }
 
     private static final Map<String, ItemHandler> ITEM_HANDLERS;
@@ -86,21 +86,21 @@ public final class FacebookFQLPageParser {
 
             m.put("page_id", new ItemHandler() {
 
-                public void handleItem(final Node item, final FacebookPage page) throws MessagingException {
+                public void handleItem(final Node item, final FacebookPage page) throws OXException {
                     page.setPageId(FacebookMessagingUtility.parseUnsignedLong(item.getTextContent()));
                 }
             });
 
             m.put("name", new ItemHandler() {
 
-                public void handleItem(final Node item, final FacebookPage page) throws MessagingException {
+                public void handleItem(final Node item, final FacebookPage page) throws OXException {
                     page.setName(item.getTextContent());
                 }
             });
 
             m.put("pic_small", new ItemHandler() {
 
-                public void handleItem(final Node item, final FacebookPage page) throws MessagingException {
+                public void handleItem(final Node item, final FacebookPage page) throws OXException {
                     page.setPicSmall(item.getTextContent());
                 }
             });
@@ -125,9 +125,9 @@ public final class FacebookFQLPageParser {
      * 
      * @param pageElement The facebook page element
      * @return The resulting page
-     * @throws MessagingException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static FacebookPage parsePageDOMElement(final Element pageElement) throws MessagingException {
+    public static FacebookPage parsePageDOMElement(final Element pageElement) throws OXException {
         if (!pageElement.hasChildNodes()) {
             return null;
         }
@@ -215,7 +215,7 @@ public final class FacebookFQLPageParser {
 
     private static final String UTF_8 = "UTF-8";
 
-    private static MimeMultipartContent createAlternative(final String messageText) throws MessagingException {
+    private static MimeMultipartContent createAlternative(final String messageText) throws OXException {
         final MimeMultipartContent alt = new MimeMultipartContent("alternative");
         {
             final MimeMessagingBodyPart text = new MimeMessagingBodyPart();

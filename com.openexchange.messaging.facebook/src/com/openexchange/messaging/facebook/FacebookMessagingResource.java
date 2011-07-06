@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.facebook;
 
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingResource;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.session.Session;
@@ -87,9 +87,9 @@ public class FacebookMessagingResource implements MessagingResource {
      * Initializes a new {@link FacebookMessagingResource}.
      * 
      * @param messagingAccount The facebook account
-     * @throws FacebookMessagingException If initialization fails
+     * @throws FacebookOXException If initialization fails
      */
-    public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
+    public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) throws FacebookOXException {
         super();
         this.messagingAccount = messagingAccount;
         this.session = session;
@@ -102,7 +102,7 @@ public class FacebookMessagingResource implements MessagingResource {
          */
     }
 
-    public void connect() throws MessagingException {
+    public void connect() throws OXException {
         // no-op
     }
 
@@ -110,7 +110,7 @@ public class FacebookMessagingResource implements MessagingResource {
         return true;
     }
 
-    public boolean ping() throws MessagingException {
+    public boolean ping() throws OXException {
         return true;
     }
 

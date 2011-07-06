@@ -60,9 +60,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.session.Session;
@@ -106,14 +105,14 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         return cacheService.newCacheKey(cid, serviceId, Integer.valueOf(id), Integer.valueOf(user));
     }
 
-    private static void invalidateMessagingAccount(final String serviceId, final int id, final int user, final int cid) throws MessagingException {
+    private static void invalidateMessagingAccount(final String serviceId, final int id, final int user, final int cid) throws OXException {
         final CacheService cacheService = MessagingGenericServiceRegistry.getServiceRegistry().getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
                 cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
-            } catch (final CacheException e) {
-                throw new MessagingException(e);
+            } catch (final OXException e) {
+                throw new OXException(e);
             }
         }
     }
@@ -141,16 +140,16 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         cacheLock = new ReentrantLock(true);
     }
 
-    public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+    public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         return delegatee.addAccount(serviceId, account, session, modifier);
     }
 
-    public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+    public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         delegatee.deleteAccount(serviceId, account, session, modifier);
         invalidateMessagingAccount(serviceId, account.getId(), session.getUserId(), session.getContextId());
     }
 
-    public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws MessagingException {
+    public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws OXException {
         final CacheService cacheService = MessagingGenericServiceRegistry.getServiceRegistry().getService(CacheService.class);
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session, modifier);
@@ -165,7 +164,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
                 return newCacheKey(cacheService, serviceId, id, user, cid);
             }
 
-            public MessagingAccount load() throws MessagingException {
+            public MessagingAccount load() throws OXException {
                 return d.getAccount(serviceId, id, session, modifier);
             }
 
@@ -175,15 +174,12 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         };
         try {
             return new MessagingAccountReloader(factory, REGION_NAME);
-        } catch (final AbstractOXException e) {
-            if (e instanceof MessagingException) {
-                throw (MessagingException) e;
-            }
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
-    public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws MessagingException {
+    public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws OXException {
         final TIntArrayList ids = delegatee.getAccountIDs(serviceId, session);
         if (ids.isEmpty()) {
             return Collections.emptyList();
@@ -191,13 +187,13 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         final List<MessagingAccount> accounts = new ArrayList<MessagingAccount>(ids.size());
         class AdderProcedure implements TIntProcedure {
 
-            MessagingException me;
+            OXException me;
 
             public boolean execute(final int id) {
                 try {
                     accounts.add(getAccount(serviceId, id, session, modifier));
                     return true;
-                } catch (final MessagingException e) {
+                } catch (final OXException e) {
                     me = e;
                     return false;
                 }
@@ -211,16 +207,16 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         return accounts;
     }
 
-    public void updateAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+    public void updateAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         delegatee.updateAccount(serviceId, account, session, modifier);
         invalidateMessagingAccount(serviceId, account.getId(), session.getUserId(), session.getContextId());
     }
 
-    public String checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws MessagingException {
+    public String checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws OXException {
         return delegatee.checkSecretCanDecryptStrings(parentService, session, secret);
     }
 
-    public void migrateToNewSecret(final MessagingService parentService, final String oldSecret, final String newSecret, final Session session) throws MessagingException {
+    public void migrateToNewSecret(final MessagingService parentService, final String oldSecret, final String newSecret, final Session session) throws OXException {
         delegatee.migrateToNewSecret(parentService, oldSecret, newSecret, session);
     }
 

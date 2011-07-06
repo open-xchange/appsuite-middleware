@@ -75,7 +75,7 @@ public final class FacebookFQLGroupParser {
 
     private interface ItemHandler {
 
-        void handleItem(Node item, FacebookGroup group) throws MessagingException;
+        void handleItem(Node item, FacebookGroup group) throws OXException;
     }
 
     private static final Map<String, ItemHandler> ITEM_HANDLERS;
@@ -86,21 +86,21 @@ public final class FacebookFQLGroupParser {
 
             m.put("gid", new ItemHandler() {
 
-                public void handleItem(final Node item, final FacebookGroup group) throws MessagingException {
+                public void handleItem(final Node item, final FacebookGroup group) throws OXException {
                     group.setGid(FacebookMessagingUtility.parseUnsignedLong(item.getTextContent()));
                 }
             });
 
             m.put("name", new ItemHandler() {
 
-                public void handleItem(final Node item, final FacebookGroup group) throws MessagingException {
+                public void handleItem(final Node item, final FacebookGroup group) throws OXException {
                     group.setName(item.getTextContent());
                 }
             });
 
             m.put("pic_small", new ItemHandler() {
 
-                public void handleItem(final Node item, final FacebookGroup group) throws MessagingException {
+                public void handleItem(final Node item, final FacebookGroup group) throws OXException {
                     group.setPicSmall(item.getTextContent());
                 }
             });
@@ -125,9 +125,9 @@ public final class FacebookFQLGroupParser {
      * 
      * @param groupElement The facebook group element
      * @return The resulting group
-     * @throws MessagingException If parsing fails
+     * @throws OXException If parsing fails
      */
-    public static FacebookGroup parseGroupDOMElement(final Element groupElement) throws MessagingException {
+    public static FacebookGroup parseGroupDOMElement(final Element groupElement) throws OXException {
         if (!groupElement.hasChildNodes()) {
             return null;
         }
@@ -215,7 +215,7 @@ public final class FacebookFQLGroupParser {
 
     private static final String UTF_8 = "UTF-8";
 
-    private static MimeMultipartContent createAlternative(final String messageText) throws MessagingException {
+    private static MimeMultipartContent createAlternative(final String messageText) throws OXException {
         final MimeMultipartContent alt = new MimeMultipartContent("alternative");
         {
             final MimeMessagingBodyPart text = new MimeMessagingBodyPart();

@@ -49,22 +49,7 @@
 
 package com.openexchange.messaging.generic;
 
-import static com.openexchange.messaging.MessagingField.BCC;
-import static com.openexchange.messaging.MessagingField.CC;
-import static com.openexchange.messaging.MessagingField.COLOR_LABEL;
-import static com.openexchange.messaging.MessagingField.CONTENT_TYPE;
-import static com.openexchange.messaging.MessagingField.DISPOSITION_NOTIFICATION_TO;
-import static com.openexchange.messaging.MessagingField.FLAGS;
-import static com.openexchange.messaging.MessagingField.FOLDER_ID;
-import static com.openexchange.messaging.MessagingField.FROM;
-import static com.openexchange.messaging.MessagingField.ID;
-import static com.openexchange.messaging.MessagingField.PRIORITY;
-import static com.openexchange.messaging.MessagingField.RECEIVED_DATE;
-import static com.openexchange.messaging.MessagingField.SENT_DATE;
-import static com.openexchange.messaging.MessagingField.SIZE;
-import static com.openexchange.messaging.MessagingField.SUBJECT;
-import static com.openexchange.messaging.MessagingField.THREAD_LEVEL;
-import static com.openexchange.messaging.MessagingField.TO;
+import static com.openexchange.messaging.MessagingField.*;
 import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -124,9 +109,9 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
      * 
      * @param field The field to sort by
      * @param locale The locale to use for sorting
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MessagingComparator(final MessagingField field, final Locale locale) throws MessagingException {
+    public MessagingComparator(final MessagingField field, final Locale locale) throws OXException {
         this(field, false, locale);
     }
 
@@ -136,9 +121,9 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
      * @param field The field to sort by
      * @param descending <code>true</code> to sort in descending order; otherwise <code>false</code> for ascending order
      *  @param locale The locale to use for sorting
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public MessagingComparator(final MessagingField field, final boolean descending, final Locale locale) throws MessagingException {
+    public MessagingComparator(final MessagingField field, final boolean descending, final Locale locale) throws OXException {
         checkField(field);
         this.field = field;
         this.descending = descending;
@@ -148,7 +133,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         get = new MessagingMessageGetSwitch();
     }
 
-    private void checkField(final MessagingField field) throws MessagingException {
+    private void checkField(final MessagingField field) throws OXException {
         if (!WHITELIST.contains(field)) {
             throw MessagingExceptionCodes.INVALID_SORTING_COLUMN.create(field);
         }
@@ -213,7 +198,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             }
 
             throw MessagingExceptionCodes.INVALID_SORTING_COLUMN.create(field);
-        } catch (final MessagingException x) {
+        } catch (final OXException x) {
             throw new RuntimeException(x);
         }
     }

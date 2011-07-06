@@ -50,8 +50,8 @@
 package com.openexchange.messaging.generic.internal;
 
 import java.util.List;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.session.Session;
 
 /**
@@ -69,9 +69,9 @@ public interface MessagingAccountStorage {
      * @param id The account ID
      * @param session The session
      * @return The account
-     * @throws MessagingException If returning account fails
+     * @throws OXException If returning account fails
      */
-    public MessagingAccount getAccount(String serviceId, int id, Session session, Modifier modifier) throws MessagingException;
+    public MessagingAccount getAccount(String serviceId, int id, Session session, Modifier modifier) throws OXException;
 
     /**
      * Gets all accounts associated with specified service and given user.
@@ -79,9 +79,9 @@ public interface MessagingAccountStorage {
      * @param serviceId The service ID
      * @param session The session
      * @return All accounts associated with specified service and given user
-     * @throws MessagingException If accounts cannot be returned
+     * @throws OXException If accounts cannot be returned
      */
-    public List<MessagingAccount> getAccounts(String serviceId, Session session, Modifier modifier) throws MessagingException;
+    public List<MessagingAccount> getAccounts(String serviceId, Session session, Modifier modifier) throws OXException;
 
     /**
      * Adds given account.
@@ -90,9 +90,9 @@ public interface MessagingAccountStorage {
      * @param account The account
      * @param session The session
      * @return The identifier of the newly created account
-     * @throws MessagingException If insertion fails
+     * @throws OXException If insertion fails
      */
-    public int addAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
+    public int addAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws OXException;
 
     /**
      * Deletes denoted account.
@@ -100,9 +100,9 @@ public interface MessagingAccountStorage {
      * @param serviceId The service identifier
      * @param account The account
      * @param session The session
-     * @throws MessagingException If deletion fails
+     * @throws OXException If deletion fails
      */
-    public void deleteAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
+    public void deleteAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws OXException;
 
     /**
      * Updates given account.
@@ -110,8 +110,8 @@ public interface MessagingAccountStorage {
      * @param serviceId The service identifier
      * @param account The account
      * @param session The session
-     * @throws MessagingException If update fails
+     * @throws OXException If update fails
      */
-    public void updateAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws MessagingException;
+    public void updateAccount(String serviceId, MessagingAccount account, Session session, Modifier modifier) throws OXException;
 
 }

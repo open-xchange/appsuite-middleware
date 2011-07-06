@@ -57,16 +57,15 @@ import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
-import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingResource;
+import com.openexchange.messaging.facebook.FacebookOXException;
 import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
@@ -86,9 +85,9 @@ public final class FacebookOAuthAccess {
      * @param messagingAccount The facebook messaging account providing credentials and settings
      * @param session The user session
      * @return The facebook OAuth access; either newly created or fetched from underlying registry
-     * @throws FacebookMessagingException If a Facebook session could not be created
+     * @throws FacebookOXException If a Facebook session could not be created
      */
-    public static FacebookOAuthAccess accessFor(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
+    public static FacebookOAuthAccess accessFor(final MessagingAccount messagingAccount, final Session session) throws FacebookOXException {
         final FacebookOAuthAccessRegistry registry = FacebookOAuthAccessRegistry.getInstance();
         String secret = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SecretService.class).getSecret(session);
         final int accountId = messagingAccount.getId();
@@ -137,9 +136,9 @@ public final class FacebookOAuthAccess {
      * Initializes a new {@link FacebookMessagingResource}.
      * 
      * @param messagingAccount The facebook messaging account providing credentials and settings
-     * @throws MessagingException
+     * @throws OXException
      */
-    private FacebookOAuthAccess(final MessagingAccount messagingAccount, final String password, final int user, final int contextId) throws FacebookMessagingException {
+    private FacebookOAuthAccess(final MessagingAccount messagingAccount, final String password, final int user, final int contextId) throws FacebookOXException {
         super();
         /*
          * Get OAuth account identifier from messaging account's configuration
@@ -168,7 +167,7 @@ public final class FacebookOAuthAccess {
             facebookUserId = object.getString("id");
             facebookUserName = object.getString("name");
         } catch (final OXException e) {
-            throw new FacebookMessagingException(e);
+            throw new FacebookOXException(e);
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
@@ -176,11 +175,11 @@ public final class FacebookOAuthAccess {
         }
     }
 
-    private void checkForErrors(JSONObject object) throws FacebookMessagingException, JSONException{
+    private void checkForErrors(JSONObject object) throws FacebookOXException, JSONException{
         if (object.has("error")) {
             JSONObject error = object.getJSONObject("error");
             if ("OXException".equals(error.opt("type"))) {
-                throw new FacebookMessagingException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
+                throw new FacebookOXException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
             } else {
                 throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
             }
@@ -255,9 +254,9 @@ public final class FacebookOAuthAccess {
      * 
      * @param url The URL
      * @return The response
-     * @throws FacebookMessagingException If request fails
+     * @throws FacebookOXException If request fails
      */
-    public String executeGETRequest(final String url) throws FacebookMessagingException {
+    public String executeGETRequest(final String url) throws FacebookOXException {
         try {
             final OAuthRequest request = new OAuthRequest(Verb.GET, url);
             facebookOAuthService.signRequest(facebookAccessToken, request);

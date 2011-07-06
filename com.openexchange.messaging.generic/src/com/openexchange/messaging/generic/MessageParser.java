@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.generic;
 
-import com.openexchange.messaging.ContentType;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
@@ -134,10 +134,10 @@ public final class MessageParser {
      * 
      * @param message The message to parse
      * @param handler The call-back handler
-     * @throws MessagingException If parsing specified message fails
+     * @throws OXException If parsing specified message fails
      * @throws IllegalArgumentException If either message or handler is <code>null</code>
      */
-    public void parseMessage(final MessagingMessage message, final MessageHandler handler) throws MessagingException {
+    public void parseMessage(final MessagingMessage message, final MessageHandler handler) throws OXException {
         if (null == message) {
             throw new IllegalArgumentException("Message is null.");
         }
@@ -158,7 +158,7 @@ public final class MessageParser {
         handler.handleMessageEnd(message);
     }
 
-    private void parsePart(final MessagingPart part, final MessageHandler handler) throws MessagingException {
+    private void parsePart(final MessagingPart part, final MessageHandler handler) throws OXException {
         if (stop) {
             return;
         }
@@ -226,7 +226,7 @@ public final class MessageParser {
         }
     }
 
-    private void parseEnvelope(final MessagingMessage message, final MessageHandler handler) throws MessagingException {
+    private void parseEnvelope(final MessagingMessage message, final MessageHandler handler) throws OXException {
         /*
          * Headers
          */

@@ -207,9 +207,9 @@ public final class InternalUtility {
      * 
      * @param flags The flags to parse
      * @return The parsed flags
-     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If a messaging error occurs
      */
-    public static ParsedFlags parseFlags(final Flags flags) throws MessagingException {
+    public static ParsedFlags parseFlags(final Flags flags) throws OXException {
         int retval = 0;
         int colorLable = COLOR_LABEL_NONE;
         Collection<String> ufCol = null;
@@ -284,9 +284,9 @@ public final class InternalUtility {
      * 
      * @param cl The color label's string representation
      * @return The color label's <code>int</code> value
-     * @throws MessagingException If coor label cannot be parsed
+     * @throws OXException If coor label cannot be parsed
      */
-    public static int getColorLabelIntValue(final String cl) throws MessagingException {
+    public static int getColorLabelIntValue(final String cl) throws OXException {
         if (!isColorLabel(cl)) {
             throw MessagingExceptionCodes.UNKNOWN_COLOR_LABEL.create(cl);
         }

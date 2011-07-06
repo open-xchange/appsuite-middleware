@@ -50,7 +50,7 @@
 package com.openexchange.messaging.generic.internal;
 
 import java.util.Map;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
 
@@ -72,9 +72,9 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
     /**
      * Initializes a new {@link MessagingAccountReloader}.
      * 
-     * @throws AbstractOXException If initial load of the object fails.
+     * @throws OXException If initial load of the object fails.
      */
-    public MessagingAccountReloader(final OXObjectFactory<MessagingAccount> factory, final String regionName) throws AbstractOXException {
+    public MessagingAccountReloader(final OXObjectFactory<MessagingAccount> factory, final String regionName) throws OXException {
         super(factory, regionName);
         delegate = refresh();
     }
@@ -85,7 +85,7 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
     private void updateDelegate() throws RuntimeException {
         try {
             delegate = refresh();
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }

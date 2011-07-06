@@ -57,8 +57,8 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
-import com.openexchange.messaging.BinaryContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -91,9 +91,9 @@ public final class FacebookURLConnectionContent implements BinaryContent {
      * 
      * @param url The URL
      * @param stream <code>true</code> to stream the URL's data; otherwise <code>false</code> to hold in memory
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public FacebookURLConnectionContent(final String url, final boolean stream) throws MessagingException {
+    public FacebookURLConnectionContent(final String url, final boolean stream) throws OXException {
         this(toURL(url), stream);
     }
 
@@ -102,9 +102,9 @@ public final class FacebookURLConnectionContent implements BinaryContent {
      * 
      * @param url The URL
      * @param stream <code>true</code> to stream the URL's data; otherwise <code>false</code> to hold in memory
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public FacebookURLConnectionContent(final URL url, final boolean stream) throws MessagingException {
+    public FacebookURLConnectionContent(final URL url, final boolean stream) throws OXException {
         super();
         this.url = url;
         if (stream) {
@@ -116,9 +116,9 @@ public final class FacebookURLConnectionContent implements BinaryContent {
      * Gets the MIME type as indicated by opened {@link URLConnection URL connection}.
      * 
      * @return The MIME type
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public String getMimeType() throws MessagingException {
+    public String getMimeType() throws OXException {
         String tmp = mimeType;
         if (null == tmp) {
             synchronized (this) {
@@ -146,9 +146,9 @@ public final class FacebookURLConnectionContent implements BinaryContent {
      * Gets (a copy of) the bytes.
      * 
      * @return The (copied) bytes
-     * @throws MessagingException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public byte[] getBytes() throws MessagingException {
+    public byte[] getBytes() throws OXException {
         byte[] tmp = bytes;
         if (null == tmp) {
             synchronized (this) {
@@ -161,7 +161,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
         return tmp;
     }
 
-    private void init() throws MessagingException {
+    private void init() throws OXException {
         try {
             final URLConnection urlCon = url.openConnection();
             urlCon.setConnectTimeout(2500);
@@ -184,7 +184,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
         }
     }
 
-    public InputStream getData() throws MessagingException {
+    public InputStream getData() throws OXException {
         final byte[] tmp = bytes;
         if (null == tmp) {
             try {
@@ -234,7 +234,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
         }
     }
 
-    private static URL toURL(final String url) throws MessagingException {
+    private static URL toURL(final String url) throws OXException {
         try {
             return new URL(url);
         } catch (final MalformedURLException e) {

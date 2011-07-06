@@ -55,15 +55,14 @@ import java.net.URLEncoder;
 import java.util.Collection;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.exceptions.OAuthException;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingContent;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
@@ -87,13 +86,13 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
      * 
      * @param messagingAccount The facebook account
      * @param session The session
-     * @throws FacebookMessagingException If initialization fails
+     * @throws FacebookOXException If initialization fails
      */
-    public FacebookMessagingAccountTransport(final MessagingAccount messagingAccount, final Session session) throws FacebookMessagingException {
+    public FacebookMessagingAccountTransport(final MessagingAccount messagingAccount, final Session session) throws FacebookOXException {
         super(messagingAccount, session);
     }
 
-    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
         transport(message, recipients, facebookOAuthInfo, facebookOAuthInfo.getFacebookUserId());
     }
 
@@ -104,9 +103,9 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
      * @param recipients The recipients
      * @param facebookRestClient The facebook REST client
      * @param facebookUserId The facebook user identifier
-     * @throws MessagingException If transport fails
+     * @throws OXException If transport fails
      */
-    public static void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients, final FacebookOAuthAccess facebookOAuthAccess, final String facebookUserId) throws MessagingException {
+    public static void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients, final FacebookOAuthAccess facebookOAuthAccess, final String facebookUserId) throws OXException {
         try {
             /*
              * Recipient identifier

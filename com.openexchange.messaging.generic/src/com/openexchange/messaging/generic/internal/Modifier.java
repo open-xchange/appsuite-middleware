@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.generic.internal;
 
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 
 
 /**
@@ -65,17 +65,17 @@ public interface Modifier {
      * 
      * @param account The account
      * @return The modified account
-     * @throws MessagingException If modifying fails
+     * @throws OXException If modifying fails
      */
-    public MessagingAccount modifyIncoming(MessagingAccount account) throws MessagingException;
+    public MessagingAccount modifyIncoming(MessagingAccount account) throws OXException;
 
     /**
      * Modifies account intended for outgoing actions.
      * 
      * @param account The account
      * @return The modified account
-     * @throws MessagingException If modifying fails
+     * @throws OXException If modifying fails
      */
-    public MessagingAccount modifyOutgoing(MessagingAccount account) throws MessagingException;
+    public MessagingAccount modifyOutgoing(MessagingAccount account) throws OXException;
 
 }

@@ -70,21 +70,21 @@ public class MessagingComparatorTest extends TestCase {
     SimpleMessagingMessage msg1 = new SimpleMessagingMessage();
     SimpleMessagingMessage msg2 = new SimpleMessagingMessage();
 
-    public void testByID() throws MessagingException {
+    public void testByID() throws OXException {
         msg1.setId("a");
         msg2.setId("b");
         
         assertBigger(msg2, msg1, MessagingField.ID);
     }
     
-    public void testByFolderId() throws MessagingException {
+    public void testByFolderId() throws OXException {
         msg1.setFolder("a");
         msg2.setFolder("b");
         
         assertBigger(msg2, msg1, MessagingField.FOLDER_ID);
     }
     
-    public void testByContentType() throws MessagingException {
+    public void testByContentType() throws OXException {
         msg1.putHeader(new MimeContentType("text/a"));
         msg2.putHeader(new MimeContentType("text/b"));
     
@@ -92,49 +92,49 @@ public class MessagingComparatorTest extends TestCase {
         
     }
     
-    public void testByFrom() throws MessagingException {
+    public void testByFrom() throws OXException {
         msg1.putHeader(new StringMessageHeader("From", "a"));
         msg2.putHeader(new StringMessageHeader("From", "b"));
     
         assertBigger(msg2, msg1, MessagingField.FROM);
     }
 
-    public void testByTo() throws MessagingException {
+    public void testByTo() throws OXException {
         msg1.putHeader(new StringMessageHeader("To", "a"));
         msg2.putHeader(new StringMessageHeader("To", "b"));
     
         assertBigger(msg2, msg1, MessagingField.TO);
     }
 
-    public void testByBcc() throws MessagingException {
+    public void testByBcc() throws OXException {
         msg1.putHeader(new StringMessageHeader("Bcc", "a"));
         msg2.putHeader(new StringMessageHeader("Bcc", "b"));
     
         assertBigger(msg2, msg1, MessagingField.BCC);
     }
 
-    public void testByCc() throws MessagingException {
+    public void testByCc() throws OXException {
         msg1.putHeader(new StringMessageHeader("Cc", "a"));
         msg2.putHeader(new StringMessageHeader("Cc", "b"));
     
         assertBigger(msg2, msg1, MessagingField.CC);
     }
 
-    public void testBySubject() throws MessagingException {
+    public void testBySubject() throws OXException {
         msg1.putHeader(new StringMessageHeader("Subject", "a"));
         msg2.putHeader(new StringMessageHeader("Subject", "b"));
     
         assertBigger(msg2, msg1, MessagingField.SUBJECT);
     }
 
-    public void testBySize() throws MessagingException {
+    public void testBySize() throws OXException {
         msg1.setSize(1);
         msg2.setSize(3);
         
         assertBigger(msg2, msg1, MessagingField.SIZE);
     }
     
-    public void testSentDate() throws MessagingException {
+    public void testSentDate() throws OXException {
         final MailDateFormat dateFormat = new MailDateFormat();
         msg1.putHeader(new StringMessageHeader("Date",dateFormat.format(new Date(0))));
         msg2.putHeader(new StringMessageHeader("Date",dateFormat.format(new Date())));
@@ -142,42 +142,42 @@ public class MessagingComparatorTest extends TestCase {
         assertBigger(msg2, msg1, MessagingField.SENT_DATE);
     }
     
-    public void testReceivedDate() throws MessagingException {
+    public void testReceivedDate() throws OXException {
         msg1.setReceivedDate(1);
         msg2.setReceivedDate(3);
         
         assertBigger(msg2, msg1, MessagingField.RECEIVED_DATE);
     }
 
-    public void testFlags() throws MessagingException {
+    public void testFlags() throws OXException {
         msg1.setFlags(1);
         msg2.setFlags(3);
         
         assertBigger(msg2, msg1, MessagingField.FLAGS);
     }
     
-    public void testThreadLevel() throws MessagingException {
+    public void testThreadLevel() throws OXException {
         msg1.setThreadLevel(1);
         msg2.setThreadLevel(3);
         
         assertBigger(msg2, msg1, MessagingField.THREAD_LEVEL);
     }
     
-    public void testDispositionNotificationTo() throws MessagingException {
+    public void testDispositionNotificationTo() throws OXException {
         msg1.putHeader(new StringMessageHeader("Disposition-Notification-To", "a"));
         msg2.putHeader(new StringMessageHeader("Disposition-Notification-To", "b"));
          
         assertBigger(msg2, msg1, MessagingField.DISPOSITION_NOTIFICATION_TO);
     }
 
-    public void testPriority() throws MessagingException {
+    public void testPriority() throws OXException {
         msg1.putHeader(new StringMessageHeader("X-Priority", "2"));
         msg2.putHeader(new StringMessageHeader("X-Priority", "100"));
         
         assertBigger(msg2, msg1, MessagingField.PRIORITY);
     }
     
-    public void testColorLabel() throws MessagingException {
+    public void testColorLabel() throws OXException {
         msg1.setColorLabel(1);
         msg2.setColorLabel(3);
         
@@ -187,7 +187,7 @@ public class MessagingComparatorTest extends TestCase {
     
     
     
-    private void assertBigger(final SimpleMessagingMessage bigger, final SimpleMessagingMessage smaller, final MessagingField field) throws MessagingException {
+    private void assertBigger(final SimpleMessagingMessage bigger, final SimpleMessagingMessage smaller, final MessagingField field) throws OXException {
         final MessagingComparator comparator = new MessagingComparator(field, Locale.ENGLISH);
         assertTrue("Comparison Failure in field "+field, comparator.compare(bigger, smaller) > 0);
     }

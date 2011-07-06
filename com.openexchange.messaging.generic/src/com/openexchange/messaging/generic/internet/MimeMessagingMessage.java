@@ -53,8 +53,8 @@ import java.util.Collection;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.generic.internal.InternalUtility;
@@ -130,7 +130,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.mimeMessage = mimeMessage;
     }
 
-    public int getColorLabel() throws MessagingException {
+    public int getColorLabel() throws OXException {
         if (null == cachedParsedFlags) {
             try {
                 cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
@@ -145,9 +145,9 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      * Sets the color label.
      * 
      * @param colorLabel The color label
-     * @throws MessagingException If setting color label fails
+     * @throws OXException If setting color label fails
      */
-    public void setColorLabel(final int colorLabel) throws MessagingException {
+    public void setColorLabel(final int colorLabel) throws OXException {
         try {
             /*
              * Disable all existing color label flags
@@ -167,7 +167,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         }
     }
 
-    public int getFlags() throws MessagingException {
+    public int getFlags() throws OXException {
         if (null == cachedParsedFlags) {
             try {
                 cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
@@ -182,9 +182,9 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      * Sets the flags.
      * 
      * @param flags The flags
-     * @throws MessagingException If given flags cannot be set
+     * @throws OXException If given flags cannot be set
      */
-    public void setFlags(final int flags) throws MessagingException {
+    public void setFlags(final int flags) throws OXException {
         try {
             /*
              * Disable all existing system flags
@@ -203,7 +203,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         }
     }
 
-    public Collection<String> getUserFlags() throws MessagingException {
+    public Collection<String> getUserFlags() throws OXException {
         if (null == cachedParsedFlags) {
             try {
                 cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
@@ -218,9 +218,9 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      * Sets specified user flags.
      * 
      * @param userFlags The user flags to set
-     * @throws MessagingException If setting user flags fails
+     * @throws OXException If setting user flags fails
      */
-    public void setUserFlags(final Collection<String> userFlags) throws MessagingException {
+    public void setUserFlags(final Collection<String> userFlags) throws OXException {
         try {
             final String[] strings = mimeMessage.getFlags().getUserFlags();
             Flags newFlags = new Flags();
@@ -323,7 +323,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.picture = picture;
     }
 
-    public String getUrl() throws MessagingException {
+    public String getUrl() throws OXException {
         return null;
     }
 

@@ -63,21 +63,17 @@ import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoException;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccount;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.secret.SecretService;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -122,7 +118,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_SELECT_CONFIDS_FOR_USER = "SELECT confId FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
-    public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws MessagingException {
+    public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -131,8 +127,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         final Connection rc;
         try {
             rc = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -185,7 +181,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
@@ -194,7 +190,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
-    public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws MessagingException {
+    public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -203,8 +199,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         final Connection rc;
         try {
             rc = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
         List<MessagingAccount> accounts;
         PreparedStatement stmt = null;
@@ -241,7 +237,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
@@ -254,9 +250,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
      * @param serviceId The service identifier
      * @param session The session
      * @return The identifiers of user-associated accounts of a certain service
-     * @throws MessagingException If identifiers cannot be returned
+     * @throws OXException If identifiers cannot be returned
      */
-    public TIntArrayList getAccountIDs(final String serviceId, final Session session) throws MessagingException {
+    public TIntArrayList getAccountIDs(final String serviceId, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
@@ -265,8 +261,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         final Connection rc;
         try {
             rc = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
         TIntArrayList accounts;
         PreparedStatement stmt = null;
@@ -297,7 +293,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_INSERT = "INSERT INTO messagingAccount (cid, user, account, confId, serviceId, displayName) VALUES (?, ?, ?, ?, ?, ?)";
 
-    public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+    public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -307,8 +303,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -354,7 +350,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             return genericConfId;
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MessagingException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -368,13 +364,13 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
     }
 
-    private String encrypt(final String toCrypt, final Session session) throws MessagingException, CryptoException {
+    private String encrypt(final String toCrypt, final Session session) throws OXException, CryptoException {
         final CryptoService cryptoService = getService(CryptoService.class);
         final SecretService secretService = getService(SecretService.class);
         return cryptoService.encrypt(toCrypt, secretService.getSecret(session));
     }
 
-    private String decrypt(final String toDecrypt, final Session session) throws MessagingException, CryptoException {
+    private String decrypt(final String toDecrypt, final Session session) throws OXException, CryptoException {
         final CryptoService cryptoService = getService(CryptoService.class);
         final SecretService secretService = getService(SecretService.class);
         return cryptoService.decrypt(toDecrypt, secretService.getSecret(session));
@@ -382,7 +378,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_DELETE = "DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
-    public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+    public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -392,8 +388,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -422,7 +418,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             wc.commit(); // COMMIT
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MessagingException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -438,7 +434,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     private static final String SQL_UPDATE = "UPDATE messagingAccount SET displayName = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
-    public void updateAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws MessagingException {
+    public void updateAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -448,8 +444,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -499,7 +495,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             wc.commit(); // COMMIT
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new MessagingException(e);
+            throw new OXException(e);
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -513,26 +509,26 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
     }
 
-    private static <S> S getService(final Class<? extends S> clazz) throws MessagingException {
+    private static <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
             return MessagingGenericServiceRegistry.getServiceRegistry().getService(clazz, true);
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         }
     }
 
-    private static Context getContext(final Session session) throws MessagingException {
+    private static Context getContext(final Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getContext();
         }
         try {
             return getService(ContextService.class).getContext(session.getContextId());
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         }
     }
 
-    private static int getGenericConfId(final int contextId, final int userId, final String serviceId, final int accountId, final Connection con) throws MessagingException, SQLException {
+    private static int getGenericConfId(final int contextId, final int userId, final String serviceId, final int accountId, final Connection con) throws OXException, SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -556,7 +552,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
     }
 
-    public String checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws MessagingException {
+    public String checkSecretCanDecryptStrings(final MessagingService parentService, final Session session, final String secret) throws OXException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {
             return null;
@@ -582,14 +578,14 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 }
             }
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         } catch (final CryptoException e) {
             return "Messaging dynamic configuration with id "+confId+" could not be decrypted";
         }
         return null;
     }
 
-    private TIntArrayList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws MessagingException {
+    private TIntArrayList getConfIDsForUser(final int contextId, final int userId, final String serviceId) throws OXException {
         final TIntArrayList confIds = new TIntArrayList(20);
         final DatabaseService databaseService = getService(CLAZZ_DB);
         PreparedStatement stmt = null;
@@ -612,8 +608,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            throw new MessagingException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (con != null) {
@@ -623,7 +619,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         return confIds;
     }
 
-    public void migrateToNewSecret(final MessagingService parentService, final String oldSecret, final String newSecret, final Session session) throws MessagingException {
+    public void migrateToNewSecret(final MessagingService parentService, final String oldSecret, final String newSecret, final Session session) throws OXException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {
             return;
@@ -656,9 +652,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 genericConfStorageService.update(ctx, confId, update);
             }
         } catch (final OXException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         } catch (final CryptoException e) {
-            throw new MessagingException(e);
+            throw new OXException(e);
         }
     }
 }

@@ -64,10 +64,9 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.exceptions.OAuthException;
 import org.w3c.dom.Element;
-import com.openexchange.messaging.MessagingContent;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingFolder;
@@ -76,9 +75,9 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.facebook.FacebookConstants;
-import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingMessageAccess;
+import com.openexchange.messaging.facebook.FacebookOXException;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
@@ -99,7 +98,7 @@ public final class FacebookMessagingUtility {
 
     public interface StaticFiller {
 
-        void fill(FacebookMessagingMessage message) throws MessagingException;
+        void fill(FacebookMessagingMessage message) throws OXException;
     }
 
     private static final class AccountNameFiller implements StaticFiller {
@@ -113,7 +112,7 @@ public final class FacebookMessagingUtility {
             this.accountName = accountName;
         }
 
-        public void fill(final FacebookMessagingMessage message) throws MessagingException {
+        public void fill(final FacebookMessagingMessage message) throws OXException {
             message.addHeader(new MimeStringMessagingHeader(NAME, accountName));
         }
 
@@ -133,7 +132,7 @@ public final class FacebookMessagingUtility {
             this.userName = userName;
         }
 
-        public void fill(final FacebookMessagingMessage message) throws MessagingException {
+        public void fill(final FacebookMessagingMessage message) throws OXException {
             /*
              * Add "To"
              */
@@ -155,7 +154,7 @@ public final class FacebookMessagingUtility {
             this.folder = folder;
         }
 
-        public void fill(final FacebookMessagingMessage message) throws MessagingException {
+        public void fill(final FacebookMessagingMessage message) throws OXException {
             message.setFolder(folder);
         }
 
@@ -497,9 +496,9 @@ public final class FacebookMessagingUtility {
      * 
      * @param message The message
      * @return The typed content
-     * @throws MessagingException If message's content is of given type
+     * @throws OXException If message's content is of given type
      */
-    public static <C extends MessagingContent> C checkContent(final Class<C> clazz, final MessagingMessage message) throws MessagingException {
+    public static <C extends MessagingContent> C checkContent(final Class<C> clazz, final MessagingMessage message) throws OXException {
         final MessagingContent content = message.getContent();
         if (!(clazz.isInstance(content))) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.toString());
@@ -609,9 +608,9 @@ public final class FacebookMessagingUtility {
      * 
      * @param fqlQuery The FQL query
      * @return The queried JSON object
-     * @throws FacebookMessagingException If FQL query fails
+     * @throws FacebookOXException If FQL query fails
      */
-    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws FacebookMessagingException {
+    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws FacebookOXException {
         try {
             final String encodedQuery = encode(fqlQuery);
             final String body =
@@ -666,9 +665,9 @@ public final class FacebookMessagingUtility {
      * @param fqlQuery The FQL query to fire
      * @param facebookOAuthInfo The facebook OAuth information
      * @return The FQL query's results
-     * @throws FacebookMessagingException If query cannot be fired
+     * @throws FacebookOXException If query cannot be fired
      */
-    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws FacebookMessagingException {
+    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws FacebookOXException {
         try {
             final String encodedQuery = encode(fqlQuery.toString());
             return FacebookDOMParser.parseXMLResponse(facebookOAuthInfo.executeGETRequest(new StringBuilder(
@@ -780,9 +779,9 @@ public final class FacebookMessagingUtility {
      * @param postId The post identifier
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
-     * @throws FacebookMessagingException If composing query fails
+     * @throws FacebookOXException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryFor(final Collection<MessagingField> fields, final String postId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final Collection<MessagingField> fields, final String postId) throws FacebookOXException {
         return composeFQLStreamQueryFor0(null, fields, null, null, new String[] { postId }, null);
     }
 
@@ -793,9 +792,9 @@ public final class FacebookMessagingUtility {
      * @param postIds The post identifiers
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
-     * @throws FacebookMessagingException If composing query fails
+     * @throws FacebookOXException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryFor(final Collection<MessagingField> fields, final String[] postIds) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final Collection<MessagingField> fields, final String[] postIds) throws FacebookOXException {
         return composeFQLStreamQueryFor0(null, fields, null, null, postIds, null);
     }
 
@@ -806,9 +805,9 @@ public final class FacebookMessagingUtility {
      * @param fields The fields
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
-     * @throws FacebookMessagingException If composing query fails
+     * @throws FacebookOXException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final Collection<MessagingField> fields, final String facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final Collection<MessagingField> fields, final String facebookUserId) throws FacebookOXException {
         return composeFQLStreamQueryFor0(queryType, fields, null, null, null, facebookUserId);
     }
 
@@ -821,9 +820,9 @@ public final class FacebookMessagingUtility {
      * @param order The order direction
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
-     * @throws FacebookMessagingException If composing query fails
+     * @throws FacebookOXException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryFor(final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String facebookUserId) throws FacebookOXException {
         return composeFQLStreamQueryFor0(queryType, fields, sortField, order, null, facebookUserId);
     }
 
@@ -832,7 +831,7 @@ public final class FacebookMessagingUtility {
      */
     private static final int DEFAULT_LIMIT = 1000;
 
-    private static FQLQuery composeFQLStreamQueryFor0(final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final String facebookUserId) throws FacebookMessagingException {
+    private static FQLQuery composeFQLStreamQueryFor0(final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final String facebookUserId) throws FacebookOXException {
         final StringBuilder query = startFQLStreamQuery(queryType, fields, facebookUserId);
         if (null == query) {
             /*
@@ -853,13 +852,13 @@ public final class FacebookMessagingUtility {
      * @param order The order direction
      * @param facebookUserId The facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
-     * @throws FacebookMessagingException If composing query fails
+     * @throws FacebookOXException If composing query fails
      */
-    public static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String facebookUserId) throws FacebookMessagingException {
+    public static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String facebookUserId) throws FacebookOXException {
         return composeFQLStreamQueryBefore(timeStamp, queryType, fields, sortField, order, null, facebookUserId);
     }
 
-    private static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final String facebookUserId) throws FacebookMessagingException {
+    private static FQLQuery composeFQLStreamQueryBefore(final long timeStamp, final FQLQueryType queryType, final Collection<MessagingField> fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final String facebookUserId) throws FacebookOXException {
         final StringBuilder query = startFQLStreamQuery(queryType, fields, facebookUserId);
         if (null == query) {
             /*
@@ -874,7 +873,7 @@ public final class FacebookMessagingUtility {
         return finishFQLStreamQuery(sortField, order, postIds, DEFAULT_LIMIT, query, (null != queryType));
     }
 
-    private static StringBuilder startFQLStreamQuery(final FQLQueryType queryType, final Collection<MessagingField> fields, final String facebookUserId) throws FacebookMessagingException {
+    private static StringBuilder startFQLStreamQuery(final FQLQueryType queryType, final Collection<MessagingField> fields, final String facebookUserId) throws FacebookOXException {
         /*
          * Resolve fields to known FQL fields
          */
@@ -1305,9 +1304,9 @@ public final class FacebookMessagingUtility {
      * 
      * @param part The part
      * @return The typed content
-     * @throws MessagingException If message's content is of given type
+     * @throws OXException If message's content is of given type
      */
-    public static <C extends MessagingContent> C checkContent(final Class<C> clazz, final MessagingPart part) throws MessagingException {
+    public static <C extends MessagingContent> C checkContent(final Class<C> clazz, final MessagingPart part) throws OXException {
         final MessagingContent content = part.getContent();
         if (!(clazz.isInstance(content))) {
             throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.toString());

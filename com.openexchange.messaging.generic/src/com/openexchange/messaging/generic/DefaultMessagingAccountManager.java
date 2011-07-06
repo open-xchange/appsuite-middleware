@@ -50,9 +50,9 @@
 package com.openexchange.messaging.generic;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
 import com.openexchange.messaging.generic.internal.Modifier;
@@ -75,11 +75,11 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
             this.manager = manager;
         }
 
-        public MessagingAccount modifyIncoming(final MessagingAccount account) throws MessagingException {
+        public MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
             return manager.modifyIncoming(account);
         }
 
-        public MessagingAccount modifyOutgoing(final MessagingAccount account) throws MessagingException {
+        public MessagingAccount modifyOutgoing(final MessagingAccount account) throws OXException {
             return manager.modifyOutgoing(account);
         }
 
@@ -111,39 +111,39 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         modifier = new DefaultModifier(this);
     }
 
-    protected MessagingAccount modifyIncoming(final MessagingAccount account) throws MessagingException {
+    protected MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
         return account;
     }
 
-    protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws MessagingException {
+    protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws OXException {
         return account;
     }
 
-    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
+    public MessagingAccount getAccount(final int id, final Session session) throws OXException {
         return CACHE.getAccount(serviceId, id, session, modifier);
     }
 
-    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
+    public List<MessagingAccount> getAccounts(final Session session) throws OXException {
         return CACHE.getAccounts(serviceId, session, modifier);
     }
 
-    public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public int addAccount(final MessagingAccount account, final Session session) throws OXException {
         return CACHE.addAccount(serviceId, account, session, modifier);
     }
 
-    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public void deleteAccount(final MessagingAccount account, final Session session) throws OXException {
         CACHE.deleteAccount(serviceId, account, session, modifier);
     }
 
-    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
+    public void updateAccount(final MessagingAccount account, final Session session) throws OXException {
         CACHE.updateAccount(serviceId, account, session, modifier);
     }
 
-    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws MessagingException {
+    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
         return CACHE.checkSecretCanDecryptStrings(service, session, secret);
     }
 
-    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws MessagingException {
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
     }
 

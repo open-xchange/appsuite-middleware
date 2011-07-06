@@ -61,16 +61,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.impl.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
-import com.openexchange.server.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -128,22 +124,14 @@ public abstract class AbstractFacebookAccess {
         return facebookUserName;
     }
 
-    protected Locale getUserLocale() throws MessagingException {
+    protected Locale getUserLocale() throws OXException {
         Locale tmp = userLocale;
         if (null == tmp) {
             /*
              * Duplicate initialization isn't harmful; no "synchronized" needed
              */
-            try {
-                final ContextService cs = getServiceRegistry().getService(ContextService.class, true);
-                userLocale = tmp = getServiceRegistry().getService(UserService.class).getUser(user, cs.getContext(cid)).getLocale();
-            } catch (final OXException e) {
-                throw new MessagingException(e);
-            } catch (final OXException e) {
-                throw new MessagingException(e);
-            } catch (final OXException e) {
-                throw new MessagingException(e);
-            }
+            final ContextService cs = getServiceRegistry().getService(ContextService.class, true);
+            userLocale = tmp = getServiceRegistry().getService(UserService.class).getUser(user, cs.getContext(cid)).getLocale();
         }
         return tmp;
     }
@@ -169,9 +157,9 @@ public abstract class AbstractFacebookAccess {
      * 
      * @param fqlQuery The FQL query
      * @return The queried JSON object
-     * @throws FacebookMessagingException If FQL query fails
+     * @throws FacebookOXException If FQL query fails
      */
-    protected JSONObject performFQLQuery(final String fqlQuery) throws FacebookMessagingException {
+    protected JSONObject performFQLQuery(final String fqlQuery) throws FacebookOXException {
         try {
             final String encodedQuery = encode(fqlQuery);
             final JSONObject result =
@@ -202,9 +190,9 @@ public abstract class AbstractFacebookAccess {
      * 
      * @param fqlQuery The FQL query
      * @return The queried JSON result
-     * @throws FacebookMessagingException If FQL query fails
+     * @throws FacebookOXException If FQL query fails
      */
-    protected <V extends JSONValue> V performFQLQuery(final Class<V> clazz, final String fqlQuery) throws FacebookMessagingException {
+    protected <V extends JSONValue> V performFQLQuery(final Class<V> clazz, final String fqlQuery) throws FacebookOXException {
         try {
             final String encodedQuery = encode(fqlQuery);
             if (JSONObject.class.equals(clazz)) {

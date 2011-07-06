@@ -50,8 +50,8 @@
 package com.openexchange.messaging.facebook;
 
 import java.util.Map;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
 
@@ -72,7 +72,7 @@ public final class FacebookMessagingAccountManager extends DefaultMessagingAccou
     }
 
     @Override
-    protected MessagingAccount modifyIncoming(final MessagingAccount account) throws MessagingException {
+    protected MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
         final Map<String, Object> configuration = account.getConfiguration();
         if (null != configuration) {
             final Integer id = (Integer) configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
@@ -84,7 +84,7 @@ public final class FacebookMessagingAccountManager extends DefaultMessagingAccou
     }
 
     @Override
-    protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws MessagingException {
+    protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws OXException {
         final Map<String, Object> configuration = account.getConfiguration();
         if (null != configuration) {
             final String id = (String) configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
