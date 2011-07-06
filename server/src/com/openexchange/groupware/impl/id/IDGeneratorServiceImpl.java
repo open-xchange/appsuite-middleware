@@ -53,8 +53,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.id.IDException;
 import com.openexchange.id.IDExceptionCodes;
 import com.openexchange.id.IDGeneratorService;
@@ -74,7 +74,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         super();
     }
 
-    public int getId(final String type, final int contextId) throws IDException {
+    public int getId(final String type, final int contextId) throws OXException {
         /*
          * Get appropriate connection
          */
@@ -114,7 +114,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
             return con;
         } catch (final SQLException e) {
             throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new IDException(e);
         }
     }

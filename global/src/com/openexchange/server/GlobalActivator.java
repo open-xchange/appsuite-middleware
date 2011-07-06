@@ -64,10 +64,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.id.IDException;
-import com.openexchange.id.exception.IDExceptionFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -87,8 +84,6 @@ public final class GlobalActivator implements BundleActivator {
 
     private Initialization initialization;
 
-    private ComponentRegistration idRegistration;
-    
     private ServiceTracker parserTracker = null;
 
     private ServiceRegistration parserRegistration;
@@ -111,7 +106,6 @@ public final class GlobalActivator implements BundleActivator {
             initialization.start();
             ServiceHolderInit.getInstance().start();
             componentRegistryRegistration = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
-            idRegistration = new ComponentRegistration(context, IDException.COMPONENT, "com.openexchange.id", IDExceptionFactory.getInstance());
             initStringParsers(context);
 
             trackers = new ArrayList<ServiceTracker>(2);
@@ -181,8 +175,6 @@ public final class GlobalActivator implements BundleActivator {
                 }
                 trackers = null;
             }
-            idRegistration.unregister();
-            idRegistration = null;
             componentRegistryRegistration.unregister();
             ServiceHolderInit.getInstance().stop();
             initialization.stop();

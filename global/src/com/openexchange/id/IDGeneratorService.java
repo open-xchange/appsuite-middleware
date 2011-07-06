@@ -49,6 +49,8 @@
 
 package com.openexchange.id;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link IDGeneratorService} - A service to generate unique numeric identifiers for a specified type.
@@ -63,8 +65,8 @@ public interface IDGeneratorService {
      * @param type The type identifier
      * @param contextId The context identifier
      * @return A unique numeric identifier
-     * @throws IDException If ID generation fails
+     * @throws OXException If ID generation fails
      */
-    int getId(String type, int contextId) throws IDException;
+    int getId(String type, int contextId) throws OXException;
 
 }

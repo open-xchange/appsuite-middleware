@@ -49,33 +49,34 @@
 
 package com.openexchange.id;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.id.exception.IDExceptionFactory;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link IDExceptionCodes} - Enumeration of all {@link IDException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum IDExceptionCodes implements OXErrorMessage {
+public enum IDExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(IDExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    UNEXPECTED_ERROR(IDExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(IDExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 2),
+    IO_ERROR(IDExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(IDExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 3),
+    SQL_ERROR(IDExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 3),
     /**
      * ID generation failed
      */
-    ID_GEN_FAILED(IDExceptionMessages.ID_GEN_FAILED_MSG, Category.CODE_ERROR, 4),
+    ID_GEN_FAILED(IDExceptionMessages.ID_GEN_FAILED_MSG, CATEGORY_ERROR, 4),
     
     
     
@@ -92,6 +93,10 @@ public enum IDExceptionCodes implements OXErrorMessage {
         this.detailNumber = detailNumber;
         this.category = category;
     }
+    
+    public String getPrefix() {
+        return "IDGEN";
+    }
 
     public Category getCategory() {
         return category;
@@ -101,43 +106,41 @@ public enum IDExceptionCodes implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
-    private static final Object[] EMPTY = new Object[0];
-
-    /**
-     * Creates a new ID exception of this error type with no message arguments.
-     * 
-     * @return A new ID exception
-     */
-    public IDException create() {
-        return IDExceptionFactory.getInstance().create(this, EMPTY);
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
-     * Creates a new ID exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new ID exception
+     * @return The newly created {@link OXException} instance
      */
-    public IDException create(final Object... messageArgs) {
-        return IDExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new ID exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new ID exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public IDException create(final Throwable cause, final Object... messageArgs) {
-        return IDExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }
