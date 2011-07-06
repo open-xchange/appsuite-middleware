@@ -56,11 +56,10 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
@@ -96,8 +95,8 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         try {
             writeCon = Database.get(ctx, true);
             writeCon.setAutoCommit(false);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
