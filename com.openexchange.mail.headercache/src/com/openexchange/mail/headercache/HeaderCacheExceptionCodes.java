@@ -49,20 +49,22 @@
 
 package com.openexchange.mail.headercache;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link HeaderCacheExceptionCode} - Enumeration about all {@link HeaderCacheException}s.
+ * {@link HeaderCacheExceptionCode} - Enumeration about all {@link OXException}s.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum HeaderCacheExceptionCode implements OXErrorMessage {
+public enum HeaderCacheExceptionCodes implements OXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(HeaderCacheExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1);
+    UNEXPECTED_ERROR(HeaderCacheExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1);
 
     private final Category category;
 
@@ -70,10 +72,14 @@ public enum HeaderCacheExceptionCode implements OXErrorMessage {
 
     private final String message;
 
-    private HeaderCacheExceptionCode(final String message, final Category category, final int detailNumber) {
+    private HeaderCacheExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+    }
+    
+    public String getPrefix() {
+        return "HDR_CACHE";
     }
 
     public Category getCategory() {
@@ -84,32 +90,41 @@ public enum HeaderCacheExceptionCode implements OXErrorMessage {
         return message;
     }
 
-    public int getDetailNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
-     * Creates a new twitter exception of this error type with specified message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @return The newly created {@link OXException} instance
      */
-    public HeaderCacheException create(final Object... messageArgs) {
-        return HeaderCacheExceptionFactory.getInstance().create(this, messageArgs);
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates a new twitter exception of this error type with specified cause and message arguments.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     * @return A new twitter exception
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public HeaderCacheException create(final Throwable cause, final Object... messageArgs) {
-        return HeaderCacheExceptionFactory.getInstance().create(this, cause, messageArgs);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

@@ -52,7 +52,7 @@ package com.openexchange.mail.headercache;
 import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * {@link HeaderCacheExceptionMessages} - Exception messages for {@link HeaderCacheException} that must be translated.
+ * {@link HeaderCacheExceptionMessages} - Exception messages for {@link OXException} that must be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

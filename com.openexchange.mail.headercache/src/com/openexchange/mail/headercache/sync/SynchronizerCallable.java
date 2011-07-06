@@ -62,7 +62,6 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.headercache.HeaderCacheException;
 import com.openexchange.mail.headercache.HeaderCacheStaticProperties;
 import com.openexchange.mail.headercache.database.DatabaseAccess;
 import com.openexchange.mail.headercache.properties.HeaderCacheProperties;
@@ -87,8 +86,8 @@ public final class SynchronizerCallable implements Callable<Object> {
      */
     private static final String[] STR_ARR = new String[0];
 
-    private static final MailField[] FIELDS_LOAD =
-        { MailField.ID, MailField.SIZE, MailField.FLAGS, MailField.RECEIVED_DATE, MailField.HEADERS };
+    private static final MailField[] FIELDS_LOAD = {
+        MailField.ID, MailField.SIZE, MailField.FLAGS, MailField.RECEIVED_DATE, MailField.HEADERS };
 
     /**
      * The mail access.
@@ -149,9 +148,8 @@ public final class SynchronizerCallable implements Callable<Object> {
                          * Refresh rate not elapsed, yet.
                          */
                         if (DEBUG) {
-                            LOG.debug(new StringBuilder(64).append(HeaderCacheException.COMPONENT.getAbbreviation()).append(
-                                ": Synchronizing folder \"").append(folder).append("\" of account ").append(accountId).append(" aborted.").append(
-                                " Refresh-rate not elapsed, yet.").toString());
+                            LOG.debug(new StringBuilder(64).append(": Synchronizing folder \"").append(folder).append("\" of account ").append(
+                                accountId).append(" aborted.").append(" Refresh-rate not elapsed, yet.").toString());
                         }
                         return null;
                     }
@@ -226,8 +224,8 @@ public final class SynchronizerCallable implements Callable<Object> {
              */
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - s;
-                LOG.debug(new StringBuilder(64).append(HeaderCacheException.COMPONENT.getAbbreviation()).append(": Synchronizing folder \"").append(
-                    folder).append("\" of account ").append(accountId).append(" took ").append(dur).append("msec").toString());
+                LOG.debug(new StringBuilder(64).append(": Synchronizing folder \"").append(folder).append("\" of account ").append(
+                    accountId).append(" took ").append(dur).append("msec").toString());
             }
             /*
              * Update properties

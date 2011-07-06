@@ -52,14 +52,12 @@ package com.openexchange.mail.headercache;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -84,8 +82,8 @@ public final class HeaderCacheDeleteListener implements DeleteListener {
             try {
                 wc = databaseService.getWritable(contextId);
                 wc.setAutoCommit(false); // BEGIN;
-            } catch (final DBPoolingException e) {
-                throw new OXException(e);
+            } catch (final OXException e) {
+                throw e;
             } catch (final SQLException e) {
                 throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             }

@@ -1,5 +1,6 @@
 /*
  *
+
  *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
@@ -49,7 +50,7 @@
 
 package com.openexchange.mail.headercache.services;
 
-import com.openexchange.server.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**

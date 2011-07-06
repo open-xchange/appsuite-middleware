@@ -54,7 +54,6 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.headercache.properties.RdbHeaderCacheProperties;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link HeaderCacheMailAccountDeleteListener}

@@ -79,7 +79,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -90,7 +89,6 @@ import com.openexchange.mail.headercache.Constants;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 import com.openexchange.mail.headercache.sync.SyncData;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.server.OXException;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -405,10 +403,8 @@ public final class DatabaseAccess {
         }
         final DatabaseService databaseService = getDBService();
         final Connection readConnection;
-        try {
+        {
             readConnection = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -495,10 +491,8 @@ public final class DatabaseAccess {
     public void fillMail(final MailMessage mail, final List<SetterApplier> setters) throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection readConnection;
-        try {
+        {
             readConnection = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         }
         try {
             fillMailInternal(mail, setters, readConnection);
@@ -606,10 +600,8 @@ public final class DatabaseAccess {
     public Set<SyncData> loadSyncData() throws OXException {
         final DatabaseService databaseService = getDBService();
         final Connection rc;
-        try {
+        {
             rc = databaseService.getReadOnly(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -666,8 +658,6 @@ public final class DatabaseAccess {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN;
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -718,10 +708,8 @@ public final class DatabaseAccess {
         }
         final DatabaseService databaseService = getDBService();
         final Connection wc;
-        try {
+        {
             wc = databaseService.getWritable(contextId);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         }
         try {
 
@@ -1004,8 +992,6 @@ public final class DatabaseAccess {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN;
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

@@ -53,12 +53,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
-import com.openexchange.server.OXException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -127,8 +125,6 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN;
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -171,12 +167,7 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
 
     public String getProperty(final String propertyName) throws OXException {
         final DatabaseService databaseService = getDBService();
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
-        }
+        final Connection con = databaseService.getReadOnly(cid);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -205,8 +196,6 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN;
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

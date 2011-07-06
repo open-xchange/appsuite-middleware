@@ -59,12 +59,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.headercache.HeaderCacheDeleteListener;
-import com.openexchange.mail.headercache.HeaderCacheException;
-import com.openexchange.mail.headercache.HeaderCacheExceptionFactory;
 import com.openexchange.mail.headercache.HeaderCacheMailAccountDeleteListener;
 import com.openexchange.mail.headercache.HeaderCacheProvider;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
@@ -84,8 +81,6 @@ public final class HeaderCacheActivator extends DeferredActivator {
     private List<ServiceRegistration> registrations;
 
     private List<ServiceTracker> trackers;
-
-    private ComponentRegistration componentRegistration;
 
     /**
      * Initializes a new {@link HeaderCacheActivator}
@@ -142,15 +137,6 @@ public final class HeaderCacheActivator extends DeferredActivator {
                 tracker.open();
             }
             /*
-             * Register component
-             */
-            componentRegistration =
-                new ComponentRegistration(
-                    context,
-                    HeaderCacheException.COMPONENT,
-                    "com.openexchange.twitter",
-                    HeaderCacheExceptionFactory.getInstance());
-            /*
              * Service registrations
              */
             registrations = new ArrayList<ServiceRegistration>(4);
@@ -172,13 +158,6 @@ public final class HeaderCacheActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            /*
-             * Unregister component
-             */
-            if (null != componentRegistration) {
-                componentRegistration.unregister();
-                componentRegistration = null;
-            }
             if (null != registrations) {
                 while (!registrations.isEmpty()) {
                     registrations.remove(0).unregister();
