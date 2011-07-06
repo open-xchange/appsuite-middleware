@@ -76,6 +76,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.AbstractOXException;
@@ -86,7 +87,6 @@ import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -135,8 +135,7 @@ public final class AJAXFile extends PermissionServlet {
         } else {
             final Response response = new Response();
             response.setException(UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(
-                null,
-                action == null ? STR_NULL : action));
+                action == null ? STR_NULL : action).setAction(null));
             try {
                 ResponseWriter.write(response, resp.getWriter());
             } catch (final JSONException e) {
@@ -192,7 +191,7 @@ public final class AJAXFile extends PermissionServlet {
         try {
             final String id = req.getParameter(PARAMETER_ID);
             if (id == null || id.length() == 0) {
-                throw UploadException.UploadCode.MISSING_PARAM.create(ACTION_GET, PARAMETER_ID);
+                throw UploadException.UploadCode.MISSING_PARAM.create(PARAMETER_ID).setAction(ACTION_GET);
             }
             /*
              * Check if user agent is internet explorer

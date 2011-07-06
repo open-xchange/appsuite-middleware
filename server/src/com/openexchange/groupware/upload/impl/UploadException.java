@@ -111,7 +111,13 @@ public class UploadException extends OXException {
         /**
          * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
          */
-        INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"", CATEGORY_ERROR, 11);
+        INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"", CATEGORY_ERROR, 11),
+        /**
+         * An error occurred: %1$s
+         */
+        UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 12),
+        
+        ;
 
         private final String message;
 
