@@ -71,7 +71,7 @@ import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseOutputters.JSONResponseOutputter;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -113,7 +113,7 @@ public class DispatcherServlet extends SessionServlet {
     
     private static List<ResponseOutputter> responseRenderers = new CopyOnWriteArrayList<ResponseOutputter>();
 
-    public DispatcherServlet(final Dispatcher dispatcher, String prefix) {
+    public DispatcherServlet(final Dispatcher dispatcher, final String prefix) {
         if (null == dispatcher) {
             throw new NullPointerException("Dispatcher is null.");
         }
@@ -122,11 +122,11 @@ public class DispatcherServlet extends SessionServlet {
         DispatcherServlet.prefix = prefix;
     }
     
-    public static void registerRenderer(ResponseOutputter renderer) {
+    public static void registerRenderer(final ResponseOutputter renderer) {
         responseRenderers.add(renderer);
     }
 
-    public static void unregisterRenderer(ResponseOutputter renderer) {
+    public static void unregisterRenderer(final ResponseOutputter renderer) {
         responseRenderers.remove(renderer);
     }
 
@@ -176,9 +176,9 @@ public class DispatcherServlet extends SessionServlet {
             
 
             
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            Response response = new Response();
+            final Response response = new Response();
             response.setException(e);
             JSONResponseOutputter.writeResponse(response, action, req, resp);
             return;
@@ -187,10 +187,10 @@ public class DispatcherServlet extends SessionServlet {
 
     }
 
-    private void sendResponse( AJAXRequestData request, AJAXRequestResult result, HttpServletRequest hReq, HttpServletResponse hResp) {
+    private void sendResponse( final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
         int highest = Integer.MIN_VALUE;
         ResponseOutputter chosen = null;
-        for(ResponseOutputter renderer : responseRenderers) {
+        for(final ResponseOutputter renderer : responseRenderers) {
             if (renderer.handles(request, result) && highest <= renderer.getPriority()) {
                 highest = renderer.getPriority();
                 chosen = renderer;
@@ -216,7 +216,7 @@ public class DispatcherServlet extends SessionServlet {
         /*
          * Set the module
          */
-        String pathInfo = req.getRequestURI();
+        final String pathInfo = req.getRequestURI();
         retval.setModule(pathInfo.substring(prefix.length()));
         /*
          * Set the action 

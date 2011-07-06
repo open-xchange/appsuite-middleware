@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -60,11 +60,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AbstractAJAXCustomizer implements AJAXActionCustomizer {
 
-    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
         return request;
     }
 
-    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException {
         return result;
     }
 

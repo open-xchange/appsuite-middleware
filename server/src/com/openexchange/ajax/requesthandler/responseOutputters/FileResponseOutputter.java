@@ -65,7 +65,7 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseOutputter;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -89,26 +89,26 @@ public class FileResponseOutputter implements ResponseOutputter {
         return 0;
     }
     
-    public void setScaler(ImageScalingService scaler) {
+    public void setScaler(final ImageScalingService scaler) {
         this.scaler = scaler;
     }
 
-    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
-        Object data = result.getResultObject();
+    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
+        final Object data = result.getResultObject();
         if (data == null) {
             return false;
         }
         return IFileHolder.class.isAssignableFrom(data.getClass());
     }
     
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
         
         
-        String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
-        String userAgent = req.getHeader("user-agent");
-        String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
-        String name = file.getName();
+        final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+        final String userAgent = req.getHeader("user-agent");
+        final String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
+        final String name = file.getName();
         
         InputStream documentData = null;
         ServletOutputStream outputStream = null;
@@ -149,15 +149,15 @@ public class FileResponseOutputter implements ResponseOutputter {
             }
             outputStream.flush();
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
             if (documentData != null) {
                 try {
                     documentData.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     // Ignore, we did all we could here.
                 }
             }
@@ -170,7 +170,7 @@ public class FileResponseOutputter implements ResponseOutputter {
      * @return
      * @throws IOException 
      */
-    private IFileHolder scaleIfImage(AJAXRequestData request, IFileHolder file) throws IOException {
+    private IFileHolder scaleIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException {
         if (scaler == null) {
             return file;
         }
@@ -198,7 +198,7 @@ public class FileResponseOutputter implements ResponseOutputter {
             return file;
         }
         
-        InputStream scaled = scaler.scale(file.getStream(), width, height);
+        final InputStream scaled = scaler.scale(file.getStream(), width, height);
         
         return new FileHolder(scaled, -1, "image/jpg", "");
     }

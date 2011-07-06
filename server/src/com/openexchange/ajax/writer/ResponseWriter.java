@@ -71,6 +71,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.AbstractOXException.Parsing;
@@ -114,7 +115,7 @@ public final class ResponseWriter {
         }
     }
 
-    public static void addException(JSONObject json, AbstractOXException exception, boolean isWarning) throws JSONException {
+    public static void addException(final JSONObject json, final OXException exception, final boolean isWarning) throws JSONException {
         json.put(ERROR, null == exception.getOrigMessage() ? ERR : exception.getOrigMessage());
         if (exception.getMessageArgs() != null) {
             final JSONArray array = new JSONArray();

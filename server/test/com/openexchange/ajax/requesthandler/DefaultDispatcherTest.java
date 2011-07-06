@@ -136,7 +136,7 @@ public class DefaultDispatcherTest extends TestCase {
             private boolean skipped = false;
             
             @Override
-            public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+            public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
                 if (!skipped) {
                     skipped = true;
                     throw new FlowControl.Later();
@@ -177,7 +177,7 @@ public class DefaultDispatcherTest extends TestCase {
             private int skipCount = 0;
             
             @Override
-            public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+            public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
                 if (skipCount < 2) {
                     skipCount++;
                     throw new FlowControl.Later();
@@ -220,7 +220,7 @@ public class DefaultDispatcherTest extends TestCase {
             private boolean skipped = false;
             
             @Override
-            public AJAXRequestResult outgoing(AJAXRequestData request,AJAXRequestResult res, ServerSession session) throws AbstractOXException {
+            public AJAXRequestResult outgoing(AJAXRequestData request,AJAXRequestResult res, ServerSession session) throws OXException {
                 if (!skipped) {
                     skipped = true;
                     throw new FlowControl.Later();
@@ -261,7 +261,7 @@ public class DefaultDispatcherTest extends TestCase {
             private int skipCount = 0;
             
             @Override
-            public AJAXRequestResult outgoing(AJAXRequestData request,AJAXRequestResult res, ServerSession session) throws AbstractOXException {
+            public AJAXRequestResult outgoing(AJAXRequestData request,AJAXRequestResult res, ServerSession session) throws OXException {
                 if (skipCount < 2) {
                     skipCount++;
                     throw new FlowControl.Later();
@@ -352,13 +352,13 @@ public class DefaultDispatcherTest extends TestCase {
             this.name = name;
         }
 
-        public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
             this.request = request;
             LOG.add(name+":incoming");
             return request;
         }
 
-        public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws AbstractOXException {
+        public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException {
             this.result = result;
             LOG.add(name+":outgoing");
             return result;

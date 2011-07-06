@@ -61,13 +61,13 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.folderstorage.messaging.MessagingFolderImpl;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.messaging.DefaultMessagingPermission;
-import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingPermission;
@@ -142,15 +142,15 @@ public final class MessagingFolderWriter {
 
     public static abstract class MessagingFolderFieldWriter {
 
-        public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder) throws MessagingException {
+        public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder) throws OXException {
             writeField(jsonContainer, serviceId, accountId, folder, null, -1);
         }
 
-        public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders) throws MessagingException {
+        public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders) throws OXException {
             writeField(jsonContainer, serviceId, accountId, folder, name, hasSubfolders, null, -1, false);
         }
 
-        public abstract void writeField(JSONValuePutter jsonContainer, String serviceId, int accountId, MessagingFolder folder, String name, int hasSubfolders, String id, int module, boolean all) throws MessagingException;
+        public abstract void writeField(JSONValuePutter jsonContainer, String serviceId, int accountId, MessagingFolder folder, String name, int hasSubfolders, String id, int module, boolean all) throws OXException;
     }
 
     /**
@@ -162,7 +162,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(DataObject.OBJECT_ID, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(
                         DataFields.ID,
@@ -175,7 +175,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(DataObject.CREATED_BY, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.CREATED_BY, Integer.valueOf(-1));
                 } catch (final JSONException e) {
@@ -186,7 +186,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(DataObject.MODIFIED_BY, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.MODIFIED_BY, Integer.valueOf(-1));
                 } catch (final JSONException e) {
@@ -197,7 +197,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(DataObject.CREATION_DATE, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.CREATION_DATE, Integer.valueOf(0));
                 } catch (final JSONException e) {
@@ -208,7 +208,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(DataObject.LAST_MODIFIED, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.LAST_MODIFIED, Integer.valueOf(0));
                 } catch (final JSONException e) {
@@ -219,7 +219,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderChildObject.FOLDER_ID, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     final Object parent;
                     if (null == folder.getParentId()) {
@@ -236,7 +236,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.FOLDER_NAME, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(FolderFields.TITLE, name == null ? folder.getName() : name);
                 } catch (final JSONException e) {
@@ -247,7 +247,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.MODULE, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(FolderFields.MODULE, AJAXServlet.getModuleString(module == -1 ? FolderObject.MESSAGING : module, -1));
                 } catch (final JSONException e) {
@@ -258,7 +258,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.TYPE, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(FolderFields.TYPE, Integer.valueOf(FolderObject.MESSAGING));
                 } catch (final JSONException e) {
@@ -269,7 +269,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.SUBFOLDERS, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     final boolean boolVal;
                     if (hasSubfolders == -1) {
@@ -289,7 +289,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.OWN_RIGHTS, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     final MessagingPermission mp;
                     if (folder.isRootFolder()) {
@@ -332,7 +332,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.PERMISSIONS_BITS, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     final JSONArray ja = new JSONArray();
                     final List<MessagingPermission> perms = folder.getPermissions();
@@ -355,7 +355,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.SUMMARY, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -372,7 +372,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.STANDARD_FOLDER, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -388,7 +388,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.TOTAL, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -402,7 +402,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.NEW, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -416,7 +416,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.UNREAD, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -430,7 +430,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.DELETED, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -444,7 +444,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.SUBSCRIBED, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -464,7 +464,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.SUBSCR_SUBFLDS, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     final Object boolVal;
                     if (!folder.getCapabilities().contains(MessagingFolder.CAPABILITY_SUBSCRIPTION)) {
@@ -486,7 +486,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(FolderObject.CAPABILITIES, new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     /*
                      * Put value
@@ -517,9 +517,9 @@ public final class MessagingFolderWriter {
      * @param folder The folder to write
      * @param session The server session
      * @return The written JSON object
-     * @throws MessagingException
+     * @throws OXException
      */
-    public static JSONObject writeMessagingFolder(final String serviceId, final int accountId, final MessagingFolder folder, final ServerSession session) throws MessagingException {
+    public static JSONObject writeMessagingFolder(final String serviceId, final int accountId, final MessagingFolder folder, final ServerSession session) throws OXException {
         final JSONObject jsonObject = new JSONObject();
         final JSONValuePutter putter = new JSONObjectPutter(jsonObject);
         final MessagingFolderFieldWriter[] writers = getMessagingFolderFieldWriter(ALL_FLD_FIELDS, session);
@@ -566,7 +566,7 @@ public final class MessagingFolderWriter {
                 retval[i] = new MessagingFolderFieldWriter() {
 
                     @Override
-                    public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+                    public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                         try {
                             /*
                              * Proper MessagingFolder-2-FolderObject conversion
@@ -593,7 +593,7 @@ public final class MessagingFolderWriter {
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
-    static int createPermissionBits(final MessagingPermission perm) throws MessagingException {
+    static int createPermissionBits(final MessagingPermission perm) throws OXException {
         return createPermissionBits(
             perm.getFolderPermission(),
             perm.getReadPermission(),
@@ -602,7 +602,7 @@ public final class MessagingFolderWriter {
             perm.isAdmin());
     }
 
-    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws MessagingException {
+    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws OXException {
         final int[] perms = new int[5];
         perms[0] = fp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
         perms[1] = orp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
@@ -612,7 +612,7 @@ public final class MessagingFolderWriter {
         return createPermissionBits(perms);
     }
 
-    private static int createPermissionBits(final int[] permission) throws MessagingException {
+    private static int createPermissionBits(final int[] permission) throws OXException {
         int retval = 0;
         boolean first = true;
         for (int i = permission.length - 1; i >= 0; i--) {

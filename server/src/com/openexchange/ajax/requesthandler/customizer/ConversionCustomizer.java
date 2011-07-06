@@ -54,7 +54,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -71,11 +71,11 @@ public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCus
         this.converter = converter;
     }
     
-    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
         return request;
     }
 
-    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException {
         String requestedFormat = request.getFormat();
         String actualFormat = result.getFormat();
         if (actualFormat.equals(requestedFormat)) {

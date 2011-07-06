@@ -57,7 +57,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONWriter;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
@@ -71,7 +71,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 		super(w);
 	}
 	
-	public void writeMetadata(final SearchIterator<DocumentMetadata> iter, final Metadata[] cols, final TimeZone tz) throws JSONException, AbstractOXException {
+	public void writeMetadata(final SearchIterator<DocumentMetadata> iter, final Metadata[] cols, final TimeZone tz) throws JSONException, OXException {
 		jsonWriter.array();
 		
 		fillArray(iter,cols,tz);
@@ -81,7 +81,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 	
 	
 	@Override
-	protected void fillArray(final SearchIterator<DocumentMetadata> iter, final Object[] cols, final TimeZone tz) throws JSONException, AbstractOXException {
+	protected void fillArray(final SearchIterator<DocumentMetadata> iter, final Object[] cols, final TimeZone tz) throws JSONException, OXException {
 		final WriterSwitch sw = new WriterSwitch(jsonWriter, tz);
 		
 		//The array contains one array for every DocumentMetadata, and filled according to the requested columns

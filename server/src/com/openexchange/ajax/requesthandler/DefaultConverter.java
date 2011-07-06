@@ -56,7 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -66,34 +66,34 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultConverter implements Converter {
 
-    private Map<String, List<Node>> understandsFormat = new ConcurrentHashMap<String, List<Node>>();
+    private final Map<String, List<Node>> understandsFormat = new ConcurrentHashMap<String, List<Node>>();
 
-    private Map<String, List<Node>> suppliesFormat = new ConcurrentHashMap<String, List<Node>>();
+    private final Map<String, List<Node>> suppliesFormat = new ConcurrentHashMap<String, List<Node>>();
 
-    private Map<Conversion, Step> cachedSteps = new ConcurrentHashMap<Conversion, Step>();
+    private final Map<Conversion, Step> cachedSteps = new ConcurrentHashMap<Conversion, Step>();
     
-    public void addConverter(ResultConverter converter) {
-        Node n = new Node();
+    public void addConverter(final ResultConverter converter) {
+        final Node n = new Node();
         n.converter = converter;
         {
             // First let's connect this node as a follow-up to all nodes outputting what we accept as input
-            Edge edge = new Edge();
+            final Edge edge = new Edge();
             edge.node = n;
 
-            List<Node> nodesWhoseOutputIsUnderstood = suppliesFormat.get(converter.getInputFormat());
+            final List<Node> nodesWhoseOutputIsUnderstood = suppliesFormat.get(converter.getInputFormat());
             if (nodesWhoseOutputIsUnderstood != null && !nodesWhoseOutputIsUnderstood.isEmpty()) {
-                for (Node node : nodesWhoseOutputIsUnderstood) {
+                for (final Node node : nodesWhoseOutputIsUnderstood) {
                     node.edges.add(edge);
                 }
             }
         }
         {
             // Next, we'll find our current followers
-            String outputFormat = converter.getOutputFormat();
-            List<Node> nodesWhoUnderstandMe = understandsFormat.get(outputFormat);
+            final String outputFormat = converter.getOutputFormat();
+            final List<Node> nodesWhoUnderstandMe = understandsFormat.get(outputFormat);
             if (nodesWhoUnderstandMe != null && !nodesWhoUnderstandMe.isEmpty()) {
-                for (Node node : nodesWhoUnderstandMe) {
-                    Edge edge = new Edge();
+                for (final Node node : nodesWhoUnderstandMe) {
+                    final Edge edge = new Edge();
                     edge.node = node;
                     n.edges.add(edge);
                 }
@@ -119,13 +119,13 @@ public class DefaultConverter implements Converter {
 
     }
     
-    public void removeConverter(ResultConverter thing) {
+    public void removeConverter(final ResultConverter thing) {
         // TODO Auto-generated method stub
         
     }
 
 
-    public void convert(String from, String to, AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws AbstractOXException {
+    public void convert(final String from, final String to, final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
         Step path = getShortestPath(from, to);
         while(path != null) {
             path.converter.convert(request, result, session, this);
@@ -134,13 +134,13 @@ public class DefaultConverter implements Converter {
         }
     }
 
-    public Step getShortestPath(String from, String to) {
-        Conversion conversion = new Conversion(from, to);
-        Step step = cachedSteps.get(conversion);
+    public Step getShortestPath(final String from, final String to) {
+        final Conversion conversion = new Conversion(from, to);
+        final Step step = cachedSteps.get(conversion);
         if(step != null) {
             return step;
         }
-        Map<Node, Mark> markings = new HashMap<Node, Mark>();
+        final Map<Node, Mark> markings = new HashMap<Node, Mark>();
         List<Edge> edges = getInitialEdges(from);
         Mark currentMark = new Mark();
         currentMark.weight = 0;
@@ -149,12 +149,12 @@ public class DefaultConverter implements Converter {
         while (true) {
             Mark nextMark = null;
             Node nextNode = null;
-            for (Edge edge : edges) {
+            for (final Edge edge : edges) {
                 if (edge.node.converter.getOutputFormat().equals(to)) {
                     // I guess we're done;
-                    Mark m = new Mark();
+                    final Mark m = new Mark();
                     m.previous = currentNode;
-                    Step newStep = unwind(m, edge, markings);
+                    final Step newStep = unwind(m, edge, markings);
                     cachedSteps.put(conversion, newStep);
                     return newStep;
                 }
@@ -185,8 +185,8 @@ public class DefaultConverter implements Converter {
                     }
                     currentNode = currentMark.previous;
                     currentMark = markings.get(currentNode);
-                    for (Edge edge : currentNode.edges) {
-                        Mark mark = markings.get(edge.node);
+                    for (final Edge edge : currentNode.edges) {
+                        final Mark mark = markings.get(edge.node);
                         if (!mark.visited && (nextMark == null || nextMark.weight > mark.weight)) {
                             nextMark = mark;
                             nextNode = edge.node;
@@ -203,12 +203,12 @@ public class DefaultConverter implements Converter {
 
     }
 
-    private Step unwind(Mark currentMark, Edge edge, Map<Node, Mark> markings) {
+    private Step unwind(Mark currentMark, final Edge edge, final Map<Node, Mark> markings) {
         Step current = new Step();
         current.converter = edge.node.converter;
         
         while (currentMark.previous != null) {
-            Step step = new Step();
+            final Step step = new Step();
             step.converter = currentMark.previous.converter;
             step.next = current;
             current = step;
@@ -219,15 +219,15 @@ public class DefaultConverter implements Converter {
     }
 
     // Synthetic edges for entry
-    private List<Edge> getInitialEdges(String format) {
-        List<Node> list = understandsFormat.get(format);
+    private List<Edge> getInitialEdges(final String format) {
+        final List<Node> list = understandsFormat.get(format);
         
         if(list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Can't convert from "+format);
         }
-        List<Edge> edges = new ArrayList<Edge>(list.size());
-        for (Node node : list) {
-            Edge edge = new Edge();
+        final List<Edge> edges = new ArrayList<Edge>(list.size());
+        for (final Node node : list) {
+            final Edge edge = new Edge();
             edge.node = node;
             edges.add(edge);
         }
@@ -277,7 +277,7 @@ public class DefaultConverter implements Converter {
         private final String to;
         private final int hashCode;
         
-        Conversion(String from, String to) {
+        Conversion(final String from, final String to) {
             super();
             this.from = from;
             this.to = to;
@@ -293,7 +293,7 @@ public class DefaultConverter implements Converter {
             return hashCode;
         }
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -303,7 +303,7 @@ public class DefaultConverter implements Converter {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            Conversion other = (Conversion) obj;
+            final Conversion other = (Conversion) obj;
             if (from == null) {
                 if (other.from != null) {
                     return false;

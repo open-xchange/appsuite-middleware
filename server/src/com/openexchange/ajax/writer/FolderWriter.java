@@ -64,9 +64,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -123,9 +121,9 @@ public final class FolderWriter extends DataWriter {
          * @param withKey <code>true</code> to include JSON key; otherwise <code>false</code>
          * @throws JSONException If a JSON error occurs
          * @throws SQLException If a SQL error occurs
-         * @throws AbstractOXException If an OX error occurs
+         * @throws OXException If an OX error occurs
          */
-        public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey) throws JSONException, SQLException, AbstractOXException {
+        public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey) throws JSONException, SQLException, OXException {
             writeField(jsonwriter, fo, withKey, null, -1);
         }
 
@@ -139,9 +137,9 @@ public final class FolderWriter extends DataWriter {
          * @param hasSubfolders <code>1</code> to indicate subfolders, <code>0</code> to indicate no subfolders, or <code>-1</code> to omit
          * @throws JSONException If a JSON error occurs
          * @throws SQLException If a SQL error occurs
-         * @throws AbstractOXException If an OX error occurs
+         * @throws OXException If an OX error occurs
          */
-        public abstract void writeField(JSONWriter jsonwriter, FolderObject fo, boolean withKey, String name, int hasSubfolders) throws JSONException, SQLException, AbstractOXException;
+        public abstract void writeField(JSONWriter jsonwriter, FolderObject fo, boolean withKey, String name, int hasSubfolders) throws JSONException, SQLException, OXException;
     }
 
     private static final TIntObjectHashMap<FolderFieldWriter> STATIC_WRITERS_MAP = new TIntObjectHashMap<FolderFieldWriter>(15);
@@ -403,8 +401,8 @@ public final class FolderWriter extends DataWriter {
             throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final AbstractOXException e) {
-            throw new OXFolderException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -446,8 +444,8 @@ public final class FolderWriter extends DataWriter {
             throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final AbstractOXException e) {
-            throw new OXFolderException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
@@ -551,7 +549,7 @@ public final class FolderWriter extends DataWriter {
                     retval[i] = new FolderFieldWriter() {
 
                         @Override
-                        public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException, DBPoolingException, OXException, SearchIteratorException, SQLException {
+                        public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException, OXException, SearchIteratorException, SQLException {
                             final boolean shared = fo.containsCreatedBy() && fo.containsType() && fo.isShared(user.getId());
                             if (withKey) {
                                 if (hasSubfolders != -1 || shared || fo.containsSubfolderFlag()) {
@@ -574,7 +572,7 @@ public final class FolderWriter extends DataWriter {
                     retval[i] = new FolderFieldWriter() {
 
                         @Override
-                        public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException, OXException, DBPoolingException, SQLException {
+                        public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException, OXException, SQLException {
                             if (!fo.containsPermissions()) {
                                 try {
                                     fo.setPermissionsAsArray(FolderObject.getFolderPermissions(fo.getObjectID(), ctx, null));
@@ -582,11 +580,6 @@ public final class FolderWriter extends DataWriter {
                                         FolderCacheManager.getInstance().putFolderObject(fo, ctx);
                                     }
                                 } catch (final SQLException e) {
-                                    throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(e,
-                                        FolderFields.OWN_RIGHTS,
-                                        Integer.valueOf(fo.getObjectID()),
-                                        Integer.valueOf(ctx.getContextId()));
-                                } catch (final DBPoolingException e) {
                                     throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(e,
                                         FolderFields.OWN_RIGHTS,
                                         Integer.valueOf(fo.getObjectID()),
@@ -619,8 +612,6 @@ public final class FolderWriter extends DataWriter {
                                     }
                                 } catch (final SQLException e) {
                                     throw OXFolderExceptionCode.MISSING_PARAMETER.create(e, FolderFields.PERMISSIONS);
-                                } catch (final DBPoolingException e) {
-                                    throw OXFolderExceptionCode.MISSING_PARAMETER.create(e, FolderFields.PERMISSIONS);
                                 }
                             }
                             /*
@@ -652,8 +643,6 @@ public final class FolderWriter extends DataWriter {
                                             ja.put(jo);
                                         }
                                     }
-                                } catch (final DBPoolingException e) {
-                                    throw new OXException(e);
                                 } catch (final SQLException e) {
                                     throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                                 }

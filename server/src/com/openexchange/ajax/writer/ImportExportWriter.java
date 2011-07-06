@@ -58,7 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
 
@@ -92,7 +92,7 @@ public class ImportExportWriter extends DataWriter {
 
 	public void writeObject(final ImportResult importResult) throws JSONException {
         if (importResult.hasError()) {
-            final AbstractOXException exception = importResult.getException();
+            final OXException exception = importResult.getException();
             final JSONObject jsonObject = new JSONObject();
             ResponseWriter.addException(jsonObject, exception, false);
 

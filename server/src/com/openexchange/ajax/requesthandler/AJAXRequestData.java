@@ -63,11 +63,10 @@ import java.util.Map.Entry;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.strings.StringParser;
 
@@ -194,7 +193,7 @@ public class AJAXRequestData {
      * @param coerceTo The type the parameter should be interpreted as
      * @return
      */
-    public <T> T getParameter(final String name, Class<T> coerceTo) {
+    public <T> T getParameter(final String name, final Class<T> coerceTo) {
         return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(getParameter(name), coerceTo);
     }
 
@@ -265,7 +264,7 @@ public class AJAXRequestData {
      *
      * @param format The format to set
      */
-    public void setFormat(String format) {
+    public void setFormat(final String format) {
         this.format = format;
     }
     
@@ -326,8 +325,8 @@ public class AJAXRequestData {
     /**
      * Require a set of mandatory parameters, throw an exception, if a parameter is missing otherwise.
      */
-    public void require(final String...mandatoryParameters) throws AbstractOXException {
-        List<String> missingParameters = getMissingParameters(mandatoryParameters);
+    public void require(final String...mandatoryParameters) throws OXException {
+        final List<String> missingParameters = getMissingParameters(mandatoryParameters);
         if(!missingParameters.isEmpty()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( missingParameters.toString());
         }
@@ -336,28 +335,28 @@ public class AJAXRequestData {
     /**
      * Finds out if a parameter is set
      */
-    public boolean isSet(String paramName) {
+    public boolean isSet(final String paramName) {
         return params.containsKey(paramName);
     }
     
     /**
      * Sets a header value
      */
-    public void setHeader(String header, String value) {
+    public void setHeader(final String header, final String value) {
         headers.put(header, value);
     }
 
     /**
      * Gets a header value
      */
-    public String getHeader(String header) {
+    public String getHeader(final String header) {
         return headers.get(header);
     }
     
     /**
      * Gets a header value
      */
-    public <T> T getHeader(String header, Class<T> coerceTo) {
+    public <T> T getHeader(final String header, final Class<T> coerceTo) {
         return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(getHeader(header), coerceTo);
     }
     
@@ -507,7 +506,7 @@ public class AJAXRequestData {
     }
 
     
-    public void setModule(String module) {
+    public void setModule(final String module) {
         this.module = module;
     }
 
@@ -517,11 +516,11 @@ public class AJAXRequestData {
     }
 
     
-    public void setAction(String action) {
+    public void setAction(final String action) {
         this.action = action;
     }
 
-    public void setData(Object object, String format) {
+    public void setData(final Object object, final String format) {
         setData(object);
         setFormat(format);
     }

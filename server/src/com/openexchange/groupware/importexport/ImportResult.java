@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * Contains information on the result of an import as done by
@@ -71,11 +70,11 @@ public class ImportResult {
 	
 	private String objectId;
 	private String folder;
-	private AbstractOXException exception;
+	private OXException exception;
 	private Date date;
 	private int entryNumber;
 	private String content;
-    private List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+    private final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
 
     /**
@@ -103,7 +102,7 @@ public class ImportResult {
 	 * @param timestamp
 	 * @param exception
 	 */
-	public ImportResult(final String objectId, final String folder, final Date date, final AbstractOXException exception){
+	public ImportResult(final String objectId, final String folder, final Date date, final OXException exception){
 		this(objectId, folder, date, exception, -1, null);
 	}
 
@@ -114,7 +113,7 @@ public class ImportResult {
 	 * @param timestamp
 	 * @param exception
 	 */
-	public ImportResult(final String objectId, final String folder, final Date date, final AbstractOXException exception, final int entryNumber, final String content){
+	public ImportResult(final String objectId, final String folder, final Date date, final OXException exception, final int entryNumber, final String content){
 		this.objectId = objectId;
 		this.folder = folder;
 		this.date = date;
@@ -153,10 +152,10 @@ public class ImportResult {
 	public boolean hasError(){
 		return exception != null;
 	}
-	public AbstractOXException getException() {
+	public OXException getException() {
 		return this.exception;
 	}
-	public void setException(final AbstractOXException exception){
+	public void setException(final OXException exception){
 		this.exception = exception;
 	}
 	public String getObjectId() {
@@ -195,7 +194,7 @@ public class ImportResult {
         return warnings;
     }
 
-    public void addWarnings(List<ConversionWarning> warningList) {
+    public void addWarnings(final List<ConversionWarning> warningList) {
         warnings.addAll(warningList);
     }
 }
