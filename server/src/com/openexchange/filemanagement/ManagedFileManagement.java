@@ -51,6 +51,7 @@ package com.openexchange.filemanagement;
 
 import java.io.File;
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ManagedFileManagement} - The file management designed to keep large content as a temporary file on disk.
@@ -75,18 +76,18 @@ public interface ManagedFileManagement {
      * </ol>
      * 
      * @return A new temporary file
-     * @throws ManagedFileException If a temporary file could not be created
+     * @throws OXException If a temporary file could not be created
      */
-    public File newTempFile() throws ManagedFileException;
+    public File newTempFile() throws OXException;
 
     /**
      * Creates a new managed file from specified temporary file.
      * 
      * @param temporaryFile A temporary file (previously obtained from {@link #newTempFile()}
      * @return A new managed file
-     * @throws ManagedFileException If a new managed file cannot be created from specified temporary file
+     * @throws OXException If a new managed file cannot be created from specified temporary file
      */
-    public ManagedFile createManagedFile(final File temporaryFile) throws ManagedFileException;
+    public ManagedFile createManagedFile(final File temporaryFile) throws OXException;
 
     /**
      * Creates a new managed file from specified input stream.
@@ -95,9 +96,9 @@ public interface ManagedFileManagement {
      * 
      * @param inputStream The input stream whose content is filled into newly created file
      * @return A new managed file
-     * @throws ManagedFileException If a new managed file cannot be created from specified content
+     * @throws OXException If a new managed file cannot be created from specified content
      */
-    public ManagedFile createManagedFile(InputStream inputStream) throws ManagedFileException;
+    public ManagedFile createManagedFile(InputStream inputStream) throws OXException;
 
     /**
      * Creates a new managed file from specified bytes.
@@ -106,18 +107,18 @@ public interface ManagedFileManagement {
      * 
      * @param bytes The bytes which are filled into newly created file
      * @return A new managed file
-     * @throws ManagedFileException If a new managed file cannot be created from specified content
+     * @throws OXException If a new managed file cannot be created from specified content
      */
-    public ManagedFile createManagedFile(byte[] bytes) throws ManagedFileException;
+    public ManagedFile createManagedFile(byte[] bytes) throws OXException;
 
     /**
      * Gets an existing managed file by its unique ID and updates its last-accessed time stamp if found.
      * 
      * @param id The managed file's unique ID
      * @return The managed file associated with specified unique ID.
-     * @throws ManagedFileException If no such managed file exists or cannot be returned
+     * @throws OXException If no such managed file exists or cannot be returned
      */
-    public ManagedFile getByID(String id) throws ManagedFileException;
+    public ManagedFile getByID(String id) throws OXException;
 
     /**
      * Checks for an existing managed file of which unique ID matches given unique ID. If such a managed file is found, its last-accessed
@@ -132,9 +133,9 @@ public interface ManagedFileManagement {
      * Manually removes an existing managed file by its unique ID.
      * 
      * @param id The managed file's unique ID
-     * @throws ManagedFileException If managed file exists and cannot be removed
+     * @throws OXException If managed file exists and cannot be removed
      */
-    public void removeByID(String id) throws ManagedFileException;
+    public void removeByID(String id) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified bytes with default capacity.
@@ -143,9 +144,9 @@ public interface ManagedFileManagement {
      * memory consumption.
      * 
      * @param bytes The bytes held by this input stream
-     * @throws ManagedFileException If size exceeds memory limit and an appropriate managed file cannot be created.
+     * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final byte[] bytes) throws ManagedFileException;
+    public InputStream createInputStream(final byte[] bytes) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified bytes.
@@ -155,9 +156,9 @@ public interface ManagedFileManagement {
      * 
      * @param bytes The bytes held by this input stream
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
-     * @throws ManagedFileException If size exceeds memory limit and an appropriate managed file cannot be created.
+     * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final byte[] bytes, final int capacity) throws ManagedFileException;
+    public InputStream createInputStream(final byte[] bytes, final int capacity) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified input stream with default capacity and unknown stream size.
@@ -166,9 +167,9 @@ public interface ManagedFileManagement {
      * file to reduce memory consumption.
      * 
      * @param in The input stream to manage
-     * @throws ManagedFileException If an appropriate managed file cannot be created.
+     * @throws OXException If an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final InputStream in) throws ManagedFileException;
+    public InputStream createInputStream(final InputStream in) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified input stream with unknown stream size.
@@ -178,9 +179,9 @@ public interface ManagedFileManagement {
      * 
      * @param in The input stream to manage
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
-     * @throws ManagedFileException If an appropriate managed file cannot be created.
+     * @throws OXException If an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final InputStream in, final int capacity) throws ManagedFileException;
+    public InputStream createInputStream(final InputStream in, final int capacity) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified input stream.
@@ -191,7 +192,7 @@ public interface ManagedFileManagement {
      * @param in The input stream to manage
      * @param size The stream's size; leave to <code>-1</code> if unknown
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
-     * @throws ManagedFileException If size exceeds memory limit and an appropriate managed file cannot be created.
+     * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final InputStream in, final int size, final int capacity) throws ManagedFileException;
+    public InputStream createInputStream(final InputStream in, final int size, final int capacity) throws OXException;
 }

@@ -85,7 +85,7 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -228,7 +228,7 @@ public class MIMEMessageFiller {
                 for (int i = 0; i < size; i++) {
                     try {
                         mfm.removeByID(iter.next());
-                    } catch (final ManagedFileException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
@@ -1266,7 +1266,7 @@ public class MIMEMessageFiller {
                 if (mfm.contains(id)) {
                     try {
                         imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
-                    } catch (final ManagedFileException e) {
+                    } catch (final OXException e) {
                         if (LOG.isWarnEnabled()) {
                             tmp.setLength(0);
                             LOG.warn(

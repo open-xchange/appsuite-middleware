@@ -80,7 +80,7 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -788,7 +788,7 @@ public final class MessageParser {
         final ManagedFile managedFile;
         try {
             managedFile = management.getByID(seqId.substring(FILE_PREFIX.length()));
-        } catch (final ManagedFileException e) {
+        } catch (final OXException e) {
             LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()), e);
             return;
         }

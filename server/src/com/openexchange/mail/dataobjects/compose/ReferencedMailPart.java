@@ -61,7 +61,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Part;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -208,7 +208,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             final ManagedFile mf;
             try {
                 mf = mfm.createManagedFile(in);
-            } catch (final ManagedFileException e) {
+            } catch (final OXException e) {
                 final IOException ioerr = new IOException();
                 ioerr.initCause(e);
                 throw ioerr;
@@ -287,7 +287,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return managedFile.getInputStream();
-                            } catch (final ManagedFileException e) {
+                            } catch (final OXException e) {
                                 final IOException err = new IOException();
                                 err.initCause(e);
                                 throw err;
@@ -342,7 +342,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             cachedContent = readStream(fis, charset);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final ManagedFileException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             if (fis != null) {
@@ -388,7 +388,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 return file.getInputStream();
             }
             throw MailExceptionCode.NO_CONTENT.create();
-        } catch (final ManagedFileException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

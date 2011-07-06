@@ -72,7 +72,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.mail.MailExceptionCode;
@@ -382,7 +382,7 @@ public final class MIMEStructure2ComposedMailParser {
                         }
                     }
                     attachmentHandler.addAttachment(mailPart);
-                } catch (final ManagedFileException e) {
+                } catch (final OXException e) {
                     org.apache.commons.logging.LogFactory.getLog(MIMEStructure2ComposedMailParser.class).warn(
                         "Creating managed file failed. Using in-memory version instead.",
                         e);

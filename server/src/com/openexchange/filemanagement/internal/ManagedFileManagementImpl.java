@@ -66,10 +66,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
-import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -219,23 +218,23 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             TimeUnit.MILLISECONDS);
     }
 
-    public InputStream createInputStream(final byte[] bytes) throws ManagedFileException {
+    public InputStream createInputStream(final byte[] bytes) throws OXException {
         return new ManagedInputStream(bytes, this);
     }
 
-    public InputStream createInputStream(final byte[] bytes, final int capacity) throws ManagedFileException {
+    public InputStream createInputStream(final byte[] bytes, final int capacity) throws OXException {
         return new ManagedInputStream(bytes, capacity, this);
     }
 
-    public InputStream createInputStream(final InputStream in) throws ManagedFileException {
+    public InputStream createInputStream(final InputStream in) throws OXException {
         return new ManagedInputStream(in, this);
     }
 
-    public InputStream createInputStream(final InputStream in, final int capacity) throws ManagedFileException {
+    public InputStream createInputStream(final InputStream in, final int capacity) throws OXException {
         return new ManagedInputStream(in, capacity, this);
     }
 
-    public InputStream createInputStream(final InputStream in, final int size, final int capacity) throws ManagedFileException {
+    public InputStream createInputStream(final InputStream in, final int size, final int capacity) throws OXException {
         return new ManagedInputStream(in, size, capacity, this);
     }
 
@@ -246,7 +245,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         files.clear();
     }
 
-    public File newTempFile() throws ManagedFileException {
+    public File newTempFile() throws OXException {
         File tmpFile = null;
         File directory = null;
         do {
@@ -267,28 +266,28 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
                     LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
                 }
-                throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.IO_ERROR, e, e.getMessage());
+                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             }
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         return tmpFile;
     }
     
-    public ManagedFile createManagedFile(final File temporaryFile) throws ManagedFileException {
+    public ManagedFile createManagedFile(final File temporaryFile) throws OXException {
         final ManagedFile mf = new ManagedFileImpl(UUID.randomUUID().toString(), temporaryFile);
         mf.setSize(temporaryFile.length());
         files.put(mf.getID(), mf);
         return mf;
     }
 
-    public ManagedFile createManagedFile(final byte[] bytes) throws ManagedFileException {
+    public ManagedFile createManagedFile(final byte[] bytes) throws OXException {
         return createManagedFile0(new UnsynchronizedByteArrayInputStream(bytes), false);
     }
 
-    public ManagedFile createManagedFile(final InputStream inputStream) throws ManagedFileException {
+    public ManagedFile createManagedFile(final InputStream inputStream) throws OXException {
         return createManagedFile0(inputStream, true);
     }
 
-    private ManagedFile createManagedFile0(final InputStream inputStream, final boolean closeStream) throws ManagedFileException {
+    private ManagedFile createManagedFile0(final InputStream inputStream, final boolean closeStream) throws OXException {
         ManagedFile mf = null;
         File tmpFile = null;
         File directory = null;
@@ -328,7 +327,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
                     LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
                 }
-                throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.IO_ERROR, e, e.getMessage());
+                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             } finally {
                 if (closeStream) {
                     try {
@@ -354,10 +353,10 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return true;
     }
 
-    public ManagedFile getByID(final String id) throws ManagedFileException {
+    public ManagedFile getByID(final String id) throws OXException {
         final ManagedFile mf = files.get(id);
         if (null == mf || mf.isDeleted()) {
-            throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.NOT_FOUND, id);
+            throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
         }
         mf.touch();
         return mf;

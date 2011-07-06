@@ -59,7 +59,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.exception.OXException;
@@ -215,7 +215,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                         if (null != fileId) {
                             try {
                                 mfm.removeByID(fileId);
-                            } catch (final ManagedFileException e) {
+                            } catch (final OXException e) {
                                 LOG.warn(e.getMessage(), e);
                             }
                         }
@@ -224,7 +224,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                         if (null != fileId) {
                             try {
                                 mfm.removeByID(fileId);
-                            } catch (final ManagedFileException e) {
+                            } catch (final OXException e) {
                                 LOG.warn(e.getMessage(), e);
                             }
                         }

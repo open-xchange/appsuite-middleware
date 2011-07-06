@@ -49,7 +49,7 @@
 
 package com.openexchange.filemanagement;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link ManagedFileExceptionMessages} - Localizable strings for managed file exceptions.

@@ -110,7 +110,7 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
@@ -705,7 +705,7 @@ public final class ServerActivator extends DeferredActivator {
             SearchExceptionFactory.getInstance()));
         componentRegistrationList.add(new ComponentRegistration(
             context,
-            ManagedFileException.MANAGED_FILE_COMPONENT,
+            OXException.MANAGED_FILE_COMPONENT,
             "com.openexchange.filemanagement",
             ManagedFileExceptionFactory.getInstance()));
         componentRegistrationList.add(new ComponentRegistration(

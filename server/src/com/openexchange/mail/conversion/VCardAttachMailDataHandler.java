@@ -68,7 +68,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -258,7 +258,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(vcard.getClass().getName());
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final ManagedFileException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

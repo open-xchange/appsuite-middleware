@@ -52,9 +52,8 @@ package com.openexchange.filemanagement.internal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
-import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -81,9 +80,9 @@ public final class ManagedInputStream extends InputStream {
      * 
      * @param bytes The bytes held by this input stream
      * @param management The file management possibly used
-     * @throws ManagedFileException If size exceeds memory limit and an appropriate managed file cannot be created.
+     * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public ManagedInputStream(final byte[] bytes, final ManagedFileManagement management) throws ManagedFileException {
+    public ManagedInputStream(final byte[] bytes, final ManagedFileManagement management) throws OXException {
         this(bytes, SIZE_LIMIT, management);
     }
 
@@ -93,9 +92,9 @@ public final class ManagedInputStream extends InputStream {
      * @param bytes The bytes held by this input stream
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @param management The file management possibly used
-     * @throws ManagedFileException If size exceeds memory limit and an appropriate managed file cannot be created.
+     * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public ManagedInputStream(final byte[] bytes, final int capacity, final ManagedFileManagement management) throws ManagedFileException {
+    public ManagedInputStream(final byte[] bytes, final int capacity, final ManagedFileManagement management) throws OXException {
         super();
         if (bytes.length <= capacity) {
             // keep in memory
@@ -112,9 +111,9 @@ public final class ManagedInputStream extends InputStream {
      * 
      * @param in The input stream to manage
      * @param management The file management possibly used
-     * @throws ManagedFileException If an appropriate managed file cannot be created.
+     * @throws OXException If an appropriate managed file cannot be created.
      */
-    public ManagedInputStream(final InputStream in, final ManagedFileManagement management) throws ManagedFileException {
+    public ManagedInputStream(final InputStream in, final ManagedFileManagement management) throws OXException {
         this(in, -1, SIZE_LIMIT, management);
     }
 
@@ -124,9 +123,9 @@ public final class ManagedInputStream extends InputStream {
      * @param in The input stream to manage
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @param management The file management possibly used
-     * @throws ManagedFileException If an appropriate managed file cannot be created.
+     * @throws OXException If an appropriate managed file cannot be created.
      */
-    public ManagedInputStream(final InputStream in, final int capacity, final ManagedFileManagement management) throws ManagedFileException {
+    public ManagedInputStream(final InputStream in, final int capacity, final ManagedFileManagement management) throws OXException {
         this(in, -1, capacity, management);
     }
 
@@ -137,9 +136,9 @@ public final class ManagedInputStream extends InputStream {
      * @param size The stream's size; leave to <code>-1</code> if unknown
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @param management The file management possibly used
-     * @throws ManagedFileException If size exceeds memory limit and an appropriate managed file cannot be created.
+     * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public ManagedInputStream(final InputStream in, final int size, final int capacity, final ManagedFileManagement management) throws ManagedFileException {
+    public ManagedInputStream(final InputStream in, final int size, final int capacity, final ManagedFileManagement management) throws OXException {
         super();
         if (size >= 0 && size <= capacity) {
             // keep in memory
@@ -164,7 +163,7 @@ public final class ManagedInputStream extends InputStream {
                     in.close();
                 }
             } catch (final IOException e) {
-                throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.IO_ERROR, e, e.getMessage());
+                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             } finally {
                 try {
                     in.close();

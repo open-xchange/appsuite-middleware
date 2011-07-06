@@ -56,10 +56,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
-import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 
 /**
  * {@link ManagedFileImpl} - Implementation of a managed file.
@@ -137,7 +136,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         return id;
     }
 
-    public InputStream getInputStream() throws ManagedFileException {
+    public InputStream getInputStream() throws OXException {
         if (!file.exists()) {
             return null;
         }
@@ -147,7 +146,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
             listeners.offer(retval);
             return retval;
         } catch (final FileNotFoundException e) {
-            throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.FILE_NOT_FOUND, e, file.getPath());
+            throw ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.create(e, file.getPath());
         }
     }
 

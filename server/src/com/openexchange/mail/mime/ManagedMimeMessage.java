@@ -57,7 +57,7 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.SharedFileInputStream;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -114,7 +114,7 @@ public final class ManagedMimeMessage extends MimeMessage {
                 try {
                     managedFile = management.createManagedFile(contentBytes);
                     contentStream = new SharedFileInputStream(managedFile.getFile(), maxInMemorySize);
-                } catch (final ManagedFileException e) {
+                } catch (final OXException e) {
                     throw new MessagingException(e.getMessage(), e);
                 }
             }
@@ -139,7 +139,7 @@ public final class ManagedMimeMessage extends MimeMessage {
             if (null != management) {
                 try {
                     management.removeByID(managedFile.getID());
-                } catch (final ManagedFileException e) {
+                } catch (final OXException e) {
                     throw new MessagingException(e.getMessage(), e);
                 }
             }

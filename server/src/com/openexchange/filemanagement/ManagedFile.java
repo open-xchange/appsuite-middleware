@@ -51,6 +51,7 @@ package com.openexchange.filemanagement;
 
 import java.io.File;
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ManagedFile} - Holds a file on disk with a time-out setting.
@@ -120,9 +121,9 @@ public interface ManagedFile {
      * Gets the backed file's content as an input stream.
      * 
      * @return The backed file's content as an input stream or <code>null</code> if already deleted.
-     * @throws ManagedFileException If file content cannot be returned as an input stream.
+     * @throws OXException If file content cannot be returned as an input stream.
      */
-    public InputStream getInputStream() throws ManagedFileException;
+    public InputStream getInputStream() throws OXException;
 
     /**
      * Gets last-access timestamp.

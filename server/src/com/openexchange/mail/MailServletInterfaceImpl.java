@@ -84,7 +84,7 @@ import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -963,7 +963,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (final IOException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
-        } catch (final ManagedFileException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             for (int i = 0; i < files.length; i++) {
