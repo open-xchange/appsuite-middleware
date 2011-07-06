@@ -225,9 +225,7 @@ public class SyncServlet extends PermissionServlet {
 						folderSyncInterface.clearFolder(delFolderObj, timestamp);
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
 					} else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-					    throw new OXFolderException(
-                            OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                            getUserName(sessionObj.getUserId(), ctx),
+					    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(getUserName(sessionObj.getUserId(), ctx),
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
 					} else {

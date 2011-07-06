@@ -358,9 +358,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             case FolderObject.PROJECT:
                 break;
             default:
-                throw new OXFolderException(
-                    OXFolderExceptionCode.UNKNOWN_MODULE,
-                    Integer.valueOf(imodule),
+                throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(imodule),
                     Integer.valueOf(event.getContext().getContextId()));
             }
         }

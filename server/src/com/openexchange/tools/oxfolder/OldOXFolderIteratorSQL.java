@@ -663,9 +663,7 @@ public final class OldOXFolderIteratorSQL {
                     /*
                      * Starting folder is not visible to user
                      */
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NOT_VISIBLE,
-                        Integer.valueOf(folderId),
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId),
                         getUserName(userId, ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
@@ -723,9 +721,7 @@ public final class OldOXFolderIteratorSQL {
                     virtualParent = FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID;
                     break;
                 default:
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.UNKNOWN_MODULE,
-                        STR_EMPTY,
+                    throw OXFolderExceptionCode.UNKNOWN_MODULE.create(STR_EMPTY,
                         folderModule2String(fo.getModule()),
                         Integer.valueOf(ctx.getContextId()));
                 }

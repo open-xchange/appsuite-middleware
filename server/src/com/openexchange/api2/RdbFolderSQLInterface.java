@@ -64,10 +64,7 @@ import java.util.Set;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -80,8 +77,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -132,12 +127,12 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         return retval;
     }
 
-    private static final int[] VIRTUAL_IDS =
-        {
-            FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-            FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+    private static final int[] VIRTUAL_IDS = {
+        FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+        FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RdbFolderSQLInterface.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RdbFolderSQLInterface.class));
 
     private final int userId;
 
@@ -177,8 +172,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
      */
     public FolderObject getUsersInfostoreFolder() throws OXException {
         if (!userConfiguration.hasInfostore()) {
-            throw new OXFolderException(
-                OXFolderExceptionCode.NO_MODULE_ACCESS,
+            throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                 getUserName(session),
                 folderModule2String(FolderObject.INFOSTORE),
                 Integer.valueOf(ctx.getContextId()));
@@ -215,33 +209,27 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             final EffectivePermission perm = fo.getEffectiveUserPermission(userId, userConfiguration);
             if (!perm.isFolderVisible()) {
                 if (!perm.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(
-                        OXFolderExceptionCode.NOT_VISIBLE,
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(
                         Integer.valueOf(id),
                         getUserName(session),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NOT_VISIBLE,
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(
                     Integer.valueOf(id),
                     getUserName(session),
                     Integer.valueOf(ctx.getContextId()));
             } else if (fo.isShared(session.getUserId()) && !userConfiguration.hasFullSharedFolderAccess()) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_SHARED_FOLDER_ACCESS,
+                throw OXFolderExceptionCode.NO_SHARED_FOLDER_ACCESS.create(
                     getUserName(session),
                     getFolderName(id, ctx),
                     Integer.valueOf(ctx.getContextId()));
             } else if (Arrays.binarySearch(userConfiguration.getAccessibleModules(), fo.getModule()) < 0) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_MODULE_ACCESS,
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                     getUserName(session),
                     folderModule2String(fo.getModule()),
                     Integer.valueOf(ctx.getContextId()));
             }
             return fo;
-        } catch (final DBPoolingException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -253,8 +241,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
      */
     public FolderObject saveFolderObject(final FolderObject folderobjectArg, final Date clientLastModified) throws OXException {
         if (folderobjectArg.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess() && (!folderobjectArg.containsModule() || folderobjectArg.getModule() != FolderObject.INFOSTORE)) {
-            throw new OXFolderException(
-                OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
+            throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(
                 getUserName(session),
                 (folderobjectArg.containsObjectID() && folderobjectArg.getObjectID() > 0 ? getFolderName(folderobjectArg) : ""),
                 Integer.valueOf(ctx.getContextId()));
@@ -265,15 +252,11 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         try {
             if (insert) {
                 if (!folderobject.containsParentFolderID()) {
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE,
-                        FolderFields.FOLDER_ID,
-                        Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.FOLDER_ID, Integer.valueOf(ctx.getContextId()));
                 }
                 final int parentFolderID = folderobject.getParentFolderID();
                 if (parentFolderID == FolderObject.SYSTEM_PUBLIC_FOLDER_ID && !userConfiguration.hasFullPublicFolderAccess()) {
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
+                    throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(
                         getUserName(session),
                         (folderobjectArg.containsObjectID() && folderobjectArg.getObjectID() > 0 ? getFolderName(folderobjectArg) : ""),
                         Integer.valueOf(ctx.getContextId()));
@@ -283,45 +266,39 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                         FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
                         FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
                 if (Arrays.binarySearch(virtualIDs, parentFolderID) > -1) {
-                    throw new OXFolderPermissionException(OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION, getUserName(session), getFolderName(
-                        parentFolderID,
-                        ctx), Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(
+                        getUserName(session),
+                        getFolderName(parentFolderID, ctx),
+                        Integer.valueOf(ctx.getContextId()));
                 }
                 final FolderObject parentFolder = oxfolderAccess.getFolderObject(parentFolderID);
                 final EffectivePermission parentalEffectivePerm = parentFolder.getEffectiveUserPermission(userId, userConfiguration);
                 if (!parentalEffectivePerm.hasModuleAccess(folderobject.getModule())) {
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NO_MODULE_ACCESS,
+                    throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                         getUserName(session),
                         folderModule2String(folderobject.getModule()),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 if (!parentalEffectivePerm.isFolderVisible()) {
                     if (!parentalEffectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                        throw new OXFolderPermissionException(
-                            OXFolderExceptionCode.NOT_VISIBLE,
+                        throw OXFolderExceptionCode.NOT_VISIBLE.create(
                             Integer.valueOf(parentFolderID),
                             getUserName(session),
                             Integer.valueOf(ctx.getContextId()));
                     }
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NOT_VISIBLE,
-                        CATEGORY_PERMISSION_DENIED,
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(
                         Integer.valueOf(parentFolderID),
                         getUserName(session),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 if (!parentalEffectivePerm.canCreateSubfolders()) {
                     if (!parentalEffectivePerm.getUnderlyingPermission().canCreateSubfolders()) {
-                        throw new OXFolderPermissionException(
-                            OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION,
+                        throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(
                             getUserName(session),
                             getFolderName(parentFolderID, ctx),
                             Integer.valueOf(ctx.getContextId()));
                     }
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION,
-                        CATEGORY_PERMISSION_DENIED,
+                    throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(
                         getUserName(session),
                         getFolderName(parentFolderID, ctx),
                         Integer.valueOf(ctx.getContextId()));
@@ -332,49 +309,39 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             } else {
                 folderobject.fill(oxfolderAccess.getFolderObject(folderobject.getObjectID()), false);
                 if (!folderobject.exists(ctx)) {
-                    throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx);
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderobject.getObjectID(), ctx.getContextId());
                 }
                 if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
-                    throw new OXConcurrentModificationException(
-                        EnumComponent.FOLDER,
-                        OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION,
-                        new Object[0]);
+                    throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(folderobject.getObjectID(), ctx.getContextId());
                 }
                 final EffectivePermission effectivePerm =
                     oxfolderAccess.getFolderPermission(folderobject.getObjectID(), userId, userConfiguration);
                 if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NO_MODULE_ACCESS,
+                    throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                         getUserName(session),
                         folderModule2String(folderobject.getModule()),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 if (!effectivePerm.isFolderVisible()) {
                     if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                        throw new OXFolderPermissionException(
-                            OXFolderExceptionCode.NOT_VISIBLE,
+                        throw OXFolderExceptionCode.NOT_VISIBLE.create(
                             Integer.valueOf(folderobject.getObjectID()),
                             getUserName(session),
                             Integer.valueOf(ctx.getContextId()));
                     }
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NOT_VISIBLE,
-                        CATEGORY_PERMISSION_DENIED,
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(
                         Integer.valueOf(folderobject.getObjectID()),
                         getUserName(session),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 if (!effectivePerm.isFolderAdmin()) {
                     if (!effectivePerm.getUnderlyingPermission().isFolderAdmin()) {
-                        throw new OXFolderPermissionException(
-                            OXFolderExceptionCode.NO_ADMIN_ACCESS,
+                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
                             getUserName(session),
                             getFolderName(folderobject),
                             Integer.valueOf(ctx.getContextId()));
                     }
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                        CATEGORY_PERMISSION_DENIED,
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
                         getUserName(session),
                         getFolderName(folderobject),
                         Integer.valueOf(ctx.getContextId()));
@@ -384,8 +351,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 manager.updateFolder(folderobject, false, lastModfified);
             }
             return folderobject;
-        } catch (final DBPoolingException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -421,55 +386,44 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             }
             final int module = folderobject.getModule();
             if (FolderObject.PUBLIC == folderobject.getType() && FolderObject.INFOSTORE != module && !userConfiguration.hasFullPublicFolderAccess()) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
+                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(
                     getUserName(session),
                     getFolderName(folderobject),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!folderobject.exists(ctx)) {
-                throw new OXFolderNotFoundException(folderId, ctx);
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
             }
             if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folderId).after(clientLastModified)) {
-                throw new OXConcurrentModificationException(
-                    EnumComponent.FOLDER,
-                    OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION,
-                    new Object[0]);
+                throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(folderId, ctx.getContextId());
             }
             final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, userConfiguration);
             if (!effectivePerm.hasModuleAccess(module)) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_MODULE_ACCESS,
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                     getUserName(session),
                     folderModule2String(module),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderVisible()) {
                 if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(
-                        OXFolderExceptionCode.NOT_VISIBLE,
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(
                         Integer.valueOf(folderId),
                         getUserName(session),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NOT_VISIBLE,
-                    CATEGORY_PERMISSION_DENIED,
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(
                     Integer.valueOf(folderId),
                     getUserName(session),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderAdmin()) {
                 if (!effectivePerm.getUnderlyingPermission().isFolderAdmin()) {
-                    throw new OXFolderPermissionException(
-                        OXFolderExceptionCode.NO_ADMIN_ACCESS,
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
                         getUserName(session),
                         getFolderName(folderobject),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                    CATEGORY_PERMISSION_DENIED,
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
                     getUserName(session),
                     getFolderName(folderobject),
                     Integer.valueOf(ctx.getContextId()));
@@ -477,8 +431,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).deleteFolder(folderobject, false, lastModified);
             return folderId;
-        } catch (final DBPoolingException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -541,8 +493,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     public SearchIterator<FolderObject> getNonTreeVisiblePublicCalendarFolders() throws OXException {
         try {
             if (!userConfiguration.hasCalendar()) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_MODULE_ACCESS,
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                     getUserName(session),
                     folderModule2String(FolderObject.CALENDAR),
                     Integer.valueOf(ctx.getContextId()));
@@ -555,8 +506,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
         } catch (final OXException e) {
             throw e;
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
         }
     }
 
@@ -567,8 +516,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     public SearchIterator<FolderObject> getNonTreeVisiblePublicTaskFolders() throws OXException {
         try {
             if (!userConfiguration.hasTask()) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_MODULE_ACCESS,
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                     getUserName(session),
                     folderModule2String(FolderObject.TASK),
                     Integer.valueOf(ctx.getContextId()));
@@ -591,8 +539,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     public SearchIterator<FolderObject> getNonTreeVisiblePublicContactFolders() throws OXException {
         try {
             if (!userConfiguration.hasContact()) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_MODULE_ACCESS,
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                     getUserName(session),
                     folderModule2String(FolderObject.CONTACT),
                     Integer.valueOf(ctx.getContextId()));
@@ -615,8 +562,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     public SearchIterator<FolderObject> getNonTreeVisiblePublicInfostoreFolders() throws OXException {
         try {
             if (!userConfiguration.hasInfostore()) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_MODULE_ACCESS,
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                     getUserName(session),
                     folderModule2String(FolderObject.INFOSTORE),
                     Integer.valueOf(ctx.getContextId()));
@@ -676,8 +622,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     public SearchIterator<FolderObject> getSubfolders(final int parentId, final Timestamp since) throws OXException {
         try {
             if (parentId == FolderObject.SYSTEM_SHARED_FOLDER_ID && !userConfiguration.hasFullSharedFolderAccess()) {
-                throw new OXFolderPermissionException(
-                    OXFolderExceptionCode.NO_SHARED_FOLDER_ACCESS,
+                throw OXFolderExceptionCode.NO_SHARED_FOLDER_ACCESS.create(
                     getUserName(session),
                     FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, user.getLocale()),
                     Integer.valueOf(ctx.getContextId()));
@@ -687,8 +632,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             return OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, userId, groups, ctx, userConfiguration, since);
         } catch (final SearchIteratorException e) {
             throw new OXException(e);
-        } catch (final DBPoolingException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -701,10 +644,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     public SearchIterator<FolderObject> getSharedFoldersFrom(final int owner, final Timestamp since) throws OXException {
         try {
             if (!userConfiguration.hasFullSharedFolderAccess()) {
-                throw new OXFolderPermissionException(
-                    OXFolderExceptionCode.NO_SHARED_FOLDER_ACCESS,
-                    getUserName(session),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_SHARED_FOLDER_ACCESS.create(getUserName(session), Integer.valueOf(ctx.getContextId()));
             }
             return OXFolderIteratorSQL.getVisibleSharedFolders(
                 userId,
@@ -728,8 +668,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, userConfiguration, user.getLocale(), ctx);
         } catch (final OXException e) {
             throw e;
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
         }
     }
 
@@ -798,46 +736,39 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 folderobject.fill(fo);
             }
             if (folderobject.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
+                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(
                     getUserName(session, user),
                     getFolderName(folderobject),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!folderobject.exists(ctx)) {
-                throw new OXFolderNotFoundException(objectID, ctx);
+                throw OXFolderExceptionCode.NOT_EXISTS.create(objectID, ctx.getContextId());
             }
             if (clientLastModified != null && oxfolderAccess.getFolderLastModified(objectID).after(clientLastModified)) {
-                throw new OXConcurrentModificationException(
-                    EnumComponent.FOLDER,
-                    OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION,
-                    new Object[0]);
+                throw OXFolderExceptionCode.CONCURRENT_MODIFICATION.create(objectID, ctx.getContextId());
             }
             final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, userConfiguration);
             if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_MODULE_ACCESS,
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
                     getUserName(session, user),
                     folderModule2String(folderobject.getModule()),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderVisible()) {
                 if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(
-                        OXFolderExceptionCode.NOT_VISIBLE,
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(
                         Integer.valueOf(objectID),
                         getUserName(session, user),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                throw OXFolderExceptionCode.NOT_VISIBLE.create(CATEGORY_PERMISSION_DENIED, Integer.valueOf(objectID), getUserName(
-                    session,
-                    user), Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(
+                    Integer.valueOf(objectID),
+                    getUserName(session, user),
+                    Integer.valueOf(ctx.getContextId()));
             }
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
             return objectID;
-        } catch (final DBPoolingException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }

@@ -582,16 +582,12 @@ public final class FolderWriter extends DataWriter {
                                         FolderCacheManager.getInstance().putFolderObject(fo, ctx);
                                     }
                                 } catch (final SQLException e) {
-                                    throw new OXFolderException(
-                                        OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE,
-                                        e,
+                                    throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(e,
                                         FolderFields.OWN_RIGHTS,
                                         Integer.valueOf(fo.getObjectID()),
                                         Integer.valueOf(ctx.getContextId()));
                                 } catch (final DBPoolingException e) {
-                                    throw new OXFolderException(
-                                        OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE,
-                                        e,
+                                    throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(e,
                                         FolderFields.OWN_RIGHTS,
                                         Integer.valueOf(fo.getObjectID()),
                                         Integer.valueOf(ctx.getContextId()));

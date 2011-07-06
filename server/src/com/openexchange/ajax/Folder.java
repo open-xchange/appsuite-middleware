@@ -534,9 +534,7 @@ public class Folder extends SessionServlet {
                     }
                 } else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                     if (!session.getUserConfiguration().hasInfostore()) {
-                        throw new OXFolderException(
-                            OXFolderExceptionCode.NO_MODULE_ACCESS,
-                            getUserName(session),
+                        throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(getUserName(session),
                             folderModule2String(FolderObject.INFOSTORE),
                             Integer.valueOf(ctx.getContextId()));
                     }
@@ -1877,9 +1875,7 @@ public class Folder extends SessionServlet {
                 retval = String.valueOf(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                    getUserName(session),
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(getUserName(session),
                     folderIdentifier,
                     Integer.valueOf(ctx.getContextId()));
             } else {
@@ -2015,9 +2011,7 @@ public class Folder extends SessionServlet {
                 retval = String.valueOf(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
             } else if (parentFolder.startsWith(FolderObject.SHARED_PREFIX)) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION,
-                    getUserName(session),
+                throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(getUserName(session),
                     parentFolder,
                     Integer.valueOf(ctx.getContextId()));
             } else {
@@ -2152,9 +2146,7 @@ public class Folder extends SessionServlet {
                         foldersqlinterface.deleteFolderObject(delFolderObj, timestamp);
                         lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
                     } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-                        throw new OXFolderException(
-                            OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                            getUserName(session),
+                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(getUserName(session),
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
                     } else {
@@ -2281,9 +2273,7 @@ public class Folder extends SessionServlet {
                         folderInterface.clearFolder(delFolderObj, timestamp);
                         lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
                     } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-                        throw new OXFolderException(
-                            OXFolderExceptionCode.NO_ADMIN_ACCESS,
-                            getUserName(session.getUserId(), ctx),
+                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(getUserName(session.getUserId(), ctx),
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
                     } else {

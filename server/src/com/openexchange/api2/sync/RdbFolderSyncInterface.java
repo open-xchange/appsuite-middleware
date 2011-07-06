@@ -117,9 +117,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
     public int clearFolder(final FolderObject folder, final Date clientLastModified) throws OXException {
         try {
             if (folder.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
-                    getUserName(session, user),
+                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(getUserName(session, user),
                     getFolderName(folder),
                     Integer.valueOf(ctx.getContextId()));
             }
@@ -134,21 +132,17 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
             }
             final EffectivePermission effectivePerm = folder.getEffectiveUserPermission(userId, userConfiguration);
             if (!effectivePerm.hasModuleAccess(folder.getModule())) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_MODULE_ACCESS,
-                    getUserName(session, user),
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(getUserName(session, user),
                     folderModule2String(folder.getModule()),
                     Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderVisible()) {
                 if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                    throw new OXFolderPermissionException(OXFolderExceptionCode.NOT_VISIBLE, Integer.valueOf(folder.getObjectID()), getUserName(
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folder.getObjectID()), getUserName(
                         session,
                         user), Integer.valueOf(ctx.getContextId()));
                 }
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NOT_VISIBLE,
-                    CATEGORY_PERMISSION_DENIED,
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(CATEGORY_PERMISSION_DENIED,
                     Integer.valueOf(folder.getObjectID()),
                     getUserName(session, user),
                     Integer.valueOf(ctx.getContextId()));

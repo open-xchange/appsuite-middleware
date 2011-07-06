@@ -1487,9 +1487,7 @@ public final class OXFolderAdminHelper {
              * Check infostore sibling
              */
             if (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, displayName, FolderObject.INFOSTORE, writeCon, ctx) != -1) {
-                throw new OXFolderException(
-                    OXFolderExceptionCode.NO_DEFAULT_INFOSTORE_CREATE,
-                    displayName,
+                throw OXFolderExceptionCode.NO_DEFAULT_INFOSTORE_CREATE.create(displayName,
                     FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME,
                     Integer.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID),
                     Integer.valueOf(ctx.getContextId()));

@@ -127,23 +127,17 @@ public class OXFolderTools {
                 fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
             }
             if (!fo.getEffectiveUserPermission(userId, userConfig).isFolderVisible()) {
-                throw new OXFolderPermissionException(
-                    OXFolderExceptionCode.NOT_VISIBLE,
-                    Integer.valueOf(folderId),
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId),
                     Integer.valueOf(userId),
                     Integer.valueOf(ctx.getContextId()));
             }
             return fo.getType(userId);
         } catch (final SQLException e) {
-            throw new OXFolderException(
-                OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED,
-                Integer.valueOf(folderId),
+            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(Integer.valueOf(folderId),
                 Integer.valueOf(ctx.getContextId()),
                 e);
         } catch (final DBPoolingException e) {
-            throw new OXFolderException(
-                OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED,
-                Integer.valueOf(folderId),
+            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(Integer.valueOf(folderId),
                 Integer.valueOf(ctx.getContextId()),
                 e);
         }
@@ -176,16 +170,12 @@ public class OXFolderTools {
                 try {
                     return folderObj.getEffectiveUserPermission(userId, userConfig);
                 } catch (final SQLException e) {
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED,
-                        e,
+                    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e,
                         OXFolderUtility.getFolderName(folderId, ctx),
                         Integer.valueOf(ctx.getContextId()),
                         e);
                 } catch (final DBPoolingException e) {
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED,
-                        e,
+                    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e,
                         OXFolderUtility.getFolderName(folderId, ctx),
                         Integer.valueOf(ctx.getContextId()),
                         e);
@@ -266,9 +256,7 @@ public class OXFolderTools {
                     }
                 }
                 if (!retval.setAllPermission(fp_highest, orp_highest, owp_highest, odp_highest)) {
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NO_EFFECTIVE_PERMISSION,
-                        Integer.valueOf(folderId),
+                    throw OXFolderExceptionCode.NO_EFFECTIVE_PERMISSION.create(Integer.valueOf(folderId),
                         Integer.valueOf(userId),
                         Integer.valueOf(ctx.getContextId()));
                 }
@@ -339,9 +327,7 @@ public class OXFolderTools {
         if (retval != 0) {
             return retval;
         }
-        throw new OXFolderException(
-            OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND,
-            folderModule2String(module),
+        throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module),
             getUserName(user, ctx),
             Integer.valueOf(ctx.getContextId()));
     }
@@ -428,16 +414,12 @@ public class OXFolderTools {
                 if (rs.next()) {
                     retval = rs.getInt(1);
                     if (rs.wasNull()) {
-                        throw new OXFolderException(
-                            OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND,
-                            folderModule2String(module),
+                        throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module),
                             getUserName(user, ctx),
                             Integer.valueOf(ctx.getContextId()));
                     }
                 } else {
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND,
-                        folderModule2String(module),
+                    throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module),
                         getUserName(user, ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
@@ -1026,9 +1008,7 @@ public class OXFolderTools {
                     virtualParent = FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID;
                     break;
                 default:
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.UNKNOWN_MODULE,
-                        folderModule2String(fo.getModule()),
+                    throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 checkForSpecialFolder(folderList, virtualParent, locale, ctx);
@@ -1583,9 +1563,7 @@ public class OXFolderTools {
                         UserStorage.getStorageUser(session.getUserId(), ctx),
                         userConfig);
                 default:
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.UNKNOWN_MODULE,
-                        folderModule2String(fo.getModule()),
+                    throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
                         Integer.valueOf(ctx.getContextId()));
                 }
             } else {
@@ -1607,9 +1585,7 @@ public class OXFolderTools {
                     final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
                     return db.isFolderEmpty(fo.getObjectID(), ctx);
                 default:
-                    throw new OXFolderException(
-                        OXFolderExceptionCode.UNKNOWN_MODULE,
-                        folderModule2String(fo.getModule()),
+                    throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
                         Integer.valueOf(ctx.getContextId()));
                 }
             }
