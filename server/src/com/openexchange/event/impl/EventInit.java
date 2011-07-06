@@ -53,7 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.provider.DBPoolProvider;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentCleaner;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -81,7 +81,7 @@ public class EventInit implements Initialization {
 		super();
 	}
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if(started) {
 			return;
 		}
@@ -132,7 +132,7 @@ public class EventInit implements Initialization {
 		EventQueue.addInfostoreEvent(lockCleaner);
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         EventQueue.stop();
         EventQueue.clearAllListeners();
     }

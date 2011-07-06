@@ -114,7 +114,6 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
@@ -538,7 +537,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             final int folderId = getUnsignedInteger(folderIdentifier);
             if (folderId < 0) {
-                throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
             }
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                 return false;
@@ -589,7 +588,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             final int folderId = getUnsignedInteger(folderIdentifier);
             if (folderId < 0) {
-                throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
             }
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                 return true;
@@ -683,7 +682,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     final int folderId = getUnsignedInteger(folderIdentifier);
 
                     if (folderId < 0) {
-                        throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                        throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
                     }
 
                     if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
@@ -708,7 +707,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final int folderId = getUnsignedInteger(folderIdentifier);
 
                 if (folderId < 0) {
-                    throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
                 }
 
                 final FolderObject fo =

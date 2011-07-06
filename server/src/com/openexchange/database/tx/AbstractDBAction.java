@@ -72,7 +72,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 	private Context context = null;
 
 	
-	protected int doUpdates(final UpdateBlock...updates) throws OXException, OXException {
+	protected int doUpdates(final UpdateBlock...updates) throws OXException {
 		Connection writeCon = null;
 		UpdateBlock current = null;
 		int counter = 0;
@@ -84,7 +84,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 				current.close();
 			}
 		} catch (final SQLException e) {
-			throw new OXException(e,current);
+			throw new OXException(e);
 		} finally {
 			if(current != null) {
 				current.close();
