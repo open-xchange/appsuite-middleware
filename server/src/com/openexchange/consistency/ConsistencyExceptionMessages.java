@@ -49,7 +49,7 @@
 
 package com.openexchange.consistency;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link ConsistencyExceptionMessages}

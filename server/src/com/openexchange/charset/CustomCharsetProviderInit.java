@@ -51,7 +51,7 @@ package com.openexchange.charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -70,7 +70,7 @@ public final class CustomCharsetProviderInit implements Initialization {
         super();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         CustomCharsetProvider.initCharsetMap();
         final CustomCharsetProvider provider = new CustomCharsetProvider();
         /*
@@ -89,7 +89,7 @@ public final class CustomCharsetProviderInit implements Initialization {
         LOG.info("Custom charsets successfully added to alias charset provider.");
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         CustomCharsetProvider.releaseCharsetMap();
         LOG.info("Custom charset provider successfully dropped.");
     }
