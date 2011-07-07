@@ -59,7 +59,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.FolderObject;
@@ -277,7 +277,7 @@ public final class GetTask {
         Date lastModifiedOfNewestAttachment = null;
         try {
             lastModifiedOfNewestAttachment = attachmentBase.getNewestCreationDate(ctx, Types.TASK, task.getObjectID());
-        } catch (final AttachmentException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         if (null != lastModifiedOfNewestAttachment) {

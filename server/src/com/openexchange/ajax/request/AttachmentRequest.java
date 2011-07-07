@@ -76,7 +76,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -230,7 +230,7 @@ public class AttachmentRequest extends CommonRequest {
                 try {
                     ts = ATTACHMENT_BASE.attachToObject(attachment, is, session, ctx, user, userConfig);
                     ATTACHMENT_BASE.commit();
-                } catch (final AttachmentException x) {
+                } catch (final OXException x) {
                     ATTACHMENT_BASE.rollback();
                     throw x;
                 } finally {

@@ -50,8 +50,8 @@
 package com.openexchange.groupware.attach.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentEvent;
-import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.tools.service.ServicePriorityConflictException;
@@ -78,7 +78,7 @@ public class OverridableAttachmentListener implements AttachmentListener {
         return getDelegate(e).detached(e);
     }
 
-    private AttachmentListener getDelegate(AttachmentEvent e) throws AttachmentException {
+    private AttachmentListener getDelegate(AttachmentEvent e) throws OXException {
         int contextId = e.getContext().getContextId();
         int folderId = e.getFolderId();
         try {

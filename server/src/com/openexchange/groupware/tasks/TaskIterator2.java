@@ -64,7 +64,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -260,7 +260,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                     task.setLastModifiedOfNewestAttachment(newestCreationDate);
                 }
             }
-        } catch (final AttachmentException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

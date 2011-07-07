@@ -50,10 +50,7 @@
 package com.openexchange.groupware.attach.impl;
 
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.attach.AttachmentException;
-import com.openexchange.groupware.attach.AttachmentExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class UpdateAttachmentAction extends AttachmentListQueryAction {
@@ -61,29 +58,25 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
     private List<AttachmentMetadata> oldAttachments;
 
     @Override
-    protected void undoAction() throws AttachmentException {
+    protected void undoAction() throws OXException {
         if (oldAttachments.size() == 0) {
             return;
         }
         try {
             doUpdates(getQueryCatalog().getUpdate(), oldAttachments, true);
         } catch (final OXException e) {
-            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
-        } catch (DBPoolingException e) {
-            throw new AttachmentException(e);
+            throw e;
         }
     }
 
-    public void perform() throws AbstractOXException {
+    public void perform() throws OXException {
         if (getAttachments().size() == 0) {
             return;
         }
         try {
             doUpdates(getQueryCatalog().getUpdate(), getAttachments(), true);
         } catch (final OXException e) {
-            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
-        } catch (DBPoolingException e) {
-            throw new AttachmentException(e);
+            throw e;
         }
     }
 

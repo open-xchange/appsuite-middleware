@@ -54,7 +54,6 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 
 public class AttachmentContextDelete extends ContextDelete {
 

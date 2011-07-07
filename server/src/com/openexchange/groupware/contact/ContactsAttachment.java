@@ -58,7 +58,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
-import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -75,7 +75,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         super();
     }
 
-    public long attached(final AttachmentEvent e) throws OXException, OXObjectNotFoundException, AttachmentException, OXConflictException, OXConcurrentModificationException, OXPermissionException {
+    public long attached(final AttachmentEvent e) throws OXException, OXObjectNotFoundException, OXException, OXConflictException, OXConcurrentModificationException, OXPermissionException {
         final int userId = e.getUser().getId();
         final int[] groups = e.getUser().getGroups();
         final Contact co = Contacts.getContactById(e.getAttachedId(), userId, groups, e.getContext(), e.getUserConfig(), e.getWriteConnection());
@@ -84,7 +84,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         return co.getLastModified().getTime();
     }
 
-    public long detached(final AttachmentEvent event) throws OXException, OXObjectNotFoundException, AttachmentException, OXConflictException, OXConcurrentModificationException, OXPermissionException {
+    public long detached(final AttachmentEvent event) throws OXException, OXObjectNotFoundException, OXException, OXConflictException, OXConcurrentModificationException, OXPermissionException {
         final Contact co = Contacts.getContactById(event.getAttachedId(),event.getUser().getId(),event.getUser().getGroups(),event.getContext(),event.getUserConfig(),event.getWriteConnection());
         if (co.getNumberOfAttachments() < 1) {
             throw ContactExceptionCodes.TOO_FEW_ATTACHMENTS.create();

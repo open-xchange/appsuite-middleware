@@ -81,7 +81,6 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -777,7 +776,7 @@ public final class Contacts {
                     if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                         try {
                             co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
-                        } catch (final ContactException e) {
+                        } catch (final OXException e) {
                             throw e;
                         } catch (final Exception e) {
                             throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
@@ -816,16 +815,7 @@ public final class Contacts {
         } catch (final OXConflictException ox) {
             rollback(writecon);
             throw ox;
-        } catch (final ContactException ox) {
-            rollback(writecon);
-            throw ox;
-        } catch (final OXObjectNotFoundException ox) {
-            rollback(writecon);
-            throw ox;
-        } catch (final OXConcurrentModificationException ox) {
-            rollback(writecon);
-            throw ox;
-        } catch (final OXPermissionException ox) {
+        } catch (final OXException ox) {
             rollback(writecon);
             throw ox;
         } catch (final DataTruncation se) {
@@ -834,9 +824,6 @@ public final class Contacts {
         } catch (final SQLException e) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
-        } catch (final OXException e) {
-            rollback(writecon);
-            throw e;
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -1017,7 +1004,7 @@ public final class Contacts {
                     if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                         try {
                             contact.setImage1(scaleContactImage(contact.getImage1(), contact.getImageContentType()));
-                        } catch (final ContactException e) {
+                        } catch (final OXException e) {
                             throw e;
                         } catch (final Exception e) {
                             throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
@@ -1050,19 +1037,7 @@ public final class Contacts {
                     ctx.getContextId());
             }
             writecon.commit();
-        } catch (final OXConflictException e) {
-            rollback(writecon);
-            throw e;
-        } catch (final OXPermissionException e) {
-            rollback(writecon);
-            throw e;
-        } catch (final OXObjectNotFoundException e) {
-            rollback(writecon);
-            throw e;
-        } catch (final OXConcurrentModificationException e) {
-            rollback(writecon);
-            throw e;
-        } catch (final ContactException ox) {
+        } catch (final OXException ox) {
             rollback(writecon);
             throw ox;
         } catch (final DataTruncation se) {
@@ -1071,9 +1046,6 @@ public final class Contacts {
         } catch (final SQLException e) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
-        } catch (final OXException e) {
-            rollback(writecon);
-            throw e;
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -2232,7 +2204,7 @@ public final class Contacts {
                 LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
             }
             del.execute(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
-        } catch (final EventException e) {
+        } catch (final OXException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(so.getContextId()), I(fid));
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);

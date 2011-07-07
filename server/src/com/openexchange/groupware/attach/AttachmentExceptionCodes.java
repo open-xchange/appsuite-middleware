@@ -49,27 +49,12 @@
 
 package com.openexchange.groupware.attach;
 
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.ATTACHMENT_NOT_FOUND_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.ATTACHMENT_WITH_FILEID_NOT_FOUND_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.ATTACH_FAILED_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.DELETE_FAILED_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.DETACH_FAILED_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.FILESTORE_DOWN_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.FILESTORE_WRITE_FAILED_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.FILE_DELETE_FAILED_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.FILE_MISSING_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.GENERATING_ID_FAILED_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.INVALID_CHARACTERS_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.INVALID_REQUEST_PARAMETER_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.READ_FAILED_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.SAVE_FAILED_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.SEARCH_PROBLEM_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.SERVICE_CONFLICT_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.attach.AttachmentExceptionMessages.UNDONE_FAILED_MSG;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.attach.impl.AttachmentExceptionFactory;
+import static com.openexchange.groupware.attach.AttachmentExceptionMessages.*;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link AttachmentExceptionCodes}
@@ -120,13 +105,17 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
     private final Category category;
     private final int number;
 
-    private AttachmentExceptionCodes(String message, Category category, int number) {
+    private AttachmentExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
     }
 
-    public int getDetailNumber() {
+    public String getPrefix() {
+        return EnumComponent.ATTACHMENT.getAbbreviation();
+    }
+
+    public int getNumber() {
         return number;
     }
 
@@ -143,11 +132,37 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
         return category;
     }
 
-    public AttachmentException create(Object... args) {
-        return AttachmentExceptionFactory.getInstance().create(this, args);
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
-    public AttachmentException create(Throwable cause, Object... args) {
-        return AttachmentExceptionFactory.getInstance().create(this, cause, args);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

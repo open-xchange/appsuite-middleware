@@ -52,7 +52,6 @@ package com.openexchange.groupware.attach.impl;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
-import com.openexchange.groupware.attach.AttachmentException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -86,7 +85,7 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
         getDelegate(folderId, ctx.getContextId()).checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
     }
 
-    private AttachmentAuthorization getDelegate(int folderId, int contextId) throws AttachmentException {
+    private AttachmentAuthorization getDelegate(int folderId, int contextId) throws OXException {
         try {
             return chooser.choose(contextId, folderId);
         } catch (ServicePriorityConflictException e) {

@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
@@ -62,17 +62,17 @@ public class FireAttachedEventAction extends AttachmentEventAction {
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FireAttachedEventAction.class));
 
     @Override
-    protected void undoAction() throws AbstractOXException {
+    protected void undoAction() throws OXException {
         try {
             fireDetached(getAttachments(), getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
             throw AttachmentExceptionCodes.DETACH_FAILED.create(e);
         }
     }
 
-    public void perform() throws AbstractOXException {
+    public void perform() throws OXException {
         final List<AttachmentMetadata> processed = new ArrayList<AttachmentMetadata>();
         try {
             fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
@@ -83,8 +83,8 @@ public class FireAttachedEventAction extends AttachmentEventAction {
                 LOG.error(e.getMessage(), e);
                 throw AttachmentExceptionCodes.UNDONE_FAILED.create(e1);
             }
-            if (e instanceof AbstractOXException) {
-                final AbstractOXException aoe = (AbstractOXException) e;
+            if (e instanceof OXException) {
+                final OXException aoe = (OXException) e;
                 throw aoe;
             }
             throw AttachmentExceptionCodes.ATTACH_FAILED.create(e);

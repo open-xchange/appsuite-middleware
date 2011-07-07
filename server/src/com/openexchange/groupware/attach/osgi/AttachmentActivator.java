@@ -51,9 +51,6 @@ package com.openexchange.groupware.attach.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.attach.impl.AttachmentExceptionFactory;
 
 /**
  * {@link AttachmentActivator}
@@ -62,17 +59,15 @@ import com.openexchange.groupware.attach.impl.AttachmentExceptionFactory;
  */
 public final class AttachmentActivator implements BundleActivator {
 
-    private ComponentRegistration registration;
-
     public AttachmentActivator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.ATTACHMENT, "com.openexchange.groupware.attach", AttachmentExceptionFactory.getInstance());
+    public void start(final BundleContext context) throws Exception {
+        // Nope
     }
 
-    public void stop(BundleContext context) throws Exception {
-        registration.unregister();
+    public void stop(final BundleContext context) throws Exception {
+        // Nope
     }
 }

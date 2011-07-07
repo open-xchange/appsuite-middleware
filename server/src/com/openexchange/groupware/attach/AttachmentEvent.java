@@ -72,7 +72,7 @@ public interface AttachmentEvent {
 
     AttachmentBase getSource();
 
-    Connection getWriteConnection() throws AttachmentException;
+    Connection getWriteConnection() throws OXException;
     
     Session getSession();
 

@@ -75,7 +75,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
@@ -1646,7 +1646,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         Date date = null;
         try {
             date = attachmentBase.getNewestCreationDate(ctx, Types.APPOINTMENT, cdao.getObjectID());
-        } catch (final AttachmentException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
         if (null != date) {

@@ -50,7 +50,6 @@ package com.openexchange.groupware.attach;
 
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.calendar.CalendarListener;
@@ -68,28 +67,28 @@ import com.openexchange.tools.session.ServerSession;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CopyAttachmentsForChangeExceptions implements CalendarListener {
-    private AttachmentBase attachmentBase;
+    private final AttachmentBase attachmentBase;
 
-    public CopyAttachmentsForChangeExceptions(AttachmentBase attachmentBase) {
+    public CopyAttachmentsForChangeExceptions(final AttachmentBase attachmentBase) {
         this.attachmentBase = attachmentBase;
     }
 
-    public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment exception,int inFolder, ServerSession session) throws OXException {
+    public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment exception,final int inFolder, final ServerSession session) throws OXException {
         try {
             attachmentBase.startTransaction();
-            Context ctx = session.getContext();
-            User userObject = UserStorage.getStorageUser(session.getUserId(), ctx);
-            UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
-            TimedResult result = attachmentBase.getAttachments(master.getParentFolderID(), master.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
-            SearchIterator iterator = result.results();
+            final Context ctx = session.getContext();
+            final User userObject = UserStorage.getStorageUser(session.getUserId(), ctx);
+            final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
+            final TimedResult result = attachmentBase.getAttachments(master.getParentFolderID(), master.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
+            final SearchIterator iterator = result.results();
             int folderId = exception.getParentFolderID();
             if(folderId == 0) {
                 folderId = inFolder;
             }
             
             while(iterator.hasNext()) {
-                AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
-                AttachmentMetadata copy = new AttachmentImpl(attachment);
+                final AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
+                final AttachmentMetadata copy = new AttachmentImpl(attachment);
                 copy.setId(AttachmentBase.NEW);
                 copy.setFileId(null);
                 copy.setAttachedId(exception.getObjectID());
@@ -97,11 +96,11 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
                 copy.setFolderId(folderId);
                 copy.setModuleId(Types.APPOINTMENT);
 
-                InputStream is = attachmentBase.getAttachedFile(folderId, exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
+                final InputStream is = attachmentBase.getAttachedFile(folderId, exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
                 attachmentBase.attachToObject(copy, is, session, ctx, userObject, userConfig);
             }
             attachmentBase.commit();
-        } catch (AbstractOXException x) {
+        } catch (final OXException x) {
             attachmentBase.rollback();
             throw x;
         } finally {

@@ -83,7 +83,7 @@ import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
@@ -725,7 +725,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             if (null != creationDate) {
                 co.setLastModifiedOfNewestAttachment(creationDate);
             }
-        } catch (final AttachmentException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             DBPool.closeReaderSilent(ctx, con);
@@ -1188,7 +1188,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (final AttachmentException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
 

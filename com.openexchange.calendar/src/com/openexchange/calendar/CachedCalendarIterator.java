@@ -66,7 +66,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -293,7 +293,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         final Map<Integer, Date> dates;
         try {
             dates = attachmentBase.getNewestCreationDates(ctx, Types.APPOINTMENT, arr);
-        } catch (final AttachmentException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return;
         }

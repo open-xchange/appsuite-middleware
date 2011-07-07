@@ -91,7 +91,7 @@ public interface AttachmentBase extends TransactionAware {
      * @param ctx The Context
      * @return A sorted set of the file_ids
      */
-    public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx) throws AttachmentException;
+    public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx) throws OXException;
 
     public abstract TimedResult<AttachmentMetadata> getAttachments(int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
 
@@ -140,13 +140,13 @@ public interface AttachmentBase extends TransactionAware {
      * Delete all Attachments in a Context.
      * @param context
      */
-    public abstract void deleteAll(Context context) throws AttachmentException;
+    public abstract void deleteAll(Context context) throws OXException;
 
     /**
      * @return the last modified date of the newest attachment or <code>null</code> if no attachments exist.
-     * @throws AttachmentException if some problem occurs.
+     * @throws OXException if some problem occurs.
      */
-    public abstract Date getNewestCreationDate(Context ctx, int moduleId, int attachedId) throws AttachmentException;
+    public abstract Date getNewestCreationDate(Context ctx, int moduleId, int attachedId) throws OXException;
 
-    public abstract Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) throws AttachmentException;
+    public abstract Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) throws OXException;
 }

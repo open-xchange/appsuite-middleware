@@ -57,6 +57,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
 
@@ -92,10 +93,10 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
      * {@inheritDoc}
      */
     @Override
-    protected String getPropertyFileName() throws ConfigurationException {
+    protected String getPropertyFileName() throws OXException {
         final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
-            throw new ConfigurationException(ConfigurationExceptionCodes.PROPERTY_MISSING,
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(
                 KEY.getPropertyName());
         }
         return filename;
@@ -105,7 +106,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
     	if(!loaded || singleton == null) {
 			try {
 				getInstance().start();
-			} catch (final ConfigurationException e) {
+			} catch (final OXException e) {
 				LOG.error("Can't init config",e);
 			}
 		}
@@ -134,7 +135,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 		return Long.parseLong(sizeS);
 	}
 
-    public void start() throws ConfigurationException {
+    public void start() throws OXException {
         if(!loaded || singleton == null) {
             INIT_LOCK.lock();
             try {

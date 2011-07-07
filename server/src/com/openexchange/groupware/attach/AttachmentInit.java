@@ -48,7 +48,7 @@
  */
 package com.openexchange.groupware.attach;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
 import com.openexchange.server.Initialization;
 
@@ -58,13 +58,13 @@ import com.openexchange.server.Initialization;
 public class AttachmentInit implements Initialization {
     private CopyAttachmentsForChangeExceptions copyAttachments;
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         copyAttachments = new CopyAttachmentsForChangeExceptions(Attachments.getInstance());
         CalendarCallbacks.getInstance().addListener(copyAttachments);
 
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         CalendarCallbacks.getInstance().removeListener(copyAttachments);
     }
 }

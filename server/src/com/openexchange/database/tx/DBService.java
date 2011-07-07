@@ -66,7 +66,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.TransactionAware;
-import com.openexchange.tx.TransactionException;
 import com.openexchange.tx.TransactionExceptionCodes;
 import com.openexchange.tx.Undoable;
 import com.openexchange.tx.UndoableAction;
@@ -193,7 +192,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         }
     }
 
-    public void commit() throws TransactionException {
+    public void commit() throws OXException {
         // Nothing to do.
     }
 
