@@ -52,7 +52,6 @@ package com.openexchange.mailaccount.json.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -92,7 +91,7 @@ public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountA
                 mailAccess.getMailConfig(),
                 session);
             return root;
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Composing mail account's folder tree failed.", e);
             }

@@ -61,7 +61,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -280,8 +279,6 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         try {
             final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             return userService.getUser(userId, ctx).getLoginInfo();
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final OXException e) {
             throw new OXException(e);
         }
