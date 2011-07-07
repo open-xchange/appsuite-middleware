@@ -58,7 +58,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,22 +78,8 @@ public abstract class PermissionServlet extends SessionServlet {
                 return;
             }
             super.service(req, resp);
-        } catch (final SessiondException e) {
-            LOG.debug(e.getMessage(), e);
-            handleSessiondException(e, req, resp);
-            final Response response = new Response();
-            response.setException(e);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, writer);
-                writer.flush();
-            } catch (final JSONException e1) {
-                log(RESPONSE_ERROR, e1);
-                sendError(resp);
-            }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            e.log(LOG);
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);

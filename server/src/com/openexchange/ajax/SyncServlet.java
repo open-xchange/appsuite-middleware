@@ -64,8 +64,8 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.sync.FolderSyncInterface;
 import com.openexchange.api2.sync.RdbFolderSyncInterface;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -77,6 +77,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -124,7 +125,7 @@ public class SyncServlet extends PermissionServlet {
 		try {
 			actionPut(req, resp);
 		} catch (final OXException e) {
-			LOG.error("SyncServlet.doPut()", e);
+			e.log(LOG);
 			final Writer writer = resp.getWriter();
 			final Response response = new Response();
 			response.setException(e);
@@ -134,7 +135,7 @@ public class SyncServlet extends PermissionServlet {
 				LOG.error(e1.getMessage(), e1);
 			}
 		} catch (final Exception e) {
-			final AbstractOXException wrapper = getWrappingOXException(e);
+			final OXException wrapper = getWrappingOXException(e);
 			LOG.error(wrapper.getMessage(), wrapper);
 			final Writer writer = resp.getWriter();
 			final Response response = new Response();
@@ -151,7 +152,7 @@ public class SyncServlet extends PermissionServlet {
 	 * Assigns incoming PUT request to corresponding method
 	 */
 	private final void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
-			AbstractOXException {
+			OXException {
 		final String actionStr = checkStringParam(req, PARAMETER_ACTION);
 		if (actionStr.equalsIgnoreCase(ACTION_REFRESH_SERVER)) {
 			actionPutClearFolderContent(req, resp);
@@ -249,15 +250,12 @@ public class SyncServlet extends PermissionServlet {
 				}
 			}
 		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(CATEGORY_PERMISSION_DENIED)) {
+			e.log(LOG);
+			if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
 				response.setException(e);
 			}
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (final Exception e) {
-			final AbstractOXException wrapper = getWrappingOXException(e);
+			final OXException wrapper = getWrappingOXException(e);
 			LOG.error(wrapper.getMessage(), wrapper);
 			response.setException(wrapper);
 		}
@@ -276,12 +274,12 @@ public class SyncServlet extends PermissionServlet {
 
 	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e)
 			throws IOException {
-		final AbstractOXException wrapper = getWrappingOXException(e);
+		final OXException wrapper = getWrappingOXException(e);
 		LOG.error(wrapper.getMessage(), wrapper);
 		writeErrorResponse(resp, wrapper);
 	}
 
-	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final AbstractOXException e)
+	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final OXException e)
 			throws IOException {
 		final Writer writer = resp.getWriter();
 		final Response response = new Response();
@@ -293,8 +291,8 @@ public class SyncServlet extends PermissionServlet {
 		}
 	}
 
-	private static final AbstractOXException getWrappingOXException(final Throwable cause) {
-		return new AbstractOXException(EnumComponent.SYNCML, CATEGORY_ERROR, 9999, cause.getMessage(), cause);
+	private static final OXException getWrappingOXException(final Throwable cause) {
+		return AjaxExceptionCodes.UnexpectedError.create(cause, cause.getMessage());
 	}
 
 	private static final String checkStringParam(final HttpServletRequest req, final String paramName)

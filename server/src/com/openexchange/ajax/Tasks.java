@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.TaskRequest;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -95,7 +96,7 @@ public class Tasks extends DataServlet {
             response.setTimestamp(taskRequest.getTimestamp());
             response.setData(responseObj);
         } catch (final OXException e) {
-            if (e.getCategory() == CATEGORY_USER_INPUT) {
+            if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);
@@ -155,7 +156,7 @@ public class Tasks extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         } catch (final OXException e) {
-            if (e.getCategory() == CATEGORY_USER_INPUT) {
+            if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);

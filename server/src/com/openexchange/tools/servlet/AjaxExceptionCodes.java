@@ -73,6 +73,11 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
      * No permission for module: %s.
      */
     NoPermissionForModule("No permission for module: %1$s.", Category.CATEGORY_PERMISSION_DENIED, 16),
+    /**
+     * Object has been changed in the meantime.
+     */
+    Conflict("Object has been changed in the meantime.", Category.CATEGORY_CONFLICT, 17),
+    
     ;
     
     /**

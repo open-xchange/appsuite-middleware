@@ -323,7 +323,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Logs this exception - if allowed - using specified logger.
+     * Logs this exception - if allowed - in best-fitting log level using specified logger.
      * 
      * @param log The logger
      */

@@ -86,7 +86,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.servlet.http.Tools;
@@ -215,25 +214,8 @@ public abstract class SessionServlet extends AJAXServlet {
         try {
             initializeSession(req);
             super.service(req, resp);
-        } catch (final SessiondException e) {
-            LOG.debug(e.getMessage(), e);
-            handleSessiondException(e, req, resp);
-            /*
-             * Return JSON response
-             */
-            final Response response = new Response();
-            response.setException(e);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, writer);
-                writer.flush();
-            } catch (final JSONException e1) {
-                log(RESPONSE_ERROR, e1);
-                sendError(resp);
-            }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            e.log(LOG);
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -267,7 +249,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param req The HTTP request
      * @param resp The HTTP response
      */
-    protected void handleSessiondException(final SessiondException e, final HttpServletRequest req, final HttpServletResponse resp) {
+    protected void handleSessiondException(final OXException e, final HttpServletRequest req, final HttpServletResponse resp) {
         if (isIpCheckError(e)) {
             try {
                 // Drop Open-Xchange cookies
@@ -286,12 +268,12 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Checks whether passed exception indicates an IP check error.
      * 
-     * @param sessiondException The exception to check
+     * @param e The exception to check
      * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
      */
-    public static boolean isIpCheckError(final OXException sessiondException) {
+    public static boolean isIpCheckError(final OXException e) {
         final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
-        return (code.equals(sessiondException)) && code.getCategory().equals(sessiondException.getCategory());
+        return (code.equals(e)) && code.getCategory().equals(e.getCategory());
     }
 
     /**
@@ -370,7 +352,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws OXException if the session can not be found.
      */
-    public ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, OXException, OXException {
+    public ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
         return getSession(hashSource, req, sessionId, sessiondService);
     }
 
@@ -383,7 +365,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public static ServerSession getSession(final CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, OXException, OXException, OXException {
+    public static ServerSession getSession(final CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);

@@ -68,7 +68,6 @@ import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailServletInterface;
@@ -101,8 +100,6 @@ public class Multiple extends SessionServlet {
 
     private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Multiple.class));
     
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Multiple.class, LOG);
-
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         JSONArray dataArray = null;
@@ -111,7 +108,7 @@ public class Multiple extends SessionServlet {
         try {
             dataArray = new JSONArray(data);
         } catch (final JSONException e) {
-            final AbstractOXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
+            final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
             LOG.error(exc.getMessage() + Tools.logHeaderForError(req), exc);
             dataArray = new JSONArray();
         }
@@ -127,9 +124,6 @@ public class Multiple extends SessionServlet {
              */
             writeMailRequest(req);
         } catch (final JSONException e) {
-            log(RESPONSE_ERROR, e);
-            sendError(resp);
-        } catch (final OXException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         } catch (final OXException e) {
@@ -216,12 +210,11 @@ public class Multiple extends SessionServlet {
                     if (null != timestamp) {
                         jsonWriter.key(ResponseFields.TIMESTAMP).value(timestamp.getTime());
                     }
-                    final Collection<AbstractOXException> warnings = multipleHandler.getWarnings();
+                    final Collection<OXException> warnings = multipleHandler.getWarnings();
                     if (null != warnings && !warnings.isEmpty()) {
                         ResponseWriter.writeException(warnings.iterator().next(), jsonWriter);
                     }
                 } catch (final OXException e) {
-                    LL.log(e);
                     if (jsonWriter.isExpectingValue()) {
                         jsonWriter.value("");
                     }

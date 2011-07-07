@@ -76,7 +76,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -234,7 +233,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         return false;
     }
 
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, UploadException {
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setSecure(Tools.considerSecure(req));
         {

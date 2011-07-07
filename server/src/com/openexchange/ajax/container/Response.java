@@ -61,7 +61,6 @@ import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**

@@ -62,8 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -78,7 +77,6 @@ import com.openexchange.tools.servlet.http.Tools;
 public abstract class MultipleAdapterServlet extends PermissionServlet {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServlet.class));
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(MultipleAdapterServlet.class, LOG);
     
 
     @Override
@@ -116,24 +114,22 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final Object response = handler.performRequest(action, request, getSessionObject(req), Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
             writeResponseSafely(response, timestamp, handler.getWarnings(), resp);
-        } catch (final AbstractOXException x) {
+        } catch (final OXException x) {
             writeException(x, resp);
         } catch (final Throwable t) {
             writeException(wrap(t), resp);
         }
     }
 
-    private AbstractOXException wrap(final Throwable t) {
-        final AbstractOXException x = new AbstractOXException(EnumComponent.NONE, CATEGORY_ERROR, 1, "Caught Exception: %s", t);
-        x.setMessageArgs(t.getMessage());
-        return x;
+    private OXException wrap(final Throwable t) {
+        return AjaxExceptionCodes.UnexpectedError.create(t, t.getMessage());
     }
 
     protected boolean handleOverride(final HttpServletRequest req, final HttpServletResponse resp) {
         return false;
     }
 
-    private void writeResponseSafely(final Object data, final Date timestamp, final Collection<AbstractOXException> warnings, final HttpServletResponse resp) {
+    private void writeResponseSafely(final Object data, final Date timestamp, final Collection<OXException> warnings, final HttpServletResponse resp) {
         final Response response = new Response();
         response.setData(data);
         if(null != timestamp) {
@@ -149,8 +145,8 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         }
     }
     
-    private void writeException(final AbstractOXException x, final HttpServletResponse resp) {
-        LL.log(x);
+    private void writeException(final OXException x, final HttpServletResponse resp) {
+        x.log(LOG);
         final Response response = new Response();
         response.setException(x);
         try {

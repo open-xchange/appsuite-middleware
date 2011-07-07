@@ -73,7 +73,6 @@ import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.writer.InfostoreWriter;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -95,6 +94,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class InfostoreRequest extends CommonRequest {
@@ -541,7 +541,7 @@ public class InfostoreRequest extends CommonRequest {
             final TimedResult<DocumentMetadata> result = infostore.getVersions(id, new Metadata[] { Metadata.VERSION_LITERAL },
                     ctx, user, userConfiguration);
             if (timestamp > ts) {
-                throw ;
+                throw AjaxExceptionCodes.Conflict.create();
             }
             iter = result.results();
             final TIntArrayList versions;
