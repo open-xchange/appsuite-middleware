@@ -57,7 +57,6 @@ import java.util.Map;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactUnificationState;
@@ -101,12 +100,12 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * @see com.openexchange.api2.ContactSQLInterface#updateContactObject(com.openexchange.groupware.container.ContactObject, int,
      * java.util.Date)
      */
-    public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException, OXConcurrentModificationException {
+    public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    public void updateUserContact(Contact contact, Date lastmodified) throws OXException {
+    public void updateUserContact(final Contact contact, final Date lastmodified) throws OXException {
         // Nothing to do.
     }
 
@@ -192,7 +191,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
         return null;
     }
 
-    public Contact[] getUsersById(int[] userIds, boolean performReadCheck) throws OXException {
+    public Contact[] getUsersById(final int[] userIds, final boolean performReadCheck) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -256,7 +255,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#associateTwoContacts(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
      */
-    public void associateTwoContacts(Contact master, Contact slave) throws OXException {
+    public void associateTwoContacts(final Contact master, final Contact slave) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -264,7 +263,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getAssociatedContacts(com.openexchange.groupware.container.Contact)
      */
-    public List<Contact> getAssociatedContacts(Contact contact) throws OXException {
+    public List<Contact> getAssociatedContacts(final Contact contact) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -272,7 +271,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getAssociationBetween(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
      */
-    public ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException {
+    public ContactUnificationState getAssociationBetween(final Contact c1, final Contact c2) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -280,7 +279,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getContactByUUID(java.lang.String)
      */
-    public Contact getContactByUUID(String uuid) throws OXException {
+    public Contact getContactByUUID(final String uuid) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -288,19 +287,19 @@ public class SimContactSQLInterface implements ContactSQLInterface {
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#separateTwoContacts(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
      */
-    public void separateTwoContacts(Contact master, Contact slave) throws OXException {
+    public void separateTwoContacts(final Contact master, final Contact slave) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
-	public SearchIterator<Contact> searchContacts(SearchTerm term, int orderBy,
-			String orderDir, int[] cols) throws OXException {
+	public SearchIterator<Contact> searchContacts(final SearchTerm term, final int orderBy,
+			final String orderDir, final int[] cols) throws OXException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
-			SearchTerm<T> searchterm, int orderBy, Order order, String collation, int[] cols)
+			final SearchTerm<T> searchterm, final int orderBy, final Order order, final String collation, final int[] cols)
 			throws OXException {
 		// TODO Auto-generated method stub
 		return null;
