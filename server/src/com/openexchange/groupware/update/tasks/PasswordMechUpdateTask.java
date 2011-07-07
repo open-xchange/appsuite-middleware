@@ -60,7 +60,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -143,9 +142,9 @@ public class PasswordMechUpdateTask implements UpdateTask {
 	 *            the context ID
 	 * @return <code>true</code> if column named 'passwordMech' was found;
 	 *         otherwise <code>false</code>
-	 * @throws AbstractOXException
+	 * @throws OXException
 	 */
-	private static final boolean checkColumn(final int contextId) throws AbstractOXException {
+	private static final boolean checkColumn(final int contextId) throws OXException {
 		Connection readCon = null;
 		Statement stmt = null;
 		ResultSet rs = null;

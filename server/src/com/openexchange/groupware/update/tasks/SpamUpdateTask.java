@@ -60,7 +60,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -137,7 +136,7 @@ public class SpamUpdateTask implements UpdateTask {
 	
 	private static final String SQL_SELECT_ALL = "SELECT * FROM user_setting_mail";
 	
-	private static final boolean checkExistence(final String colName, final int contextId) throws AbstractOXException {
+	private static final boolean checkExistence(final String colName, final int contextId) throws OXException {
 		Connection readCon = null;
 		Statement stmt = null;
 		ResultSet rs = null;

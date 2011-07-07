@@ -66,11 +66,10 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.impl.OCLPermission;
@@ -122,7 +121,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
             final int currentContextId = me.getKey().intValue();
             try {
                 iterateUsersPerContext(me.getValue(), currentContextId);
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 final StringBuilder sb = new StringBuilder(128);
                 sb.append("GlobalAddressBookPermissionsResolverTask experienced an error while resolving to individual permissions for users in context ");
                 sb.append(currentContextId);

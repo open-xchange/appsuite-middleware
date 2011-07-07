@@ -73,7 +73,6 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -543,7 +542,7 @@ public final class Tools {
 
     private static final String TABLE = "TABLE";
 
-    public static void removeFile(final int cid, final String fileStoreLocation) throws OXException, FilestoreException, OXException {
+    public static void removeFile(final int cid, final String fileStoreLocation) throws OXException {
         final Context ctx = ContextStorage.getInstance().loadContext(cid);
         final URI fileStorageURI = FilestoreStorage.createURI(ctx);
         final File file = new File(fileStorageURI);
@@ -596,10 +595,10 @@ public final class Tools {
         }
     }
 
-    private static void addColumns(Connection con, String tableName, Column... cols) throws SQLException {
-        StringBuffer sql = new StringBuffer("ALTER TABLE ");
+    private static void addColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        final StringBuffer sql = new StringBuffer("ALTER TABLE ");
         sql.append(tableName);
-        for (Column column : cols) {
+        for (final Column column : cols) {
             sql.append(" ADD ");
             sql.append(column.getName());
             sql.append(' ');
@@ -621,9 +620,9 @@ public final class Tools {
         }
     }
 
-    public static void checkAndAddColumns(Connection con, String tableName, Column... cols) throws SQLException {
-        List<Column> notExisting = new ArrayList<Column>();
-        for (Column col : cols) {
+    public static void checkAndAddColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        final List<Column> notExisting = new ArrayList<Column>();
+        for (final Column col : cols) {
             if (!columnExists(con, tableName, col.getName())) {
                 notExisting.add(col);
             }
@@ -633,14 +632,14 @@ public final class Tools {
         }
     }
 
-    public static void modifyColumns(Connection con, String tableName, Collection<Column> columns) throws SQLException {
+    public static void modifyColumns(final Connection con, final String tableName, final Collection<Column> columns) throws SQLException {
         modifyColumns(con, tableName, columns.toArray(new Column[columns.size()]));
     }
 
-    public static void modifyColumns(Connection con, String tableName, Column... cols) throws SQLException {
-        StringBuffer sql = new StringBuffer("ALTER TABLE ");
+    public static void modifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        final StringBuffer sql = new StringBuffer("ALTER TABLE ");
         sql.append(tableName);
-        for (Column column : cols) {
+        for (final Column column : cols) {
             sql.append(" MODIFY COLUMN ");
             sql.append(column.getName());
             sql.append(' ');
@@ -662,9 +661,9 @@ public final class Tools {
         }
     }
 
-    public static void checkAndModifyColumns(Connection con, String tableName, Column... cols) throws SQLException {
-        List<Column> toDo = new ArrayList<Column>();
-        for (Column col : cols) {
+    public static void checkAndModifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        final List<Column> toDo = new ArrayList<Column>();
+        for (final Column col : cols) {
             if (!col.getDefinition().contains(getColumnTypeName(con, tableName, col.getName()))) {
                 toDo.add(col);
             }

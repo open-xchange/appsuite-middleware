@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -121,7 +120,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
     private static final String SQL_QUERY = "SELECT created_from,cid,intfield01 FROM prg_contacts WHERE fid = "+FolderObject.SYSTEM_LDAP_FOLDER_ID+" AND userid is NULL";
 
 
-    public void correctTable(final String sqltable, final int contextId) throws AbstractOXException {
+    public void correctTable(final String sqltable, final int contextId) throws OXException {
 
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);

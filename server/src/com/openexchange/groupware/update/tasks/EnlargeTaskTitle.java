@@ -60,7 +60,6 @@ import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.SQL;
 import com.openexchange.groupware.tasks.StorageType;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;

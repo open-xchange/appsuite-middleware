@@ -61,14 +61,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.internal.SQL;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
@@ -150,7 +147,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
                 rows += mRow;
             }
             if (brokens.length != rows) {
-                throw new OXException(ReminderExceptionCode.SQL_ERROR, "Strangely deleted "
+                throw ReminderExceptionCode.SQL_ERROR.create("Strangely deleted "
                     + rows + " instead of " + brokens.length);
             }
         } catch (final SQLException e) {

@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.upload.quotachecker;
 
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -91,7 +91,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
             int globalQuota;
             try {
                 globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
-            } catch (final ConfigurationException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 globalQuota = 0;
             }

@@ -55,10 +55,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 

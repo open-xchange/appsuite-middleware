@@ -59,14 +59,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -274,7 +272,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         }
     }
 
-    public void correctAttachments(final Connection con) throws AbstractOXException {
+    public void correctAttachments(final Connection con) throws OXException {
         final String sql = "SELECT a.cid,a.id,a.filename FROM prg_attachment a "
             + "LEFT JOIN prg_contacts c ON a.attached=c.intfield01 AND a.cid=c.cid "
             + "WHERE a.module=? AND c.intfield01 IS NULL";
@@ -304,10 +302,6 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
             Tools.removeFile(cid, filename);
         } catch (final OXException e) {
             LOG.info("Context is already removed. Assuming its files are removed, too.");
-        } catch (final FilestoreException e) {
-            LOG.warn("Unable to delete file '" + filename + "' in context " + cid + ". Problem with FilestoreStorage.", e);
-        } catch (final OXException e) {
-            LOG.warn("Unable to delete file '" + filename + "' in context " + cid + ". Problem with Filestore.", e);
         }
         final String sql = "DELETE FROM prg_attachment WHERE cid=? AND id=?";
         PreparedStatement ps = null;

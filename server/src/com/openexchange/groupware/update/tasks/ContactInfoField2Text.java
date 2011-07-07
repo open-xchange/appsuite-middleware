@@ -54,10 +54,9 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 

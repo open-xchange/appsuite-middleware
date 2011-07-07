@@ -66,15 +66,12 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.internal.DynamicList;
@@ -132,7 +129,7 @@ public final class UpdateTaskToolkit {
      * @throws OXException If update task cannot be performed
      */
     private static void forceUpdateTask0(final UpdateTask task, final int contextId) throws OXException {
-        List<UpdateTask> taskList = new ArrayList<UpdateTask>(1);
+        final List<UpdateTask> taskList = new ArrayList<UpdateTask>(1);
         taskList.add(task);
         new UpdateExecutor(getSchema(contextId), contextId, taskList).execute();
     }
@@ -170,7 +167,7 @@ public final class UpdateTaskToolkit {
         // Get schemas with their context IDs
         final Map<String, Set<Integer>> schemasAndContexts = getSchemasAndContexts();
         final Map<String, Schema> schemas = new HashMap<String, Schema>(schemasAndContexts.size());
-        for (Map.Entry<String, Set<Integer>> entry : schemasAndContexts.entrySet()) {
+        for (final Map.Entry<String, Set<Integer>> entry : schemasAndContexts.entrySet()) {
             final Schema schema = getSchema(entry.getValue().iterator().next().intValue());
             schemas.put(entry.getKey(), schema);
         }
@@ -267,8 +264,6 @@ public final class UpdateTaskToolkit {
                     removeContexts(contextId);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
                 }
             }
         }
@@ -281,8 +276,8 @@ public final class UpdateTaskToolkit {
      * @throws OXException if the update task class can not be determined.
      */
     private static UpdateTask getUpdateTask(final String className) throws OXException {
-        List<UpdateTask> taskList = DynamicList.getInstance().getTaskList();
-        for (UpdateTask task : taskList) {
+        final List<UpdateTask> taskList = DynamicList.getInstance().getTaskList();
+        for (final UpdateTask task : taskList) {
             if (task.getClass().getName().equals(className)) {
                 return task;
             }
@@ -314,10 +309,10 @@ public final class UpdateTaskToolkit {
                     // Schema is NOT locked by update process
                     throw SchemaExceptionCodes.UPDATE_CONFLICT.create(schema.getSchema());
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 rollback(con);
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 rollback(con);
                 throw new OXException(e);
             } finally {
@@ -333,10 +328,10 @@ public final class UpdateTaskToolkit {
                 }
                 // Everything went fine. Schema is marked as unlocked
                 con.commit();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 rollback(con);
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 rollback(con);
                 throw new OXException(e);
             } finally {
@@ -355,25 +350,25 @@ public final class UpdateTaskToolkit {
     private static SchemaUpdateState getSchema(final int contextId) throws OXException {
         try {
             return SchemaStore.getInstance().getSchema(contextId);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
 
     private static final String SQL_SELECT_LOCKED_FOR_UPDATE = "SELECT locked FROM version FOR UPDATE";
 
-    private static void lockSchema(Schema schema, int contextId) throws OXException {
+    private static void lockSchema(final Schema schema, final int contextId) throws OXException {
         try {
             SchemaStore.getInstance().lockSchema(schema, contextId, false);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
 
-    private static void unlockSchema(Schema schema, int contextId) throws OXException {
+    private static void unlockSchema(final Schema schema, final int contextId) throws OXException {
         try {
             SchemaStore.getInstance().unlockSchema(schema, contextId, false);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

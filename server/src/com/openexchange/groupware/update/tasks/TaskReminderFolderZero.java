@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -129,7 +128,7 @@ public class TaskReminderFolderZero implements UpdateTask {
              }
         }
         LOG.info("Fixing " + update.size() + " reminder and removing " + remove.size() + " not fixable reminder.");
-        Connection con = Database.get(contextId, true);
+        final Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false);
             update(con, update);
@@ -149,9 +148,9 @@ public class TaskReminderFolderZero implements UpdateTask {
     }
 
     private List<ReminderData> getReminder(final int contextId)
-        throws AbstractOXException {
+        throws OXException {
         final List<ReminderData> retval = new ArrayList<ReminderData>();
-        Connection con = Database.get(contextId, false);
+        final Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -177,8 +176,8 @@ public class TaskReminderFolderZero implements UpdateTask {
     }
 
     private int findFolder(final int contextId, final int taskId,
-        final int userId) throws AbstractOXException {
-        Connection con = Database.get(contextId, false);
+        final int userId) throws OXException {
+        final Connection con = Database.get(contextId, false);
         int retval = -1;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -201,7 +200,7 @@ public class TaskReminderFolderZero implements UpdateTask {
     }
 
     private int update(final Connection con, final List<ReminderData> update)
-        throws AbstractOXException {
+        throws OXException {
         int retval = 0;
         PreparedStatement stmt = null;
         try {
@@ -230,7 +229,7 @@ public class TaskReminderFolderZero implements UpdateTask {
     }
 
     private int delete(final Connection con, final List<ReminderData> remove)
-        throws AbstractOXException {
+        throws OXException {
         int retval = 0;
         PreparedStatement stmt = null;
         try {

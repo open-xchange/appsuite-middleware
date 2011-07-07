@@ -63,7 +63,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -128,7 +127,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         final Hashtable<String, ArrayList<String>> missingCols = missingColumns(contextId);
         final boolean deleteLastmodified = tableContainsColumn(contextId, "del_user", "lastModified");
 
-        Connection writeCon = Database.get(contextId, true);
+        final Connection writeCon = Database.get(contextId, true);
         try {
             writeCon.setAutoCommit(false);
             createSequenceTables(writeCon, contextId);
@@ -151,8 +150,8 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
     }
 
-    private final Hashtable<String, ArrayList<String>> missingColumns(final int contextId) throws AbstractOXException {
-        Connection readCon = Database.get(contextId, false);
+    private final Hashtable<String, ArrayList<String>> missingColumns(final int contextId) throws OXException {
+        final Connection readCon = Database.get(contextId, false);
         Statement stmt = null;
         ResultSet rs = null;
 
@@ -200,7 +199,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         }
     }
 
-    private void createSequenceTables(final Connection con, final int contextId) throws AbstractOXException {
+    private void createSequenceTables(final Connection con, final int contextId) throws OXException {
         PreparedStatement stmt = null;
         try {
             // create missing sequence tables
@@ -217,7 +216,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         }
     }
 
-    private void alterTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws AbstractOXException {
+    private void alterTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws OXException {
         PreparedStatement stmt = null;
         try {
             for(final Map.Entry<String, ArrayList<String>> entry : missingCols.entrySet() ) {
@@ -266,7 +265,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         }
     }
 
-    private void updateTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws AbstractOXException {
+    private void updateTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws OXException {
         PreparedStatement stmt = null;
         try {
             for(final Map.Entry<String, ArrayList<String>> entry : missingCols.entrySet() ) {
@@ -321,8 +320,8 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         }
     }
 
-    private final boolean tableContainsColumn(final int contextId, final String table, final String column) throws AbstractOXException {
-        Connection readCon = Database.get(contextId, false);
+    private final boolean tableContainsColumn(final int contextId, final String table, final String column) throws OXException {
+        final Connection readCon = Database.get(contextId, false);
         Statement stmt = null;
         ResultSet rs = null;
 
@@ -350,7 +349,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         }
     }
 
-    private void removeColumnFromTable(final Connection con, final int contextId, final String column, final String table) throws AbstractOXException {
+    private void removeColumnFromTable(final Connection con, final int contextId, final String column, final String table) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("ALTER TABLE "+table+" DROP "+column);

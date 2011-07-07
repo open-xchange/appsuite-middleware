@@ -61,18 +61,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.RdbUserStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -80,7 +77,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.exception.OXException;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -120,7 +116,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             final int currentContextId = me.getKey().intValue();
             try {
                 iterateUsersPerContext(me.getValue(), currentContextId);
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 final StringBuilder sb = new StringBuilder(128);
                 sb.append("MailAccountMigrationTask experienced an error while migrating mail accounts for users in context ");
                 sb.append(currentContextId);
@@ -223,8 +219,6 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                 final UserSettingMail usm = loadUserSettingMail(ctx, userId.intValue());
                 try {
                     handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
-                } catch (final OXException e) {
-                    LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 } catch (final OXException e) {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 }

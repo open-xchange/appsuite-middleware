@@ -73,13 +73,11 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 
@@ -105,7 +103,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
     }
 
     private MBeanInfo buildMBeanInfo() {
-        List<MBeanOperationInfo> operations = new ArrayList<MBeanOperationInfo>(6);
+        final List<MBeanOperationInfo> operations = new ArrayList<MBeanOperationInfo>(6);
         // Trigger update process
         final MBeanParameterInfo[] tparams = { new MBeanParameterInfo(
             "id",
@@ -152,9 +150,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
             MBeanOperationInfo.ACTION));
         try {
             // List executed update tasks
-            String[] taskTypeDescriptions = {
+            final String[] taskTypeDescriptions = {
                 "Class name of the update task", "Wether it is executed successfully or not.", "Last task execution time stamp." };
-            OpenType[] taskTypes = { SimpleType.STRING, SimpleType.BOOLEAN, SimpleType.DATE };
+            final OpenType[] taskTypes = { SimpleType.STRING, SimpleType.BOOLEAN, SimpleType.DATE };
             taskType = new CompositeType(
                 "Update task",
                 "Executed update task",
@@ -162,7 +160,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 taskTypeDescriptions,
                 taskTypes);
             taskListType = new TabularType("UpdateTask list", "List of update tasks.", taskType, new String[] { "taskName" });
-            MBeanParameterInfo[] listExecutedTasks = { new MBeanParameterInfo(
+            final MBeanParameterInfo[] listExecutedTasks = { new MBeanParameterInfo(
                 "schema",
                 "java.lang.String",
                 "Name of a schema that update tasks should be listed.") };
@@ -172,7 +170,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 listExecutedTasks,
                 "javax.management.openmbean.TabularData",
                 MBeanOperationInfo.INFO));
-        } catch (OpenDataException e) {
+        } catch (final OpenDataException e) {
             LOG.error(e.getMessage(), e);
         }
         // MBean info
@@ -314,7 +312,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } else if (actionName.equals("listExecutedTasks")) {
             try {
                 return getExecutedTasksList(params[0].toString());
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 throw new MBeanException(new Exception(e.getMessage()), e.getMessage());
             } catch (final RuntimeException e) {
@@ -338,23 +336,21 @@ public final class UpdateTaskMBean implements DynamicMBean {
         return new AttributeList();
     }
 
-    private TabularDataSupport getExecutedTasksList(String schemaName) throws OXException {
-        SchemaStore store = SchemaStore.getInstance();
+    private TabularDataSupport getExecutedTasksList(final String schemaName) throws OXException {
+        final SchemaStore store = SchemaStore.getInstance();
         final TabularDataSupport retval;
         try {
-            int contextId = UpdateTaskToolkit.getContextIdBySchema(schemaName);
-            int poolId = Database.resolvePool(contextId, true);
-            ExecutedTask[] tasks = store.getExecutedTasks(poolId, schemaName);
+            final int contextId = UpdateTaskToolkit.getContextIdBySchema(schemaName);
+            final int poolId = Database.resolvePool(contextId, true);
+            final ExecutedTask[] tasks = store.getExecutedTasks(poolId, schemaName);
             retval = new TabularDataSupport(taskListType, tasks.length, 1);
-            for (ExecutedTask task : tasks) {
-                CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified() });
+            for (final ExecutedTask task : tasks) {
+                final CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified() });
                 retval.put(data);
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
-        } catch (OXException e) {
-            throw new OXException(e);
-        } catch (OpenDataException e) {
+        } catch (final OpenDataException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         }
         return retval;
