@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.global;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -59,5 +59,5 @@ import com.openexchange.groupware.AbstractOXException;
  *
  */
 public interface OXCloseable {
-    public void close() throws AbstractOXException;
+    public void close() throws OXException;
 }

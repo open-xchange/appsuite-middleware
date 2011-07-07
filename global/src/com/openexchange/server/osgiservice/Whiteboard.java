@@ -54,7 +54,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.global.OXCloseable;
 
 
@@ -92,11 +92,11 @@ public class Whiteboard implements OXCloseable {
         return factory.isActive(o);
     }
     
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         for(final OXCloseable closeable : closeables) {
             try {
                 closeable.close();
-            } catch (final AbstractOXException x) {
+            } catch (final OXException x) {
                 LOG.error(x);
             }
         }
