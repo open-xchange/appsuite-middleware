@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
@@ -74,7 +74,7 @@ public class ValidationChain {
         validators.add(validator);
     }
 
-    public void validate(final DocumentMetadata metadata) throws InfostoreException {
+    public void validate(final DocumentMetadata metadata) throws OXException {
         final StringBuilder message = new StringBuilder();
         boolean failed = false;
         for(final InfostoreValidator validator : validators) {

@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore.facade.impl;
 
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -223,7 +222,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                 }
 
                 public OXException[] getWarnings() {
-                    return new AbstractOXException[0];
+                    return new OXException[0];
                 }
 
                 public boolean hasNext() throws OXException {

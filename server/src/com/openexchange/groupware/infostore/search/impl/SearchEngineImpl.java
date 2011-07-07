@@ -62,18 +62,14 @@ import java.util.List;
 import java.util.Queue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -85,8 +81,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.iterator.SearchIteratorException.Code;
+import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.sql.SearchStrings;
 
@@ -157,7 +152,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
             all = Collections.unmodifiableList(all);
             own = Collections.unmodifiableList(own);
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
 
@@ -256,8 +251,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         try {
@@ -271,18 +266,18 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         }
     }
 
-    public static void checkPatternLength(String pattern) throws InfostoreException {
+    public static void checkPatternLength(final String pattern) throws OXException {
         final int minimumSearchCharacters;
         try {
             minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (ConfigurationException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         if (0 == minimumSearchCharacters) {
             return;
@@ -425,10 +420,10 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
         private Statement stmt;
 
-        private final List<AbstractOXException> warnings;
+        private final List<OXException> warnings;
 
-        public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws SearchIteratorException {
-            this.warnings = new ArrayList<AbstractOXException>(2);
+        public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws OXException {
+            this.warnings = new ArrayList<OXException>(2);
             this.rs = rs;
             this.s = s;
             this.columns = columns;
@@ -442,7 +437,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                     close();
                 }
             } catch (final Exception e) {
-                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.INFOSTORE);
+                throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.INFOSTORE);
             }
         }
 
@@ -450,7 +445,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             return next != null;
         }
 
-        public DocumentMetadata next() throws SearchIteratorException, OXException {
+        public DocumentMetadata next() throws OXException, OXException {
             try {
                 DocumentMetadata retval = null;
                 retval = next;
@@ -471,7 +466,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 }
                 return retval;
             } catch (final Exception exc) {
-                throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.INFOSTORE);
+                throw SearchIteratorExceptionCodes.SQL_ERROR.create(exc, EnumComponent.INFOSTORE);
             }
         }
 
@@ -514,7 +509,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
 
         public OXException[] getWarnings() {
-            return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+            return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
         public boolean hasWarnings() {

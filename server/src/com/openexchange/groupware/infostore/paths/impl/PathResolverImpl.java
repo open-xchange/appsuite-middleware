@@ -62,13 +62,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.Resolved;
@@ -76,7 +74,6 @@ import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.tx.TransactionException;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
@@ -162,7 +159,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             folder = path.get(i);
             String folderName = folder.getFolderName();
             if(aliases != null)  {
-                String alias = aliases.getAlias(folder.getObjectID());
+                final String alias = aliases.getAlias(folder.getObjectID());
                 if(alias != null) {
                     folderName = alias;
                 }
@@ -227,10 +224,10 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                     boolean found = false;
                     int folderid = 0;
                     while(rs.next()) {
-                        String fname = rs.getString(2);
+                        final String fname = rs.getString(2);
                         if(fname.equals(component)) {
                             if( found ) {
-                                InfostoreException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(ctx.getContextId()));
+                                final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(ctx.getContextId()));
                                 LOG.warn(e.toString(), e);
                             }
                             folderid = rs.getInt(1);
@@ -250,10 +247,10 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                             found = false;
                             int id = 0;
                             while(rs.next()) {
-                                String name = rs.getString(2);
+                                final String name = rs.getString(2);
                                 if(name.equals(component)) {
                                     if(found) {
-                                        InfostoreException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(ctx.getContextId()));
+                                        final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(ctx.getContextId()));
                                         LOG.warn(e.toString(), e);
                                     }
                                     found = true;
@@ -278,19 +275,17 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             return new ResolvedImpl(current,parentId, false);
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, stmt.toString());
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx,con);
         }
     }
 
-    private void tryAlias(String component, int parentId, WebdavPath current, Map<WebdavPath, Resolved> cache) {
+    private void tryAlias(final String component, final int parentId, final WebdavPath current, final Map<WebdavPath, Resolved> cache) {
         if(aliases == null) {
             return;
         }
-        int aliasId = aliases.getId(component, parentId);
+        final int aliasId = aliases.getId(component, parentId);
         if(WebdavFolderAliases.NOT_REGISTERED == aliasId) {
             return;
         }
@@ -311,7 +306,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
 
     @Override
-    public void finish() throws TransactionException {
+    public void finish() throws OXException {
         clearCache();
         super.finish();
     }
@@ -323,7 +318,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     }
 
     @Override
-    public void startTransaction() throws TransactionException {
+    public void startTransaction() throws OXException {
         super.startTransaction();
         resolveCache.set(new HashMap<WebdavPath,Resolved>());
         docPathCache.set(new HashMap<Integer,WebdavPath>());
@@ -344,7 +339,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         return MODE.getFolder(folderid, ctx);
     }
 
-    public void setAliases(WebdavFolderAliases aliases) {
+    public void setAliases(final WebdavFolderAliases aliases) {
         this.aliases = aliases;
     }
 
@@ -366,12 +361,10 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                 try {
                     readCon = provider.getReadConnection(ctx);
                     return FolderCacheManager.getInstance().loadFolderObject(folderid, ctx, readCon);
-                } catch (DBPoolingException e) {
-                    throw new InfostoreException(e);
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);
                 }
-            } catch (final FolderCacheNotEnabledException e) {
+            } catch (final OXException e) {
                 MODE = new NORMAL_MODE();
                 return MODE.getFolder(folderid, ctx);
             }
