@@ -53,14 +53,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.config.MailAccountUnifiedINBOXProperties;
 import com.openexchange.unifiedinbox.config.UnifiedINBOXConfig;
@@ -167,7 +165,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     }
 
     @Override
-    protected void connectInternal() throws MailException {
+    protected void connectInternal() throws OXException {
         // Nothing to connect
         connected = true;
     }
@@ -178,9 +176,9 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     }
 
     @Override
-    public UnifiedINBOXFolderStorage getFolderStorage() throws MailException {
+    public UnifiedINBOXFolderStorage getFolderStorage() throws OXException {
         if (!connected) {
-            throw new UnifiedINBOXException(UnifiedINBOXException.Code.NOT_CONNECTED);
+            throw UnifiedINBOXException.Code.NOT_CONNECTED.create();
         }
         if (null == folderStorage) {
             folderStorage = new UnifiedINBOXFolderStorage(this, session);
@@ -189,9 +187,9 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     }
 
     @Override
-    public MailLogicTools getLogicTools() throws MailException {
+    public MailLogicTools getLogicTools() throws OXException {
         if (!connected) {
-            throw new UnifiedINBOXException(UnifiedINBOXException.Code.NOT_CONNECTED);
+            throw UnifiedINBOXException.Code.NOT_CONNECTED.create();
         }
         if (null == logicTools) {
             logicTools = new MailLogicTools(session, accountId);
@@ -200,9 +198,9 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     }
 
     @Override
-    public UnifiedINBOXMessageStorage getMessageStorage() throws MailException {
+    public UnifiedINBOXMessageStorage getMessageStorage() throws OXException {
         if (!connected) {
-            throw new UnifiedINBOXException(UnifiedINBOXException.Code.NOT_CONNECTED);
+            throw UnifiedINBOXException.Code.NOT_CONNECTED.create();
         }
         if (null == messageStorage) {
             messageStorage = new UnifiedINBOXMessageStorage(this, session);
@@ -225,7 +223,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
         if (folderStorage != null) {
             try {
                 folderStorage.releaseResources();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(new StringBuilder("Error while closing Unified INBOX folder storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 folderStorage = null;
@@ -234,7 +232,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
         if (messageStorage != null) {
             try {
                 messageStorage.releaseResources();
-            } catch (final MailException e) {
+            } catch (final OXException e) {
                 LOG.error(new StringBuilder("Error while closing Unified INBOX message storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 messageStorage = null;
@@ -247,17 +245,17 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
     }
 
     @Override
-    protected void shutdown() throws MailException {
+    protected void shutdown() throws OXException {
         // Nothing to shut-down
     }
 
     @Override
-    protected void startup() throws MailException {
+    protected void startup() throws OXException {
         // Nothing to start-up
     }
 
     @Override
-    protected IMailProperties createNewMailProperties() throws MailException {
+    protected IMailProperties createNewMailProperties() throws OXException {
         try {
             final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
                 MailAccountStorageService.class,
@@ -266,10 +264,8 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
                 accountId,
                 session.getUserId(),
                 session.getContextId()));
-        } catch (final ServiceException e) {
-            throw new MailException(e);
-        } catch (final MailAccountException e) {
-            throw new MailException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 

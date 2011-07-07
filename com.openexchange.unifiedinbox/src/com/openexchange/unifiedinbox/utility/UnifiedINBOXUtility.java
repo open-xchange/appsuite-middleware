@@ -56,8 +56,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.tools.stream.UnsynchronizedStringWriter;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
@@ -83,9 +83,9 @@ public final class UnifiedINBOXUtility {
      * 
      * @param mailIDs The Unified INBOX mail IDs to parse
      * @return A map grouping referenced accounts and referenced fullnames and IDs.
-     * @throws MailException If parsing mail IDs fails
+     * @throws OXException If parsing mail IDs fails
      */
-    public static Map<Integer, Map<String, List<String>>> parseMailIDs(final String[] mailIDs) throws MailException {
+    public static Map<Integer, Map<String, List<String>>> parseMailIDs(final String[] mailIDs) throws OXException {
         final Map<Integer, Map<String, List<String>>> map = new HashMap<Integer, Map<String, List<String>>>(mailIDs.length);
         // Start parsing
         final UnifiedINBOXUID uidl = new UnifiedINBOXUID();
@@ -130,14 +130,12 @@ public final class UnifiedINBOXUtility {
      * 
      * @param nestedFullname The nested fullname to parse
      * @return The parsed nested fullname argument
-     * @throws UnifiedINBOXException If specified nested fullname is invalid
+     * @throws OXException If specified nested fullname is invalid
      */
-    public static FullnameArgument parseNestedFullname(final String nestedFullname) throws UnifiedINBOXException {
+    public static FullnameArgument parseNestedFullname(final String nestedFullname) throws OXException {
         // INBOX/default0/INBOX
         if (!startsWithKnownFullname(nestedFullname)) {
-            throw new UnifiedINBOXException(
-                UnifiedINBOXException.Code.FOLDER_NOT_FOUND,
-                prepareMailFolderParam(nestedFullname).getFullname());
+            throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullname).getFullname());
         }
         // Cut off starting known fullname and its separator character
         final String fn = nestedFullname.substring(nestedFullname.indexOf(SEPERATOR) + 1);
@@ -159,9 +157,9 @@ public final class UnifiedINBOXUtility {
      * @param mailAccess The mail access to desired account
      * @param fullname The fullname to look-up
      * @return The account's fullname
-     * @throws MailException If fullname look-up fails
+     * @throws OXException If fullname look-up fails
      */
-    public static String determineAccountFullname(final MailAccess<?, ?> mailAccess, final String fullname) throws MailException {
+    public static String determineAccountFullname(final MailAccess<?, ?> mailAccess, final String fullname) throws OXException {
         if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
             return UnifiedINBOXAccess.INBOX;
         }
@@ -177,7 +175,7 @@ public final class UnifiedINBOXUtility {
         if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
             return mailAccess.getFolderStorage().getTrashFolder();
         }
-        throw new UnifiedINBOXException(UnifiedINBOXException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX, fullname);
+        throw UnifiedINBOXException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX.create(fullname);
     }
 
     /**

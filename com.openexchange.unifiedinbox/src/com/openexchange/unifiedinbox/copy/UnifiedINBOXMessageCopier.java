@@ -53,8 +53,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -104,9 +105,9 @@ public final class UnifiedINBOXMessageCopier {
      * @param fast <code>true</code> to perform fast copy; otherwise <code>false</code>
      * @param move <code>true</code> to perform a move operation; otherwise <code>false</code> for a copy operation
      * @return The corresponding mail IDs of copied messages in destination folder
-     * @throws MailException If copy operation fails
+     * @throws OXException If copy operation fails
      */
-    public String[] doCopy(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws MailException {
+    public String[] doCopy(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws OXException {
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(sourceFolder)) {
             if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(destFolder)) {
                 return knownFolder2KnownFolder(sourceFolder, destFolder, mailIds, fast, move);
@@ -119,13 +120,13 @@ public final class UnifiedINBOXMessageCopier {
         return accountFolder2AccountFolder(sourceFolder, destFolder, mailIds, fast, move);
     }
 
-    private String[] knownFolder2KnownFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws MailException {
+    private String[] knownFolder2KnownFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws OXException {
         /*
          * A copy from an account's default folder to same account's default folder. Resolving account's real fullnames for denoted default
          * folders is needed here.
          */
         if (move && sourceFolder.equals(destFolder)) {
-            throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
+            throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
         }
         // Helper object
         final UnifiedINBOXUID tmp = new UnifiedINBOXUID();
@@ -155,7 +156,7 @@ public final class UnifiedINBOXMessageCopier {
         return retval;
     }
 
-    private String[] knownFolder2AccountFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws MailException {
+    private String[] knownFolder2AccountFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws OXException {
         /*
          * A copy/move from an account's default folder to a specific folder
          */
@@ -170,7 +171,7 @@ public final class UnifiedINBOXMessageCopier {
                 tmp.setUIDString(mailId);
                 // Check if accounts and fullnames are equal
                 if (tmp.getAccountId() == destAccountId && tmp.getFullName().equals(destFullname)) {
-                    throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
+                    throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
                 }
             }
         }
@@ -208,7 +209,7 @@ public final class UnifiedINBOXMessageCopier {
         return retval;
     }
 
-    private String[] accountFolder2KnownFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws MailException {
+    private String[] accountFolder2KnownFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws OXException {
         /*
          * A copy/move from a specific folder to this account's default folder
          */
@@ -221,7 +222,7 @@ public final class UnifiedINBOXMessageCopier {
             final String realDest = UnifiedINBOXUtility.determineAccountFullname(mailAccess, destFolder);
             final String sourceFullname = sourceFullnameArgument.getFullname();
             if (move && sourceFullname.equals(realDest)) {
-                throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
+                throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
             }
             if (move) {
                 retval = mailAccess.getMessageStorage().moveMessages(sourceFullname, realDest, mailIds, fast);
@@ -235,7 +236,7 @@ public final class UnifiedINBOXMessageCopier {
         return retval;
     }
 
-    private String[] accountFolder2AccountFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws MailException {
+    private String[] accountFolder2AccountFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws OXException {
         /*
          * A copy/move from a specific folder to an account's specific folder
          */
@@ -248,7 +249,7 @@ public final class UnifiedINBOXMessageCopier {
         final String destFullname = destFullnameArgument.getFullname();
         if (sourceFullnameArgument.getAccountId() == destFullnameArgument.getAccountId()) {
             if (move && sourceFullname.equals(destFullname)) {
-                throw new UnifiedINBOXException(UnifiedINBOXException.Code.NO_EQUAL_MOVE);
+                throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
             }
             final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
             mailAccess.connect();
@@ -282,7 +283,7 @@ public final class UnifiedINBOXMessageCopier {
         return retval;
     }
 
-    private static void performCallables(final Collection<? extends Task<Object>> callables, final ThreadPoolService threadPoolService) throws MailException {
+    private static void performCallables(final Collection<? extends Task<Object>> callables, final ThreadPoolService threadPoolService) throws OXException {
         final CompletionFuture<Object> completionFuture = threadPoolService.invoke(callables, CallerRunsBehavior.getInstance());
         // Wait for completion
         try {
@@ -292,9 +293,9 @@ public final class UnifiedINBOXMessageCopier {
             }
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e);
         } catch (final ExecutionException e) {
-            throw ThreadPools.launderThrowable(e, MailException.class);
+            throw ThreadPools.launderThrowable(e, OXException.class);
         }
     }
 

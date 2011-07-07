@@ -49,92 +49,95 @@
 
 package com.openexchange.unifiedinbox;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 
 /**
  * {@link UnifiedINBOXException} - Indicates a Unified INBOX error.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXException extends MIMEMailException {
+public final class UnifiedINBOXException extends OXException {
 
     /**
      * Serial Version UID
      */
     private static final long serialVersionUID = -8226676160145457046L;
 
-    public static enum Code {
+    public static enum Code implements OXExceptionCode {
 
         /**
          * Unified INBOX does not support to create folders.
          */
-        CREATE_DENIED("Unified INBOX does not support to create folders.", Category.CODE_ERROR, 2001),
+        CREATE_DENIED("Unified INBOX does not support to create folders.", Category.CATEGORY_ERROR, 2001),
         /**
          * Unified INBOX does not support to delete folders.
          */
-        DELETE_DENIED("Unified INBOX does not support to delete folders.", Category.CODE_ERROR, 2002),
+        DELETE_DENIED("Unified INBOX does not support to delete folders.", Category.CATEGORY_ERROR, 2002),
         /**
          * Unified INBOX does not support to update folders.
          */
-        UPDATE_DENIED("Unified INBOX does not support to update folders.", Category.CODE_ERROR, 2003),
+        UPDATE_DENIED("Unified INBOX does not support to update folders.", Category.CATEGORY_ERROR, 2003),
         /**
          * Unified INBOX does not support to move messages.
          */
-        MOVE_MSGS_DENIED("Unified INBOX does not support to move messages.", Category.CODE_ERROR, 2004),
+        MOVE_MSGS_DENIED("Unified INBOX does not support to move messages.", Category.CATEGORY_ERROR, 2004),
         /**
          * Unified INBOX does not support to copy messages.
          */
-        COPY_MSGS_DENIED("Unified INBOX does not support to copy messages.", Category.CODE_ERROR, 2005),
+        COPY_MSGS_DENIED("Unified INBOX does not support to copy messages.", Category.CATEGORY_ERROR, 2005),
         /**
          * Append messages failed.
          */
-        APPEND_MSGS_DENIED("Append messages failed.", Category.CODE_ERROR, 2006),
+        APPEND_MSGS_DENIED("Append messages failed.", Category.CATEGORY_ERROR, 2006),
         /**
          * Unified INBOX does not support draft messages.
          */
-        DRAFTS_NOT_SUPPORTED("Unified INBOX does not support draft messages.", Category.CODE_ERROR, 2007),
+        DRAFTS_NOT_SUPPORTED("Unified INBOX does not support draft messages.", Category.CATEGORY_ERROR, 2007),
         /**
          * Unified INBOX does not support to move folders.
          */
-        MOVE_DENIED("Unified INBOX does not support to move folders.", Category.CODE_ERROR, 2008),
+        MOVE_DENIED("Unified INBOX does not support to move folders.", Category.CATEGORY_ERROR, 2008),
         /**
          * Unified INBOX does not support mail folder creation
          */
-        FOLDER_CREATION_FAILED("Unified INBOX does not support mail folder creation", Category.CODE_ERROR, 2009),
+        FOLDER_CREATION_FAILED("Unified INBOX does not support mail folder creation", Category.CATEGORY_ERROR, 2009),
         /**
          * Unified INBOX does not support to clear INBOX folder.
          */
-        CLEAR_NOT_SUPPORTED("Unified INBOX does not support to clear INBOX folder.", Category.CODE_ERROR, 2010),
+        CLEAR_NOT_SUPPORTED("Unified INBOX does not support to clear INBOX folder.", Category.CATEGORY_ERROR, 2010),
         /**
          * No connection available to access mailbox
          */
-        NOT_CONNECTED("No connection available to access mailbox", Category.CODE_ERROR, 2011),
+        NOT_CONNECTED("No connection available to access mailbox", Category.CATEGORY_ERROR, 2011),
         /**
          * Folder %1$s does not hold messages and is therefore not selectable.
          */
-        FOLDER_DOES_NOT_HOLD_MESSAGES(MailException.UserExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES),
+        FOLDER_DOES_NOT_HOLD_MESSAGES(MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES),
         /**
          * Mail folder could not be found: %1$s.
          */
-        FOLDER_NOT_FOUND(MIMEMailException.Code.FOLDER_NOT_FOUND),
+        FOLDER_NOT_FOUND(MIMEMailExceptionCode.FOLDER_NOT_FOUND),
         /**
          * Unknown default folder fullname: %1$s.
          */
-        UNKNOWN_DEFAULT_FOLDER_INDEX("Unknown default folder fullname: %1$s.", Category.CODE_ERROR, 2012),
+        UNKNOWN_DEFAULT_FOLDER_INDEX("Unknown default folder fullname: %1$s.", Category.CATEGORY_ERROR, 2012),
         /**
          * Move operation aborted. Source and destination folder are equal.
          */
-        NO_EQUAL_MOVE("Move operation aborted. Source and destination folder are equal.", Category.CODE_ERROR, 2013),
+        NO_EQUAL_MOVE("Move operation aborted. Source and destination folder are equal.", Category.CATEGORY_ERROR, 2013),
         /**
          * Request aborted due to timeout of %1$s %2$s.
          */
-        TIMEOUT("Request aborted due to timeout of %1$s %2$s.", Category.CODE_ERROR, 2014),
+        TIMEOUT("Request aborted due to timeout of %1$s %2$s.", Category.CATEGORY_ERROR, 2014),
         /**
          * Invalid destination folder. Don't know where to append the mails.
          */
-        INVALID_DESTINATION_FOLDER("Invalid destination folder. Don't know where to append the mails.", Category.USER_INPUT, 2015),
+        INVALID_DESTINATION_FOLDER("Invalid destination folder. Don't know where to append the mails.", Category.CATEGORY_USER_INPUT, 2015),
         ;
 
         private final String message;
@@ -143,22 +146,31 @@ public final class UnifiedINBOXException extends MIMEMailException {
 
         private final Category category;
 
+        private final String prefix;
+
         private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.detailNumber = detailNumber;
             this.category = category;
+            prefix = UnifiedINBOXProvider.PROTOCOL_UNIFIED_INBOX.getName();
         }
 
-        private Code(final UserExceptionCode.Code code) {
+        private Code(final MailExceptionCode code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();
+            prefix = code.getPrefix();
         }
 
-        private Code(final MIMEMailException.UserExceptionCode code) {
+        private Code(final MIMEMailExceptionCode code) {
             message = code.getMessage();
             detailNumber = code.getNumber();
             category = code.getCategory();
+            prefix = code.getPrefix();
+        }
+
+        public String getPrefix() {
+            return prefix;
         }
 
         public Category getCategory() {
@@ -171,6 +183,40 @@ public final class UnifiedINBOXException extends MIMEMailException {
 
         public String getMessage() {
             return message;
+        }
+        
+        public boolean equals(final OXException e) {
+            return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        }
+
+        /**
+         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * 
+         * @return The newly created {@link OXException} instance
+         */
+        public OXException create() {
+            return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        }
+
+        /**
+         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * 
+         * @param args The message arguments in case of printf-style message
+         * @return The newly created {@link OXException} instance
+         */
+        public OXException create(final Object... args) {
+            return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        }
+
+        /**
+         * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+         * 
+         * @param cause The optional initial cause
+         * @param args The message arguments in case of printf-style message
+         * @return The newly created {@link OXException} instance
+         */
+        public OXException create(final Throwable cause, final Object... args) {
+            return OXExceptionFactory.getInstance().create(this, cause, args);
         }
     }
 
@@ -185,46 +231,11 @@ public final class UnifiedINBOXException extends MIMEMailException {
         return String.format(code.getMessage(), msgArgs);
     }
 
-    private static final transient Object[] EMPTY_ARGS = new Object[0];
-
     /**
      * Initializes a new {@link UnifiedINBOXException}
-     * 
-     * @param cause The cause
      */
-    public UnifiedINBOXException(final AbstractOXException cause) {
-        super(cause);
-    }
-
-    /**
-     * Initializes a new {@link UnifiedINBOXException}
-     * 
-     * @param code The code
-     * @param messageArgs The message arguments
-     */
-    public UnifiedINBOXException(final Code code, final Object... messageArgs) {
-        this(code, null, messageArgs);
-    }
-
-    /**
-     * Initializes a new {@link UnifiedINBOXException}
-     * 
-     * @param code The code
-     * @param cause The cause
-     * @param messageArgs The message arguments
-     */
-    public UnifiedINBOXException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(UnifiedINBOXProvider.PROTOCOL_UNIFIED_INBOX, code.getCategory(), code.getNumber(), code.getMessage(), cause);
-        super.setMessageArgs(messageArgs);
-    }
-
-    /**
-     * Initializes a new {@link UnifiedINBOXException}
-     * 
-     * @param code The code
-     */
-    public UnifiedINBOXException(final Code code) {
-        this(code, EMPTY_ARGS);
+    private UnifiedINBOXException() {
+        super();
     }
 
 }

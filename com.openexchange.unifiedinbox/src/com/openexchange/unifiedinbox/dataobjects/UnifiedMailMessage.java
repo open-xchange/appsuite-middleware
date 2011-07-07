@@ -56,7 +56,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -148,7 +148,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public void setContentType(final String contentType) throws MailException {
+    public void setContentType(final String contentType) throws OXException {
         delegatee.setContentType(contentType);
     }
 
@@ -168,7 +168,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public void setContentDisposition(final String disposition) throws MailException {
+    public void setContentDisposition(final String disposition) throws OXException {
         delegatee.setContentDisposition(disposition);
     }
 
@@ -488,7 +488,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public boolean hasEnclosedParts() throws MailException {
+    public boolean hasEnclosedParts() throws OXException {
         return delegatee.hasEnclosedParts();
     }
 
@@ -498,7 +498,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public Object getContent() throws MailException {
+    public Object getContent() throws OXException {
         return delegatee.getContent();
     }
 
@@ -518,7 +518,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public DataHandler getDataHandler() throws MailException {
+    public DataHandler getDataHandler() throws OXException {
         return delegatee.getDataHandler();
     }
 
@@ -533,7 +533,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public InputStream getInputStream() throws MailException {
+    public InputStream getInputStream() throws OXException {
         return delegatee.getInputStream();
     }
 
@@ -548,17 +548,17 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public int getEnclosedCount() throws MailException {
+    public int getEnclosedCount() throws OXException {
         return delegatee.getEnclosedCount();
     }
 
     @Override
-    public void setFlag(final int flag, final boolean enable) throws MailException {
+    public void setFlag(final int flag, final boolean enable) throws OXException {
         delegatee.setFlag(flag, enable);
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws MailException {
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
         return delegatee.getEnclosedMailPart(index);
     }
 
@@ -568,7 +568,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public void loadContent() throws MailException {
+    public void loadContent() throws OXException {
         delegatee.loadContent();
     }
 
@@ -588,7 +588,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws MailException {
+    public void writeTo(final OutputStream out) throws OXException {
         delegatee.writeTo(out);
     }
 
@@ -613,7 +613,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public String getSource() throws MailException {
+    public String getSource() throws OXException {
         return delegatee.getSource();
     }
 
@@ -628,7 +628,7 @@ public final class UnifiedMailMessage extends MailMessage {
     }
 
     @Override
-    public byte[] getSourceBytes() throws MailException {
+    public byte[] getSourceBytes() throws OXException {
         return delegatee.getSourceBytes();
     }
 

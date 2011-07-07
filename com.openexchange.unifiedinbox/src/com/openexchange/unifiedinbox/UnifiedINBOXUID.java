@@ -52,7 +52,7 @@ package com.openexchange.unifiedinbox;
 import static com.openexchange.mail.utils.MailPasswordUtil.decrypt;
 import static com.openexchange.mail.utils.MailPasswordUtil.encrypt;
 import java.security.GeneralSecurityException;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 
 /**
@@ -95,9 +95,9 @@ public final class UnifiedINBOXUID {
      * Initializes a new {@link UnifiedINBOXUID}.
      * 
      * @param unifiedINBOXUID The Unified INBOX UID as a string
-     * @throws MailException If parsing Unified INBOX UID fails
+     * @throws OXException If parsing Unified INBOX UID fails
      */
-    public UnifiedINBOXUID(final String unifiedINBOXUID) throws MailException {
+    public UnifiedINBOXUID(final String unifiedINBOXUID) throws OXException {
         super();
         setUIDString(unifiedINBOXUID);
     }
@@ -133,7 +133,7 @@ public final class UnifiedINBOXUID {
      * @throws MailException If parsing Unified INBOX UID fails
      * @return This {@link UnifiedINBOXUID} with new UID applied.
      */
-    public UnifiedINBOXUID setUIDString(final String unifiedINBOXUID) throws MailException {
+    public UnifiedINBOXUID setUIDString(final String unifiedINBOXUID) throws OXException {
         String decoded;
         try {
             decoded = decrypt(unifiedINBOXUID, KEY);

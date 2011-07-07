@@ -55,7 +55,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
@@ -63,10 +64,8 @@ import com.openexchange.mail.dataobjects.ReadOnlyMailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -157,9 +156,9 @@ public final class UnifiedINBOXFolderConverter {
      * @param fullname The folder's fullname
      * @param localizedName The localized name of the folder
      * @return The appropriately filled instance of {@link MailFolder}
-     * @throws MailException If converting mail folder fails
+     * @throws OXException If converting mail folder fails
      */
-    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName) throws MailException {
+    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName) throws OXException {
         return getUnifiedINBOXFolder(unifiedInboxAccountId, session, fullname, localizedName, null);
     }
 
@@ -172,9 +171,9 @@ public final class UnifiedINBOXFolderConverter {
      * @param localizedName The localized name of the folder
      * @param executor The executor to use to concurrently load accounts' message counts
      * @return The appropriately filled instance of {@link MailFolder}
-     * @throws MailException If converting mail folder fails
+     * @throws OXException If converting mail folder fails
      */
-    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName, final Executor executor) throws MailException {
+    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName, final Executor executor) throws OXException {
         final MailFolder tmp = new MailFolder();
         // Subscription not supported by Unified INBOX, so every folder is "subscribed"
         tmp.setSubscribed(true);
@@ -247,9 +246,9 @@ public final class UnifiedINBOXFolderConverter {
         mailFolder.addPermission(permission);
     }
 
-    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, MailException {
+    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, OXException {
         final MailAccount[] accounts;
-        try {
+        {
             final MailAccountStorageService storageService =
                 UnifiedINBOXServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
@@ -260,10 +259,6 @@ public final class UnifiedINBOXFolderConverter {
                 }
             }
             accounts = l.toArray(new MailAccount[l.size()]);
-        } catch (final ServiceException e) {
-            throw new UnifiedINBOXException(e);
-        } catch (final MailAccountException e) {
-            throw new UnifiedINBOXException(e);
         }
         // Create completion service for simultaneous access
         final int length = accounts.length;
@@ -287,7 +282,7 @@ public final class UnifiedINBOXFolderConverter {
                         try {
                             mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                             mailAccess.connect();
-                        } catch (final MailException e) {
+                        } catch (final OXException e) {
                             getLogger().error(e.getMessage(), e);
                             return EMPTY_COUNTS;
                         }
@@ -340,9 +335,10 @@ public final class UnifiedINBOXFolderConverter {
             return retval.get();
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailException(MailException.UserExceptionCode.INTERRUPT_ERROR, e);
+            throw MailExceptionCode.INTERRUPT_ERROR.create(
+                e);
         } catch (final ExecutionException e) {
-            throw ThreadPools.launderThrowable(e, MailException.class);
+            throw ThreadPools.launderThrowable(e, OXException.class);
         }
     }
 
@@ -353,9 +349,9 @@ public final class UnifiedINBOXFolderConverter {
      * @param session The session providing needed user data
      * @param fullnames The fullnames
      * @return The default folder's message counts of denoted account
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
-    public static int[][] getAccountDefaultFolders(final int accountId, final Session session, final String[] fullnames) throws MailException {
+    public static int[][] getAccountDefaultFolders(final int accountId, final Session session, final String[] fullnames) throws OXException {
         final int[][] retval;
         if (LOG.isDebugEnabled()) {
             final long s = System.currentTimeMillis();
@@ -368,14 +364,14 @@ public final class UnifiedINBOXFolderConverter {
         return retval;
     }
 
-    private static int[][] getAccountDefaultFolders0(final int accountId, final Session session, final String[] fullnames) throws MailException {
+    private static int[][] getAccountDefaultFolders0(final int accountId, final Session session, final String[] fullnames) throws OXException {
         final int[][] retval = new int[fullnames.length][];
         // Get & connect appropriate mail access
         final MailAccess<?, ?> mailAccess;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-        } catch (final MailException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return new int[0][];
         }
