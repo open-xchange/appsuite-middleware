@@ -68,9 +68,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -309,9 +306,14 @@ public final class vcard extends PermissionServlet {
                     deleteEntry(context, principal_id, Integer.parseInt(s_object_id));
                 }
             }
-        } catch (final OXConflictException exc) {
-            LOG.debug("doGet", exc);
-            doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
+        } catch (final OXException exc) {
+            if (exc.isConflict()) {
+                LOG.debug("doGet", exc);
+                doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
+            } else {
+                LOG.error("doGet", exc);
+                doError(resp);
+            }
         } catch (final Exception exc) {
             LOG.error("doGet", exc);
             doError(resp);
@@ -486,8 +488,12 @@ public final class vcard extends PermissionServlet {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("STATUS: OK");
                         }
-                    } catch (final OXObjectNotFoundException exc) {
-                        LOG.debug("object was already deleted on server: " + object_id, exc);
+                    } catch (final OXException exc) {
+                        if (exc.isNotFound()) {
+                            LOG.debug("object was already deleted on server: " + object_id, exc);
+                        } else {
+                            throw exc;
+                        }
                     }
                 }
             } finally {
@@ -506,19 +512,28 @@ public final class vcard extends PermissionServlet {
                             ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, session);
                         try {
                             contactInterface.deleteContactObject(object_id, contactfolder_id, timestamp);
-                        } catch (final OXObjectNotFoundException exc) {
-                            LOG.debug("object was already deleted on server: " + object_id, exc);
+                        } catch (final OXException exc) {
+                            if (exc.isNotFound()) {
+                                LOG.debug("object was already deleted on server: " + object_id, exc);
+                            } else {
+                                throw exc;
+                            }
                         }
                     }
                 }
             }
-        } catch (final OXConflictException exc) {
-            LOG.debug("doPut", exc);
-            doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-        } catch (final OXPermissionException exc) {
-            LOG.debug("doPut", exc);
-            doError(resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
-        } catch (final Exception exc) {
+        } catch (final OXException exc) {
+            if (exc.isNoPermission()) {
+                LOG.debug("doPut", exc);
+                doError(resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
+            } else if (exc.isConflict()) {
+                LOG.debug("doPut", exc);
+                doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
+            } else {
+                LOG.error("doPut", exc);
+                doError(resp);
+            }
+        }catch (final Exception exc) {
             LOG.error("doPut", exc);
             doError(resp);
         }

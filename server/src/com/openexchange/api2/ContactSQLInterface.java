@@ -50,8 +50,6 @@
 package com.openexchange.api2;
 
 import java.util.Date;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
@@ -86,6 +84,6 @@ public interface ContactSQLInterface extends ContactInterface {
 	 * @param contactObj
 	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
 	 */
-	public void deleteContactObject(int objectId, int inFolder, Date clientLastModified)throws OXObjectNotFoundException, OXConflictException, OXException;
+	public void deleteContactObject(int objectId, int inFolder, Date clientLastModified)throws OXException;
 
 }

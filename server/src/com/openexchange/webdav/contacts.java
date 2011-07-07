@@ -59,10 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -284,22 +281,35 @@ public final class contacts extends XmlServlet<ContactInterface> {
                     throw WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action));
                 }
                 writeResponse(contactObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
-            } catch (final OXMandatoryFieldException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                        MANDATORY_FIELD_EXCEPTION), clientId, os, xo);
-            } catch (final OXPermissionException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(contactObject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
-                        PERMISSION_EXCEPTION), clientId, os, xo);
-            } catch (final OXConflictException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, CONFLICT_EXCEPTION),
-                        clientId, os, xo);
-            } catch (final OXObjectNotFoundException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(contactObject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, clientId,
-                        os, xo);
+            } catch (final OXException exc) {
+                if (exc.isMandatory()) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                            MANDATORY_FIELD_EXCEPTION), clientId, os, xo);
+                } else if (exc.isNoPermission()) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(contactObject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
+                            PERMISSION_EXCEPTION), clientId, os, xo);
+                } else if (exc.isConflict()) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                            CONFLICT_EXCEPTION), clientId, os, xo);
+                } else if (exc.isNotFound()) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(contactObject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,
+                            clientId, os, xo);
+                } else {
+                    if (exc.getCategory() == Category.CATEGORY_TRUNCATED) {
+                        LOG.debug(_parsePropChilds, exc);
+                        writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                                USER_INPUT_EXCEPTION), clientId, os, xo);
+                    } else {
+                        LOG.error(_parsePropChilds, exc);
+                        writeResponse(contactObject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
+                                SERVER_ERROR_EXCEPTION)
+                                + exc.toString(), clientId, os, xo);
+                    }
+                }
             } catch (final Exception exc) {
                 LOG.error(_parsePropChilds, exc);
                 writeResponse(contactObject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(

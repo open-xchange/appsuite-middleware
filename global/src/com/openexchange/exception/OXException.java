@@ -160,8 +160,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return A missing-field exception.
      */
     public static OXException mandatoryField(final String name) {
-        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE_MISSING_FIELD, name).setCategory(CATEGORY_ERROR).setPrefix(PREFIX_GENERAL).setGeneric(
-            Generic.MANDATORY_FIELD);
+        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE_MISSING_FIELD, name).setCategory(CATEGORY_ERROR).setPrefix(
+            PREFIX_GENERAL).setGeneric(Generic.MANDATORY_FIELD);
     }
 
     /**
@@ -377,6 +377,42 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public boolean isGeneric(final Generic generic) {
         return null != generic && generic.equals(this.generic);
+    }
+
+    /**
+     * Checks if generic is set to {@link Generic#NOT_FOUND}.
+     * 
+     * @return <code>true</code> for {@link Generic#NOT_FOUND}; otherwise <code>false</code>
+     */
+    public boolean isNotFound() {
+        return Generic.NOT_FOUND.equals(generic);
+    }
+
+    /**
+     * Checks if generic is set to {@link Generic#NO_PERMISSION}.
+     * 
+     * @return <code>true</code> for {@link Generic#NO_PERMISSION}; otherwise <code>false</code>
+     */
+    public boolean isNoPermission() {
+        return Generic.NO_PERMISSION.equals(generic);
+    }
+
+    /**
+     * Checks if generic is set to {@link Generic#MANDATORY_FIELD}.
+     * 
+     * @return <code>true</code> for {@link Generic#MANDATORY_FIELD}; otherwise <code>false</code>
+     */
+    public boolean isMandatory() {
+        return Generic.MANDATORY_FIELD.equals(generic);
+    }
+
+    /**
+     * Checks if generic is set to {@link Generic#CONFLICT}.
+     * 
+     * @return <code>true</code> for {@link Generic#CONFLICT}; otherwise <code>false</code>
+     */
+    public boolean isConflict() {
+        return Generic.CONFLICT.equals(generic);
     }
 
     /**

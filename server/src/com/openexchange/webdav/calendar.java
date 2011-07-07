@@ -59,10 +59,6 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -334,22 +330,6 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 } else {
                     writeResponse(appointmentobject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
                 }
-            } catch (final OXMandatoryFieldException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                        MANDATORY_FIELD_EXCEPTION), clientId, os, xo);
-            } catch (final OXPermissionException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(appointmentobject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
-                        PERMISSION_EXCEPTION), clientId, os, xo);
-            } catch (final OXConflictException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                        CONFLICT_EXCEPTION), clientId, os, xo);
-            } catch (final OXObjectNotFoundException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(appointmentobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,
-                        clientId, os, xo);
             }
 //            catch (final OXCalendarException exc) {
 //                if (exc.getCategory() == Category.USER_INPUT) {
@@ -368,15 +348,33 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 //                }
 //            }
             catch (final OXException exc) {
-                if (exc.getCategory() == Category.CATEGORY_TRUNCATED) {
+                if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                            USER_INPUT_EXCEPTION), clientId, os, xo);
+                            MANDATORY_FIELD_EXCEPTION), clientId, os, xo);
+                } else if (exc.isNoPermission()) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
+                            PERMISSION_EXCEPTION), clientId, os, xo);
+                } else if (exc.isConflict()) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                            CONFLICT_EXCEPTION), clientId, os, xo);
+                } else if (exc.isNotFound()) {
+                    LOG.debug(_parsePropChilds, exc);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,
+                            clientId, os, xo);
                 } else {
-                    LOG.error(_parsePropChilds, exc);
-                    writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
-                            SERVER_ERROR_EXCEPTION)
-                            + exc.toString(), clientId, os, xo);
+                    if (exc.getCategory() == Category.CATEGORY_TRUNCATED) {
+                        LOG.debug(_parsePropChilds, exc);
+                        writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+                                USER_INPUT_EXCEPTION), clientId, os, xo);
+                    } else {
+                        LOG.error(_parsePropChilds, exc);
+                        writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
+                                SERVER_ERROR_EXCEPTION)
+                                + exc.toString(), clientId, os, xo);
+                    }
                 }
             } catch (final Exception exc) {
                 LOG.error(_parsePropChilds, exc);
