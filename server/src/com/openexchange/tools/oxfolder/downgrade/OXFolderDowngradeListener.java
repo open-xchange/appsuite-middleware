@@ -70,7 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
-import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.infostore.OXException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.tasks.Tasks;
@@ -432,16 +432,16 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             try {
                 db.rollback();
             } catch (final OXException e) {
-                throw new InfostoreException(e);
+                throw new OXException(e);
             }
             throw x;
         } catch (final OXException e) {
-            throw new InfostoreException(e);
+            throw new OXException(e);
         } finally {
             try {
                 db.finish();
             } catch (final OXException e) {
-                throw new InfostoreException(e);
+                throw new OXException(e);
             }
         }
     }

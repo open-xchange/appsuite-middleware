@@ -60,10 +60,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -214,12 +214,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 deleteMetadata();
                 exists = false;
                 factory.removed(this);
-            } catch (final InfostoreException x) {
+            } catch (final OXException x) {
                 if (com.openexchange.exception.Category.CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                     throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
-                throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (final OXException x) {
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch (final Exception x) {
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -394,12 +392,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             lockHelper.dumpLocksToDB();
         } catch (final WebdavProtocolException x) {
             throw x;
-        } catch (final InfostoreException x) {
+        } catch (final OXException x) {
             if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
-            throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (final OXException x) {
             throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (final Exception x) {
             throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -593,7 +589,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 set.setValue(m.doSwitch(get));
                 m.doSwitch(set);
             }
-        } catch (final InfostoreException x) {
+        } catch (final OXException x) {
             if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                 metadata.setId(getId());
                 metadata.setFolderId(((OXWebdavResource) parent()).getId());
@@ -601,8 +597,6 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             } else {
                 throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
-        } catch (final OXException x) {
-            throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (final Exception x) {
             throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
@@ -624,7 +618,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 dumpMetadataToDB(body, guessSize);
             } catch (final WebdavProtocolException x) {
                 throw x;
-            } catch (final InfostoreException x) {
+            } catch (final OXException x) {
                 if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                     throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
                 }
@@ -649,13 +643,15 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 } catch (final OXException e) {
                     LOG.error("Couldn't rollback transaction. Run the recovery tool.");
                 }
-                if (x instanceof InfostoreException) {
-                    final InfostoreException iStoreException = (InfostoreException) x;
-                    if (415 == iStoreException.getCode()) {
-                        throw new WebdavProtocolException(getUrl(), Protocol.SC_LOCKED);
-                    }
-                    if (CATEGORY_PERMISSION_DENIED == iStoreException.getCategory()) {
-                        throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
+                if (x instanceof OXException) {
+                    final OXException iStoreException = (OXException) x;
+                    if (EnumComponent.INFOSTORE.getAbbreviation().equals(iStoreException.getPrefix())) {
+                        if (415 == iStoreException.getCode()) {
+                            throw new WebdavProtocolException(getUrl(), Protocol.SC_LOCKED);
+                        }
+                        if (CATEGORY_PERMISSION_DENIED == iStoreException.getCategory()) {
+                            throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
+                        }
                     }
                 }
                 throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

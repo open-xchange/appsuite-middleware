@@ -86,7 +86,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.infostore.OXException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
@@ -1748,7 +1748,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             try {
                 infostoreFacade.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(session, ctx));
                 infostoreFacade.commit();
-            } catch (final InfostoreException x) {
+            } catch (final OXException x) {
                 infostoreFacade.rollback();
                 if (InfostoreExceptionCodes.ALREADY_LOCKED.getDetailNumber() == x.getDetailNumber()) {
                     throw OXFolderExceptionCode.DELETE_FAILED_LOCKED_DOCUMENTS.create(x,
@@ -1766,7 +1766,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 infostoreFacade.finish();
             }
         } catch (final OXException e) {
-            throw new InfostoreException(e);
+            throw new OXException(e);
         }
     }
 
