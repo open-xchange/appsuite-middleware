@@ -91,12 +91,12 @@ public abstract class WebdavStructureAction extends AbstractAction {
 					url = destUrl.dup().append(url.subpath(sourceUrlLength));
 					final WebdavResource d = factory.resolveResource(url);
 					if(d.exists() && !d.isCollection()) {
-						throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+						throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 					}
 				}
 				
 			} else {
-				throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 			
 		}
@@ -109,7 +109,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 	
 	protected void checkSame(final WebdavRequest req) throws WebdavProtocolException {
 		if(req.getUrl().equals(req.getDestinationUrl())) {
-			throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
 		}
 	}
 

@@ -78,7 +78,7 @@ public class WebdavExistsAction extends AbstractAction {
         } catch (final IOException e) {
             LOG.debug("Client gone?", e);
         }
-        throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
 
     }
 

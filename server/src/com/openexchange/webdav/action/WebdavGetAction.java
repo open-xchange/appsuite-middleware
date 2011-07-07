@@ -74,7 +74,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		final WebdavResource resource = req.getResource();
 		if(!resource.exists()) {
-			throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
 		}
 		final List<ByteRange> ranges = getRanges(req, res);
 		
@@ -115,7 +115,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 			}
 			
 		} catch (final IOException e) {
-			throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if(out != null) {
 				try {
@@ -206,7 +206,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 				return new ByteRange(0,0);
 			}*/
 			if(startOffset>length) {
-				throw new WebdavProtocolException(url, HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+				throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
 			}
 			final ByteRange br = new ByteRange(startOffset, endOffset);
 			return br;

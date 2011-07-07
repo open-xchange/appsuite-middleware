@@ -59,6 +59,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -80,7 +81,7 @@ public class WebdavPropfindAction extends AbstractAction {
 
     protected Protocol protocol;
 	
-	public WebdavPropfindAction(Protocol protocol) {
+	public WebdavPropfindAction(final Protocol protocol) {
 	    this.protocol = protocol;
 	}
 	
@@ -89,8 +90,8 @@ public class WebdavPropfindAction extends AbstractAction {
 		
 		final Element response = new Element("multistatus",DAV_NS);
 		
-        List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-        for (Namespace namespace : namespaces) {
+        final List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+        for (final Namespace namespace : namespaces) {
             response.addNamespaceDeclaration(namespace);
         }
 
@@ -106,7 +107,7 @@ public class WebdavPropfindAction extends AbstractAction {
 			forceAllProp = true; //Assume All Prop, if all else fails
 			
 		} catch (final IOException e1) {
-			throw new WebdavProtocolException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
 		}
 		
         final LoadingHints loadingHints = new LoadingHints();
@@ -125,7 +126,14 @@ public class WebdavPropfindAction extends AbstractAction {
 		}
 		preLoad(loadingHints);
 		if (marshaller != null) {
-			response.addContent(marshaller.marshal(req.getResource()));
+			try {
+                response.addContent(marshaller.marshal(req.getResource()));
+            } catch (final OXException e) {
+                if (e instanceof WebdavProtocolException) {
+                    throw (WebdavProtocolException) e;
+                }
+                WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
 		}
 		
 		try {
@@ -137,7 +145,7 @@ public class WebdavPropfindAction extends AbstractAction {
 		}
 	}
 
-    protected ResourceMarshaller getMarshaller(final WebdavRequest req, boolean forceAllProp, Document requestBody, LoadingHints loadingHints) {
+    protected ResourceMarshaller getMarshaller(final WebdavRequest req, final boolean forceAllProp, final Document requestBody, LoadingHints loadingHints) {
         if (loadingHints == null) {
             loadingHints = new LoadingHints();
         }

@@ -61,11 +61,11 @@ import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavLock.Scope;
+import com.openexchange.webdav.protocol.WebdavLock.Type;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.WebdavLock.Scope;
-import com.openexchange.webdav.protocol.WebdavLock.Type;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 
 public class WebdavLockAction extends AbstractAction {
@@ -88,7 +88,7 @@ public class WebdavLockAction extends AbstractAction {
 		        defaultLockParams(lock);
 		    }
 		    if(null == lock.getToken() && req.getUserInfo().containsKey("mentionedLocks")) {
-		        List<String> mentionedLocks = (List<String>) req.getUserInfo().get("mentionedLocks");
+		        final List<String> mentionedLocks = (List<String>) req.getUserInfo().get("mentionedLocks");
 		        if(1 == mentionedLocks.size()) {
 		            lock.setToken(mentionedLocks.get(0));
 		        }
@@ -97,7 +97,7 @@ public class WebdavLockAction extends AbstractAction {
 			WebdavResource resource = req.getResource();
 		       
             if(null != lock.getToken()) {
-                WebdavLock originalLock = resource.getLock(lock.getToken());
+                final WebdavLock originalLock = resource.getLock(lock.getToken());
                 copyOldValues(originalLock, lock);
             }
     
@@ -128,13 +128,13 @@ public class WebdavLockAction extends AbstractAction {
 			
 		} catch (final JDOMException e) {
 			LOG.error("JDOM Exception",e);
-			throw new WebdavProtocolException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (final IOException e) {
 			LOG.debug("Client gone?", e);
 		}
 	}
 
-    private void copyOldValues(WebdavLock originalLock, WebdavLock lock) {
+    private void copyOldValues(final WebdavLock originalLock, final WebdavLock lock) {
         if(lock.getOwner() == null) {
             lock.setOwner(originalLock.getOwner());
         }
@@ -143,7 +143,7 @@ public class WebdavLockAction extends AbstractAction {
     /**
      * @param lock
      */
-    private void defaultLockParams(WebdavLock lock) {
+    private void defaultLockParams(final WebdavLock lock) {
         lock.setScope(Scope.EXCLUSIVE_LITERAL);
         lock.setType(Type.WRITE_LITERAL);
     }

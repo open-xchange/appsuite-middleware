@@ -62,10 +62,9 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
@@ -240,12 +239,11 @@ public final class attachments extends OXServlet {
             exc.printStarterTrace();
             rollbackTransaction();
         } catch (final OXException exc) {
-            if (exc.getCategory() == Category.PERMISSION) {
+            if (exc.getCategory() == Category.CATEGORY_PERMISSION_DENIED) {
                 LOG.debug(exc.getMessage(), exc);
             } else {
                 LOG.error(exc.getMessage(), exc);
             }
-
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
             rollbackTransaction();
         } catch (final Exception exc) {
@@ -275,37 +273,37 @@ public final class attachments extends OXServlet {
             os = resp.getOutputStream();
 
             if (req.getHeader(MODULE) == null) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, MODULE));
+                throw WebdavExceptionCode.MISSING_FIELD.create(MODULE);
             }
             try {
                 module = Integer.parseInt(req.getHeader(MODULE));
             } catch (final NumberFormatException exc) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, MODULE));
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, MODULE);
             }
 
             if (req.getHeader(TARGET_ID) == null) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, TARGET_ID));
+                throw WebdavExceptionCode.MISSING_FIELD.create(TARGET_ID);
             }
             try {
                 target_id = Integer.parseInt(req.getHeader(TARGET_ID));
             } catch (final NumberFormatException exc) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_ID));
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TARGET_ID);
             }
 
             if (req.getHeader(DataFields.OBJECT_ID) == null) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.OBJECT_ID));
+                throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.OBJECT_ID);
             }
             try {
                 object_id = Integer.parseInt(req.getHeader(DataFields.OBJECT_ID));
             } catch (final NumberFormatException exc) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, DataFields.OBJECT_ID));
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, DataFields.OBJECT_ID);
             }
 
             if (req.getHeader(TARGET_FOLDER_ID) != null) {
                 try {
                     folder_id = Integer.parseInt(req.getHeader(TARGET_FOLDER_ID));
                 } catch (final NumberFormatException exc) {
-                    throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_FOLDER_ID));
+                    throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TARGET_FOLDER_ID);
                 }
             }
 
@@ -395,7 +393,7 @@ public final class attachments extends OXServlet {
     private void finishTransaction() {
         try {
             ATTACHMENT_BASE.finish();
-        } catch (final TransactionException exc) {
+        } catch (final OXException exc) {
             LOG.error("finishTransaction", exc);
         }
     }
@@ -403,7 +401,7 @@ public final class attachments extends OXServlet {
     private void rollbackTransaction() {
         try {
             ATTACHMENT_BASE.rollback();
-        } catch (final TransactionException exc) {
+        } catch (final OXException exc) {
             LOG.error("finishTransaction", exc);
         }
     }

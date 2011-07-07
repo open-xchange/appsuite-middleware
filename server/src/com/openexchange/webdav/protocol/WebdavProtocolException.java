@@ -49,8 +49,12 @@
 
 package com.openexchange.webdav.protocol;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.webdav.WebdavException;
+import org.apache.webdav.lib.WebdavException;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link WebdavProtocolException} - Indicates a WebDAV/XML protocol error.
@@ -60,42 +64,42 @@ import com.openexchange.webdav.WebdavException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class WebdavProtocolException extends WebdavException implements WebdavStatus<Object> {
+public class WebdavProtocolException extends OXException implements WebdavStatus<Object> {
 
     public static enum Code {
 
         /**
          * A WebDAV error occurred.
          */
-        GENERAL_ERROR("A WebDAV error occurred.", Category.CODE_ERROR, 1000),
+        GENERAL_ERROR("A WebDAV error occurred.", CATEGORY_ERROR, 1000),
         /**
          * The folder %s doesn't exist.
          */
-        FOLDER_NOT_FOUND("The folder %s doesn't exist.", Category.CODE_ERROR, 1001),
+        FOLDER_NOT_FOUND("The folder %s doesn't exist.", CATEGORY_ERROR, 1001),
         /**
          * The directory already exists.
          */
-        DIRECTORY_ALREADY_EXISTS("The directory already exists.", Category.CODE_ERROR, 1002),
+        DIRECTORY_ALREADY_EXISTS("The directory already exists.", CATEGORY_ERROR, 1002),
         /**
          * No write permission.
          */
-        NO_WRITE_PERMISSION("No write permission.", Category.PERMISSION, 1003),
+        NO_WRITE_PERMISSION("No write permission.", CATEGORY_PERMISSION_DENIED, 1003),
         /**
          * File &quot;%1$s&quot; already exists
          */
-        FILE_ALREADY_EXISTS("File \"%1$s\" already exists.", Category.CODE_ERROR, 1004),
+        FILE_ALREADY_EXISTS("File \"%1$s\" already exists.", CATEGORY_ERROR, 1004),
         /**
          * Collections must not have bodies.
          */
-        NO_BODIES_ALLOWED("Collections must not have bodies.", Category.CODE_ERROR, 1005),
+        NO_BODIES_ALLOWED("Collections must not have bodies.", CATEGORY_ERROR, 1005),
         /**
          * File "%1$s" does not exist.
          */
-        FILE_NOT_FOUND("File \"%1$s\" does not exist.", Category.CODE_ERROR, 1006),
+        FILE_NOT_FOUND("File \"%1$s\" does not exist.", CATEGORY_ERROR, 1006),
         /**
          * "%1$s" is a directory.
          */
-        FILE_IS_DIRECTORY("\"%1$s\" is a directory.", Category.CODE_ERROR, 1007);
+        FILE_IS_DIRECTORY("\"%1$s\" is a directory.", CATEGORY_ERROR, 1007);
 
         private final String message;
 
@@ -109,6 +113,10 @@ public class WebdavProtocolException extends WebdavException implements WebdavSt
             this.category = category;
         }
 
+        public String getPrefix() {
+            return EnumComponent.WEBDAV.getAbbreviation();
+        }
+
         public Category getCategory() {
             return category;
         }
@@ -120,6 +128,57 @@ public class WebdavProtocolException extends WebdavException implements WebdavSt
         public String getMessage() {
             return message;
         }
+
+        public boolean equals(final OXException e) {
+            return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+        }
+
+        /**
+         * Creates a new {@link WebdavProtocolException} instance pre-filled with this code's attributes.
+         * 
+         * @return The newly created {@link WebdavProtocolException} instance
+         */
+        public WebdavProtocolException create(final WebdavPath url, final int status) {
+            return create(url, status);
+        }
+
+        /**
+         * Creates a new {@link WebdavProtocolException} instance pre-filled with this code's attributes.
+         * @param args The message arguments in case of printf-style message
+         * 
+         * @return The newly created {@link WebdavProtocolException} instance
+         */
+        public WebdavProtocolException create(final WebdavPath url, final int status, final Object... args) {
+            return create(url, status, null, args);
+        }
+
+        /**
+         * Creates a new {@link WebdavProtocolException} instance pre-filled with this code's attributes.
+         * @param cause The optional initial cause
+         * @param args The message arguments in case of printf-style message
+         * 
+         * @return The newly created {@link WebdavProtocolException} instance
+         */
+        public WebdavProtocolException create(final WebdavPath url, final int status, final Throwable cause, final Object... args) {
+            final Category category = getCategory();
+            final WebdavProtocolException ret;
+            if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+                ret = new WebdavProtocolException(status, url, getNumber(), getMessage(), cause, args);
+            } else {
+                ret =
+                    new WebdavProtocolException(
+                        status,
+                        url,
+                        getNumber(),
+                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                        cause,
+                        new Object[0]);
+                ret.setLogMessage(getMessage(), args);
+            }
+            ret.addCategory(category);
+            ret.setPrefix(getPrefix());
+            return ret;
+        }
     }
 
     private static final long serialVersionUID = 617401197355575125L;
@@ -129,74 +188,18 @@ public class WebdavProtocolException extends WebdavException implements WebdavSt
     private final transient WebdavPath url;
 
     /**
-     * Initializes a new {@link WebdavProtocolException}.
-     * 
-     * @param url The WebDAV URL
-     * @param status The (response) status code
+     * No direct instantiation.
      */
-    public WebdavProtocolException(final WebdavPath url, final int status) {
-        super(Code.GENERAL_ERROR.getCategory(), Code.GENERAL_ERROR.getNumber(), Code.GENERAL_ERROR.getMessage(), null);
-        super.setMessageArgs(new Object[0]);
-        this.url = url;
+    protected WebdavProtocolException(final int status, final WebdavPath url, final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
+        super(code, displayMessage, cause, displayArgs);
         this.status = status;
+        this.url = url;
     }
 
-    /**
-     * Initializes a new {@link WebdavProtocolException}.
-     * 
-     * @param code The error code
-     * @param url The WebDAV URL
-     * @param status The (response) status code
-     * @param messageArgs The message arguments
-     */
-    public WebdavProtocolException(final Code code, final WebdavPath url, final int status, final Object... messageArgs) {
-        super(code.getCategory(), code.getNumber(), code.getMessage(), null);
-        super.setMessageArgs(messageArgs);
-        this.url = url;
+    public WebdavProtocolException(final WebdavPath url, final int status, final OXException e) {
+        super(e);
         this.status = status;
-    }
-
-    /**
-     * Initializes a new {@link WebdavProtocolException}.
-     * 
-     * @param code The error code
-     * @param cause The init cause
-     * @param url The WebDAV URL
-     * @param status The (response) status code
-     * @param messageArgs The message arguments
-     */
-    public WebdavProtocolException(final Code code, final Throwable cause, final WebdavPath url, final int status, final Object... messageArgs) {
-        super(code.getCategory(), code.getNumber(), code.getMessage(), cause);
-        super.setMessageArgs(messageArgs);
         this.url = url;
-        this.status = status;
-    }
-
-    /**
-     * Initializes a new {@link WebdavProtocolException}.
-     * 
-     * @param cause The init cause
-     * @param url The WebDAV URL
-     * @param status The (response) status code
-     */
-    public WebdavProtocolException(final Throwable cause, final WebdavPath url, final int status) {
-        super(Code.GENERAL_ERROR.getCategory(), Code.GENERAL_ERROR.getNumber(), Code.GENERAL_ERROR.getMessage(), cause);
-        super.setMessageArgs(new Object[0]);
-        this.url = url;
-        this.status = status;
-    }
-
-    /**
-     * Initializes a new {@link WebdavProtocolException}.
-     * 
-     * @param cause The initial abstract exception
-     * @param url The WebDAV URL
-     * @param status The (response) status code
-     */
-    public WebdavProtocolException(final AbstractOXException cause, final WebdavPath url, final int status) {
-        super(cause);
-        this.url = url;
-        this.status = status;
     }
 
     public int getStatus() {

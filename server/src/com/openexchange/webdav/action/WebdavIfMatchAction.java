@@ -71,7 +71,7 @@ public class WebdavIfMatchAction extends AbstractAction {
 			final String etag = res.getETag();
 			
 			if(res.exists() && res.isCollection()) {
-				throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 			
 			boolean foundMatch = false;
@@ -88,7 +88,7 @@ public class WebdavIfMatchAction extends AbstractAction {
 				return;
 			}
 			
-			throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 		}
 	}
 	

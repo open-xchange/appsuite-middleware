@@ -131,8 +131,8 @@ public class WebdavIfAction extends AbstractAction {
 		
 	}
 	
-    private void rememberMentionedLocks(WebdavRequest req, IfHeader ifHeader) {
-        List<String> mentionedLocks = new LinkedList<String>();
+    private void rememberMentionedLocks(final WebdavRequest req, final IfHeader ifHeader) {
+        final List<String> mentionedLocks = new LinkedList<String>();
         for(final IfHeaderList list : ifHeader.getLists()) {
             for(final IfHeaderEntity entity : list) {
                 if(entity.isLockToken()) {
@@ -180,7 +180,7 @@ public class WebdavIfAction extends AbstractAction {
 		removeProvidedLocks(ifHeader,locks);
 		
 		if(!locks.isEmpty()) {
-			throw new WebdavProtocolException(req.getUrl(), Protocol.SC_LOCKED);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), Protocol.SC_LOCKED);
 		}
 	}
 
@@ -204,7 +204,7 @@ public class WebdavIfAction extends AbstractAction {
 		removeProvidedLocks(ifHeader,neededLocks);
 		
 		if(!neededLocks.isEmpty()) {
-			throw new WebdavProtocolException(req.getUrl(), Protocol.SC_LOCKED);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), Protocol.SC_LOCKED);
 		}
 	}
 
@@ -245,7 +245,7 @@ public class WebdavIfAction extends AbstractAction {
 		
 		for(final WebdavResource resource : iter) {
 			if( !checkList(ifHeader, resource, req) ) {
-				throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 		}
 		
@@ -253,7 +253,7 @@ public class WebdavIfAction extends AbstractAction {
 			return ;
 		}
 		
-		throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+		throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 	}
 
 	private boolean checkList(final IfHeader ifHeader, final WebdavResource resource, final WebdavRequest req) throws WebdavProtocolException {
@@ -268,7 +268,7 @@ public class WebdavIfAction extends AbstractAction {
 
 	private boolean matches(final IfHeaderList list, final WebdavResource resource) throws WebdavProtocolException {
 		for(final IfHeaderEntity entity : list) {
-		    IfHeaderApply apply = getApply();
+		    final IfHeaderApply apply = getApply();
 		    if(! apply.matches(entity, resource)) {
 		        return false;
 		    }
@@ -277,7 +277,7 @@ public class WebdavIfAction extends AbstractAction {
 	}
 	
 	private IfHeaderApply getApply() {
-	    IfHeaderApply apply = BehaviourLookup.getInstance().get(IfHeaderApply.class);
+	    final IfHeaderApply apply = BehaviourLookup.getInstance().get(IfHeaderApply.class);
 	    if(apply != null) {
 	        return apply;
 	    }

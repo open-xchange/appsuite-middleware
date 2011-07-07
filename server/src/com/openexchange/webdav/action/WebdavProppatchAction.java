@@ -76,7 +76,7 @@ public class WebdavProppatchAction extends AbstractAction {
 	private static final PropertyAction REMOVE = new RemoveAction();
 	
 	private final XMLOutputter outputter = new XMLOutputter();
-    private Protocol protocol;
+    private final Protocol protocol;
 
 	public WebdavProppatchAction(final Protocol protocol) {
 		SET = new SetAction(protocol);
@@ -90,8 +90,8 @@ public class WebdavProppatchAction extends AbstractAction {
 			final Document responseDoc = new Document();
 			final Element multistatus = new Element("multistatus",DAV_NS);
 
-			List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-			for (Namespace namespace : namespaces) {
+			final List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+			for (final Namespace namespace : namespaces) {
                 multistatus.addNamespaceDeclaration(namespace);
             }
 			
@@ -130,7 +130,7 @@ public class WebdavProppatchAction extends AbstractAction {
 			
 		} catch (final JDOMException e) {
 			LOG.error("JDOMException: ",e);
-			throw new WebdavProtocolException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (final IOException e) {
 			LOG.debug("Client gone?" ,e);
 		}

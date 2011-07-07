@@ -264,7 +264,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
                 case DataParser.SAVE:
                     if (contactObject.containsObjectID()) {
                         if (lastModified == null) {
-                            throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
+                            throw new OXMandatoryFieldException(WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED));
                         }
 
                         final Date currentLastModified = lastModifiedCache.getLastModified(contactObject.getObjectID(), lastModified);
@@ -278,13 +278,13 @@ public final class contacts extends XmlServlet<ContactInterface> {
                     break;
                 case DataParser.DELETE:
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
+                        throw new OXMandatoryFieldException(WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED));
                     }
 
                     contactInterface.deleteContactObject(contactObject.getObjectID(), inFolder, lastModified);
                     break;
                 default:
-                    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
+                    throw new OXConflictException(WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action)));
                 }
                 writeResponse(contactObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXMandatoryFieldException exc) {

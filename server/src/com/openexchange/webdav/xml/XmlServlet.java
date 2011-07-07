@@ -67,6 +67,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -83,7 +84,6 @@ import com.openexchange.webdav.LastModifiedCache;
 import com.openexchange.webdav.PendingInvocations;
 import com.openexchange.webdav.PermissionServlet;
 import com.openexchange.webdav.QueuedAction;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.CommonFields;
@@ -283,7 +283,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw new OXConflictException(WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText()));
+                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText());
                         }
                     }
 
@@ -303,7 +303,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                             } else if (value[a].trim().equals("LIST")) {
                                 bList = true;
                             } else {
-                                throw new OXConflictException(WebdavExceptionCode.INVALID_VALUE.create("objectmode", value[a]));
+                                throw WebdavExceptionCode.INVALID_VALUE.create("objectmode", value[a]);
                             }
                         }
                     }
@@ -311,7 +311,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                     try {
                         object_id = Integer.parseInt(eObjectId.getText());
                     } catch (final NumberFormatException exc) {
-                        throw new OXConflictException(WebdavExceptionCode.INVALID_VALUE.create(exc, DataFields.OBJECT_ID, eObjectId.getText()));
+                        throw WebdavExceptionCode.INVALID_VALUE.create(exc, DataFields.OBJECT_ID, eObjectId.getText());
                     }
 
                     final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
@@ -320,7 +320,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw new OXConflictException(WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText()));
+                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText());
                         }
                     }
                 } else {
@@ -358,7 +358,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         } catch (final OXException exc) {
             if (OXException.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
-            } else if (OXException.Category.CONCURRENT_MODIFICATION.equals(exc.getCategory())) {
+            } else if (Category.CATEGORY_CONFLICT.equals(exc.getCategory())) {
                 LOG.error("doPropFind", exc);
                 doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
             } else {
@@ -416,10 +416,10 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             writeResponse(dataObject, httpErrorCode, description, clientId, resp.getOutputStream(), new XMLOutputter());
 
             os.write(("</D:multistatus>").getBytes());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error("doOXError", e);
             doError(req, resp, httpErrorCode, description);
-        } catch (XmlPullParserException e) {
+        } catch (final XmlPullParserException e) {
             LOG.error("doOXError", e);
             doError(req, resp, httpErrorCode, description);
         }
@@ -434,7 +434,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         final String message;
         if (e instanceof OXException) {
             final OXException o = (OXException) e;
-            if (o.getComponent().equals(EnumComponent.CONTACT) && o.getDetailNumber() == ContactExceptionCodes.INVALID_EMAIL.getDetailNumber()) {
+            if (o.getPrefix().equals(EnumComponent.CONTACT.getAbbreviation()) && o.getCode() == ContactExceptionCodes.INVALID_EMAIL.getNumber()) {
                 descriptionCode = 1500;
                 message = o.getMessage();
             } else {

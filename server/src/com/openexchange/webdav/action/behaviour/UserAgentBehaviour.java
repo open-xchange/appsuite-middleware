@@ -56,8 +56,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.consistency.ConsistencyExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.WebdavRequest;
 
 
@@ -66,7 +66,7 @@ public class UserAgentBehaviour implements Behaviour{
 	private Map<Class<? extends Object>, Object> classes = null;
 	private Pattern pattern;
 	
-	public UserAgentBehaviour(final String userAgentPattern, final Object...implementations) throws ConfigurationException {
+	public UserAgentBehaviour(final String userAgentPattern, final Object...implementations) throws OXException {
 		setPattern(userAgentPattern);
 		setChanges(new HashSet<Object>(Arrays.asList(implementations)));
 	}
@@ -80,7 +80,7 @@ public class UserAgentBehaviour implements Behaviour{
 		pattern = Pattern.compile(userAgentPattern);
 	}
 	
-	public void setChanges(final Set<Object> implementations) throws ConfigurationException {
+	public void setChanges(final Set<Object> implementations) throws OXException {
 		classes = new HashMap<Class<? extends Object>, Object>();
 		
 		for(final Object object : implementations) {
@@ -90,7 +90,7 @@ public class UserAgentBehaviour implements Behaviour{
 				final Class[] interfaces = addMe.getInterfaces();
 				for(final Class<? extends Object> iFace : interfaces) {
 					if(classes.get(iFace) != null) {
-						throw new ConfigurationException(Code.INVALID_CONFIGURATION, "Two implemenations for "+iFace);
+						throw ConsistencyExceptionCodes.REGISTRATION_FAILED.create("Two implemenations for "+iFace);
 					} 
 					classes.put(iFace, object);
 				}
@@ -99,7 +99,7 @@ public class UserAgentBehaviour implements Behaviour{
 		}
 	}
 	
-	public void setChange(final Object implementation) throws ConfigurationException {
+	public void setChange(final Object implementation) throws OXException {
 		setChanges(new HashSet(Arrays.asList(implementation)));
 	}
 

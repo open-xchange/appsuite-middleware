@@ -66,20 +66,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceException;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
@@ -89,10 +89,8 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -100,7 +98,6 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -673,7 +670,7 @@ public final class ical extends PermissionServlet {
                 return req.getHeader(userAgent);
             }
         }
-        throw new OXConflictException(new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, userAgent));
+        throw new OXConflictException(WebdavExceptionCode.MISSING_HEADER_FIELD.create(userAgent));
     }
 
     private int getCalendarFolderID(final HttpServletRequest req) throws OXConflictException {
@@ -681,7 +678,7 @@ public final class ical extends PermissionServlet {
             try {
                 return Integer.parseInt(req.getParameter(CALENDARFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, CALENDARFOLDER));
+                throw new OXConflictException(WebdavExceptionCode.NOT_A_NUMBER.create(exc, CALENDARFOLDER));
             }
         }
         return 0;
@@ -692,7 +689,7 @@ public final class ical extends PermissionServlet {
             try {
                 return Integer.parseInt(req.getParameter(TASKFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TASKFOLDER));
+                throw new OXConflictException(WebdavExceptionCode.NOT_A_NUMBER.create(exc, TASKFOLDER));
             }
         }
         return 0;

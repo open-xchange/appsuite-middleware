@@ -54,7 +54,7 @@ import java.net.URLDecoder;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
@@ -70,33 +70,33 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
 
     }
 
-    public void endRequest(int status) {
+    public void endRequest(final int status) {
 
     }
 
-    public WebdavCollection resolveCollection(String url) throws OXException {
+    public WebdavCollection resolveCollection(String url) throws WebdavProtocolException {
         url = normalize(url);
         return resolveCollection(decode(new WebdavPath(url)));
     }
 
-    public WebdavResource resolveResource(String url) throws OXException {
+    public WebdavResource resolveResource(String url) throws WebdavProtocolException {
         url = normalize(url);
         return resolveResource(decode(new WebdavPath(url)));
     }
     
-    public WebdavPath decode(WebdavPath webdavPath) {
-        WebdavPath path = new WebdavPath();
-        for(String component : webdavPath) {
+    public WebdavPath decode(final WebdavPath webdavPath) {
+        final WebdavPath path = new WebdavPath();
+        for(final String component : webdavPath) {
             try {
                 path.append(URLDecoder.decode(component, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 // Won't happen
             }
         }
         return path;
     }
 
-    public <T extends AbstractResource> T mixin(T thing) {
+    public <T extends AbstractResource> T mixin(final T thing) {
         thing.includeProperties(mixins);
         return thing;
     }
@@ -112,7 +112,7 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
         return url;
     }
     
-    public void setGlobalMixins(PropertyMixin...mixins) {
+    public void setGlobalMixins(final PropertyMixin...mixins) {
         this.mixins = mixins;
     }
 

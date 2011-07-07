@@ -57,7 +57,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavStatusImpl;
 
@@ -89,7 +89,7 @@ public class PropfindResponseMarshaller extends PropertiesMarshaller implements 
 				} else {
 					props.add(p);
 				}
-			} catch (final OXException e) {
+			} catch (final WebdavProtocolException e) {
 				multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(e.getStatus(), e.getUrl(),Arrays.asList(prop)));
 			}
 		}

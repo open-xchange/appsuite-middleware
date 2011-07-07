@@ -58,15 +58,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 public class DummyResource extends AbstractResource implements WebdavResource  {
 
@@ -112,9 +114,13 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	
 	public void create() throws WebdavProtocolException {
 		if(exists) {
-		    throw new WebdavProtocolException(WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS, getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		    throw WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS.create(getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
-		checkPath();
+		try {
+            checkPath();
+        } catch (final OXException e) {
+            throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+        }
 		exists = true;
 		creationDate = new Date();
 		lastModified = new Date();
@@ -127,7 +133,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 	public void delete() throws WebdavProtocolException {
 		if(!exists) {
-		    throw new WebdavProtocolException(WebdavProtocolException.Code.FILE_NOT_FOUND, getUrl(), HttpServletResponse.SC_NOT_FOUND, getUrl());
+		    throw WebdavProtocolException.Code.FILE_NOT_FOUND.create(getUrl(), HttpServletResponse.SC_NOT_FOUND, getUrl());
 		}
 		exists = false;
 		mgr.remove(url,this);
@@ -250,7 +256,11 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		if(!exists()) {
 			// Create Lock Null Resource
 			final WebdavResource res = this.mgr.addLockNullResource(this);
-			res.lock(lock);
+			try {
+                res.lock(lock);
+            } catch (final OXException e) {
+                throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+            }
 			return;
 		}
 		if(null != lock.getToken() && (null != locks.get(lock.getToken()))) {
@@ -269,7 +279,11 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 	public List<WebdavLock> getLocks() throws WebdavProtocolException {
 		final List<WebdavLock> lockList =  getOwnLocks();
-		addParentLocks(lockList);
+		try {
+            addParentLocks(lockList);
+        } catch (final OXException e) {
+            throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+        }
 		return lockList;
 	}
 	
@@ -302,7 +316,11 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		if(lock != null) {
 			return lock;
 		}
-		return findParentLock(token);
+		try {
+            return findParentLock(token);
+        } catch (final OXException e) {
+            throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+        }
 	}
 
 	@Override
@@ -316,7 +334,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 				bytes.add(b);
 			}
 		} catch (final IOException e) {
-			throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		
 		int i = 0;

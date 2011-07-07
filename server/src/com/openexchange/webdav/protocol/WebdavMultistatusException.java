@@ -50,22 +50,75 @@
 package com.openexchange.webdav.protocol;
 
 import java.util.Collection;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.OXExceptionStrings;
 
 public class WebdavMultistatusException extends WebdavProtocolException {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final WebdavProtocolException.Code CODE = WebdavProtocolException.Code.GENERAL_ERROR;
+
+	public static WebdavMultistatusException create(final WebdavPath url, final WebdavProtocolException... exceptions) {
+	    final Category category = CODE.getCategory();
+        final WebdavMultistatusException ret;
+        if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+            ret = new WebdavMultistatusException(url, exceptions, CODE.getNumber(), CODE.getMessage(), null);
+        } else {
+            ret =
+                new WebdavMultistatusException(
+                    url,
+                    exceptions,
+                    CODE.getNumber(),
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    null);
+            ret.setLogMessage(CODE.getMessage());
+        }
+        ret.addCategory(category);
+        ret.setPrefix(CODE.getPrefix());
+        return ret;
+	    
+	}
+	
+	public static WebdavMultistatusException create(final WebdavPath url, final Collection<WebdavProtocolException> exceptions) {
+        final Category category = CODE.getCategory();
+        final WebdavMultistatusException ret;
+        if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+            ret = new WebdavMultistatusException(url, exceptions, CODE.getNumber(), CODE.getMessage(), null);
+        } else {
+            ret =
+                new WebdavMultistatusException(
+                    url,
+                    exceptions,
+                    CODE.getNumber(),
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    null);
+            ret.setLogMessage(CODE.getMessage());
+        }
+        ret.addCategory(category);
+        ret.setPrefix(CODE.getPrefix());
+        return ret;
+        
+    }
+
 	private final WebdavProtocolException[] exceptions;
 
-
-    public WebdavMultistatusException(final WebdavPath url, final WebdavProtocolException...exceptions) {
-        super(url, 207);
+    /**
+     * No direct instantiation.
+     */
+    protected WebdavMultistatusException(final WebdavPath url, final WebdavProtocolException[] exceptions, final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
+        super(207, url, code, displayMessage, cause, displayArgs);
         this.exceptions = exceptions;
     }
-
-    public WebdavMultistatusException(final WebdavPath url, final Collection<WebdavProtocolException> exceptions){
-        this(url, exceptions.toArray(new WebdavProtocolException[exceptions.size()]));
+    
+    /**
+     * No direct instantiation.
+     */
+    protected WebdavMultistatusException(final WebdavPath url, final Collection<WebdavProtocolException> exceptions, final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
+        super(207, url, code, displayMessage, cause, displayArgs);
+        this.exceptions = exceptions.toArray(new WebdavProtocolException[exceptions.size()]);
     }
-
 
     public WebdavProtocolException[] getExceptions(){
 		return exceptions;

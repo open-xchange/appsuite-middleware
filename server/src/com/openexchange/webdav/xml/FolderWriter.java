@@ -115,8 +115,6 @@ public class FolderWriter extends FolderChildWriter {
         try {
             final FolderObject folderObj = sqlinterface.getFolderById(objectId);
             writeObject(folderObj, eProp, false, xo, os);
-        } catch (final OXFolderNotFoundException exc) {
-            writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
         } catch (final OXObjectNotFoundException exc) {
             writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
         } catch (final Exception ex) {
