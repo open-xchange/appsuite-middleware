@@ -65,6 +65,9 @@ public final class OXExceptionStrings implements LocalizableStrings {
     // The default message displayed to user.
     public static final String MESSAGE_RETRY = "An error occurred. Please try again later.";
 
+    // The general message for a conflicting update operation.
+    public static final String MESSAGE_CONFLICT = "The object has been changed in the meantime.";
+
     /**
      * Initializes a new {@link OXExceptionStrings}.
      */

@@ -632,7 +632,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException, SQLException, OXPermissionException, OXConcurrentModificationException {
+    public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException, SQLException, OXPermissionException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
@@ -642,13 +642,6 @@ public class CalendarSql implements AppointmentSQLInterface {
             writecon.setAutoCommit(false);
             cimp.deleteAppointment(session.getUserId(), cdao, writecon, session, ctx, inFolder, clientLastModified);
             writecon.commit();
-        } catch(final OXConcurrentModificationException oxcme) {
-            try {
-                writecon.rollback();
-            } catch(final SQLException rb) {
-                LOG.error("Rollback failed: " + rb.getMessage(), rb);
-            }
-            throw oxcme;
         } catch(final OXPermissionException oxpe) {
             try {
                 writecon.rollback();

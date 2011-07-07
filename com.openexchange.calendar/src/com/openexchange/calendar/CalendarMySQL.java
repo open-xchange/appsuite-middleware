@@ -2189,11 +2189,11 @@ public class CalendarMySQL implements CalendarSqlImp {
         return edao;
     }
 
-    public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+    public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException {
         return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
     }
 
-    private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, final boolean skipParticipants) throws DataTruncation, SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+    private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, final boolean skipParticipants) throws DataTruncation, SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException {
 
         final CalendarOperation co = new CalendarOperation();
 
@@ -2214,7 +2214,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (clientLastModifiedCheck && edao.getLastModified().getTime() > clientLastModified.getTime()) {
-            throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+            throw OXException.conflict();
         }
 
         final int rec_action = co.checkUpdateRecurring(cdao, edao);
@@ -2502,7 +2502,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
                 final int ret = pst.executeUpdate();
                 if (ret == 0) {
-                    throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+                    throw OXException.conflict();
                 }
                 if (edao.isException()) {
                     // Update last-modified of master
@@ -4172,7 +4172,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return false;
     }
 
-    public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+    public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
         final Connection readcon = DBPool.pickup(ctx);
         final CalendarDataObject edao;
         PreparedStatement prep = null;
@@ -4200,7 +4200,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (edao.getLastModified().getTime() > clientLastModified.getTime()) {
-            throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+            throw OXException.conflict();
         }
 
         deleteSingleAppointment(cdao.getContextID(), cdao.getObjectID(), uid, edao.getCreatedBy(), inFolder, null, writecon, edao.getFolderType(), so, ctx, collection.getRecurringAppointmentDeleteAction(cdao, edao), cdao, edao, clientLastModified);

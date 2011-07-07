@@ -103,6 +103,15 @@ public class OXException extends Exception implements OXExceptionConstants {
         return SERVER_ID;
     }
 
+    /**
+     * Creates a general conflict exception.
+     * 
+     * @return A general conflict exception.
+     */
+    public static OXException conflict() {
+        return new OXException(1, OXExceptionStrings.MESSAGE_CONFLICT).setCategory(CATEGORY_CONFLICT).setPrefix(PREFIX_GENERAL);
+    }
+
     /*-
      * ------------------------------------- Member stuff -------------------------------------
      */
