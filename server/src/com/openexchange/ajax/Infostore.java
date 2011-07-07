@@ -78,7 +78,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -104,6 +103,7 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.tools.UnsynchronizedStringWriter;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -140,8 +140,6 @@ public class Infostore extends PermissionServlet {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Infostore.class));
 
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Infostore.class, LOG);
-
     private final long maxUploadSize = -1;
 
     // TODO: Better error handling
@@ -170,7 +168,7 @@ public class Infostore extends PermissionServlet {
         if (action.equals(ACTION_DOCUMENT)) {
             if (req.getParameter(PARAMETER_ID) == null) {
                 final Response resp = new Response();
-                resp.setException(new AbstractOXException("You must provide a value for " + PARAMETER_ID));
+                resp.setException(AjaxExceptionCodes.UnexpectedError.create("You must provide a value for " + PARAMETER_ID));
                 final UnsynchronizedStringWriter w = new UnsynchronizedStringWriter();
                 try {
                     ResponseWriter.write(resp, w);
@@ -187,7 +185,7 @@ public class Infostore extends PermissionServlet {
             try {
                 id = Integer.valueOf(req.getParameter(PARAMETER_ID));
             } catch (final NumberFormatException x) {
-                handleOXException(res, new AbstractOXException("Invalid number"), STR_ERROR, true);
+                handleOXException(res, AjaxExceptionCodes.InvalidParameter.create(PARAMETER_ID), STR_ERROR, true);
                 return;
             }
 
@@ -332,11 +330,9 @@ public class Infostore extends PermissionServlet {
                     }
                 }
             }
-        } catch (final OXException x) {
-            handleOXException(res, x, action, true);
         } catch (final UploadException x) {
             final Response resp = new Response();
-            resp.setException(new AbstractOXException(x.getMessage())); // FIXME
+            resp.setException(x);
             try {
                 res.setContentType("text/html; charset=UTF-8");
                 throw new UploadServletException(res, substituteJS(
@@ -345,9 +341,11 @@ public class Infostore extends PermissionServlet {
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
+        } catch (final OXException x) {
+            handleOXException(res, x, action, true);
         } catch (final Throwable t) {
             final Response resp = new Response();
-            resp.setException(new AbstractOXException(t.getMessage())); // FIXME
+            resp.setException(AjaxExceptionCodes.UnexpectedError.create(t, t.getMessage()));
             try {
                 res.setContentType("text/html; charset=UTF-8");
                 throw new UploadServletException(res, substituteJS(
@@ -369,7 +367,7 @@ public class Infostore extends PermissionServlet {
         }
 
         if (size > maxSize) {
-            throw new UploadSizeExceededException(size, maxSize, true);
+            throw UploadSizeExceededException.create(size, maxSize, true);
         }
     }
 
@@ -411,7 +409,7 @@ public class Infostore extends PermissionServlet {
         } catch (final FileNotFoundException e) {
             rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
             return;
-        } catch (final OXException e) {
+        } catch (final RuntimeException e) {
             rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
             return;
         } finally {
@@ -489,7 +487,7 @@ public class Infostore extends PermissionServlet {
         } catch (final FileNotFoundException e) {
             rollback(infostore, null, res, e, ACTION_UPDATE, true);
             return;
-        } catch (final OXException e) {
+        } catch (final RuntimeException e) {
             rollback(infostore, null, res, e, ACTION_UPDATE, true);
             return;
         } finally {
@@ -561,7 +559,7 @@ public class Infostore extends PermissionServlet {
         } catch (final FileNotFoundException e) {
             rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
             return;
-        } catch (final OXException e) {
+        } catch (final RuntimeException e) {
             rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
             return;
         } finally {
@@ -628,7 +626,7 @@ public class Infostore extends PermissionServlet {
             os.flush();
             os = null;
 
-        } catch (final AbstractOXException x) {
+        } catch (final OXException x) {
             LOG.debug(x.getMessage(), x);
             handleOXException(res, x, STR_ERROR, true);
             return;
@@ -658,11 +656,11 @@ public class Infostore extends PermissionServlet {
 
     private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, final boolean post) {
         res.setContentType("text/html; charset=UTF-8");
-        final AbstractOXException e;
-        if (t instanceof AbstractOXException) {
-            e = (AbstractOXException) t;
+        final OXException e;
+        if (t instanceof OXException) {
+            e = (OXException) t;
         } else {
-            e = new AbstractOXException(t); 
+            e = new OXException(t); 
         }
         final Response resp = new Response();
         resp.setException(e);
@@ -682,7 +680,7 @@ public class Infostore extends PermissionServlet {
         } catch (final IOException e1) {
             LOG.error("", e);
         }
-        LL.log((AbstractOXException) t);
+        ((OXException) t).log(LOG);
         return true;
     }
 

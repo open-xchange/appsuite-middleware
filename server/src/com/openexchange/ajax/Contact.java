@@ -345,7 +345,6 @@ public class Contact extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         } catch (final OXException e) {
-            Logging.log(LOG, e);
             response.setException(e);
         }
         try {

@@ -71,12 +71,10 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.AbstractOXException.Parsing;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
-import com.openexchange.groupware.AbstractOXException.Truncated;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.exception.OXException.Truncated;
 
 /**
  * JSON writer for the response container objekt.
@@ -110,7 +108,7 @@ public final class ResponseWriter {
             json.put(TIMESTAMP, response.getTimestamp().getTime());
         }
         if (null != response.getException()) {
-            final AbstractOXException exception = response.getException();
+            final OXException exception = response.getException();
             addException(json, exception,response.hasWarning());
         }
     }
@@ -124,7 +122,7 @@ public final class ResponseWriter {
             }
             json.put(ERROR_PARAMS, array);
         }
-        json.put(ERROR_CATEGORY, isWarning ? Category.WARNING.getCode() : exception.getCategory()
+        json.put(ERROR_CATEGORY, isWarning ? Category.CATEGORY_WARNING.getCode() : exception.getCategory()
                 .getCode());
         json.put(ERROR_CODE, exception.getErrorCode());
         json.put(ERROR_ID, exception.getExceptionID());
@@ -233,14 +231,14 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes given instance of <code>AbstractOXException</code> into given instance of <code>JSONWriter</code> assuming that writer's mode
+     * Writes given instance of <code>OXException</code> into given instance of <code>JSONWriter</code> assuming that writer's mode
      * is already set to writing a JSON object
      * 
      * @param exc - the exception to write
      * @param writer - the writer to write to
      * @throws JSONException - if writing fails
      */
-    public static void writeException(final AbstractOXException exc, final JSONWriter writer) throws JSONException {
+    public static void writeException(final OXException exc, final JSONWriter writer) throws JSONException {
         writer.key(ResponseFields.ERROR).value(exc.getOrigMessage());
         if (exc.getMessageArgs() != null) {
             final JSONArray array = new JSONArray();
@@ -256,7 +254,7 @@ public final class ResponseWriter {
         writeTruncated(exc, writer);
     }
 
-    private static void writeProblematic(final AbstractOXException exc, final JSONWriter writer) throws JSONException {
+    private static void writeProblematic(final OXException exc, final JSONWriter writer) throws JSONException {
         final ProblematicAttribute[] problematics = exc.getProblematics();
         if (problematics.length > 0) {
             writer.key(PROBLEMATIC);
@@ -268,7 +266,7 @@ public final class ResponseWriter {
         }
     }
 
-    private static void writeTruncated(final AbstractOXException exc, final JSONWriter writer) throws JSONException {
+    private static void writeTruncated(final OXException exc, final JSONWriter writer) throws JSONException {
         final ProblematicAttribute[] problematics = exc.getProblematics();
         if (problematics.length > 0) {
             final JSONArray array = new JSONArray();
@@ -282,14 +280,14 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes given instance of <code>AbstractOXException</code> as a warning into given instance of <code>JSONWriter</code> assuming that
+     * Writes given instance of <code>OXException</code> as a warning into given instance of <code>JSONWriter</code> assuming that
      * writer's mode is already set to writing a JSON object
      * 
      * @param warning - the warning to write
      * @param writer - the writer to write to
      * @throws JSONException - if writing fails
      */
-    public static void writeWarning(final AbstractOXException warning, final JSONWriter writer) throws JSONException {
+    public static void writeWarning(final OXException warning, final JSONWriter writer) throws JSONException {
         writer.key(ResponseFields.ERROR).value(warning.getOrigMessage());
         if (warning.getMessageArgs() != null) {
             final JSONArray array = new JSONArray();
@@ -298,7 +296,7 @@ public final class ResponseWriter {
             }
             writer.key(ResponseFields.ERROR_PARAMS).value(array);
         }
-        writer.key(ResponseFields.ERROR_CATEGORY).value(Category.WARNING.getCode());
+        writer.key(ResponseFields.ERROR_CATEGORY).value(Category.CATEGORY_WARNING.getCode());
         writer.key(ResponseFields.ERROR_CODE).value(warning.getErrorCode());
         writer.key(ResponseFields.ERROR_ID).value(warning.getExceptionID());
         writeProblematic(warning, writer);

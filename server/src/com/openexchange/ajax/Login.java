@@ -85,8 +85,8 @@ import com.openexchange.config.ConfigTools;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -103,7 +103,6 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
@@ -273,9 +272,6 @@ public class Login extends AJAXServlet {
                 } catch (final OXException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final OXException e) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
                 }
 
                 String client = req.getParameter(LoginFields.CLIENT_PARAM);
@@ -333,9 +329,6 @@ public class Login extends AJAXServlet {
                         return;
                     }
                 } catch (final UndeclaredThrowableException e) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                } catch (final OXException e) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
@@ -440,12 +433,13 @@ public class Login extends AJAXServlet {
                         SessionServlet.removeJSESSIONID(req, resp);
                         throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                     }
-                } catch (final SessiondException e) {
-                    LOG.debug(e.getMessage(), e);
+                } catch (final OXException e) {
+                    e.log(LOG);
                     if (SessionServlet.isIpCheckError(e) && null != session) {
                         try {
                             // Drop Open-Xchange cookies
-                            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                            final SessiondService sessiondService =
+                                ServerServiceRegistry.getInstance().getService(SessiondService.class);
                             SessionServlet.removeOXCookies(session.getHash(), req, resp);
                             SessionServlet.removeJSESSIONID(req, resp);
                             sessiondService.removeSession(session.getSessionID());
@@ -454,29 +448,10 @@ public class Login extends AJAXServlet {
                         }
                     }
                     response.setException(e);
-                } catch (final OXException e) {
-                    LOG.debug(e.getMessage(), e);
-                    response.setException(e);
-                } catch (final OXException e) {
-                    LOG.debug(e.getMessage(), e);
-                    response.setException(e);
                 } catch (final JSONException e) {
                     final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     LOG.error(oje.getMessage(), oje);
                     response.setException(oje);
-                } catch (final OXException e) {
-                    LOG.debug(e.getMessage(), e);
-                    response.setException(e);
-                } catch (final OXException e) {
-                    LOG.debug(e.getMessage(), e);
-                    response.setException(e);
-                } catch (final OXException e) {
-                    if (AbstractOXException.CATEGORY_USER_INPUT == e.getCategory()) {
-                        LOG.debug(e.getMessage(), e);
-                    } else {
-                        LOG.error(e.getMessage(), e);
-                    }
-                    response.setException(e);
                 }
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
@@ -499,10 +474,6 @@ public class Login extends AJAXServlet {
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doFormLogin(req, resp);
-                } catch (final OXException e) {
-                    final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
-                    resp.setContentType(CONTENTTYPE_HTML);
-                    resp.getWriter().write(errorPage);
                 } catch (final OXException e) {
                     final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                     resp.setContentType(CONTENTTYPE_HTML);
@@ -627,7 +598,7 @@ public class Login extends AJAXServlet {
     /**
      * Writes or rewrites a cookie
      */
-    private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws AbstractOXException, JSONException, IOException {
+    private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws OXException, JSONException, IOException {
         if (!sessiondAutoLogin && CookieType.SESSION == type) {
             throw AjaxExceptionCodes.DisabledAction.create( "store");
         }
@@ -657,19 +628,19 @@ public class Login extends AJAXServlet {
         ResponseWriter.write(response, resp.getWriter());
     }
 
-    private void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
+    private void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
     	doCookieReWrite(req, resp, CookieType.SESSION);
     }
 
-    private void doRefreshSecret(final HttpServletRequest req, final HttpServletResponse resp) throws AbstractOXException, JSONException, IOException {
+    private void doRefreshSecret(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
     	doCookieReWrite(req, resp, CookieType.SECRET);
     }
 
-    private void logAndSendException(final HttpServletResponse resp, final AbstractOXException e) throws IOException {
+    private void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
         LOG.debug(e.getMessage(), e);
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -731,7 +702,7 @@ public class Login extends AJAXServlet {
             appendModules(session, json, req);
             response.setData(json);
         } catch (final OXException e) {
-            if (AbstractOXException.CATEGORY_USER_INPUT == e.getCategory()) {
+            if (Category.CATEGORY_USER_INPUT == e.getCategory()) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);

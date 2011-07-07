@@ -119,19 +119,10 @@ public class Link extends DataServlet {
 		} catch (final OXException exc) {
 			LOG.error(exc.getMessage(), exc);
 			response.setException(exc);
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (final JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		}
 
 		writeResponse(response, httpServletResponse);
@@ -191,18 +182,6 @@ public class Link extends DataServlet {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
-		} catch (final OXConflictException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		}
 
 		writeResponse(response, httpServletResponse);

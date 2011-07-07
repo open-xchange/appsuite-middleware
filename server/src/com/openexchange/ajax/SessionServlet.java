@@ -289,9 +289,9 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param sessiondException The exception to check
      * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
      */
-    public static boolean isIpCheckError(final SessiondException sessiondException) {
+    public static boolean isIpCheckError(final OXException sessiondException) {
         final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
-        return (code.getNumber() == sessiondException.getDetailNumber()) && code.getCategory().equals(sessiondException.getCategory());
+        return (code.equals(sessiondException)) && code.getCategory().equals(sessiondException.getCategory());
     }
 
     /**
