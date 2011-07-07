@@ -108,7 +108,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -4081,7 +4080,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         rsql.deleteReminder(oid, uid, Types.APPOINTMENT);
                     }
                 } catch (final OXException exc) {
-                    if (ReminderExceptionCode.NOT_FOUND.getDetailNumber() == exc.getCode()) {
+                    if (ReminderExceptionCode.NOT_FOUND.equals(exc)) {
                         LOG.debug("Reminder was not found for deletion", exc);
                     } else {
                         throw exc;
@@ -4578,7 +4577,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             rsql.deleteReminder(oid, Types.APPOINTMENT, con);
         } catch (final OXException oxe) {
             // this is wanted if Code = Code.NOT_FOUND
-            if (!oxe.isPrefix("REM") || oxe.getCode() != ReminderExceptionCode.NOT_FOUND.getDetailNumber()) {
+            if (!ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                 throw oxe;
             }
         }
