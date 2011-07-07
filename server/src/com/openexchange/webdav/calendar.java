@@ -350,10 +350,6 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 LOG.debug(_parsePropChilds, exc);
                 writeResponse(appointmentobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,
                         clientId, os, xo);
-            } catch (final OXConcurrentModificationException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os,
-                        xo);
             }
 //            catch (final OXCalendarException exc) {
 //                if (exc.getCategory() == Category.USER_INPUT) {

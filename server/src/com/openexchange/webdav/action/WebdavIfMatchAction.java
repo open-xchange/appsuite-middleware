@@ -50,20 +50,21 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavIfMatchAction extends AbstractAction {
 
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throw OXException {
+			throws OXException {
 		check(req, true);
 		check(req, false);
 		yield(req,res);
 		
 	}
 
-	private void check(final WebdavRequest req,final boolean mustMatch) throw OXException {
+	private void check(final WebdavRequest req,final boolean mustMatch) throws OXException {
 		final String header = mustMatch ? "If-Match" : "If-None-Match";
 		
 		if(req.getHeader(header) != null) {

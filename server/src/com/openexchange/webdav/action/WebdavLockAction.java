@@ -59,6 +59,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavLock.Scope;
@@ -75,7 +76,7 @@ public class WebdavLockAction extends AbstractAction {
 	private static final Log LOG = LogFactory.getLog(WebdavLockAction.class);
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throw OXException {
+			throws OXException {
 		final WebdavLock lock = new WebdavLock();
 		
 		lock.setTimeout(getTimeout(req.getHeader("Timeout")));

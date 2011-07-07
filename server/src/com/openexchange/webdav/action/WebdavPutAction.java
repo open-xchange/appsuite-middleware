@@ -54,6 +54,7 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.tools.io.SizeAwareInputStream;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -63,7 +64,7 @@ public class WebdavPutAction extends AbstractAction {
 
 	private static final Log LOG = LogFactory.getLog(WebdavPutAction.class);
 	
-	public void perform(final WebdavRequest req, final WebdavResponse res) throw OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		final WebdavResource resource = req.getResource();
 		if(null != req.getHeader("content-length")) {
 			resource.setLength(new Long(req.getHeader("content-length")));

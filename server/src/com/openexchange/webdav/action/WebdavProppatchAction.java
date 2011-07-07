@@ -60,6 +60,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -84,7 +85,7 @@ public class WebdavProppatchAction extends AbstractAction {
 	}
 	
 	
-	public void perform(final WebdavRequest req, final WebdavResponse res) throw OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		try {
 			final Document requestDoc = req.getBodyAsDocument();
 			final Document responseDoc = new Document();
@@ -189,7 +190,9 @@ public class WebdavProppatchAction extends AbstractAction {
 					resource.putProperty(property);
 				} catch (final WebdavProtocolException e) {
 					status = e.getStatus();
-				}
+				} catch (final OXException e) {
+                    status = 500;
+                }
 			}
 			
 			final Element propstat = new Element("propstat", DAV_NS);
@@ -228,7 +231,9 @@ public class WebdavProppatchAction extends AbstractAction {
 				resource.removeProperty(propertyElement.getNamespaceURI(), propertyElement.getName());
 			} catch (final WebdavProtocolException e) {
 				status = e.getStatus();
-			}
+			} catch (final OXException e) {
+                status = 500;
+            }
 			
 			final Element propstat = new Element("propstat", DAV_NS);
 			

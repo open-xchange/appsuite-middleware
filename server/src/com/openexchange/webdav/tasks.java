@@ -275,9 +275,6 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
             } catch (final OXObjectNotFoundException exc) {
                 LOG.debug(_parsePropChilds, exc);
                 writeResponse(task, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, clientId, os, xo);
-            } catch (final OXConcurrentModificationException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(task, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
             } catch (final OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                     LOG.debug(_parsePropChilds, e);

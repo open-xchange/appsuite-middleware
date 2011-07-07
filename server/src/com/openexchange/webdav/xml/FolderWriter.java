@@ -75,6 +75,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.webdav.WebdavExceptionCode;
 
 /**
  * {@link FolderWriter}
@@ -222,7 +223,7 @@ public class FolderWriter extends FolderChildWriter {
                 addElement("module", "task", e_prop);
                 break;
             default:
-                throw "invalid module";
+                throw WebdavExceptionCode.IO_ERROR.create("invalid module");
             }
 
             if (type == FolderObject.PRIVATE) {

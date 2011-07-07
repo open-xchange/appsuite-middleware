@@ -59,6 +59,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
@@ -125,7 +126,7 @@ public class CalendarParser extends CommonParser {
             } else if ("none".equals(s)) {
                 calendarobject.setConfirm(CalendarObject.NONE);
             } else {
-                throw "invalid value in confirm tag";
+                throw WebdavExceptionCode.IO_ERROR.create("invalid value in confirm tag");
             }
             return ;
         } else if (isTag(parser, CalendarFields.CONFIRM_MESSAGE)) {
@@ -150,7 +151,7 @@ public class CalendarParser extends CommonParser {
         } else if ("yearly".equals(value)) {
             return CalendarObject.YEARLY;
         } else {
-            throw "unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value;
+            throw WebdavExceptionCode.IO_ERROR.create("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
         }
     }
 
@@ -164,7 +165,7 @@ public class CalendarParser extends CommonParser {
                 parser.nextTag();
 
                 if (isEnd(parser)) {
-                    throw "invalid xml in participant!";
+                    throw WebdavExceptionCode.IO_ERROR.create("invalid xml in participant!");
                 }
 
                 if (parser.getName().equals(CalendarFields.PARTICIPANTS) && parser.getEventType() == XmlPullParser.END_TAG) {
@@ -179,7 +180,7 @@ public class CalendarParser extends CommonParser {
                 } else if (isTag(parser, "resource")) {
                     parseElementResource(parser, participants);
                 } else {
-                    throw "unknown xml tag in permissions!";
+                    throw WebdavExceptionCode.IO_ERROR.create("unknown xml tag in permissions!");
                 }
             }
 
@@ -224,7 +225,7 @@ public class CalendarParser extends CommonParser {
                 } else if ("none".equals(confirm)) {
                     userparticipant.setConfirm(CalendarObject.NONE);
                 } else {
-                    throw "unknown value in confirm attribute: " + confirm;
+                    throw WebdavExceptionCode.IO_ERROR.create("unknown value in confirm attribute: " + confirm);
                 }
             }
 
@@ -234,7 +235,7 @@ public class CalendarParser extends CommonParser {
         participants.add(p);
     }
 
-    private void parseElementGroup(XmlPullParser parser, Participants participants) throws Exception {
+    private void parseElementGroup(final XmlPullParser parser, final Participants participants) throws Exception {
         Participant p = null;
 
         final String external = parser.getAttributeValue(XmlServlet.NAMESPACE, "external");
@@ -256,7 +257,7 @@ public class CalendarParser extends CommonParser {
         participants.add(p);
     }
 
-    private void parseElementResource(XmlPullParser parser, Participants participants) throws Exception {
+    private void parseElementResource(final XmlPullParser parser, final Participants participants) throws Exception {
         final Participant p = new ResourceParticipant(getValueAsInt(parser));
         participants.add(p);
     }

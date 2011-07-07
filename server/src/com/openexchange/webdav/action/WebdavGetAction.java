@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -71,7 +72,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 	private static final Pattern RANGE_PATTERN = Pattern.compile("bytes=(\\S+)");
 
 	@Override
-	public void perform(final WebdavRequest req, final WebdavResponse res) throw OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		final WebdavResource resource = req.getResource();
 		if(!resource.exists()) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
@@ -141,7 +142,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 		}
 	}
 	
-	private List<ByteRange> getRanges(final WebdavRequest req, final WebdavResponse res) throw OXException {
+	private List<ByteRange> getRanges(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		final String byteRanges = req.getHeader("Bytes");
 		if(req.getResource().isCollection()) {
 			return new ArrayList<ByteRange>();
@@ -186,7 +187,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 		return retVal;
 	}
 
-	private ByteRange parseRange(final String range, final long length, final WebdavPath url) throw OXException {
+	private ByteRange parseRange(final String range, final long length, final WebdavPath url) throws OXException {
 		if(range.charAt(0) == '-') {
 			final long reqLength = Long.parseLong(range.substring(1));
 			if(reqLength > length) {

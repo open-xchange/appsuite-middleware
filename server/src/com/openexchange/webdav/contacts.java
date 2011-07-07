@@ -300,9 +300,6 @@ public final class contacts extends XmlServlet<ContactInterface> {
                 LOG.debug(_parsePropChilds, exc);
                 writeResponse(contactObject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, clientId,
                         os, xo);
-            } catch (final OXConcurrentModificationException exc) {
-                LOG.debug(_parsePropChilds, exc);
-                writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
             } catch (final Exception exc) {
                 LOG.error(_parsePropChilds, exc);
                 writeResponse(contactObject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(

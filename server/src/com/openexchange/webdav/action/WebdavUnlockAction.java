@@ -50,12 +50,12 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 public class WebdavUnlockAction extends AbstractAction {
 
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throw OXException {
+			throws OXException {
 		req.getResource().unlock(getToken(req.getHeader("Lock-Token")));
 		res.setStatus(HttpServletResponse.SC_OK);
 	}

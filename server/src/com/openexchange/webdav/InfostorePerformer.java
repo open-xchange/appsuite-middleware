@@ -340,6 +340,8 @@ public final class InfostorePerformer implements SessionHolder {
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());
+        } catch (final OXException x) {
+            LOG.error("Error detected.", x);
         } catch (final NullPointerException x) {
             LOG.error("Null reference detected.", x);
         } finally {

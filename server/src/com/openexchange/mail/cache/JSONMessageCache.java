@@ -1025,9 +1025,6 @@ public final class JSONMessageCache {
             if (t instanceof OXException) {
                 throw (OXException) t;
             }
-            if (t instanceof AbstractOXException) {
-                throw new OXException((AbstractOXException) t);
-            }
             if (t instanceof Exception) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
@@ -1056,9 +1053,6 @@ public final class JSONMessageCache {
             final Throwable t = e.getCause();
             if (t instanceof OXException) {
                 throw (OXException) t;
-            }
-            if (t instanceof AbstractOXException) {
-                throw new OXException((AbstractOXException) t);
             }
             if (t instanceof Exception) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());

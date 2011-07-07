@@ -49,13 +49,13 @@
 
 package com.openexchange.webdav.action;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavOptionsAction extends AbstractAction {
 
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throw OXException {
+			throws OXException {
 		res.setHeader("Content-Length","0");
 		res.setHeader("Allow", join(req.getResource().getOptions()));
 		res.setHeader("DAV", "1, 2");

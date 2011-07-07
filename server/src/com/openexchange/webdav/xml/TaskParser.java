@@ -56,6 +56,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
+import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.TaskFields;
 
 /**
@@ -101,7 +102,7 @@ public class TaskParser extends CalendarParser {
             try {
                 taskobject.setStatus(getValueAsInt(parser));
             } catch (final NumberFormatException exc) {
-                throw TaskFields.STATUS + " is not an integer";
+                throw WebdavExceptionCode.IO_ERROR.create(TaskFields.STATUS + " is not an integer");
             }
 
             return ;
@@ -109,7 +110,7 @@ public class TaskParser extends CalendarParser {
             try {
                 taskobject.setPercentComplete(getValueAsInt(parser));
             } catch (final NumberFormatException exc) {
-                throw TaskFields.PERCENT_COMPLETED + " is not an integer";
+                throw WebdavExceptionCode.IO_ERROR.create(TaskFields.PERCENT_COMPLETED + " is not an integer");
             }
 
             return ;
@@ -117,7 +118,7 @@ public class TaskParser extends CalendarParser {
             try {
                 taskobject.setPriority(getValueAsInt(parser));
             } catch (final NumberFormatException exc) {
-                throw TaskFields.PRIORITY + " is not an integer";
+                throw WebdavExceptionCode.IO_ERROR.create(TaskFields.PRIORITY + " is not an integer");
             }
 
             return ;
@@ -125,7 +126,7 @@ public class TaskParser extends CalendarParser {
             try {
                 taskobject.setTargetDuration(getValueAsLong(parser));
             } catch (final NumberFormatException exc) {
-                throw TaskFields.TARGET_DURATION + " is not a long";
+                throw WebdavExceptionCode.IO_ERROR.create(TaskFields.TARGET_DURATION + " is not a long");
             }
 
             return ;
@@ -133,7 +134,7 @@ public class TaskParser extends CalendarParser {
             try {
                 taskobject.setTargetCosts(getValueAsFloat(parser));
             } catch (final NumberFormatException exc) {
-                throw TaskFields.TARGET_COSTS + " is not a float";
+                throw WebdavExceptionCode.IO_ERROR.create(TaskFields.TARGET_COSTS + " is not a float");
             }
 
             return ;
@@ -141,7 +142,7 @@ public class TaskParser extends CalendarParser {
             try {
                 taskobject.setActualDuration(getValueAsLong(parser));
             } catch (final NumberFormatException exc) {
-                throw TaskFields.ACTUAL_DURATION + " is not a long";
+                throw WebdavExceptionCode.IO_ERROR.create(TaskFields.ACTUAL_DURATION + " is not a long");
             }
 
             return ;
@@ -149,7 +150,7 @@ public class TaskParser extends CalendarParser {
             try {
                 taskobject.setActualCosts(getValueAsFloat(parser));
             } catch (final NumberFormatException exc) {
-                throw TaskFields.ACTUAL_COSTS + " is not a float";
+                throw WebdavExceptionCode.IO_ERROR.create(TaskFields.ACTUAL_COSTS + " is not a float");
             }
 
             return ;
@@ -157,7 +158,7 @@ public class TaskParser extends CalendarParser {
             try {
                 taskobject.setDateCompleted(getValueAsDate(parser));
             } catch (final NumberFormatException exc) {
-                throw TaskFields.DATE_COMPLETED + " is not a long";
+                throw WebdavExceptionCode.IO_ERROR.create(TaskFields.DATE_COMPLETED + " is not a long");
             }
 
             return ;

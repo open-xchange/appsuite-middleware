@@ -92,32 +92,32 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	}
 
 	@Override
-    public String getResourceType() throw OXException {
+    public String getResourceType() throws OXException {
 		return Protocol.COLLECTION;
 	}
 
 	@Override
-	public void putBody(final InputStream data, final boolean guessSize) throw OXException {
+	public void putBody(final InputStream data, final boolean guessSize) throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
 	@Override
-	public String getLanguage() throw OXException{
+	public String getLanguage() throws OXException{
 		return null;
 	}
 	
 	@Override
-	public void setLanguage(final String lang) throw OXException{
+	public void setLanguage(final String lang) throws OXException{
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
 	@Override
-	public Long getLength() throw OXException{
+	public Long getLength() throws OXException{
 		return null;
 	}
 	
 	@Override
-	public void delete() throw OXException {
+	public void delete() throws OXException {
 		final List<WebdavResource> copy = new ArrayList<WebdavResource>(children);
 		final List<WebdavProtocolException> exceptions = new ArrayList<WebdavProtocolException>();
 		for(final WebdavResource res : copy) {
@@ -150,7 +150,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	
 	
 	@Override
-    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throw OXException {
+    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
 		try {
             checkParentExists(dest);
         } catch (final OXException e) {
@@ -194,25 +194,25 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	}
 
 	@Override
-	public void setLength(final Long l) throw OXException {
+	public void setLength(final Long l) throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
 	@Override
-	public String getETag() throw OXException{
+	public String getETag() throws OXException{
 		return null;
 	}
 	
 	@Override
-	public void setContentType(final String s) throw OXException {
+	public void setContentType(final String s) throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	public WebdavResource resolveResource(final WebdavPath subPath) throw OXException {
+	public WebdavResource resolveResource(final WebdavPath subPath) throws OXException {
 		return mgr.resolveResource(url.dup().append(subPath));
 	}
 
-	public WebdavCollection resolveCollection(final WebdavPath subPath) throw OXException {
+	public WebdavCollection resolveCollection(final WebdavPath subPath) throws OXException {
 		return mgr.resolveCollection(url.dup().append(subPath));
 	}
 	

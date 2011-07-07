@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderApply;
@@ -94,7 +95,7 @@ public class WebdavIfAction extends AbstractAction {
 	}
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throw OXException {
+			throws OXException {
 		final int depth = getDepth(req);
 		
 		IfHeader ifHeader;
@@ -161,7 +162,7 @@ public class WebdavIfAction extends AbstractAction {
 		return loadingHints;
 	}
 
-	private void checkDestinationLocks(final IfHeader ifHeader, final WebdavRequest req) throw OXException {
+	private void checkDestinationLocks(final IfHeader ifHeader, final WebdavRequest req) throws OXException {
 		if(null == req.getDestinationUrl()) {
 			return;
 		}
@@ -184,7 +185,7 @@ public class WebdavIfAction extends AbstractAction {
 		}
 	}
 
-	private void checkNeededLocks(final IfHeader ifHeader, final WebdavRequest req, final int depth) throw OXException {
+	private void checkNeededLocks(final IfHeader ifHeader, final WebdavRequest req, final int depth) throws OXException {
 		final WebdavResource res = req.getResource();
 		Iterable<WebdavResource> iter = null;
 		if(res.isCollection()) {
@@ -221,13 +222,13 @@ public class WebdavIfAction extends AbstractAction {
 		}
 	}
 
-	private void addLocks(final Set<String> neededLocks, final WebdavResource res) throw OXException {
+	private void addLocks(final Set<String> neededLocks, final WebdavResource res) throws OXException {
 		for(final WebdavLock lock : res.getLocks()) {
 			neededLocks.add(lock.getToken());
 		}
 	}
 
-	private void checkIfs(final IfHeader ifHeader, final WebdavRequest req, final int depth) throw OXException {
+	private void checkIfs(final IfHeader ifHeader, final WebdavRequest req, final int depth) throws OXException {
 		final LoadingHints loadingHints = new LoadingHints();
 		loadingHints.setUrl(req.getUrl());
 		loadingHints.setDepth(depth);
@@ -256,7 +257,7 @@ public class WebdavIfAction extends AbstractAction {
 		throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 	}
 
-	private boolean checkList(final IfHeader ifHeader, final WebdavResource resource, final WebdavRequest req) throw OXException {
+	private boolean checkList(final IfHeader ifHeader, final WebdavResource resource, final WebdavRequest req) throws OXException {
 		final List<IfHeaderList> relevant = ifHeader.getRelevant(req.getURLPrefix()+resource.getUrl());
 		for(final IfHeaderList list : relevant) {
 			if(matches(list, resource)) {
@@ -266,7 +267,7 @@ public class WebdavIfAction extends AbstractAction {
 		return relevant.isEmpty();
 	}
 
-	private boolean matches(final IfHeaderList list, final WebdavResource resource) throw OXException {
+	private boolean matches(final IfHeaderList list, final WebdavResource resource) throws OXException {
 		for(final IfHeaderEntity entity : list) {
 		    final IfHeaderApply apply = getApply();
 		    if(! apply.matches(entity, resource)) {
@@ -284,7 +285,7 @@ public class WebdavIfAction extends AbstractAction {
 	    return STANDARD_APPLY;
 	}
 
-	private int getDepth(final WebdavRequest req) throw OXException {
+	private int getDepth(final WebdavRequest req) throws OXException {
 		if(!req.getResource().isCollection()) {
 			return 0;
 		}

@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
@@ -113,7 +114,7 @@ public class FolderParser extends FolderChildParser {
 			} else if ("public".equals(type)) {
 				folderobject.setType(FolderObject.PUBLIC);
 			} else {
-				throw "unknown value in " + FolderFields.TYPE + ": " + type;
+				throw WebdavExceptionCode.IO_ERROR.create("unknown value in " + FolderFields.TYPE + ": " + type);
 			}
 			
 			return ;
@@ -128,7 +129,7 @@ public class FolderParser extends FolderChildParser {
 			} else if ("unbound".equals(module)) {
 				folderobject.setModule(FolderObject.UNBOUND);
 			} else {
-				throw "unknown value in " + FolderFields.MODULE + ": " + module;
+				throw WebdavExceptionCode.IO_ERROR.create("unknown value in " + FolderFields.MODULE + ": " + module);
 			}
 			
 			return ;
@@ -151,7 +152,7 @@ public class FolderParser extends FolderChildParser {
 				parser.nextTag();
 				
 				if (isEnd(parser)) {
-					throw "invalid xml in permission!";
+					throw WebdavExceptionCode.IO_ERROR.create("invalid xml in permission!");
 				}
 				
 				if (parser.getName().equals(FolderFields.PERMISSIONS) && parser.getEventType() == XmlPullParser.END_TAG) {
@@ -169,7 +170,7 @@ public class FolderParser extends FolderChildParser {
 					parseEntity(oclp, parser);
 					oclp.setGroupPermission(true);
 				} else {
-					throw "unknown xml tag in permissions: " + parser.getName();
+					throw WebdavExceptionCode.IO_ERROR.create("unknown xml tag in permissions: " + parser.getName());
 				}
 				
 				permissions.add(oclp);

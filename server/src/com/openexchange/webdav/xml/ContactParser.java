@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
+import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.ContactFields;
 
 /**
@@ -409,7 +410,7 @@ public class ContactParser extends CommonParser {
             parser.nextTag();
 
             if (isEnd(parser)) {
-                throw "invalid xml in distributionlist!";
+                throw WebdavExceptionCode.IO_ERROR.create("invalid xml in distributionlist!");
             }
 
             if (parser.getName().equals(ContactFields.DISTRIBUTIONLIST) && parser.getEventType() == XmlPullParser.END_TAG) {
@@ -422,7 +423,7 @@ public class ContactParser extends CommonParser {
             if (isTag(parser, "email")) {
                 parseElementEntry(parser, entry);
             } else {
-                throw "unknown xml tag in distributionlist!";
+                throw WebdavExceptionCode.IO_ERROR.create("unknown xml tag in distributionlist!");
             }
 
             distributionlist.add(entry);
@@ -460,7 +461,7 @@ public class ContactParser extends CommonParser {
                 parser.nextTag();
 
                 if (isEnd(parser)) {
-                    throw "invalid xml in links!";
+                    throw WebdavExceptionCode.IO_ERROR.create("invalid xml in links!");
                 }
 
                 if (parser.getName().equals(ContactFields.LINKS) && parser.getEventType() == XmlPullParser.END_TAG) {
@@ -473,7 +474,7 @@ public class ContactParser extends CommonParser {
                 if (isTag(parser, "link")) {
                     parseElementLink(parser, link);
                 } else {
-                    throw "unknown xml tag in links!";
+                    throw WebdavExceptionCode.IO_ERROR.create("unknown xml tag in links!");
                 }
 
                 links.add(link);

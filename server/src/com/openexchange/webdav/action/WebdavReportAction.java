@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -71,7 +72,7 @@ public class WebdavReportAction extends AbstractAction {
         this.protocol = protocol;
     }
     
-    public void perform(final WebdavRequest req, final WebdavResponse res) throw OXException {
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
         try {
             final Document reportQuery = req.getBodyAsDocument();
             final Element root = reportQuery.getRootElement();

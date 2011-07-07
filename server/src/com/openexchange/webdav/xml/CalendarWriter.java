@@ -57,6 +57,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
@@ -125,7 +126,7 @@ public abstract class CalendarWriter extends CommonWriter {
 
                 break;
             default:
-                throw "invalid recurrence type: " + recurrenceType;
+                throw WebdavExceptionCode.IO_ERROR.create("invalid recurrence type: " + recurrenceType);
         }
 
         if (calendarobject.containsInterval()) {
@@ -183,7 +184,7 @@ public abstract class CalendarWriter extends CommonWriter {
                                 } else if (userparticipant[userPos].getConfirm() == CalendarObject.TENTATIVE) {
                                     eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "tentative", XmlServlet.NS);
                                 } else {
-                                    throw "invalid value in confirm: " + userparticipant[a].getConfirm();
+                                    throw WebdavExceptionCode.IO_ERROR.create("invalid value in confirm: " + userparticipant[a].getConfirm());
                                 }
                             }
                         } else {
@@ -232,7 +233,7 @@ public abstract class CalendarWriter extends CommonWriter {
                         external = true;
                         break;
                     default:
-                        throw "invalid type in participant: " + type;
+                        throw WebdavExceptionCode.IO_ERROR.create("invalid type in participant: " + type);
 
                 }
 
