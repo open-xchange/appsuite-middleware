@@ -53,8 +53,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
-import com.openexchange.spamhandler.spamassassin.exceptions.SpamhandlerSpamassassinConfigurationException;
-import com.openexchange.spamhandler.spamassassin.exceptions.SpamhandlerSpamassassinConfigurationException.Code;
+import com.openexchange.exception.OXException;
+import com.openexchange.spamhandler.spamassassin.exceptions.SpamhandlerSpamassassinConfigurationExceptionCode;
 import com.openexchange.spamhandler.spamassassin.osgi.ServiceRegistry;
 import com.openexchange.spamhandler.spamassassin.osgi.SpamAssassinSpamHandlerActivator;
 
@@ -107,7 +107,7 @@ public class PropertyHandler {
     
     private String hostname;
     
-    private AtomicBoolean loaded = new AtomicBoolean();
+    private final AtomicBoolean loaded = new AtomicBoolean();
     
     private int port;
     
@@ -125,28 +125,28 @@ public class PropertyHandler {
         return singleton;
     }
 
-    private static String checkStringProperty(ConfigurationService conf, final Parameters param) throws SpamhandlerSpamassassinConfigurationException {
+    private static String checkStringProperty(final ConfigurationService conf, final Parameters param) throws OXException {
         final String name = param.getName();
         final String property = conf.getProperty(name);
         if (null == property) {
-            throw new SpamhandlerSpamassassinConfigurationException(Code.PARAMETER_NOT_SET, name);
+            throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NOT_SET.create(name);
         } else {
             return property;
         }
     }
 
-    private static String checkStringPropertyOptional(ConfigurationService conf, final Parameters param) {
+    private static String checkStringPropertyOptional(final ConfigurationService conf, final Parameters param) {
         final String name = param.getName();
         final String property = conf.getProperty(name, new PropertyListener() {
 
-            public void onPropertyChange(PropertyEvent event) {
+            public void onPropertyChange(final PropertyEvent event) {
                 switch (event.getType()) {
                 case CHANGED:
                     // load all properties again, just to be sure...
                     LOG.info("Re-read configuration of Spamhandler Spamassassin bundle, because of property change");
                     try {
                         PropertyHandler.getInstance().loadProperties();
-                    } catch (final SpamhandlerSpamassassinConfigurationException e) {
+                    } catch (final OXException e) {
                         // As an exception at this point may only occur if something ugly has happened to the
                         // config file, the proper operation of this bundle is no more guaranteed. So it's
                         // safe to shutdown the bundle here...
@@ -159,7 +159,7 @@ public class PropertyHandler {
                     LOG.info("Re-read configuration of Spamhandler Spamassassin bundle, because of property deletion");
                     try {
                         PropertyHandler.getInstance().loadProperties();
-                    } catch (final SpamhandlerSpamassassinConfigurationException e) {
+                    } catch (final OXException e) {
                         // As an exception at this point may only occur if something ugly has happened to the
                         // config file, the proper operation of this bundle is no more guaranteed. So it's
                         // safe to shutdown the bundle here...
@@ -213,7 +213,7 @@ public class PropertyHandler {
         return spamd;
     }
 
-    public void loadProperties() throws SpamhandlerSpamassassinConfigurationException {
+    public void loadProperties() throws OXException {
         final StringBuilder logBuilder = new StringBuilder();
         
         final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -225,13 +225,13 @@ public class PropertyHandler {
             this.setSpamd(Boolean.valueOf(modestring));
             logBuilder.append("\t" + Parameters.spamd.getName() + ": ").append(this.isSpamd()).append('\n');
         } catch (final IllegalArgumentException e) {
-            throw new SpamhandlerSpamassassinConfigurationException(Code.MODE_TYPE_WRONG, modestring);
+            throw SpamhandlerSpamassassinConfigurationExceptionCode.MODE_TYPE_WRONG.create(modestring);
         }
 
         final String hostname = checkStringPropertyOptional(configuration, Parameters.hostname);
         if (null == hostname) {
             if (spamd) {
-                throw new SpamhandlerSpamassassinConfigurationException(Code.PARAMETER_NOT_SET_SPAMD, Parameters.hostname.getName());
+                throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NOT_SET_SPAMD.create(Parameters.hostname.getName());
             }
         } else {
             this.setHostname(hostname);
@@ -248,14 +248,14 @@ public class PropertyHandler {
         final String timeoutstring = checkStringPropertyOptional(configuration, Parameters.timeout);
         if (null == timeoutstring) {
             if (spamd) {
-                throw new SpamhandlerSpamassassinConfigurationException(Code.PARAMETER_NOT_SET_SPAMD, Parameters.timeout.getName());
+                throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NOT_SET_SPAMD.create(Parameters.timeout.getName());
             }
         } else {
             try {
                 this.setTimeout(Long.parseLong(timeoutstring));
                 logBuilder.append("\t" + Parameters.timeout.getName() + ": ").append(this.getHostname()).append('\n');
             } catch (final NumberFormatException e) {
-                throw new SpamhandlerSpamassassinConfigurationException(Code.PARAMETER_NO_LONG, Parameters.timeout.getName(), timeoutstring);
+                throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NO_LONG.create(Parameters.timeout.getName(), timeoutstring);
             }
         }
         
@@ -274,13 +274,13 @@ public class PropertyHandler {
 //        final String userSourceString = checkStringPropertyOptional(configuration, Parameters.userSource);
 //        if (null == userSourceString) {
 //            if (spamd) {
-//                throw new SpamhandlerSpamassassinConfigurationException(Code.USERSOURCE_NOT_SET);
+//                throw new OXException(Code.USERSOURCE_NOT_SET);
 //            }
 //        } else {
 //            try {
 //                this.setUserSource(UserSource.valueOf(userSourceString));
 //            } catch (final IllegalArgumentException e) {
-//                throw new SpamhandlerSpamassassinConfigurationException(Code.USERSOURCE_WRONG, userSourceString);
+//                throw new OXException(Code.USERSOURCE_WRONG, userSourceString);
 //            }
 //        }
         
@@ -295,16 +295,16 @@ public class PropertyHandler {
     }
 
     
-    private void setHostname(String hostname) {
+    private void setHostname(final String hostname) {
         this.hostname = hostname;
     }
 
     
-    private void setIntegerParam(final StringBuilder logBuilder, final ConfigurationService configuration, final Parameters param, final IntegerSetterClosuse closure) throws SpamhandlerSpamassassinConfigurationException {
+    private void setIntegerParam(final StringBuilder logBuilder, final ConfigurationService configuration, final Parameters param, final IntegerSetterClosuse closure) throws OXException {
         final String value = checkStringPropertyOptional(configuration, param);
         if (null == value) {
             if (spamd) {
-                throw new SpamhandlerSpamassassinConfigurationException(Code.PARAMETER_NOT_SET_SPAMD, param.getName());
+                throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NOT_SET_SPAMD.create(param.getName());
             }
         } else {
             try {
@@ -312,20 +312,20 @@ public class PropertyHandler {
                 closure.setter(parseInt);
                 logBuilder.append("\t" + param.getName() + ": ").append(parseInt).append('\n');
             } catch (final NumberFormatException e) {
-                throw new SpamhandlerSpamassassinConfigurationException(Code.PARAMETER_NO_INTEGER, param.getName(), value);
+                throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NO_INTEGER.create(param.getName(), value);
             }
         }
     }
 
-    private void setPort(int port) {
+    private void setPort(final int port) {
         this.port = port;
     }
 
-    private void setRetries(int retries) {
+    private void setRetries(final int retries) {
         this.retries = retries;
     }
 
-    private void setRetrysleep(int retrysleep) {
+    private void setRetrysleep(final int retrysleep) {
         this.retrysleep = retrysleep;
     }
 
@@ -333,7 +333,7 @@ public class PropertyHandler {
         this.spamd = mode;
     }
 
-    private void setTimeout(long timeout) {
+    private void setTimeout(final long timeout) {
         this.timeout = timeout;
     }
 

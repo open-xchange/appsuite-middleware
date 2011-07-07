@@ -68,8 +68,7 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamassassin.api.SpamdProvider;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
-import com.openexchange.spamhandler.spamassassin.exceptions.SpamhandlerSpamassassinException;
-import com.openexchange.spamhandler.spamassassin.exceptions.SpamhandlerSpamassassinException.Code;
+import com.openexchange.spamhandler.spamassassin.exceptions.SpamhandlerSpamassassinExceptionCode;
 import com.openexchange.spamhandler.spamassassin.osgi.ServiceRegistry;
 import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
 
@@ -197,7 +196,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         final MailService mailService = ServiceRegistry.getInstance().getService(MailService.class);
         if (null == mailService) {
-            throw new SpamhandlerSpamassassinException(Code.MAILSERVICE_MISSING);
+            throw SpamhandlerSpamassassinExceptionCode.MAILSERVICE_MISSING.create();
         }
         final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, accountId);
         mailAccess.connect();
@@ -213,7 +212,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
          */
         final MailService mailService = ServiceRegistry.getInstance().getService(MailService.class);
         if (null == mailService) {
-            throw new SpamhandlerSpamassassinException(Code.MAILSERVICE_MISSING);
+            throw SpamhandlerSpamassassinExceptionCode.MAILSERVICE_MISSING.create();
         }
         final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, accountId);
         mailAccess.connect();
@@ -280,7 +279,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         return nestedMails.toArray(new MailMessage[nestedMails.size()]);
     }
     
-    private SpamdSettings getSpamdSettings(final Session session, final PropertyHandler propertyHandler) throws SpamhandlerSpamassassinException {
+    private SpamdSettings getSpamdSettings(final Session session, final PropertyHandler propertyHandler) throws OXException {
         SpamdSettings spamdSettings = null;
         if (propertyHandler.isSpamd()) {
             final SpamdService spamdservice = ServiceRegistry.getInstance().getService(SpamdService.class);
@@ -291,7 +290,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                     provider = spamdservice.getProvider(session);
                     spamdSettings = new SpamdSettings(provider.getHostname(), provider.getPort(), provider.getUsername());
                 } catch (final OXException e) {
-                    throw new SpamhandlerSpamassassinException(Code.ERROR_GETTING_SPAMD_PROVIDER, e, e.getMessage());
+                    throw SpamhandlerSpamassassinExceptionCode.ERROR_GETTING_SPAMD_PROVIDER.create(e, e.getMessage());
                 }
             } else {
                 spamdSettings = new SpamdSettings(propertyHandler.getHostname(), propertyHandler.getPort(), getUsername(session));
@@ -308,9 +307,9 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
      * @param source - A string containing the message
      * @param spam - Whether the message should be marked as spam or ham, if set to false it's marked as ham
      * @param spamdsettings the settings how spamd can be reached
-     * @throws SpamhandlerSpamassassinException 
+     * @throws OXException 
      */
-    private void sendToSpamd(final String source, final boolean spam, final SpamdSettings spamdsettings) throws SpamhandlerSpamassassinException {
+    private void sendToSpamd(final String source, final boolean spam, final SpamdSettings spamdsettings) throws OXException {
         final Spamc spamc = new Spamc();
         spamc.setHost(spamdsettings.getHostname());
         spamc.setPort(spamdsettings.getPort());
@@ -323,13 +322,13 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         try {
             resp = spamc.tell(source, spam, true, true, false, false);
         } catch (final IllegalArgumentException e) {
-            throw new SpamhandlerSpamassassinException(Code.WRONG_TELL_CMD_ARGS, e, e.getMessage());
+            throw SpamhandlerSpamassassinExceptionCode.WRONG_TELL_CMD_ARGS.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new SpamhandlerSpamassassinException(Code.COMMUNICATION_ERROR, e, e.getMessage());
+            throw SpamhandlerSpamassassinExceptionCode.COMMUNICATION_ERROR.create(e, e.getMessage());
         }
         final int responseCode = resp.getResponseCode();
         if (Spamc.ExitCodes.EX_OK != responseCode) {
-            throw new SpamhandlerSpamassassinException(Code.WRONG_SPAMD_EXIT, responseCode);
+            throw SpamhandlerSpamassassinExceptionCode.WRONG_SPAMD_EXIT.create(responseCode);
         }
     }
 
@@ -353,7 +352,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         return new PlainAndNestedMessages(extractIDs.toArray(new String[extractIDs.size()]), plainIDs.toArray(new String[plainIDs.size()]));
     }
 
-    private void spamdMessageProcessing(final MailMessage[] mails, final SpamdSettings spamdSettings, final boolean spam) throws OXException, SpamhandlerSpamassassinException {
+    private void spamdMessageProcessing(final MailMessage[] mails, final SpamdSettings spamdSettings, final boolean spam) throws OXException {
         for (final MailMessage mail : mails) {
             // ...then get the plaintext of the mail as spamhandler is not able to cope with our mail objects ;-) ...
             final String source = mail.getSource();
