@@ -49,10 +49,10 @@
 
 package com.openexchange.mobile.configuration.json.exception;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MobileProvisioningJsonExceptionMessages} - Exception messages for {@link MobileProvisioningJsonException} that needs to be translated.
+ * {@link MobileProvisioningJsonExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  * 
  * @author Tobias Prinz <a href=mailto:tobias.prinz@open-xchange.com>
  */

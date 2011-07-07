@@ -51,22 +51,19 @@ package com.openexchange.mobile.configuration.json.servlet;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.osgi.framework.ServiceException;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mobile.configuration.json.action.ActionException;
@@ -76,9 +73,7 @@ import com.openexchange.mobile.configuration.json.container.ProvisioningInformat
 import com.openexchange.mobile.configuration.json.container.ProvisioningResponse;
 import com.openexchange.mobile.configuration.json.exception.MobileProvisioningJsonExceptionCodes;
 import com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningServiceRegistry;
-import com.openexchange.server.ServiceException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -104,17 +99,18 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		return true;
 	}
 
-	protected void doGet(final HttpServletRequest request,
+	@Override
+    protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse resp) throws ServletException,
 			IOException {
 		final Response response = new Response();
 
-		JSONObject obj = new JSONObject();
+		final JSONObject obj = new JSONObject();
 
 		try {
-			String action = JSONUtility.checkStringParameter(request, "action");
+			final String action = JSONUtility.checkStringParameter(request, "action");
 			if (action.equals(ActionTypes.LISTSERVICES.code)) {
-				JSONArray services = new JSONArray();
+				final JSONArray services = new JSONArray();
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.EMAIL)) {
 					services.put(ActionTypes.EMAIL.code);
 				}
@@ -127,12 +123,12 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				
 				obj.put("services", services);
 			}
-		} catch (AjaxException e) {
+		} catch (final OXException e) {
 			LOG.error("Missing or wrong field action in JSON request", e);
 			response.setException(e);
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
-            response.setException(new OXJSONException(OXJSONException.LdapExceptionCode.JSON_WRITE_ERROR, e) );
+            response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
 		}
 		
 		response.setData(obj);
@@ -147,20 +143,21 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		}
 	}
 	
-	protected void doPut(final HttpServletRequest request,
+	@Override
+    protected void doPut(final HttpServletRequest request,
 			final HttpServletResponse resp) throws ServletException,
 			IOException {
 		final Response response = new Response();
 		
-		JSONObject obj = new JSONObject();
+		final JSONObject obj = new JSONObject();
 
 		try {
 			final ServerSession session = getSessionObject(request);
 
-			String action = JSONUtility.checkStringParameter(request, "action");
+			final String action = JSONUtility.checkStringParameter(request, "action");
 
 			if (action.equals(ActionTypes.LISTSERVICES.code)) {
-				JSONArray services = new JSONArray();
+				final JSONArray services = new JSONArray();
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.EMAIL)) {
 					services.put(ActionTypes.EMAIL.code);
 				}
@@ -188,8 +185,8 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				ProvisioningResponse provisioningResponse = null;
 			    if (service != null) {
 			    	try {
-						Context ctx = ContextStorage.getStorageContext(session);
-						User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
+						final Context ctx = ContextStorage.getStorageContext(session);
+						final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 
 						String url = MobilityProvisioningServletConfiguration.getProvisioningURL();
 						url = url.replace("%h", URLEncoder.encode(request.getServerName(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
@@ -198,7 +195,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 						url = url.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 						url = url.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 			    								
-						ProvisioningInformation provisioningInformation = new com.openexchange.mobile.configuration.json.container.ProvisioningInformation(
+						final ProvisioningInformation provisioningInformation = new com.openexchange.mobile.configuration.json.container.ProvisioningInformation(
 								JSONUtility.checkStringParameter(request, "target"),
 								url,
 								MobilityProvisioningServletConfiguration.getProvisioningURLEncoding(),
@@ -210,16 +207,13 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 								user);
 												
 			    		provisioningResponse = service.handleAction(provisioningInformation);
-			    	} catch (ContextException e) {
-			    		LOG.error(e.getLocalizedMessage(), e);
-			    		response.setException(MobileProvisioningJsonExceptionCodes.CONTEXT_ERROR.create(e, session.getContextId()));
-					} catch (OXException e) {
+			    	} catch (final OXException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 						response.setException(MobileProvisioningJsonExceptionCodes.USER_ERROR.create(e, session.getUserId()));
-					} catch (ServiceException e) {
+					} catch (final ServiceException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 						response.setException(MobileProvisioningJsonExceptionCodes.CONFIGURATION_ERROR.create(e));
-					} catch (ActionException e) {
+					} catch (final ActionException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 			    		response.setException(MobileProvisioningJsonExceptionCodes.ACTION_ERROR.create(e));
 					}
@@ -234,14 +228,12 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				obj.put("success", provisioningResponse.isSuccess());
 				obj.put("message", provisioningResponse.getMessage());
 			}
-		} catch (AjaxException e) {
+		} catch (final OXException e) {
 			LOG.error("Missing or wrong field action in JSON request", e);
 			response.setException(e);
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
-            response.setException(
-            	new OXJSONException(OXJSONException.LdapExceptionCode.JSON_WRITE_ERROR, e)
-            );
+			response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
 		}
 		
 		response.setData(obj);
