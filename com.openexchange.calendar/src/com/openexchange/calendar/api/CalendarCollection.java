@@ -88,7 +88,6 @@ import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -1334,11 +1333,7 @@ public final class CalendarCollection implements CalendarCollectionService {
              * date in the meantime
              */
             if (Arrays.equals(edao.getChangeException(), newChangeExcs)) {
-                throw 
-                
-                
-                throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT,
-                        OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+                throw OXException.conflict();
             }
             cdao.setChangeExceptions(newChangeExcs);
         }
