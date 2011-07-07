@@ -61,7 +61,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
@@ -108,11 +107,8 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
         }
         return bob.toString();
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.parser.SubscriptionHandler#handleSubscription(com.openexchange.subscribe.Subscription)
-     */
-    public void handleSubscription(final Subscription subscription) throws AbstractOXException{
+
+    public void handleSubscription(final Subscription subscription) throws OXException{
         try {
             final String website = readSubscription(subscription);
             

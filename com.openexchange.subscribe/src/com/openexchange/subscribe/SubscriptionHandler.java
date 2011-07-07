@@ -49,11 +49,11 @@
 
 package com.openexchange.subscribe;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 
 public interface SubscriptionHandler {
 
-    public abstract void handleSubscription(Subscription subscription) throws AbstractOXException;
+    public abstract void handleSubscription(Subscription subscription) throws OXException;
 
 }
