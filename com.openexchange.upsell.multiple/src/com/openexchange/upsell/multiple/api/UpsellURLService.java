@@ -1,7 +1,6 @@
 package com.openexchange.upsell.multiple.api;
 
 import java.util.Map;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;

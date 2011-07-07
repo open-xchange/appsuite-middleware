@@ -54,12 +54,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.server.ServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.tools.service.SessionServletRegistration;
@@ -75,7 +74,7 @@ public class MyActivator extends DeferredActivator {
     private static final Class<?>[] NEEDED_SERVICES = {
         UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class };
 
-    private List<ServiceTracker> serviceTrackerList;
+    private final List<ServiceTracker> serviceTrackerList;
 
     private SessionServletRegistration servletRegistration;
 
@@ -90,7 +89,7 @@ public class MyActivator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
@@ -99,7 +98,7 @@ public class MyActivator extends DeferredActivator {
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
@@ -143,8 +142,8 @@ public class MyActivator extends DeferredActivator {
 		
 	}
 
-    private String getFromConfig(String key) throws ServiceException {
-        ConfigurationService configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true);
+    private String getFromConfig(final String key) throws OXException {
+        final ConfigurationService configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true);
         return configservice.getProperty(key);
     }
 

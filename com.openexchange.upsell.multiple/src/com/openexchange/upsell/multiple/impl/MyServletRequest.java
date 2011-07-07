@@ -11,7 +11,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.Address;
@@ -23,28 +22,25 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osgi.framework.ServiceException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.api2.OXException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.upsell.multiple.api.UpsellURLParametersMap;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.upsell.multiple.api.URLGeneratorException;
+import com.openexchange.upsell.multiple.api.UpsellURLParametersMap;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
 import com.openexchange.upsell.multiple.osgi.MyServiceRegistry;
 
@@ -109,7 +105,7 @@ public final class MyServletRequest  {
 	private User user;	
 	private User admin;	
 	private final Context ctx;
-	private ConfigurationService configservice;
+	private final ConfigurationService configservice;
 	
 	
 	private static final Log LOG = LogFactory.getLog(MyServletRequest.class);
@@ -163,11 +159,11 @@ public final class MyServletRequest  {
 		this.configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true); 
 	}
 	
-	public Object action(final String action, final JSONObject jsonObject, final HttpServletRequest http_request) throws AbstractOXException, JSONException {
+	public Object action(final String action, final JSONObject jsonObject, final HttpServletRequest http_request) throws OXException, JSONException {
 		Object retval = null;
 		
 		// Host/UI URL from where the request came, needed for different types of shops per domain/branding
-		String request_src_hostname = http_request.getServerName();
+		final String request_src_hostname = http_request.getServerName();
 		
 		if(action.equalsIgnoreCase(ACTION_GET_CONFIGURED_METHOD)){
 			// return configur�ed upsell method
@@ -186,13 +182,13 @@ public final class MyServletRequest  {
 			// UI must send feature, upsell package and hostname
 			retval = actionTriggerEmailUpsell(jsonObject,request_src_hostname);
 		}else {
-			throw new AjaxException(AjaxException.LdapExceptionCode.UnknownAction, action);
+			throw AjaxExceptionCodes.UnknownAction.create(action);
 		}
 		
 		return retval;
 	}
 	
-	private Object actionUpDownGradeContext(JSONObject json) throws MyServletException {
+	private Object actionUpDownGradeContext(final JSONObject json) throws OXException {
 		
 		try {
 		
@@ -204,9 +200,9 @@ public final class MyServletRequest  {
 			
 			final OXContextInterface iface = (OXContextInterface)Naming.lookup("rmi://"+getFromConfig(PROPERTY_RMI_HOST)+"/"+OXContextInterface.RMI_NAME);
 		
-			com.openexchange.admin.rmi.dataobjects.Context bla = new com.openexchange.admin.rmi.dataobjects.Context(this.sessionObj.getContextId());
+			final com.openexchange.admin.rmi.dataobjects.Context bla = new com.openexchange.admin.rmi.dataobjects.Context(this.sessionObj.getContextId());
 			
-			Credentials authcreds = new Credentials(getFromConfig(PROPERTY_RMI_MASTERADMIN),getFromConfig(PROPERTY_RMI_MASTERADMIN_PWD));
+			final Credentials authcreds = new Credentials(getFromConfig(PROPERTY_RMI_MASTERADMIN),getFromConfig(PROPERTY_RMI_MASTERADMIN_PWD));
 			
 			iface.getAccessCombinationName(bla, authcreds);
 			LOG.info("Current access combination name for context "+this.ctx.getContextId()+": "+iface.getAccessCombinationName(bla, authcreds));
@@ -218,33 +214,33 @@ public final class MyServletRequest  {
 			iface.getAccessCombinationName(bla, authcreds);
 			LOG.info("Updated access combination name for context "+this.ctx.getContextId()+" to: "+iface.getAccessCombinationName(bla, authcreds));
 			
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			LOG.error("Error changing context",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
-		} catch (RemoteException e) {
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final RemoteException e) {
 			LOG.error("Error changing context",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
-		} catch (NotBoundException e) {
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final NotBoundException e) {
 			LOG.error("Error changing context",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
-		} catch (StorageException e) {
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final StorageException e) {
 			LOG.error("Error changing context",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
-		} catch (InvalidCredentialsException e) {
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final InvalidCredentialsException e) {
 			LOG.error("Invalid credentials supplied for OX API",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
-		} catch (NoSuchContextException e) {
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final NoSuchContextException e) {
 			LOG.error("Error changing context",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
-		} catch (InvalidDataException e) {
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final InvalidDataException e) {
 			LOG.error("Error changing context",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
-		} catch (JSONException e) {
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final JSONException e) {
 			LOG.error("Error changing context",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
-		} catch (ServiceException e) {
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final ServiceException e) {
 			LOG.error("Error changing context. Mandatory configuration option not found",e);
-			throw new MyServletException(MyServletException.Code.API_COMMUNICATION_ERROR,e.getMessage());
+			throw MyServletException.Code.API_COMMUNICATION_ERROR.create(e.getMessage());
 		}
 		
 		
@@ -254,7 +250,7 @@ public final class MyServletRequest  {
 		return null;
 	}
 
-	private Object actionGetExternalRedirectURL(JSONObject jsonObject,String request_src_hostname) {
+	private Object actionGetExternalRedirectURL(final JSONObject jsonObject,final String request_src_hostname) {
 		
 		
 		return null;
@@ -269,14 +265,14 @@ public final class MyServletRequest  {
 	 * @param jsonObject
 	 * @param request_src_hostname
 	 * @return
-	 * @throws MyServletException
+	 * @throws OXException
 	 */
-	private Object actionTriggerEmailUpsell(JSONObject jsonObject,String request_src_hostname) throws MyServletException {
+	private Object actionTriggerEmailUpsell(final JSONObject jsonObject,final String request_src_hostname) throws OXException {
 		
 		try {
 			
-			String email_addy_ox_user = this.user.getMail();
-			String email_addy_provider = getFromConfig(PROPERTY_METHOD_EMAIL_ADDRESS);
+			final String email_addy_ox_user = this.user.getMail();
+			final String email_addy_provider = getFromConfig(PROPERTY_METHOD_EMAIL_ADDRESS);
 			String subject = getFromConfig(PROPERTY_METHOD_EMAIL_SUBJECT);
 			
 				
@@ -322,29 +318,29 @@ public final class MyServletRequest  {
 				}
 			}
 			
-		} catch (ServiceException e) {
+		} catch (final ServiceException e) {
 			LOG.error("Error reading mandatory configuration parameters for sending upsell email",e);
-			throw new MyServletException(MyServletException.Code.EMAIL_COMMUNICATION_ERROR,e.getMessage());
-		} catch (URIException e) {
+			throw MyServletException.Code.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final URIException e) {
 			LOG.error("Error parsing upsell email text",e);
-			throw new MyServletException(MyServletException.Code.EMAIL_COMMUNICATION_ERROR,e.getMessage());
-		} catch (UnsupportedEncodingException e) {
+			throw MyServletException.Code.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Error parsing upsell email text",e);
-			throw new MyServletException(MyServletException.Code.EMAIL_COMMUNICATION_ERROR,e.getMessage());
-		} catch (JSONException e) {
+			throw MyServletException.Code.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final JSONException e) {
 			LOG.error("Error processing upsell email text",e);
-			throw new MyServletException(MyServletException.Code.EMAIL_COMMUNICATION_ERROR,e.getMessage());
+			throw MyServletException.Code.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
 		}
 		
 		return null;
 	}
 	
 	
-	private String getTemplateContent(String fulltemplatepath,boolean i18n){
+	private String getTemplateContent(final String fulltemplatepath,final boolean i18n){
 		
 		
 		if (!i18n) {
-			File templateFile = new File(fulltemplatepath);
+			final File templateFile = new File(fulltemplatepath);
 			if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()) {
 				LOG.debug("Found and now using the upsell mail template at "+ fulltemplatepath);
 				return getFileContents(templateFile);
@@ -356,8 +352,8 @@ public final class MyServletRequest  {
 			}
 		} else {
 			// load with langcode extension
-			File templateFile_i18n = new File(fulltemplatepath + "_"+ this.user.getPreferredLanguage());
-			File templateFile = new File(fulltemplatepath);
+			final File templateFile_i18n = new File(fulltemplatepath + "_"+ this.user.getPreferredLanguage());
+			final File templateFile = new File(fulltemplatepath);
 			// first try to load i18n file, then the fallback file
 			if (templateFile_i18n.exists() && templateFile_i18n.canRead()
 					&& templateFile_i18n.isFile()) {
@@ -386,12 +382,12 @@ public final class MyServletRequest  {
 	 * @throws ServiceException
 	 * @throws JSONException
 	 */
-	private Object actionGetStaticRedirectURL(JSONObject jsonObject,String request_src_hostname) throws ServiceException, JSONException {
-		JSONObject jsonResponseObject = new JSONObject();
+	private Object actionGetStaticRedirectURL(final JSONObject jsonObject,final String request_src_hostname) throws ServiceException, JSONException {
+		final JSONObject jsonResponseObject = new JSONObject();
 		
 		// Default implementation to generate the redirect URL
 		// this checks for configured url in file or configured url in admin user attributes
-		String STATIC_URL_RAW = getRedirectURL();
+		final String STATIC_URL_RAW = getRedirectURL();
 				
 		
 		try {
@@ -401,7 +397,7 @@ public final class MyServletRequest  {
 			
 			// now check for custom implementations of the URL
             final UpsellURLService urlservice = MyServiceRegistry.getServiceRegistry().getService(UpsellURLService.class);
-            UpsellURLService provider = null;
+            final UpsellURLService provider = null;
             if (null != urlservice) {
             	if(LOG.isDebugEnabled()){
                 	LOG.debug("Found URLGenerator service. Using it now to generate redirect Upsell URL instead of default.");
@@ -419,9 +415,9 @@ public final class MyServletRequest  {
             }
 
             jsonResponseObject.put("upsell_static_redirect_url",url); // parsed url with all parameter
-		} catch (URIException e) {
+		} catch (final URIException e) {
 			LOG.error("Error encoding static redirect URL", e);
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Error encoding static redirect URL", e);
 		}		
 		
@@ -436,14 +432,14 @@ public final class MyServletRequest  {
 	private String getRedirectURL() throws ServiceException{
 		
 		String STATIC_URL_RAW = getFromConfig(PROPERTY_METHOD_STATIC_SHOP_REDIR_URL);
-		int contextId = this.ctx.getContextId();
+		final int contextId = this.ctx.getContextId();
 		
 		if(LOG.isDebugEnabled()){
 			LOG.debug("Admin user attributes for context "+contextId+" : "+this.admin.getAttributes().toString());
 		}
 		
 		if(this.admin.getAttributes().containsKey("com.openexchange.upsell/url")){
-			Set urlset = this.admin.getAttributes().get("com.openexchange.upsell/url");
+			final Set urlset = this.admin.getAttributes().get("com.openexchange.upsell/url");
 			STATIC_URL_RAW = (String) urlset.iterator().next();
 			STATIC_URL_RAW += "src=ox&user=_USER_&invite=_INVITE_&mail=_MAIL_&purchase_type=_PURCHASE_TYPE_&login=_LOGIN_&imaplogin=_IMAPLOGIN_&clicked_feat=_CLICKED_FEATURE_&upsell_plan=_UPSELL_PLAN_&cid=_CID_&lang=_LANG_";
 			if(LOG.isDebugEnabled()){
@@ -458,8 +454,8 @@ public final class MyServletRequest  {
 		return STATIC_URL_RAW;
 	}
 	
-    private String parseText(String raw_text, JSONObject json, boolean url_encode_it) throws JSONException, URIException, UnsupportedEncodingException {
-        Map<UpsellURLParametersMap, String> bla = getParameterMap(json);
+    private String parseText(String raw_text, final JSONObject json, final boolean url_encode_it) throws JSONException, URIException, UnsupportedEncodingException {
+        final Map<UpsellURLParametersMap, String> bla = getParameterMap(json);
 
         // loop through all params and replace
         for (final Map.Entry<UpsellURLParametersMap, String> entry : bla.entrySet()) {
@@ -477,13 +473,13 @@ public final class MyServletRequest  {
         return raw_text;
     }
 	
-	private void sendUpsellEmail(String to, String from,String text,String subject) throws MyServletException{
+	private void sendUpsellEmail(final String to, final String from,final String text,final String subject) throws OXException{
 		try {		
-			InternetAddress fromAddress = new InternetAddress(from, true);
+			final InternetAddress fromAddress = new InternetAddress(from, true);
 
 			final com.openexchange.mail.transport.TransportProvider provider = com.openexchange.mail.transport.TransportProviderRegistry.getTransportProviderBySession(this.sessionObj, 0);
 
-			ComposedMailMessage msg = provider.getNewComposedMailMessage(this.sessionObj, this.ctx);
+			final ComposedMailMessage msg = provider.getNewComposedMailMessage(this.sessionObj, this.ctx);
 			msg.setSubject(subject);
 			msg.addFrom(fromAddress);
 			msg.addTo(new InternetAddress(to));
@@ -502,12 +498,12 @@ public final class MyServletRequest  {
 			}
 			
 			
-		} catch (MailException e) {
+		} catch (final OXException e) {
 			LOG.error("Couldn't send provisioning mail", e);
-			throw new MyServletException(MyServletException.Code.EMAIL_COMMUNICATION_ERROR,e.getMessage());
-		} catch (AddressException e) {
+			throw MyServletException.Code.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
+		} catch (final AddressException e) {
 			LOG.error("Target email address cannot be parsed",e);
-			throw new MyServletException(MyServletException.Code.EMAIL_COMMUNICATION_ERROR,e.getMessage());
+			throw MyServletException.Code.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
 
 		}
 		
@@ -520,9 +516,9 @@ public final class MyServletRequest  {
 	 * @return
 	 * @throws JSONException 
 	 */
-	private Map<UpsellURLParametersMap, String> getParameterMap(JSONObject jsondata) throws JSONException{
+	private Map<UpsellURLParametersMap, String> getParameterMap(final JSONObject jsondata) throws JSONException{
 		
-		Map<UpsellURLParametersMap, String> bla = new HashMap<UpsellURLParametersMap, String>();
+		final Map<UpsellURLParametersMap, String> bla = new HashMap<UpsellURLParametersMap, String>();
 		
 		bla.put(UpsellURLParametersMap.MAP_ATTR_USER,this.sessionObj.getUserlogin()); // users username 
 		bla.put(UpsellURLParametersMap.MAP_ATTR_PWD,this.sessionObj.getPassword()); // password
@@ -554,10 +550,10 @@ public final class MyServletRequest  {
 		
 	}
 	
-	static public String getFileContents(File file) {
-        StringBuilder stringBuilder = new StringBuilder();
+	static public String getFileContents(final File file) {
+        final StringBuilder stringBuilder = new StringBuilder();
         try {
-            BufferedReader input = new BufferedReader(new FileReader(file));
+            final BufferedReader input = new BufferedReader(new FileReader(file));
             try {
                 String line = null;
                 while ((line = input.readLine()) != null) {
@@ -567,7 +563,7 @@ public final class MyServletRequest  {
             } finally {
                 input.close();
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
         return stringBuilder.toString();
@@ -584,8 +580,8 @@ public final class MyServletRequest  {
 	 * @throws ServiceException
 	 * @throws JSONException
 	 */
-	private Object actionGetUpsellMethod(JSONObject jsonObject) throws ServiceException, JSONException {
-		JSONObject jsonResponseObject = new JSONObject();
+	private Object actionGetUpsellMethod(final JSONObject jsonObject) throws ServiceException, JSONException {
+		final JSONObject jsonResponseObject = new JSONObject();
 		
 		jsonResponseObject.put("upsell_method",getFromConfig(PROPERTY_METHOD)); // send method
 		
@@ -593,7 +589,7 @@ public final class MyServletRequest  {
 	}
 
 	
-	private String getFromConfig(String key) throws ServiceException{		
+	private String getFromConfig(final String key) throws ServiceException{		
 		return this.configservice.getProperty(key); 
 	}
 	
