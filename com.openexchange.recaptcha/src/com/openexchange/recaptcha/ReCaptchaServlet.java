@@ -56,8 +56,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.recaptcha.osgi.ReCaptchaServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,22 +75,22 @@ public class ReCaptchaServlet extends DataServlet {
     private static final String ACTION_KEY = "key";
 
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return true;
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Response response = new Response();
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        final Response response = new Response();
         try {
-            String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
+            final String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
 
             if (action.equalsIgnoreCase(ACTION_HTML)) {
                 doGetHtml(response);
             } else if (action.equalsIgnoreCase(ACTION_KEY)) {
                 doGetPublicKey(response);
             }
-        } catch (OXMandatoryFieldException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
@@ -98,11 +98,11 @@ public class ReCaptchaServlet extends DataServlet {
         writeResponse(response, resp);
     }
 
-    private void doGetPublicKey(Response response) {
+    private void doGetPublicKey(final Response response) {
         response.setData(ReCaptchaServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("publicKey"));
     }
 
-    private void doGetHtml(Response response) {
+    private void doGetHtml(final Response response) {
         response.setData(ReCaptchaServiceRegistry.getInstance().getService(ReCaptchaService.class).getHTML());
     }
 

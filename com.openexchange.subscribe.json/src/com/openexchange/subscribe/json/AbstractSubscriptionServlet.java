@@ -56,7 +56,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -100,7 +99,6 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
             getLog().error(e.getMessage(), e);
         }
     }
-    
-    protected abstract LoggingLogic getLoggingLogic();
+
     protected abstract Log getLog();
 }
