@@ -1,17 +1,9 @@
 package com.openexchange.mobile.configuration.generator.test;
 
-import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Calendar;
 import junit.framework.Assert;
 import org.junit.Test;
-
 import com.openexchange.mobile.configuration.generator.CabUtil;
-import com.openexchange.mobile.configuration.generator.MobileConfigServlet;
-import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
-import com.openexchange.templating.TemplateException;
 
 
 public class CabUtilTest extends CabUtil {
@@ -32,37 +24,37 @@ public class CabUtilTest extends CabUtil {
     @Test
     public void testLittleEndianShort3() {
         final short littleEndian = toLittleEndian((short)0x0FFE);
-        Assert.assertTrue("Value of 0x0FFE must be 0xFE0F, but is " + Integer.toHexString((int)littleEndian), littleEndian == (short)0xFE0F);
+        Assert.assertTrue("Value of 0x0FFE must be 0xFE0F, but is " + Integer.toHexString(littleEndian), littleEndian == (short)0xFE0F);
     }
     
     @Test
     public void testLittleEndianShort4() {
         final short littleEndian = toLittleEndian((short)0xFFFF);
-        Assert.assertTrue("Value of 0xFFFF must be 0xFFFF, but is " + Integer.toHexString((int)littleEndian), littleEndian == (short)0xFFFF);
+        Assert.assertTrue("Value of 0xFFFF must be 0xFFFF, but is " + Integer.toHexString(littleEndian), littleEndian == (short)0xFFFF);
     }
     
     @Test
     public void testLittleEndianInt() {
         final int littleEndian = toLittleEndian(0x4010);
-        Assert.assertTrue("Value of 0x4010 must be 0x10400000, but is " + Integer.toHexString((int)littleEndian), littleEndian == (int)0x10400000);
+        Assert.assertTrue("Value of 0x4010 must be 0x10400000, but is " + Integer.toHexString(littleEndian), littleEndian == 0x10400000);
     }
     
     @Test
     public void testLittleEndianInt2() {
         final int littleEndian = toLittleEndian(0x4010FFFF);
-        Assert.assertTrue("Value of 0x4010FFFF must be 0xFFFF1040, but is " + Integer.toHexString((int)littleEndian), littleEndian == (int)0xFFFF1040);
+        Assert.assertTrue("Value of 0x4010FFFF must be 0xFFFF1040, but is " + Integer.toHexString(littleEndian), littleEndian == 0xFFFF1040);
     }
 
     @Test
     public void testLittleEndianInt3() {
         final int littleEndian = toLittleEndian(0xFFFEFFFF);
-        Assert.assertTrue("Value of 0xFFFEFFFF must be 0xFFFFFEFF, but is " + Integer.toHexString((int)littleEndian), littleEndian == (int)0xFFFFFEFF);
+        Assert.assertTrue("Value of 0xFFFEFFFF must be 0xFFFFFEFF, but is " + Integer.toHexString(littleEndian), littleEndian == 0xFFFFFEFF);
     }
     
     @Test
     public void testLittleEndianInt4() {
         final int littleEndian = toLittleEndian(0xFEFFFFFF);
-        Assert.assertTrue("Value of 0xFEFFFFFF must be 0xFFFFFFFE, but is " + Integer.toHexString((int)littleEndian), littleEndian == (int)0xFFFFFFFE);
+        Assert.assertTrue("Value of 0xFEFFFFFF must be 0xFFFFFFFE, but is " + Integer.toHexString(littleEndian), littleEndian == 0xFFFFFFFE);
     }
     
     @Test
@@ -76,7 +68,7 @@ public class CabUtilTest extends CabUtil {
         final short date = getDate(instance);
         System.out.println("Year: " + year + "; Month: " + month + "; Day: " + day);
         final short littleEndian = toLittleEndian(date);
-        Assert.assertTrue("Date value should be 0xBF3C but is " + Integer.toHexString(littleEndian), (short)0xBF3C == (short)littleEndian);
+        Assert.assertTrue("Date value should be 0xBF3C but is " + Integer.toHexString(littleEndian), (short)0xBF3C == littleEndian);
     }
     
     @Test
@@ -89,7 +81,7 @@ public class CabUtilTest extends CabUtil {
         
         final short time = getTime(instance);
         final short littleEndian = toLittleEndian(time);
-        Assert.assertTrue("Date value should be 0x6C71 but is " + Integer.toHexString(littleEndian), (short)0x6C71 == (short)littleEndian);
+        Assert.assertTrue("Date value should be 0x6C71 but is " + Integer.toHexString(littleEndian), (short)0x6C71 == littleEndian);
     }
     
 //    @Test

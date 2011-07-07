@@ -25,13 +25,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
 import com.openexchange.mobile.configuration.generator.osgi.Activator;
 import com.openexchange.mobile.configuration.generator.services.MobileConfigServiceRegistry;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -82,7 +82,7 @@ public class MobileConfigServlet extends HttpServlet {
             }
         }
         
-        public static ErrorMessage getErrorMessageByNumber(int value) {
+        public static ErrorMessage getErrorMessageByNumber(final int value) {
             return members.get(Integer.valueOf(value));
         }
         
@@ -95,7 +95,7 @@ public class MobileConfigServlet extends HttpServlet {
      */
     private static final long serialVersionUID = 7913468326542861986L;
     
-    public static String write(final String email, final String host, final String username, final String domain) throws ConfigurationException, TemplateException {
+    public static String write(final String email, final String host, final String username, final String domain) throws OXException {
             final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
             final OXTemplate loadTemplate = service.loadTemplate("winMobileTemplate.tmpl");
             final StringWriter writer = new StringWriter();
@@ -109,7 +109,7 @@ public class MobileConfigServlet extends HttpServlet {
      * @return An array. Index 0 is the username. Index 1 is the domain
      * @throws ConfigurationException
      */
-    protected static String[] splitUsernameAndDomain(String username) throws ConfigurationException {
+    protected static String[] splitUsernameAndDomain(final String username) throws ConfigurationException {
         final String domain_user = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry(), Property.DomainUser);
         final String separator = domain_user.replaceAll("\\$USER|\\$DOMAIN", "");
         final String[] split = username.split(Pattern.quote(separator));
@@ -138,12 +138,12 @@ public class MobileConfigServlet extends HttpServlet {
         return hashMap;
     }
 
-    private static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String username, final String domain) throws IOException, ConfigurationException, TemplateException {
+    private static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String username, final String domain) throws IOException, OXException {
         CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, username, domain));
     }
 
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.setCharacterEncoding("UTF-8");
         Tools.disableCaching(resp);
         final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
@@ -209,11 +209,7 @@ public class MobileConfigServlet extends HttpServlet {
         } else {
             try {
                 generateConfig(req, resp, login, device);
-            } catch (final ConfigurationException e) {
-                LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
-                printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
-                return;
-            } catch (final TemplateException e) {
+            } catch (final OXException e) {
                 LOG.error("A template exception occurred, which should not happen: " + e.getMessage(), e);
                 printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
@@ -225,7 +221,7 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    private Device detectDevice(HttpServletRequest req) {
+    private Device detectDevice(final HttpServletRequest req) {
         final String pathInfo = req.getPathInfo();
         if ("/eas.mobileconfig".equals(pathInfo)) {
             return Device.iPhone;
@@ -241,7 +237,7 @@ public class MobileConfigServlet extends HttpServlet {
      * @param req
      * @return
      */
-    private Locale detectLanguage(HttpServletRequest req) {
+    private Locale detectLanguage(final HttpServletRequest req) {
         final String parameter = req.getHeader("Accept-Language");
         if (null == parameter) {
             return Locale.ENGLISH;
@@ -255,7 +251,7 @@ public class MobileConfigServlet extends HttpServlet {
     }
 
     private void errorOutput(final HttpServletRequest req, final HttpServletResponse resp, final String string) {
-        Locale locale = detectLanguage(req);
+        final Locale locale = detectLanguage(req);
         ErrorMessage msg = null;
         try {
             msg = ErrorMessage.getErrorMessageByNumber(Integer.parseInt(string));
@@ -323,13 +319,18 @@ public class MobileConfigServlet extends HttpServlet {
         
     }
 
-    private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws IOException, ConfigurationException, TemplateException {
+    private void generateConfig(final HttpServletRequest req, final HttpServletResponse resp, final String login, final Device device) throws IOException, OXException {
         String mail = login;
         final String parameter = req.getParameter(PARAMETER_MAIL);
         if (null != parameter) {
             mail = parameter;
         }
-        final String[] usernameAndDomain = splitUsernameAndDomain(login);
+        final String[] usernameAndDomain;
+        try {
+            usernameAndDomain = splitUsernameAndDomain(login);
+        } catch (final ConfigurationException e) {
+            throw new OXException(e);
+        }
         if (Device.iPhone.equals(device)) {
             resp.setContentType("application/x-apple-aspen-config");
             final ServletOutputStream outputStream = resp.getOutputStream();
@@ -348,7 +349,7 @@ public class MobileConfigServlet extends HttpServlet {
         return canonicalHostName;
     }
 
-    private PrintWriter getWriterFromOutputStream(ServletOutputStream outputStream) {
+    private PrintWriter getWriterFromOutputStream(final ServletOutputStream outputStream) {
         try {
             return new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream), Charset.forName("UTF-8")));
         } catch (final IllegalCharsetNameException e) {
@@ -360,11 +361,11 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    private void printError(HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
+    private void printError(final HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
         resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(String.valueOf(string.ordinal()),"UTF-8"));
     }
 
-    private void writeMobileConfig(final PrintWriter printWriter, OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, TemplateException, ConfigurationException {
+    private void writeMobileConfig(final PrintWriter printWriter, final OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, OXException {
         try {
             final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
             final OXTemplate loadTemplate = service.loadTemplate("iPhoneTemplate.tmpl");
@@ -379,6 +380,8 @@ public class MobileConfigServlet extends HttpServlet {
             } else {
                 loadTemplate.process(generateHashMap(email, host, username, domain), printWriter);
             }
+        } catch (final ConfigurationException e) {
+            throw new OXException(e);
         } finally {
             printWriter.close();
         }
