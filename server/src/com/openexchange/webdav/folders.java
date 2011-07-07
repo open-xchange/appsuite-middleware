@@ -66,7 +66,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbFolderSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -112,7 +112,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
             final XmlPullParser parser, final PendingInvocations<FolderSQLInterface> pendingInvocations)
-            throws XmlPullParserException, IOException, AbstractOXException {
+            throws XmlPullParserException, IOException, OXException {
         final Session session = getSession(req);
         if (isTag(parser, "prop", "DAV:")) {
             /*
@@ -182,7 +182,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final PendingInvocations<FolderSQLInterface> pendingInvocations) throws IOException, AbstractOXException {
+            final PendingInvocations<FolderSQLInterface> pendingInvocations) throws IOException, OXException {
         final FolderSQLInterface foldersql = new RdbFolderSQLInterface(new ServerSessionAdapter(session));
         while (!pendingInvocations.isEmpty()) {
             final QueuedFolder qfld = (QueuedFolder) pendingInvocations.poll();
@@ -261,27 +261,27 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                         return;
                     }
 
-                    Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
+                    final Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
                     lastModifiedCache.update(folderObject.getObjectID(), 0, lastModified);
                     foldersSQL.saveFolderObject(folderObject, currentLastModified);
                     lastModifiedCache.update(folderObject.getObjectID(), 0, folderObject.getLastModified());
                     break;
                 case DataParser.DELETE:
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException(WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED));
+                        throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
 
                     foldersSQL.deleteFolderObject(folderObject, lastModified);
                     break;
                 case DataParser.CLEAR:
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException(WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED));
+                        throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
 
                     foldersSQL.clearFolder(folderObject, lastModified);
                     break;
                 default:
-                    throw new OXConflictException(WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action)));
+                    throw WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action));
                 }
 
                 writeResponse(folderObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);

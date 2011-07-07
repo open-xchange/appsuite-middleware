@@ -58,9 +58,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
@@ -173,12 +173,12 @@ public final class InfostorePerformer implements SessionHolder {
         
         
         final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
-        InfostoreFacadeImpl database = new InfostoreFacadeImpl();
+        final InfostoreFacadeImpl database = new InfostoreFacadeImpl();
         infoFactory.setDatabase(database);
         infoFactory.setFolderLockManager(new FolderLockManagerImpl());
         infoFactory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));
         
-        EntityLockManagerImpl infoLockManager = new EntityLockManagerImpl("infostore_lock");
+        final EntityLockManagerImpl infoLockManager = new EntityLockManagerImpl("infostore_lock");
         infoLockManager.addExpiryListener(new TouchInfoitemsWithExpiredLocksListener(this, database));
         
         infoFactory.setInfoLockManager(infoLockManager);
@@ -270,7 +270,7 @@ public final class InfostorePerformer implements SessionHolder {
         }
         try {
             registry.add(new UserAgentBehaviour("Microsoft Data Access Internet Publishing Provider DAV", new IgnoreLocksIfHeaderApply()));
-        } catch (ConfigurationException e) {
+        } catch (final OXException e) {
             LOG.error("Can't add default overrides", e);
         }
         registry.log();

@@ -67,7 +67,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceException;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -76,9 +75,6 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -98,6 +94,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -198,7 +195,7 @@ public final class ical extends PermissionServlet {
 
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             if (null == emitter) {
-                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ICalEmitter.class.getName());
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalEmitter.class.getName());
             }
             final ICalSession iSession = emitter.createSession();
             final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
@@ -244,13 +241,13 @@ public final class ical extends PermissionServlet {
                     }
                 }
                 patchers.forEachValue(PATCH_PROCEDURE);
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 if (null != iter) {
                     try {
                         iter.close();
-                    } catch (final AbstractOXException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
@@ -273,13 +270,13 @@ public final class ical extends PermissionServlet {
                     // item.setUID(clientId);
                     // }
                 }
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 if (null != itTask) {
                     try {
                         itTask.close();
-                    } catch (final AbstractOXException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
@@ -306,19 +303,10 @@ public final class ical extends PermissionServlet {
 
             // addEntries(context, principal, entriesApp, entriesTask);
             // deleteEntries(context, principal, mapping, entriesApp, entriesTask);
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final LdapException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final OXConflictException e) {
-            LOG.error(e.getMessage(), e);
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -662,7 +650,7 @@ public final class ical extends PermissionServlet {
         writer.write("<html><body>" + msg + "</body></html>");
     }
 
-    private String getUserAgent(final HttpServletRequest req) throws OXConflictException {
+    private String getUserAgent(final HttpServletRequest req) throws OXException {
         final Enumeration<?> e = req.getHeaderNames();
         final String userAgent = "user-agent";
         while (e.hasMoreElements()) {
@@ -670,26 +658,26 @@ public final class ical extends PermissionServlet {
                 return req.getHeader(userAgent);
             }
         }
-        throw new OXConflictException(WebdavExceptionCode.MISSING_HEADER_FIELD.create(userAgent));
+        throw WebdavExceptionCode.MISSING_HEADER_FIELD.create(userAgent);
     }
 
-    private int getCalendarFolderID(final HttpServletRequest req) throws OXConflictException {
+    private int getCalendarFolderID(final HttpServletRequest req) throws OXException {
         if (req.getParameter(CALENDARFOLDER) != null) {
             try {
                 return Integer.parseInt(req.getParameter(CALENDARFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(WebdavExceptionCode.NOT_A_NUMBER.create(exc, CALENDARFOLDER));
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, CALENDARFOLDER);
             }
         }
         return 0;
     }
 
-    private int getTaskFolderID(final HttpServletRequest req) throws OXConflictException {
+    private int getTaskFolderID(final HttpServletRequest req) throws OXException {
         if (req.getParameter(TASKFOLDER) != null) {
             try {
                 return Integer.parseInt(req.getParameter(TASKFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(WebdavExceptionCode.NOT_A_NUMBER.create(exc, TASKFOLDER));
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TASKFOLDER);
             }
         }
         return 0;
@@ -750,8 +738,8 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -767,7 +755,7 @@ public final class ical extends PermissionServlet {
                 retval = null;
             }
         } catch (final SQLException e) {
-            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
+            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(ctx, con);
@@ -779,8 +767,8 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement ps = null;
         try {
@@ -796,7 +784,7 @@ public final class ical extends PermissionServlet {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
+            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, ps);
             DBUtils.autocommit(con);
@@ -808,8 +796,8 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement ps = null;
         try {
@@ -820,7 +808,7 @@ public final class ical extends PermissionServlet {
             ps.setInt(4, principal.getId());
             ps.executeUpdate();
         } catch (final SQLException e) {
-            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
+            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, ps);
             DBPool.closeWriterSilent(ctx, con);

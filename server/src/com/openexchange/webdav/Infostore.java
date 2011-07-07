@@ -50,12 +50,12 @@
 package com.openexchange.webdav;
 
 import java.io.IOException;
-import javax.security.auth.login.LoginException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
@@ -150,7 +150,7 @@ public class Infostore extends OXServlet {
         ServerSession session;
         try {
             session = new ServerSessionAdapter(getSession(req));
-        } catch (final ContextException exc) {
+        } catch (final OXException exc) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
@@ -174,7 +174,7 @@ public class Infostore extends OXServlet {
         removeCookie(req, resp);
         try {
             LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final LoginException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }

@@ -61,11 +61,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omg.CORBA.UserException;
 import org.osgi.framework.ServiceException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -137,7 +136,13 @@ public class freebusy extends HttpServlet {
             return;
         }
 
-        Participant participant = findParticipant(context, mailAddress);
+        Participant participant = null;
+        try {
+            participant = findParticipant(context, mailAddress);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user or a resource.");
+        }
         if (null == participant) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user or a resource.");
             return;
@@ -200,12 +205,12 @@ public class freebusy extends HttpServlet {
         }
         Context context;
         try {
-            ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
+            final ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             context = service.getContext(contextId);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             LOG.error(e.getMessage(), e);
             return null;
-        } catch (ContextException e) {
+        } catch (final OXException e) {
             LOG.error("Can not load context.", e);
             return null;
         }
@@ -253,7 +258,7 @@ public class freebusy extends HttpServlet {
             }
         }catch (final ServiceException e) {
                 LOG.error("Calendar service not found.", e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
         }
         printWriter.println("END:VFREEBUSY");
@@ -287,27 +292,27 @@ public class freebusy extends HttpServlet {
         pw.println(format.format(appointment.getEndDate()));
     }
 
-    private Participant findParticipant(Context ctx, String mailAddress) {
+    private Participant findParticipant(final Context ctx, final String mailAddress) throws OXException {
         User user = null;
         try {
-            UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+            final UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             user = service.searchUser(mailAddress, ctx);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             LOG.error(e.getMessage(), e);
-        } catch (UserException e) {
+        } catch (final OXException e) {
             LOG.debug("User '" + mailAddress + "' not found.");
         }
 
         Resource resource = null;
         try {
-            ResourceService service = ServerServiceRegistry.getInstance().getService(ResourceService.class, true);
+            final ResourceService service = ServerServiceRegistry.getInstance().getService(ResourceService.class, true);
             final Resource[] resources = service.searchResourcesByMail(mailAddress, ctx);
             if (1 == resources.length) {
                 resource = resources[0];
             }
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             LOG.error(e.getMessage(), e);
-        } catch (ResourceException e) {
+        } catch (final OXException e) {
             LOG.error("Resource '" + mailAddress + "' not found.");
         }
 
