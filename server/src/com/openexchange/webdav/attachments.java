@@ -62,7 +62,6 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -234,17 +233,7 @@ public final class attachments extends OXServlet {
             xo.output(output_doc, resp.getOutputStream());
         } catch (final OXException exc) {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
-            LOG.error(exc.getMessage(), exc);
-            exc.printStarterTrace();
-            rollbackTransaction();
-        } catch (final OXException exc) {
-            if (exc.getCategory() == CATEGORY_PERMISSION_DENIED) {
-                LOG.debug(exc.getMessage(), exc);
-            } else {
-                LOG.error(exc.getMessage(), exc);
-            }
-
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
+            exc.log(LOG);
             rollbackTransaction();
         } catch (final Exception exc) {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
@@ -273,37 +262,37 @@ public final class attachments extends OXServlet {
             os = resp.getOutputStream();
 
             if (req.getHeader(MODULE) == null) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, MODULE));
+                throw new WebdavException(WebdavException.Code.MISSING_FIELD, MODULE);
             }
             try {
                 module = Integer.parseInt(req.getHeader(MODULE));
             } catch (final NumberFormatException exc) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, MODULE));
+                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, MODULE);
             }
 
             if (req.getHeader(TARGET_ID) == null) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, TARGET_ID));
+                throw new WebdavException(WebdavException.Code.MISSING_FIELD, TARGET_ID);
             }
             try {
                 target_id = Integer.parseInt(req.getHeader(TARGET_ID));
             } catch (final NumberFormatException exc) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_ID));
+                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_ID);
             }
 
             if (req.getHeader(DataFields.OBJECT_ID) == null) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.OBJECT_ID));
+                throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.OBJECT_ID);
             }
             try {
                 object_id = Integer.parseInt(req.getHeader(DataFields.OBJECT_ID));
             } catch (final NumberFormatException exc) {
-                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, DataFields.OBJECT_ID));
+                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, DataFields.OBJECT_ID);
             }
 
             if (req.getHeader(TARGET_FOLDER_ID) != null) {
                 try {
                     folder_id = Integer.parseInt(req.getHeader(TARGET_FOLDER_ID));
                 } catch (final NumberFormatException exc) {
-                    throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_FOLDER_ID));
+                    throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_FOLDER_ID);
                 }
             }
 

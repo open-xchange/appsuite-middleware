@@ -261,27 +261,27 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                         return;
                     }
 
-                    Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
+                    final Date currentLastModified = lastModifiedCache.getLastModified(folderObject.getObjectID(), lastModified);
                     lastModifiedCache.update(folderObject.getObjectID(), 0, lastModified);
                     foldersSQL.saveFolderObject(folderObject, currentLastModified);
                     lastModifiedCache.update(folderObject.getObjectID(), 0, folderObject.getLastModified());
                     break;
                 case DataParser.DELETE:
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
+                        throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED);
                     }
 
                     foldersSQL.deleteFolderObject(folderObject, lastModified);
                     break;
                 case DataParser.CLEAR:
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
+                        throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED);
                     }
 
                     foldersSQL.clearFolder(folderObject, lastModified);
                     break;
                 default:
-                    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
+                    throw new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action));
                 }
 
                 writeResponse(folderObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);

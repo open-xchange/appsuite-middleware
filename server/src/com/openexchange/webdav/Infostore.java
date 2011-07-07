@@ -50,7 +50,6 @@
 package com.openexchange.webdav;
 
 import java.io.IOException;
-import javax.security.auth.login.OXException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

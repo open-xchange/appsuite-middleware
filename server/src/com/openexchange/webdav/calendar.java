@@ -292,10 +292,10 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 case DataParser.SAVE:
                     if (appointmentobject.containsObjectID()) {
                         if (lastModified == null) {
-                            throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
+                            throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED);
                         }
                         
-                        Date currentLastModified = lastModifiedCache.getLastModified(appointmentobject.getObjectID(), lastModified);
+                        final Date currentLastModified = lastModifiedCache.getLastModified(appointmentobject.getObjectID(), lastModified);
                         lastModifiedCache.update(appointmentobject.getObjectID(), appointmentobject.getRecurrenceID(), lastModified);
                         conflicts = appointmentsSQL.updateAppointmentObject(appointmentobject, inFolder, currentLastModified);
                         hasConflicts = (conflicts != null);
@@ -316,7 +316,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     }
 
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
+                        throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED);
                     }
 
                     appointmentsSQL.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
@@ -326,7 +326,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                             appointmentobject.getConfirmMessage());
                     break;
                 default:
-                    throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
+                    throw new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action));
                 }
 
                 if (hasConflicts) {
@@ -356,22 +356,11 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os,
                         xo);
             } catch (final OXException exc) {
-                if (exc.getCategory() == CATEGORY_USER_INPUT) {
+                if (exc.getCategory() == Category.CATEGORY_USER_INPUT) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
                             USER_INPUT_EXCEPTION), clientId, os, xo);
-                } else if (exc.getCategory() == Category.TRUNCATED) {
-                    LOG.debug(_parsePropChilds, exc);
-                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                            USER_INPUT_EXCEPTION), clientId, os, xo);
-                } else {
-                    LOG.error(_parsePropChilds, exc);
-                    writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
-                            SERVER_ERROR_EXCEPTION)
-                            + exc.toString(), clientId, os, xo);
-                }
-            } catch (final OXException exc) {
-                if (exc.getCategory() == Category.TRUNCATED) {
+                } else if (exc.getCategory() == Category.CATEGORY_TRUNCATED) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
                             USER_INPUT_EXCEPTION), clientId, os, xo);

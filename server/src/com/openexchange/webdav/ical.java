@@ -307,18 +307,6 @@ public final class ical extends PermissionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final OXConflictException e) {
-            LOG.error(e.getMessage(), e);
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -668,7 +656,7 @@ public final class ical extends PermissionServlet {
                 return req.getHeader(userAgent);
             }
         }
-        throw new OXConflictException(new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, userAgent));
+        throw new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, userAgent);
     }
 
     private int getCalendarFolderID(final HttpServletRequest req) throws OXConflictException {
@@ -676,7 +664,7 @@ public final class ical extends PermissionServlet {
             try {
                 return Integer.parseInt(req.getParameter(CALENDARFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, CALENDARFOLDER));
+                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, CALENDARFOLDER);
             }
         }
         return 0;
@@ -687,7 +675,7 @@ public final class ical extends PermissionServlet {
             try {
                 return Integer.parseInt(req.getParameter(TASKFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TASKFOLDER));
+                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TASKFOLDER);
             }
         }
         return 0;
