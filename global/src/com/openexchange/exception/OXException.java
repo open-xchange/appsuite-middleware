@@ -104,6 +104,16 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Creates a general exception.
+     * 
+     * @param logMessage The log message
+     * @return A general exception.
+     */
+    public static OXException general(final String logMessage) {
+        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(PREFIX_GENERAL);
+    }
+
+    /**
      * Creates a general conflict exception.
      * 
      * @return A general conflict exception.

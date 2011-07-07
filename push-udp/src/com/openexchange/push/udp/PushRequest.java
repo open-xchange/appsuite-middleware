@@ -56,7 +56,6 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.event.EventException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -204,8 +203,6 @@ public class PushRequest {
             LOG.error("PushRequest: " + e, e);
         } catch (final UnknownHostException e) {
             LOG.error("PushRequest: Remote host registration failed: " + e.getMessage(), e);
-        } catch (final EventException e) {
-            LOG.error("PushRequest: Event could not be enqueued: " + e.getMessage(), e);
         } catch (final Exception e) {
             LOG.error("PushRequest: " + e, e);
         }

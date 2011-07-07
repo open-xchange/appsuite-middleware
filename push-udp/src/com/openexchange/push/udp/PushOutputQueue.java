@@ -62,9 +62,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventException;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.event.RemoteEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -102,9 +102,9 @@ public class PushOutputQueue implements Runnable {
      * Adds specified push object to queue for delivery.
      * 
      * @param pushObject The push object to deliver
-     * @throws EventException If an event exception occurs
+     * @throws OXException If an event exception occurs
      */
-    public static void add(final PushObject pushObject) throws EventException {
+    public static void add(final PushObject pushObject) throws OXException {
         if (DEBUG) {
             LOG.debug("add PushObject: " + pushObject);
         }
@@ -114,7 +114,7 @@ public class PushOutputQueue implements Runnable {
         }
 
         if (!isInit) {
-            throw new EventException("PushOutputQueue not initialisiert!");
+            throw OXException.general("PushOutputQueue not initialisiert!");
         }
 
         final PushDelayedObject pushDelayedObject;
@@ -133,9 +133,9 @@ public class PushOutputQueue implements Runnable {
      * Adds specified register object to queue for delivery.
      * 
      * @param registerObject The register object
-     * @throws EventException If an event exception occurs
+     * @throws OXException If an event exception occurs
      */
-    public static void add(final RegisterObject registerObject) throws EventException {
+    public static void add(final RegisterObject registerObject) throws OXException {
         add(registerObject, false);
     }
 
@@ -144,9 +144,9 @@ public class PushOutputQueue implements Runnable {
      * 
      * @param registerObject The register object
      * @param noDelay <code>true</code> to immediately deliver the object; otherwise <code>false</code>
-     * @throws EventException If an event exception occurs
+     * @throws OXException If an event exception occurs
      */
-    public static void add(final RegisterObject registerObject, final boolean noDelay) throws EventException {
+    public static void add(final RegisterObject registerObject, final boolean noDelay) throws OXException {
         if (DEBUG) {
             LOG.debug("add RegisterObject: " + registerObject);
         }
@@ -156,7 +156,7 @@ public class PushOutputQueue implements Runnable {
         }
 
         if (!isInit) {
-            throw new EventException("PushOutputQueue not initialized!");
+            throw OXException.general("PushOutputQueue not initialized!");
         }
 
         if (noDelay) {
@@ -377,7 +377,7 @@ public class PushOutputQueue implements Runnable {
 
     private boolean isRunning = false;
 
-    public PushOutputQueue(final PushConfiguration pushConfigInterface, PushChannels channels2) {
+    public PushOutputQueue(final PushConfiguration pushConfigInterface, final PushChannels channels2) {
         PushOutputQueue.pushConfigInterface = pushConfigInterface;
 
         remoteHost = pushConfigInterface.getRemoteHost();
