@@ -61,7 +61,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
@@ -85,20 +85,20 @@ public class FileDeliveryServlet extends HttpServlet {
     public static DataProviderRegistry DATA_PROVIDERS = null;
     
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Configuration configuration = Services.getConfiguration();
-        String token = req.getParameter("token");
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        final Configuration configuration = Services.getConfiguration();
+        final String token = req.getParameter("token");
         if(token == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing parameter 'token");
         }
-        Map<String, Object> parameters = PARAM_MAP.get(token);
+        final Map<String, Object> parameters = PARAM_MAP.get(token);
         if(parameters == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         
-        String id = (String) parameters.get(Constants.DATA_PROVDER_KEY);
-        ServerSession session = (ServerSession) parameters.get(Constants.SESSION_KEY);
+        final String id = (String) parameters.get(Constants.DATA_PROVDER_KEY);
+        final ServerSession session = (ServerSession) parameters.get(Constants.SESSION_KEY);
         
         if(configuration.hasExpired((Long)parameters.get(Constants.CREATED))) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -112,7 +112,7 @@ public class FileDeliveryServlet extends HttpServlet {
             
             state = provider.start();
             
-            FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
+            final FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
             
             InputStream stream = provider.retrieve(state, parameters, session);
             stream = setHeaders(stream, metadata, req, resp);
@@ -121,7 +121,7 @@ public class FileDeliveryServlet extends HttpServlet {
             if(configuration.expiresAfterAccess()) {
                 PARAM_MAP.remove(token);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } finally {
@@ -131,9 +131,9 @@ public class FileDeliveryServlet extends HttpServlet {
         }
     }
 
-    private InputStream setHeaders(InputStream stream, FileMetadata metadata, HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException, IOException {
-        InputStream in = new BufferedInputStream(stream); // FIXME: How come backends don't supply correct size? This has memory implications that are not so nice.
-        ByteArrayOutputStream out = new ByteArrayOutputStream((int) metadata.getSize());
+    private InputStream setHeaders(final InputStream stream, final FileMetadata metadata, final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
+        final InputStream in = new BufferedInputStream(stream); // FIXME: How come backends don't supply correct size? This has memory implications that are not so nice.
+        final ByteArrayOutputStream out = new ByteArrayOutputStream((int) metadata.getSize());
         int count = 0;
         int value = 0;
         try {
