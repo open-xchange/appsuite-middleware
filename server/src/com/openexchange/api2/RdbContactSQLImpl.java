@@ -81,9 +81,7 @@ import com.openexchange.contact.LdapServer;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
@@ -693,7 +691,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
         try {
             return new PrefetchIterator<Contact>(si);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -867,7 +865,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         try {
             return new PrefetchIterator<Contact>(si);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -912,7 +910,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         try {
             return new PrefetchIterator<Contact>(si);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
