@@ -54,9 +54,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import javax.swing.text.Document;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.spellcheck.SpellCheckError;
-import com.openexchange.spellcheck.SpellCheckException;
+import com.openexchange.spellcheck.SpellCheckExceptionCode;
 import com.openexchange.spellcheck.SpellChecker;
 import com.swabunga.spell.engine.SpellDictionary;
 import com.swabunga.spell.event.DocumentWordTokenizer;
@@ -81,10 +82,10 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 * @param ctx
 	 *            The context
 	 * @return A newly created spell check
-	 * @throws SpellCheckException
+	 * @throws OXException
 	 *             If spell check creation fails
 	 */
-	public static SpellChecker newSpellCheck(final int userId, final Context ctx) throws SpellCheckException {
+	public static SpellChecker newSpellCheck(final int userId, final Context ctx) throws OXException {
 		return new SpellCheckerImpl(null, new RdbUserSpellDictionary(userId, ctx));
 	}
 
@@ -99,14 +100,14 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 * @param ctx
 	 *            The context
 	 * @return A newly created spell check
-	 * @throws SpellCheckException
+	 * @throws OXException
 	 *             If spell check creation fails
 	 */
 	public static SpellChecker newSpellCheck(final int userId, final String localeStr, final Context ctx)
-			throws SpellCheckException {
+			throws OXException {
 		final SpellDictionary localeDictionary = DictonaryStorage.getDictionary(localeStr);
 		if (localeDictionary == null) {
-			throw new SpellCheckException(SpellCheckException.Code.MISSING_LOCALE_DIC, localeStr);
+			throw SpellCheckExceptionCode.MISSING_LOCALE_DIC.create(localeStr);
 		}
 		return new SpellCheckerImpl(localeDictionary, new RdbUserSpellDictionary(userId, ctx));
 	}
@@ -121,14 +122,14 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 * @param ctx
 	 *            The context
 	 * @return A newly created spell check
-	 * @throws SpellCheckException
+	 * @throws OXException
 	 *             If spell check creation fails
 	 */
 	public static SpellChecker newSpellCheck(final int userId, final Locale locale, final Context ctx)
-			throws SpellCheckException {
+			throws OXException {
 		final SpellDictionary localeDictionary = DictonaryStorage.getDictionary(locale);
 		if (localeDictionary == null) {
-			throw new SpellCheckException(SpellCheckException.Code.MISSING_LOCALE_DIC, locale.toString());
+			throw SpellCheckExceptionCode.MISSING_LOCALE_DIC.create(locale.toString());
 		}
 		return new SpellCheckerImpl(localeDictionary, new RdbUserSpellDictionary(userId, ctx));
 	}

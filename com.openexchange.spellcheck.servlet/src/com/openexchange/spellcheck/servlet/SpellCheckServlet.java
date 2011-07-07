@@ -75,7 +75,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.session.Session;
 import com.openexchange.spellcheck.SpellCheckError;
-import com.openexchange.spellcheck.SpellCheckException;
+import com.openexchange.spellcheck.OXException;
+import com.openexchange.spellcheck.SpellCheckExceptionCode;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.SpellChecker;
 import com.openexchange.tools.servlet.http.Tools;
@@ -388,12 +389,12 @@ public final class SpellCheckServlet extends SessionServlet {
      * 
      * @param localeStr The locale string to parse
      * @return The parsed instance of {@link Locale}
-     * @throws SpellCheckException If locale string is invalid
+     * @throws OXException If locale string is invalid
      */
-    private static Locale parseLocaleString(final String localeStr) throws SpellCheckException {
+    private static Locale parseLocaleString(final String localeStr) throws OXException {
         final Matcher m = PAT_LOCALE.matcher(localeStr);
         if (!m.matches()) {
-            throw new SpellCheckException(SpellCheckException.Code.INVALID_LOCALE_STR, localeStr);
+            throw SpellCheckExceptionCode.INVALID_LOCALE_STR.create(localeStr);
         }
         final String country = m.group(2);
         if (null == country) {
@@ -430,7 +431,7 @@ public final class SpellCheckServlet extends SessionServlet {
      * <pre>
      * 
      * 
-     * private static String optStringParam(final HttpServletRequest req, final String paramName) throws SpellCheckException {
+     * private static String optStringParam(final HttpServletRequest req, final String paramName) throws OXException {
      *     final String paramVal = req.getParameter(paramName);
      *     if (paramVal == null || paramVal.length() == 0 || &quot;null&quot;.equals(paramVal)) {
      *         return null;

@@ -50,6 +50,7 @@
 package com.openexchange.spellcheck;
 
 import java.util.Locale;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -65,9 +66,9 @@ public interface SpellCheckService {
      * @param userId The user ID
      * @param ctx The context
      * @return An appropriate spell checker
-     * @throws SpellCheckException If spell check creation fails
+     * @throws OXException If spell check creation fails
      */
-    public SpellChecker getSpellChecker(int userId, Context ctx) throws SpellCheckException;
+    public SpellChecker getSpellChecker(int userId, Context ctx) throws OXException;
 
     /**
      * Gets a spell checker
@@ -76,9 +77,9 @@ public interface SpellCheckService {
      * @param localeStr The desired locale's string representation (determines the locale-specific dictionary)
      * @param ctx The context
      * @return An appropriate spell checker
-     * @throws SpellCheckException If spell check creation fails
+     * @throws OXException If spell check creation fails
      */
-    public SpellChecker getSpellChecker(final int userId, final String localeStr, final Context ctx) throws SpellCheckException;
+    public SpellChecker getSpellChecker(final int userId, final String localeStr, final Context ctx) throws OXException;
 
     /**
      * Gets a spell checker
@@ -87,8 +88,8 @@ public interface SpellCheckService {
      * @param locale The desired locale (determines the locale-specific dictionary)
      * @param ctx The context
      * @return An appropriate spell checker
-     * @throws SpellCheckException If spell check creation fails
+     * @throws OXException If spell check creation fails
      */
-    public SpellChecker getSpellChecker(final int userId, final Locale locale, final Context ctx) throws SpellCheckException;
+    public SpellChecker getSpellChecker(final int userId, final Locale locale, final Context ctx) throws OXException;
 
 }

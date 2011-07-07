@@ -68,10 +68,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.spellcheck.SpellCheckException;
+import com.openexchange.spellcheck.SpellCheckExceptionCode;
 import com.openexchange.spellcheck.services.SpellCheckServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -171,9 +171,9 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
      * 
      * @param userId The user ID
      * @param ctx The user's context
-     * @throws SpellCheckException If initialization fails
+     * @throws OXException If initialization fails
      */
-    public RdbUserSpellDictionary(final int userId, final Context ctx) throws SpellCheckException {
+    public RdbUserSpellDictionary(final int userId, final Context ctx) throws OXException {
         super();
         modified = new AtomicBoolean();
         key = new Key(userId, ctx.getContextId());
@@ -194,7 +194,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
         if (_addWord(word) && save) {
             try {
                 save();
-            } catch (final SpellCheckException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -279,7 +279,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
         if (_removeWord(word) && save) {
             try {
                 save();
-            } catch (final SpellCheckException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -297,9 +297,9 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
     /**
      * Writes this dictionary's content to database storage
      * 
-     * @throws SpellCheckException If writing to database storage fails
+     * @throws OXException If writing to database storage fails
      */
-    public void save() throws SpellCheckException {
+    public void save() throws OXException {
         if (modified.compareAndSet(true, false)) {
             write2DB();
         }
@@ -327,7 +327,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     private static final String SQL_UPDATE = "UPDATE spellcheck_user_dict SET words = ? WHERE cid = ? AND user = ?";
 
-    private void write2DB() throws SpellCheckException {
+    private void write2DB() throws OXException {
         final Lock writeLock = getLock(key).writeLock();
         writeLock.lock();
         try {
@@ -348,9 +348,9 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
                 }
                 stmt.executeUpdate();
             } catch (final OXException e) {
-                throw new SpellCheckException(e);
+                throw new OXException(e);
             } catch (final SQLException e) {
-                throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
+                throw SpellCheckExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeResources(null, stmt, writeCon, false, key.contextId);
             }
@@ -361,7 +361,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     private static final String SQL_SELECT = "SELECT words FROM spellcheck_user_dict WHERE cid = ? AND user = ?";
 
-    private boolean existsInDB() throws SpellCheckException {
+    private boolean existsInDB() throws OXException {
         final Lock readLock = getLock(key).readLock();
         readLock.lock();
         try {
@@ -376,9 +376,9 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
                 rs = stmt.executeQuery();
                 return rs.next();
             } catch (final OXException e) {
-                throw new SpellCheckException(e);
+                throw new OXException(e);
             } catch (final SQLException e) {
-                throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
+                throw SpellCheckExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeResources(rs, stmt, readCon, true, key.contextId);
             }
@@ -387,7 +387,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
         }
     }
 
-    private void readFromDB() throws SpellCheckException {
+    private void readFromDB() throws OXException {
         final Lock readLock = getLock(key).readLock();
         readLock.lock();
         try {
@@ -409,11 +409,11 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
                     }
                 }
             } catch (final OXException e) {
-                throw new SpellCheckException(e);
+                throw new OXException(e);
             } catch (final SQLException e) {
-                throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
+                throw SpellCheckExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } catch (final JSONException e) {
-                throw new SpellCheckException(SpellCheckException.Code.INVALID_FORMAT, e, e.getMessage());
+                throw SpellCheckExceptionCode.INVALID_FORMAT.create(e, e.getMessage());
             } finally {
                 closeResources(rs, stmt, readCon, true, key.contextId);
             }

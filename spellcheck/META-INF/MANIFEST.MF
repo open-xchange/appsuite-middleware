@@ -7,6 +7,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.config,
  com.openexchange.database,
  com.openexchange.databaseold,
+ com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.server,

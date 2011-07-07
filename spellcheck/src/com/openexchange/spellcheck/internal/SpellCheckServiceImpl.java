@@ -50,8 +50,8 @@
 package com.openexchange.spellcheck.internal;
 
 import java.util.Locale;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.spellcheck.SpellCheckException;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.SpellChecker;
 
@@ -76,7 +76,7 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
 	 *      com.openexchange.groupware.contexts.Context)
 	 */
-	public SpellChecker getSpellChecker(final int userId, final Context ctx) throws SpellCheckException {
+	public SpellChecker getSpellChecker(final int userId, final Context ctx) throws OXException {
 		return SpellCheckerImpl.newSpellCheck(userId, ctx);
 	}
 
@@ -87,7 +87,7 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 	 *      java.lang.String, com.openexchange.groupware.contexts.Context)
 	 */
 	public SpellChecker getSpellChecker(final int userId, final String localeStr, final Context ctx)
-			throws SpellCheckException {
+			throws OXException {
 		return SpellCheckerImpl.newSpellCheck(userId, localeStr, ctx);
 	}
 
@@ -98,7 +98,7 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 	 *      java.util.Locale, com.openexchange.groupware.contexts.Context)
 	 */
 	public SpellChecker getSpellChecker(final int userId, final Locale locale, final Context ctx)
-			throws SpellCheckException {
+			throws OXException {
 		return SpellCheckerImpl.newSpellCheck(userId, locale, ctx);
 	}
 

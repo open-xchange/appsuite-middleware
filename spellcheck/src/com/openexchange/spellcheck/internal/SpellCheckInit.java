@@ -49,8 +49,8 @@
 
 package com.openexchange.spellcheck.internal;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
-import com.openexchange.spellcheck.SpellCheckException;
 
 /**
  * {@link SpellCheckInit}
@@ -83,7 +83,7 @@ public class SpellCheckInit implements Initialization {
 	 * 
 	 * @see com.openexchange.server.Initialization#start()
 	 */
-	public void start() throws SpellCheckException {
+	public void start() throws OXException {
 		DictonaryStorage.loadDictionaries();
 		RdbUserSpellDictionary.start();
 	}
