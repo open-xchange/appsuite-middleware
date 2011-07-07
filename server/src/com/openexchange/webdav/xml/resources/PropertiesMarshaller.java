@@ -67,7 +67,7 @@ import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavStatus;
 import com.openexchange.webdav.protocol.util.Utils;
@@ -99,7 +99,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		this.charset = charset;
 	}
 
-	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException {
+	public List<Element> marshal(final WebdavResource resource) throws OXException {
 		final Element response =  new Element("response",DAV_NS);
 		response.addContent(marshalHREF(resource.getUrl(), resource.getResourceType() != null)); //TODO: Fix the new bug here
 		final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);

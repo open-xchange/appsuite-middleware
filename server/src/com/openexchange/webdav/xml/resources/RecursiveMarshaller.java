@@ -54,7 +54,7 @@ import java.util.List;
 import org.jdom.Element;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class RecursiveMarshaller implements ResourceMarshaller {
@@ -67,7 +67,7 @@ public class RecursiveMarshaller implements ResourceMarshaller {
 		this.depth = depth;
 	}
 
-	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException  {
+	public List<Element> marshal(final WebdavResource resource) throws OXException  {
 		final List<Element> list = new ArrayList<Element>();
 		final List<Element> delegateMarshal = delegate.marshal(resource);
 		list.addAll(delegateMarshal);
@@ -78,14 +78,14 @@ public class RecursiveMarshaller implements ResourceMarshaller {
 					public List<Element> inject(final List<Element> list, final WebdavResource element) {
 						try {
                             list.addAll(delegate.marshal(element));
-                        } catch (WebdavProtocolException e) {
+                        } catch (OXException e) {
                             // IGNORE
                         }
 						return list;
 					}
 					
 				});
-			} catch (final WebdavProtocolException e) {
+			} catch (final OXException e) {
 				return list;
 			}
 		}

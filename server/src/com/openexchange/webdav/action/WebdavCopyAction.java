@@ -50,7 +50,7 @@
 package com.openexchange.webdav.action;
 
 import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 public class WebdavCopyAction extends WebdavStructureAction {
 
@@ -60,7 +60,7 @@ public class WebdavCopyAction extends WebdavStructureAction {
 	}
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+			throws OXException {
 		checkOverwrite(req);
 		checkSame(req);
 		final int rc = chooseReturnCode(req);

@@ -66,7 +66,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -75,7 +74,6 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -648,7 +646,7 @@ public final class ical extends PermissionServlet {
         writer.write("<html><body>" + msg + "</body></html>");
     }
 
-    private String getUserAgent(final HttpServletRequest req) throws OXConflictException {
+    private String getUserAgent(final HttpServletRequest req) throws OXException {
         final Enumeration<?> e = req.getHeaderNames();
         final String userAgent = "user-agent";
         while (e.hasMoreElements()) {
@@ -656,26 +654,26 @@ public final class ical extends PermissionServlet {
                 return req.getHeader(userAgent);
             }
         }
-        throw new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, userAgent);
+        throw WebdavExceptionCode.MISSING_HEADER_FIELD.create(userAgent);
     }
 
-    private int getCalendarFolderID(final HttpServletRequest req) throws OXConflictException {
+    private int getCalendarFolderID(final HttpServletRequest req) throws OXException {
         if (req.getParameter(CALENDARFOLDER) != null) {
             try {
                 return Integer.parseInt(req.getParameter(CALENDARFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, CALENDARFOLDER);
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, CALENDARFOLDER);
             }
         }
         return 0;
     }
 
-    private int getTaskFolderID(final HttpServletRequest req) throws OXConflictException {
+    private int getTaskFolderID(final HttpServletRequest req) throws OXException {
         if (req.getParameter(TASKFOLDER) != null) {
             try {
                 return Integer.parseInt(req.getParameter(TASKFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TASKFOLDER);
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TASKFOLDER);
             }
         }
         return 0;
@@ -753,7 +751,7 @@ public final class ical extends PermissionServlet {
                 retval = null;
             }
         } catch (final SQLException e) {
-            throw new OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e);
+            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(ctx, con);
@@ -782,7 +780,7 @@ public final class ical extends PermissionServlet {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e);
+            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, ps);
             DBUtils.autocommit(con);
@@ -806,7 +804,7 @@ public final class ical extends PermissionServlet {
             ps.setInt(4, principal.getId());
             ps.executeUpdate();
         } catch (final SQLException e) {
-            throw new OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e);
+            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, ps);
             DBPool.closeWriterSilent(ctx, con);

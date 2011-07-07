@@ -262,37 +262,37 @@ public final class attachments extends OXServlet {
             os = resp.getOutputStream();
 
             if (req.getHeader(MODULE) == null) {
-                throw new WebdavException(WebdavException.Code.MISSING_FIELD, MODULE);
+                throw WebdavExceptionCode.MISSING_FIELD.create(MODULE);
             }
             try {
                 module = Integer.parseInt(req.getHeader(MODULE));
             } catch (final NumberFormatException exc) {
-                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, MODULE);
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, MODULE);
             }
 
             if (req.getHeader(TARGET_ID) == null) {
-                throw new WebdavException(WebdavException.Code.MISSING_FIELD, TARGET_ID);
+                throw WebdavExceptionCode.MISSING_FIELD.create(TARGET_ID);
             }
             try {
                 target_id = Integer.parseInt(req.getHeader(TARGET_ID));
             } catch (final NumberFormatException exc) {
-                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_ID);
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TARGET_ID);
             }
 
             if (req.getHeader(DataFields.OBJECT_ID) == null) {
-                throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.OBJECT_ID);
+                throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.OBJECT_ID);
             }
             try {
                 object_id = Integer.parseInt(req.getHeader(DataFields.OBJECT_ID));
             } catch (final NumberFormatException exc) {
-                throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, DataFields.OBJECT_ID);
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, DataFields.OBJECT_ID);
             }
 
             if (req.getHeader(TARGET_FOLDER_ID) != null) {
                 try {
                     folder_id = Integer.parseInt(req.getHeader(TARGET_FOLDER_ID));
                 } catch (final NumberFormatException exc) {
-                    throw new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_FOLDER_ID);
+                    throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TARGET_FOLDER_ID);
                 }
             }
 

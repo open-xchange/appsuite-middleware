@@ -57,7 +57,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavLogAction extends AbstractAction {
@@ -71,7 +71,7 @@ public class WebdavLogAction extends AbstractAction {
 	private boolean logResponse;
 	
 	public void perform(WebdavRequest req, WebdavResponse res)
-			throws WebdavProtocolException {
+			throws OXException {
 		StringBuilder b = new StringBuilder();
 		try {
 			b.append("URL: "); b.append(req.getUrl()); b.append('\n');
@@ -113,10 +113,10 @@ public class WebdavLogAction extends AbstractAction {
 				LOG.trace(((CapturingWebdavResponse)res).getBodyAsString());
 			}
 			
-		} catch (final WebdavProtocolException x) {
+		} catch (final OXException x) {
 			b = new StringBuilder();
 			b.append("Status: "); b.append(x.getMessage()); b.append(' '); b.append(x.getStatus()); b.append('\n');
-			b.append("WebdavException: ");
+			b.append("OXException: ");
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString(),x);
 			} else if(LOG.isErrorEnabled() && x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {

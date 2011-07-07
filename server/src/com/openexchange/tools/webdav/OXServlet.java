@@ -76,7 +76,8 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.webdav.digest.Authorization;
 import com.openexchange.tools.webdav.digest.DigestUtility;
-import com.openexchange.webdav.WebdavException;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.xml.jdom.JDOMParser;
 
 /**
@@ -234,7 +235,7 @@ public abstract class OXServlet extends WebDavServlet {
             final LoginRequest loginRequest;
             try {
                 loginRequest = parseLogin(req, face);
-            } catch (final WebdavException e) {
+            } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
                 addUnauthorizedHeader(req, resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
@@ -349,18 +350,18 @@ public abstract class OXServlet extends WebDavServlet {
 //        resp.addHeader("WWW-Authenticate", builder.toString());
     }
 
-    private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws WebdavException, IOException {
+    private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws OXException, IOException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Authentication header missing.");
             }
-            throw new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, "Authorization");
+            throw WebdavExceptionCode.MISSING_HEADER_FIELD.create("Authorization");
         }
         if (com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization(auth)) {
             final Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(auth);
             if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
-                throw new WebdavException(WebdavException.Code.EMPTY_PASSWORD);
+                throw WebdavExceptionCode.EMPTY_PASSWORD.create();
             }
             return new LoginRequestImpl(creds.getLogin(), creds.getPassword(), face, req);
         }
@@ -376,7 +377,7 @@ public abstract class OXServlet extends WebDavServlet {
             final String userName = authorization.getUser();
             final String password = digestUtility.getPasswordByUserName(userName);
             if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(password)) {
-                throw new WebdavException(WebdavException.Code.UNSUPPORTED_AUTH_MECH, "Digest");
+                throw WebdavExceptionCode.UNSUPPORTED_AUTH_MECH.create("Digest");
             }
             /*
              * Calculate MD5
@@ -386,7 +387,7 @@ public abstract class OXServlet extends WebDavServlet {
              * Compare to client "response"
              */
             if (!serverDigest.equals(authorization.getResponse())) {
-                throw new WebdavException(WebdavException.Code.AUTH_FAILED, userName);
+                throw WebdavExceptionCode.AUTH_FAILED.create(userName);
             }
             /*
              * Return appropriate login request to generate a session
@@ -401,7 +402,7 @@ public abstract class OXServlet extends WebDavServlet {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Unsupported Authentication header.");
         }
-        throw new WebdavException(WebdavException.Code.UNSUPPORTED_AUTH_MECH, mech);
+        throw WebdavExceptionCode.UNSUPPORTED_AUTH_MECH.create(mech);
     }
 
     /**

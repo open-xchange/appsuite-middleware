@@ -268,20 +268,20 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                     break;
                 case DataParser.DELETE:
                     if (lastModified == null) {
-                        throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED);
+                        throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
 
                     foldersSQL.deleteFolderObject(folderObject, lastModified);
                     break;
                 case DataParser.CLEAR:
                     if (lastModified == null) {
-                        throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED);
+                        throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
 
                     foldersSQL.clearFolder(folderObject, lastModified);
                     break;
                 default:
-                    throw new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action));
+                    throw WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action));
                 }
 
                 writeResponse(folderObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);

@@ -83,7 +83,8 @@ import com.openexchange.webdav.LastModifiedCache;
 import com.openexchange.webdav.PendingInvocations;
 import com.openexchange.webdav.PermissionServlet;
 import com.openexchange.webdav.QueuedAction;
-import com.openexchange.webdav.WebdavException;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;
@@ -282,7 +283,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, CommonFields.FOLDER_ID, eFolderId.getText()));
+                            throw new OXConflictException(WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText()));
                         }
                     }
 
@@ -302,7 +303,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                             } else if (value[a].trim().equals("LIST")) {
                                 bList = true;
                             } else {
-                                throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, "objectmode", value[a]));
+                                throw new OXConflictException(WebdavExceptionCode.INVALID_VALUE.create("objectmode", value[a]));
                             }
                         }
                     }
@@ -310,7 +311,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                     try {
                         object_id = Integer.parseInt(eObjectId.getText());
                     } catch (final NumberFormatException exc) {
-                        throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, DataFields.OBJECT_ID, eObjectId.getText()));
+                        throw new OXConflictException(WebdavExceptionCode.INVALID_VALUE.create(exc, DataFields.OBJECT_ID, eObjectId.getText()));
                     }
 
                     final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
@@ -319,7 +320,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_VALUE, exc, CommonFields.FOLDER_ID, eFolderId.getText()));
+                            throw new OXConflictException(WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText()));
                         }
                     }
                 } else {

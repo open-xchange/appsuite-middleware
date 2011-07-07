@@ -55,7 +55,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -71,7 +71,7 @@ public class WebdavReportAction extends AbstractAction {
         this.protocol = protocol;
     }
     
-    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
+    public void perform(WebdavRequest req, WebdavResponse res) throws OXException {
         try {
             Document reportQuery = req.getBodyAsDocument();
             Element root = reportQuery.getRootElement();
@@ -81,15 +81,15 @@ public class WebdavReportAction extends AbstractAction {
             WebdavAction reportAction = protocol.getReportAction(ns, name);
             
             if (reportAction == null) {
-                throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+                throw new OXException(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
             }
             
             reportAction.perform(req, res);
             
         } catch (JDOMException e) {
-            throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            throw new OXException(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } catch (IOException e) {
-            throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         
     }

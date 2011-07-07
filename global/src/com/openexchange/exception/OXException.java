@@ -113,9 +113,9 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private final List<Category> categories;
 
-    private final Object[] displayArgs;
+    private Object[] displayArgs;
 
-    private final int code;
+    private int code;
 
     /**
      * List of problematic attributes.
@@ -163,12 +163,13 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Initializes a {@link OXException} cloned from specified {@link OXException}.
+     * Initializes a {@link OXException} cloned from specified {@link OXException} including stack trace.
      * 
      * @param cloneMe The <code>OXException</code> instance to clone
      */
     public OXException(final OXException cloneMe) {
         super();
+        setStackTrace(cloneMe.getStackTrace());
         this.count = cloneMe.count;
         this.code = cloneMe.code;
         this.categories = null == cloneMe.categories ? new LinkedList<Category>() : new ArrayList<Category>(cloneMe.categories);
@@ -234,6 +235,28 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
         problematics = new ArrayList<ProblematicAttribute>(1);
+    }
+
+    /**
+     * Copies from specified {@link OXException}.
+     * 
+     * @param e The {@link OXException} to copy from
+     */
+    public void copyFrom(final OXException e) {
+        this.code = e.code;
+        this.categories.clear();
+        this.categories.addAll(e.getCategories());
+        this.displayArgs = e.displayArgs;
+        this.displayMessage = e.displayMessage;
+        this.exceptionId = e.exceptionId;
+        this.logMessage = e.logMessage;
+        this.prefix = e.prefix;
+        this.problematics.clear();
+        if (null != e.problematics) {
+            this.problematics.addAll(e.problematics);
+        }
+        this.properties.clear();
+        this.properties.putAll(e.properties);
     }
 
     /**

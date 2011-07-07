@@ -67,7 +67,7 @@ import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
@@ -89,8 +89,8 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
     }
 
     @Override
-    protected void internalDelete() throws WebdavProtocolException {
-        throw new WebdavProtocolException(GroupwareCaldavFactory.ROOT_URL, HttpServletResponse.SC_FORBIDDEN);
+    protected void internalDelete() throws OXException {
+        throw new OXException(GroupwareCaldavFactory.ROOT_URL, HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override
@@ -99,22 +99,22 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
+    protected List<WebdavProperty> internalGetAllProps() throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
+    protected void internalPutProperty(final WebdavProperty prop) throws OXException {
         // IGNORE
     }
 
     @Override
-    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
+    protected void internalRemoveProperty(final String namespace, final String name) throws OXException {
         // IGNORE
     }
 
@@ -127,67 +127,67 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
     }
 
     @Override
-    public void setCreationDate(final Date date) throws WebdavProtocolException {
+    public void setCreationDate(final Date date) throws OXException {
 
     }
 
-    public void create() throws WebdavProtocolException {
+    public void create() throws OXException {
         // IGNORE
     }
 
-    public boolean exists() throws WebdavProtocolException {
+    public boolean exists() throws OXException {
         return true;
     }
 
-    public Date getCreationDate() throws WebdavProtocolException {
+    public Date getCreationDate() throws OXException {
         return new Date(0);
     }
 
-    public Date getLastModified() throws WebdavProtocolException {
+    public Date getLastModified() throws OXException {
         return new Date(0);
     }
 
-    public WebdavLock getLock(final String token) throws WebdavProtocolException {
+    public WebdavLock getLock(final String token) throws OXException {
         return null;
     }
 
-    public List<WebdavLock> getLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getLocks() throws OXException {
         return Collections.emptyList();
     }
 
-    public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
+    public WebdavLock getOwnLock(final String token) throws OXException {
         return null;
     }
 
-    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getOwnLocks() throws OXException {
         return Collections.emptyList();
     }
 
-    public String getSource() throws WebdavProtocolException {
+    public String getSource() throws OXException {
         return null;
     }
 
-    public void lock(final WebdavLock lock) throws WebdavProtocolException {
+    public void lock(final WebdavLock lock) throws OXException {
         // IGNORE
     }
 
-    public void save() throws WebdavProtocolException {
+    public void save() throws OXException {
         // IGNORE
     }
 
-    public void setDisplayName(final String displayName) throws WebdavProtocolException {
+    public void setDisplayName(final String displayName) throws OXException {
         // IGNORE
     }
 
-    public void unlock(final String token) throws WebdavProtocolException {
+    public void unlock(final String token) throws OXException {
         // IGNORE
     }
     
-    public WebdavProtocolException internalError(final OXException x) {
-        return new WebdavProtocolException(getUrl(), 500);
+    public OXException internalError(final OXException x) {
+        return new OXException(getUrl(), 500);
     }
     
-    protected List<WebdavResource> getVisibleCalendarFoldersOfType(final Type type) throws WebdavProtocolException {
+    protected List<WebdavResource> getVisibleCalendarFoldersOfType(final Type type) throws OXException {
         try {
             final FolderResponse<UserizedFolder[]> visibleFolders = factory.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, CALENDAR_CTYPE, type, true, factory.getSession(), null);
             final UserizedFolder[] response = visibleFolders.getResponse();

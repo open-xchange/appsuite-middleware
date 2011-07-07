@@ -55,7 +55,7 @@ import java.util.List;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
@@ -127,11 +127,11 @@ public class CurrentUserPrivilegeSet implements PropertyMixin {
         this.privileges = Privilege.getApplying(permission);
     }
 
-    public List<WebdavProperty> getAllProperties() throws WebdavProtocolException {
+    public List<WebdavProperty> getAllProperties() throws OXException {
         return Collections.emptyList();
     }
 
-    public WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException {
+    public WebdavProperty getProperty(String namespace, String name) throws OXException {
         if (namespace.equals(Protocol.DAV_NS.getURI()) && name.equals("current-user-privilege-set")) {
             WebdavProperty property = new WebdavProperty(namespace, name);
             property.setXML(true);

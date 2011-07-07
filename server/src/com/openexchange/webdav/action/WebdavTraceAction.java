@@ -49,11 +49,11 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 public class WebdavTraceAction extends AbstractAction{
 
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		for(final String header : req.getHeaderNames()) {
 			res.setHeader(header, req.getHeader(header));
 		}

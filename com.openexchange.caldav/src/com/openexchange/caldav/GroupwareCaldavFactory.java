@@ -84,7 +84,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
@@ -147,9 +147,9 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return PROTOCOL;
     }
 
-    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavProtocolException {
+    public WebdavCollection resolveCollection(final WebdavPath url) throws OXException {
         if (url.size() > 1) {
-            throw new WebdavProtocolException(url, 404);
+            throw new OXException(url, 404);
         }
         if (isRoot(url)) {
             return mixin(new RootCollection(this));
@@ -157,13 +157,13 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return resolveChild(resolveCollection(url.parent()), url);
     }
 
-    public WebdavCollection resolveChild(final WebdavCollection collection, final WebdavPath url) throws WebdavProtocolException {
+    public WebdavCollection resolveChild(final WebdavCollection collection, final WebdavPath url) throws OXException {
         for (final WebdavResource resource : collection) {
             if (resource.getUrl().equals(url)) {
                 return mixin((AbstractCollection) resource);
             }
         }
-        throw new WebdavProtocolException(url, 404);
+        throw new OXException(url, 404);
     }
 
     // TODO: i18n
@@ -172,7 +172,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return url.size() == 0;
     }
 
-    public WebdavResource resolveResource(final WebdavPath url) throws WebdavProtocolException {
+    public WebdavResource resolveResource(final WebdavPath url) throws OXException {
         if (url.size() == 2) {
             return mixin(((CaldavCollection) resolveCollection(url.parent())).getChild(url.name()));
         }
@@ -215,7 +215,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return calendarUtils;
     }
     
-    public String getConfigValue(final String key, final String defaultValue) throws WebdavProtocolException {
+    public String getConfigValue(final String key, final String defaultValue) throws OXException {
         try {
             final ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
             final ComposedConfigProperty<String> property = view.property(key, String.class);
@@ -225,7 +225,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             return property.get();
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(new WebdavPath(), 500);
+            throw new OXException(new WebdavPath(), 500);
         }
     }
 
@@ -233,7 +233,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return stateHolder.get();
     }
     
-    public boolean isInRange(final Appointment appointment) throws WebdavProtocolException {
+    public boolean isInRange(final Appointment appointment) throws OXException {
         final Date start = start();
         final Date end = end();
         for(final Date d : Arrays.asList(appointment.getStartDate(), appointment.getEndDate())) {
@@ -244,7 +244,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return true;
     }
     
-    public Date end() throws WebdavProtocolException {
+    public Date end() throws OXException {
         final String value = getConfigValue("com.openexchange.caldav.interval.end", "one_year");
         int addYears = 2;
         if (value.equals("two_years")) {
@@ -261,7 +261,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         return instance.getTime();
     }
 
-    public Date start() throws WebdavProtocolException {
+    public Date start() throws OXException {
         final String value = getConfigValue("com.openexchange.caldav.interval.start", "one_month");
 
         if (value.equals("one_year")) {
@@ -293,12 +293,12 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     }
 
 
-    public User resolveUser(final int uid) throws WebdavProtocolException {
+    public User resolveUser(final int uid) throws OXException {
         try {
             return users.getUser(uid, getContext());
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(new WebdavPath(), 500);
+            throw new OXException(new WebdavPath(), 500);
         }
     }
 

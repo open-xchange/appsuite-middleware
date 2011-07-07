@@ -87,7 +87,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
@@ -118,7 +118,7 @@ public class CaldavResource extends AbstractResource {
 
     private List<CalendarDataObject> deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
 
-    public CaldavResource(CaldavCollection parent, Appointment appointment, GroupwareCaldavFactory factory) throws WebdavProtocolException {
+    public CaldavResource(CaldavCollection parent, Appointment appointment, GroupwareCaldavFactory factory) throws OXException {
         super();
         if (appointment == null) {
             throw new NullPointerException();
@@ -148,23 +148,23 @@ public class CaldavResource extends AbstractResource {
     }
 
     @Override
-    public boolean hasBody() throws WebdavProtocolException {
+    public boolean hasBody() throws OXException {
         return true;
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
+    protected List<WebdavProperty> internalGetAllProps() throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(String namespace, String name) throws OXException {
         if (namespace.equals(CaldavProtocol.CAL_NS.getURI()) && name.equals("calendar-data")) {
             WebdavProperty property = new WebdavProperty(namespace, name);
             try {
                 property.setValue(new String(icalFile(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                throw new WebdavProtocolException(getUrl(), 500);
+                throw new OXException(getUrl(), 500);
             }
             return property;
         }
@@ -172,12 +172,12 @@ public class CaldavResource extends AbstractResource {
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+    protected void internalPutProperty(WebdavProperty prop) throws OXException {
 
     }
 
     @Override
-    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
+    protected void internalRemoveProperty(String namespace, String name) throws OXException {
 
     }
 
@@ -187,7 +187,7 @@ public class CaldavResource extends AbstractResource {
     }
 
     @Override
-    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
+    public void putBody(InputStream body, boolean guessSize) throws OXException {
         fileData = null;
         ICalParser parser = factory.getIcalParser();
         try {
@@ -238,7 +238,7 @@ public class CaldavResource extends AbstractResource {
             }
         } catch (ConversionError e) {
             LOG.error(e.getMessage(),e );
-            throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            throw new OXException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -286,17 +286,17 @@ public class CaldavResource extends AbstractResource {
     }
 
     @Override
-    public void setCreationDate(Date date) throws WebdavProtocolException {
+    public void setCreationDate(Date date) throws OXException {
 
     }
 
-    public void create() throws WebdavProtocolException {
+    public void create() throws OXException {
         checkRange();
         write(true);
     }
     
     @Override
-    public WebdavResource move(WebdavPath dest, boolean noroot, boolean overwrite) throws WebdavProtocolException {
+    public WebdavResource move(WebdavPath dest, boolean noroot, boolean overwrite) throws OXException {
         WebdavResource destinationResource = factory.resolveResource(dest);
         CaldavCollection destinationCollection;
         if (destinationResource.isCollection()) {
@@ -315,7 +315,7 @@ public class CaldavResource extends AbstractResource {
         return this;
     }
 
-    private void write(boolean create) throws WebdavProtocolException {
+    private void write(boolean create) throws OXException {
         try {
             CalendarDataObject toSave = (CalendarDataObject) appointment;
             AppointmentSQLInterface appointmentSQLInterface = factory.getAppointmentInterface();
@@ -343,22 +343,22 @@ public class CaldavResource extends AbstractResource {
 
         } catch (ClassCastException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw new OXException(getUrl(), 500);
         } catch (OXPermissionException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 403);
+            throw new OXException(getUrl(), 403);
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw new OXException(getUrl(), 500);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw new OXException(getUrl(), 500);
         }
     }
 
-    private void checkRange() throws WebdavProtocolException {
+    private void checkRange() throws OXException {
         if (!factory.isInRange(appointment)) {
-            throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            throw new OXException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -378,28 +378,28 @@ public class CaldavResource extends AbstractResource {
         exception.setObjectID(appointment.getObjectID());
     }
 
-    public void delete() throws WebdavProtocolException {
+    public void delete() throws OXException {
         AppointmentSQLInterface appointments = factory.getAppointmentInterface();
         try {
             appointments.deleteAppointmentObject((CalendarDataObject) appointment, parent.getId(), getLastModified());
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw new OXException(getUrl(), 500);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw new OXException(getUrl(), 500);
         }
     }
 
-    public boolean exists() throws WebdavProtocolException {
+    public boolean exists() throws OXException {
         return exists;
     }
 
-    public InputStream getBody() throws WebdavProtocolException {
+    public InputStream getBody() throws OXException {
         return new ByteArrayInputStream(icalFile());
     }
 
-    private byte[] icalFile() throws WebdavProtocolException {
+    private byte[] icalFile() throws OXException {
         if (fileData != null) {
             return fileData;
         }
@@ -430,59 +430,59 @@ public class CaldavResource extends AbstractResource {
             return fileData = bytes.toByteArray();
         } catch (ConversionError e) {
             LOG.error(e.getMessage(), e);
-            throw new WebdavProtocolException(getUrl(), 500);
+            throw new OXException(getUrl(), 500);
         }
 
     }
 
-    public String getContentType() throws WebdavProtocolException {
+    public String getContentType() throws OXException {
         return "text/calendar";
     }
 
-    public Date getCreationDate() throws WebdavProtocolException {
+    public Date getCreationDate() throws OXException {
         return appointment.getCreationDate();
     }
 
-    public String getDisplayName() throws WebdavProtocolException {
+    public String getDisplayName() throws OXException {
         return appointment.getTitle();
     }
 
-    public String getETag() throws WebdavProtocolException {
+    public String getETag() throws OXException {
         if (!exists) {
             return "";
         }
         return "http://www.open-xchange.com/caldav/etags/" + appointment.getObjectID() + "-" + appointment.getLastModified().getTime();
     }
 
-    public String getLanguage() throws WebdavProtocolException {
+    public String getLanguage() throws OXException {
         return null;
     }
 
-    public Date getLastModified() throws WebdavProtocolException {
+    public Date getLastModified() throws OXException {
         return appointment.getLastModified();
     }
 
-    public Long getLength() throws WebdavProtocolException {
+    public Long getLength() throws OXException {
         return (long) icalFile().length;
     }
 
-    public WebdavLock getLock(String token) throws WebdavProtocolException {
+    public WebdavLock getLock(String token) throws OXException {
         return null;
     }
 
-    public List<WebdavLock> getLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getLocks() throws OXException {
         return Collections.emptyList();
     }
 
-    public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+    public WebdavLock getOwnLock(String token) throws OXException {
         return null;
     }
 
-    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getOwnLocks() throws OXException {
         return null;
     }
 
-    public String getSource() throws WebdavProtocolException {
+    public String getSource() throws OXException {
         return null;
     }
 
@@ -490,42 +490,42 @@ public class CaldavResource extends AbstractResource {
         return url;
     }
 
-    public void lock(WebdavLock lock) throws WebdavProtocolException {
+    public void lock(WebdavLock lock) throws OXException {
 
     }
 
-    public void save() throws WebdavProtocolException {
+    public void save() throws OXException {
         write(false);
     }
 
-    public void setContentType(String type) throws WebdavProtocolException {
+    public void setContentType(String type) throws OXException {
 
     }
 
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
+    public void setDisplayName(String displayName) throws OXException {
         appointment.setTitle(displayName);
     }
 
-    public void setLanguage(String language) throws WebdavProtocolException {
+    public void setLanguage(String language) throws OXException {
 
     }
 
-    public void setLength(Long length) throws WebdavProtocolException {
+    public void setLength(Long length) throws OXException {
 
     }
 
-    public void setSource(String source) throws WebdavProtocolException {
+    public void setSource(String source) throws OXException {
 
     }
 
-    public void unlock(String token) throws WebdavProtocolException {
+    public void unlock(String token) throws OXException {
 
     }
 
     // Patching groupware data
 
     // TODO: Warum ist das nicht gesetzt?
-    private void patchOrganizer() throws WebdavProtocolException {
+    private void patchOrganizer() throws OXException {
         String organizer = appointment.getOrganizer();
         if (organizer == null) {
             int createdBy = appointment.getCreatedBy();

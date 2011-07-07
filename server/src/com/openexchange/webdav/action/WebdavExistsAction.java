@@ -53,7 +53,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 public class WebdavExistsAction extends AbstractAction {
     private boolean tolerateLockNull = false;
@@ -62,7 +62,7 @@ public class WebdavExistsAction extends AbstractAction {
 
     private static final String NOT_FOUND = "There is nothing here, sorry.";
 
-    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		if(!req.getResource().exists()) {
 		    notFound(req, res);
         }
@@ -72,13 +72,13 @@ public class WebdavExistsAction extends AbstractAction {
         yield(req,res);
 	}
 
-    private void notFound(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+    private void notFound(final WebdavRequest req, final WebdavResponse res) throws OXException {
         try {
             res.sendString(NOT_FOUND);
         } catch (final IOException e) {
             LOG.debug("Client gone?", e);
         }
-        throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        throw new OXException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
 
     }
 

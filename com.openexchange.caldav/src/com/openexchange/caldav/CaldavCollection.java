@@ -72,7 +72,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
@@ -120,7 +120,7 @@ public class CaldavCollection extends AbstractCollection {
                 final int entity = permission.getEntity();
                 try {
                     return factory.resolveUser(entity).getDisplayName();
-                } catch (final WebdavProtocolException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     return new Integer(entity).toString();
                 }
@@ -130,8 +130,8 @@ public class CaldavCollection extends AbstractCollection {
         return null;
     }
     @Override
-    protected void internalDelete() throws WebdavProtocolException {
-        // throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+    protected void internalDelete() throws OXException {
+        // throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override
@@ -140,22 +140,22 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
+    protected List<WebdavProperty> internalGetAllProps() throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
+    protected void internalPutProperty(final WebdavProperty prop) throws OXException {
         // IGNORE
     }
 
     @Override
-    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
+    protected void internalRemoveProperty(final String namespace, final String name) throws OXException {
         // IGNORE
     }
 
@@ -168,11 +168,11 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     @Override
-    public void setCreationDate(final Date date) throws WebdavProtocolException {
+    public void setCreationDate(final Date date) throws OXException {
         // IGNORE, this is not writable
     }
 
-    public List<WebdavResource> getChildren() throws WebdavProtocolException {
+    public List<WebdavResource> getChildren() throws OXException {
         final State state = factory.getState();
         final List<Appointment> appointments = state.getFolder(getId());
         if (appointments == null) {
@@ -193,10 +193,10 @@ public class CaldavCollection extends AbstractCollection {
 
     private static final Pattern NAME_PATTERN = Pattern.compile("(.+?)\\.ics");
     
-    public CaldavResource getChild(final String name) throws WebdavProtocolException {
+    public CaldavResource getChild(final String name) throws OXException {
         final Matcher matcher = NAME_PATTERN.matcher(name);
         if (!matcher.find()) {
-            throw new WebdavProtocolException(getUrl().dup().append(name), 404);
+            throw new OXException(getUrl().dup().append(name), 404);
         }
         
         final String uid = matcher.group(1);
@@ -209,43 +209,43 @@ public class CaldavCollection extends AbstractCollection {
         return new CaldavResource(this, appointment, factory);
     }
 
-    public void create() throws WebdavProtocolException {
-        // throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+    public void create() throws OXException {
+        // throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
-    public boolean exists() throws WebdavProtocolException {
+    public boolean exists() throws OXException {
         return true;
     }
 
-    public Date getCreationDate() throws WebdavProtocolException {
+    public Date getCreationDate() throws OXException {
         return folder.getCreationDate();
     }
 
-    public String getDisplayName() throws WebdavProtocolException {
+    public String getDisplayName() throws OXException {
         return getFolderName(folder);
     }
 
-    public Date getLastModified() throws WebdavProtocolException {
+    public Date getLastModified() throws OXException {
         return folder.getLastModified();
     }
 
-    public WebdavLock getLock(final String token) throws WebdavProtocolException {
+    public WebdavLock getLock(final String token) throws OXException {
         return null;
     }
 
-    public List<WebdavLock> getLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getLocks() throws OXException {
         return Collections.emptyList();
     }
 
-    public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
+    public WebdavLock getOwnLock(final String token) throws OXException {
         return null;
     }
 
-    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getOwnLocks() throws OXException {
         return Collections.emptyList();
     }
 
-    public String getSource() throws WebdavProtocolException {
+    public String getSource() throws OXException {
         return null;
     }
 
@@ -253,19 +253,19 @@ public class CaldavCollection extends AbstractCollection {
         return url;
     }
 
-    public void lock(final WebdavLock lock) throws WebdavProtocolException {
+    public void lock(final WebdavLock lock) throws OXException {
         // IGNORE
     }
 
-    public void save() throws WebdavProtocolException {
-//        throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+    public void save() throws OXException {
+//        throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
-    public void setDisplayName(final String displayName) throws WebdavProtocolException {
+    public void setDisplayName(final String displayName) throws OXException {
         // IGNORE
     }
 
-    public void unlock(final String token) throws WebdavProtocolException {
+    public void unlock(final String token) throws OXException {
         // IGNORE
     }
     
@@ -277,7 +277,7 @@ public class CaldavCollection extends AbstractCollection {
     }
     
     @Override
-    public String getResourceType() throws WebdavProtocolException {
+    public String getResourceType() throws OXException {
         return super.getResourceType()+CaldavProtocol.CALENDAR;
     }
 

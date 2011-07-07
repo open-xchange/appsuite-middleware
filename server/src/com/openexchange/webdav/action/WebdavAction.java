@@ -49,10 +49,10 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 public interface WebdavAction {
 
-	void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException ;
+	void perform(WebdavRequest req, WebdavResponse res) throws OXException ;
 
 }

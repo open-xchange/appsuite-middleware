@@ -51,7 +51,7 @@ package com.openexchange.webdav.protocol.helpers;
 
 import java.util.List;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -60,6 +60,6 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface PropertyMixin {
-    public List<WebdavProperty> getAllProperties() throws WebdavProtocolException;
-    public WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException;
+    public List<WebdavProperty> getAllProperties() throws OXException;
+    public WebdavProperty getProperty(String namespace, String name) throws OXException;
 }

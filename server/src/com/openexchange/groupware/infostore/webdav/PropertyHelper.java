@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 public class PropertyHelper {
 	
@@ -88,12 +88,12 @@ public class PropertyHelper {
 		this.url = url;
 	}
 
-	public List<WebdavProperty> getAllProps() throws WebdavProtocolException {
+	public List<WebdavProperty> getAllProps() throws OXException {
 		loadAllProperties();
 		return new ArrayList<WebdavProperty>(properties.values());
 	}
 
-	public WebdavProperty getProperty(final String namespace, final String name) throws WebdavProtocolException {
+	public WebdavProperty getProperty(final String namespace, final String name) throws OXException {
 		loadProperty(namespace, name);
 		return properties.get(new WebdavProperty(namespace, name));
 	}
@@ -136,7 +136,7 @@ public class PropertyHelper {
         return changed;
     }
 
-    private void loadProperty(final String namespace, final String name) throws WebdavProtocolException {
+    private void loadProperty(final String namespace, final String name) throws OXException {
 		if(removedProperties.contains(new WebdavProperty(namespace, name))) {
 			return;
 		}
@@ -153,11 +153,11 @@ public class PropertyHelper {
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			
 		} catch (final OXException e) {
-		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	private void loadAllProperties() throws WebdavProtocolException {
+	private void loadAllProperties() throws OXException {
 		if(loadedAllProps) {
 			return;
 		}
@@ -169,7 +169,7 @@ public class PropertyHelper {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
 		} catch (final OXException e) {
-		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	

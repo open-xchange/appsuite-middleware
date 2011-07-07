@@ -60,7 +60,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 
@@ -78,7 +78,7 @@ public class RootCollection extends AbstractStandardCaldavCollection {
         includeProperties(new CalendarHomeSet());
     }
 
-    public List<WebdavResource> getChildren() throws WebdavProtocolException {
+    public List<WebdavResource> getChildren() throws OXException {
         List<WebdavResource> children = new ArrayList<WebdavResource>(3);
         for (Type type : Arrays.asList(PrivateType.getInstance(), PublicType.getInstance(), SharedType.getInstance())) {
             children.addAll(getVisibleCalendarFoldersOfType(type));
@@ -90,11 +90,11 @@ public class RootCollection extends AbstractStandardCaldavCollection {
         return GroupwareCaldavFactory.ROOT_URL;
     }
 
-    public String getDisplayName() throws WebdavProtocolException {
+    public String getDisplayName() throws OXException {
         return "";
     }
     
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(String namespace, String name) throws OXException {
         return null;
     }
 

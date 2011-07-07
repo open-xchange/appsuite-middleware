@@ -54,7 +54,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavStatusImpl;
 
@@ -72,7 +72,7 @@ public class PropfindAllPropsMarshaller extends PropertiesMarshaller {
 		try {
 			final Iterable<WebdavProperty> iterable =  resource.getAllProps();
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_OK, resource.getUrl(), iterable));
-		} catch (final WebdavProtocolException e) {
+		} catch (final OXException e) {
 			LOG.debug(e);
 		}
 		return multistatus;

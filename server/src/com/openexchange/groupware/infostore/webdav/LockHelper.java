@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 public abstract class LockHelper {
 	private final Map<String, WebdavLock> locks = new HashMap<String, WebdavLock>();
@@ -94,12 +94,12 @@ public abstract class LockHelper {
 		this.id = id;
 	}
 	
-	public WebdavLock getLock(final String token) throws WebdavProtocolException {
+	public WebdavLock getLock(final String token) throws OXException {
 		loadLocks();
 		return locks.get(token);
 	}
 
-	public List<WebdavLock> getAllLocks() throws WebdavProtocolException {
+	public List<WebdavLock> getAllLocks() throws OXException {
 		loadLocks();
 		final List<WebdavLock> lockList = new ArrayList<WebdavLock>(locks.values());
 		final List<WebdavLock> notExpired = new ArrayList<WebdavLock>();
@@ -115,7 +115,7 @@ public abstract class LockHelper {
 		return notExpired;
 	}
 
-	public void addLock(final WebdavLock lock) throws WebdavProtocolException {
+	public void addLock(final WebdavLock lock) throws OXException {
 		try {
 			loadLocks();
 			if(lock.getToken()!= null && locks.containsKey(lock.getToken())) {
@@ -128,7 +128,7 @@ public abstract class LockHelper {
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
 		} catch (final OXException e) {
-		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -151,7 +151,7 @@ public abstract class LockHelper {
 	protected abstract WebdavLock toWebdavLock(Lock lock);
 	protected abstract Lock toLock(WebdavLock lock);
 
-	private synchronized void loadLocks() throws WebdavProtocolException {
+	private synchronized void loadLocks() throws OXException {
 		if(loadedLocks) {
 			return;
 		}
@@ -170,7 +170,7 @@ public abstract class LockHelper {
 			}
 			setLocks(cleanedLocks);
 		} catch (final OXException e) {
-		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	

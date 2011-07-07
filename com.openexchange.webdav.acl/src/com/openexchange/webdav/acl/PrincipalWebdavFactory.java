@@ -55,7 +55,7 @@ import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
@@ -83,14 +83,14 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
         return PROTOCOL;
     }
 
-    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
+    public WebdavCollection resolveCollection(WebdavPath url) throws OXException {
         if (url.size() != 0) {
-            throw new WebdavProtocolException(url, 404);
+            throw new OXException(url, 404);
         }
         return mixin(new RootPrincipal(this));
     }
 
-    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
+    public WebdavResource resolveResource(WebdavPath url) throws OXException {
         if (url.size() == 0) {
             return mixin(new RootPrincipal(this));
         }

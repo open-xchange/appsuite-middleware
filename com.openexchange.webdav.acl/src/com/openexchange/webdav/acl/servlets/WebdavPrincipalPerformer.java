@@ -90,7 +90,7 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
@@ -274,7 +274,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
                 LOG.debug("Executing " + action);
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
-        } catch (final WebdavProtocolException x) {
+        } catch (final OXException x) {
             resp.setStatus(x.getStatus());
         } catch (final NullPointerException x) {
             LOG.error("Null reference detected.", x);

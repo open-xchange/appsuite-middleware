@@ -85,7 +85,8 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolExceptionCode;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
@@ -154,18 +155,18 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public boolean hasBody() throws WebdavProtocolException {
+    public boolean hasBody() throws OXException {
         loadMetadata();
         return metadata.getFileSize() > 0;
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
+    protected List<WebdavProperty> internalGetAllProps() throws OXException {
         return propertyHelper.getAllProps();
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
         return propertyHelper.getProperty(namespace, name);
     }
 
@@ -194,11 +195,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         markSet(Metadata.CREATION_DATE_LITERAL);
     }
 
-    public void create() throws WebdavProtocolException {
+    public void create() throws OXException {
         if (exists) {
-            throw new WebdavProtocolException(
-                WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS,
-                getUrl(),
+            throw WebdavProtocolExceptionCode.DIRECTORY_ALREADY_EXISTS.create(getUrl(),
                 HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
         save();
@@ -206,7 +205,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         factory.created(this);
     }
 
-    public void delete() throws WebdavProtocolException {
+    public void delete() throws OXException {
         if (exists) {
             try {
                 lockHelper.deleteLocks();
@@ -216,11 +215,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 factory.removed(this);
             } catch (final OXException x) {
                 if (com.openexchange.exception.Category.CATEGORY_PERMISSION_DENIED == x.getCategory()) {
-                    throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                    throw new OXException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
-                throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                throw new OXException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch (final Exception x) {
-                throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                throw new OXException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         }
     }
@@ -229,7 +228,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return exists;
     }
 
-    public InputStream getBody() throws WebdavProtocolException {
+    public InputStream getBody() throws OXException {
         final ServerSession session = getSession();
         try {
             return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), UserStorage.getStorageUser(
@@ -238,23 +237,23 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 session.getUserId(),
                 session.getContext()));
         } catch (final OXException e) {
-            throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (final Exception e) {
-            throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public String getContentType() throws WebdavProtocolException {
+    public String getContentType() throws OXException {
         loadMetadata();
         return metadata.getFileMIMEType();
     }
 
-    public Date getCreationDate() throws WebdavProtocolException {
+    public Date getCreationDate() throws OXException {
         loadMetadata();
         return metadata.getCreationDate();
     }
 
-    public String getDisplayName() throws WebdavProtocolException {
+    public String getDisplayName() throws OXException {
         loadMetadata();
         return metadata.getFileName();
     }
@@ -262,7 +261,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     public String getETag() {
         if (!exists && !existsInDB) {
             /*
-             * try { dumpMetadataToDB(); } catch (Exception e) { throw new WebdavException(e.getMessage(), e, getUrl(),
+             * try { dumpMetadataToDB(); } catch (Exception e) { throw new OXException(e.getMessage(), e, getUrl(),
              * HttpServletResponse.SC_INTERNAL_SERVER_ERROR); }
              */
             return null;
@@ -278,17 +277,17 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return null;
     }
 
-    public Date getLastModified() throws WebdavProtocolException {
+    public Date getLastModified() throws OXException {
         loadMetadata();
         return metadata.getLastModified();
     }
 
-    public Long getLength() throws WebdavProtocolException {
+    public Long getLength() throws OXException {
         loadMetadata();
         return Long.valueOf(metadata.getFileSize());
     }
 
-    public WebdavLock getLock(final String token) throws WebdavProtocolException {
+    public WebdavLock getLock(final String token) throws OXException {
         final WebdavLock lock = lockHelper.getLock(token);
         if (lock != null) {
             return lock;
@@ -296,21 +295,21 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return findParentLock(token);
     }
 
-    public List<WebdavLock> getLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getLocks() throws OXException {
         final List<WebdavLock> lockList = getOwnLocks();
         addParentLocks(lockList);
         return lockList;
     }
 
-    public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
+    public WebdavLock getOwnLock(final String token) throws OXException {
         return injectOwner(lockHelper.getLock(token));
     }
 
-    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getOwnLocks() throws OXException {
         return injectOwner(lockHelper.getAllLocks());
     }
 
-    private WebdavLock injectOwner(final WebdavLock lock) throws WebdavProtocolException {
+    private WebdavLock injectOwner(final WebdavLock lock) throws OXException {
         if(lock.getOwner() == null || "".equals(lock.getOwner())) {
             loadMetadata();
             final int userId = metadata.getModifiedBy();
@@ -332,7 +331,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return lock;
     }
 
-    private List<WebdavLock> injectOwner(final List<WebdavLock> allLocks) throws WebdavProtocolException {
+    private List<WebdavLock> injectOwner(final List<WebdavLock> allLocks) throws OXException {
         for (final WebdavLock webdavLock : allLocks) {
             injectOwner(webdavLock);
         }
@@ -347,7 +346,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return url;
     }
 
-    public void lock(final WebdavLock lock) throws WebdavProtocolException {
+    public void lock(final WebdavLock lock) throws OXException {
         if (!exists) {
             new InfostoreLockNullResource(this, factory).lock(lock);
             factory.invalidate(getUrl(), getId(), Type.RESOURCE);
@@ -357,21 +356,21 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         try {
             touch();
         } catch (final OXException e) {
-            throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public void unlock(final String token) throws WebdavProtocolException {
+    public void unlock(final String token) throws OXException {
         lockHelper.removeLock(token);
         try {
             lockHelper.dumpLocksToDB();
             touch();
         } catch (final OXException e) {
-            throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public void save() throws WebdavProtocolException {
+    public void save() throws OXException {
         try {
             dumpMetadataToDB();
             if (propertyHelper.mustWrite()) {
@@ -382,23 +381,21 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                     userId,
                     ctx), UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx));
                 if (!perm.canWriteObject()) {
-                    throw new WebdavProtocolException(
-                        WebdavProtocolException.Code.NO_WRITE_PERMISSION,
-                        getUrl(),
+                    throw WebdavProtocolExceptionCode.NO_WRITE_PERMISSION.create(getUrl(),
                         HttpServletResponse.SC_FORBIDDEN);
                 }
             }
             propertyHelper.dumpPropertiesToDB();
             lockHelper.dumpLocksToDB();
-        } catch (final WebdavProtocolException x) {
+        } catch (final OXException x) {
             throw x;
         } catch (final OXException x) {
             if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
-                throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                throw new OXException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
-            throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (final Exception x) {
-            throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -443,13 +440,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     // 
 
     @Override
-    public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
+    public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
         final WebdavResource res = factory.resolveResource(dest);
         if (res.exists()) {
             if (!overwrite) {
-                throw new WebdavProtocolException(
-                    WebdavProtocolException.Code.FILE_ALREADY_EXISTS,
-                    getUrl(),
+                throw WebdavProtocolExceptionCode.FILE_ALREADY_EXISTS.create(getUrl(),
                     HttpServletResponse.SC_PRECONDITION_FAILED,
                     dest);
             }
@@ -460,9 +455,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
         final FolderCollection coll = (FolderCollection) factory.resolveCollection(parent);
         if (!coll.exists()) {
-            throw new WebdavProtocolException(
-                WebdavProtocolException.Code.FOLDER_NOT_FOUND,
-                getUrl(),
+            throw WebdavProtocolExceptionCode.FOLDER_NOT_FOUND.create(getUrl(),
                 HttpServletResponse.SC_CONFLICT,
                 parent);
         }
@@ -484,22 +477,20 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         try {
             lockHelper.deleteLocks();
         } catch (final OXException e) {
-            throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         return this;
     }
 
     @Override
-    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
+    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
 
         final WebdavPath parent = dest.parent();
         final String name = dest.name();
 
         final FolderCollection coll = (FolderCollection) factory.resolveCollection(parent);
         if (!coll.exists()) {
-            throw new WebdavProtocolException(
-                WebdavProtocolException.Code.FOLDER_NOT_FOUND,
-                getUrl(),
+            throw WebdavProtocolExceptionCode.FOLDER_NOT_FOUND.create(getUrl(),
                 HttpServletResponse.SC_CONFLICT,
                 parent);
         }
@@ -507,9 +498,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         final DocumentMetadataResource copy = (DocumentMetadataResource) factory.resolveResource(dest);
         if (copy.exists()) {
             if (!overwrite) {
-                throw new WebdavProtocolException(
-                    WebdavProtocolException.Code.FILE_ALREADY_EXISTS,
-                    getUrl(),
+                throw WebdavProtocolExceptionCode.FILE_ALREADY_EXISTS.create(getUrl(),
                     HttpServletResponse.SC_PRECONDITION_FAILED,
                     dest);
             }
@@ -527,7 +516,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         try {
             lockHelper.deleteLocks();
         } catch (final OXException e) {
-            throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         return copy;
 
@@ -541,7 +530,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     }
 
-    private void copyMetadata(final DocumentMetadataResource copy) throws WebdavProtocolException {
+    private void copyMetadata(final DocumentMetadataResource copy) throws OXException {
         loadMetadata();
         copy.metadata = new DocumentMetadataImpl(metadata);
         copy.metadata.setFilestoreLocation(null); // No file attachment in original version
@@ -550,20 +539,20 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         copy.setMetadata.addAll(Metadata.VALUES);
     }
 
-    private void copyProperties(final DocumentMetadataResource copy) throws WebdavProtocolException {
+    private void copyProperties(final DocumentMetadataResource copy) throws OXException {
         for (final WebdavProperty prop : internalGetAllProps()) {
             copy.putProperty(prop);
         }
     }
 
-    private void copyBody(final DocumentMetadataResource copy) throws WebdavProtocolException {
+    private void copyBody(final DocumentMetadataResource copy) throws OXException {
         final InputStream in = getBody();
         if (in != null) {
             copy.putBody(in);
         }
     }
 
-    private void loadMetadata() throws WebdavProtocolException {
+    private void loadMetadata() throws OXException {
         if (!exists) {
             return;
         }
@@ -595,10 +584,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 metadata.setFolderId(((OXWebdavResource) parent()).getId());
                 initNameAndTitle();
             } else {
-                throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                throw new OXException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } catch (final Exception x) {
-            throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -611,20 +600,20 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void putBody(final InputStream body, final boolean guessSize) throws WebdavProtocolException {
+    public void putBody(final InputStream body, final boolean guessSize) throws OXException {
         if (!exists && !existsInDB) {
             // CREATE WITH FILE
             try {
                 dumpMetadataToDB(body, guessSize);
-            } catch (final WebdavProtocolException x) {
+            } catch (final OXException x) {
                 throw x;
             } catch (final OXException x) {
                 if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
-                    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
+                    throw new OXException(x, url, HttpServletResponse.SC_FORBIDDEN);
                 }
-                throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                throw new OXException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch (final Exception x) {
-                throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                throw new OXException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } else {
             // UPDATE
@@ -647,14 +636,14 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                     final OXException iStoreException = (OXException) x;
                     if (EnumComponent.INFOSTORE.getAbbreviation().equals(iStoreException.getPrefix())) {
                         if (415 == iStoreException.getCode()) {
-                            throw new WebdavProtocolException(getUrl(), Protocol.SC_LOCKED);
+                            throw new OXException(getUrl(), Protocol.SC_LOCKED);
                         }
                         if (CATEGORY_PERMISSION_DENIED == iStoreException.getCategory()) {
-                            throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
+                            throw new OXException(x, url, HttpServletResponse.SC_FORBIDDEN);
                         }
                     }
                 }
-                throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                throw new OXException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } finally {
                 try {
                     database.finish();
@@ -666,7 +655,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     }
 
-    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, WebdavProtocolException, TransactionException {
+    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, OXException, TransactionException {
         if ((exists || existsInDB) && !metadataChanged) {
             return;
         }
@@ -674,12 +663,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         try {
             parent = (FolderCollection) parent();
             if (!parent.exists()) {
-                throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
+                throw new OXException(getUrl(), HttpServletResponse.SC_CONFLICT);
             } else if (parent.isRoot()) {
-                throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
         } catch (final ClassCastException x) {
-            throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
+            throw new OXException(getUrl(), HttpServletResponse.SC_CONFLICT);
         }
 
         initNameAndTitle();
@@ -752,7 +741,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         metadata.setTitle(metadata.getFileName());
     }
 
-    private void dumpMetadataToDB() throws OXException, WebdavProtocolException, TransactionException {
+    private void dumpMetadataToDB() throws OXException, OXException, TransactionException {
         dumpMetadataToDB(null, false);
     }
 
@@ -778,23 +767,23 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return id;
     }
 
-    public int getParentId() throws WebdavProtocolException {
+    public int getParentId() throws OXException {
         if (metadata == null) {
             loadMetadata();
         }
         return (int) metadata.getFolderId();
     }
 
-    public void removedParent() throws WebdavProtocolException {
+    public void removedParent() throws OXException {
         exists = false;
         factory.removed(this);
     }
 
-    public void transferLock(final WebdavLock lock) throws WebdavProtocolException {
+    public void transferLock(final WebdavLock lock) throws OXException {
         try {
             lockHelper.transferLock(lock);
         } catch (final OXException e) {
-            throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

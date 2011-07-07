@@ -66,6 +66,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -103,7 +104,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
     }
 
     @Override
-    protected void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser, PendingInvocations<TasksSQLInterface> pendingInvocations) throws OXException, XmlPullParserException, IOException {
+    protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<TasksSQLInterface> pendingInvocations) throws OXException, XmlPullParserException, IOException {
         final Session session = getSession(req);
         if (isTag(parser, "prop", "DAV:")) {
             /*
@@ -218,7 +219,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
          * @param lastModified The last-modified date
          * @param inFolder The task's folder
          */
-        public QueuedTask(Task task, String clientId, int action, Date lastModified, int inFolder) {
+        public QueuedTask(final Task task, final String clientId, final int action, final Date lastModified, final int inFolder) {
             super();
             this.task = task;
             this.clientId = clientId;
@@ -236,17 +237,15 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
          * @param user The user ID
          * @throws IOException If writing response fails
          */
-        public void actionPerformed(TasksSQLInterface tasksSQL, OutputStream os, int user) throws IOException {
+        public void actionPerformed(final TasksSQLInterface tasksSQL, final OutputStream os, final int user) throws IOException {
             final XMLOutputter xo = new XMLOutputter();
             try {
                 if (action == DataParser.SAVE) {
                     if (task.containsObjectID()) {
                         if (lastModified == null) {
-                            throw new OXMandatoryFieldException(new WebdavException(
-                                WebdavException.Code.MISSING_FIELD,
-                                DataFields.LAST_MODIFIED));
+                            throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                         }
-                        Date currentLastModified = lastModifiedCache.getLastModified(task.getObjectID(), lastModified);
+                        final Date currentLastModified = lastModifiedCache.getLastModified(task.getObjectID(), lastModified);
                         lastModifiedCache.update(task.getObjectID(), 0, lastModified);
                         tasksSQL.updateTaskObject(task, inFolder, currentLastModified);
                         lastModifiedCache.update(task.getObjectID(), 0, task.getLastModified());
@@ -256,15 +255,13 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                     }
                 } else if (action == DataParser.DELETE) {
                     if (lastModified == null) {
-                        throw new OXMandatoryFieldException(new WebdavException(
-                            WebdavException.Code.MISSING_FIELD,
-                            DataFields.LAST_MODIFIED));
+                        throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
                     tasksSQL.deleteTaskObject(task.getObjectID(), inFolder, lastModified);
                 } else if (action == DataParser.CONFIRM) {
                     tasksSQL.setUserConfirmation(task.getObjectID(), user, task.getConfirm(), task.getConfirmMessage());
                 } else {
-                    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
+                    throw WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action));
                 }
                 writeResponse(task, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXMandatoryFieldException exc) {
@@ -282,8 +279,8 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
             } catch (final OXConcurrentModificationException exc) {
                 LOG.debug(_parsePropChilds, exc);
                 writeResponse(task, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
-            } catch (OXException e) {
-                if (e.getCategory() == CATEGORY_USER_INPUT) {
+            } catch (final OXException e) {
+                if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                     LOG.debug(_parsePropChilds, e);
                     writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(e, USER_INPUT_EXCEPTION), clientId, os, xo);
                 } else {
@@ -296,7 +293,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                         os,
                         xo);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(_parsePropChilds, e);
                 writeResponse(task, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
                     SERVER_ERROR_EXCEPTION,

@@ -350,7 +350,7 @@ public final class vcard extends PermissionServlet {
             }
 
             if (user_agent == null) {
-                throw new OXConflictException(new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, STR_USER_AGENT));
+                throw WebdavExceptionCode.MISSING_HEADER_FIELD.create(STR_USER_AGENT);
             }
 
             principal = user_agent + '_' + session.getUserId();
@@ -398,13 +398,13 @@ public final class vcard extends PermissionServlet {
                 exists = rs.next();
 
                 if (!exists) {
-                    throw new OXConflictException(new WebdavException(WebdavException.Code.NO_PRINCIPAL, principal));
+                    throw WebdavExceptionCode.NO_PRINCIPAL.create(principal);
                 }
                 principal_id = rs.getInt(1);
                 db_contactfolder_id = rs.getInt(2);
 
                 if (db_contactfolder_id != contactfolder_id) {
-                    throw new OXConflictException(new WebdavException(WebdavException.Code.NO_PRINCIPAL, principal));
+                    throw WebdavExceptionCode.NO_PRINCIPAL.create(principal);
                 }
 
                 entries_db = loadDBEntries(context, principal_id);
@@ -534,7 +534,7 @@ public final class vcard extends PermissionServlet {
         resp.setContentType("text/html");
     }
 
-    private String getUserAgent(final HttpServletRequest req) throws OXConflictException {
+    private String getUserAgent(final HttpServletRequest req) throws OXException {
         final Enumeration<?> e = req.getHeaderNames();
         while (e.hasMoreElements()) {
             final String tmp = e.nextElement().toString().toLowerCase();
@@ -542,15 +542,15 @@ public final class vcard extends PermissionServlet {
                 return req.getHeader(STR_USER_AGENT);
             }
         }
-        throw new OXConflictException(new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, STR_USER_AGENT));
+        throw WebdavExceptionCode.MISSING_HEADER_FIELD.create(STR_USER_AGENT);
     }
 
-    private int getContactFolderID(final HttpServletRequest req) throws OXConflictException {
+    private int getContactFolderID(final HttpServletRequest req) throws OXException {
         if (req.getParameter(CONTACTFOLDER) != null) {
             try {
                 return Integer.parseInt(req.getParameter(CONTACTFOLDER));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, CONTACTFOLDER));
+                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, CONTACTFOLDER);
             }
         }
         return 0;

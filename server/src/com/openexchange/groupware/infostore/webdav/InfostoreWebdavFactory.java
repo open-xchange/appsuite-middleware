@@ -89,7 +89,7 @@ import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
@@ -150,7 +150,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             }
         }
 
-        public void remove(final OXWebdavResource resource) throws WebdavProtocolException {
+        public void remove(final OXWebdavResource resource) throws OXException {
             final int id = resource.getParentId();
             final FolderCollection coll = getFolder(id);
             if(coll == null) {
@@ -159,7 +159,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             coll.unregisterChild(resource);
         }
 
-        public void registerNew(final OXWebdavResource resource) throws WebdavProtocolException {
+        public void registerNew(final OXWebdavResource resource) throws OXException {
             if(resource.isCollection()) {
                 collectionsById.put(resource.getId(), (FolderCollection) resource);
             } else {
@@ -213,7 +213,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return PROTOCOL;
     }
 
-    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavProtocolException {
+    public WebdavCollection resolveCollection(final WebdavPath url) throws OXException {
         final State s = state.get();
         if(s.folders.containsKey(url)) {
             return s.folders.get(url);
@@ -237,15 +237,15 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
                 s.addNewResource(res);
             }
         } catch (final OXException e) {
-            throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         if(!res.isCollection()) {
-            throw new WebdavProtocolException(url, HttpServletResponse.SC_PRECONDITION_FAILED);
+            throw new OXException(url, HttpServletResponse.SC_PRECONDITION_FAILED);
         }
         return (WebdavCollection) res;
     }
 
-    public WebdavResource resolveResource(final WebdavPath url) throws WebdavProtocolException {
+    public WebdavResource resolveResource(final WebdavPath url) throws OXException {
         final State s = state.get();
         if(s.resources.containsKey(url)) {
             return s.resources.get(url);
@@ -275,7 +275,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             }
             return res;
         } catch (final OXException e) {
-            throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -285,7 +285,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return this.services;
     }
 
-    private OXWebdavResource tryLoad(final WebdavPath url, final OXWebdavResource def) throws OXException, WebdavProtocolException {
+    private OXWebdavResource tryLoad(final WebdavPath url, final OXWebdavResource def) throws OXException, OXException {
         final State s = state.get();
         final ServerSession session = getSession();
         final Context ctx = session.getContext();
@@ -321,7 +321,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
-    private FolderCollection loadCollection(final WebdavPath url, final int id, final State s) throws WebdavProtocolException {
+    private FolderCollection loadCollection(final WebdavPath url, final int id, final State s) throws OXException {
         final FolderCollection collection = new FolderCollection(url, this);
         collection.setId(id);
         collection.setExists(true);
@@ -448,7 +448,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return aliases;
     }
 
-    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws WebdavProtocolException {
+    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws OXException {
         final State s = state.get();
         final Set<Integer> toLoad = new HashSet<Integer>(subfolderIds);
         final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>(subfolderIds.size());
@@ -465,7 +465,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         for(final int id : toLoad) {
             try {
                 retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
-            } catch (final WebdavProtocolException x) {
+            } catch (final OXException x) {
                 //System.out.println(x.getStatus());
                 if(x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
                     throw x;
@@ -476,7 +476,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return retVal;
     }
 
-    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, WebdavProtocolException {
+    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, OXException {
         if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new ArrayList<OXWebdavResource>();
         }
@@ -574,17 +574,17 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
-    public void created(final DocumentMetadataResource resource) throws WebdavProtocolException {
+    public void created(final DocumentMetadataResource resource) throws OXException {
         final State s = state.get();
         s.registerNew(resource);
     }
 
-    public void created(final FolderCollection collection) throws WebdavProtocolException {
+    public void created(final FolderCollection collection) throws OXException {
         final State s = state.get();
         s.registerNew(collection);
     }
 
-    public void removed(final OXWebdavResource resource) throws WebdavProtocolException {
+    public void removed(final OXWebdavResource resource) throws OXException {
         invalidate(resource.getUrl(), resource.getId(), (resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE );
         final State s = state.get();
         s.remove(resource);

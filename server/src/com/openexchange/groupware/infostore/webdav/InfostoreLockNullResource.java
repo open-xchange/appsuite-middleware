@@ -76,7 +76,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
@@ -115,7 +115,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		this.setId(id);
 	}
 	
-	public static int findInfostoreLockNullResource(final WebdavPath url, final Connection readCon, final Context ctx) throws WebdavProtocolException {
+	public static int findInfostoreLockNullResource(final WebdavPath url, final Connection readCon, final Context ctx) throws OXException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
@@ -128,7 +128,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			}
 			return -1;
 		} catch (final SQLException x) {
-			throw new WebdavProtocolException(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new OXException(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if(stmt != null) {
 				try {
@@ -159,53 +159,53 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	}
 	
 	@Override
-	protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
+	protected List<WebdavProperty> internalGetAllProps() throws OXException {
 		return Collections.emptyList();
 	}
 
 	@Override
 	protected WebdavProperty internalGetProperty(final String namespace, final String name)
-			throws WebdavProtocolException {
+			throws OXException {
 		return null;
 	}
 
 	@Override
 	protected void internalPutProperty(final WebdavProperty prop)
-			throws WebdavProtocolException {
+			throws OXException {
 		// IGNORE
 	}
 
 	@Override
 	protected void internalRemoveProperty(final String namespace, final String name)
-			throws WebdavProtocolException {
+			throws OXException {
 		// IGNORE
 	}
 
 	@Override
 	public void putBody(final InputStream body, final boolean guessSize)
-			throws WebdavProtocolException {
+			throws OXException {
 		resource.putBody(body,guessSize);
 	}
 
 	@Override
-	public void setCreationDate(final Date date) throws WebdavProtocolException {
+	public void setCreationDate(final Date date) throws OXException {
 		// IGNORE
 	}
 
-	public void create() throws WebdavProtocolException {
+	public void create() throws OXException {
 		delete();
 		resource.create();
 		transferLocks();
 	}
 
-	private void transferLocks() throws WebdavProtocolException {
+	private void transferLocks() throws OXException {
 		for(final WebdavLock lock : getOwnLocks()) {
 			((OXWebdavResource) resource).transferLock(lock);
 		}
 	}
 
 	@Override
-	public void delete() throws WebdavProtocolException {
+	public void delete() throws OXException {
 		final Context ctx = sessionHolder.getContext();
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
@@ -221,10 +221,10 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			factory.invalidate(getUrl(), getId()	, ((resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE));
 		} catch (final SQLException x) {
 		    rollback(writeCon);
-            throw new WebdavProtocolException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new OXException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (final OXException e) {
 		    rollback(writeCon);
-			throw new WebdavProtocolException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new OXException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if (stmt != null) {
 				try {
@@ -240,48 +240,48 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		}
 	}
 
-	public boolean exists() throws WebdavProtocolException {
+	public boolean exists() throws OXException {
 		return exists;
 	}
 
 	@Override
-	public InputStream getBody() throws WebdavProtocolException {
+	public InputStream getBody() throws OXException {
 		return null;
 	}
 
 	@Override
-	public String getContentType() throws WebdavProtocolException {
+	public String getContentType() throws OXException {
 		return null;
 	}
 
-	public Date getCreationDate() throws WebdavProtocolException {
+	public Date getCreationDate() throws OXException {
 		return null;
 	}
 
-	public String getDisplayName() throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	public String getETag() throws WebdavProtocolException {
+	public String getDisplayName() throws OXException {
 		return null;
 	}
 
 	@Override
-	public String getLanguage() throws WebdavProtocolException {
-		return null;
-	}
-
-	public Date getLastModified() throws WebdavProtocolException {
+	public String getETag() throws OXException {
 		return null;
 	}
 
 	@Override
-	public Long getLength() throws WebdavProtocolException {
+	public String getLanguage() throws OXException {
 		return null;
 	}
 
-	public WebdavLock getLock(final String token) throws WebdavProtocolException {
+	public Date getLastModified() throws OXException {
+		return null;
+	}
+
+	@Override
+	public Long getLength() throws OXException {
+		return null;
+	}
+
+	public WebdavLock getLock(final String token) throws OXException {
 		final WebdavLock lock = lockHelper.getLock(token);
 		if(lock != null) {
 			return lock;
@@ -289,21 +289,21 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return findParentLock(token);
 	}
 
-	public List<WebdavLock> getLocks() throws WebdavProtocolException {
+	public List<WebdavLock> getLocks() throws OXException {
 		final List<WebdavLock> lockList =  getOwnLocks();
 		addParentLocks(lockList);
 		return lockList;
 	}
 
-	public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
+	public WebdavLock getOwnLock(final String token) throws OXException {
 		return lockHelper.getLock(token);
 	}
 
-	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+	public List<WebdavLock> getOwnLocks() throws OXException {
 		return lockHelper.getAllLocks();
 	}
 
-	public String getSource() throws WebdavProtocolException {
+	public String getSource() throws OXException {
 		return null;
 	}
 
@@ -311,41 +311,41 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return resource.getUrl();
 	}
 
-	public void lock(final WebdavLock lock) throws WebdavProtocolException {
+	public void lock(final WebdavLock lock) throws OXException {
 		try {
 			dumpToDB();
 			lockHelper.addLock(lock);
 			lockHelper.dumpLocksToDB();
 		} catch (final Exception e) {
-			throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new OXException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	public void save() throws WebdavProtocolException {
-		throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
+	public void save() throws OXException {
+		throw new OXException(getUrl(), HttpServletResponse.SC_CONFLICT);
 	}
 
 	@Override
-	public void setContentType(final String type) throws WebdavProtocolException {
+	public void setContentType(final String type) throws OXException {
 		// IGNORE
 	}
 
-	public void setDisplayName(final String displayName) throws WebdavProtocolException {
-		// IGNORE
-	}
-
-	@Override
-	public void setLanguage(final String language) throws WebdavProtocolException {
+	public void setDisplayName(final String displayName) throws OXException {
 		// IGNORE
 	}
 
 	@Override
-	public void setLength(final Long length) throws WebdavProtocolException {
+	public void setLanguage(final String language) throws OXException {
 		// IGNORE
 	}
 
 	@Override
-	public void setSource(final String source) throws WebdavProtocolException {
+	public void setLength(final Long length) throws OXException {
+		// IGNORE
+	}
+
+	@Override
+	public void setSource(final String source) throws OXException {
 		// IGNORE
 	}
 
@@ -364,7 +364,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		}
 	}
 	
-	public void unlock(final String token) throws WebdavProtocolException {
+	public void unlock(final String token) throws OXException {
 		lockHelper.removeLock(token);
 		if(getOwnLocks().isEmpty()) {
 			delete();
@@ -415,11 +415,11 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return id;
 	}
 
-	public int getParentId() throws WebdavProtocolException {
+	public int getParentId() throws OXException {
 		return ((OXWebdavResource) parent()).getId();
 	}
 
-	public void removedParent() throws WebdavProtocolException {
+	public void removedParent() throws OXException {
 		// IGNORE
 	}
 
@@ -428,11 +428,11 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	}
 
 	@Override
-	protected void internalDelete() throws WebdavProtocolException {
+	protected void internalDelete() throws OXException {
 		//IGNORE
 	}
 
-	public List<WebdavResource> getChildren() throws WebdavProtocolException {
+	public List<WebdavResource> getChildren() throws OXException {
 		return Collections.emptyList();
 	}
 

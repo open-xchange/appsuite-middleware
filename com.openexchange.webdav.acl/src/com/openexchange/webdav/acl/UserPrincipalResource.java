@@ -60,7 +60,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 
@@ -81,7 +81,7 @@ public class UserPrincipalResource extends AbstractResource {
     }
 
     @Override
-    public String getResourceType() throws WebdavProtocolException {
+    public String getResourceType() throws OXException {
         return"<D:resourcetype><D:principal /></D:resourcetype>";
     }
     
@@ -91,27 +91,27 @@ public class UserPrincipalResource extends AbstractResource {
     }
 
     @Override
-    public boolean hasBody() throws WebdavProtocolException {
+    public boolean hasBody() throws OXException {
         return false;
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
+    protected List<WebdavProperty> internalGetAllProps() throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+    protected WebdavProperty internalGetProperty(String namespace, String name) throws OXException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+    protected void internalPutProperty(WebdavProperty prop) throws OXException {
         // IGNORE
     }
 
     @Override
-    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
+    protected void internalRemoveProperty(String namespace, String name) throws OXException {
         // IGNORE
     }
 
@@ -121,76 +121,76 @@ public class UserPrincipalResource extends AbstractResource {
     }
 
     @Override
-    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
+    public void putBody(InputStream body, boolean guessSize) throws OXException {
         // IGNORE
     }
 
     @Override
-    public void setCreationDate(Date date) throws WebdavProtocolException {
+    public void setCreationDate(Date date) throws OXException {
         // IGNORE
     }
 
-    public void create() throws WebdavProtocolException {
+    public void create() throws OXException {
         // IGNORE
     }
 
-    public void delete() throws WebdavProtocolException {
+    public void delete() throws OXException {
         // IGNORE
     }
 
-    public boolean exists() throws WebdavProtocolException {
+    public boolean exists() throws OXException {
         return true;
     }
 
-    public InputStream getBody() throws WebdavProtocolException {
+    public InputStream getBody() throws OXException {
         return null;
     }
 
-    public String getContentType() throws WebdavProtocolException {
+    public String getContentType() throws OXException {
         return null;
     }
 
-    public Date getCreationDate() throws WebdavProtocolException {
+    public Date getCreationDate() throws OXException {
         return new Date(0);
     }
 
-    public String getDisplayName() throws WebdavProtocolException {
+    public String getDisplayName() throws OXException {
         return user.getDisplayName();
     }
 
-    public String getETag() throws WebdavProtocolException {
+    public String getETag() throws OXException {
         return "http://www.open-xchange.com/webdav/users/"+user.getId();
     }
 
-    public String getLanguage() throws WebdavProtocolException {
+    public String getLanguage() throws OXException {
         return null;
     }
 
-    public Date getLastModified() throws WebdavProtocolException {
+    public Date getLastModified() throws OXException {
         return new Date(0);
     }
 
-    public Long getLength() throws WebdavProtocolException {
+    public Long getLength() throws OXException {
         return null;
     }
 
-    public WebdavLock getLock(String token) throws WebdavProtocolException {
+    public WebdavLock getLock(String token) throws OXException {
         return null;
     }
 
-    public List<WebdavLock> getLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getLocks() throws OXException {
         return Collections.emptyList();
     }
 
-    public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+    public WebdavLock getOwnLock(String token) throws OXException {
         return null;
     }
 
-    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+    public List<WebdavLock> getOwnLocks() throws OXException {
         return Collections.emptyList();
     }
 
-    public String getSource() throws WebdavProtocolException {
+    public String getSource() throws OXException {
         return null;
     }
 
@@ -198,35 +198,35 @@ public class UserPrincipalResource extends AbstractResource {
         return new WebdavPath(user.getLoginInfo());
     }
 
-    public void lock(WebdavLock lock) throws WebdavProtocolException {
+    public void lock(WebdavLock lock) throws OXException {
         // IGNORE
     }
 
-    public void save() throws WebdavProtocolException {
+    public void save() throws OXException {
         // IGNORE
     }
 
-    public void setContentType(String type) throws WebdavProtocolException {
+    public void setContentType(String type) throws OXException {
         // IGNORE
     }
 
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
+    public void setDisplayName(String displayName) throws OXException {
         // IGNORE
     }
 
-    public void setLanguage(String language) throws WebdavProtocolException {
+    public void setLanguage(String language) throws OXException {
         // IGNORE
     }
 
-    public void setLength(Long length) throws WebdavProtocolException {
+    public void setLength(Long length) throws OXException {
         // IGNORE
     }
 
-    public void setSource(String source) throws WebdavProtocolException {
+    public void setSource(String source) throws OXException {
         // IGNORE
     }
 
-    public void unlock(String token) throws WebdavProtocolException {
+    public void unlock(String token) throws OXException {
         // IGNORE
     }
 

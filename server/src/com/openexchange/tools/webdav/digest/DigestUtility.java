@@ -69,7 +69,8 @@ import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.webdav.WebdavException;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.WebdavExceptionCode;
 
 /**
  * {@link DigestUtility}
@@ -288,9 +289,9 @@ public final class DigestUtility {
      * 
      * @param userName The user name
      * @return The clear-text password or <code>null</code> if not available
-     * @throws WebdavException If clear-text password cannot be returned
+     * @throws OXException If clear-text password cannot be returned
      */
-    public String getPasswordByUserName(final String userName) throws WebdavException {
+    public String getPasswordByUserName(final String userName) throws OXException {
         if (null == userName) {
             return null;
         }
@@ -299,7 +300,7 @@ public final class DigestUtility {
             final ContextStorage contextStorage = ContextStorage.getInstance();
             final int ctxId = contextStorage.getContextId(splitted[0]);
             if (ContextStorage.NOT_FOUND == ctxId) {
-                throw new WebdavException(WebdavException.Code.RESOLVING_USER_NAME_FAILED, userName);
+                throw WebdavExceptionCode.RESOLVING_USER_NAME_FAILED.create(userName);
             }
             final Context ctx = contextStorage.getContext(ctxId);
             final int userId;
@@ -307,7 +308,7 @@ public final class DigestUtility {
             try {
                 userId = userStorage.getUserId(splitted[1], ctx);
             } catch (final OXException e) {
-                throw new WebdavException(WebdavException.Code.RESOLVING_USER_NAME_FAILED, userName);
+                throw WebdavExceptionCode.RESOLVING_USER_NAME_FAILED.create(userName);
             }
             final User user = userStorage.getUser(userId, ctx);
             /*
@@ -319,7 +320,7 @@ public final class DigestUtility {
             final String key = serviceRegistry.getService(ConfigurationService.class).getProperty("com.openexchange.passcrypt.key");
             return cryptoService.decrypt(passCrypt, key);
         } catch (final OXException e) {
-            throw new WebdavException(e);
+            throw new OXException(e);
         }
     }
 

@@ -64,7 +64,7 @@ import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
@@ -82,7 +82,7 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
         super(protocol);
     }
 
-    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
+    public void perform(WebdavRequest req, WebdavResponse res) throws OXException {
         final Element response = new Element("multistatus", DAV_NS);
 
         List<Namespace> namespaces = protocol.getAdditionalNamespaces();
@@ -125,7 +125,7 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
 
     }
 
-    private List<WebdavPath> getPaths(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
+    private List<WebdavPath> getPaths(WebdavRequest req, Document requestBody) throws OXException {
         if (requestBody == null) {
             return Collections.emptyList();
         }

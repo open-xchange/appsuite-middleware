@@ -63,7 +63,7 @@ import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindPropNamesMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
@@ -85,7 +85,7 @@ public class WebdavPropfindAction extends AbstractAction {
 	}
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+			throws OXException {
 		
 		final Element response = new Element("multistatus",DAV_NS);
 		
@@ -106,7 +106,7 @@ public class WebdavPropfindAction extends AbstractAction {
 			forceAllProp = true; //Assume All Prop, if all else fails
 			
 		} catch (final IOException e1) {
-			throw new WebdavProtocolException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
+			throw new OXException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
 		}
 		
         final LoadingHints loadingHints = new LoadingHints();

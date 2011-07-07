@@ -54,7 +54,7 @@ import java.net.URLDecoder;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
@@ -74,12 +74,12 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
 
     }
 
-    public WebdavCollection resolveCollection(String url) throws WebdavProtocolException {
+    public WebdavCollection resolveCollection(String url) throws OXException {
         url = normalize(url);
         return resolveCollection(decode(new WebdavPath(url)));
     }
 
-    public WebdavResource resolveResource(String url) throws WebdavProtocolException {
+    public WebdavResource resolveResource(String url) throws OXException {
         url = normalize(url);
         return resolveResource(decode(new WebdavPath(url)));
     }

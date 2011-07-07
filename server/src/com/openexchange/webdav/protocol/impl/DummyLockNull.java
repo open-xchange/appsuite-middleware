@@ -55,7 +55,7 @@ import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class DummyLockNull extends DummyCollection {
@@ -86,7 +86,7 @@ public class DummyLockNull extends DummyCollection {
 	}
 	
 	@Override
-	public void unlock(final String token) throws WebdavProtocolException {
+	public void unlock(final String token) throws OXException {
 		super.unlock(token);
 		if(getOwnLocks().isEmpty()) {
 			mgr.removeLockNull(this.getUrl());
@@ -99,12 +99,12 @@ public class DummyLockNull extends DummyCollection {
 	}
 
 	@Override
-	public void delete() throws WebdavProtocolException {
+	public void delete() throws OXException {
 		super.delete();
 	}
 
 	@Override
-	public void create() throws WebdavProtocolException {
+	public void create() throws OXException {
 		final WebdavResource res = getRealResource();
 		res.create();
 		if (res instanceof DummyResource) {

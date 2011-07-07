@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -68,7 +68,7 @@ public class InMemoryMixin implements PropertyMixin {
 
     private PropertyMixin mixin = null;
     
-    public List<WebdavProperty> getAllProperties() throws WebdavProtocolException {
+    public List<WebdavProperty> getAllProperties() throws OXException {
         ArrayList<WebdavProperty> allProperties = new ArrayList<WebdavProperty>(properties.values());
         if (mixin != null) {
             allProperties.addAll(mixin.getAllProperties());
@@ -76,7 +76,7 @@ public class InMemoryMixin implements PropertyMixin {
         return allProperties;
     }
 
-    public WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException {
+    public WebdavProperty getProperty(String namespace, String name) throws OXException {
         WebdavProperty webdavProperty = properties.get(namespace+":"+name);
         if (webdavProperty == null && mixin != null) {
             return mixin.getProperty(namespace, name);

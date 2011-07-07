@@ -50,24 +50,25 @@
 package com.openexchange.webdav.protocol;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 
-public class WebdavMultistatusException extends WebdavProtocolException {
+public class WebdavMultistatusException extends OXException {
 
 	private static final long serialVersionUID = 1L;
-	private final WebdavProtocolException[] exceptions;
+	private final OXException[] exceptions;
 
-
-    public WebdavMultistatusException(final WebdavPath url, final WebdavProtocolException...exceptions) {
-        super(url, 207);
+    public WebdavMultistatusException(final WebdavPath url, final OXException...exceptions) {
+        super();
+        copyFrom(WebdavProtocolExceptionCode.GENERAL_ERROR.create());
         this.exceptions = exceptions;
     }
 
-    public WebdavMultistatusException(final WebdavPath url, final Collection<WebdavProtocolException> exceptions){
-        this(url, exceptions.toArray(new WebdavProtocolException[exceptions.size()]));
+    public WebdavMultistatusException(final WebdavPath url, final Collection<OXException> exceptions){
+        this(url, exceptions.toArray(new OXException[exceptions.size()]));
     }
 
 
-    public WebdavProtocolException[] getExceptions(){
+    public OXException[] getExceptions(){
 		return exceptions;
 	}
 }

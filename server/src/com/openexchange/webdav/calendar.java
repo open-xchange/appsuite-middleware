@@ -292,7 +292,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 case DataParser.SAVE:
                     if (appointmentobject.containsObjectID()) {
                         if (lastModified == null) {
-                            throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED);
+                            throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                         }
                         
                         final Date currentLastModified = lastModifiedCache.getLastModified(appointmentobject.getObjectID(), lastModified);
@@ -316,7 +316,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     }
 
                     if (lastModified == null) {
-                        throw new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED);
+                        throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
 
                     appointmentsSQL.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
@@ -326,7 +326,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                             appointmentobject.getConfirmMessage());
                     break;
                 default:
-                    throw new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action));
+                    throw WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action));
                 }
 
                 if (hasConflicts) {
