@@ -65,7 +65,6 @@ import org.json.JSONObject;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.concurrent.TimeoutListener;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;

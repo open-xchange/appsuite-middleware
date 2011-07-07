@@ -58,13 +58,13 @@ import java.util.Map;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class ReplayWebdavRequest implements WebdavRequest{
@@ -100,11 +100,11 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return new SAXBuilder().build(getBody());
 	}
 
-	public WebdavCollection getCollection() throws WebdavProtocolException {
+	public WebdavCollection getCollection() throws OXException {
 		return delegate.getCollection();
 	}
 
-	public WebdavResource getDestination() throws WebdavProtocolException {
+	public WebdavResource getDestination() throws OXException {
 		return delegate.getDestination();
 	}
 
@@ -124,7 +124,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return delegate.getIfHeader();
 	}
 
-	public WebdavResource getResource() throws WebdavProtocolException {
+	public WebdavResource getResource() throws OXException {
 		return delegate.getResource();
 	}
 
@@ -140,7 +140,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return delegate.getDepth(depth);
 	}
 
-	public WebdavFactory getFactory() throws WebdavProtocolException {
+	public WebdavFactory getFactory() throws OXException {
 		return delegate.getFactory();
 	}
 

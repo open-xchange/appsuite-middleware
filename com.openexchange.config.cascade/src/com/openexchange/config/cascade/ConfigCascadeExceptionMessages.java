@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**

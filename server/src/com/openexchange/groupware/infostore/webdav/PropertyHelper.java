@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
@@ -152,7 +151,7 @@ public class PropertyHelper {
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			
 		} catch (final OXException e) {
-		    throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw e;
 		}
 	}
 
@@ -168,7 +167,7 @@ public class PropertyHelper {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
 		} catch (final OXException e) {
-		    throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw e;
 		}
 	}
 	

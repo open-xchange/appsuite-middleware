@@ -59,7 +59,7 @@ public class WebdavMoveAction extends WebdavStructureAction {
 	}
 
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+			throw OXException {
 		checkOverwrite(req);
 		checkSame(req);
 		final int rc = chooseReturnCode(req);

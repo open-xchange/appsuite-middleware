@@ -92,32 +92,32 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	}
 
 	@Override
-    public String getResourceType() throws WebdavProtocolException {
+    public String getResourceType() throw OXException {
 		return Protocol.COLLECTION;
 	}
 
 	@Override
-	public void putBody(final InputStream data, final boolean guessSize) throws WebdavProtocolException {
+	public void putBody(final InputStream data, final boolean guessSize) throw OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
 	@Override
-	public String getLanguage() throws WebdavProtocolException{
+	public String getLanguage() throw OXException{
 		return null;
 	}
 	
 	@Override
-	public void setLanguage(final String lang) throws WebdavProtocolException{
+	public void setLanguage(final String lang) throw OXException{
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
 	@Override
-	public Long getLength() throws WebdavProtocolException{
+	public Long getLength() throw OXException{
 		return null;
 	}
 	
 	@Override
-	public void delete() throws WebdavProtocolException {
+	public void delete() throw OXException {
 		final List<WebdavResource> copy = new ArrayList<WebdavResource>(children);
 		final List<WebdavProtocolException> exceptions = new ArrayList<WebdavProtocolException>();
 		for(final WebdavResource res : copy) {
@@ -150,7 +150,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	
 	
 	@Override
-    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
+    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throw OXException {
 		try {
             checkParentExists(dest);
         } catch (final OXException e) {
@@ -194,25 +194,25 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	}
 
 	@Override
-	public void setLength(final Long l) throws WebdavProtocolException {
+	public void setLength(final Long l) throw OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
 	@Override
-	public String getETag() throws WebdavProtocolException{
+	public String getETag() throw OXException{
 		return null;
 	}
 	
 	@Override
-	public void setContentType(final String s) throws WebdavProtocolException {
+	public void setContentType(final String s) throw OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	public WebdavResource resolveResource(final WebdavPath subPath) throws WebdavProtocolException {
+	public WebdavResource resolveResource(final WebdavPath subPath) throw OXException {
 		return mgr.resolveResource(url.dup().append(subPath));
 	}
 
-	public WebdavCollection resolveCollection(final WebdavPath subPath) throws WebdavProtocolException {
+	public WebdavCollection resolveCollection(final WebdavPath subPath) throw OXException {
 		return mgr.resolveCollection(url.dup().append(subPath));
 	}
 	

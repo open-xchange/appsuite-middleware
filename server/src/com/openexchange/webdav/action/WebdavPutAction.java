@@ -63,7 +63,7 @@ public class WebdavPutAction extends AbstractAction {
 
 	private static final Log LOG = LogFactory.getLog(WebdavPutAction.class);
 	
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throw OXException {
 		final WebdavResource resource = req.getResource();
 		if(null != req.getHeader("content-length")) {
 			resource.setLength(new Long(req.getHeader("content-length")));

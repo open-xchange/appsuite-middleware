@@ -60,6 +60,7 @@ import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -98,7 +99,6 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**

@@ -71,7 +71,7 @@ public class WebdavReportAction extends AbstractAction {
         this.protocol = protocol;
     }
     
-    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+    public void perform(final WebdavRequest req, final WebdavResponse res) throw OXException {
         try {
             final Document reportQuery = req.getBodyAsDocument();
             final Element root = reportQuery.getRootElement();

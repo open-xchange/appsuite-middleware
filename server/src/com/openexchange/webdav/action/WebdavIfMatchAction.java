@@ -56,14 +56,14 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class WebdavIfMatchAction extends AbstractAction {
 
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+			throw OXException {
 		check(req, true);
 		check(req, false);
 		yield(req,res);
 		
 	}
 
-	private void check(final WebdavRequest req,final boolean mustMatch) throws WebdavProtocolException {
+	private void check(final WebdavRequest req,final boolean mustMatch) throw OXException {
 		final String header = mustMatch ? "If-Match" : "If-None-Match";
 		
 		if(req.getHeader(header) != null) {

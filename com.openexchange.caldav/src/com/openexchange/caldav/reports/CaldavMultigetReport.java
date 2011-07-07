@@ -59,12 +59,12 @@ import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**

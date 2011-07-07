@@ -75,7 +75,7 @@ public class WebdavLockAction extends AbstractAction {
 	private static final Log LOG = LogFactory.getLog(WebdavLockAction.class);
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+			throw OXException {
 		final WebdavLock lock = new WebdavLock();
 		
 		lock.setTimeout(getTimeout(req.getHeader("Timeout")));

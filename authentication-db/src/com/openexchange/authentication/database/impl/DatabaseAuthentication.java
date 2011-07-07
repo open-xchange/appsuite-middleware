@@ -50,7 +50,6 @@
 package com.openexchange.authentication.database.impl;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
-import javax.security.auth.login.OXException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginInfo;
@@ -59,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.user.UserService;
 
 /**

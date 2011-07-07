@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.caldav.mixins.CalendarHomeSet;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -60,7 +61,6 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 

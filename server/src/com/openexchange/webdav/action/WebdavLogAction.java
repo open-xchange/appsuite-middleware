@@ -71,7 +71,7 @@ public class WebdavLogAction extends AbstractAction {
 	private boolean logResponse;
 	
 	public void perform(WebdavRequest req, WebdavResponse res)
-			throws WebdavProtocolException {
+			throw OXException {
 		StringBuilder b = new StringBuilder();
 		try {
 			b.append("URL: "); b.append(req.getUrl()); b.append('\n');

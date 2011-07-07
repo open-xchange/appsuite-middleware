@@ -57,7 +57,7 @@ public class WebdavRequestCycleAction extends AbstractAction {
 	private static final Log LOG = LogFactory.getLog(WebdavRequestCycleAction.class);
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+			throw OXException {
 		
 		
 		req.getFactory().beginRequest();

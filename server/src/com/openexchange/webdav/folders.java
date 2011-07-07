@@ -64,7 +64,6 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.FolderSQLInterface;
-import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;

@@ -80,7 +80,7 @@ public class Protocol {
 			this.namespace = namespace;
 		}
 		
-		public Object doSwitch(final PropertySwitch sw) throws WebdavProtocolException {
+		public Object doSwitch(final PropertySwitch sw) throw OXException {
 			switch(id) {
 			case CREATIONDATE : return sw.creationDate();
 			case DISPLAYNAME : return sw.displayName();

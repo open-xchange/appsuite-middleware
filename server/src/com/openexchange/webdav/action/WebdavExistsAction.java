@@ -62,7 +62,7 @@ public class WebdavExistsAction extends AbstractAction {
 
     private static final String NOT_FOUND = "There is nothing here, sorry.";
 
-    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+    public void perform(final WebdavRequest req, final WebdavResponse res) throw OXException {
 		if(!req.getResource().exists()) {
 		    notFound(req, res);
         }
@@ -72,7 +72,7 @@ public class WebdavExistsAction extends AbstractAction {
         yield(req,res);
 	}
 
-    private void notFound(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+    private void notFound(final WebdavRequest req, final WebdavResponse res) throw OXException {
         try {
             res.sendString(NOT_FOUND);
         } catch (final IOException e) {

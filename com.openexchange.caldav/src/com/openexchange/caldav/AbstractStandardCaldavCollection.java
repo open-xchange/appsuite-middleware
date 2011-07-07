@@ -62,12 +62,12 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
@@ -90,7 +90,7 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
 
     @Override
     protected void internalDelete() throws OXException {
-        throw new OXException(GroupwareCaldavFactory.ROOT_URL, HttpServletResponse.SC_FORBIDDEN);
+        throw WebdavExceptionCode.IO_ERROR.create(GroupwareCaldavFactory.ROOT_URL, HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override

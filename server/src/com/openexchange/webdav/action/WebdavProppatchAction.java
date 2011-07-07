@@ -84,7 +84,7 @@ public class WebdavProppatchAction extends AbstractAction {
 	}
 	
 	
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throw OXException {
 		try {
 			final Document requestDoc = req.getBodyAsDocument();
 			final Document responseDoc = new Document();

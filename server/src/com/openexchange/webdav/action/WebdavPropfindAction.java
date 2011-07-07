@@ -86,7 +86,7 @@ public class WebdavPropfindAction extends AbstractAction {
 	}
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+			throws OXException {
 		
 		final Element response = new Element("multistatus",DAV_NS);
 		

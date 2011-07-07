@@ -88,7 +88,7 @@ public class DummyLockNull extends DummyCollection {
 	}
 	
 	@Override
-	public void unlock(final String token) throws WebdavProtocolException {
+	public void unlock(final String token) throw OXException {
 		super.unlock(token);
 		if(getOwnLocks().isEmpty()) {
 			mgr.removeLockNull(this.getUrl());
@@ -101,12 +101,12 @@ public class DummyLockNull extends DummyCollection {
 	}
 
 	@Override
-	public void delete() throws WebdavProtocolException {
+	public void delete() throw OXException {
 		super.delete();
 	}
 
 	@Override
-	public void create() throws WebdavProtocolException {
+	public void create() throw OXException {
 		final WebdavResource res = getRealResource();
 		try {
             res.create();

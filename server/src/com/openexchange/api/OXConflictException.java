@@ -50,7 +50,6 @@
 package com.openexchange.api;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link OXConflictException} - Thrown when a conflict occurs.

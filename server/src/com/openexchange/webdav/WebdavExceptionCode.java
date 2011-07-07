@@ -51,7 +51,12 @@ public enum WebdavExceptionCode implements OXExceptionCode {
     /**
      * Authentication failed for user name: %1$s
      */
-    AUTH_FAILED("Authentication failed for user name: %1$s", CATEGORY_ERROR, 11);
+    AUTH_FAILED("Authentication failed for user name: %1$s", CATEGORY_ERROR, 11),
+    /**
+     * Unexpected error: %1$s
+     */
+    UNEXPECTED_ERROR("Unexpected error: %1$s", CATEGORY_ERROR, 11);
+    
 
     private final String message;
 
