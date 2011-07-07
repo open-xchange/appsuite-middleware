@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.upload.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
@@ -81,9 +82,9 @@ public abstract class UploadQuotaChecker {
      * @param module The module for which the upload starts
      * @param session The current session
      * @return The upload quota checker appropriate for given module
-     * @throws UploadException If the module is unknown
+     * @throws OXException If the module is unknown
      */
-    public static final UploadQuotaChecker getUploadQuotaChecker(final int module, final Session session, final Context ctx) throws UploadException {
+    public static final UploadQuotaChecker getUploadQuotaChecker(final int module, final Session session, final Context ctx) throws OXException {
         if (module == FolderObject.MAIL) {
             return new MailUploadQuotaChecker(session, ctx);
         }

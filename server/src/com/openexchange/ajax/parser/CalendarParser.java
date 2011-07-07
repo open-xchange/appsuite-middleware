@@ -255,7 +255,7 @@ public class CalendarParser extends CommonParser {
                     p.setIdentifier(id);
                     break;
                 default:
-                    throw new OXConflictException("invalid type");
+                    throw "invalid type";
             }
             participant[i] = p;
         }
@@ -285,7 +285,7 @@ public class CalendarParser extends CommonParser {
         return participants.getUsers();
     }
 
-    public static int parseRecurrenceType(final String value) throws OXConflictException {
+    public static int parseRecurrenceType(final String value) throws OXException {
         if ("none".equals(value)) {
             return CalendarObject.NONE;
         } else if ("daily".equals(value)) {
@@ -297,7 +297,7 @@ public class CalendarParser extends CommonParser {
         } else if ("yearly".equals(value)) {
             return CalendarObject.YEARLY;
         } else {
-            throw new OXConflictException("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
+            throw "unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value;
         }
     }
 

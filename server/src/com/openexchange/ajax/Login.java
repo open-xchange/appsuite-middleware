@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.security.auth.login.OXException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -178,7 +177,7 @@ public class Login extends AJAXServlet {
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doStore(req, resp);
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     logAndSendException(resp, e);
                 } catch (final JSONException e) {
                     log(RESPONSE_ERROR, e);
@@ -191,7 +190,7 @@ public class Login extends AJAXServlet {
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doRefreshSecret(req, resp);
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     logAndSendException(resp, e);
                 } catch (final JSONException e) {
                     log(RESPONSE_ERROR, e);

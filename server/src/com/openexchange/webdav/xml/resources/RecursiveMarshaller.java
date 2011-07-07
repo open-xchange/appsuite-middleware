@@ -52,9 +52,9 @@ package com.openexchange.webdav.xml.resources;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom.Element;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class RecursiveMarshaller implements ResourceMarshaller {

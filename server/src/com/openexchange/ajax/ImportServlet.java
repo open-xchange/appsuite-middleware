@@ -64,7 +64,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.writer.ImportExportWriter;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -145,7 +145,7 @@ public class ImportServlet extends ImportExport {
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             if (CATEGORY_USER_INPUT.equals(e.getCategory())) {
                 LOG.debug(e.getMessage(), e);
             } else {

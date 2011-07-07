@@ -61,7 +61,6 @@ import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.TaskRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -95,7 +94,7 @@ public class Tasks extends DataServlet {
             final JSONValue responseObj = taskRequest.action(action, jsonObj);
             response.setTimestamp(taskRequest.getTimestamp());
             response.setData(responseObj);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             if (e.getCategory() == CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
@@ -155,7 +154,7 @@ public class Tasks extends DataServlet {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             if (e.getCategory() == CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {

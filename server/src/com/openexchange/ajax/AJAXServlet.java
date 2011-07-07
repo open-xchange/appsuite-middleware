@@ -90,13 +90,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.UploadServletException;
 
 /**
  * This is a super class of all AJAX servlets providing common methods.
@@ -528,12 +526,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * 
      * @param req The servlet request
      * @return The action parameter's value
-     * @throws OXConflictException If action parameter is missing in specified servlet request
+     * @throws OXException If action parameter is missing in specified servlet request
      */
-    protected static String getAction(final HttpServletRequest req) throws OXConflictException {
+    protected static String getAction(final HttpServletRequest req) throws OXException {
         final String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
-            throw new OXConflictException(AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION));
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
         }
         return action;
     }
@@ -638,9 +636,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * 
      * @param req The request whose upload shall be processed
      * @return The processed instance of {@link UploadEvent}
-     * @throws UploadException Id processing the upload fails
+     * @throws OXException Id processing the upload fails
      */
-    public UploadEvent processUpload(final HttpServletRequest req) throws UploadException {
+    public UploadEvent processUpload(final HttpServletRequest req) throws OXException {
         return processUploadStatic(req);
     }
 
@@ -705,12 +703,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * 
      * @param req The request whose upload shall be processed
      * @return The processed instance of {@link UploadEvent}
-     * @throws UploadException Id processing the upload fails
+     * @throws OXException Id processing the upload fails
      */
-    public static final UploadEvent processUploadStatic(final HttpServletRequest req) throws UploadException {
+    public static final UploadEvent processUploadStatic(final HttpServletRequest req) throws OXException {
         if (!FileUploadBase.isMultipartContent(new ServletRequestContext(req))) {
             // No multipart content
-            throw new UploadException(UploadCode.NO_MULTIPART_CONTENT, null);
+            throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
         }
         /*
          * Check action parameter existence
@@ -719,7 +717,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         try {
             action = getAction(req);
         } catch (final OXConflictException e) {
-            throw new UploadException(UploadCode.UPLOAD_FAILED, null, e);
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e);
         }
         /*-
          * Check proper action value
@@ -729,7 +727,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          * ###########################################################################################################
          */
         if (mayUpload(action)) {
-            throw new UploadException(UploadCode.UNKNOWN_ACTION_VALUE, null, action);
+            throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
         }
         /*
          * Create file upload base
@@ -740,7 +738,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             @SuppressWarnings("unchecked") final List<FileItem> tmp = upload.parseRequest(req);
             items = tmp;
         } catch (final FileUploadException e) {
-            throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         }
         /*
          * Create the upload event
@@ -764,25 +762,25 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 try {
                     uploadEvent.addFormField(fileItem.getFieldName(), fileItem.getString(charEnc));
                 } catch (final UnsupportedEncodingException e) {
-                    throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                 }
             } else {
                 if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
                     try {
                         uploadEvent.addUploadFile(processUploadedFile(fileItem, ServerConfig.getProperty(Property.UploadDirectory)));
                     } catch (final Exception e) {
-                        throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+                        throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                     }
                 }
             }
         }
         if (uploadEvent.getAffiliationId() < 0) {
-            throw new UploadException(UploadCode.MISSING_AFFILIATION_ID, action);
+            throw UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action);
         }
         return uploadEvent;
     }
 
-    protected static boolean mayUpload(String action) {
+    protected static boolean mayUpload(final String action) {
         return !UPLOAD_ACTIONS.contains(action) && !com.openexchange.groupware.importexport.Format.containsConstantName(action);
     }
 
@@ -807,7 +805,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
-    public void fireUploadEvent(final UploadEvent uploadEvent, final Collection<UploadListener> uploadListeners) throws UploadServletException {
+    public void fireUploadEvent(final UploadEvent uploadEvent, final Collection<UploadListener> uploadListeners) throws OXException {
         try {
             for (final UploadListener uploadListener : uploadListeners) {
                 try {

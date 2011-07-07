@@ -78,7 +78,6 @@ import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
@@ -91,14 +90,12 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.encoding.Helper;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -134,8 +131,6 @@ public class Attachment extends PermissionServlet {
 
     private static transient final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Attachment.class));
 
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Attachment.class, LOG);
-
     private long maxUploadSize = -2;
 
     @Override
@@ -168,7 +163,7 @@ public class Attachment extends PermissionServlet {
         if (ACTION_DOCUMENT.equals(action)) {
             try {
                 require(req, PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
-            } catch (final UploadException e) {
+            } catch (final OXException e) {
                 handle(res, e, action);
                 return;
             }
@@ -338,7 +333,7 @@ public class Attachment extends PermissionServlet {
                     }
                 }
             }
-        } catch (final UploadException x) {
+        } catch (final OXException x) {
             final Response resp = new Response();
             resp.setException(x);
             try {
@@ -458,14 +453,14 @@ public class Attachment extends PermissionServlet {
         } catch (final OXException e) {
             LOG.debug("", e);
         }
-        if (t instanceof AbstractOXException) {
-            handle(res, (AbstractOXException) t, action);
+        if (t instanceof OXException) {
+            handle(res, (OXException) t, action);
         } else {
             handle(res, new OXException(t), action);
         }
     }
 
-    private void attach(final HttpServletResponse res, final List<AttachmentMetadata> attachments, final List<UploadFile> uploadFiles, ServerSession session, final Context ctx, final User user, final UserConfiguration userConfig) {
+    private void attach(final HttpServletResponse res, final List<AttachmentMetadata> attachments, final List<UploadFile> uploadFiles, final ServerSession session, final Context ctx, final User user, final UserConfiguration userConfig) {
         initAttachments(attachments, uploadFiles);
         PrintWriter w = null;
         try {
@@ -522,14 +517,6 @@ public class Attachment extends PermissionServlet {
             }
             handle(res, new OXException(e), ResponseFields.ERROR);
             return;
-        } catch (final OXException e) {
-            try {
-                ATTACHMENT_BASE.rollback();
-            } catch (final OXException x) {
-                LOG.error(x);
-            }
-            handle(res, e, ResponseFields.ERROR);
-            return;
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
@@ -573,9 +560,7 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void handle(final HttpServletResponse res, final AbstractOXException t, final String action) {
-        LL.log(t);
-
+    private void handle(final HttpServletResponse res, final OXException t, final String action) {
         res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
 
         final Response resp = new Response();
@@ -593,7 +578,7 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void checkSize(final long size) throws UploadException {
+    private void checkSize(final long size) throws OXException {
         if (maxUploadSize == -2) {
             maxUploadSize = AttachmentConfig.getMaxUploadSize();
         }
@@ -601,14 +586,14 @@ public class Attachment extends PermissionServlet {
             return;
         }
         if (size > maxUploadSize) {
-            throw new UploadSizeExceededException(size, maxUploadSize, true);
+            throw UploadSizeExceededException.create(size, maxUploadSize, true);
         }
     }
 
-    protected void require(final HttpServletRequest req, final String... parameters) throws UploadException {
+    protected void require(final HttpServletRequest req, final String... parameters) throws OXException {
         for (final String param : parameters) {
             if (req.getParameter(param) == null) {
-                throw new UploadException(UploadCode.MISSING_PARAM, null, param);
+                throw UploadException.UploadCode.MISSING_PARAM.create(param);
             }
         }
     }

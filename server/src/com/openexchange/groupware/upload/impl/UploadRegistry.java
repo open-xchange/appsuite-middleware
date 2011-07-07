@@ -51,7 +51,7 @@ package com.openexchange.groupware.upload.impl;
 
 import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
-import com.openexchange.tools.servlet.UploadServletException;
+import com.openexchange.exception.OXException;
 
 /**
  * An interface that defines a method to register instances of <code>com.openexchange.groupware.upload.UploadListener</code>
@@ -66,16 +66,16 @@ public interface UploadRegistry {
      * 
      * @param uploadEvent The upload event
      * @param uploadListeners The upload listeners for current upload event
-     * @throws UploadServletException if an error like over quota occurs
+     * @throws OXException if an error like over quota occurs
      */
-    public void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners) throws UploadServletException;
+    public void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners) throws OXException;
 
     /**
      * Create an <code>UpdateEvent</code> object from incoming multipart form data
      * 
      * @param req The corresponding instance of <code>HttpServletRequest</code>
      * @return An <code>UpdateEvent</code> object from incoming multipart form data
-     * @throws UploadException if an error like over quota occurs
+     * @throws OXException if an error like over quota occurs
      */
-    public UploadEvent processUpload(HttpServletRequest req) throws UploadException;
+    public UploadEvent processUpload(HttpServletRequest req) throws OXException;
 }

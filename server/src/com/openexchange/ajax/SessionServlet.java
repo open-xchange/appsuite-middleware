@@ -77,7 +77,6 @@ import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -233,7 +232,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 log(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);

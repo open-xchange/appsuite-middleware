@@ -541,7 +541,7 @@ public class InfostoreRequest extends CommonRequest {
             final TimedResult<DocumentMetadata> result = infostore.getVersions(id, new Metadata[] { Metadata.VERSION_LITERAL },
                     ctx, user, userConfiguration);
             if (timestamp > ts) {
-                throw new OXConflictException();
+                throw ;
             }
             iter = result.results();
             final TIntArrayList versions;

@@ -76,7 +76,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.webdav.digest.Authorization;
 import com.openexchange.tools.webdav.digest.DigestUtility;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.xml.jdom.JDOMParser;
 

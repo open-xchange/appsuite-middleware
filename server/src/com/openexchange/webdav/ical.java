@@ -395,7 +395,7 @@ public final class ical extends PermissionServlet {
     // }
     //
     // if (user_agent == null) {
-    // throw new OXConflictException("missing header field: user-agent");
+    // throw "missing header field: user-agent";
     // }
     //
     // principal = user_agent + '_' + sessionObj.getUserId();
@@ -441,14 +441,14 @@ public final class ical extends PermissionServlet {
     // db_taskfolder_id = rs.getInt(3);
     //
     // if (!(db_calendarfolder_id == calendarfolder_id && db_taskfolder_id == taskfolder_id)) {
-    // throw new OXConflictException("no principal found for the given folders: " + principal);
+    // throw "no principal found for the given folders: " + principal;
     // }
     //
     // final Map<String, String>[] h = loadDBEntries(context, principal_id);
     // entries_db = h[0];
     // entries_module = h[1];
     // } else {
-    // throw new OXConflictException("no principal found: " + principal);
+    // throw "no principal found: " + principal;
     // }
     // } finally {
     // if (rs != null) {
@@ -614,7 +614,7 @@ public final class ical extends PermissionServlet {
     // } else if (i_module == Types.TASK) {
     // taskInterface.deleteTaskObject(object_id, taskfolder_id, timestamp);
     // } else {
-    // throw new OXConflictException("unknown module: " + i_module);
+    // throw "unknown module: " + i_module;
     // }
     // } catch (final OXObjectNotFoundException exc) {
     // LOG.debug("object was already delete", exc);

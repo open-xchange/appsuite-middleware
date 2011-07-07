@@ -70,14 +70,12 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.ContactRequest;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.Logging;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -160,8 +158,7 @@ public class Contact extends DataServlet {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-        } catch (final AbstractOXException e) {
-            Logging.log(LOG, e);
+        } catch (final OXException e) {
             response.setException(e);
         }
         
@@ -218,8 +215,7 @@ public class Contact extends DataServlet {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-        } catch (final AbstractOXException e) {
-            Logging.log(LOG, e);
+        } catch (final OXException e) {
             response.setException(e);
         }
         
@@ -243,7 +239,7 @@ public class Contact extends DataServlet {
                     final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
 
                     if (uploadFile == null) {
-                        throw new OXException(AjaxExceptionCodes.NoUploadImage);
+                        throw AjaxExceptionCodes.NoUploadImage.create();
                     }
 
                     final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
@@ -348,7 +344,7 @@ public class Contact extends DataServlet {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             Logging.log(LOG, e);
             response.setException(e);
         }

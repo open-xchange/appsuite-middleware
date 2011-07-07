@@ -65,7 +65,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
@@ -106,7 +105,7 @@ public class ConfigMenu extends SessionServlet {
             setting = ConfigTree.getSettingByPath(path);
             stor.readValues(setting);
             response.setData(convert2JS(setting));
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             response.setException(e);
         } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
@@ -199,7 +198,7 @@ public class ConfigMenu extends SessionServlet {
             final Setting setting = ConfigTree.getSettingByPath(path);
             setting.setSingleValue(value);
             saveSettingWithSubs(stor, setting);
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             log(e.getMessage(), e);
             response.setException(e);
         } catch (JSONException e) {

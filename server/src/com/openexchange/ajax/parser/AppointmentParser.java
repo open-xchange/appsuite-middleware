@@ -78,7 +78,7 @@ public class AppointmentParser extends CalendarParser {
         this.timeZone = timeZone;
     }
 
-    public void parse(final Appointment appointmentobject, final JSONObject jsonobject) throws OXConflictException, OXException {
+    public void parse(final Appointment appointmentobject, final JSONObject jsonobject) throws OXException, OXException {
         try {
             parseElementAppointment(appointmentobject, jsonobject);
         } catch (final OXConflictException exc) {

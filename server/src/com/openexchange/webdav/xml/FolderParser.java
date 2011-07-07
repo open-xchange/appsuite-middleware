@@ -114,7 +114,7 @@ public class FolderParser extends FolderChildParser {
 			} else if ("public".equals(type)) {
 				folderobject.setType(FolderObject.PUBLIC);
 			} else {
-				throw new OXConflictException("unknown value in " + FolderFields.TYPE + ": " + type);
+				throw "unknown value in " + FolderFields.TYPE + ": " + type;
 			}
 			
 			return ;
@@ -129,7 +129,7 @@ public class FolderParser extends FolderChildParser {
 			} else if ("unbound".equals(module)) {
 				folderobject.setModule(FolderObject.UNBOUND);
 			} else {
-				throw new OXConflictException("unknown value in " + FolderFields.MODULE + ": " + module);
+				throw "unknown value in " + FolderFields.MODULE + ": " + module;
 			}
 			
 			return ;
@@ -152,7 +152,7 @@ public class FolderParser extends FolderChildParser {
 				parser.nextTag();
 				
 				if (isEnd(parser)) {
-					throw new OXConflictException("invalid xml in permission!");
+					throw "invalid xml in permission!";
 				}
 				
 				if (parser.getName().equals(FolderFields.PERMISSIONS) && parser.getEventType() == XmlPullParser.END_TAG) {
@@ -170,7 +170,7 @@ public class FolderParser extends FolderChildParser {
 					parseEntity(oclp, parser);
 					oclp.setGroupPermission(true);
 				} else {
-					throw new OXConflictException("unknown xml tag in permissions: " + parser.getName());
+					throw "unknown xml tag in permissions: " + parser.getName();
 				}
 				
 				permissions.add(oclp);

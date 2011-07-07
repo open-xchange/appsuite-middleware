@@ -61,7 +61,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -102,7 +101,7 @@ public class Group extends DataServlet {
 			response.setTimestamp(groupRequest.getTimestamp());
 			response.setData(responseObj);
 			//response.setData(new JSONObject(sw.toString()));
-		} catch (final AbstractOXException e) {
+		} catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
 		} catch (final JSONException e) {
@@ -158,7 +157,7 @@ public class Group extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 			}
-		} catch (final AbstractOXException e) {
+		} catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
 		} catch (final JSONException e) {

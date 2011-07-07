@@ -50,7 +50,6 @@
 package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.UploadServletException;
 
 /**
  * An interface to handle upload events by the <code>action()</code> method
@@ -66,9 +65,8 @@ public interface UploadListener {
      * @return <code>true</code> if upload event can be properly handled by this listener and upload event's affiliation id is accepted by
      *         this listener; <code>false</code> otherwise
      * @throws OXException
-     * @throws UploadServletException
      */
-    public boolean action(UploadEvent uploadEvent) throws OXException, UploadServletException;
+    public boolean action(UploadEvent uploadEvent) throws OXException;
 
     /**
      * Gets the associated registry for this listener.

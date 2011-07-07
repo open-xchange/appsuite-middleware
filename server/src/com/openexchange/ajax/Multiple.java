@@ -78,7 +78,6 @@ import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -133,7 +132,7 @@ public class Multiple extends SessionServlet {
         } catch (final OXException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         } finally {
@@ -221,7 +220,7 @@ public class Multiple extends SessionServlet {
                     if (null != warnings && !warnings.isEmpty()) {
                         ResponseWriter.writeException(warnings.iterator().next(), jsonWriter);
                     }
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LL.log(e);
                     if (jsonWriter.isExpectingValue()) {
                         jsonWriter.value("");
@@ -302,7 +301,7 @@ public class Multiple extends SessionServlet {
                         }
                         return;
                     }
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     jsonWriter.object();
                     ResponseWriter.writeException(e, jsonWriter);

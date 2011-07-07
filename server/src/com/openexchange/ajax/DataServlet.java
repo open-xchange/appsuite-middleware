@@ -55,8 +55,8 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.exception.OXException;
 
 /**
  * TODO Remove this class from inheritance tree because all its methods are
@@ -72,23 +72,23 @@ public abstract class DataServlet extends PermissionServlet {
 
     public static final int maxEntries = 50000;
 
-    public static int parseIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
+    public static int parseIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException {
         if (containsParameter(httpServletRequest, name)) {
             try {
                 return Integer.parseInt(httpServletRequest.getParameter(name));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(_invalidParameter + name, exc);
+                throw _invalidParameter + name, exc;
             }
         }
         return 0;
     }
 
-    public static Date parseDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
+    public static Date parseDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException {
         if (containsParameter(httpServletRequest, name)) {
             try {
                 return new Date(Long.parseLong(httpServletRequest.getParameter(name)));
             } catch (final NumberFormatException exc) {
-                throw new OXConflictException(_invalidParameter + name, exc);
+                throw _invalidParameter + name, exc;
             }
         }
         return null;
@@ -105,7 +105,7 @@ public abstract class DataServlet extends PermissionServlet {
         return parseStringParameter(httpServletRequest, name);
     }
 
-    public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
+    public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException, OXMandatoryFieldException {
         if (!containsParameter(httpServletRequest, name)) {
             throw new OXMandatoryFieldException(_missingField + name);
         }
@@ -150,7 +150,7 @@ public abstract class DataServlet extends PermissionServlet {
         return i;
     }
 
-    public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
+    public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException, OXMandatoryFieldException {
         if (!containsParameter(httpServletRequest, name)) {
             throw new OXMandatoryFieldException(_missingField + name);
         }

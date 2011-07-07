@@ -50,8 +50,8 @@
 package com.openexchange.webdav.protocol.helpers;
 
 import java.util.List;
-import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProperty;
 
 
 /**

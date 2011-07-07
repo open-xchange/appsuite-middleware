@@ -363,7 +363,7 @@ public class Folder extends SessionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {
@@ -1040,7 +1040,7 @@ public class Folder extends SessionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {
@@ -1304,7 +1304,7 @@ public class Folder extends SessionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {
@@ -1677,7 +1677,7 @@ public class Folder extends SessionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {
@@ -1808,7 +1808,7 @@ public class Folder extends SessionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {
@@ -1946,7 +1946,7 @@ public class Folder extends SessionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {
@@ -2057,7 +2057,7 @@ public class Folder extends SessionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {
@@ -2180,7 +2180,7 @@ public class Folder extends SessionServlet {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {
@@ -2309,7 +2309,7 @@ public class Folder extends SessionServlet {
             if (!e.getCategory().equals(CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final Exception e) {

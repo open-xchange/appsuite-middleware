@@ -63,8 +63,8 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -99,8 +99,8 @@ public class Appointment extends DataServlet {
         } catch (final OXConflictException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (final AbstractOXException e) {
-            if (e.getCategory() == CATEGORY_USER_INPUT) {
+        } catch (final OXException e) {
+            if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);
@@ -165,8 +165,8 @@ public class Appointment extends DataServlet {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-        } catch (final AbstractOXException e) {
-            if (e.getCategory() == CATEGORY_USER_INPUT) {
+        } catch (final OXException e) {
+            if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                 LOG.debug(e.getMessage(), e);
             } else {
                 LOG.error(e.getMessage(), e);

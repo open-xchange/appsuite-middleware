@@ -126,7 +126,7 @@ public class CalendarParser extends CommonParser {
             } else if ("none".equals(s)) {
                 calendarobject.setConfirm(CalendarObject.NONE);
             } else {
-                throw new OXConflictException("invalid value in confirm tag");
+                throw "invalid value in confirm tag";
             }
             return ;
         } else if (isTag(parser, CalendarFields.CONFIRM_MESSAGE)) {
@@ -151,7 +151,7 @@ public class CalendarParser extends CommonParser {
         } else if ("yearly".equals(value)) {
             return CalendarObject.YEARLY;
         } else {
-            throw new OXConflictException("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
+            throw "unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value;
         }
     }
 
@@ -165,7 +165,7 @@ public class CalendarParser extends CommonParser {
                 parser.nextTag();
 
                 if (isEnd(parser)) {
-                    throw new OXConflictException("invalid xml in participant!");
+                    throw "invalid xml in participant!";
                 }
 
                 if (parser.getName().equals(CalendarFields.PARTICIPANTS) && parser.getEventType() == XmlPullParser.END_TAG) {
@@ -180,7 +180,7 @@ public class CalendarParser extends CommonParser {
                 } else if (isTag(parser, "resource")) {
                     parseElementResource(parser, participants);
                 } else {
-                    throw new OXConflictException("unknown xml tag in permissions!");
+                    throw "unknown xml tag in permissions!";
                 }
             }
 
@@ -225,7 +225,7 @@ public class CalendarParser extends CommonParser {
                 } else if ("none".equals(confirm)) {
                     userparticipant.setConfirm(CalendarObject.NONE);
                 } else {
-                    throw new OXConflictException("unknown value in confirm attribute: " + confirm);
+                    throw "unknown value in confirm attribute: " + confirm;
                 }
             }
 

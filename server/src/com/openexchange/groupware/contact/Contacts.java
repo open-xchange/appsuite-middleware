@@ -332,7 +332,7 @@ public final class Contacts {
         }
     }
 
-    public static void performContactStorageInsert(final Contact contact, final int user, final Session session, final boolean override) throws OXConflictException, OXException {
+    public static void performContactStorageInsert(final Contact contact, final int user, final Session session, final boolean override) throws OXException, OXException {
 
         final StringBuilder insert_fields = new StringBuilder();
         final StringBuilder insert_values = new StringBuilder();
@@ -1776,7 +1776,7 @@ public final class Contacts {
         }
     }
 
-    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXConflictException, OXException {
+    public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException, OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
             throw ContactExceptionCodes.IMAGE_BROKEN.create();
         }
@@ -1799,7 +1799,7 @@ public final class Contacts {
         }
     }
 
-    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXConflictException, OXException {
+    public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException, OXException {
         if ((contact_id < 1) || (img == null) || (img.length < 1) || (cid < 1) || (mime == null) || (mime.length() < 1)) {
             throw ContactExceptionCodes.IMAGE_BROKEN.create();
         }

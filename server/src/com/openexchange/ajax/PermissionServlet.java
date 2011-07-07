@@ -57,7 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessiondException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -93,7 +93,7 @@ public abstract class PermissionServlet extends SessionServlet {
                 log(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);

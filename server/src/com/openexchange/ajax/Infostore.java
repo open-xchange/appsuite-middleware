@@ -104,7 +104,6 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.tools.UnsynchronizedStringWriter;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -363,7 +362,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    private void checkSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
+    private void checkSize(final long size, final UserSettingMail userSettingMail) throws OXException {
         final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
         if (maxSize == 0) {
             return;

@@ -69,7 +69,6 @@ import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.WebdavExceptionCode;
 
 /**

@@ -73,13 +73,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
@@ -257,7 +255,7 @@ public final class AJAXFile extends PermissionServlet {
 					responseObj == null ? STR_NULL : responseObj.toString(),
 					e.getAction() == null ? STR_NULL : e.getAction()),
 					e.getMessage(), e);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
             Tools.disableCaching(resp);
@@ -320,7 +318,7 @@ public final class AJAXFile extends PermissionServlet {
                  */
                 try {
                     action = getAction(req);
-                } catch (final OXConflictException e) {
+                } catch (final OXException e) {
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, e.getMessage()).setAction(action);
                 }
                 if (!ACTION_NEW.equalsIgnoreCase(action)) {
@@ -373,7 +371,7 @@ public final class AJAXFile extends PermissionServlet {
                 writer.flush();
 
             }
-        } catch (final UploadException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             JSONObject responseObj = null;
             try {
@@ -385,7 +383,7 @@ public final class AJAXFile extends PermissionServlet {
             }
 			throw new UploadServletException(resp, substituteJS(
 					responseObj == null ? STR_NULL : responseObj.toString(),
-					e.getAction() == null ? STR_NULL : e.getAction()),
+					STR_NULL),
 					e.getMessage(), e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);

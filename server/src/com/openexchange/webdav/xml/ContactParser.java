@@ -410,7 +410,7 @@ public class ContactParser extends CommonParser {
             parser.nextTag();
 
             if (isEnd(parser)) {
-                throw new OXConflictException("invalid xml in distributionlist!");
+                throw "invalid xml in distributionlist!";
             }
 
             if (parser.getName().equals(ContactFields.DISTRIBUTIONLIST) && parser.getEventType() == XmlPullParser.END_TAG) {
@@ -423,7 +423,7 @@ public class ContactParser extends CommonParser {
             if (isTag(parser, "email")) {
                 parseElementEntry(parser, entry);
             } else {
-                throw new OXConflictException("unknown xml tag in distributionlist!");
+                throw "unknown xml tag in distributionlist!";
             }
 
             distributionlist.add(entry);
@@ -461,7 +461,7 @@ public class ContactParser extends CommonParser {
                 parser.nextTag();
 
                 if (isEnd(parser)) {
-                    throw new OXConflictException("invalid xml in links!");
+                    throw "invalid xml in links!";
                 }
 
                 if (parser.getName().equals(ContactFields.LINKS) && parser.getEventType() == XmlPullParser.END_TAG) {
@@ -474,7 +474,7 @@ public class ContactParser extends CommonParser {
                 if (isTag(parser, "link")) {
                     parseElementLink(parser, link);
                 } else {
-                    throw new OXConflictException("unknown xml tag in links!");
+                    throw "unknown xml tag in links!";
                 }
 
                 links.add(link);

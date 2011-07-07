@@ -84,7 +84,7 @@ public abstract class CalendarWriter extends CommonWriter {
         writeCommonElements(calendarobject, e_prop);
     }
 
-    public void addRecurrenceElements(final CalendarObject calendarobject, final Element e_prop) throws OXConflictException {
+    public void addRecurrenceElements(final CalendarObject calendarobject, final Element e_prop) throws OXException {
         if (calendarobject.containsRecurrenceID()) {
             addElement(CalendarFields.RECURRENCE_ID, calendarobject.getRecurrenceID(), e_prop);
         }
@@ -126,7 +126,7 @@ public abstract class CalendarWriter extends CommonWriter {
 
                 break;
             default:
-                throw new OXConflictException("invalid recurrence type: " + recurrenceType);
+                throw "invalid recurrence type: " + recurrenceType;
         }
 
         if (calendarobject.containsInterval()) {
@@ -142,7 +142,7 @@ public abstract class CalendarWriter extends CommonWriter {
         }
     }
 
-    public void addElementParticipants(final CalendarObject calendarobject, final Element e_prop) throws OXConflictException {
+    public void addElementParticipants(final CalendarObject calendarobject, final Element e_prop) throws OXException {
         boolean hasParticipants = false;
 
         final Element e_participants = new Element(CalendarFields.PARTICIPANTS, XmlServlet.NS);
@@ -184,7 +184,7 @@ public abstract class CalendarWriter extends CommonWriter {
                                 } else if (userparticipant[userPos].getConfirm() == CalendarObject.TENTATIVE) {
                                     eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "tentative", XmlServlet.NS);
                                 } else {
-                                    throw new OXConflictException("invalid value in confirm: " + userparticipant[a].getConfirm());
+                                    throw "invalid value in confirm: " + userparticipant[a].getConfirm();
                                 }
                             }
                         } else {
@@ -233,7 +233,7 @@ public abstract class CalendarWriter extends CommonWriter {
                         external = true;
                         break;
                     default:
-                        throw new OXConflictException("invalid type in participant: " + type);
+                        throw "invalid type in participant: " + type;
 
                 }
 

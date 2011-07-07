@@ -61,7 +61,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.LinkRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
@@ -130,7 +129,7 @@ public class Link extends DataServlet {
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (final AbstractOXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		}
@@ -201,7 +200,7 @@ public class Link extends DataServlet {
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (final AbstractOXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		}

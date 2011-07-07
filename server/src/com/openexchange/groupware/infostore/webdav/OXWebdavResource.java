@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public interface OXWebdavResource extends WebdavResource{

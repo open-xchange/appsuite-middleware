@@ -223,7 +223,7 @@ public class FolderWriter extends FolderChildWriter {
                 addElement("module", "task", e_prop);
                 break;
             default:
-                throw new OXConflictException("invalid module");
+                throw "invalid module";
             }
 
             if (type == FolderObject.PRIVATE) {

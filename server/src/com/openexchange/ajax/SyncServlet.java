@@ -123,7 +123,7 @@ public class SyncServlet extends PermissionServlet {
 		Tools.disableCaching(resp);
 		try {
 			actionPut(req, resp);
-		} catch (final AbstractOXException e) {
+		} catch (final OXException e) {
 			LOG.error("SyncServlet.doPut()", e);
 			final Writer writer = resp.getWriter();
 			final Response response = new Response();
@@ -253,7 +253,7 @@ public class SyncServlet extends PermissionServlet {
 			if (!e.getCategory().equals(CATEGORY_PERMISSION_DENIED)) {
 				response.setException(e);
 			}
-		} catch (final AbstractOXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
