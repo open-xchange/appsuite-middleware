@@ -65,9 +65,9 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
-import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -106,7 +106,7 @@ public final class groupuser extends PermissionServlet {
 
     private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified > ?";
 
-    private static transient final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(groupuser.class));
+    private static transient final Log LOG = LogFactory.getLog(groupuser.class);
 
     @Override
     protected Interface getInterface() {
@@ -225,7 +225,7 @@ public final class groupuser extends PermissionServlet {
         }
     }
 
-    private void writeElementGroups(final String s_groups, final Date lastsync, final OutputStream os, final XMLOutputter xo, final Context ctx) throws IOException, OXException, SQLException {
+    private void writeElementGroups(final String s_groups, final Date lastsync, final OutputStream os, final XMLOutputter xo, final Context ctx) throws IOException, AbstractOXException, SQLException {
         os.write(("<ox:groups>").getBytes());
 
         final GroupStorage groupstorage = GroupStorage.getInstance();
@@ -322,7 +322,7 @@ public final class groupuser extends PermissionServlet {
         DataWriter.addElement("memberuid", member, e_members);
     }
 
-    private void writeElementResources(final String s_resources, final Date lastsync, final OutputStream os, final XMLOutputter xo, final Context ctx) throws IOException, OXException, SQLException {
+    private void writeElementResources(final String s_resources, final Date lastsync, final OutputStream os, final XMLOutputter xo, final Context ctx) throws IOException, AbstractOXException, SQLException {
         os.write(("<ox:resources>").getBytes());
 
         final ResourceStorage resourcestorage = ResourceStorage.getInstance();

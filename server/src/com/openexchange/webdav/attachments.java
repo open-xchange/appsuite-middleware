@@ -62,8 +62,10 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.exception.OXException;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
@@ -77,6 +79,7 @@ import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.OXServlet;
+import com.openexchange.tx.TransactionException;
 import com.openexchange.webdav.xml.DataWriter;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
@@ -116,7 +119,7 @@ public final class attachments extends OXServlet {
         ATTACHMENT_BASE.setTransactional(true);
     }
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(attachments.class));
+    private static final transient Log LOG = LogFactory.getLog(attachments.class);
 
     @Override
     protected Interface getInterface() {
@@ -231,9 +234,19 @@ public final class attachments extends OXServlet {
             resp.setContentType(XmlServlet._contentType);
 
             xo.output(output_doc, resp.getOutputStream());
-        } catch (final OXException exc) {
+        } catch (final TransactionException exc) {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
-            exc.log(LOG);
+            LOG.error(exc.getMessage(), exc);
+            exc.printStarterTrace();
+            rollbackTransaction();
+        } catch (final OXException exc) {
+            if (exc.getCategory() == Category.PERMISSION) {
+                LOG.debug(exc.getMessage(), exc);
+            } else {
+                LOG.error(exc.getMessage(), exc);
+            }
+
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
             rollbackTransaction();
         } catch (final Exception exc) {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
@@ -262,37 +275,37 @@ public final class attachments extends OXServlet {
             os = resp.getOutputStream();
 
             if (req.getHeader(MODULE) == null) {
-                throw WebdavExceptionCode.MISSING_FIELD.create(MODULE);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, MODULE));
             }
             try {
                 module = Integer.parseInt(req.getHeader(MODULE));
             } catch (final NumberFormatException exc) {
-                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, MODULE);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, MODULE));
             }
 
             if (req.getHeader(TARGET_ID) == null) {
-                throw WebdavExceptionCode.MISSING_FIELD.create(TARGET_ID);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, TARGET_ID));
             }
             try {
                 target_id = Integer.parseInt(req.getHeader(TARGET_ID));
             } catch (final NumberFormatException exc) {
-                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TARGET_ID);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_ID));
             }
 
             if (req.getHeader(DataFields.OBJECT_ID) == null) {
-                throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.OBJECT_ID);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.OBJECT_ID));
             }
             try {
                 object_id = Integer.parseInt(req.getHeader(DataFields.OBJECT_ID));
             } catch (final NumberFormatException exc) {
-                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, DataFields.OBJECT_ID);
+                throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, DataFields.OBJECT_ID));
             }
 
             if (req.getHeader(TARGET_FOLDER_ID) != null) {
                 try {
                     folder_id = Integer.parseInt(req.getHeader(TARGET_FOLDER_ID));
                 } catch (final NumberFormatException exc) {
-                    throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TARGET_FOLDER_ID);
+                    throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TARGET_FOLDER_ID));
                 }
             }
 
@@ -382,7 +395,7 @@ public final class attachments extends OXServlet {
     private void finishTransaction() {
         try {
             ATTACHMENT_BASE.finish();
-        } catch (final OXException exc) {
+        } catch (final TransactionException exc) {
             LOG.error("finishTransaction", exc);
         }
     }
@@ -390,7 +403,7 @@ public final class attachments extends OXServlet {
     private void rollbackTransaction() {
         try {
             ATTACHMENT_BASE.rollback();
-        } catch (final OXException exc) {
+        } catch (final TransactionException exc) {
             LOG.error("finishTransaction", exc);
         }
     }

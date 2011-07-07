@@ -53,7 +53,6 @@ import gnu.trove.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import com.openexchange.exception.OXException;
 
 public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 	
@@ -65,7 +64,7 @@ public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 	}
 
     public Multistatus(final WebdavMultistatusException x){
-		for(final OXException e : x.getExceptions()) {
+		for(final WebdavProtocolException e : x.getExceptions()) {
 		    @SuppressWarnings("unchecked")
             final WebdavStatus<T> status = (WebdavStatus<T>) e;
             addStatus(status);

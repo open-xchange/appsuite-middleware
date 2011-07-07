@@ -49,7 +49,7 @@
 package com.openexchange.webdav.tools;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -57,13 +57,13 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class WebdavWhitelistInit implements Initialization {
-    public void start() throws OXException {
+    public void start() throws AbstractOXException {
         final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(
 				ConfigurationService.class);
         WebdavWhiteList.getInstance().init(configuration);
     }
 
-    public void stop() throws OXException {
+    public void stop() throws AbstractOXException {
         // IGNORE
     }
 }

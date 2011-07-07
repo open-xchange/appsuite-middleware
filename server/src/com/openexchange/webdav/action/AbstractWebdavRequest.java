@@ -60,7 +60,7 @@ import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.xml.jdom.JDOMParser;
 
@@ -75,14 +75,14 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         this.factory = factory;
     }
 
-    public WebdavResource getResource() throws OXException {
+    public WebdavResource getResource() throws WebdavProtocolException {
         if(res != null) {
             return res;
         }
         return res = factory.resolveResource(getUrl());
     }
     
-    public WebdavResource getDestination() throws OXException {
+    public WebdavResource getDestination() throws WebdavProtocolException {
         if(null == getDestinationUrl()) {
             return null;
         }
@@ -92,7 +92,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         return dest = factory.resolveResource(getDestinationUrl());
     }
     
-    public WebdavCollection getCollection() throws OXException {
+    public WebdavCollection getCollection() throws WebdavProtocolException {
         if(res != null && res.isCollection()) {
             return (WebdavCollection) res;
         }

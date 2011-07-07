@@ -49,12 +49,12 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavDeleteAction extends AbstractAction {
 
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws OXException {
+			throws WebdavProtocolException {
 		req.getResource().delete();
 	}
 

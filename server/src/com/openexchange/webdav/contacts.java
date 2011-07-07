@@ -64,8 +64,9 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.exception.Category;
-import com.openexchange.exception.OXException;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
@@ -94,7 +95,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
 
     private static final long serialVersionUID = -3731372041610025543L;
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(contacts.class));
+    private static final transient Log LOG = LogFactory.getLog(contacts.class);
 
     /**
      * Initializes a new {@link contacts}.
@@ -111,7 +112,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
             final XmlPullParser parser, final PendingInvocations<ContactInterface> pendingInvocations)
-            throws XmlPullParserException, IOException, OXException {
+            throws XmlPullParserException, IOException, AbstractOXException {
         final Session session = getSession(req);
 
         if (isTag(parser, "prop", "DAV:")) {
@@ -263,7 +264,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
                 case DataParser.SAVE:
                     if (contactObject.containsObjectID()) {
                         if (lastModified == null) {
-                            throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
+                            throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
                         }
 
                         final Date currentLastModified = lastModifiedCache.getLastModified(contactObject.getObjectID(), lastModified);
@@ -277,13 +278,13 @@ public final class contacts extends XmlServlet<ContactInterface> {
                     break;
                 case DataParser.DELETE:
                     if (lastModified == null) {
-                        throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
+                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
                     }
 
                     contactInterface.deleteContactObject(contactObject.getObjectID(), inFolder, lastModified);
                     break;
                 default:
-                    throw WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action));
+                    throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
                 }
                 writeResponse(contactObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXMandatoryFieldException exc) {
@@ -306,7 +307,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
                 LOG.debug(_parsePropChilds, exc);
                 writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
             } catch (final OXException exc) {
-                if (exc.getCategory() == Category.CATEGORY_USER_INPUT) {
+                if (exc.getCategory() == Category.USER_INPUT) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
                             USER_INPUT_EXCEPTION), clientId, os, xo);

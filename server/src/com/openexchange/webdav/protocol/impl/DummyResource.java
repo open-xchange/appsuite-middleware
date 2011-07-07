@@ -58,17 +58,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolExceptionCode;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.AbstractResource;
+import com.openexchange.webdav.protocol.Protocol.Property;
 
 public class DummyResource extends AbstractResource implements WebdavResource  {
 
@@ -112,9 +110,9 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		return mgr;
 	}
 	
-	public void create() throws OXException {
+	public void create() throws WebdavProtocolException {
 		if(exists) {
-		    throw WebdavProtocolExceptionCode.DIRECTORY_ALREADY_EXISTS.create(getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		    throw new WebdavProtocolException(WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS, getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
 		checkPath();
 		exists = true;
@@ -123,13 +121,13 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		mgr.save(url,this);
 	}
 
-	public boolean exists() throws OXException {
+	public boolean exists() throws WebdavProtocolException {
 		return exists;
 	}
 
-	public void delete() throws OXException {
+	public void delete() throws WebdavProtocolException {
 		if(!exists) {
-		    throw WebdavProtocolExceptionCode.FILE_NOT_FOUND.create(getUrl(), HttpServletResponse.SC_NOT_FOUND, getUrl());
+		    throw new WebdavProtocolException(WebdavProtocolException.Code.FILE_NOT_FOUND, getUrl(), HttpServletResponse.SC_NOT_FOUND, getUrl());
 		}
 		exists = false;
 		mgr.remove(url,this);
@@ -141,7 +139,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	}
 
 	@Override
-	public List<WebdavProperty> internalGetAllProps() throws OXException {
+	public List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
 		final List<WebdavProperty> props = new ArrayList<WebdavProperty>();
 		for(final WebdavProperty prop : properties.values()) {
 			props.add(prop);
@@ -150,7 +148,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	}
 	
 	@Override
-	protected void internalRemoveProperty(final String namespace, final String name) throws OXException {
+	protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
 		final WebdavProperty key = new WebdavProperty();
 		key.setName(name);
 		key.setNamespace(namespace);
@@ -158,14 +156,14 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	}
 	
 	@Override
-	protected void internalPutProperty(final WebdavProperty prop) throws OXException {
+	protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
 		final WebdavProperty key = new WebdavProperty();
 		key.setName(prop.getName());
 		key.setNamespace(prop.getNamespace());
 		properties.put(key,prop);
 	}
 
-	public void save() throws OXException {
+	public void save() throws WebdavProtocolException {
 		lastModified = new Date();
 	}
 
@@ -174,7 +172,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	}
 
 	@Override
-	protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
+	protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
 		final WebdavProperty key = new WebdavProperty();
 		key.setName(name);
 		key.setNamespace(namespace);
@@ -182,73 +180,73 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		return properties.get(key);
 	}
 	
-	public Date getCreationDate() throws OXException {
+	public Date getCreationDate() throws WebdavProtocolException {
 		return creationDate;
 	}
 	
 	@Override
-	public void setCreationDate(final Date date) throws OXException {
+	public void setCreationDate(final Date date) throws WebdavProtocolException {
 		creationDate = date;
 	}
 	
 	
-	public Date getLastModified() throws OXException {
+	public Date getLastModified() throws WebdavProtocolException {
 		return lastModified;
 	}
 	
-	public String getDisplayName() throws OXException{
+	public String getDisplayName() throws WebdavProtocolException{
 		return displayName;
 	}
 	
-	public void setDisplayName(final String dispName) throws OXException {
+	public void setDisplayName(final String dispName) throws WebdavProtocolException {
 		this.displayName = dispName;
 	}
 		
-	public String getLanguage() throws OXException{
+	public String getLanguage() throws WebdavProtocolException{
 		return lang;
 	}
 	
-	public void setLanguage(final String lang) throws OXException {
+	public void setLanguage(final String lang) throws WebdavProtocolException {
 		this.lang = lang;
 	}
 	
-	public Long getLength() throws OXException {
+	public Long getLength() throws WebdavProtocolException {
 		return length;
 	}
 	
-	public void setLength(final Long length) throws OXException{
+	public void setLength(final Long length) throws WebdavProtocolException{
 		this.length = length;
 	}
 	
-	public String getContentType() throws OXException{
+	public String getContentType() throws WebdavProtocolException{
 		return contentType;
 	}
 	
-	public void setContentType(final String contentType) throws OXException {
+	public void setContentType(final String contentType) throws WebdavProtocolException {
 		this.contentType = contentType;
 	}
 	
-	public String getETag() throws OXException{
+	public String getETag() throws WebdavProtocolException{
 		return eTag;
 	}
 	
-	public void setSource(final String source) throws OXException {
+	public void setSource(final String source) throws WebdavProtocolException {
 		this.source = source;
 	}
 	
-	public String getSource() throws OXException {
+	public String getSource() throws WebdavProtocolException {
 		return source;
 	}
 	
-	public boolean isLocked() throws OXException {
+	public boolean isLocked() throws WebdavProtocolException {
 		return getLocks().size()>0;
 	}
 	
-	public void unlock(final String token) throws OXException {
+	public void unlock(final String token) throws WebdavProtocolException {
 		locks.remove(token);
 	}
 	
-	public void lock(final WebdavLock lock) throws OXException {
+	public void lock(final WebdavLock lock) throws WebdavProtocolException {
 		if(!exists()) {
 			// Create Lock Null Resource
 			final WebdavResource res = this.mgr.addLockNullResource(this);
@@ -269,18 +267,18 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		this.exists = exists;
 	}
 
-	public List<WebdavLock> getLocks() throws OXException {
+	public List<WebdavLock> getLocks() throws WebdavProtocolException {
 		final List<WebdavLock> lockList =  getOwnLocks();
 		addParentLocks(lockList);
 		return lockList;
 	}
 	
-	public List<WebdavLock> getOwnLocks() throws OXException {
+	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
 		clearTimeoutLocks(locks, System.currentTimeMillis());
 		return new ArrayList<WebdavLock>(locks.values());
 	}
 	
-	public WebdavLock getOwnLock(final String token) throws OXException{
+	public WebdavLock getOwnLock(final String token) throws WebdavProtocolException{
 		clearTimeoutLocks(locks, System.currentTimeMillis());
 		return locks.get(token);
 	}
@@ -299,7 +297,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	}
 
 
-	public WebdavLock getLock(final String token) throws OXException {
+	public WebdavLock getLock(final String token) throws WebdavProtocolException {
 		final WebdavLock lock =  locks.get(token);
 		if(lock != null) {
 			return lock;
@@ -308,7 +306,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	}
 
 	@Override
-	public void putBody(final InputStream data, final boolean guessLength) throws OXException {
+	public void putBody(final InputStream data, final boolean guessLength) throws WebdavProtocolException {
 		eTag = String.valueOf(Integer.valueOf(eTag)+1);
 		final List<Integer> bytes = new ArrayList<Integer>();
 		
@@ -318,8 +316,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 				bytes.add(b);
 			}
 		} catch (final IOException e) {
-		    throw WebdavProtocolExceptionCode.GENERAL_ERROR.create();
-			//throw new OXException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		
 		int i = 0;
@@ -335,7 +332,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	}
 	
 	
-	public InputStream getBody() throws OXException{
+	public InputStream getBody() throws WebdavProtocolException{
 		if(null == body) {
 			return null;
 		}
@@ -343,7 +340,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	}
 	
 	@Override
-	public boolean hasBody() throws OXException {
+	public boolean hasBody() throws WebdavProtocolException {
 		return body != null;
 	}
 

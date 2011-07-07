@@ -63,17 +63,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -88,7 +92,7 @@ public class freebusy extends HttpServlet {
 
     private static final long serialVersionUID = 6336387126907903347L;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(freebusy.class));
+    private static final Log LOG = LogFactory.getLog(freebusy.class);
 
     private static final DateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
 
@@ -135,7 +139,7 @@ public class freebusy extends HttpServlet {
             return;
         }
 
-        final Participant participant = findParticipant(context, mailAddress);
+        Participant participant = findParticipant(context, mailAddress);
         if (null == participant) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to resolve mail address to a user or a resource.");
             return;
@@ -198,10 +202,13 @@ public class freebusy extends HttpServlet {
         }
         Context context;
         try {
-            final ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
+            ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             context = service.getContext(contextId);
-        } catch (final OXException e) {
+        } catch (ServiceException e) {
             LOG.error(e.getMessage(), e);
+            return null;
+        } catch (ContextException e) {
+            LOG.error("Can not load context.", e);
             return null;
         }
         return context;
@@ -246,8 +253,10 @@ public class freebusy extends HttpServlet {
             } finally {
                 it.close();
             }
-        }catch (final OXException e) {
+        }catch (final ServiceException e) {
                 LOG.error("Calendar service not found.", e);
+        } catch (final AbstractOXException e) {
+            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
         }
         printWriter.println("END:VFREEBUSY");
         printWriter.println("END:VCALENDAR");
@@ -280,24 +289,28 @@ public class freebusy extends HttpServlet {
         pw.println(format.format(appointment.getEndDate()));
     }
 
-    private Participant findParticipant(final Context ctx, final String mailAddress) {
+    private Participant findParticipant(Context ctx, String mailAddress) {
         User user = null;
         try {
-            final UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+            UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             user = service.searchUser(mailAddress, ctx);
-        } catch (final OXException e) {
+        } catch (ServiceException e) {
             LOG.error(e.getMessage(), e);
+        } catch (UserException e) {
+            LOG.debug("User '" + mailAddress + "' not found.");
         }
 
         Resource resource = null;
         try {
-            final ResourceService service = ServerServiceRegistry.getInstance().getService(ResourceService.class, true);
+            ResourceService service = ServerServiceRegistry.getInstance().getService(ResourceService.class, true);
             final Resource[] resources = service.searchResourcesByMail(mailAddress, ctx);
             if (1 == resources.length) {
                 resource = resources[0];
             }
-        } catch (final OXException e) {
+        } catch (ServiceException e) {
             LOG.error(e.getMessage(), e);
+        } catch (ResourceException e) {
+            LOG.error("Resource '" + mailAddress + "' not found.");
         }
 
         Participant retval = null;

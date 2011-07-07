@@ -55,7 +55,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
+import com.openexchange.authentication.LoginException;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
@@ -74,7 +75,7 @@ public class Infostore extends OXServlet {
 
     private static final long serialVersionUID = -2064098724675986123L;
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Infostore.class));
+    private static final transient Log LOG = LogFactory.getLog(Infostore.class);
 
     @Override
     protected Interface getInterface() {
@@ -150,7 +151,7 @@ public class Infostore extends OXServlet {
         ServerSession session;
         try {
             session = new ServerSessionAdapter(getSession(req));
-        } catch (final OXException exc) {
+        } catch (final ContextException exc) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
@@ -174,7 +175,7 @@ public class Infostore extends OXServlet {
         removeCookie(req, resp);
         try {
             LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final OXException e) {
+        } catch (final LoginException e) {
             LOG.error(e.getMessage(), e);
         }
     }

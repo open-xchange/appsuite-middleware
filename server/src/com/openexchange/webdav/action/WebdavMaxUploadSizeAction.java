@@ -50,15 +50,15 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavMaxUploadSizeAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		if(fits(req)) {
 			yield(req,res);
 		} else {
-			throw new OXException(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+			throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
 		}
 	}
 	

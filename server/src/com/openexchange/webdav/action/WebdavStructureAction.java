@@ -54,7 +54,7 @@ import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public abstract class WebdavStructureAction extends AbstractAction {
@@ -66,7 +66,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 	}
 
 	// Returns the status for a successful move/copy
-	protected void checkOverwrite(final WebdavRequest req) throws OXException{
+	protected void checkOverwrite(final WebdavRequest req) throws WebdavProtocolException{
 		if(req.getHeader("Overwrite") != null && "F".equals(req.getHeader("Overwrite"))){
 			final LoadingHints loadingHints = new LoadingHints();
 			loadingHints.setUrl(req.getDestinationUrl());
@@ -91,25 +91,25 @@ public abstract class WebdavStructureAction extends AbstractAction {
 					url = destUrl.dup().append(url.subpath(sourceUrlLength));
 					final WebdavResource d = factory.resolveResource(url);
 					if(d.exists() && !d.isCollection()) {
-						throw new OXException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+						throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 					}
 				}
 				
 			} else {
-				throw new OXException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+				throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 			
 		}
 		return;
 	}
 	
-	protected int chooseReturnCode(final WebdavRequest req) throws OXException {
+	protected int chooseReturnCode(final WebdavRequest req) throws WebdavProtocolException {
 		return (req.getDestination().exists()) ? HttpServletResponse.SC_NO_CONTENT : HttpServletResponse.SC_CREATED;
 	}
 	
-	protected void checkSame(final WebdavRequest req) throws OXException {
+	protected void checkSame(final WebdavRequest req) throws WebdavProtocolException {
 		if(req.getUrl().equals(req.getDestinationUrl())) {
-			throw new OXException(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			throw new WebdavProtocolException(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
 		}
 	}
 

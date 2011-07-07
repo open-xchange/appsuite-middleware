@@ -66,15 +66,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.exception.OXException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
@@ -84,8 +89,10 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -93,7 +100,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -116,7 +123,7 @@ public final class ical extends PermissionServlet {
     /**
      * Logger.
      */
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ical.class));
+    private static final transient Log LOG = LogFactory.getLog(ical.class);
 
     private final static int[] APPOINTMENT_FIELDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.MODIFIED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED,
@@ -194,7 +201,7 @@ public final class ical extends PermissionServlet {
 
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             if (null == emitter) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ICalEmitter.class.getName());
+                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ICalEmitter.class.getName());
             }
             final ICalSession iSession = emitter.createSession();
             final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
@@ -240,13 +247,13 @@ public final class ical extends PermissionServlet {
                     }
                 }
                 patchers.forEachValue(PATCH_PROCEDURE);
-            } catch (final OXException e) {
+            } catch (final AbstractOXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 if (null != iter) {
                     try {
                         iter.close();
-                    } catch (final OXException e) {
+                    } catch (final AbstractOXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
@@ -269,13 +276,13 @@ public final class ical extends PermissionServlet {
                     // item.setUID(clientId);
                     // }
                 }
-            } catch (final OXException e) {
+            } catch (final AbstractOXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 if (null != itTask) {
                     try {
                         itTask.close();
-                    } catch (final OXException e) {
+                    } catch (final AbstractOXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
@@ -302,6 +309,18 @@ public final class ical extends PermissionServlet {
 
             // addEntries(context, principal, entriesApp, entriesTask);
             // deleteEntries(context, principal, mapping, entriesApp, entriesTask);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (final LdapException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (final OXConflictException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -646,7 +665,7 @@ public final class ical extends PermissionServlet {
         writer.write("<html><body>" + msg + "</body></html>");
     }
 
-    private String getUserAgent(final HttpServletRequest req) throws OXException {
+    private String getUserAgent(final HttpServletRequest req) throws OXConflictException {
         final Enumeration<?> e = req.getHeaderNames();
         final String userAgent = "user-agent";
         while (e.hasMoreElements()) {
@@ -654,26 +673,26 @@ public final class ical extends PermissionServlet {
                 return req.getHeader(userAgent);
             }
         }
-        throw WebdavExceptionCode.MISSING_HEADER_FIELD.create(userAgent);
+        throw new OXConflictException(new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, userAgent));
     }
 
-    private int getCalendarFolderID(final HttpServletRequest req) throws OXException {
+    private int getCalendarFolderID(final HttpServletRequest req) throws OXConflictException {
         if (req.getParameter(CALENDARFOLDER) != null) {
             try {
                 return Integer.parseInt(req.getParameter(CALENDARFOLDER));
             } catch (final NumberFormatException exc) {
-                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, CALENDARFOLDER);
+                throw new OXConflictException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, CALENDARFOLDER));
             }
         }
         return 0;
     }
 
-    private int getTaskFolderID(final HttpServletRequest req) throws OXException {
+    private int getTaskFolderID(final HttpServletRequest req) throws OXConflictException {
         if (req.getParameter(TASKFOLDER) != null) {
             try {
                 return Integer.parseInt(req.getParameter(TASKFOLDER));
             } catch (final NumberFormatException exc) {
-                throw WebdavExceptionCode.NOT_A_NUMBER.create(exc, TASKFOLDER);
+                throw new OXConflictException(new WebdavException(WebdavException.Code.NOT_A_NUMBER, exc, TASKFOLDER));
             }
         }
         return 0;
@@ -734,7 +753,7 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (final OXException e) {
+        } catch (final DBPoolingException e) {
             throw new OXException(e);
         }
         PreparedStatement ps = null;
@@ -751,7 +770,7 @@ public final class ical extends PermissionServlet {
                 retval = null;
             }
         } catch (final SQLException e) {
-            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(ctx, con);
@@ -763,7 +782,7 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (final OXException e) {
+        } catch (final DBPoolingException e) {
             throw new OXException(e);
         }
         PreparedStatement ps = null;
@@ -780,7 +799,7 @@ public final class ical extends PermissionServlet {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(null, ps);
             DBUtils.autocommit(con);
@@ -792,7 +811,7 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (final OXException e) {
+        } catch (final DBPoolingException e) {
             throw new OXException(e);
         }
         PreparedStatement ps = null;
@@ -804,7 +823,7 @@ public final class ical extends PermissionServlet {
             ps.setInt(4, principal.getId());
             ps.executeUpdate();
         } catch (final SQLException e) {
-            throw WebdavExceptionCode.IO_ERROR.create(e, e.getMessage());
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(null, ps);
             DBPool.closeWriterSilent(ctx, con);
@@ -825,28 +844,28 @@ public final class ical extends PermissionServlet {
     /*
      * private void addEntries(final Context ctx, final Principal principal, final Map<String, Integer> entriesApp, final Map<String,
      * Integer> entriesTask) throws OXException { final Connection con; try { con = DBPool.pickupWriteable(ctx); } catch (final
-     * OXException e) { throw new OXException(e); } PreparedStatement ps = null; try { con.setAutoCommit(false); ps =
+     * DBPoolingException e) { throw new OXException(e); } PreparedStatement ps = null; try { con.setAutoCommit(false); ps =
      * con.prepareStatement(SQL_ENTRY_INSERT); for (final Map.Entry<String, Integer> entry : entriesApp.entrySet()) { final int objectId =
      * IDGenerator.getId(ctx, Types.ICAL, con); ps.setInt(1, objectId); ps.setLong(2, ctx.getContextId()); ps.setInt(3, principal.getId());
      * ps.setString(4, entry.getKey()); ps.setInt(5, entry.getValue().intValue()); ps.setInt(6, Types.APPOINTMENT); ps.addBatch(); } for
      * (final Map.Entry<String, Integer> entry : entriesTask.entrySet()) { final int objectId = IDGenerator.getId(ctx, Types.ICAL, con);
      * ps.setInt(1, objectId); ps.setLong(2, ctx.getContextId()); ps.setInt(3, principal.getId()); ps.setString(4, entry.getKey());
      * ps.setInt(5, entry.getValue().intValue()); ps.setInt(6, Types.TASK); ps.addBatch(); } ps.executeBatch(); con.commit(); } catch (final
-     * SQLException e) { DBUtils.rollback(con); throw new OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e); }
+     * SQLException e) { DBUtils.rollback(con); throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e); }
      * finally { DBUtils.closeSQLStuff(null, ps); DBUtils.autocommit(con); DBPool.closeWriterSilent(ctx, con); } }
      */
 
     /*
      * private void deleteEntries(final Context ctx, final Principal principal, final Mapping mapping, final Map<String, Integer>
      * entriesApp, final Map<String, Integer> entriesTask) throws OXException { final Connection con; try { con =
-     * DBPool.pickupWriteable(ctx); } catch (final OXException e) { throw new OXException(e); } PreparedStatement ps = null; try {
+     * DBPool.pickupWriteable(ctx); } catch (final DBPoolingException e) { throw new OXException(e); } PreparedStatement ps = null; try {
      * con.setAutoCommit(false); ps = con.prepareStatement(SQL_ENTRY_DELETE); for (final String clientId : mapping.client2App.keySet()) { if
      * (!entriesApp.containsKey(clientId)) { ps.setInt(1, ctx.getContextId()); ps.setInt(2, principal.getId()); ps.setInt(3,
      * mapping.client2App.get(clientId).intValue()); ps.setInt(4, Types.APPOINTMENT); ps.addBatch(); } } for (final String clientId :
      * mapping.client2Task.keySet()) { if (!entriesTask.containsKey(clientId)) { ps.setInt(1, ctx.getContextId()); ps.setInt(2,
      * principal.getId()); ps.setInt(3, mapping.client2Task.get(clientId).intValue()); ps.setInt(4, Types.TASK); ps.addBatch(); } }
      * ps.executeBatch(); con.commit(); } catch (final SQLException e) { DBUtils.rollback(con); throw new OXException(EnumComponent.ICAL,
-     * CATEGORY_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(null, ps); DBUtils.autocommit(con);
+     * Category.CODE_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(null, ps); DBUtils.autocommit(con);
      * DBPool.closeWriterSilent(ctx, con); } }
      */
 
@@ -884,13 +903,13 @@ public final class ical extends PermissionServlet {
 
     /*
      * private Mapping loadDBEntriesNew(final Context context, final Principal principal) throws OXException { final Connection readCon; try
-     * { readCon = DBPool.pickup(context); } catch (final OXException e) { throw new OXException(e); } PreparedStatement ps = null;
+     * { readCon = DBPool.pickup(context); } catch (final DBPoolingException e) { throw new OXException(e); } PreparedStatement ps = null;
      * ResultSet rs = null; final Mapping mapping = new Mapping(); try { ps = readCon.prepareStatement(SQL_ENTRIES_LOAD); ps.setInt(1,
      * principal.getId()); ps.setLong(2, context.getContextId()); rs = ps.executeQuery(); while (rs.next()) { final String client_id =
      * rs.getString(2); final int target_id = rs.getInt(3); final int module = rs.getInt(4); switch (module) { case Types.APPOINTMENT:
      * mapping.addAppointment(client_id, target_id); break; case Types.TASK: mapping.addTask(client_id, target_id); break; default:
      * LOG.warn("Unknown iCal object mapping module " + module); } } } catch (final SQLException e) { throw new
-     * OXException(EnumComponent.ICAL, CATEGORY_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(rs, ps);
+     * OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(rs, ps);
      * DBPool.closeReaderSilent(context, readCon); } return mapping; }
      */
 

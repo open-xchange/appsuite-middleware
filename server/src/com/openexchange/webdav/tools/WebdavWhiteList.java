@@ -63,7 +63,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public class WebdavWhiteList {
     private static WebdavWhiteList INSTANCE = new WebdavWhiteList();
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(WebdavWhiteList.class));
+    private static final Log LOG = LogFactory.getLog(WebdavWhiteList.class);
 
 
     private List<Pattern> patterns = Collections.emptyList();

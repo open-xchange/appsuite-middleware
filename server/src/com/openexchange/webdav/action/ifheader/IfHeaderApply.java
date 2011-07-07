@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.action.ifheader;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 
@@ -60,5 +60,5 @@ import com.openexchange.webdav.protocol.WebdavResource;
  *
  */
 public interface IfHeaderApply {
-    public boolean matches(IfHeaderEntity entity, WebdavResource resource) throws OXException;
+    public boolean matches(IfHeaderEntity entity, WebdavResource resource) throws WebdavProtocolException;
 }

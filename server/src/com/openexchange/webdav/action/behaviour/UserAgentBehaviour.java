@@ -57,7 +57,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.webdav.action.WebdavRequest;
 
 
@@ -90,7 +90,7 @@ public class UserAgentBehaviour implements Behaviour{
 				final Class[] interfaces = addMe.getInterfaces();
 				for(final Class<? extends Object> iFace : interfaces) {
 					if(classes.get(iFace) != null) {
-						throw new ConfigurationException(ConfigurationExceptionCodes.INVALID_CONFIGURATION, "Two implemenations for "+iFace);
+						throw new ConfigurationException(Code.INVALID_CONFIGURATION, "Two implemenations for "+iFace);
 					} 
 					classes.put(iFace, object);
 				}

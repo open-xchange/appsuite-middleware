@@ -51,12 +51,12 @@ package com.openexchange.webdav.protocol.impl;
 
 import java.util.HashMap;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 
 public class DummyLockNull extends DummyCollection {
 	
@@ -86,7 +86,7 @@ public class DummyLockNull extends DummyCollection {
 	}
 	
 	@Override
-	public void unlock(final String token) throws OXException {
+	public void unlock(final String token) throws WebdavProtocolException {
 		super.unlock(token);
 		if(getOwnLocks().isEmpty()) {
 			mgr.removeLockNull(this.getUrl());
@@ -99,12 +99,12 @@ public class DummyLockNull extends DummyCollection {
 	}
 
 	@Override
-	public void delete() throws OXException {
+	public void delete() throws WebdavProtocolException {
 		super.delete();
 	}
 
 	@Override
-	public void create() throws OXException {
+	public void create() throws WebdavProtocolException {
 		final WebdavResource res = getRealResource();
 		res.create();
 		if (res instanceof DummyResource) {

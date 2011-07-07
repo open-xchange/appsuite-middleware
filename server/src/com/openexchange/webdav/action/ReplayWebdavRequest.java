@@ -64,7 +64,7 @@ import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class ReplayWebdavRequest implements WebdavRequest{
@@ -100,11 +100,11 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return new SAXBuilder().build(getBody());
 	}
 
-	public WebdavCollection getCollection() throws OXException {
+	public WebdavCollection getCollection() throws WebdavProtocolException {
 		return delegate.getCollection();
 	}
 
-	public WebdavResource getDestination() throws OXException {
+	public WebdavResource getDestination() throws WebdavProtocolException {
 		return delegate.getDestination();
 	}
 
@@ -124,7 +124,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return delegate.getIfHeader();
 	}
 
-	public WebdavResource getResource() throws OXException {
+	public WebdavResource getResource() throws WebdavProtocolException {
 		return delegate.getResource();
 	}
 
@@ -140,7 +140,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return delegate.getDepth(depth);
 	}
 
-	public WebdavFactory getFactory() throws OXException {
+	public WebdavFactory getFactory() throws WebdavProtocolException {
 		return delegate.getFactory();
 	}
 

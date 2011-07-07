@@ -57,12 +57,12 @@ import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public final class DummyResourceManager implements WebdavFactory {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DummyResourceManager.class));
+    private static final Log LOG = LogFactory.getLog(DummyResourceManager.class);
 	private static final DummyResourceManager INSTANCE = new DummyResourceManager();
 
 	public static DummyResourceManager getInstance(){
@@ -72,7 +72,7 @@ public final class DummyResourceManager implements WebdavFactory {
 	private DummyResourceManager(){
 		try {
 			resolveCollection("/").create();
-		} catch (final OXException e) {
+		} catch (final WebdavProtocolException e) {
 			LOG.error("Can't resolve root", e);
 		}
 		

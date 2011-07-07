@@ -53,8 +53,8 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.OXServlet;
@@ -98,7 +98,7 @@ public abstract class PermissionServlet extends OXServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
                 return;
             }
-        } catch (final OXException ce) {
+        } catch (final ContextException ce) {
             return;
         }
         super.service(req, resp);

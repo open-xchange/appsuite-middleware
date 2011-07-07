@@ -63,7 +63,7 @@ import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindPropNamesMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
@@ -74,7 +74,7 @@ public class WebdavPropfindAction extends AbstractAction {
 
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 	
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(WebdavPropfindAction.class));
+	private static final Log LOG = LogFactory.getLog(WebdavPropfindAction.class);
 	
 	protected final XMLOutputter outputter = new XMLOutputter();
 
@@ -85,7 +85,7 @@ public class WebdavPropfindAction extends AbstractAction {
 	}
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws OXException {
+			throws WebdavProtocolException {
 		
 		final Element response = new Element("multistatus",DAV_NS);
 		
@@ -106,7 +106,7 @@ public class WebdavPropfindAction extends AbstractAction {
 			forceAllProp = true; //Assume All Prop, if all else fails
 			
 		} catch (final IOException e1) {
-			throw new OXException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
+			throw new WebdavProtocolException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
 		}
 		
         final LoadingHints loadingHints = new LoadingHints();

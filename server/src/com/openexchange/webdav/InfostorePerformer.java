@@ -108,7 +108,7 @@ import com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry
 import com.openexchange.webdav.action.behaviour.UserAgentBehaviour;
 import com.openexchange.webdav.action.ifheader.IgnoreLocksIfHeaderApply;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.xml.spring.SpringParser;
 
 /**
@@ -118,7 +118,7 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class InfostorePerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostorePerformer.class));
+    private static final Log LOG = LogFactory.getLog(InfostorePerformer.class);
 
     private static final InfostorePerformer INSTANCE = new InfostorePerformer();
 
@@ -338,7 +338,7 @@ public final class InfostorePerformer implements SessionHolder {
                 LOG.debug("Executing " + action);
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
-        } catch (final OXException x) {
+        } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());
         } catch (final NullPointerException x) {
             LOG.error("Null reference detected.", x);
