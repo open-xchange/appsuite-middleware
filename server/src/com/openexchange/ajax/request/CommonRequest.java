@@ -59,14 +59,12 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.exceptions.LoggingLogic;
 
 public abstract class CommonRequest {
 	
 	protected JSONWriter w;
 	
 	private final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CommonRequest.class));
-	private final LoggingLogic LL = LoggingLogic.getLoggingLogic(CommonRequest.class, LOG);
 	
 	public CommonRequest(final JSONWriter w) {
 		this.w = w;

@@ -93,7 +93,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
@@ -111,8 +110,6 @@ public class InfostoreRequest extends CommonRequest {
     private final UserConfiguration userConfiguration;
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostoreRequest.class));
-
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreRequest.class);
 
     public InfostoreRequest(final ServerSession session, final JSONWriter w) {
         super(w);
