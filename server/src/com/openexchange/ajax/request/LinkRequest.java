@@ -61,7 +61,6 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.LinkSQLInterface;
 import com.openexchange.api2.RdbLinkSQLInterface;
 import com.openexchange.exception.OXException;
@@ -116,7 +115,7 @@ public class LinkRequest {
 	 * @throws OXException If handling action fails due to an AJAX error
 	 * @throws OXException If handling action fails due to a JSON error
 	 */
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, OXException, OXException {
+	public void action(final String action, final JSONObject jsonObject) throws OXException, JSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			actionAll(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -128,7 +127,7 @@ public class LinkRequest {
 		}
 	}
 	
-	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException,
+	public void actionAll(final JSONObject jsonObj) throws JSONException, OXException,
 			OXException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
@@ -218,7 +217,7 @@ public class LinkRequest {
 
 	}
 
-	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);

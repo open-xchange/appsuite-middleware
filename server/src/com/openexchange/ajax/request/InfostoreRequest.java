@@ -73,7 +73,6 @@ import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.writer.InfostoreWriter;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
@@ -123,9 +122,9 @@ public class InfostoreRequest extends CommonRequest {
         return userConfig.hasInfostore();
     }
 
-    public boolean action(final String action, final SimpleRequest req) throws OXPermissionException {
+    public boolean action(final String action, final SimpleRequest req) throws OXException {
         if (!hasPermission(userConfiguration)) {
-            throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "infostore");
+            throw OXException.noPermissionForModule("infostore");
         }
         try {
             ThreadLocalSessionHolder.getInstance().setSession(session);

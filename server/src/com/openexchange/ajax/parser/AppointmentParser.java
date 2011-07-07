@@ -54,7 +54,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
@@ -78,17 +77,17 @@ public class AppointmentParser extends CalendarParser {
         this.timeZone = timeZone;
     }
 
-    public void parse(final Appointment appointmentobject, final JSONObject jsonobject) throws OXException, OXException {
+    public void parse(final Appointment appointmentobject, final JSONObject jsonobject) throws OXException {
         try {
             parseElementAppointment(appointmentobject, jsonobject);
-        } catch (final OXConflictException exc) {
+        } catch (final OXException exc) {
             throw exc;
         } catch (final Exception exc) {
             throw new OXException(exc);
         }
     }
     
-    protected void parseElementAppointment(final Appointment appointmentobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXException {
+    protected void parseElementAppointment(final Appointment appointmentobject, final JSONObject jsonobject) throws JSONException, OXException {
         boolean isFullTime = false;
         
         if (jsonobject.has(AppointmentFields.FULL_TIME)) {

@@ -69,10 +69,6 @@ import com.openexchange.ajax.parser.CalendarParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
@@ -138,7 +134,7 @@ public class TaskRequest extends CalendarRequest {
 
     public JSONValue action(final String action, final JSONObject json) throws JSONException, OXException {
         if (!session.getUserConfiguration().hasTask()) {
-            throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
+            throw OXException.noPermissionForModule("task");
         }
         final String sTimeZone = DataParser.parseString(json, AJAXServlet.PARAMETER_TIMEZONE);
         if (null != sTimeZone) {
@@ -169,7 +165,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws JSONException, OXException, OXException, OXException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws JSONException, OXException {
         final Task task = new Task();
 
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
@@ -189,7 +185,7 @@ public class TaskRequest extends CalendarRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, OXException, OXException {
+    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -280,7 +276,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws OXException {
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
         final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
@@ -389,7 +385,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    public JSONObject actionGet(final JSONObject jsonObj) throws OXException, JSONException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = new Date(0);
@@ -406,7 +402,7 @@ public class TaskRequest extends CalendarRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionConfirm(final JSONObject json) throws OXMandatoryFieldException, OXException, OXException, OXException, JSONException {
+    public JSONObject actionConfirm(final JSONObject json) throws OXException, JSONException {
         final JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
         final Task task = new Task();
         new TaskParser(timeZone).parse(task, data);
@@ -509,7 +505,7 @@ public class TaskRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    public JSONObject actionCopy(final JSONObject jsonObj) throws JSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);

@@ -79,11 +79,8 @@ import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -212,13 +209,13 @@ public class AppointmentRequest extends CalendarRequest {
         final String uid = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_UID);
         final int id = appointmentSql.resolveUid(uid);
         if (id == 0) {
-            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, EnumComponent.APPOINTMENT, "");
+            throw OXException.notFound("");
         }
         json.put("id", id);
         return json;
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws JSONException, OXException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         final TimeZone timeZone;
         {
@@ -632,7 +629,7 @@ public class AppointmentRequest extends CalendarRequest {
                                     appointment.setEndDate(new Date(result.getEnd()));
                                     appointment.setRecurrencePosition(result.getPosition());
                                 } else {
-                                    throw new OXObjectNotFoundException("no recurrence appointment found at pos: " + counter);
+                                    throw OXException.notFound("no recurrence appointment found at pos: " + counter);
                                 }
 
                                 appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
@@ -651,7 +648,7 @@ public class AppointmentRequest extends CalendarRequest {
                                 appointment.setEndDate(new Date(result.getEnd()));
                                 appointment.setRecurrencePosition(result.getPosition());
                             } else if (recuResults != null) {
-                                throw new OXObjectNotFoundException("no recurrence appointment found at pos: " + counter);
+                                throw OXException.notFound("no recurrence appointment found at pos: " + counter);
                             }
 
                             if (appointment.getFullTime() && appointment.getStartDate().getTime() == appointment.getEndDate().getTime()) {
@@ -1215,7 +1212,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONObject actionCopy(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXObjectNotFoundException, OXException, OXException, OXException {
+    public JSONObject actionCopy(final JSONObject jsonObj) throws JSONException, OXException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final boolean ignoreConflicts = DataParser.checkBoolean(jsonObj, AppointmentFields.IGNORE_CONFLICTS);

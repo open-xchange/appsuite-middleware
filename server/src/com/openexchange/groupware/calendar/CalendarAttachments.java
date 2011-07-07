@@ -51,9 +51,9 @@ package com.openexchange.groupware.calendar;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
@@ -88,17 +88,15 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     
     public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
-            CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            final CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, collection.getUniqueCalendarSessionName());
             if (!collection.getWritePermission(objectId, folderId, so, ctx)) {
                 throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_ATTACH_DETACH.create();
             }
-        } catch (final OXObjectNotFoundException oxonfe) {
-            if (LOG.isErrorEnabled()) {
+        } catch (final OXException e) {
+            if (e.isGeneric(Generic.NOT_FOUND)) {
                 LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayAttach failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
             }
-            throw oxonfe;
-        } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, 14);
@@ -111,7 +109,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     
     public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
-            CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            final CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, collection.getUniqueCalendarSessionName());
             if (!collection.getReadPermission(objectId, folderId, so, ctx)) {
                 throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ.create();

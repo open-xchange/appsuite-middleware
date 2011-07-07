@@ -54,8 +54,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -82,7 +80,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#deleteContactObject(int, int, java.util.Date)
      */
-    public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXObjectNotFoundException, OXConflictException, OXException {
+    public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -98,7 +96,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#updateContactObject(com.openexchange.groupware.container.Contact, int, java.util.Date)
      */
-    public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException, OXConcurrentModificationException {
+    public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException {
         contactsByUUID.put(UUID.fromString(contactObj.getUserField20()), contactObj);        
     }
 

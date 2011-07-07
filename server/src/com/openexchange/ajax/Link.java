@@ -59,7 +59,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.LinkRequest;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -113,9 +112,6 @@ public class Link extends DataServlet {
 			linkRequest.action(action, jsonObj);
 
 			response.setData(new JSONArray(sw.toString()));
-		} catch (final OXConflictException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (final OXException exc) {
 			LOG.error(exc.getMessage(), exc);
 			response.setException(exc);

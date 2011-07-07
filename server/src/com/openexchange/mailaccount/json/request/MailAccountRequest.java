@@ -63,7 +63,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
@@ -139,7 +138,7 @@ public final class MailAccountRequest {
      * @throws OXException If an AJAX error occurs
      * @throws OXException If a JSON error occurs
      */
-    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, OXException, OXException {
+    public Object action(final String action, final JSONObject jsonObject) throws OXException, JSONException {
         if (AJAXServlet.ACTION_DELETE.equalsIgnoreCase(action)) {
             return actionDelete(jsonObject);
         } else if (AJAXServlet.ACTION_NEW.equalsIgnoreCase(action)) {

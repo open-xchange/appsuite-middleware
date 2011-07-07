@@ -156,6 +156,17 @@ public class OXException extends Exception implements OXExceptionConstants {
     /**
      * Creates a missing-field exception.
      * 
+     * @param name The field name
+     * @return A missing-field exception.
+     */
+    public static OXException mandatoryField(final String name) {
+        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE_MISSING_FIELD, name).setCategory(CATEGORY_ERROR).setPrefix(PREFIX_GENERAL).setGeneric(
+            Generic.MANDATORY_FIELD);
+    }
+
+    /**
+     * Creates a missing-field exception.
+     * 
      * @param code The code number
      * @param name The field name
      * @return A missing-field exception.

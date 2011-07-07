@@ -105,7 +105,6 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -4112,15 +4111,10 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws OXMandatoryFieldException {
+    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {
         final String paramVal = req.getParameter(paramName);
         if (paramVal == null || paramVal.length() == 0 || STR_NULL.equals(paramVal)) {
-            throw new OXMandatoryFieldException(
-                EnumComponent.MAIL,
-                MailExceptionCode.MISSING_PARAM.getCategory(),
-                MailExceptionCode.MISSING_PARAM.getNumber(),
-                null,
-                paramName);
+            throw MailExceptionCode.MISSING_FIELD.create(paramName);
         }
         return paramVal;
     }
@@ -4128,12 +4122,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static String[] checkStringArrayParam(final HttpServletRequest req, final String paramName) throws OXException {
         final String tmp = req.getParameter(paramName);
         if (tmp == null || tmp.length() == 0 || STR_NULL.equals(tmp)) {
-            throw new OXMandatoryFieldException(
-                EnumComponent.MAIL,
-                MailExceptionCode.MISSING_PARAM.getCategory(),
-                MailExceptionCode.MISSING_PARAM.getNumber(),
-                null,
-                paramName);
+            throw MailExceptionCode.MISSING_FIELD.create(paramName);
         }
         return SPLIT.split(tmp, 0);
     }

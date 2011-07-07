@@ -68,8 +68,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.exceptions.Exception2Message;
-import com.openexchange.ajax.exceptions.InfostoreException2Message;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
@@ -126,8 +124,6 @@ public class Attachment extends PermissionServlet {
     static {
         ATTACHMENT_BASE.setTransactional(true);
     }
-
-    public static transient final Exception2Message OXEXCEPTION_HANDLER = new InfostoreException2Message();
 
     private static transient final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Attachment.class));
 

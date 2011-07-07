@@ -75,7 +75,6 @@ import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -215,7 +214,7 @@ public class Infostore extends PermissionServlet {
                 throw (IOException) e.getCause();
             }
             LOG.error(e.getMessage(), e);
-        } catch (final OXPermissionException e) {
+        } catch (final OXException e) {
             LOG.error("Not possible, obviously: " + e.getMessage(), e);
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
@@ -253,7 +252,7 @@ public class Infostore extends PermissionServlet {
                 throw (IOException) e.getCause();
             }
             LOG.error(e.getMessage(), e);
-        } catch (final OXPermissionException e) {
+        } catch (final OXException e) {
             LOG.error("Not possible, obviously: " + e.getMessage(), e);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);

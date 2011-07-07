@@ -64,11 +64,10 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.ReminderParser;
 import com.openexchange.ajax.writer.ReminderWriter;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -236,7 +235,7 @@ public final class ReminderRequest {
         }
     }
 
-    private JSONObject actionRemindAgain(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    private JSONObject actionRemindAgain(final JSONObject jsonObject) throws JSONException, OXException {
         // timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
         final int reminderId = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
         final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
@@ -290,7 +289,7 @@ public final class ReminderRequest {
         return jsonReminderObj;
     }
 
-    private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+    private JSONArray actionRange(final JSONObject jsonObject) throws JSONException, OXException {
         final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
         final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
         final TimeZone timeZone;
@@ -318,13 +317,15 @@ public final class ReminderRequest {
                                 }
                                 continue;
                             }
-                        } catch (final OXObjectNotFoundException e) {
-                            LOG.warn("Cannot load target object of this reminder.", e);
-                            reminderSql.deleteReminder(reminder.getTargetId(), userObj.getId(), reminder.getModule());
                         } catch (final OXException e) {
-                            LOG.error(
-                                "Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + session.getContextId(),
-                                e);
+                            if (e.isGeneric(Generic.NOT_FOUND)) {
+                                LOG.warn("Cannot load target object of this reminder.", e);
+                                reminderSql.deleteReminder(reminder.getTargetId(), userObj.getId(), reminder.getModule());
+                            } else {
+                                LOG.error(
+                                    "Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + session.getContextId(),
+                                    e);
+                            }
                         }
                     }
                     if (hasModulePermission(reminder)) {

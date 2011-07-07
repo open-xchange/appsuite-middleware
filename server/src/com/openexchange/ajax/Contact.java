@@ -68,7 +68,6 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.ContactRequest;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -254,7 +253,7 @@ public class Contact extends DataServlet {
                     contactparser.parse(contactobject, jsonobject);
 
                     if (!contactobject.containsParentFolderID()) {
-                        throw new OXMandatoryFieldException("missing folder");
+                        throw OXException.mandatoryField("missing folder");
                     }
 
                     final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());

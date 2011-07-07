@@ -82,7 +82,6 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
@@ -716,7 +715,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         final String action;
         try {
             action = getAction(req);
-        } catch (final OXConflictException e) {
+        } catch (final OXException e) {
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e);
         }
         /*-

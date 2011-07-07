@@ -73,8 +73,6 @@ import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.FinalContactInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.databaseold.Database;
@@ -161,7 +159,7 @@ public class ContactRequest {
 
     public JSONValue action(final String action, final JSONObject jsonObject) throws JSONException, OXException {
         if (!session.getUserConfiguration().hasContact()) {
-            throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
+            throw OXException.noPermissionForModule("contact");
         }
 
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -205,7 +203,7 @@ public class ContactRequest {
 
 
 
-	public JSONValue actionGetByUuid(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXException, OXException {
+	public JSONValue actionGetByUuid(final JSONObject jsonObj) throws JSONException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         
         final Contact contactObj = getFinalContact(contactInterface, jsonObj);
@@ -279,7 +277,7 @@ public class ContactRequest {
         contactparser.parse(contactObj, jData);
 
         if (!contactObj.containsParentFolderID()) {
-            throw new OXMandatoryFieldException("missing folder");
+            throw OXException.mandatoryField("missing folder");
         }
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(

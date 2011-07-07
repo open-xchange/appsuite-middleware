@@ -65,6 +65,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -82,7 +83,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 /**
  * EventClient
@@ -523,7 +523,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final FolderObject folder) throws OXException, OXException {
+    public void delete(final FolderObject folder) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = folder.getParentFolderID();
@@ -531,8 +531,12 @@ public class EventClient {
             FolderObject parentFolderObj = null;
             try {
                 parentFolderObj = getFolder(folderId, ctx);
-            } catch (final OXFolderPermissionException exc) {
-                LOG.error("cannot load folder", exc);
+            } catch (final OXException exc) {
+                if (exc.isGeneric(Generic.NO_PERMISSION)) {
+                    LOG.error("cannot load folder", exc);
+                } else {
+                    throw exc;
+                }
             }
             delete(folder, parentFolderObj);
         }

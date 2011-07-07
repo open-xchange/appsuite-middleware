@@ -61,8 +61,6 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.ReminderRequest;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -97,12 +95,6 @@ public class Reminder extends DataServlet {
 			final JSONValue responseObj = reminderRequest.action(action, jsonObj);
 			response.setTimestamp(reminderRequest.getTimestamp());
 			response.setData(responseObj);
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXConflictException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -150,12 +142,6 @@ public class Reminder extends DataServlet {
 				final Object responseObj = reminderRequest.action(action, jsonObj);
 				response.setData(responseObj);
 			}
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXConflictException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (final OXException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);

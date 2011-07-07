@@ -97,6 +97,7 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.groupware.EnumComponent;
@@ -146,7 +147,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -780,10 +780,12 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             folderWriter.writeOXFolderFieldsAsArray(columns, internalUsers, FolderObject.getFolderString(
                                 internalUsers.getObjectID(),
                                 locale), -1);
-                        } catch (final OXFolderPermissionException e) {
+                        } catch (final OXException e) {
                             // Internal users folder not visible to current user
-                            if (LOG.isDebugEnabled()) {
+                            if (e.isGeneric(Generic.NO_PERMISSION)) {
                                 LOG.debug(e.getMessage(), e);
+                            } else {
+                                throw e;
                             }
                         }
                     }

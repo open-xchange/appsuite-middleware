@@ -58,7 +58,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
-import com.openexchange.api.OXConflictException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
@@ -92,7 +91,7 @@ public class CalendarParser extends CommonParser {
         super(parseAll, timeZone);
     }
 
-    protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXException {
+    protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXException {
         if (jsonobject.has(CalendarFields.TITLE)) {
             calendarobject.setTitle(parseString(jsonobject, CalendarFields.TITLE));
         }
@@ -198,7 +197,7 @@ public class CalendarParser extends CommonParser {
         parseElementCommon(calendarobject, jsonobject);
     }
 
-    public static Participant[] parseParticipants(final JSONObject jsonObj, final Participants participants) throws JSONException, OXConflictException, OXException {
+    public static Participant[] parseParticipants(final JSONObject jsonObj, final Participants participants) throws JSONException, OXException {
         final JSONArray jparticipants = jsonObj.getJSONArray(CalendarFields.PARTICIPANTS);
         final Participant[] participant = new Participant[jparticipants.length()];
         for (int i = 0; i < jparticipants.length(); i++) {
