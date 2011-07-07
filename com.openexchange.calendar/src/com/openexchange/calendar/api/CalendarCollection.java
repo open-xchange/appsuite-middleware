@@ -1334,6 +1334,9 @@ public final class CalendarCollection implements CalendarCollectionService {
              * date in the meantime
              */
             if (Arrays.equals(edao.getChangeException(), newChangeExcs)) {
+                throw 
+                
+                
                 throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT,
                         OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
             }
