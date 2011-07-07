@@ -92,8 +92,6 @@ public class Exception2Message {
 	public ErrorMessage getMessage(final OXException x) {
 		if(x instanceof OXObjectNotFoundException) {
 			return objectNotFound((OXObjectNotFoundException) x);
-		} else if (x instanceof OXConcurrentModificationException ){
-			return concurrentModification((OXConcurrentModificationException)x);
 		} else if (x instanceof OXConflictException) {
 			return conflictException((OXConflictException)x);
 		} else if (x instanceof OXPermissionException) {
@@ -109,10 +107,6 @@ public class Exception2Message {
 
 	protected ErrorMessage conflictException(final OXConflictException exception) {
 		return new ErrorMessage("Conflict.");
-	}
-
-	protected ErrorMessage concurrentModification(final OXConcurrentModificationException exception) {
-		return new ErrorMessage("Concurrent Modification");
 	}
 
 	protected ErrorMessage objectNotFound(final OXObjectNotFoundException exception) {
