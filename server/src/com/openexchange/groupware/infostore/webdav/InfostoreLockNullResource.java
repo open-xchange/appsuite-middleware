@@ -76,6 +76,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
@@ -127,7 +128,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			}
 			return -1;
 		} catch (final SQLException x) {
-			throw new OXException(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if(stmt != null) {
 				try {
@@ -220,10 +221,10 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			factory.invalidate(getUrl(), getId()	, ((resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE));
 		} catch (final SQLException x) {
 		    rollback(writeCon);
-            throw new OXException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw WebdavProtocolException.generalError(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (final OXException e) {
 		    rollback(writeCon);
-			throw new OXException(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw WebdavProtocolException.generalError(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if (stmt != null) {
 				try {
@@ -316,12 +317,12 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			lockHelper.addLock(lock);
 			lockHelper.dumpLocksToDB();
 		} catch (final Exception e) {
-			throw new OXException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	public void save() throws OXException {
-		throw new OXException(getUrl(), HttpServletResponse.SC_CONFLICT);
+		throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_CONFLICT);
 	}
 
 	@Override

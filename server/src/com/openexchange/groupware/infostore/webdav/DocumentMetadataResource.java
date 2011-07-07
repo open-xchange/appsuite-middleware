@@ -748,7 +748,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throw OXException, OXException, TransactionException {
+    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, OXException, TransactionException {
         if ((exists || existsInDB) && !metadataChanged) {
             return;
         }
@@ -841,7 +841,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         metadata.setTitle(metadata.getFileName());
     }
 
-    private void dumpMetadataToDB() throw OXException, OXException, TransactionException {
+    private void dumpMetadataToDB() throws OXException, OXException, TransactionException {
         dumpMetadataToDB(null, false);
     }
 

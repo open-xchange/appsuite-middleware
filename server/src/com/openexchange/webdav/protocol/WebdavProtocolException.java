@@ -181,6 +181,10 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         }
     }
 
+    public static OXException generalError(final Throwable t, final WebdavPath url, final int status) {
+        return Code.GENERAL_ERROR.create(url, status, t);
+    }
+
     public static OXException generalError(final WebdavPath url, final int status) {
         return Code.GENERAL_ERROR.create(url, status);
     }

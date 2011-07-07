@@ -89,6 +89,7 @@ import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
@@ -236,10 +237,10 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
                 s.addNewResource(res);
             }
         } catch (final OXException e) {
-            throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         if(!res.isCollection()) {
-            throw new OXException(url, HttpServletResponse.SC_PRECONDITION_FAILED);
+            throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_PRECONDITION_FAILED);
         }
         return (WebdavCollection) res;
     }
@@ -274,7 +275,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             }
             return res;
         } catch (final OXException e) {
-            throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -310,7 +311,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
                     return new InfostoreLockNullResource((AbstractResource) def, this,lockNullId);
                 }
             } catch (final OXException e) {
-                throw new OXException(e);
+                throw e;
             } finally {
                 if(readCon != null) {
                     provider.releaseReadConnection(ctx, readCon);
@@ -464,7 +465,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         for(final int id : toLoad) {
             try {
                 retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
-            } catch (final OXException x) {
+            } catch (final WebdavProtocolException x) {
                 //System.out.println(x.getStatus());
                 if(x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
                     throw x;

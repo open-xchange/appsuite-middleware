@@ -67,6 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public abstract class LockHelper {
 	private final Map<String, WebdavLock> locks = new HashMap<String, WebdavLock>();
@@ -127,7 +128,7 @@ public abstract class LockHelper {
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
 		} catch (final OXException e) {
-		    throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -169,7 +170,7 @@ public abstract class LockHelper {
 			}
 			setLocks(cleanedLocks);
 		} catch (final OXException e) {
-		    throw new OXException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	
