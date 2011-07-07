@@ -62,8 +62,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
@@ -79,8 +77,6 @@ import com.openexchange.tools.strings.TimeSpanParser;
 public final class GlobalActivator implements BundleActivator {
 
     private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
-
-    private ServiceRegistration componentRegistryRegistration;
 
     private Initialization initialization;
 
@@ -105,7 +101,6 @@ public final class GlobalActivator implements BundleActivator {
             initialization = new com.openexchange.server.ServerInitialization();
             initialization.start();
             ServiceHolderInit.getInstance().start();
-            componentRegistryRegistration = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
             initStringParsers(context);
 
             trackers = new ArrayList<ServiceTracker>(2);
@@ -175,7 +170,6 @@ public final class GlobalActivator implements BundleActivator {
                 }
                 trackers = null;
             }
-            componentRegistryRegistration.unregister();
             ServiceHolderInit.getInstance().stop();
             initialization.stop();
             initialization = null;

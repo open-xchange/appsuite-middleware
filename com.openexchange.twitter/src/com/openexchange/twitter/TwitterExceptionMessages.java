@@ -49,7 +49,7 @@
 
 package com.openexchange.twitter;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link TwitterExceptionMessages} - Exception messages for {@link TwitterException} that must be translated.

@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.headercache;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link HeaderCacheExceptionMessages} - Exception messages for {@link OXException} that must be translated.

@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link FolderExceptionMessages} - Locale-sensitive strings for folder exceptions.

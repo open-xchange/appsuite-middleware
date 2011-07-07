@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.facebook;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link FacebookMessagingExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.

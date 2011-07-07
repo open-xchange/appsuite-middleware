@@ -6,7 +6,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.recaptcha.ReCaptchaService;
 import com.openexchange.recaptcha.ReCaptchaServlet;
 import com.openexchange.recaptcha.impl.ReCaptchaServiceImpl;
@@ -22,7 +21,6 @@ public class Activator extends DeferredActivator {
     private ReCaptchaServlet servlet;
 
     private ServiceRegistration serviceRegistration;
-    private ComponentRegistration componentRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -30,31 +28,31 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         registerServlet();
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         unregisterServlet();
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
+        final ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
         registry.clearRegistry();
-        Class<?>[] classes = getNeededServices();
+        final Class<?>[] classes = getNeededServices();
         for (int i = 0; i < classes.length; i++) {
-            Object service = getService(classes[i]);
+            final Object service = getService(classes[i]);
             if (service != null) {
                 registry.addService(classes[i], service);
             }
         }
         
-        ConfigurationService config = registry.getService(ConfigurationService.class);
-        Properties props = config.getFile("recaptcha.properties");
-        Properties options = config.getFile("recaptcha_options.properties");
-        ReCaptchaServiceImpl reCaptchaService = new ReCaptchaServiceImpl(props, options);
+        final ConfigurationService config = registry.getService(ConfigurationService.class);
+        final Properties props = config.getFile("recaptcha.properties");
+        final Properties options = config.getFile("recaptcha_options.properties");
+        final ReCaptchaServiceImpl reCaptchaService = new ReCaptchaServiceImpl(props, options);
         serviceRegistration = context.registerService(ReCaptchaService.class.getName(), reCaptchaService, null);
         registry.addService(ReCaptchaService.class, reCaptchaService);
         
@@ -63,10 +61,6 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        if(componentRegistration != null) {
-            componentRegistration.unregister();
-            componentRegistration = null;
-        }
         
         if (serviceRegistration != null) {
             serviceRegistration.unregister();
@@ -78,20 +72,20 @@ public class Activator extends DeferredActivator {
     }
     
     private void registerServlet() {
-        ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
-        HttpService httpService = registry.getService(HttpService.class);
+        final ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
+        final HttpService httpService = registry.getService(HttpService.class);
         if(servlet == null) {
             try {
                 httpService.registerServlet(ALIAS, servlet = new ReCaptchaServlet(), null, null);
                 LOG.info("reCAPTCHA Servlet registered.");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }
     }
     
     private void unregisterServlet() {
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
         if(httpService != null && servlet != null) {
             httpService.unregister(ALIAS);
             servlet = null;

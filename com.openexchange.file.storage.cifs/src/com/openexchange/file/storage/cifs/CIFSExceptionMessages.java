@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.cifs;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link CIFSExceptionMessages} - Exception messages for {@link CIFSException} that needs to be translated.

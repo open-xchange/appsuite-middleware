@@ -50,7 +50,7 @@
 package com.openexchange.database;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * Exception messages to translate for {@link OXException}.

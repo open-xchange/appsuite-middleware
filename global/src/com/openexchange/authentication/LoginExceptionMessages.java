@@ -49,7 +49,7 @@
 
 package com.openexchange.authentication;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * Exception messages for the {@link OXException} that must be translated.

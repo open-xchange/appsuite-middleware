@@ -49,7 +49,7 @@
 
 package com.openexchange.id;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link IDExceptionMessages} - Exception messages for {@link IDException} that needs to be translated.
