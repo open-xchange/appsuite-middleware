@@ -51,7 +51,7 @@ package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 
@@ -87,7 +87,7 @@ public class UpdateProcess implements Runnable {
                 return;
             }
             new UpdateExecutor(state, contextId, null).execute();
-        } catch (SchemaException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);

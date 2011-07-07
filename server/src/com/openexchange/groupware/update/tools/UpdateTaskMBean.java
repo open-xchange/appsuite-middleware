@@ -77,7 +77,7 @@ import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -352,7 +352,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
             }
         } catch (OXException e) {
             throw new OXException(e);
-        } catch (SchemaException e) {
+        } catch (OXException e) {
             throw new OXException(e);
         } catch (OpenDataException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());

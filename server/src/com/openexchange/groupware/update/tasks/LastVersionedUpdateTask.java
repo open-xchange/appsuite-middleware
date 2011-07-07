@@ -61,7 +61,7 @@ import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -105,7 +105,7 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         } catch (SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (SchemaException e) {
+        } catch (OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -114,7 +114,7 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    public static void insertTasks(Connection con, List<String> executed) throws SchemaException {
+    public static void insertTasks(Connection con, List<String> executed) throws OXException {
         SchemaStore store = SchemaStore.getInstance();
         for (String taskName : executed) {
             store.addExecutedTask(con, taskName, true);

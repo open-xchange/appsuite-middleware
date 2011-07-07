@@ -50,15 +50,13 @@
 package com.openexchange.groupware.update.internal;
 
 import java.util.List;
-import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 
@@ -77,12 +75,12 @@ public class UpdaterImpl extends Updater {
     }
 
     @Override
-    public UpdateStatus getStatus(int contextId) throws OXException {
+    public UpdateStatus getStatus(final int contextId) throws OXException {
         return getStatus(getSchema(contextId));
     }
 
     @Override
-    public UpdateStatus getStatus(String schema, int writePoolId) throws OXException {
+    public UpdateStatus getStatus(final String schema, final int writePoolId) throws OXException {
         return getStatus(getSchema(writePoolId, schema));
     }
 
@@ -105,33 +103,33 @@ public class UpdaterImpl extends Updater {
     }
 
     @Override
-    public void startUpdate(int contextId) throws OXException {
+    public void startUpdate(final int contextId) throws OXException {
         final TimerService timerService;
         try {
             timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         timerService.schedule(new UpdateProcess(contextId), 0);
     }
 
-    private SchemaUpdateState getSchema(int contextId) throws OXException {
+    private SchemaUpdateState getSchema(final int contextId) throws OXException {
         final SchemaUpdateState schema;
         try {
             final SchemaStore store = SchemaStore.getInstance();
             schema = store.getSchema(contextId);
-        } catch (final SchemaException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         return schema;
     }
 
-    private SchemaUpdateState getSchema(int poolId, String schemaName) throws OXException {
+    private SchemaUpdateState getSchema(final int poolId, final String schemaName) throws OXException {
         final SchemaUpdateState state;
         try {
             final SchemaStore store = SchemaStore.getInstance();
             state = store.getSchema(poolId, schemaName);
-        } catch (final SchemaException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         return state;
@@ -139,7 +137,7 @@ public class UpdaterImpl extends Updater {
 
     @Override
     public UpdateTask[] getAvailableUpdateTasks() {
-        List<UpdateTask> retval = UpdateTaskCollection.getInstance().getListWithoutExcludes();
+        final List<UpdateTask> retval = UpdateTaskCollection.getInstance().getListWithoutExcludes();
         return retval.toArray(new UpdateTask[retval.size()]);
     }
 }

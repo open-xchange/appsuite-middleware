@@ -62,10 +62,10 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.exception.OXException;
 
 /**
- * Exception codes for the {@link SchemaException}.
+ * Exception codes for the {@link OXException}.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

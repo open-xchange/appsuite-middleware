@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.update.internal;
 
-import com.openexchange.exceptions.LocalizableStrings;
-import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * Exception message texts for the {@link SchemaException}.
+ * Exception message texts for the {@link OXException}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

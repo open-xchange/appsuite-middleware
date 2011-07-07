@@ -55,11 +55,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
-import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
@@ -122,7 +120,7 @@ public final class UpdateExecutor {
                 // Try to unlock schema
                 try {
                     unlockSchema(blocking);
-                } catch (final SchemaException e1) {
+                } catch (final OXException e1) {
                     LOG.error(e1.getMessage(), e1);
                 }
             }
@@ -156,7 +154,7 @@ public final class UpdateExecutor {
                         task.perform(state, contextId);
                     }
                     success = true;
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
                 if (success) {
@@ -167,10 +165,8 @@ public final class UpdateExecutor {
                 addExecutedTask(task.getClass().getName(), success);
             }
             LOG.info("Finished " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
-        } catch (final SchemaException e) {
-            throw new OXException(e);
         } catch (final OXException e) {
-            throw e;
+            throw new OXException(e);
         } catch (final Throwable t) {
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
         } finally {
@@ -180,21 +176,21 @@ public final class UpdateExecutor {
                 if (blocking) {
                     removeContexts();
                 }
-            } catch (final SchemaException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
         }
     }
 
-    private final void lockSchema(final boolean blocking) throws SchemaException {
+    private final void lockSchema(final boolean blocking) throws OXException {
         store.lockSchema(state, contextId, !blocking);
     }
 
-    private final void unlockSchema(final boolean blocking) throws SchemaException {
+    private final void unlockSchema(final boolean blocking) throws OXException {
         store.unlockSchema(state, contextId, !blocking);
     }
 
-    private final void addExecutedTask(final String taskName, final boolean success) throws SchemaException {
+    private final void addExecutedTask(final String taskName, final boolean success) throws OXException {
         store.addExecutedTask(contextId, taskName, success);
     }
 
@@ -205,8 +201,6 @@ public final class UpdateExecutor {
             for (final int cid : contextIds) {
                 contextStorage.invalidateContext(cid);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final OXException e) {
             throw new OXException(e);
         }

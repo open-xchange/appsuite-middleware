@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * Exception message texts for the {@link OXException}.

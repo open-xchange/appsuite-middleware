@@ -87,7 +87,7 @@ public abstract class SchemaStore {
      * @param schema the schema
      * @param contextId unique context identifier
      * @param background <code>false</code> if blocking tasks are executed.
-     * @throws SchemaException
+     * @throws OXException
      */
     public abstract void lockSchema(Schema schema, int contextId, boolean background) throws OXException;
 
@@ -97,7 +97,7 @@ public abstract class SchemaStore {
      * @param schema the schema
      * @param contextId the unique context identifier
      * @param background <code>false</code> if blocking tasks finished.
-     * @throws SchemaException
+     * @throws OXException
      */
     public abstract void unlockSchema(Schema schema, int contextId, boolean background) throws OXException;
 
@@ -120,7 +120,7 @@ public abstract class SchemaStore {
         } catch (final SQLException e) {
             rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final SchemaException e) {
+        } catch (final OXException e) {
             rollback(con);
             throw e;
         } finally {

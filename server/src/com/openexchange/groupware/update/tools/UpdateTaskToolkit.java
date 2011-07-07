@@ -71,7 +71,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.exception.OXException;
@@ -317,7 +317,7 @@ public final class UpdateTaskToolkit {
             } catch (SQLException e) {
                 rollback(con);
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-            } catch (SchemaException e) {
+            } catch (OXException e) {
                 rollback(con);
                 throw new OXException(e);
             } finally {
@@ -336,7 +336,7 @@ public final class UpdateTaskToolkit {
             } catch (SQLException e) {
                 rollback(con);
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-            } catch (SchemaException e) {
+            } catch (OXException e) {
                 rollback(con);
                 throw new OXException(e);
             } finally {
@@ -355,7 +355,7 @@ public final class UpdateTaskToolkit {
     private static SchemaUpdateState getSchema(final int contextId) throws OXException {
         try {
             return SchemaStore.getInstance().getSchema(contextId);
-        } catch (SchemaException e) {
+        } catch (OXException e) {
             throw new OXException(e);
         }
     }
@@ -365,7 +365,7 @@ public final class UpdateTaskToolkit {
     private static void lockSchema(Schema schema, int contextId) throws OXException {
         try {
             SchemaStore.getInstance().lockSchema(schema, contextId, false);
-        } catch (SchemaException e) {
+        } catch (OXException e) {
             throw new OXException(e);
         }
     }
@@ -373,7 +373,7 @@ public final class UpdateTaskToolkit {
     private static void unlockSchema(Schema schema, int contextId) throws OXException {
         try {
             SchemaStore.getInstance().unlockSchema(schema, contextId, false);
-        } catch (SchemaException e) {
+        } catch (OXException e) {
             throw new OXException(e);
         }
     }
