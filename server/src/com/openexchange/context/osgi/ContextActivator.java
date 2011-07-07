@@ -51,11 +51,8 @@ package com.openexchange.context.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import com.openexchange.context.internal.OXExceptionFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
 import com.openexchange.groupware.update.UpdateTask;
@@ -73,7 +70,6 @@ public class ContextActivator extends HousekeepingActivator {
      * 
      */
     private static final Class[] NEEDED = new Class[]{DatabaseService.class};
-    private ComponentRegistration registration;
 
     public ContextActivator() {
         super();
@@ -86,11 +82,9 @@ public class ContextActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.CONTEXT, "com.openexchange.context", OXExceptionFactory.getInstance());
+        final DatabaseService dbase = getService(DatabaseService.class);
         
-        DatabaseService dbase = getService(DatabaseService.class);
-        
-        ContextAttributeCreateTable createTable = new ContextAttributeCreateTable();
+        final ContextAttributeCreateTable createTable = new ContextAttributeCreateTable();
         registerService(CreateTableService.class, createTable);
         
         final ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
@@ -108,7 +102,6 @@ public class ContextActivator extends HousekeepingActivator {
     
     @Override
     protected void stopBundle() throws Exception {
-        registration.unregister();
         super.stopBundle();
     }
 }

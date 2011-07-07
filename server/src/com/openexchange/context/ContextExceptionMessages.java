@@ -49,21 +49,21 @@
 
 package com.openexchange.context;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link OXExceptionMessages}
+ * {@link ContextExceptionMessages}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class OXExceptionMessages implements LocalizableStrings {
+public class ContextExceptionMessages implements LocalizableStrings {
 
     // This message will be logged if a context is disabled and some user of that context tries to login.
     // %1$d is replaced with the unique context identifier.
     // %2$s is replaced with the context name.
     public static final String CONTEXT_DISABLED_MSG = "Context %1$d, %1$s is disabled.";
 
-    private OXExceptionMessages() {
+    private ContextExceptionMessages() {
         super();
     }
 }
