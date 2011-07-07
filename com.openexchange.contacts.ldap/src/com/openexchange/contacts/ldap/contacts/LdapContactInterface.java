@@ -57,8 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
@@ -232,7 +230,7 @@ public class LdapContactInterface implements ContactInterface {
 //    }
 
 
-    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException {
+    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXException {
         throw LdapExceptionCode.DELETE_NOT_POSSIBLE.create();
     }
 

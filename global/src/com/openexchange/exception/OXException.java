@@ -104,13 +104,65 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * The generic types.
+     */
+    public static enum Generic {
+        NONE, NOT_FOUND, NO_PERMISSION, MANDATORY_FIELD, CONFLICT,
+    }
+
+    /**
      * Creates a general exception.
      * 
      * @param logMessage The log message
      * @return A general exception.
      */
     public static OXException general(final String logMessage) {
-        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(PREFIX_GENERAL);
+        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(
+            PREFIX_GENERAL);
+    }
+
+    /**
+     * Creates a not-found exception.
+     * 
+     * @param id The identifier of the missing object
+     * @return A not-found exception.
+     */
+    public static OXException notFound(final String id) {
+        return new OXException(1, OXExceptionStrings.MESSAGE_NOT_FOUND, id).setCategory(CATEGORY_USER_INPUT).setPrefix(PREFIX_GENERAL).setGeneric(
+            Generic.NOT_FOUND);
+    }
+
+    /**
+     * Creates a module-denied exception.
+     * 
+     * @param module The identifier of the module
+     * @return A module-denied exception.
+     */
+    public static OXException noPermissionForModule(final String module) {
+        return new OXException(1, OXExceptionStrings.MESSAGE_PERMISSION_MODULE, module).setCategory(CATEGORY_USER_INPUT).setPrefix(
+            PREFIX_GENERAL).setGeneric(Generic.NO_PERMISSION);
+    }
+
+    /**
+     * Creates a folder-denied exception.
+     * 
+     * @return A folder-denied exception.
+     */
+    public static OXException noPermissionForFolder() {
+        return new OXException(1, OXExceptionStrings.MESSAGE_PERMISSION_FOLDER).setCategory(CATEGORY_PERMISSION_DENIED).setPrefix(
+            PREFIX_GENERAL).setGeneric(Generic.NO_PERMISSION);
+    }
+
+    /**
+     * Creates a missing-field exception.
+     * 
+     * @param code The code number
+     * @param name The field name
+     * @return A missing-field exception.
+     */
+    public static OXException mandatoryField(final int code, final String name) {
+        return new OXException(code, OXExceptionStrings.MESSAGE_MISSING_FIELD, name).setCategory(CATEGORY_ERROR).setPrefix(PREFIX_GENERAL).setGeneric(
+            Generic.MANDATORY_FIELD);
     }
 
     /**
@@ -119,7 +171,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return A general conflict exception.
      */
     public static OXException conflict() {
-        return new OXException(1, OXExceptionStrings.MESSAGE_CONFLICT).setCategory(CATEGORY_CONFLICT).setPrefix(PREFIX_GENERAL);
+        return new OXException(1, OXExceptionStrings.MESSAGE_CONFLICT).setCategory(CATEGORY_CONFLICT).setPrefix(PREFIX_GENERAL).setGeneric(
+            Generic.CONFLICT);
     }
 
     /*-
@@ -149,11 +202,14 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private String prefix;
 
+    private Generic generic;
+
     /**
      * Initializes a default {@link OXException}.
      */
     public OXException() {
         super();
+        generic = Generic.NONE;
         code = CODE_DEFAULT;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
@@ -171,6 +227,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final Throwable cause) {
         super(cause);
+        generic = Generic.NONE;
         code = CODE_DEFAULT;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
@@ -189,6 +246,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     public OXException(final OXException cloneMe) {
         super();
         setStackTrace(cloneMe.getStackTrace());
+        this.generic = cloneMe.generic;
         this.count = cloneMe.count;
         this.code = cloneMe.code;
         this.categories = null == cloneMe.categories ? new LinkedList<Category>() : new ArrayList<Category>(cloneMe.categories);
@@ -210,6 +268,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final int code) {
         super();
+        generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
@@ -228,6 +287,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final int code, final String displayMessage, final Object... displayArgs) {
         super();
+        generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
@@ -247,6 +307,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
         super(cause);
+        generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(8);
         categories = new LinkedList<Category>();
@@ -263,6 +324,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public void copyFrom(final OXException e) {
         this.code = e.code;
+        this.generic = e.generic;
         this.categories.clear();
         this.categories.addAll(e.getCategories());
         this.displayArgs = e.displayArgs;
@@ -285,6 +347,36 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public int getCode() {
         return code;
+    }
+
+    /**
+     * Gets the generic
+     * 
+     * @return The generic
+     */
+    public Generic getGeneric() {
+        return generic;
+    }
+
+    /**
+     * Checks generic equality.
+     * 
+     * @param generic The generic
+     * @return <code>true</code> if equal; otherwise <code>false</code>
+     */
+    public boolean isGeneric(final Generic generic) {
+        return null != generic && generic.equals(this.generic);
+    }
+
+    /**
+     * Sets the generic
+     * 
+     * @param generic The generic to set
+     * @return This {@link OXException} with generic applied
+     */
+    public OXException setGeneric(final Generic generic) {
+        this.generic = generic;
+        return this;
     }
 
     /**

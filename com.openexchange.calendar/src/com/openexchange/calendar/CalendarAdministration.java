@@ -63,8 +63,8 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -728,8 +728,12 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 cdao.setNotification(false);
                 collection.triggerEvent(so, type, cdao);
 
-            } catch (final OXObjectNotFoundException ex) {
-                LOG.warn("While deleting an object (type:"+type+") the master object with id "+object_id+" in context "+context.getContextId()+" was not found!");
+            } catch (final OXException ex) {
+                if (Category.CATEGORY_WARNING.equals(ex.getCategory())) {
+                    LOG.warn("While deleting an object (type:"+type+") the master object with id "+object_id+" in context "+context.getContextId()+" was not found!", ex);
+                } else {
+                    throw ex;
+                }
             }
         } finally {
             collection.closeResultSet(rs);

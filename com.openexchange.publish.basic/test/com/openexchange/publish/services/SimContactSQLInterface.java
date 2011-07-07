@@ -54,8 +54,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.exception.OXException;
@@ -81,7 +79,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      * (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#deleteContactObject(int, int, java.util.Date)
      */
-    public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXObjectNotFoundException, OXConflictException, OXException {
+    public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXException {
         // TODO Auto-generated method stub
 
     }

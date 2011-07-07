@@ -51,8 +51,6 @@ package com.openexchange.api2;
 
 import java.sql.Connection;
 import java.util.Date;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -68,9 +66,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public interface ReminderService {
 
-    public int insertReminder(ReminderObject reminderObj) throws OXMandatoryFieldException, OXConflictException, OXException;
+    public int insertReminder(ReminderObject reminderObj) throws OXException;
 
-    public int insertReminder(ReminderObject reminderObj, Connection writeCon) throws OXMandatoryFieldException, OXConflictException, OXException;
+    public int insertReminder(ReminderObject reminderObj, Connection writeCon) throws OXException;
 
     void updateReminder(ReminderObject reminder) throws OXException;
 
@@ -99,7 +97,7 @@ public interface ReminderService {
 
     public ReminderObject loadReminder(int targetId, int userId, int module) throws OXException;
 
-    public ReminderObject loadReminder(int objectId) throws OXMandatoryFieldException, OXConflictException, OXException;
+    public ReminderObject loadReminder(int objectId) throws OXException;
     
     public ReminderObject loadReminder(final int targetId, final int userId, final int module, final Connection con) throws OXException;
     

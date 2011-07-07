@@ -49,7 +49,6 @@
 
 package com.openexchange.calendar;
 
-import static com.openexchange.groupware.EnumComponent.APPOINTMENT;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import java.sql.Connection;
@@ -71,17 +70,13 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
 import com.openexchange.groupware.calendar.CalendarConfig;
@@ -1783,7 +1778,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 collection.closePreparedStatement(stmt);
             }
         } else {
-            throw new OXMandatoryFieldException(EnumComponent.APPOINTMENT, 1000011, "UserParticipant is empty!");
+            throw OXException.mandatoryField(1000011, "UserParticipant is empty!");
         }
     }
 
@@ -2149,7 +2144,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return participants;
     }
 
-    public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con) throws SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException {
+    public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con) throws SQLException, OXException {
         final CalendarOperation co = new CalendarOperation();
         Connection readcon = null;
         boolean pushCon = false;
@@ -2173,10 +2168,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.UPDATE, action_folder);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
-        } catch (final OXPermissionException oxpe) {
-            throw oxpe;
-        } catch (final OXObjectNotFoundException oxonfe) {
-            throw oxonfe;
         } catch (final OXException oxe) {
             throw oxe;
         } finally {
@@ -2189,11 +2180,11 @@ public class CalendarMySQL implements CalendarSqlImp {
         return edao;
     }
 
-    public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException {
+    public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
     }
 
-    private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, final boolean skipParticipants) throws DataTruncation, SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException {
+    private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, final boolean skipParticipants) throws DataTruncation, SQLException, OXException {
 
         final CalendarOperation co = new CalendarOperation();
 
@@ -3499,8 +3490,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 mo.setInt(4, so.getContextId());
                 mo.executeUpdate();
             } else if (changes == 0) {
-                final OXObjectNotFoundException e = new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
-                    APPOINTMENT, "Object: " + oid + ", Context: " + so.getContextId() + ", User: " + uid);
+                final OXException e = OXException.notFound("Object: " + oid + ", Context: " + so.getContextId() + ", User: " + uid);
                 LOG.error(e.getMessage(), e);
                 throw e;
             } else {
@@ -3669,7 +3659,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 oldAmount = rs.getInt(1);
             } else {
                 LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
+                throw OXException.notFound("");
             }
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
@@ -3684,7 +3674,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         oldAmount += numberOfAttachments;
         if (oldAmount < 0) {
             LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: new number of attachments:", Integer.valueOf(oldAmount), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
-            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
+            throw OXException.notFound("");
         }
 
         try {
@@ -3701,7 +3691,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             changes = pst.executeBatch();
             if (changes[0] == 0) {
                 LOG.error(StringCollection.convertArraytoString(new Object[] { "Object not found: attachmentAction: oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
+                throw OXException.notFound("");
             }
             LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ", Integer.valueOf(changes[0]), ". Check prg_dates oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
         } catch (final SQLException sqle) {
@@ -3878,8 +3868,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private final long deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid,
-            final int fid, final Context c, final Connection writecon, final Session so) throws SQLException,
-            OXMandatoryFieldException, OXConflictException, OXException {
+            final int fid, final Context c, final Connection writecon, final Session so) throws SQLException, OXException {
         final long lastModified = System.currentTimeMillis();
         final PreparedStatement pd = writecon
                 .prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
@@ -4019,7 +4008,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
 	private final void deleteOnlyOneRecurringParticipantInPrivateFolder(final int recurrenceId, final int cid,
 			final int uid, final int fid, final Context c, final Connection writecon, final Session so)
-			throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+			throws SQLException, OXException {
 		/*
 		 * Get all object IDs belonging to specified recurrence ID
 		 */
@@ -4056,19 +4045,19 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @throws OXConflictException If deleting reminder fails
      * @throws OXException If deleting reminder fails
      */
-    private static final void deleteReminder(final int oid, final int uid, final Context c) throws OXMandatoryFieldException, OXConflictException, OXException {
+    private static final void deleteReminder(final int oid, final int uid, final Context c) throws OXException {
         changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false);
     }
 
-    private static final void deleteReminder(final int oid, final int uid, final Context c, final Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
+    private static final void deleteReminder(final int oid, final int uid, final Context c, final Connection con) throws OXException {
         changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false, con);
     }
 
-    private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange) throws OXMandatoryFieldException, OXConflictException, OXException {
+    private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange) throws OXException {
         changeReminder(oid, uid, fid, c, sequence, end_date, reminder_date, action, recurrenceChange, null);
     }
 
-    private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange, final Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
+    private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange, final Connection con) throws OXException {
         final ReminderService rsql = new ReminderHandler(c);
         if (action == CalendarOperation.DELETE || action == CalendarOperation.UPDATE && collection.isInThePast(end_date)) {
             if (rsql.existsReminder(oid, uid, Types.APPOINTMENT, con)) {
@@ -4172,7 +4161,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return false;
     }
 
-    public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
+    public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         final Connection readcon = DBPool.pickup(ctx);
         final CalendarDataObject edao;
         PreparedStatement prep = null;
@@ -4184,8 +4173,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.DELETE, inFolder);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
-        } catch (final OXPermissionException oxpe) {
-            throw oxpe;
         } catch (final OXException oxe) {
             throw oxe;
         } finally {
@@ -4248,7 +4235,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
-    public void deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
+    public void deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXException {
         while (rs.next()) {
             final int oid = rs.getInt(1);
             final int owner = rs.getInt(2);
@@ -4464,19 +4451,21 @@ public class CalendarMySQL implements CalendarSqlImp {
                             update.setDeleteExceptions(collection.addException(ldao.getDeleteException(), edao.getRecurrenceDatePosition()));
                             updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
                             // OBJfinal ECT
-                        } catch (final OXObjectNotFoundException onfe) {
-                            LOG.info("Unable to find master during Exception delete. Ignoring. Seems to be corrupt data.", onfe);
-                            final long modified = deleteAppointment(writecon, cid, oid, uid);
-
-                            if (edao == null) {
-                                triggerDeleteEvent(writecon, oid, fid, so, ctx, null);
-                            } else {
-                                edao.setModifiedBy(uid);
-                                edao.setLastModified(new Date(modified));
-                                triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
-                            }
                         } catch (final OXException le) {
-                            throw new OXException(le);
+                            if (le.isGeneric(Generic.NOT_FOUND)) {
+                                LOG.info("Unable to find master during Exception delete. Ignoring. Seems to be corrupt data.", le);
+                                final long modified = deleteAppointment(writecon, cid, oid, uid);
+
+                                if (edao == null) {
+                                    triggerDeleteEvent(writecon, oid, fid, so, ctx, null);
+                                } else {
+                                    edao.setModifiedBy(uid);
+                                    edao.setLastModified(new Date(modified));
+                                    triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
+                                }
+                            } else {
+                                throw new OXException(le);
+                            }
                         } catch (final RuntimeException e) {
                             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(11));
                         }
@@ -4582,7 +4571,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
     }
 
-    private final void createSingleVirtualDeleteException(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final int oid, final int uid, final int fid, final Session so, final Context ctx, final java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+    private final void createSingleVirtualDeleteException(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final int oid, final int uid, final int fid, final Session so, final Context ctx, final java.util.Date clientLastModified) throws SQLException, OXException {
         final CalendarDataObject udao = new CalendarDataObject();
         udao.setObjectID(oid);
         udao.setContext(ctx);

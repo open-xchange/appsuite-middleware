@@ -55,8 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
@@ -127,13 +125,13 @@ public interface CalendarSqlImp {
 
     CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, Session so) throws SQLException, OXException, OXException;
 
-    CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException;
+    CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, OXException;
 
-    CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, Session so, Context ctx, int inFolder, Connection con) throws SQLException, OXException, OXObjectNotFoundException, OXPermissionException, OXException;
+    CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, Session so, Context ctx, int inFolder, Connection con) throws SQLException, OXException;
 
-    void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
+    void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, OXException;
 
-    void deleteAppointmentsInFolder(Session so, Context ctx, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
+    void deleteAppointmentsInFolder(Session so, Context ctx, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXException;
 
     Date setUserConfirmation(int oid, int folderId, int uid, int confirm, String confirm_message, Session so, Context ctx) throws OXException;
 

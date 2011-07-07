@@ -67,7 +67,6 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -344,9 +343,6 @@ public class CaldavResource extends AbstractResource {
         } catch (final ClassCastException e) {
             LOG.error(e.getMessage(), e);
             throw WebdavProtocolException.generalError(getUrl(), 500);
-        } catch (final OXPermissionException e) {
-            LOG.error(e.getMessage(), e);
-            throw WebdavProtocolException.generalError(getUrl(), 403);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw WebdavProtocolException.generalError(getUrl(), 500);

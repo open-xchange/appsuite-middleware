@@ -59,7 +59,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -208,10 +207,7 @@ public final class Tools {
             stmt.setInt(pos++, objectId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw new OXObjectNotFoundException(
-                    OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
-                    com.openexchange.groupware.EnumComponent.APPOINTMENT,
-                    "");
+                throw OXException.notFound("");
             }
             folderId = rs.getInt(1);
             if (folderId <= 0) {
@@ -226,10 +222,7 @@ public final class Tools {
                 stmt.setInt(pos++, userId);
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
-                    throw new OXObjectNotFoundException(
-                        OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
-                        com.openexchange.groupware.EnumComponent.APPOINTMENT,
-                        "");
+                    throw OXException.notFound("");
                 }
                 folderId = rs.getInt(1);
             }

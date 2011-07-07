@@ -58,7 +58,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
@@ -89,7 +88,7 @@ public class Partitioner {
     private Date displayStart;
     private Date displayEnd;
 
-    public Partitioner(CPParameters params, CPCalendar cal, Context context, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools) {
+    public Partitioner(final CPParameters params, final CPCalendar cal, final Context context, final AppointmentSQLInterface appointmentSql, final CalendarCollectionService calendarTools) {
         super();
         this.params = params;
         this.cal = cal;
@@ -98,24 +97,24 @@ public class Partitioner {
         this.calendarTools = calendarTools;
     }
 
-    public List<Day> partition(List<Appointment> idList) {
-        SortedMap<Date, Day> dayMap = new TreeMap<Date, Day>();
+    public List<Day> partition(final List<Appointment> idList) {
+        final SortedMap<Date, Day> dayMap = new TreeMap<Date, Day>();
         preFill(dayMap);
 
-        for (Appointment appointment : idList) {
+        for (final Appointment appointment : idList) {
             calculateToDays(dayMap, appointment);
         }
 
-        List<Day> retval = new ArrayList<Day>(dayMap.size());
+        final List<Day> retval = new ArrayList<Day>(dayMap.size());
         while (!dayMap.isEmpty()) {
-            Date tmp = dayMap.firstKey();
+            final Date tmp = dayMap.firstKey();
             retval.add(dayMap.get(tmp));
             dayMap.remove(tmp);
         }
         return retval;
     }
 
-    private void preFill(SortedMap<Date, Day> dayMap) {
+    private void preFill(final SortedMap<Date, Day> dayMap) {
         makeFullBlock();
         cal.setTime(displayStart);
         Date tmp = cal.getTime();
@@ -130,7 +129,7 @@ public class Partitioner {
         firstDay = CalendarTools.getDayStart(cal, params.getStart());
         // omit the last millisecond of the end, because this must be exclusive and we calculate always inclusive.
         lastDay = CalendarTools.getDayStart(cal, new Date(params.getEnd().getTime() - 1));
-        long days = (lastDay.getTime() - firstDay.getTime()) / Constants.MILLI_DAY;
+        final long days = (lastDay.getTime() - firstDay.getTime()) / Constants.MILLI_DAY;
         if (days >= 27 && days <= 31) {
             makeMonthBlock(firstDay, lastDay);
         } else {
@@ -139,7 +138,7 @@ public class Partitioner {
         }
     }
 
-    private void makeMonthBlock(Date start, Date end) {
+    private void makeMonthBlock(final Date start, final Date end) {
         cal.setTime(start);
         // To be consistent with UI only use Monday as week start day.
         // cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
@@ -152,17 +151,17 @@ public class Partitioner {
         displayEnd = cal.getTime();
     }
 
-    private void calculateToDays(SortedMap<Date, Day> dayMap, Appointment appointmentId) {
+    private void calculateToDays(final SortedMap<Date, Day> dayMap, final Appointment appointmentId) {
         try {
-            Appointment appointment = appointmentSql.getObjectById(appointmentId.getObjectID(), appointmentId.getParentFolderID());
+            final Appointment appointment = appointmentSql.getObjectById(appointmentId.getObjectID(), appointmentId.getParentFolderID());
             if (appointment.isMaster()) {
-                RecurringResultsInterface results = calendarTools.calculateRecurring(appointment, displayStart.getTime(), CalendarTools.getDayEnd(cal, displayEnd).getTime(), 0);
+                final RecurringResultsInterface results = calendarTools.calculateRecurring(appointment, displayStart.getTime(), CalendarTools.getDayEnd(cal, displayEnd).getTime(), 0);
                 if (results == null) {
                     addToMap(dayMap, appointment);
                 } else {
                     for (int i = 0; i < results.size(); i++) {
-                        RecurringResultInterface result = results.getRecurringResult(i);
-                        Appointment occurrence = appointment.clone();
+                        final RecurringResultInterface result = results.getRecurringResult(i);
+                        final Appointment occurrence = appointment.clone();
                         occurrence.setStartDate(new Date(result.getStart()));
                         occurrence.setEndDate(new Date(result.getEnd()));
                         addToMap(dayMap, occurrence);
@@ -171,28 +170,26 @@ public class Partitioner {
             } else {
                 addToMap(dayMap, appointment);
             }
-        } catch (OXObjectNotFoundException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    private void addToMap(SortedMap<Date, Day> dayMap, Appointment appointment) {
+    private void addToMap(final SortedMap<Date, Day> dayMap, final Appointment appointment) {
         if (appointment.getFullTime()) {
             // always have time at 00:00 UTC -> move to 00:00 of user time zone to ease following calculation
-            long start = appointment.getStartDate().getTime();
+            final long start = appointment.getStartDate().getTime();
             appointment.setStartDate(new Date(start - cal.getTimeZone().getOffset(start)));
-            long end = appointment.getEndDate().getTime();
+            final long end = appointment.getEndDate().getTime();
             appointment.setEndDate(new Date(end - cal.getTimeZone().getOffset(end)));
         }
         Date dest = CalendarTools.getDayStart(cal, appointment.getStartDate());
         Day day = dayMap.get(dest);
         Date endOfDay = CalendarTools.getDayEnd(cal, dest);
         do {
-            CPAppointment cpAppointment = new CPAppointment(appointment, cal, context);
+            final CPAppointment cpAppointment = new CPAppointment(appointment, cal, context);
             if (dest.after(appointment.getStartDate())) {
                 cpAppointment.setStartDate(dest);
             }

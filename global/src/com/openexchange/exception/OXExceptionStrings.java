@@ -68,6 +68,18 @@ public final class OXExceptionStrings implements LocalizableStrings {
     // The general message for a conflicting update operation.
     public static final String MESSAGE_CONFLICT = "The object has been changed in the meantime.";
 
+    // The general message for a missing object.
+    public static final String MESSAGE_NOT_FOUND = "Object not found. %1$s";
+
+    // The general message if a user has no access to a certain module (e.g. calendar)
+    public static final String MESSAGE_PERMISSION_MODULE = "No permission for module: %1$s.";
+
+    // The general message if a user has no permission to access a certain folder.
+    public static final String MESSAGE_PERMISSION_FOLDER = "No folder permission.";
+
+    // The general message for a missing field.
+    public static final String MESSAGE_MISSING_FIELD = "Missing field: %s";
+
     /**
      * Initializes a new {@link OXExceptionStrings}.
      */

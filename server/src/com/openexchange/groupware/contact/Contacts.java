@@ -76,9 +76,6 @@ import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -486,7 +483,7 @@ public final class Contacts {
         }
     }
 
-    public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException, OXConflictException, OXObjectNotFoundException, OXPermissionException {
+    public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
         validateEmailAddress(co);
 
         boolean can_edit_only_own = false;
@@ -662,13 +659,6 @@ public final class Contacts {
              * Check for bad characters
              */
             checkCharacters(co);
-
-        } catch (final OXPermissionException e) {
-            throw e;
-        } catch (final OXConflictException e) {
-            throw e;
-        } catch (final OXObjectNotFoundException e) {
-            throw e;
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
@@ -809,9 +799,6 @@ public final class Contacts {
                     ctx.getContextId());
             }
             writecon.commit();
-        } catch (final OXConflictException ox) {
-            rollback(writecon);
-            throw ox;
         } catch (final OXException ox) {
             rollback(writecon);
             throw ox;
@@ -834,7 +821,7 @@ public final class Contacts {
         }
     }
 
-    public static void performUserContactStorageUpdate(final Contact contact, final java.util.Date lastModified, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig) throws OXException, OXPermissionException, OXObjectNotFoundException, OXConflictException {
+    public static void performUserContactStorageUpdate(final Contact contact, final java.util.Date lastModified, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig) throws OXException  {
         validateEmailAddress(contact);
         if (!contact.containsParentFolderID() || (contact.getParentFolderID() == 0)) {
             contact.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -1056,7 +1043,7 @@ public final class Contacts {
         }
     }
 
-    public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException, OXObjectNotFoundException {
+    public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
         final ContactSql contactSQL = new ContactMySql(ctx, user);
 
         StringBuilder sb = new StringBuilder();
@@ -1077,7 +1064,7 @@ public final class Contacts {
 
     private static final int LIMIT = 1000;
 
-    public static Contact[] getUsersById(final int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException, OXObjectNotFoundException {
+    public static Contact[] getUsersById(final int[] userIds, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
         final ContactSql contactSQL = new ContactMySql(ctx, user);
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 650; i++) {
@@ -1106,7 +1093,7 @@ public final class Contacts {
         return retval;
     }
 
-    public static Contact getContactById(final int objectId, final Session session) throws OXException, OXException, OXObjectNotFoundException {
+    public static Contact getContactById(final int objectId, final Session session) throws OXException {
         final Context ctx = ContextStorage.getStorageContext(session);
         final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         final Connection readCon = DBPool.pickup(ctx);
@@ -1120,7 +1107,7 @@ public final class Contacts {
         return co;
     }
 
-    public static Contact getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException, OXObjectNotFoundException {
+    public static Contact getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 
         Contact co = null;
         final ContactSql contactSQL = new ContactMySql(ctx, userId);
@@ -1143,7 +1130,7 @@ public final class Contacts {
         return co;
     }
 
-    private static Contact fillContactObject(final ContactSql contactSQL, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException, OXObjectNotFoundException {
+    private static Contact fillContactObject(final ContactSql contactSQL, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
         final Contact co = new Contact();
         Statement stmt = null;
         ResultSet rs = null;

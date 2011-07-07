@@ -71,7 +71,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.calendar.CachedCalendarIterator;
@@ -86,6 +85,7 @@ import com.openexchange.calendar.recurrence.RecurringException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
@@ -1788,8 +1788,12 @@ public final class CalendarCollection implements CalendarCollectionService {
             final CalendarSql csql = new CalendarSql(so);
             final CalendarDataObject cdao = csql.getObjectById(oid, fid);
             return checkPermissions(cdao, so, ctx, readcon, type, fid);
-        } catch(final OXPermissionException x) {
-            return false; // Thrown when the user has no READ access.
+        } catch(final OXException x) {
+            if (x.isGeneric(Generic.NO_PERMISSION)) {
+                return false; // Thrown when the user has no READ access.
+            } else {
+                throw x;
+            }
         } finally {
             if (readcon != null) {
                 DBPool.push(ctx, readcon);

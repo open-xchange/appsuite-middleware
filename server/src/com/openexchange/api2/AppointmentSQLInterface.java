@@ -52,7 +52,6 @@ package com.openexchange.api2;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -198,7 +197,7 @@ public interface AppointmentSQLInterface {
      * return the AppointmentObject
      * @throws OXException, OXPermissionException
      */
-    public CalendarDataObject getObjectById(int objectId, int inFolder) throws OXException, SQLException, OXObjectNotFoundException;
+    public CalendarDataObject getObjectById(int objectId, int inFolder) throws OXException, SQLException;
 
     /**
      * Loads a range of appointments by the given IDs

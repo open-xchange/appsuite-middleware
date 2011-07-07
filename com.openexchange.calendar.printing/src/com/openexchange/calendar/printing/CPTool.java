@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.WeekAndDayCalculator;
 import com.openexchange.exception.OXException;
@@ -74,12 +73,14 @@ public class CPTool extends WeekAndDayCalculator {
     /**
      * Based on the selected template, this method determines new start and end dates to present exactly the block that the template needs.
      */
-    public void calculateNewStartAndEnd(CPParameters params) {
+    public void calculateNewStartAndEnd(final CPParameters params) {
         if (!isBlockTemplate(params))
+         {
             return;
         // TODO this calls for a strategy pattern later on when there is more than one
+        }
 
-        Calendar cal = getCalendar();
+        final Calendar cal = getCalendar();
         cal.setTime(params.getStart());
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -99,65 +100,66 @@ public class CPTool extends WeekAndDayCalculator {
      * Checks whether the template given is one that prints a specific timeframe as a block, which might be different from the given start
      * and end date.
      */
-    public boolean isBlockTemplate(CPParameters params) {
-        String basic = "/[^/]+$";
-        String template = (params.hasUserTemplate()) ? params.getUserTemplate() : params.getTemplate();
-        Matcher m1 = Pattern.compile(CPType.WORKWEEKVIEW.getName() + basic).matcher(template);
-        Matcher m2 = Pattern.compile(CPType.WORKWEEKVIEW.getNumber() + basic).matcher(template);
+    public boolean isBlockTemplate(final CPParameters params) {
+        final String basic = "/[^/]+$";
+        final String template = (params.hasUserTemplate()) ? params.getUserTemplate() : params.getTemplate();
+        final Matcher m1 = Pattern.compile(CPType.WORKWEEKVIEW.getName() + basic).matcher(template);
+        final Matcher m2 = Pattern.compile(CPType.WORKWEEKVIEW.getNumber() + basic).matcher(template);
         return m1.find() || m2.find();
     }
 
     /**
      * Sort a list of appointments by start date.
      */
-    public void sort(List<CPAppointment> appointments) {
+    public void sort(final List<CPAppointment> appointments) {
         Collections.sort(appointments, new StartDateComparator());
     }
 
     /**
      * Expands all appointments in a list using their recurrence information for a certain given timeframe
      */
-    public List<CPAppointment> expandAppointements(List<Appointment> compressedAppointments, Date start, Date end, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools) throws OXObjectNotFoundException, OXException, SQLException {
-        List<CPAppointment> expandedAppointments = new LinkedList<CPAppointment>();
-        for (Appointment appointment : compressedAppointments) {
-            Appointment temp = appointmentSql.getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
-            List<Appointment> split = splitIntoSingleDays(temp);
-            for (Appointment temp2 : split)
+    public List<CPAppointment> expandAppointements(final List<Appointment> compressedAppointments, final Date start, final Date end, final AppointmentSQLInterface appointmentSql, final CalendarCollectionService calendarTools) throws OXException, SQLException {
+        final List<CPAppointment> expandedAppointments = new LinkedList<CPAppointment>();
+        for (final Appointment appointment : compressedAppointments) {
+            final Appointment temp = appointmentSql.getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
+            final List<Appointment> split = splitIntoSingleDays(temp);
+            for (final Appointment temp2 : split) {
                 expandedAppointments.addAll(expandRecurrence(temp2, start, end, calendarTools));
+            }
         }
         return expandedAppointments;
     }
 
-    public List<Appointment> splitIntoSingleDays(Appointment appointment) {
-        List<Appointment> appointments = new LinkedList<Appointment>();
+    public List<Appointment> splitIntoSingleDays(final Appointment appointment) {
+        final List<Appointment> appointments = new LinkedList<Appointment>();
 
         if (!isOnDifferentDays(appointment.getStartDate(), appointment.getEndDate())) {
             appointments.add(appointment);
             return appointments;
         }
 
-        int duration = getMissingDaysInbetween(appointment.getStartDate(), appointment.getEndDate()).size() + 1;
+        final int duration = getMissingDaysInbetween(appointment.getStartDate(), appointment.getEndDate()).size() + 1;
 
-        Calendar newStartCal = Calendar.getInstance();
+        final Calendar newStartCal = Calendar.getInstance();
         newStartCal.setTime(appointment.getStartDate());
         newStartCal.set(Calendar.HOUR_OF_DAY, 0);
         newStartCal.set(Calendar.MINUTE, 0);
         newStartCal.set(Calendar.SECOND, 0);
         newStartCal.set(Calendar.MILLISECOND, 0);
 
-        Calendar newEndCal = Calendar.getInstance();
+        final Calendar newEndCal = Calendar.getInstance();
         newEndCal.setTime(appointment.getStartDate());
         newEndCal.set(Calendar.HOUR_OF_DAY, 23);
         newEndCal.set(Calendar.MINUTE, 59);
         newEndCal.set(Calendar.SECOND, 59);
         newEndCal.set(Calendar.MILLISECOND, 999);
 
-        Appointment first = (Appointment) appointment.clone();
+        final Appointment first = appointment.clone();
         first.setEndDate(newEndCal.getTime());
         appointments.add(first);
 
         for (int i = 1; i < duration; i++) {
-            Appointment middle = (Appointment) appointment.clone();
+            final Appointment middle = appointment.clone();
             newStartCal.add(Calendar.DAY_OF_YEAR, 1);
             newEndCal.add(Calendar.DAY_OF_YEAR, 1);
             middle.setStartDate(newStartCal.getTime());
@@ -165,7 +167,7 @@ public class CPTool extends WeekAndDayCalculator {
             appointments.add(middle);
         }
 
-        Appointment last = (Appointment) appointment.clone();
+        final Appointment last = appointment.clone();
         newStartCal.add(Calendar.DAY_OF_YEAR, 1);
         last.setStartDate(newStartCal.getTime());
         appointments.add(last);
@@ -176,18 +178,18 @@ public class CPTool extends WeekAndDayCalculator {
     /**
      * Takes an appointment and interprets its recurrence information to find all occurrences between start and end date.
      */
-    public List<CPAppointment> expandRecurrence(Appointment appointment, Date start, Date end, CalendarCollectionService calendarTools) throws OXException {
-        RecurringResultsInterface recurrences = calendarTools.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
-        List<CPAppointment> all = new LinkedList<CPAppointment>();
+    public List<CPAppointment> expandRecurrence(final Appointment appointment, final Date start, final Date end, final CalendarCollectionService calendarTools) throws OXException {
+        final RecurringResultsInterface recurrences = calendarTools.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
+        final List<CPAppointment> all = new LinkedList<CPAppointment>();
         if (recurrences == null) {
             all.add(new CPAppointment(appointment));
             return all;
         }
 
         for (int i = 0, length = recurrences.size(); i < length; i++) {
-            CPAppointment temp = new CPAppointment();
+            final CPAppointment temp = new CPAppointment();
             temp.setTitle(appointment.getTitle());
-            RecurringResultInterface recurringResult = recurrences.getRecurringResult(i);
+            final RecurringResultInterface recurringResult = recurrences.getRecurringResult(i);
             temp.setStartDate(new Date(recurringResult.getStart()));
             temp.setEndDate(new Date(recurringResult.getEnd()));
             temp.setOriginal(appointment);
