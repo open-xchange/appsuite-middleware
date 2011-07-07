@@ -76,7 +76,6 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;

@@ -60,7 +60,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;

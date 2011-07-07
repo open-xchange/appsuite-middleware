@@ -59,14 +59,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -264,7 +262,7 @@ public final class OXFolderUtility {
         }
     }
 
-    private static void checkPrivateAdminPerm(final int adminPermissionCount, final int creator, final OCLPermission oclPerm) throws OXFolderLogicException {
+    private static void checkPrivateAdminPerm(final int adminPermissionCount, final int creator, final OCLPermission oclPerm) throws OXException {
         if (adminPermissionCount > 1) {
             throw OXFolderExceptionCode.ONLY_ONE_PRIVATE_FOLDER_ADMIN.create();
         }

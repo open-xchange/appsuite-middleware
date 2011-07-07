@@ -85,7 +85,6 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;

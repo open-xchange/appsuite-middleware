@@ -62,7 +62,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.exception.OXException;
 
 /**
  * Exception codes for the {@link OXException}.

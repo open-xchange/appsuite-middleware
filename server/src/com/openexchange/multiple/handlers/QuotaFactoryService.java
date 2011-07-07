@@ -57,7 +57,6 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.tools.session.ServerSession;
@@ -105,14 +104,14 @@ public final class QuotaFactoryService implements MultipleHandlerFactoryService 
                 final QuotaRequest request = new QuotaRequest(session);
                 final JSONValue retval = request.action(action);
                 return retval;
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 org.apache.commons.logging.LogFactory.getLog(QuotaFactoryService.QuotaHandler.class).error(e.getMessage(), e);
                 throw e;
             }
         }
 
         public Collection<OXException> getWarnings() {
-            return Collections.<AbstractOXException> emptySet();
+            return Collections.<OXException> emptySet();
         }
 
     }

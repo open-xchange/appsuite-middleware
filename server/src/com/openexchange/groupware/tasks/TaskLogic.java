@@ -83,7 +83,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;

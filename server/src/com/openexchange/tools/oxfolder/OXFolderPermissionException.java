@@ -50,7 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.exception.Category;
 import com.openexchange.groupware.EnumComponent;
 
 /**

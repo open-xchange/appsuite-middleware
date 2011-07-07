@@ -50,7 +50,7 @@
 package com.openexchange.authentication.database.impl;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
-import javax.security.auth.login.LoginException;
+import javax.security.auth.login.OXException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginInfo;
@@ -135,7 +135,7 @@ public class DatabaseAuthentication implements AuthenticationService {
      * @param loginInfo combined information seperated by an @ sign.
      * @param separator for spliting user name and context.
      * @return a string array with context and user name (in this order).
-     * @throws LoginException if no seperator is found.
+     * @throws OXException if no seperator is found.
      */
     private String[] split(final String loginInfo, final char separator) {
         final int pos = loginInfo.lastIndexOf(separator);

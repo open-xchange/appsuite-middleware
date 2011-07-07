@@ -63,7 +63,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.exceptions.LoggingLogic;

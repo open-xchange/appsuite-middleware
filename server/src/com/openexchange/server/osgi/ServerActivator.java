@@ -106,12 +106,11 @@ import com.openexchange.event.impl.EventFactoryServiceImpl;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
+import com.openexchange.exception.OXException;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFileExceptionFactory;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
@@ -119,7 +118,6 @@ import com.openexchange.folder.internal.FolderServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -164,8 +162,6 @@ import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
@@ -177,8 +173,6 @@ import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.search.SearchException;
-import com.openexchange.search.SearchExceptionFactory;
 import com.openexchange.search.SearchService;
 import com.openexchange.search.internal.SearchServiceImpl;
 import com.openexchange.secret.SecretService;
@@ -320,7 +314,7 @@ public final class ServerActivator extends DeferredActivator {
             if (null != reg) {
                 try {
                     reg.notifyAbsence();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -339,7 +333,7 @@ public final class ServerActivator extends DeferredActivator {
             if (null != reg) {
                 try {
                     reg.notifyAvailability();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -692,27 +686,7 @@ public final class ServerActivator extends DeferredActivator {
          */
         if (!adminBundleInstalled.booleanValue()) {
             registerServlets(getService(HttpService.class));
-        }
-        
-        /*
-         * Register components
-         */
-        // TODO: Decide what to register dependent on admin/groupware start
-        componentRegistrationList.add(new ComponentRegistration(
-            context,
-            SearchException.SEARCH_COMPONENT,
-            "com.openexchange.search",
-            SearchExceptionFactory.getInstance()));
-        componentRegistrationList.add(new ComponentRegistration(
-            context,
-            OXException.MANAGED_FILE_COMPONENT,
-            "com.openexchange.filemanagement",
-            ManagedFileExceptionFactory.getInstance()));
-        componentRegistrationList.add(new ComponentRegistration(
-            context,
-            OXException.MAIL_ACCOUNT_COMPONENT,
-            "com.openexchange.mailaccount",
-            MailAccountExceptionFactory.getInstance()));
+        }        
     }
 
     @Override

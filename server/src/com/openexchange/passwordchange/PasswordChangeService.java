@@ -55,22 +55,18 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -150,11 +146,11 @@ public abstract class PasswordChangeService {
             final Session session = event.getSession();
             UserStorage.getStorageUser(session.getUserId(), event.getContext());
             authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword()));
-        } catch (final LoginException e) {
+        } catch (final OXException e) {
             /*
              * Verification of old password failed
              */
-            throw new OXException(e);
+            throw e;
         }
         /*
          * No validation of new password since admin daemon does no validation, too
@@ -207,9 +203,9 @@ public abstract class PasswordChangeService {
         }
         try {
             sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());
-        } catch (final SessiondException e) {
+        } catch (final OXException e) {
             LOG.error("Updating password in user session failed", e);
-            throw new OXException(e);
+            throw e;
         }
     }
 

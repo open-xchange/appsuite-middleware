@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 

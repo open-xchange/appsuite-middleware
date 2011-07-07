@@ -51,8 +51,8 @@ package com.openexchange.tools.oxfolder.deletelistener;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 import com.openexchange.tools.oxfolder.deletelistener.sql.DetectCorruptPermissions;

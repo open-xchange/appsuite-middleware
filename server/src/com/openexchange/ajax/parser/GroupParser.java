@@ -53,8 +53,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.GroupFields;
-import com.openexchange.group.Group;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.Group;
 
 /**
  * This class parses a JSON into a group object.

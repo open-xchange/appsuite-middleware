@@ -74,7 +74,7 @@ public enum UserExceptionCode implements OXExceptionCode {
     /**
      * No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s
      */
-     CATEGORY_PERMISSION_DENIED("No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s",
+     PERMISSION("No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s",
         Category.CATEGORY_PERMISSION_DENIED, 13),
      /**
       * Missing or unknown password mechanism %1$s

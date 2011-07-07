@@ -66,8 +66,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;

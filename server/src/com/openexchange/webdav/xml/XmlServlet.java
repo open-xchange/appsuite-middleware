@@ -68,7 +68,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
@@ -208,7 +207,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         } catch (final XmlPullParserException e) {
             LOG.error("doPropPatch", e);
             doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, parser);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("doPropPatch", e);
             doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, parser);
         }
@@ -355,10 +354,10 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         } catch (final org.jdom.JDOMException exc) {
             LOG.error("doPropFind", exc);
             doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
-        } catch (final AbstractOXException exc) {
-            if (AbstractOXException.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
+        } catch (final OXException exc) {
+            if (OXException.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
-            } else if (AbstractOXException.Category.CONCURRENT_MODIFICATION.equals(exc.getCategory())) {
+            } else if (OXException.Category.CONCURRENT_MODIFICATION.equals(exc.getCategory())) {
                 LOG.error("doPropFind", exc);
                 doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
             } else {
@@ -432,8 +431,8 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     private String createResponseErrorMessage(final Exception e) {
         final int descriptionCode;
         final String message;
-        if (e instanceof AbstractOXException) {
-            final AbstractOXException o = (AbstractOXException) e;
+        if (e instanceof OXException) {
+            final OXException o = (OXException) e;
             if (o.getComponent().equals(EnumComponent.CONTACT) && o.getDetailNumber() == ContactExceptionCodes.INVALID_EMAIL.getDetailNumber()) {
                 descriptionCode = 1500;
                 message = o.getMessage();
@@ -450,7 +449,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     }
 
     protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
+            final XmlPullParser parser, final PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, OXException {
 
         while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
             if (isTag(parser, "set", davUri)) {
@@ -463,12 +462,12 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     }
 
     protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations)
-            throws XmlPullParserException, IOException, AbstractOXException {
+            throws XmlPullParserException, IOException, OXException {
         openProp(req, resp, parser, pendingInvocations);
     }
 
     protected void openProp(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<I> pendingInvocations)
-            throws XmlPullParserException, IOException, AbstractOXException {
+            throws XmlPullParserException, IOException, OXException {
         parser.nextTag();
         parser.require(XmlPullParser.START_TAG, davUri, prop);
 
@@ -606,10 +605,10 @@ public abstract class XmlServlet<I> extends PermissionServlet {
      *            The session providing needed user data
      * @throws IOException
      *             If writing response fails
-     * @throws AbstractOXException
+     * @throws OXException
      *             If an OX exception occurs
      */
-    private final void commit(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException, AbstractOXException {
+    private final void commit(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException, OXException {
         os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
         os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\""
                 + Version.NAME + "\">").getBytes());
@@ -629,14 +628,14 @@ public abstract class XmlServlet<I> extends PermissionServlet {
      * @param pendingInvocations queues the objects to process.
      * @throws IOException
      *             If writing response fails
-     * @throws AbstractOXException
+     * @throws OXException
      *             If an OX exception occurs
      */
     protected abstract void performActions(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException,
-            AbstractOXException;
+            OXException;
 
     protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser,
-            PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException;
+            PendingInvocations<I> pendingInvocations) throws XmlPullParserException, IOException, OXException;
 
     protected abstract void startWriter(Session sessionObj, Context ctx, int objectId, int folderId, OutputStream os)
             throws Exception;

@@ -65,9 +65,8 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -115,7 +114,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
             final XmlPullParser parser, final PendingInvocations<AppointmentSQLInterface> pendingInvocations)
-            throws XmlPullParserException, IOException, AbstractOXException {
+            throws XmlPullParserException, IOException, OXException {
         final Session session = getSession(req);
 
         if (isTag(parser, "prop", "DAV:")) {

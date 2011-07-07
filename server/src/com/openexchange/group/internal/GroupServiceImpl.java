@@ -55,7 +55,6 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 
 /**

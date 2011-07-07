@@ -64,13 +64,12 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import com.openexchange.ajax.fields.Header;
-import com.openexchange.authentication.LoginException;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -219,7 +218,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
      * @throws IOException If an I/O error occurs
      */
-    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face) throws IOException {
         Session session;
         try {
             session = findSessionByCookie(req, resp);
@@ -243,8 +242,8 @@ public abstract class OXServlet extends WebDavServlet {
             }
             try {
                 session = addSession(loginRequest);
-            } catch (final LoginException e) {
-                if (e.getCategory() == CATEGORY_USER_INPUT) {
+            } catch (final OXException e) {
+                if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                     addUnauthorizedHeader(req, resp);
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 } else {
@@ -274,7 +273,7 @@ public abstract class OXServlet extends WebDavServlet {
         return true;
     }
 
-    private static void removeCookie(HttpServletRequest req, HttpServletResponse resp, String...cookiesToRemove) {
+    private static void removeCookie(final HttpServletRequest req, final HttpServletResponse resp, final String...cookiesToRemove) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
             return;
@@ -297,10 +296,10 @@ public abstract class OXServlet extends WebDavServlet {
     /**
      * @param sessionID
      */
-    private static void removeSession(String sessionID) {
+    private static void removeSession(final String sessionID) {
         try {
             ServerServiceRegistry.getInstance().getService(SessiondService.class, true).removeSession(sessionID);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // Ignore. Probably we're just about to shut down.
         }
     }
@@ -350,7 +349,7 @@ public abstract class OXServlet extends WebDavServlet {
 //        resp.addHeader("WWW-Authenticate", builder.toString());
     }
 
-    private static LoginRequest parseLogin(final HttpServletRequest req, Interface face) throws WebdavException, IOException {
+    private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws WebdavException, IOException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             if (LOG.isDebugEnabled()) {
@@ -359,7 +358,7 @@ public abstract class OXServlet extends WebDavServlet {
             throw new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, "Authorization");
         }
         if (com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization(auth)) {
-            Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(auth);
+            final Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(auth);
             if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
                 throw new WebdavException(WebdavException.Code.EMPTY_PASSWORD);
             }
@@ -412,9 +411,9 @@ public abstract class OXServlet extends WebDavServlet {
      * @param pass plain text password of the user.
      * @param ipAddress client IP.
      * @return the initialized session or <code>null</code>.
-     * @throws LoginException if an error occurs while creating the session.
+     * @throws OXException if an error occurs while creating the session.
      */
-    private static Session addSession(final LoginRequest request) throws LoginException {
+    private static Session addSession(final LoginRequest request) throws OXException {
         return loginPerformer.doLogin(request).getSession();
     }
 

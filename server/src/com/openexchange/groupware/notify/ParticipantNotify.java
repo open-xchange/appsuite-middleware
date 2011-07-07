@@ -143,7 +143,6 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -158,8 +157,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private final static Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ParticipantNotify.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
 
     public static ParticipantNotify messageSender = new ParticipantNotify();
 

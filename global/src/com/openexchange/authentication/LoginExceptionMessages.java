@@ -52,7 +52,7 @@ package com.openexchange.authentication;
 import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * Exception messages for the {@link LoginException} that must be translated.
+ * Exception messages for the {@link OXException} that must be translated.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */

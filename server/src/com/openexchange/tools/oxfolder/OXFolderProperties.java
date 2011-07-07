@@ -71,12 +71,9 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
@@ -123,7 +120,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         super();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error("Folder properties have already been started", new Throwable());
             return;
@@ -139,7 +136,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         FolderQueryCacheManager.initInstance();
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error("Folder properties cannot be stopped since they have not been started before", new Throwable());
             return;
@@ -294,8 +291,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                 if (FolderCacheManager.isInitialized()) {
                     try {
                         FolderCacheManager.getInstance().clearAll();
-                    } catch (final FolderCacheNotEnabledException e) {
-                        logger.error(e.getMessage(), e);
                     } catch (final OXException e) {
                         logger.error(e.getMessage(), e);
                     }

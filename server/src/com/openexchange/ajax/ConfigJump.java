@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ICookie;
 import com.openexchange.configjump.Replacements;
 import com.openexchange.exception.OXException;

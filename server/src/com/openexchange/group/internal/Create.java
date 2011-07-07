@@ -61,7 +61,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;

@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.tools.session.ServerSession;
@@ -107,7 +106,7 @@ public final class GroupFactoryService implements MultipleHandlerFactoryService 
         }
 
         public Collection<OXException> getWarnings() {
-            return Collections.<AbstractOXException> emptySet();
+            return Collections.<OXException> emptySet();
         }
 
     }

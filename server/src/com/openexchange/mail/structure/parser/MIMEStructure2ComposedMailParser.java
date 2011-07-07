@@ -72,7 +72,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.mail.MailExceptionCode;

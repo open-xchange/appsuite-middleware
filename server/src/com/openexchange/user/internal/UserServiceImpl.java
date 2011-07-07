@@ -50,10 +50,9 @@
 package com.openexchange.user.internal;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.user.UserService;
 

@@ -54,8 +54,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ReminderFields;
-import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**

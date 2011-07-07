@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 
 public interface CalendarAdministrationService extends DeleteListener {

@@ -58,7 +58,6 @@ import java.util.Set;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -68,9 +67,7 @@ import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
-import com.openexchange.groupware.infostore.OXException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.tasks.Tasks;
@@ -435,8 +432,6 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 throw new OXException(e);
             }
             throw x;
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             try {
                 db.finish();

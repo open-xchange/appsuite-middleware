@@ -57,7 +57,6 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.exception.OXException;
 
 /**
  * AppointmentParser

@@ -63,10 +63,8 @@ import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
@@ -75,7 +73,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
@@ -265,7 +262,7 @@ public final class OXFolderAdminHelper {
                     if (CalendarCache.isInitialized()) {
                         CalendarCache.getInstance().invalidateGroup(cid);
                     }
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             } catch (final SQLException e) {
@@ -531,7 +528,7 @@ public final class OXFolderAdminHelper {
                     if (CalendarCache.isInitialized()) {
                         CalendarCache.getInstance().invalidateGroup(cid);
                     }
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -1339,8 +1336,6 @@ public final class OXFolderAdminHelper {
                          */
                         try {
                             FolderCacheManager.getInstance().removeFolderObject(fuid, new ContextImpl(cid));
-                        } catch (final FolderCacheNotEnabledException e) {
-                            LOG.error("Folder could not be removed from cache", e);
                         } catch (final OXException e) {
                             LOG.error("Folder could not be removed from cache", e);
                         }
@@ -1402,11 +1397,9 @@ public final class OXFolderAdminHelper {
             final int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, readCon, ctx);
             final String newDisplayName = getUserDisplayName(userId, cid, readCon == null ? writeCon : readCon);
             if (newDisplayName == null) {
-                throw new OXException(
-                    EnumComponent.USER,
-                    LdapExceptionCode.USER_NOT_FOUND,
+                throw LdapExceptionCode.USER_NOT_FOUND.create(LdapExceptionCode.USER_NOT_FOUND,
                     Integer.valueOf(userId),
-                    Integer.valueOf(cid));
+                    Integer.valueOf(cid)).setPrefix(EnumComponent.USER.getAbbreviation());
             }
             OXFolderSQL.updateName(defaultInfostoreFolderId, newDisplayName, lastModified, contextAdminID, writeCon, ctx);
             /*
@@ -1421,9 +1414,7 @@ public final class OXFolderAdminHelper {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.LDAP_ERROR.create(e, Integer.valueOf(cid));
+            throw e;
         }
     }
 

@@ -94,7 +94,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;

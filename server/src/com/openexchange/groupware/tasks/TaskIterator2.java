@@ -64,7 +64,6 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;

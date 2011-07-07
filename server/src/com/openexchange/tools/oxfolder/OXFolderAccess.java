@@ -60,7 +60,6 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -171,8 +170,11 @@ public class OXFolderAccess {
         for (final int fuid : folderIDs) {
             try {
                 retval.add(getFolderObject(fuid));
-            } catch (final OXFolderNotFoundException e) {
-                continue;
+            } catch (final OXException e) {
+                if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                    continue;
+                }
+                throw e;
             }
         }
         return retval;
@@ -192,8 +194,11 @@ public class OXFolderAccess {
         for (int i = 0; i < size; i++) {
             try {
                 retval.add(getFolderObject(iter.next().intValue()));
-            } catch (final OXFolderNotFoundException e) {
-                continue;
+            } catch (final OXException e) {
+                if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                    continue;
+                }
+                throw e;
             }
         }
         return retval;

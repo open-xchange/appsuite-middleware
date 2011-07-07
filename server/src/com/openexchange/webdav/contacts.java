@@ -65,8 +65,6 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
@@ -112,7 +110,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
             final XmlPullParser parser, final PendingInvocations<ContactInterface> pendingInvocations)
-            throws XmlPullParserException, IOException, AbstractOXException {
+            throws XmlPullParserException, IOException, OXException {
         final Session session = getSession(req);
 
         if (isTag(parser, "prop", "DAV:")) {

@@ -50,8 +50,8 @@
 package com.openexchange.context;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.OXException;
 
 
 /**

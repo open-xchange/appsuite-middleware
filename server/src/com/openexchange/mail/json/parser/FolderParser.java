@@ -61,7 +61,6 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;

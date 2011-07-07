@@ -54,7 +54,6 @@ import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link UserSettingMailStorage} - Access to {@link UserSettingMail}

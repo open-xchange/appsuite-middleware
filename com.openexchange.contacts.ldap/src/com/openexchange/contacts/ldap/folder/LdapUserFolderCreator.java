@@ -131,9 +131,9 @@ public class LdapUserFolderCreator implements LoginHandlerService {
 //                    ") successfully created for user ").append(userId).append(" in context ").append(cid));
 //            }
 //        } catch (final OXException e) {
-//            throw new LoginException(e);
+//            throw new OXException(e);
 //        } catch (final OXException e) {
-//            throw new LoginException(e);
+//            throw new OXException(e);
 //        }
     }
 

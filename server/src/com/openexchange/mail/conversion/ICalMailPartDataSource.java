@@ -53,12 +53,11 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.io.InputStream;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;

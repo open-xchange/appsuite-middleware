@@ -56,12 +56,11 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**

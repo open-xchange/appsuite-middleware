@@ -64,7 +64,6 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.server.impl.DBPool;

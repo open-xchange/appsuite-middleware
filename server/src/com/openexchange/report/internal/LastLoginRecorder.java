@@ -53,15 +53,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.authentication.LoginException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
 
@@ -76,8 +74,8 @@ public class LastLoginRecorder implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(LoginResult login) throws LoginException {
-        LoginRequest request = login.getRequest();
+    public void handleLogin(final LoginResult login) throws OXException {
+        final LoginRequest request = login.getRequest();
         String key;
         if (null != request.getClient()) {
             key = request.getClient();
@@ -88,30 +86,28 @@ public class LastLoginRecorder implements LoginHandlerService {
         }
         
         key = "client:" + key;
-        Context ctx = login.getContext();
+        final Context ctx = login.getContext();
         if (ctx.isReadOnly()) {
             return;
         }
-        User origUser = login.getUser();
-        Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+        final User origUser = login.getUser();
+        final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
         attributes.putAll(origUser.getAttributes());
-        Set<String> value = new HashSet<String>();
+        final Set<String> value = new HashSet<String>();
         value.add(Long.toString(System.currentTimeMillis()));
         attributes.put(key, value);
-        UserImpl newUser = new UserImpl(origUser);
+        final UserImpl newUser = new UserImpl(origUser);
         newUser.setAttributes(attributes);
         UserService service;
         try {
             service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             service.updateUser(newUser, ctx);
-        } catch (OXException e) {
-            throw new LoginException(e);
-        } catch (OXException e) {
-            throw new LoginException(e);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
-    public void handleLogout(LoginResult logout) {
+    public void handleLogout(final LoginResult logout) {
         // Nothing to to.
     }
 }

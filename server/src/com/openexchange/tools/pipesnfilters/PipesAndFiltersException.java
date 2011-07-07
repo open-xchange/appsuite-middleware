@@ -49,28 +49,29 @@
 
 package com.openexchange.tools.pipesnfilters;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.exceptions.StringComponent;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link PipesAndFiltersException}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class PipesAndFiltersException extends AbstractOXException {
+public class PipesAndFiltersException extends OXException {
 
     private static final long serialVersionUID = 600136457840868035L;
 
-    public PipesAndFiltersException(AbstractOXException cause) {
+    public PipesAndFiltersException(final OXException cause) {
         super(cause);
     }
 
-    public PipesAndFiltersException(InterruptedException e) {
-        super(new ErrorMessage(1, new StringComponent("PAF"), "com.openexchange.pipe&filters", CATEGORY_ERROR, "Waiting in pipe failed.", "Please contact administrator."), e);
+    public PipesAndFiltersException(final InterruptedException e) {
+        super(1, OXExceptionStrings.MESSAGE, e);
+        setPrefix("PAF").addCategory(CATEGORY_ERROR).setLogMessage("Waiting in pipe failed.");
     }
 
-    public PipesAndFiltersException(Throwable t) {
-        super(new ErrorMessage(1, new StringComponent("PAF"), "com.openexchange.pipe&filters", CATEGORY_ERROR, t.getMessage(), "Please contact administrator."), t);
+    public PipesAndFiltersException(final Throwable t) {
+        super(1, OXExceptionStrings.MESSAGE, t);
+        setPrefix("PAF").addCategory(CATEGORY_ERROR).setLogMessage(t.getMessage());
     }
 }

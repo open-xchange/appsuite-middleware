@@ -80,16 +80,12 @@ import javax.management.openmbean.TabularType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
@@ -104,15 +100,15 @@ public class ReportingMBean implements DynamicMBean {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ReportingMBean.class));
 
-    private String[] totalNames = { "contexts", "users" };
+    private final String[] totalNames = { "contexts", "users" };
 
     private CompositeType totalRow;
 
     private TabularType totalType;
 
-    private String[] moduleAccessCombinationNames = { "module access combination", "users", "inactive" };
+    private final String[] moduleAccessCombinationNames = { "module access combination", "users", "inactive" };
 
-    private String[] detailNames = { "identifier", "admin permission", "users", "age", "created", "mappings", "module access combinations" };
+    private final String[] detailNames = { "identifier", "admin permission", "users", "age", "created", "mappings", "module access combinations" };
 
     private CompositeType detailRow;
 
@@ -120,7 +116,7 @@ public class ReportingMBean implements DynamicMBean {
 
     private TabularType detailType;
 
-    private MBeanInfo mbeanInfo;
+    private final MBeanInfo mbeanInfo;
 
     private CompositeType moduleAccessPermission;
 
@@ -132,7 +128,7 @@ public class ReportingMBean implements DynamicMBean {
         mbeanInfo = buildMBeanInfo();
     }
 
-    public Object getAttribute(String attribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
+    public Object getAttribute(final String attribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
         if (attribute == null) {
             throw new RuntimeOperationsException(
                 new IllegalArgumentException("Attribute name cannot be null"),
@@ -145,25 +141,23 @@ public class ReportingMBean implements DynamicMBean {
             contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             configurationService = ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw new MBeanException(new Exception(e.getMessage()));
         }
         if ("Total".equals(attribute)) {
-            TabularDataSupport total = new TabularDataSupport(totalType);
+            final TabularDataSupport total = new TabularDataSupport(totalType);
             try {
-                List<Integer> allContextIds = contextService.getAllContextIds();
+                final List<Integer> allContextIds = contextService.getAllContextIds();
                 int userCount = 0;
-                for (Integer contextId : allContextIds) {
+                for (final Integer contextId : allContextIds) {
                     userCount += userService.listAllUser(contextService.getContext(contextId.intValue())).length;
                 }
-                CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] { I(allContextIds.size()), I(userCount) });
+                final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] { I(allContextIds.size()), I(userCount) });
                 total.put(value);
-            } catch (OpenDataException e) {
+            } catch (final OpenDataException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             return total;
@@ -174,48 +168,44 @@ public class ReportingMBean implements DynamicMBean {
         throw new AttributeNotFoundException("Cannot find " + attribute + " attribute ");
     }
 
-    private TabularDataSupport generateDetailTabular(ContextService contextService, UserService userService, UserConfigurationService configService) {
-        TabularDataSupport detail = new TabularDataSupport(detailType);
+    private TabularDataSupport generateDetailTabular(final ContextService contextService, final UserService userService, final UserConfigurationService configService) {
+        final TabularDataSupport detail = new TabularDataSupport(detailType);
         try {
-            List<Integer> allContextIds = contextService.getAllContextIds();
-            for (Integer contextId : allContextIds) {
-                Context context = contextService.getContext(contextId.intValue());
-                int contextAdmin = context.getMailadmin();
-                UserConfiguration[] configs = getUserConfigurations(userService, configService, context);
-                Date created = getContextCreated(context);
-                StringBuilder sb = new StringBuilder();
-                for (String loginInfo : context.getLoginInfo()) {
+            final List<Integer> allContextIds = contextService.getAllContextIds();
+            for (final Integer contextId : allContextIds) {
+                final Context context = contextService.getContext(contextId.intValue());
+                final int contextAdmin = context.getMailadmin();
+                final UserConfiguration[] configs = getUserConfigurations(userService, configService, context);
+                final Date created = getContextCreated(context);
+                final StringBuilder sb = new StringBuilder();
+                for (final String loginInfo : context.getLoginInfo()) {
                     sb.append(loginInfo);
                     sb.append(',');
                 }
                 if (sb.length() > 0) {
                     sb.setLength(sb.length() - 1);
                 }
-                TabularDataSupport moduleAccessCombinations = new TabularDataSupport(moduleAccessCombinationsType);
+                final TabularDataSupport moduleAccessCombinations = new TabularDataSupport(moduleAccessCombinationsType);
                 consolidateAccessCombinations(configs, userService, moduleAccessCombinations);
-                CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] {
+                final CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] {
                     contextId, getAdminPermission(contextAdmin, configs), I(configs.length), calcAge(created), created, sb.toString(), moduleAccessCombinations });
                 detail.put(value);
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-        } catch (OpenDataException e) {
+        } catch (final OpenDataException e) {
             LOG.error(e.getMessage(), e);
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }
         return detail;
     }
 
-    private void consolidateAccessCombinations(UserConfiguration[] configs, UserService userService, TabularDataSupport moduleAccessCombinations) throws OpenDataException, OXException {
-        Map<Integer, Integer[]> combinations = new HashMap<Integer, Integer[]>();
-        for (UserConfiguration config : configs) {
-            User user = userService.getUser(config.getUserId(), config.getContext());
-            Integer accessCombination = I(config.getPermissionBits());
+    private void consolidateAccessCombinations(final UserConfiguration[] configs, final UserService userService, final TabularDataSupport moduleAccessCombinations) throws OpenDataException, OXException {
+        final Map<Integer, Integer[]> combinations = new HashMap<Integer, Integer[]>();
+        for (final UserConfiguration config : configs) {
+            final User user = userService.getUser(config.getUserId(), config.getContext());
+            final Integer accessCombination = I(config.getPermissionBits());
             Integer[] users = combinations.get(accessCombination);
             if (null == users) {
                 users = new Integer[]{I(1), user.isMailEnabled() ? I(0) : I(1)};
@@ -227,14 +217,14 @@ public class ReportingMBean implements DynamicMBean {
             }
             combinations.put(accessCombination, users);
         }
-        for (Map.Entry<Integer, Integer[]> entry : combinations.entrySet()) {
+        for (final Map.Entry<Integer, Integer[]> entry : combinations.entrySet()) {
             moduleAccessCombinations.put(new CompositeDataSupport(moduleAccessPermission, moduleAccessCombinationNames, new Object[] {
                 entry.getKey(), entry.getValue()[0], entry.getValue()[1] }));
         }
     }
     
-    private Integer getAdminPermission(int contextAdmin, UserConfiguration[] configs) {
-        for (UserConfiguration config : configs) {
+    private Integer getAdminPermission(final int contextAdmin, final UserConfiguration[] configs) {
+        for (final UserConfiguration config : configs) {
             if (config.getUserId() == contextAdmin) {
                 return I(config.getPermissionBits());
             }
@@ -243,21 +233,21 @@ public class ReportingMBean implements DynamicMBean {
         return I(-1);
     }
 
-    private UserConfiguration[] getUserConfigurations(UserService userService, UserConfigurationService configurationService, Context ctx) throws OXException, OXException {
-        User[] users = userService.getUser(ctx);
-        UserConfiguration[] configurations = configurationService.getUserConfiguration(ctx, users);
+    private UserConfiguration[] getUserConfigurations(final UserService userService, final UserConfigurationService configurationService, final Context ctx) throws OXException, OXException {
+        final User[] users = userService.getUser(ctx);
+        final UserConfiguration[] configurations = configurationService.getUserConfiguration(ctx, users);
         return configurations;
     }
 
-    private Long calcAge(Date created) {
+    private Long calcAge(final Date created) {
         return L((System.currentTimeMillis() - created.getTime()) / Constants.MILLI_DAY);
     }
 
-    private Date getContextCreated(Context ctx) {
+    private Date getContextCreated(final Context ctx) {
         final Connection con;
         try {
             con = Database.get(ctx, false);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error("Unable to get database connection.", e);
             return new Date(0);
         }
@@ -270,7 +260,7 @@ public class ReportingMBean implements DynamicMBean {
             if (result.next()) {
                 return new Date(result.getLong(1));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error("SQL problem.", e);
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
@@ -279,20 +269,21 @@ public class ReportingMBean implements DynamicMBean {
         return new Date(0);
     }
 
-    public AttributeList getAttributes(String[] attributes) {
+    public AttributeList getAttributes(final String[] attributes) {
         if (attributes == null) {
             throw new RuntimeOperationsException(
                 new IllegalArgumentException("attributes can not be null"),
                 "Cannot call getAttributes with null attribute names");
         }
-        AttributeList resultList = new AttributeList();
-        if (attributes.length == 0)
+        final AttributeList resultList = new AttributeList();
+        if (attributes.length == 0) {
             return resultList;
+        }
         for (int i = 0; i < attributes.length; i++) {
             try {
-                Object value = getAttribute(attributes[i]);
+                final Object value = getAttribute(attributes[i]);
                 resultList.add(new Attribute(attributes[i], value));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
             }
         }
@@ -303,41 +294,41 @@ public class ReportingMBean implements DynamicMBean {
         return mbeanInfo;
     }
 
-    public Object invoke(String actionName, Object[] params, String[] signature) {
+    public Object invoke(final String actionName, final Object[] params, final String[] signature) {
         throw new RuntimeOperationsException(
             new UnsupportedOperationException("invoke is not supported"),
             "The method invoke is not supported.");
     }
 
-    public void setAttribute(Attribute attribute) throws AttributeNotFoundException {
+    public void setAttribute(final Attribute attribute) throws AttributeNotFoundException {
         throw new AttributeNotFoundException("No attribute can be set in this MBean");
     }
 
-    public AttributeList setAttributes(AttributeList attributes) {
+    public AttributeList setAttributes(final AttributeList attributes) {
         return new AttributeList();
     }
 
     private final MBeanInfo buildMBeanInfo() {
         try {
-            String[] totalDescriptions = { "Number of contexts", "Number of users" };
-            OpenType[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER };
+            final String[] totalDescriptions = { "Number of contexts", "Number of users" };
+            final OpenType[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER };
             totalRow = new CompositeType("Total row", "A total row", totalNames, totalDescriptions, totalTypes);
             totalType = new TabularType("Total", "Total view", totalRow, totalNames);
 
-            String[] moduleAccessCombinationDescriptions = { "Integer value of the module access combination", "number of users configured with this module access combination", "inactive subset of useres configured with this module access combination" };
-            OpenType[] moduleAccessCombinationTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
+            final String[] moduleAccessCombinationDescriptions = { "Integer value of the module access combination", "number of users configured with this module access combination", "inactive subset of useres configured with this module access combination" };
+            final OpenType[] moduleAccessCombinationTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
             moduleAccessPermission = new CompositeType("Module access permission", "A module access combination and the number of users having it", moduleAccessCombinationNames, moduleAccessCombinationDescriptions, moduleAccessCombinationTypes);
             moduleAccessCombinationsType = new TabularType("Module access permission combinations", "The different access combinations used in this context", moduleAccessPermission, new String[] { "module access combination" });
 
-            String[] detailDescriptions = { "Context identifier", "Context admin permission", "Number of users", "Context age in days", "Date and time of context creation", "Login mappings", "Module access permission combinations" };
-            OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, SimpleType.STRING, moduleAccessCombinationsType };
+            final String[] detailDescriptions = { "Context identifier", "Context admin permission", "Number of users", "Context age in days", "Date and time of context creation", "Login mappings", "Module access permission combinations" };
+            final OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, SimpleType.STRING, moduleAccessCombinationsType };
             detailRow = new CompositeType("Detail row", "A detail row", detailNames, detailDescriptions, detailTypes);
             detailType = new TabularType("Detail", "Detail view", detailRow, new String[] { "identifier" });
 
-            OpenMBeanAttributeInfo totalAttribute = new OpenMBeanAttributeInfoSupport("Total", "Total contexts and users.", totalType, true, false, false);
-            OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport("Detail", "Detailed report about contexts and users", detailType, true, false, false);
+            final OpenMBeanAttributeInfo totalAttribute = new OpenMBeanAttributeInfoSupport("Total", "Total contexts and users.", totalType, true, false, false);
+            final OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport("Detail", "Detailed report about contexts and users", detailType, true, false, false);
             return new OpenMBeanInfoSupport(this.getClass().getName(), "Context and user reporting.", new OpenMBeanAttributeInfo[] { totalAttribute, detailAttribute }, null, null, null);
-        } catch (OpenDataException e) {
+        } catch (final OpenDataException e) {
             LOG.error(e.getMessage(), e);
         }
         return null;

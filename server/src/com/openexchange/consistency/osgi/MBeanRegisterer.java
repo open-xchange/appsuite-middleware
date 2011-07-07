@@ -56,7 +56,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.exception.OXException;
 import com.openexchange.consistency.ConsistencyExceptionCodes;
 import com.openexchange.consistency.MBeanNamer;
 import com.openexchange.consistency.OsgiOXConsistency;

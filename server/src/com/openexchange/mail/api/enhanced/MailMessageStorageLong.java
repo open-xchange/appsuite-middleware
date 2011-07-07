@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.api.enhanced;
 
-import com.openexchange.mail.IndexRange;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailPath;

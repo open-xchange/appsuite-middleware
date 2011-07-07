@@ -59,7 +59,6 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.SizedInputStream;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;

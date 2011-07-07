@@ -50,7 +50,6 @@
 package com.openexchange.mail.conversion;
 
 import java.io.InputStream;
-import com.openexchange.exception.OXException;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;

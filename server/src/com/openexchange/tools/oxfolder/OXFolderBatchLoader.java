@@ -64,7 +64,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
-import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -168,29 +167,25 @@ public final class OXFolderBatchLoader {
      * @throws OXException If folder cannot be loaded
      */
     public static final List<FolderObject> loadFolderObjectsFromDB(final int[] folderIds, final Context ctx, final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList, final String table, final String permTable) throws OXException {
+        Connection readCon = readConArg;
+        boolean closeCon = false;
         try {
-            Connection readCon = readConArg;
-            boolean closeCon = false;
-            try {
-                if (readCon == null) {
-                    readCon = DBPool.pickup(ctx);
-                    closeCon = true;
-                }
-                final FolderObject[] array = new FolderObject[folderIds.length];
-                final TIntObjectHashMap<FolderObject> map = loadFolderObjectsFromDB0(folderIds, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
-                for (int i = 0; i < folderIds.length; i++) {
-                    final int fuid = folderIds[i];
-                    final FolderObject fo = map.get(fuid);
-                    array[i] = fo;
-                }
-                return Arrays.asList(array);
-            } finally {
-                if (closeCon) {
-                    DBPool.closeReaderSilent(ctx, readCon);
-                }
+            if (readCon == null) {
+                readCon = DBPool.pickup(ctx);
+                closeCon = true;
             }
-        } catch (final OXException e) {
-            throw new OXFolderException(e);
+            final FolderObject[] array = new FolderObject[folderIds.length];
+            final TIntObjectHashMap<FolderObject> map = loadFolderObjectsFromDB0(folderIds, ctx, readCon, loadPermissions, loadSubfolderList, table, permTable);
+            for (int i = 0; i < folderIds.length; i++) {
+                final int fuid = folderIds[i];
+                final FolderObject fo = map.get(fuid);
+                array[i] = fo;
+            }
+            return Arrays.asList(array);
+        } finally {
+            if (closeCon) {
+                DBPool.closeReaderSilent(ctx, readCon);
+            }
         }
     }
 
@@ -252,8 +247,6 @@ public final class OXFolderBatchLoader {
             return folders;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXFolderException(e);
         }
     }
 
@@ -309,7 +302,7 @@ public final class OXFolderBatchLoader {
                     rs = stmt.executeQuery();
                     while (rs.next()) {
                         final int fuid = rs.getInt(9);
-                        List<OCLPermission> list = ret.get(fuid);
+                        final List<OCLPermission> list = ret.get(fuid);
                         final OCLPermission p = new OCLPermission();
                         p.setEntity(rs.getInt(1)); // Entity
                         p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5)); // fp, orp, owp, and odp

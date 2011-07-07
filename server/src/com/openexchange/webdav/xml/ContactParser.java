@@ -57,7 +57,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
@@ -79,7 +78,7 @@ public class ContactParser extends CommonParser {
         this.sessionObj = sessionObj;
     }
 
-    public void parse(final XmlPullParser parser, final Contact contactobject) throws AbstractOXException, XmlPullParserException, IOException {
+    public void parse(final XmlPullParser parser, final Contact contactobject) throws OXException, XmlPullParserException, IOException {
 
         while (true) {
             if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -92,7 +91,7 @@ public class ContactParser extends CommonParser {
 
     }
 
-    protected void parseElementContact(final Contact contactobject, final XmlPullParser parser) throws XmlPullParserException, IOException, AbstractOXException {
+    protected void parseElementContact(final Contact contactobject, final XmlPullParser parser) throws XmlPullParserException, IOException, OXException {
         if (!hasCorrectNamespace(parser)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("unknown namespace in tag: " + parser.getName());
@@ -402,7 +401,7 @@ public class ContactParser extends CommonParser {
         }
     }
 
-    protected void parseElementDistributionlists(final Contact oxobject, final XmlPullParser parser) throws AbstractOXException, XmlPullParserException, IOException {
+    protected void parseElementDistributionlists(final Contact oxobject, final XmlPullParser parser) throws OXException, XmlPullParserException, IOException {
         final ArrayList<DistributionListEntryObject> distributionlist = new ArrayList<DistributionListEntryObject>();
 
         boolean isDistributionList = true;
@@ -433,7 +432,7 @@ public class ContactParser extends CommonParser {
         oxobject.setDistributionList(distributionlist.toArray(new DistributionListEntryObject[distributionlist.size()]));
     }
 
-    protected void parseElementEntry(final XmlPullParser parser, final DistributionListEntryObject entry) throws AbstractOXException, XmlPullParserException, IOException {
+    protected void parseElementEntry(final XmlPullParser parser, final DistributionListEntryObject entry) throws OXException, XmlPullParserException, IOException {
         String s = null;
 
         if ((s = parser.getAttributeValue(XmlServlet.NAMESPACE, ContactFields.ID)) != null) {

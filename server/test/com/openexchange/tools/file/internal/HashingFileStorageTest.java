@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import com.openexchange.tools.file.external.OXException;
+import com.openexchange.exception.OXException;
 
 
 /**

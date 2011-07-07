@@ -57,8 +57,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**

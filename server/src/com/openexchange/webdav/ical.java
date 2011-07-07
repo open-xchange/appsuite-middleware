@@ -74,10 +74,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -91,7 +88,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -99,7 +95,6 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -247,13 +242,13 @@ public final class ical extends PermissionServlet {
                     }
                 }
                 patchers.forEachValue(PATCH_PROCEDURE);
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 if (null != iter) {
                     try {
                         iter.close();
-                    } catch (final AbstractOXException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
@@ -276,13 +271,13 @@ public final class ical extends PermissionServlet {
                     // item.setUID(clientId);
                     // }
                 }
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
                 if (null != itTask) {
                     try {
                         itTask.close();
-                    } catch (final AbstractOXException e) {
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }

@@ -54,7 +54,7 @@ import java.util.Properties;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -269,7 +269,7 @@ public class Starter implements Initialization {
             try {
                 init.start();
                 started.push(init);
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error("Initialization of " + init.getClass().getName() + " failed", e);
             }
         }
@@ -306,7 +306,7 @@ public class Starter implements Initialization {
             try {
                 init.start();
                 started.push(init);
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error("Initialization of " + init.getClass().getName() + " failed", e);
             }
         }
@@ -361,7 +361,7 @@ public class Starter implements Initialization {
 
         if (LOG.isInfoEnabled()) {
             LOG.info("System version : " + Version.NAME + " Server [" + Version.getVersionString() + "] initializing ...");
-            LOG.info("Server Footprint : " + AbstractOXException.SERVER_ID);
+            LOG.info("Server Footprint : " + OXException.getServerId());
         }
     }
 
@@ -372,7 +372,7 @@ public class Starter implements Initialization {
         while (!started.isEmpty()) {
             try {
                 started.pop().stop();
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error("Component shutdown failed.", e);
             }
         }

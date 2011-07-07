@@ -52,12 +52,10 @@ package com.openexchange.tools.oxfolder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.oxfolder.deletelistener.OXFolderDeleteListenerHelper;
@@ -169,21 +167,16 @@ public class OXFolderDeleteListener implements DeleteListener {
 		        try {
 		            FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
 		            FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, ctx);
-		        } catch (final FolderCacheNotEnabledException e) {
-		            LOG.error(e.getMessage(), e);
 		        } catch (final OXException e) {
 		            LOG.error(e.getMessage(), e);
 		        }
 		    }
 		} catch (final OXException e) {
 		    LOG.error(e.getMessage(), e);
-		    throw new OXException(e);
+		    throw e;
 		} catch (final SQLException e) {
 		    LOG.error(e.getMessage(), e);
 		    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-		} catch (final OXException e) {
-		    LOG.error(e.getMessage(), e);
-		    throw new OXException(e);
 		}
 	}
 
@@ -299,8 +292,6 @@ public class OXFolderDeleteListener implements DeleteListener {
 		             */
 		            try {
 		                FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
-		            } catch (final FolderCacheNotEnabledException e) {
-		                LOG.error(e.getMessage(), e);
 		            } catch (final OXException e) {
 		                LOG.error(e.getMessage(), e);
 		            }
@@ -308,13 +299,10 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    }
 		} catch (final OXException e) {
 		    LOG.error(e.getMessage(), e);
-		    throw new OXException(e);
+		    throw e;
 		} catch (final SQLException e) {
 		    LOG.error(e.getMessage(), e);
 		    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-		} catch (final OXException e) {
-		    LOG.error(e.getMessage(), e);
-		    throw new OXException(e);
 		}
 	}
 

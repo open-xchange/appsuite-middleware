@@ -64,13 +64,12 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.session.Session;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 

@@ -56,7 +56,6 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;

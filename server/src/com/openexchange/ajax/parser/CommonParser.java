@@ -53,8 +53,8 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CommonFields;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CommonObject;
 
 /**
  * CommonParser

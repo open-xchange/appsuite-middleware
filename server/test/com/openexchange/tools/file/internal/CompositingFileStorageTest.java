@@ -59,9 +59,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.OXException;
 
 /**
  * {@link CompositingFileStorageTest}

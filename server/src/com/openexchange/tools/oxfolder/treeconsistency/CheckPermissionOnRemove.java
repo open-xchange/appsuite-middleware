@@ -58,14 +58,11 @@ import java.util.Map;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -267,7 +264,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 if (CalendarCache.isInitialized()) {
                     CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

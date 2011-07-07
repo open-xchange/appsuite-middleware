@@ -57,7 +57,6 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.request.ReminderRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.tools.session.ServerSession;
@@ -108,7 +107,7 @@ public final class ReminderFactoryService implements MultipleHandlerFactoryServi
         }
 
         public Collection<OXException> getWarnings() {
-            return Collections.<AbstractOXException> emptySet();
+            return Collections.<OXException> emptySet();
         }
 
     }

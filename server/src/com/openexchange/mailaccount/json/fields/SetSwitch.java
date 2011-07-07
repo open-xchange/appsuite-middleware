@@ -49,9 +49,9 @@
 
 package com.openexchange.mailaccount.json.fields;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link SetSwitch}

@@ -70,7 +70,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * Defines all error messages for the LoginException.
+ * Defines all error messages for the OXException.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */

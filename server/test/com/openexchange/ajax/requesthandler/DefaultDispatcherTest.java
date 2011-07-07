@@ -55,7 +55,6 @@ import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**

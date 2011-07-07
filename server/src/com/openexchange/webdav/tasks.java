@@ -67,8 +67,6 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -105,7 +103,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
     }
 
     @Override
-    protected void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser, PendingInvocations<TasksSQLInterface> pendingInvocations) throws AbstractOXException, XmlPullParserException, IOException {
+    protected void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser, PendingInvocations<TasksSQLInterface> pendingInvocations) throws OXException, XmlPullParserException, IOException {
         final Session session = getSession(req);
         if (isTag(parser, "prop", "DAV:")) {
             /*

@@ -59,19 +59,15 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.webdav.WebdavException;
 
@@ -324,12 +320,6 @@ public final class DigestUtility {
             return cryptoService.decrypt(passCrypt, key);
         } catch (final OXException e) {
             throw new WebdavException(e);
-        } catch (final OXException e) {
-            throw new WebdavException(e);
-        } catch (final OXException e) {
-            throw new WebdavException(e);
-        } catch (final OXException e) {
-            throw new WebdavException(e);
         }
     }
 
@@ -347,7 +337,7 @@ public final class DigestUtility {
      * @param loginInfo combined information seperated by an @ sign.
      * @param separator for spliting user name and context.
      * @return a string array with context and user name (in this order).
-     * @throws LoginException if no seperator is found.
+     * @throws OXException if no seperator is found.
      */
     private String[] split(final String loginInfo, final char separator) {
         final int pos = loginInfo.lastIndexOf(separator);

@@ -49,7 +49,8 @@
 
 package com.openexchange.webdav.protocol;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.WebdavException;
 
 /**
@@ -193,7 +194,7 @@ public class WebdavProtocolException extends WebdavException implements WebdavSt
      * @param url The WebDAV URL
      * @param status The (response) status code
      */
-    public WebdavProtocolException(final AbstractOXException cause, final WebdavPath url, final int status) {
+    public WebdavProtocolException(final OXException cause, final WebdavPath url, final int status) {
         super(cause);
         this.url = url;
         this.status = status;

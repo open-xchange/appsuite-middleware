@@ -14,7 +14,7 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum FileStorageCodes implements OXExceptionCode {
     /** An IO error occurred: %s */
     IOERROR("An IO error occurred: %s", Category.CATEGORY_SERVICE_DOWN, 3),
-    /** May be used to turn the IOException of getInstance into a proper AbstractOXException */
+    /** May be used to turn the IOException of getInstance into a proper OXException */
     INSTANTIATIONERROR("Couldn't reach the filestore: %s", Category.CATEGORY_SERVICE_DOWN, 4),
     /** Cannot create directory \"%1$s\" for FileStorage. */
     CREATE_DIR_FAILED("Cannot create directory \"%1$s\" for FileStorage.", Category.CATEGORY_CONFIGURATION, 6),

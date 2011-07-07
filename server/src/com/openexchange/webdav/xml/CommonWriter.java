@@ -52,7 +52,7 @@ package com.openexchange.webdav.xml;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import org.jdom.Element;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.results.TimedResult;
@@ -67,7 +67,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public abstract class CommonWriter extends FolderChildWriter {
 
-    protected void writeCommonElements(final CommonObject commonobject, final Element e_prop) throws AbstractOXException, SearchIteratorException, UnsupportedEncodingException {
+    protected void writeCommonElements(final CommonObject commonobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
 
         if (commonobject.containsParentFolderID() && commonobject.getParentFolderID() == 0) {
             addElement("personal_folder_id", commonobject.getParentFolderID(), e_prop);
@@ -84,7 +84,7 @@ public abstract class CommonWriter extends FolderChildWriter {
         addElement("private_flag", commonobject.getPrivateFlag(), e_prop);
     }
 
-    protected void writeElementAttachments(final CommonObject commonobject, final Element e_prop) throws AbstractOXException, SearchIteratorException, UnsupportedEncodingException {
+    protected void writeElementAttachments(final CommonObject commonobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
         final Element e_attachments = new Element("attachments", XmlServlet.NS);
         SearchIterator it = null;
         try {

@@ -73,7 +73,6 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**

@@ -91,7 +91,6 @@ import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileAction;
@@ -110,8 +109,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     private static final FetchMode fetchMode = FetchMode.PREFETCH;
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AttachmentBaseImpl.class));
-
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentBaseImpl.class, LOG);
 
     private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
 

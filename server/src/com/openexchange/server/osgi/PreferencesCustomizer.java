@@ -54,8 +54,8 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 
 /**

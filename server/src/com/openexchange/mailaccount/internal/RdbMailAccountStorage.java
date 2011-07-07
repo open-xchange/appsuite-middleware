@@ -80,7 +80,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;

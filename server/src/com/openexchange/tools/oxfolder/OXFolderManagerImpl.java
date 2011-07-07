@@ -68,16 +68,13 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.folder.FolderDeleteListenerService;
-import com.openexchange.folder.FolderException;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
@@ -86,15 +83,12 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.infostore.OXException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.links.LinkException;
 import com.openexchange.groupware.links.Links;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -116,7 +110,7 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class OXFolderManagerImpl extends OXFolderManager {
+final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderManagerImpl.class));
 
@@ -207,7 +201,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
         } catch (final OXException e) {
-            throw new OXFolderException(e);
+            throw e;
         }
         userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
         user = UserStorage.getStorageUser(session.getUserId(), ctx);
@@ -470,8 +464,6 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
                 try {
                     new EventClient(session).create(folderObj);
-                } catch (final EventException e) {
-                    LOG.warn("Create event could not be enqueued", e);
                 } catch (final OXException e) {
                     LOG.warn("Create event could not be enqueued", e);
                 }
@@ -594,7 +586,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                             getFolderFromMaster(fo.getObjectID()),
                             fo,
                             FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false));
-                    } catch (final EventException e) {
+                    } catch (final OXException e) {
                         LOG.warn("Update event could not be enqueued", e);
                     }
                 }
@@ -840,10 +832,8 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
             }
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-        } catch (final OXFolderNotFoundException e) {
-            throw e;
         } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
+            throw e;
         }
     }
 
@@ -1259,7 +1249,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
              */
             try {
                 if (!OXFolderSQL.exists(fo.getObjectID(), readCon, ctx)) {
-                    throw new OXFolderNotFoundException(fo.getObjectID(), ctx);
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(fo.getObjectID(), ctx.getContextId());
                 }
             } catch (final OXException e) {
                 throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
@@ -1336,7 +1326,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
              */
             try {
                 if (!OXFolderSQL.exists(fo.getObjectID(), readCon, ctx)) {
-                    throw new OXFolderNotFoundException(fo.getObjectID(), ctx);
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(fo.getObjectID(), ctx.getContextId());
                 }
             } catch (final OXException e) {
                 throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
@@ -1545,12 +1535,12 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 final FolderDeleteListenerService next = iter.next();
                 try {
                     next.onFolderDelete(folderID, ctx);
-                } catch (final FolderException e) {
+                } catch (final OXException e) {
                     LOG.error(
                         new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
                             "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()),
                         e);
-                    throw new OXFolderException(e);
+                    throw e;
                 }
             }
             /*
@@ -1620,9 +1610,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     sus.setContactCollectionFolder(ctx.getContextId(), user.getId(), null);
                 }
             } catch (final OXException e) {
-                throw new OXFolderException(e);
-            } catch (final LinkException e) {
-                throw new OXFolderException(e);
+                throw e;
             }
             /*
              * Propagate
@@ -1638,8 +1626,6 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     "del_oxfolder_permissions");
                 try {
                     new EventClient(session).delete(fo);
-                } catch (final EventException e) {
-                    LOG.warn("Delete event could not be enqueued", e);
                 } catch (final OXException e) {
                     LOG.warn("Delete event could not be enqueued", e);
                 }
@@ -1750,14 +1736,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 infostoreFacade.commit();
             } catch (final OXException x) {
                 infostoreFacade.rollback();
-                if (InfostoreExceptionCodes.ALREADY_LOCKED.getDetailNumber() == x.getDetailNumber()) {
+                if (InfostoreExceptionCodes.ALREADY_LOCKED.equals(x)) {
                     throw OXFolderExceptionCode.DELETE_FAILED_LOCKED_DOCUMENTS.create(x,
                         OXFolderUtility.getFolderName(folderID, ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                throw x;
-            } catch (final OXException x) {
-                infostoreFacade.rollback();
                 throw x;
             } catch (final RuntimeException x) {
                 infostoreFacade.rollback();
@@ -1934,7 +1917,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     private OXException parseTruncated(final DataTruncation exc, final FolderObject folder, final String tableName) {
         final String[] fields = DBUtils.parseTruncatedFields(exc);
-        final OXFolderException.Truncated[] truncateds = new OXFolderException.Truncated[fields.length];
+        final OXException.Truncated[] truncateds = new OXException.Truncated[fields.length];
         final StringBuilder sFields = new StringBuilder(fields.length << 3);
         for (int i = 0; i < fields.length; i++) {
             sFields.append(fields[i]);
@@ -1970,7 +1953,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
             }
             final int length = -1 == tmp2 ? 0 : tmp2;
-            truncateds[i] = new OXFolderException.Truncated() {
+            truncateds[i] = new OXException.Truncated() {
 
                 public int getId() {
                     return fieldId;
@@ -1988,7 +1971,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         sFields.setLength(sFields.length() - 2);
         final OXException fe;
         if (truncateds.length > 0) {
-            final OXFolderException.Truncated truncated = truncateds[0];
+            final OXException.Truncated truncated = truncateds[0];
             fe = OXFolderExceptionCode.TRUNCATED.create(exc,
                 sFields.toString(),
                 Integer.valueOf(truncated.getMaxSize()),
@@ -1999,7 +1982,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 Integer.valueOf(0),
                 Integer.valueOf(0));
         }
-        for (final OXFolderException.Truncated truncated : truncateds) {
+        for (final OXException.Truncated truncated : truncateds) {
             fe.addProblematic(truncated);
         }
         return fe;

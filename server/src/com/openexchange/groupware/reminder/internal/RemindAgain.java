@@ -53,7 +53,6 @@ import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.session.Session;

@@ -65,8 +65,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
@@ -82,8 +80,6 @@ import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
@@ -93,9 +89,7 @@ import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -185,15 +179,14 @@ public final class MailAccountRequest {
             }
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
 
             final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
             return jsonAccount;
-        } catch (final AbstractOXException exc) {
+        } catch (final OXException exc) {
             throw new OXException(exc);
         }
     }
@@ -216,8 +209,7 @@ public final class MailAccountRequest {
             }
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -225,7 +217,7 @@ public final class MailAccountRequest {
             // Create a mail access instance
             final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
             return actionValidateTree0(mailAccess);
-        } catch (final AbstractOXException exc) {
+        } catch (final OXException exc) {
             throw new OXException(exc);
         }
     }
@@ -238,8 +230,7 @@ public final class MailAccountRequest {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
                 for (final int id : ids) {
                     if (MailAccount.DEFAULT_ID != id) {
-                        throw MailAccountExceptionFactory.getInstance().create(
-                            MailAccountExceptionCodes.NOT_ENABLED,
+                        throw MailAccountExceptionCodes.NOT_ENABLED.create(
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()));
                     }
@@ -258,7 +249,7 @@ public final class MailAccountRequest {
 
                 jsonArray.put(id);
             }
-        } catch (final AbstractOXException exc) {
+        } catch (final OXException exc) {
             throw new OXException(exc);
         }
         return jsonArray;
@@ -269,8 +260,7 @@ public final class MailAccountRequest {
 
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -296,7 +286,7 @@ public final class MailAccountRequest {
                 MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
             return jsonAccount;
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -311,8 +301,7 @@ public final class MailAccountRequest {
 
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -343,13 +332,12 @@ public final class MailAccountRequest {
                 return actionValidateTree(accountDescription);
             }
             return actionValidateBoolean(accountDescription);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final GeneralSecurityException e) {
-            throw new OXException(MailAccountExceptionFactory.getInstance().create(
-                MailAccountExceptionCodes.UNEXPECTED_ERROR,
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(
                 e,
-                e.getMessage()));
+                e.getMessage());
         }
     }
 
@@ -378,7 +366,7 @@ public final class MailAccountRequest {
                 mailAccess,
                 mailAccess.getMailConfig());
             return root;
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             if (DEBUG) {
                 LOG.debug("Composing mail account's folder tree failed.", e);
             }
@@ -425,7 +413,7 @@ public final class MailAccountRequest {
                 validated = checkTransportServerURL(accountDescription);
             }
             return Boolean.valueOf(validated);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -541,7 +529,7 @@ public final class MailAccountRequest {
         try {
             mailTransport.ping();
             close = true;
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             if (DEBUG) {
                 LOG.debug("Validating transport account failed.", e);
             }
@@ -577,8 +565,7 @@ public final class MailAccountRequest {
             final Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
-                throw MailAccountExceptionFactory.getInstance().create(
-                    MailAccountExceptionCodes.NOT_ENABLED,
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
@@ -637,7 +624,7 @@ public final class MailAccountRequest {
                 MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
             return jsonAccount;
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -664,7 +651,7 @@ public final class MailAccountRequest {
             userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
             return MailAccountWriter.writeArray(userMailAccounts, attributes);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }
@@ -707,7 +694,7 @@ public final class MailAccountRequest {
             }
 
             return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
     }

@@ -53,9 +53,9 @@ package com.openexchange.groupware.impl;
 
 /**
  *   PasswordExpiredException
- * TODO Integrate into LoginException
+ * TODO Integrate into OXException
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @deprecated use LoginException.
+ * @deprecated use OXException.
  */
 @Deprecated
 public class PasswordExpiredException extends Exception

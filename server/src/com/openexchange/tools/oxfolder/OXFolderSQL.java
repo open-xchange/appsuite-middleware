@@ -1693,8 +1693,6 @@ public final class OXFolderSQL {
                     for (final Integer fuid : reassignPerms) {
                         FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
                     }
-                } catch (final FolderCacheNotEnabledException e) {
-                    LOG.error(e.getMessage(), e);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -2047,8 +2045,6 @@ public final class OXFolderSQL {
                     for (final Integer fuid : reassignFolders) {
                         FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
                     }
-                } catch (final FolderCacheNotEnabledException e) {
-                    LOG.error(e.getMessage(), e);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -2094,8 +2090,6 @@ public final class OXFolderSQL {
                     for (final Integer fuid : reassignFolders) {
                         FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
                     }
-                } catch (final FolderCacheNotEnabledException e) {
-                    LOG.error(e.getMessage(), e);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }

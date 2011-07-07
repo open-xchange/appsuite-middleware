@@ -67,7 +67,6 @@ import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -282,7 +281,7 @@ public class AppointmentWriter extends CalendarWriter {
     }
 
     public void addContent2PropElement(final Element e_prop, final Appointment ao, final boolean delete,
-            final boolean externalUse) throws AbstractOXException, SearchIteratorException, UnsupportedEncodingException {
+            final boolean externalUse) throws OXException, SearchIteratorException, UnsupportedEncodingException {
         if (delete) {
             addElement(AppointmentFields.OBJECT_ID, ao.getObjectID(), e_prop);
             addElement(AppointmentFields.LAST_MODIFIED, ao.getLastModified(), e_prop);

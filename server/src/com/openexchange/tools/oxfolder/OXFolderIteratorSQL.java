@@ -74,7 +74,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -1381,8 +1380,6 @@ public final class OXFolderIteratorSQL {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.LDAP_ERROR.create(e, Integer.valueOf(contextId));
         } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {

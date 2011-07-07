@@ -84,7 +84,6 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -96,7 +95,6 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -786,7 +784,7 @@ public class OXContainerConverter {
                             newEntry.setEmailaddress(value);
                             distributionList[distributionList.length - 1] = newEntry;
                             contactContainer.setDistributionList(distributionList);
-                        } catch (final ContactException e) {
+                        } catch (final OXException e) {
                             throw new ConverterException(e);
                         }
                     } else {

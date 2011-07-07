@@ -49,7 +49,8 @@
 
 package com.openexchange.webdav;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -57,7 +58,7 @@ import com.openexchange.groupware.EnumComponent;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class WebdavException extends AbstractOXException {
+public class WebdavException extends OXException {
 
     private static final long serialVersionUID = 1527534646646673389L;
 
@@ -138,7 +139,7 @@ public class WebdavException extends AbstractOXException {
      * 
      * @param cause The cause
      */
-    public WebdavException(final AbstractOXException cause) {
+    public WebdavException(final OXException cause) {
         super(cause);
     }
 

@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -69,7 +70,6 @@ import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**

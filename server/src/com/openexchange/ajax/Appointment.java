@@ -63,9 +63,8 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

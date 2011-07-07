@@ -52,9 +52,7 @@ package com.openexchange.preferences;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.exception.OXException;
 
 /**
  * Removes the user setting server entry for a deleted user.

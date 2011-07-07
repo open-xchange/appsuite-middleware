@@ -54,9 +54,9 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 

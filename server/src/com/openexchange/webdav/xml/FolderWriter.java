@@ -64,7 +64,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -74,7 +74,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
-import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -312,7 +311,7 @@ public class FolderWriter extends FolderChildWriter {
     }
 
     private static interface Enqueuer {
-        public void enqueue(FolderObject fo) throws AbstractOXException;
+        public void enqueue(FolderObject fo) throws OXException;
     } // End of Enqueuer interface
 
     private static class FullEnqueuer implements Enqueuer {
@@ -330,7 +329,7 @@ public class FolderWriter extends FolderChildWriter {
             this.userConf = userConf;
         }
 
-        public void enqueue(final FolderObject fo) throws AbstractOXException {
+        public void enqueue(final FolderObject fo) throws OXException {
             try {
                 if (fo.isVisible(userId, userConf)) {
                     updatedQueue.add(fo);
@@ -351,7 +350,7 @@ public class FolderWriter extends FolderChildWriter {
         }
 
         @Override
-        public void enqueue(final FolderObject fo) throws AbstractOXException {
+        public void enqueue(final FolderObject fo) throws OXException {
             try {
                 if (fo.isVisible(userId, userConf)) {
                     if (fo.isShared(userId)) {
@@ -379,7 +378,7 @@ public class FolderWriter extends FolderChildWriter {
         }
 
         @Override
-        public void enqueue(final FolderObject fo) throws AbstractOXException {
+        public void enqueue(final FolderObject fo) throws OXException {
             try {
                 if (fo.isVisible(userId, userConf)) {
                     updatedQueue.add(fo);
@@ -398,7 +397,7 @@ public class FolderWriter extends FolderChildWriter {
         }
 
         @Override
-        public void enqueue(final FolderObject fo) throws AbstractOXException {
+        public void enqueue(final FolderObject fo) throws OXException {
             try {
                 if (!fo.isShared(userId) && fo.isVisible(userId, userConf)) {
                     /*
@@ -426,7 +425,7 @@ public class FolderWriter extends FolderChildWriter {
         return new NoSharedAccessEnqueuer(updatedQueue, deletedQueue, userConf);
     }
 
-    private static UpdatesResult calculateUpdates(final FolderSQLInterface sqlInterface, final Date timestamp, final boolean ignoreDeleted, final ServerSession session) throws AbstractOXException {
+    private static UpdatesResult calculateUpdates(final FolderSQLInterface sqlInterface, final Date timestamp, final boolean ignoreDeleted, final ServerSession session) throws OXException {
         /*
          * Get all updated folders
          */

@@ -70,9 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link LinkRequest} - Handles request to link module.

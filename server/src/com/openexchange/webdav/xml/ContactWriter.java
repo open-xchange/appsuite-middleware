@@ -64,7 +64,7 @@ import org.jdom.Namespace;
 import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -236,7 +236,7 @@ public class ContactWriter extends CommonWriter {
         addContent2PropElement(e, contactobject, delete, false);
     }
 
-    public void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws AbstractOXException, SearchIteratorException, UnsupportedEncodingException, AddressException {
+    public void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws OXException, SearchIteratorException, UnsupportedEncodingException, AddressException {
         if (delete) {
             addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
             addElement(ContactFields.LAST_MODIFIED, contactobject.getLastModified(), e);

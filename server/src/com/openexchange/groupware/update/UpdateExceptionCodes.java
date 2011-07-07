@@ -49,19 +49,7 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.groupware.update.UpdateExceptionMessages.BLOCKING_FIRST_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.COLUMN_NOT_FOUND_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.LOADING_TASK_FAILED_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.ONLY_REDUCE_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.RESET_FORBIDDEN_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.UNEXPECTED_ERROR_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.UNKNOWN_CONCURRENCY_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.UNKNOWN_SCHEMA_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.UNKNOWN_TASK_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.UNRESOLVABLE_DEPENDENCIES_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.UPDATE_FAILED_MSG;
-import static com.openexchange.groupware.update.UpdateExceptionMessages.WRONG_ROW_COUNT_MSG;
+import static com.openexchange.groupware.update.UpdateExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;

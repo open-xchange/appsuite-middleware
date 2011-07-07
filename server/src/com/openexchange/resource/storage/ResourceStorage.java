@@ -51,10 +51,9 @@ package com.openexchange.resource.storage;
 
 import java.sql.Connection;
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
-import com.openexchange.exception.OXException;
 import com.openexchange.resource.ResourceGroup;
 
 /**

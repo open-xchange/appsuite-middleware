@@ -52,7 +52,7 @@ package com.openexchange.authentication.service;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.security.auth.login.LoginException;
+import javax.security.auth.login.OXException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginInfo;
@@ -84,7 +84,7 @@ public final class Authentication {
      * @return a string array with two elements in which the first contains the
      * login info for the context and the second contains the login info for the
      * user.
-     * @throws LoginException if something with the login info is wrong.
+     * @throws OXException if something with the login info is wrong.
      * @throws OXException if the authentication service is not available.
      */
     public static Authenticated login(final String login, final String pass)
@@ -100,7 +100,7 @@ public final class Authentication {
      * @return a string array with two elements in which the first contains the
      * login info for the context and the second contains the login info for the
      * user.
-     * @throws LoginException if something with the login info is wrong.
+     * @throws OXException if something with the login info is wrong.
      * @throws OXException if the authentication service is not available.
      */
     public static Authenticated login(final String login, final String pass, final Map<String, Object> properties)

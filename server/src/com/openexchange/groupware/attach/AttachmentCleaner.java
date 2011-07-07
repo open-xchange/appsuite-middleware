@@ -63,7 +63,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -73,9 +72,6 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AttachmentCleaner.class));
 
     private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission
-                                                                                                        // check.
-
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentCleaner.class);
 
     public final void appointmentDeleted(final Appointment appointmentObj, final Session sessionObj) {
         deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj);

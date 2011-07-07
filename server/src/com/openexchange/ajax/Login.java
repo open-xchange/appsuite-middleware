@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.security.auth.login.OXException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -80,7 +81,6 @@ import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.configuration.CookieHashSource;
@@ -90,11 +90,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.util.UUIDs;
@@ -103,7 +101,6 @@ import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.server.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -111,9 +108,7 @@ import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
@@ -230,7 +225,7 @@ public class Login extends AJAXServlet {
                         removeOXCookies(session.getHash(), req, resp);
                         removeJSESSIONID(req, resp);
                     }
-                } catch (final LoginException e) {
+                } catch (final OXException e) {
                     LOG.error("Logout failed", e);
                 }
             }
@@ -476,7 +471,7 @@ public class Login extends AJAXServlet {
                 } catch (final OXException e) {
                     LOG.debug(e.getMessage(), e);
                     response.setException(e);
-                } catch (final LoginException e) {
+                } catch (final OXException e) {
                     if (AbstractOXException.CATEGORY_USER_INPUT == e.getCategory()) {
                         LOG.debug(e.getMessage(), e);
                     } else {
@@ -509,7 +504,7 @@ public class Login extends AJAXServlet {
                     final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                     resp.setContentType(CONTENTTYPE_HTML);
                     resp.getWriter().write(errorPage);
-                } catch (final LoginException e) {
+                } catch (final OXException e) {
                     final String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
                     resp.setContentType(CONTENTTYPE_HTML);
                     resp.getWriter().write(errorPage);
@@ -584,7 +579,7 @@ public class Login extends AJAXServlet {
         if (req.getHeader(Header.AUTH_HEADER) != null) {
             try {
                 doAuthHeaderLogin(req, resp);
-            } catch (final LoginException e) {
+            } catch (final OXException e) {
                 resp.setHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             }
@@ -736,7 +731,7 @@ public class Login extends AJAXServlet {
             // Append "config/modules"
             appendModules(session, json, req);
             response.setData(json);
-        } catch (final LoginException e) {
+        } catch (final OXException e) {
             if (AbstractOXException.CATEGORY_USER_INPUT == e.getCategory()) {
                 LOG.debug(e.getMessage(), e);
             } else {
@@ -884,7 +879,7 @@ public class Login extends AJAXServlet {
         return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
     }
 
-    private void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, LoginException, IOException {
+    private void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, OXException, IOException {
         final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM ,true);
         final LoginResult result = LoginPerformer.getInstance().doLogin(request);
         final Session session = result.getSession();
@@ -897,7 +892,7 @@ public class Login extends AJAXServlet {
             session.getSessionID()));
     }
 
-    private void doAuthHeaderLogin(final HttpServletRequest req, final HttpServletResponse resp) throws LoginException, IOException {
+    private void doAuthHeaderLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         final Credentials creds;
         if (Authorization.checkForBasicAuthorization(auth)) {

@@ -57,7 +57,6 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.request.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.tools.session.ServerSession;
@@ -106,7 +105,7 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
                 final JSONValue retval = request.action(action, jsonObject);
                 timestamp = request.getTimestamp();
                 return retval;
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 final org.apache.commons.logging.Log log =
                     com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactsFactoryService.ContactsHandler.class));
                 log.error(e.getMessage(), e);
@@ -115,7 +114,7 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
         }
 
         public Collection<OXException> getWarnings() {
-            return Collections.<AbstractOXException> emptySet();
+            return Collections.<OXException> emptySet();
         }
 
     }

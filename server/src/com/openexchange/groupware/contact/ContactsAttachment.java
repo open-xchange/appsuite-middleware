@@ -58,7 +58,6 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;

@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Locale;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -74,7 +73,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -1027,9 +1025,7 @@ public class OXFolderTools {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.LDAP_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
+            throw e;
         } catch (final Throwable t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
