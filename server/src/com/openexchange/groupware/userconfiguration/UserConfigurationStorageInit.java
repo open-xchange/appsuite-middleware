@@ -52,7 +52,7 @@ package com.openexchange.groupware.userconfiguration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -123,7 +123,7 @@ public final class UserConfigurationStorageInit implements Initialization {
         return null;
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(UserConfigurationStorageInit.class.getName() + " already started");
             return;
@@ -152,7 +152,7 @@ public final class UserConfigurationStorageInit implements Initialization {
         }
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(UserConfigurationStorageInit.class.getName() + " cannot be stopped since it has not been started before");
             return;

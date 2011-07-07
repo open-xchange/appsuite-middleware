@@ -56,13 +56,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
 import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
-import com.openexchange.groupware.update.internal.UpdateExceptionFactory;
 
 /**
  * This {@link Activator} currently is only used to initialize some structures within the database update component. Lateron this may used
@@ -76,18 +72,14 @@ public class Activator implements BundleActivator {
 
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
-    private final Stack<ComponentRegistration> exceptions = new Stack<ComponentRegistration>();
-
     private ServiceRegistration createTableRegistration;
 
     public Activator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         createTableRegistration = context.registerService(CreateTableService.class.getName(), new CreateUpdateTaskTable(), null);
-        exceptions.push(new ComponentRegistration(context, EnumComponent.UPDATE, APPLICATION_ID, SchemaExceptionFactory.getInstance()));
-        exceptions.push(new ComponentRegistration(context, EnumComponent.UPDATE, APPLICATION_ID, UpdateExceptionFactory.getInstance()));
         trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context)));
         trackers.push(new ServiceTracker(context, UpdateTaskProviderService.class.getName(), new UpdateTaskCustomizer(context)));
         InternalList.getInstance().start();
@@ -96,14 +88,11 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
         InternalList.getInstance().stop();
-        while (!exceptions.isEmpty()) {
-            exceptions.pop().unregister();
-        }
         createTableRegistration.unregister();
     }
 }
