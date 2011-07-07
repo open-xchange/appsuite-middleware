@@ -99,7 +99,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.webdav.workarounds.LiberalUnLockMethod;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
@@ -611,9 +610,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             if (e instanceof OXException) {
                 throw (OXException) e;
             }
-            if (e instanceof AbstractOXException) {
-                throw new OXException(e);
-            }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -713,7 +709,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final DavException e) {
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            if (e instanceof AbstractOXException) {
+            if (e instanceof OXException) {
                 throw new OXException(e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -897,9 +893,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final Exception e) {
             if (e instanceof OXException) {
                 throw (OXException) e;
-            }
-            if (e instanceof AbstractOXException) {
-                throw new OXException(e);
             }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
