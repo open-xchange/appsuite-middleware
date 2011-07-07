@@ -58,7 +58,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.global.OXCloseable;
 
 /**
@@ -75,7 +75,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
         tracker.open();
     }
 
-    public void close() throws AbstractOXException {
+    public void close() throws OXException {
         tracker.close();
     }
 
@@ -199,7 +199,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
             return tracker.getService();
         }
 
-        public void close() throws AbstractOXException {
+        public void close() throws OXException {
             tracker.close();
         }
 
