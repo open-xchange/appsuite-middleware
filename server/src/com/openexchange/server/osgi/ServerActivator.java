@@ -107,7 +107,6 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exception.OXException;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -262,8 +261,6 @@ public final class ServerActivator extends DeferredActivator {
 
     private final List<ServiceTracker> serviceTrackerList;
 
-    private final List<ComponentRegistration> componentRegistrationList;
-
     private final List<EventHandlerRegistration> eventHandlerList;
 
     private final List<BundleActivator> activators;
@@ -285,7 +282,6 @@ public final class ServerActivator extends DeferredActivator {
         this.starter = new Starter();
         registrationList = new ArrayList<ServiceRegistration>();
         serviceTrackerList = new ArrayList<ServiceTracker>();
-        componentRegistrationList = new ArrayList<ComponentRegistration>();
         eventHandlerList = new ArrayList<EventHandlerRegistration>();
         activators = new ArrayList<BundleActivator>(8);
     }
@@ -700,13 +696,6 @@ public final class ServerActivator extends DeferredActivator {
                 activator.stop(context);
             }
             activators.clear();
-            /*
-             * Unregister components
-             */
-            for (final ComponentRegistration componentRegistration : componentRegistrationList) {
-                componentRegistration.unregister();
-            }
-            componentRegistrationList.clear();
             /*
              * Unregister server's services
              */

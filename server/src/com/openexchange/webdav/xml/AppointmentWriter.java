@@ -64,9 +64,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -138,9 +138,14 @@ public class AppointmentWriter extends CalendarWriter {
         try {
             final Appointment appointmentobject = appointmentsql.getObjectById(objectId, folderId);
             writeObject(appointmentobject, eProp, false, xo, os);
-        } catch (final OXObjectNotFoundException exc) {
-            writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo,
+        } catch (final OXException exc) {
+            if (exc.isGeneric(Generic.NOT_FOUND)) {
+                writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo,
                     os);
+            } else {
+                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+            }
         } catch (final Exception ex) {
             LOG.error("AppointmentWriter.startWriter()", ex);
             writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -197,7 +202,7 @@ public class AppointmentWriter extends CalendarWriter {
                                     /*
                                      * Load withheld change exceptions by IDs
                                      */
-                                    CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+                                    final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                                     final Appointment[] ces = calColl.getAppointmentsByID(
                                             folder_id, ids, deleteFields, sessionObj);
                                     for (final Appointment ce : ces) {
@@ -303,7 +308,7 @@ public class AppointmentWriter extends CalendarWriter {
                 if (!externalUse) {
                     RecurringResultsInterface recuResults = null;
                     try {
-                        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+                        final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                         recuResults = recColl.calculateFirstRecurring(ao);
                     } catch (final OXException x) {
                         LOG.error(new StringBuilder("Can not calculate recurrence ").append(ao.getObjectID()).append(
@@ -405,7 +410,7 @@ public class AppointmentWriter extends CalendarWriter {
         boolean applyNewExceptions = false;
         for (final Iterator<Date> iterator = clist.iterator(); iterator.hasNext();) {
             final Date changeException = iterator.next();
-            CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             final Appointment app = calColl.getChangeExceptionByDate(folderId, master
                     .getRecurrenceID(), changeException, changeFields, session);
             if (null != app && !isVisibleAsParticipantOrOwner(app, session.getUserId())) {

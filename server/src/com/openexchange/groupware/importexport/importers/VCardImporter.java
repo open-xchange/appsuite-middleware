@@ -61,9 +61,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -107,9 +107,7 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
             return false;
         }
         if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasContact()) {
-            throw ImportExportExceptionCodes.CONTACTS_DISABLED.create(new OXPermissionException(
-                OXPermissionException.Code.NoPermissionForModul,
-                "Contacts"));
+            throw ImportExportExceptionCodes.CONTACTS_DISABLED.create().setGeneric(Generic.NO_PERMISSION);
         }
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
         final Iterator<String> iterator = folders.iterator();

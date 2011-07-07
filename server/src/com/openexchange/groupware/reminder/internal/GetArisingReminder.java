@@ -55,9 +55,9 @@ import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -115,10 +115,11 @@ public class GetArisingReminder {
                 final CalendarDataObject appointment;
                 try {
                     appointment = appointmentSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
-                } catch (final OXObjectNotFoundException e) {
-                    STORAGE.deleteReminder(ctx, reminder);
-                    continue;
                 } catch (final OXException e) {
+                    if (e.isGeneric(Generic.NOT_FOUND)) {
+                        STORAGE.deleteReminder(ctx, reminder);
+                        continue;
+                    }
                     final OXException re = new OXException(e);
                     LOG.error(re.getMessage(), re);
                     continue;

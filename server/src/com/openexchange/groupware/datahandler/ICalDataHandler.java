@@ -66,7 +66,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.ServerConfig;
@@ -76,6 +75,7 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -129,8 +129,12 @@ public abstract class ICalDataHandler implements DataHandler {
                 if (confirm != null) {
                     try {
                         updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
-                    } catch (final OXPermissionException e) {
-                        handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
+                    } catch (final OXException e) {
+                        if (e.isGeneric(Generic.NO_PERMISSION)) {
+                            handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
+                        } else {
+                            throw e;
+                        }
                     }
                 }
                 appointment.setObjectID(objectId);

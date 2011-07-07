@@ -49,15 +49,14 @@
 
 package com.openexchange.tools.oxfolder;
 
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 
 /**
  * OXFolderPermissionException
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXFolderPermissionException extends OXPermissionException {
+public class OXFolderPermissionException extends OXException {
 
     private static final long serialVersionUID = -5108199975949161729L;
 
@@ -72,7 +71,9 @@ public class OXFolderPermissionException extends OXPermissionException {
     }
 
     public OXFolderPermissionException(final OXFolderExceptionCode code, final Exception cause, final Object... messageArgs) {
-        super(EnumComponent.FOLDER, CATEGORY_PERMISSION_DENIED, code.getNumber(), code.getMessage(), cause, messageArgs);
+        super();
+        copyFrom(OXException.noPermissionForFolder());
+        setLogMessage(code.getMessage(), messageArgs);
     }
 
 }

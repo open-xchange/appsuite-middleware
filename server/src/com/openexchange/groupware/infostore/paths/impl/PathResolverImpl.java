@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -175,8 +174,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     }
 
     public Resolved resolve(final int relativeToFolder, final WebdavPath path, final Context ctx,
-            final User user, final UserConfiguration userConfig) throws OXException,
-            OXObjectNotFoundException {
+            final User user, final UserConfiguration userConfig) throws OXException {
 
         final Map<WebdavPath, Resolved> cache = resolveCache.get();
 
@@ -263,7 +261,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                                 return resolved;
                             }
                         }
-                        throw new OXObjectNotFoundException();
+                        throw OXException.notFound("");
                     }
                     final int nextStep = folderid;
                     rs.close();

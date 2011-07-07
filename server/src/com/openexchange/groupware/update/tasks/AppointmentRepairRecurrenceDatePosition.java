@@ -59,10 +59,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -164,7 +162,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             stmt.setString(1, String.valueOf(recurrenceDatePosition));
             stmt.setInt(2, cid);
             stmt.setInt(3, id);
-            int changed = stmt.executeUpdate();
+            final int changed = stmt.executeUpdate();
             if (1 != changed) {
                 LOG.error("Updated " + changed + " appointments instead of 1.");
             }
@@ -175,7 +173,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         }
     }
 
-    private CalendarDataObject loadAppointment(final Connection con, final Context ctx, final int id) throws OXObjectNotFoundException, OXException {
+    private CalendarDataObject loadAppointment(final Connection con, final Context ctx, final int id) throws OXException {
         final String sql = "SELECT cid,timestampfield01,timestampfield02,timezone,intfield01,intfield02,intfield04,intfield05,field06 FROM prg_dates WHERE cid=? AND intfield01=?";
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -188,10 +186,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             if (result.next()) {
                 retval = fillAppointment(result);
             } else {
-                throw new OXObjectNotFoundException(
-                    OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
-                    EnumComponent.UPDATE,
-                    Integer.valueOf(id));
+                throw OXException.notFound(String.valueOf(id));
             }
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
@@ -232,7 +227,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
     }
 
     private static final void calculateRecurrenceDatePosition(final CalendarDataObject appointment, final int recurrencePosition) throws OXException {
-        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(
+        final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(
             CalendarCollectionService.class);
         recColl.fillDAO(appointment);
         final RecurringResultsInterface rrs = recColl.calculateRecurring(appointment, 0, 0, recurrencePosition, recColl.MAX_OCCURRENCESE, true);

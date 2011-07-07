@@ -61,10 +61,9 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
@@ -335,9 +334,14 @@ public final class attachments extends OXServlet {
                 os.write(b, 0, i);
                 i = is.read(b);
             }
-        } catch (final OXConflictException exc) {
-            LOG.error("doGet", exc);
-            doError(resp, HttpServletResponse.SC_CONFLICT, exc.toString());
+        } catch (final OXException exc) {
+            if (exc.isGeneric(Generic.CONFLICT)) {
+                LOG.error("doGet", exc);
+                doError(resp, HttpServletResponse.SC_CONFLICT, exc.toString());
+            } else {
+                LOG.error("doGet", exc);
+                doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
+            }
             rollbackTransaction();
         } catch (final Exception exc) {
             LOG.error("doGet", exc);
@@ -370,12 +374,19 @@ public final class attachments extends OXServlet {
                 ctx), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
             ATTACHMENT_BASE.commit();
             resp.setStatus(HttpServletResponse.SC_OK);
-        } catch (final OXConflictException exc) {
-            doError(resp, HttpServletResponse.SC_CONFLICT, exc.toString());
-            LOG.error("doDelete", exc);
-        } catch (final OXObjectNotFoundException exc) {
-            doError(resp, HttpServletResponse.SC_NOT_FOUND, exc.toString());
-            rollbackTransaction();
+        } catch (final OXException e) {
+            if (e.isGeneric(Generic.CONFLICT)) {
+                doError(resp, HttpServletResponse.SC_CONFLICT, e.toString());
+                LOG.error("doDelete", e);
+                rollbackTransaction();
+            } else if (e.isGeneric(Generic.NOT_FOUND)) {
+                doError(resp, HttpServletResponse.SC_NOT_FOUND, e.toString());
+                rollbackTransaction();
+            } else {
+                doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + e.toString());
+                LOG.error("doDelete", e);
+                rollbackTransaction();
+            }
         } catch (final Exception exc) {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
             LOG.error("doDelete", exc);

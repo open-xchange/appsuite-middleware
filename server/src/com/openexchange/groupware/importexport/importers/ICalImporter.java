@@ -67,13 +67,13 @@ import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -539,9 +539,7 @@ public class ICalImporter extends AbstractImporter {
 				.getUserConfigurationSafe(session.getUserId(),
 						session.getContext()).hasCalendar()) {
             throw ImportExportExceptionCodes.CALENDAR_DISABLED
-					.create(new OXPermissionException(
-							OXPermissionException.Code.NoPermissionForModul,
-							"Calendar"));
+					.create().setGeneric(Generic.NO_PERMISSION);
         }
 
 		return ServerServiceRegistry.getInstance()
@@ -559,9 +557,7 @@ public class ICalImporter extends AbstractImporter {
 				.getUserConfigurationSafe(session.getUserId(),
 						session.getContext()).hasTask()) {
             throw ImportExportExceptionCodes.TASKS_DISABLED
-					.create(new OXPermissionException(
-							OXPermissionException.Code.NoPermissionForModul,
-							"Task"));
+					.create().setGeneric(Generic.NO_PERMISSION);
         }
 
 		return new TasksSQLImpl(session);

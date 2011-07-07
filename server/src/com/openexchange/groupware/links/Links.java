@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -189,9 +188,6 @@ public class Links {
                 int fid = -1;
                 try {
                     fid = calColl.getAppointmentFolder(oid, user, ct);
-                } catch (final OXObjectNotFoundException x) {
-                    // may not read and is not participant
-                    return false;
                 } catch (final OXException ox) {
                     LOG.error("UNABLE TO CHECK CALENDAR READRIGHT FOR LINK", ox);
                     return false;

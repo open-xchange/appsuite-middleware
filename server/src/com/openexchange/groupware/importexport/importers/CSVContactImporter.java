@@ -65,9 +65,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
@@ -107,9 +107,7 @@ public class CSVContactImporter extends AbstractImporter {
         }
 
         if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasContact()) {
-            throw ImportExportExceptionCodes.CONTACTS_DISABLED.create(new OXPermissionException(
-                OXPermissionException.Code.NoPermissionForModul,
-                "Contacts"));
+            throw ImportExportExceptionCodes.CONTACTS_DISABLED.create().setGeneric(Generic.NO_PERMISSION);
         }
 
         String folder;

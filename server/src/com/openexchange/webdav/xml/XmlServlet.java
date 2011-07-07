@@ -65,10 +65,9 @@ import org.jdom.output.XMLOutputter;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
@@ -345,18 +344,18 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
             os.write(("</D:multistatus>").getBytes());
             os.flush();
-        } catch (final OXPermissionException opexc) {
-            doError(req, resp, HttpServletResponse.SC_FORBIDDEN, opexc.getMessage());
-        } catch (final OXConflictException ocexc) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(ocexc.getMessage(), ocexc);
-            }
-            doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + ocexc.getMessage());
         } catch (final org.jdom.JDOMException exc) {
             LOG.error("doPropFind", exc);
             doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
         } catch (final OXException exc) {
-            if (OXException.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
+            if (exc.isGeneric(Generic.NO_PERMISSION)) {
+                doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
+            } else if (exc.isGeneric(Generic.CONFLICT)) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(exc.getMessage(), exc);
+                }
+                doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
+            } else if (OXException.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
             } else if (Category.CATEGORY_CONFLICT.equals(exc.getCategory())) {
                 LOG.error("doPropFind", exc);

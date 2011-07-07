@@ -62,10 +62,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.FolderLockManager;
@@ -302,22 +302,25 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             resource.setExists(true);
             s.addResource(resource);
             return resource;
-        } catch (final OXObjectNotFoundException x) {
-            Connection readCon = null;
-            try {
-                readCon = provider.getReadConnection(ctx);
-                final int lockNullId = InfostoreLockNullResource.findInfostoreLockNullResource(url, readCon, ctx);
-                if(lockNullId>0) {
-                    return new InfostoreLockNullResource((AbstractResource) def, this,lockNullId);
+        } catch (final OXException x) {
+            if (x.isGeneric(Generic.NOT_FOUND)) {
+                Connection readCon = null;
+                try {
+                    readCon = provider.getReadConnection(ctx);
+                    final int lockNullId = InfostoreLockNullResource.findInfostoreLockNullResource(url, readCon, ctx);
+                    if(lockNullId>0) {
+                        return new InfostoreLockNullResource((AbstractResource) def, this,lockNullId);
+                    }
+                } catch (final OXException e) {
+                    throw e;
+                } finally {
+                    if(readCon != null) {
+                        provider.releaseReadConnection(ctx, readCon);
+                    }
                 }
-            } catch (final OXException e) {
-                throw e;
-            } finally {
-                if(readCon != null) {
-                    provider.releaseReadConnection(ctx, readCon);
-                }
+                return def;
             }
-            return def;
+            throw x;
         }
     }
 
