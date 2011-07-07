@@ -50,7 +50,6 @@
 package com.openexchange.tools.iterator;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 
 
 /**
