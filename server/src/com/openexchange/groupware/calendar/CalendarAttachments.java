@@ -114,11 +114,11 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             if (!collection.getReadPermission(objectId, folderId, so, ctx)) {
                 throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ.create();
             }
-        } catch (final OXObjectNotFoundException oxonfe) {
-            if (LOG.isErrorEnabled()) {
+        } catch (final OXException e) {
+            if (e.isGeneric(Generic.NOT_FOUND)) {
                 LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayReadAttachments failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
             }
-            throw oxonfe;
+            throw e;
         } catch(final Exception e) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, 15);
         }
