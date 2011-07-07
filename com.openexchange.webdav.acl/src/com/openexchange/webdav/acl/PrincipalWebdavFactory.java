@@ -49,13 +49,14 @@
 
 package com.openexchange.webdav.acl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
@@ -69,11 +70,11 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
     
     private static final Protocol PROTOCOL = new Protocol();
 
-    private UserService userService;
-    private SessionHolder sessionHolder;
+    private final UserService userService;
+    private final SessionHolder sessionHolder;
 
     
-    public PrincipalWebdavFactory(UserService userService, SessionHolder sessionHolder) {
+    public PrincipalWebdavFactory(final UserService userService, final SessionHolder sessionHolder) {
         super();
         this.userService = userService;
         this.sessionHolder = sessionHolder;
@@ -83,14 +84,14 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
         return PROTOCOL;
     }
 
-    public WebdavCollection resolveCollection(WebdavPath url) throws OXException {
+    public WebdavCollection resolveCollection(final WebdavPath url) throws OXException {
         if (url.size() != 0) {
-            throw new OXException(url, 404);
+            throw WebdavProtocolException.generalError(url, 404);
         }
         return mixin(new RootPrincipal(this));
     }
 
-    public WebdavResource resolveResource(WebdavPath url) throws OXException {
+    public WebdavResource resolveResource(final WebdavPath url) throws OXException {
         if (url.size() == 0) {
             return mixin(new RootPrincipal(this));
         }

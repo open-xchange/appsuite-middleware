@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
@@ -90,7 +91,7 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
@@ -105,7 +106,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
     
     private static ServiceLookup services;
     
-    public static void setServices(ServiceLookup lookup){
+    public static void setServices(final ServiceLookup lookup){
         services = lookup;
     }
 
@@ -274,8 +275,10 @@ public class WebdavPrincipalPerformer implements SessionHolder{
                 LOG.debug("Executing " + action);
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
-        } catch (final OXException x) {
+        } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());
+        } catch (final OXException x) {
+            resp.setStatus(500);
         } catch (final NullPointerException x) {
             LOG.error("Null reference detected.", x);
         } finally {
@@ -287,7 +290,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         return factory;
     }
     
-    public void setGlobalMixins(PropertyMixin...mixins) {
+    public void setGlobalMixins(final PropertyMixin...mixins) {
         factory.setGlobalMixins(mixins);
     }
 }

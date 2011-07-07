@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.mixins.PrincipalURL;
 import com.openexchange.webdav.protocol.Protocol.Property;
@@ -62,7 +62,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
@@ -74,10 +74,10 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
  */
 public class RootPrincipal extends AbstractCollection {
 
-    private PrincipalWebdavFactory factory;
-    private WebdavPath url;
+    private final PrincipalWebdavFactory factory;
+    private final WebdavPath url;
 
-    public RootPrincipal(PrincipalWebdavFactory factory) {
+    public RootPrincipal(final PrincipalWebdavFactory factory) {
         super();
         this.factory = factory;
         this.url = new WebdavPath();
@@ -87,7 +87,7 @@ public class RootPrincipal extends AbstractCollection {
 
     @Override
     protected void internalDelete() throws OXException {
-        throw new OXException(getUrl(), 403);
+        throw WebdavProtocolException.generalError(getUrl(), 403);
     }
 
     @Override
@@ -101,53 +101,53 @@ public class RootPrincipal extends AbstractCollection {
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws OXException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws OXException {
+    protected void internalPutProperty(final WebdavProperty prop) throws OXException {
 
     }
 
     @Override
-    protected void internalRemoveProperty(String namespace, String name) throws OXException {
+    protected void internalRemoveProperty(final String namespace, final String name) throws OXException {
 
     }
 
     @Override
-    protected boolean isset(Property p) {
+    protected boolean isset(final Property p) {
         return true;
     }
 
     @Override
-    public void setCreationDate(Date date) throws OXException {
+    public void setCreationDate(final Date date) throws OXException {
 
     }
 
     public List<WebdavResource> getChildren() throws OXException {
-        UserService users = factory.getUserService();
+        final UserService users = factory.getUserService();
         try {
-            User[] user = users.getUser(factory.getContext());
-            List<WebdavResource> children = new ArrayList<WebdavResource>(user.length);
-            for (User u : user) {
+            final User[] user = users.getUser(factory.getContext());
+            final List<WebdavResource> children = new ArrayList<WebdavResource>(user.length);
+            for (final User u : user) {
                 children.add(new UserPrincipalResource(factory, u));
             }
             return children;
-        } catch (OXException e) {
-            throw new OXException(getUrl(), 403);
+        } catch (final OXException e) {
+            throw WebdavProtocolException.generalError(getUrl(), 403);
         }
     }
     
-    public UserPrincipalResource resolveUser(WebdavPath url) throws OXException {
-        String name = url.name();
-        UserService users = factory.getUserService();
+    public UserPrincipalResource resolveUser(final WebdavPath url) throws OXException {
+        final String name = url.name();
+        final UserService users = factory.getUserService();
         try {
-            int userId = users.getUserId(name, factory.getContext());
-            User user = users.getUser(userId, factory.getContext());
+            final int userId = users.getUserId(name, factory.getContext());
+            final User user = users.getUser(userId, factory.getContext());
             return new UserPrincipalResource(factory, user);
-        } catch (OXException e) {
-            throw new OXException(url, 500);
+        } catch (final OXException e) {
+            throw WebdavProtocolException.generalError(url, 500);
         }
     }
 
@@ -171,7 +171,7 @@ public class RootPrincipal extends AbstractCollection {
         return new Date(0);
     }
 
-    public WebdavLock getLock(String token) throws OXException {
+    public WebdavLock getLock(final String token) throws OXException {
         return null;
     }
 
@@ -179,7 +179,7 @@ public class RootPrincipal extends AbstractCollection {
         return Collections.emptyList();
     }
 
-    public WebdavLock getOwnLock(String token) throws OXException {
+    public WebdavLock getOwnLock(final String token) throws OXException {
         return null;
     }
 
@@ -195,7 +195,7 @@ public class RootPrincipal extends AbstractCollection {
         return url;
     }
 
-    public void lock(WebdavLock lock) throws OXException {
+    public void lock(final WebdavLock lock) throws OXException {
         //IGNORE
     }
 
@@ -203,11 +203,11 @@ public class RootPrincipal extends AbstractCollection {
         // IGNORE
     }
 
-    public void setDisplayName(String displayName) throws OXException {
+    public void setDisplayName(final String displayName) throws OXException {
         // IGNORE
     }
 
-    public void unlock(String token) throws OXException {
+    public void unlock(final String token) throws OXException {
         // IGNORE
     }
 
