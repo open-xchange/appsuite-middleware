@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -64,7 +65,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
     private static final String SELECT = "SELECT uri, size, max_context FROM filestore WHERE id = ?";
 
     @Override
-    public Filestore getFilestore(final int id) throws FilestoreException {
+    public Filestore getFilestore(final int id) throws OXException {
         final Connection con = DBPool.pickup();
         try {
             return getFilestore(con, id);
@@ -74,7 +75,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
     }
 
     @Override
-    public Filestore getFilestore(final Connection con, final int id) throws FilestoreException {
+    public Filestore getFilestore(final Connection con, final int id) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {

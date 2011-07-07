@@ -51,9 +51,6 @@ package com.openexchange.groupware.filestore.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.filestore.internal.FilestoreExceptionFactory;
 
 /**
  * {@link FilestoreActivator}
@@ -62,17 +59,15 @@ import com.openexchange.groupware.filestore.internal.FilestoreExceptionFactory;
  */
 public class FilestoreActivator implements BundleActivator {
 
-    private ComponentRegistration registration;
-
     public FilestoreActivator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.FILESTORE, "com.openexchange.groupware.filestore", FilestoreExceptionFactory.getInstance());
+    public void start(final BundleContext context) throws Exception {
+        // Nope
     }
 
-    public void stop(BundleContext context) throws Exception {
-        registration.unregister();
+    public void stop(final BundleContext context) throws Exception {
+        // Nope
     }
 }

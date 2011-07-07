@@ -61,7 +61,6 @@ import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
@@ -79,7 +78,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
     }
 
     @Override
-    public Filestore getFilestore(int id) throws FilestoreException {
+    public Filestore getFilestore(final int id) throws OXException {
         final FilestoreFactory factory = new FilestoreFactory(id, delegate);
         try {
             return CacheProxy.getCacheProxy(factory, REGION_NAME, Filestore.class);
@@ -89,10 +88,8 @@ public class CachingFilestoreStorage extends FilestoreStorage {
              */
             LOG.error(e.getMessage(), e);
             return delegate.getFilestore(id);
-        } catch (FilestoreException e) {
+        } catch (final OXException e) {
             throw e;
-        } catch (AbstractOXException e) {
-            throw new FilestoreException(e);
         }
     }
 
@@ -102,7 +99,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 
         private final FilestoreStorage delegate;
 
-        public FilestoreFactory(int id, FilestoreStorage delegate) {
+        public FilestoreFactory(final int id, final FilestoreStorage delegate) {
             super();
             this.id = I(id);
             this.delegate = delegate;
@@ -112,7 +109,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
             return id;
         }
 
-        public Filestore load() throws FilestoreException, OXException {
+        public Filestore load() throws OXException {
             return delegate.getFilestore(id.intValue());
         }
 
@@ -122,13 +119,13 @@ public class CachingFilestoreStorage extends FilestoreStorage {
     }
 
     @Override
-    public Filestore getFilestore(Connection con, int id) throws FilestoreException {
+    public Filestore getFilestore(final Connection con, final int id) throws OXException {
         final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
         Cache filestoreCache = null;
         if (service != null) {
             try {
                 filestoreCache = service.getCache(REGION_NAME);
-            } catch (CacheException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -141,7 +138,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
             if (null != filestoreCache) {
                 try {
                     filestoreCache.put(I(id), retval);
-                } catch (CacheException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
