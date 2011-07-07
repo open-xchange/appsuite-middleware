@@ -51,8 +51,8 @@ package com.openexchange.folderstorage;
 
 import java.util.Date;
 import java.util.Set;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;

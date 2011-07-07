@@ -78,7 +78,7 @@ public interface ContactSQLInterface extends ContactInterface {
 	 * @param clientLastModified
 	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
 	 */
-	public void updateContactObject(Contact contactObj, int inFolder, Date clientLastModified) throws OXException, OXConcurrentModificationException;
+	public void updateContactObject(Contact contactObj, int inFolder, Date clientLastModified) throws OXException;
 	
 	/**
 	 * deletes the ContactObject

@@ -79,7 +79,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -487,7 +486,7 @@ public final class Contacts {
         }
     }
 
-    public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXPermissionException {
+    public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException, OXConflictException, OXObjectNotFoundException, OXPermissionException {
         validateEmailAddress(co);
 
         boolean can_edit_only_own = false;
@@ -664,8 +663,6 @@ public final class Contacts {
              */
             checkCharacters(co);
 
-        } catch (final OXConcurrentModificationException e) {
-            throw e;
         } catch (final OXPermissionException e) {
             throw e;
         } catch (final OXConflictException e) {
@@ -837,7 +834,7 @@ public final class Contacts {
         }
     }
 
-    public static void performUserContactStorageUpdate(final Contact contact, final java.util.Date lastModified, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig) throws OXException, OXPermissionException, OXObjectNotFoundException, OXConflictException, OXConcurrentModificationException {
+    public static void performUserContactStorageUpdate(final Contact contact, final java.util.Date lastModified, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig) throws OXException, OXPermissionException, OXObjectNotFoundException, OXConflictException {
         validateEmailAddress(contact);
         if (!contact.containsParentFolderID() || (contact.getParentFolderID() == 0)) {
             contact.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);

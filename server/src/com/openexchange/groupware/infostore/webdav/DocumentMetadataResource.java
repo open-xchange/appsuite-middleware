@@ -85,6 +85,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
@@ -153,19 +154,40 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public boolean hasBody() throws OXException {
-        loadMetadata();
+    public boolean hasBody() throws WebdavProtocolException {
+        try {
+            loadMetadata();
+        } catch (final OXException e) {
+            if (e instanceof WebdavProtocolException) {
+                throw (WebdavProtocolException) e;
+            }
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
+        }
         return metadata.getFileSize() > 0;
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws OXException {
-        return propertyHelper.getAllProps();
+    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
+        try {
+            return propertyHelper.getAllProps();
+        } catch (final OXException e) {
+            if (e instanceof WebdavProtocolException) {
+                throw (WebdavProtocolException) e;
+            }
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
+        }
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
-        return propertyHelper.getProperty(namespace, name);
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
+        try {
+            return propertyHelper.getProperty(namespace, name);
+        } catch (final OXException e) {
+            if (e instanceof WebdavProtocolException) {
+                throw (WebdavProtocolException) e;
+            }
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
+        }
     }
 
     @Override

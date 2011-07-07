@@ -178,7 +178,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXConcurrentModificationException, OXException, OXConflictException, OXObjectNotFoundException, OXPermissionException {
+    public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException, OXConflictException, OXObjectNotFoundException, OXPermissionException {
 
         try {
             final Contact storageVersion = Contacts.getContactById(co.getObjectID(), session);
@@ -190,7 +190,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public void updateUserContact(final Contact contact, final java.util.Date lastModified) throws OXException, OXObjectNotFoundException, OXPermissionException, OXConflictException, OXConcurrentModificationException {
+    public void updateUserContact(final Contact contact, final java.util.Date lastModified) throws OXException, OXObjectNotFoundException, OXPermissionException, OXConflictException {
         try {
             final Contact storageVersion = Contacts.getContactById(contact.getObjectID(), session);
             Contacts.performUserContactStorageUpdate(contact, lastModified, userId, memberInGroups, ctx, userConfiguration);
@@ -915,7 +915,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXPermissionException, OXConcurrentModificationException, OXException {
+    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXPermissionException, OXException {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fuid) {
             throw ContactExceptionCodes.NO_USER_CONTACT_DELETE.create();
         }
@@ -976,8 +976,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (final OXConflictException e) {
             throw e;
         } catch (final OXPermissionException e) {
-            throw e;
-        } catch (final OXConcurrentModificationException e) {
             throw e;
         } catch (final OXException e) {
             throw new OXException(e);
@@ -1380,8 +1378,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             
         } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
-            LOG.error(e.getMessage(), e);
-        } catch (final OXConcurrentModificationException e) {
             LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
