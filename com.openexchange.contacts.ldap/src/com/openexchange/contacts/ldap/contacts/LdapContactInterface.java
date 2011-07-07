@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
 import com.openexchange.contacts.ldap.ldap.LdapGetter;
@@ -450,7 +449,7 @@ public class LdapContactInterface implements ContactInterface {
         initMappingTable();
     }
     
-    public void updateContactObject(final Contact co, final int fid, final Date d) throws OXException, OXConcurrentModificationException {
+    public void updateContactObject(final Contact co, final int fid, final Date d) throws OXException {
         LOG.info("Called updateContactObject");
     }
 
