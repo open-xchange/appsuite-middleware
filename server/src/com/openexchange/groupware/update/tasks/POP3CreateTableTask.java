@@ -57,7 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.exception.OXException;
@@ -119,7 +119,7 @@ public class POP3CreateTableTask implements UpdateTask {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;

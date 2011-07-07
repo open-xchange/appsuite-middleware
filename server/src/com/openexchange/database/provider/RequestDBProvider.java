@@ -139,12 +139,12 @@ public class RequestDBProvider implements DBProvider {
             if(ajpv13Thread.isDead()) {
                 try {
                     rollback();
-                } catch (final DBPoolingException x) {
+                } catch (final OXException x) {
                     LOG.debug("",x);
                 }
                 try {
                     finish();
-                } catch (final DBPoolingException x) {
+                } catch (final OXException x) {
                     LOG.debug("",x);
                 }
                 

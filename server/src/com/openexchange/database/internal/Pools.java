@@ -96,7 +96,7 @@ public final class Pools implements Runnable {
     }
 
     /**
-     * @throws DBPoolingException if creating the pool fails.
+     * @throws OXException if creating the pool fails.
      */
     ConnectionPool getPool(final int poolId) throws OXException {
         ConnectionPool retval;

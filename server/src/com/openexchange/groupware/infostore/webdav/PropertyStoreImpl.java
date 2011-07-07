@@ -60,12 +60,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
@@ -92,7 +90,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
+        final StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
         builder.append(tablename);
         builder.append(" WHERE CID = ? AND id IN (");
         join(entities, builder);
@@ -108,7 +106,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             rs = stmt.executeQuery();
             final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
             while(rs.next()) {
-                Integer id = I(rs.getInt(1));
+                final Integer id = I(rs.getInt(1));
                 List<WebdavProperty> props = retVal.get(id);
                 if(props == null) {
                     props = new ArrayList<WebdavProperty>();
@@ -120,8 +118,8 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             return retVal;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, builder.toString());
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx, readCon);
@@ -142,7 +140,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
+        final StringBuilder builder = new StringBuilder("SELECT id, name, namespace, value, language, xml FROM ");
         builder.append(tablename);
         builder.append(" WHERE CID = ? AND id = ");
         builder.append(entity);
@@ -164,8 +162,8 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             return props;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, builder.toString());
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx, readCon);
@@ -187,8 +185,8 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             }
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, null);
             releaseWriteConnection(ctx, writeCon);
@@ -225,8 +223,8 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             return props;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx, readCon);
@@ -251,7 +249,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             rs = stmt.executeQuery();
             final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
             while(rs.next()) {
-                Integer id = I(rs.getInt(1));
+                final Integer id = I(rs.getInt(1));
                 List<WebdavProperty> props = retVal.get(id);
                 if(props == null) {
                     props = new ArrayList<WebdavProperty>();
@@ -263,8 +261,8 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             return retVal;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx, readCon);
@@ -287,8 +285,8 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, null);
             releaseWriteConnection(ctx, writeCon);
@@ -311,8 +309,8 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             removeProperties(entity, properties, ctx, writeCon);
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, null);
             releaseWriteConnection(ctx, writeCon);

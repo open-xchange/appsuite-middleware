@@ -54,7 +54,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.session.Session;
@@ -87,19 +86,12 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
 			folderProperties.commit();
 		} catch (final OXException e) {
-			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (final OXException e) {
-			if(e.getDetailNumber() == 3 && e.getComponent().equals(EnumComponent.USER_SETTING)) {
-				LOG.debug("I assume the user was deleted, so these properties are cleaned elsewhere.");
-			}
-			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
+			LOG.error(e.getMessage(), e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
+		} finally {
 			try {
 				folderProperties.finish();
 			} catch (final OXException e) {
-				LL.log(e);
+			    LOG.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -121,19 +113,12 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 			infoProperties.removeAll(metadata.getId(), sessionObject.getContext());
 			infoProperties.commit();
 		} catch (final OXException e) {
-			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (final OXException e) {
-			if(e.getDetailNumber() == 3 && e.getComponent().equals(EnumComponent.USER_SETTING)) {
-				LOG.debug("I assume the user was deleted, so these properties are cleaned elsewhere.");
-			}
-			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
+		    LOG.error(e.getMessage(), e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
+		} finally {
 			try {
 				infoProperties.finish();
 			} catch (final OXException e) {
-				LL.log(e);
+			    LOG.error(e.getMessage(), e);
 			}
 		}
 	}

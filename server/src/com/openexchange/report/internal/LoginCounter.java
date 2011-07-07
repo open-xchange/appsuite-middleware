@@ -62,7 +62,7 @@ import java.util.regex.PatternSyntaxException;
 import javax.management.MBeanException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -113,7 +113,7 @@ public class LoginCounter implements LoginCounterMBean {
             final Connection readcon;
             try {
                 readcon = dbService.getReadOnly();
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 logger.error(e.getMessage(), e);
                 throw new MBeanException(e, "Couldn't get connection to configdb.");
             }
@@ -144,7 +144,7 @@ public class LoginCounter implements LoginCounterMBean {
             final Connection connection;
             try {
                 connection = dbService.get(readPool, schema);
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 logger.error(e.getMessage(), e);
                 throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
             }

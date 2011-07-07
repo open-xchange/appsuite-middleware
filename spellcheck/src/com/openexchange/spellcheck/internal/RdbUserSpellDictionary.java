@@ -68,7 +68,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.spellcheck.SpellCheckException;
@@ -347,7 +347,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
                     stmt.setString(3, getUserWords().toString());
                 }
                 stmt.executeUpdate();
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw new SpellCheckException(e);
             } catch (final SQLException e) {
                 throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
@@ -375,7 +375,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
                 stmt.setInt(2, key.userId);
                 rs = stmt.executeQuery();
                 return rs.next();
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw new SpellCheckException(e);
             } catch (final SQLException e) {
                 throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());
@@ -408,7 +408,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
                         words.put(jsonArray.getString(i), DUMMY_ENTRY);
                     }
                 }
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw new SpellCheckException(e);
             } catch (final SQLException e) {
                 throw new SpellCheckException(SpellCheckException.Code.SQL_ERROR, e, e.getMessage());

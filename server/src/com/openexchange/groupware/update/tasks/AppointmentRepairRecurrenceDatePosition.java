@@ -60,7 +60,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
@@ -101,7 +101,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
 
     private static final String findSQL = "SELECT cid,timestampfield01,timestampfield02,timezone,intfield01,intfield02,intfield04,intfield05,field06 FROM prg_dates WHERE intfield01!=intfield02 AND field08 IS NULL ORDER BY cid ASC";
 
-    public void perform(final Schema schema, final int contextId) throws DBPoolingException, OXException {
+    public void perform(final Schema schema, final int contextId) throws OXException, OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Performing update task to repair the recurrence date position of appointment change exceptions.");
         }

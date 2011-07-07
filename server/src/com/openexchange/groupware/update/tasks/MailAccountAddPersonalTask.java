@@ -54,7 +54,7 @@ import static com.openexchange.tools.update.Tools.columnExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.exception.OXException;
@@ -94,7 +94,7 @@ public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {
         final Connection con;
         try {
             con = Database.getNoTimeout(contextId, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;

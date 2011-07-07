@@ -60,7 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -319,7 +319,7 @@ public class OXFolderAccess {
             return fo.getEffectiveUserPermission(userId, userConfig, readCon);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -345,7 +345,7 @@ public class OXFolderAccess {
             return getFolderObject(folderId);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -394,7 +394,7 @@ public class OXFolderAccess {
             return isEmpty(fo, session, ctx);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final Throwable t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
@@ -421,7 +421,7 @@ public class OXFolderAccess {
                     try {
                         rc = DBPool.pickup(ctx);
                         return tasks.containsNotSelfCreatedTasks(session, rc, fo.getObjectID());
-                    } catch (final DBPoolingException e) {
+                    } catch (final OXException e) {
                         throw new OXException(e);
                     } finally {
                         if (null != rc) {
@@ -452,7 +452,7 @@ public class OXFolderAccess {
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

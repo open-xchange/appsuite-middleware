@@ -63,16 +63,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.PathResolver;
 import com.openexchange.groupware.infostore.Resolved;
@@ -84,7 +81,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tx.TransactionAware;
@@ -314,7 +310,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
                 if(lockNullId>0) {
                     return new InfostoreLockNullResource((AbstractResource) def, this,lockNullId);
                 }
-            } catch (DBPoolingException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             } finally {
                 if(readCon != null) {
@@ -480,7 +476,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return retVal;
     }
 
-    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws AbstractOXException, IllegalAccessException, SearchIteratorException, WebdavProtocolException {
+    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, WebdavProtocolException {
         if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new ArrayList<OXWebdavResource>();
         }
@@ -528,6 +524,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         services.remove(service);
     }
 
+    @Override
     public void beginRequest() {
         state.set(new State());
         for(final TransactionAware service : services()) {
@@ -539,6 +536,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
+    @Override
     public void endRequest(final int status) {
         state.set(null);
         for (final TransactionAware service : services()) {
@@ -596,7 +594,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         try {
             return new ServerSessionAdapter(sessionHolder.getSessionObject());
         } catch (final OXException e) {
-            throw new InfostoreException(e);
+            throw e;
         }
     }
 

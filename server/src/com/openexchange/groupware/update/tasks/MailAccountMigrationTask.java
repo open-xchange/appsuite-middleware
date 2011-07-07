@@ -61,7 +61,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
@@ -137,7 +137,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;
@@ -174,7 +174,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;
@@ -238,7 +238,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         final Connection con;
         try {
             con = Database.get(ctx, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
@@ -253,7 +253,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         final Connection con;
         try {
             con = Database.get(ctx, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
@@ -380,7 +380,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         Connection con = null;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;
@@ -448,7 +448,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         Connection con = null;
         try {
             con = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;

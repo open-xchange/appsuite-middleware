@@ -59,7 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -616,9 +616,9 @@ public final class OXFolderUtility {
      * @param ctx The context
      * @return <code>true</code> if specified folder ID is a descendant folder; otherwise <code>false</code>
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static boolean isDescendentFolder(final TIntArrayList parentIDList, final int possibleDescendant, final Connection readCon, final Context ctx) throws SQLException, DBPoolingException {
+    public static boolean isDescendentFolder(final TIntArrayList parentIDList, final int possibleDescendant, final Connection readCon, final Context ctx) throws SQLException, OXException {
         final int size = parentIDList.size();
         boolean isDescendant = false;
         for (int i = 0; i < size && !isDescendant; i++) {

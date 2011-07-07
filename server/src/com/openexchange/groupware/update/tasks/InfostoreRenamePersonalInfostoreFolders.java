@@ -58,7 +58,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -109,7 +109,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
             this.contextId = contextId;
         }
         
-        public void resolve() throws SQLException, DBPoolingException {
+        public void resolve() throws SQLException, OXException {
             LOG.info(String.format("Resolving name collisions for folders named %s in context %d", name, contextId));
             
             Connection writeCon = null;
@@ -239,7 +239,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
         
         
         
-        public static List<NameCollision> getCollisions(final int contextId, final int parentFolder) throws SQLException, DBPoolingException {
+        public static List<NameCollision> getCollisions(final int contextId, final int parentFolder) throws SQLException, OXException {
             final List<NameCollision> c = new ArrayList<NameCollision>();
             Connection writeCon = null;
             PreparedStatement stmt = null;

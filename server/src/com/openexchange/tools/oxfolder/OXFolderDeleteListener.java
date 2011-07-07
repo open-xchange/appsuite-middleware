@@ -52,7 +52,7 @@ package com.openexchange.tools.oxfolder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -181,7 +181,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		} catch (final SQLException e) {
 		    LOG.error(e.getMessage(), e);
 		    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-		} catch (final DBPoolingException e) {
+		} catch (final OXException e) {
 		    LOG.error(e.getMessage(), e);
 		    throw new OXException(e);
 		}
@@ -312,7 +312,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		} catch (final SQLException e) {
 		    LOG.error(e.getMessage(), e);
 		    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-		} catch (final DBPoolingException e) {
+		} catch (final OXException e) {
 		    LOG.error(e.getMessage(), e);
 		    throw new OXException(e);
 		}

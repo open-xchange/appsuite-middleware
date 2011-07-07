@@ -54,7 +54,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.exception.OXException;
@@ -81,7 +81,7 @@ public class ContactInfoField2Text extends UpdateTaskAdapter {
         try {
             con = Database.getNoTimeout(contextId, true);
             innerPerform(con);
-        } catch (DBPoolingException e) {
+        } catch (OXException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (con != null) {

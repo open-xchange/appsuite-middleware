@@ -81,8 +81,6 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
             folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (final OXException e) {
 			LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
-		} catch (final OXException e) {
-            LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
 		}
     }
 
@@ -93,9 +91,7 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
             infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (final OXException e) {
 			LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+session.getContextId()+". Run the consistency tool.");
-		} catch (final OXException e) {
-            LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+session.getContextId()+". Run the consistency tool.");
-        }
+		}
     }
 
 	public void folderCreated(final FolderObject folderObj, final Session sessionObj) {

@@ -53,7 +53,6 @@ import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -85,13 +84,6 @@ public class InfostoreDowngrade extends DowngradeListener {
             infostore.removeDocument(folderId, Long.MAX_VALUE, session);
 
             infostore.commit();
-        } catch (final OXException e) {
-            try {
-                infostore.rollback();
-            } catch (final OXException e1) {
-                //IGNORE
-            }
-            throw new OXException(e);
         } catch (final OXException e) {
             try {
                 infostore.rollback();

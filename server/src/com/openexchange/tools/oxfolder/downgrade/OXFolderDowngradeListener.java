@@ -58,7 +58,7 @@ import java.util.Set;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -384,7 +384,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             try {
                 wc = DBPool.pickupWriteable(event.getContext());
                 tasks.deleteTasksInFolder(event.getSession(), wc, folderID);
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             } finally {
                 if (null != wc) {
@@ -410,7 +410,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                     DBPool.closeWriterSilent(event.getContext(), writeCon);
                 }
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(event.getContext().getContextId()));
         }
     }

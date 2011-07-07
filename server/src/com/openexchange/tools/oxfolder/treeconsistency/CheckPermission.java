@@ -56,7 +56,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.container.FolderObject;
@@ -137,7 +137,7 @@ abstract class CheckPermission {
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
         } catch (final OXFolderNotFoundException e) {
             throw e;
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }

@@ -64,7 +64,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -189,7 +189,7 @@ public final class OXFolderBatchLoader {
                     DBPool.closeReaderSilent(ctx, readCon);
                 }
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXFolderException(e);
         }
     }
@@ -252,7 +252,7 @@ public final class OXFolderBatchLoader {
             return folders;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXFolderException(e);
         }
     }
@@ -265,9 +265,9 @@ public final class OXFolderBatchLoader {
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The folder's permissions
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static final TIntObjectHashMap<List<OCLPermission>> getFolderPermissions(final int[] folderIds, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static final TIntObjectHashMap<List<OCLPermission>> getFolderPermissions(final int[] folderIds, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getFolderPermissions(folderIds, ctx, readConArg, TABLE_OP);
     }
 
@@ -280,9 +280,9 @@ public final class OXFolderBatchLoader {
      * @param table Either folder permissions working or backup table name
      * @return The folder's permissions
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static final TIntObjectHashMap<List<OCLPermission>> getFolderPermissions(final int[] folderIds, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static final TIntObjectHashMap<List<OCLPermission>> getFolderPermissions(final int[] folderIds, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         if (readCon == null) {
@@ -341,9 +341,9 @@ public final class OXFolderBatchLoader {
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static final TIntObjectHashMap<ArrayList<Integer>> getSubfolderIds(final int[] folderIds, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
+    public static final TIntObjectHashMap<ArrayList<Integer>> getSubfolderIds(final int[] folderIds, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getSubfolderIds(folderIds, ctx, readConArg, TABLE_OT);
     }
 
@@ -356,9 +356,9 @@ public final class OXFolderBatchLoader {
      * @param table The folder's working or backup table name
      * @return The subfolder IDs of specified folder
      * @throws SQLException If a SQL error occurs
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      */
-    public static final TIntObjectHashMap<ArrayList<Integer>> getSubfolderIds(final int[] folderIds, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
+    public static final TIntObjectHashMap<ArrayList<Integer>> getSubfolderIds(final int[] folderIds, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         if (readCon == null) {

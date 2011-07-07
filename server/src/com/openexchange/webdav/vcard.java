@@ -71,7 +71,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -556,7 +556,7 @@ public final class vcard extends PermissionServlet {
         return 0;
     }
 
-    private Map<String, String> loadDBEntries(final Context context, final int principal_object_id) throws DBPoolingException, SQLException {
+    private Map<String, String> loadDBEntries(final Context context, final int principal_object_id) throws OXException, SQLException {
         final Map<String, String> entries_db = new HashMap<String, String>();
 
         Connection readCon = null;
@@ -603,7 +603,7 @@ public final class vcard extends PermissionServlet {
         return false;
     }
 
-    private void addEntry(final Context context, final int principal_id, final int object_target_id, final String client_id) throws DBPoolingException, SQLException {
+    private void addEntry(final Context context, final int principal_id, final int object_target_id, final String client_id) throws OXException, SQLException {
         Connection writeCon = null;
 
         PreparedStatement ps = null;
@@ -635,7 +635,7 @@ public final class vcard extends PermissionServlet {
         }
     }
 
-    private void deleteEntry(final Context context, final int principal_id, final int object_target_id) throws DBPoolingException, SQLException {
+    private void deleteEntry(final Context context, final int principal_id, final int object_target_id) throws OXException, SQLException {
         Connection writeCon = null;
 
         PreparedStatement ps = null;

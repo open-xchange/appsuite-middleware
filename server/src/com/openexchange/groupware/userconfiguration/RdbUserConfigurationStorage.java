@@ -142,7 +142,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      * @param insert - <code>true</code> for an INSERT; otherwise UPDATE
      * @param writeCon - the writable connection; may be <code>null</code>
      * @throws SQLException - if saving fails due to a SQL error
-     * @throws DBPoolingException - if a writable connection could not be obtained from database
+     * @throws OXException - if a writable connection could not be obtained from database
      */
     public static void saveUserConfiguration(final UserConfiguration userConfig, final boolean insert, final Connection writeCon) throws SQLException, OXException {
         saveUserConfiguration(userConfig.getPermissionBits(), userConfig.getUserId(), insert, userConfig.getContext(), writeCon);

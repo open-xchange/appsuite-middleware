@@ -63,8 +63,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
@@ -80,7 +80,6 @@ import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.Protocol;
@@ -460,8 +459,6 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				folder = FolderObject.loadFolderObjectFromDB(id, ctx, readCon);
 				
 			}
-		} catch (final FolderCacheNotEnabledException e) {
-			LOG.error("",e);
 		} catch (final Exception e) {
 		    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
@@ -494,8 +491,6 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 				}
 				throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			} catch (final OXFolderPermissionException e) {
-			    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_FORBIDDEN);
 			} catch (final Exception e) {
 			    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} finally {
@@ -524,8 +519,6 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				    throw new WebdavProtocolException(x, url, HttpServletResponse.SC_FORBIDDEN);
 				}
 				throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			} catch (final OXFolderPermissionException e) {
-			    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_FORBIDDEN);
 			} catch (final Exception e) {
 			    throw new WebdavProtocolException(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} finally {
@@ -536,7 +529,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	}
 	
 	private boolean isPermissionException(final OXException x) {
-		return CATEGORY_PERMISSION_DENIED.equals(x.getCategory());
+		return Category.CATEGORY_PERMISSION_DENIED.equals(x.getCategory());
 	}
 
 	private void initDefaultFields(final FolderObject folder) throws WebdavProtocolException {

@@ -49,52 +49,24 @@
 
 package com.openexchange.groupware.infostore;
 
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.ALREADY_LOCKED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.COULD_NOT_LOAD_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DELETE_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DOCUMENT_CONTAINS_NO_FILE_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DOCUMENT_NOT_EXISTS_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DUPLICATE_SUBFOLDER_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.FILENAME_NOT_UNIQUE_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.ITERATE_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.LOCKED_BY_ANOTHER_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.MODIFIED_CONCURRENTLY_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NEW_ID_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_ALL_DELETED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_EXIST_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_INFOSTORE_FOLDER_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_CREATE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DELETE_PERMISSION_FOR_VERSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DELETE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_READ_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_SOURCE_DELETE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_TARGET_CREATE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_WRITE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NUMBER_OF_VERSIONS_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.PREFETCH_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.TOO_LONG_VALUES_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.UPDATED_BETWEEN_DO_AND_UNDO_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.VALIDATION_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.WRITE_PERMS_FOR_LOCK_MISSING_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.WRITE_PERMS_FOR_UNLOCK_MISSING_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link InfostoreExceptionCodes}
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum InfostoreExceptionCodes {
-    TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, Category.TRUNCATED, 100, false),
+public enum InfostoreExceptionCodes implements OXExceptionCode {
+    TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, CATEGORY_TRUNCATED, 100),
     /** Invalid SQL Query: %s */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 200, false),
+    SQL_PROBLEM(SQL_PROBLEM_MSG, CATEGORY_ERROR, 200),
     /** Cannot pre-fetch results. */
-    PREFETCH_FAILED(PREFETCH_FAILED_MSG, Category.TRY_AGAIN, 219, false),
+    PREFETCH_FAILED(PREFETCH_FAILED_MSG, CATEGORY_TRY_AGAIN, 219),
     /** The requested item does not exist. */
     NOT_EXIST(NOT_EXIST_MSG, CATEGORY_USER_INPUT, 300),
     /** Could not load documents to check the permissions */
@@ -110,15 +82,15 @@ public enum InfostoreExceptionCodes {
     /** You are not allowed to create objects in the target folder. */
     NO_TARGET_CREATE_PERMISSION(NO_TARGET_CREATE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 404),
     /** Could not delete all objects. */
-    NOT_ALL_DELETED(NOT_ALL_DELETED_MSG, Category.CONCURRENT_MODIFICATION, 405),
+    NOT_ALL_DELETED(NOT_ALL_DELETED_MSG, CATEGORY_CONFLICT, 405),
     /** You do not have sufficient permission to delete this version. */
     NO_DELETE_PERMISSION_FOR_VERSION(NO_DELETE_PERMISSION_FOR_VERSION_MSG, CATEGORY_PERMISSION_DENIED, 406),
     /** Could not iterate result. */
     ITERATE_FAILED(ITERATE_FAILED_MSG, CATEGORY_ERROR, 413),
     /** This document is locked. */
-    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.CONCURRENT_MODIFICATION, 415),
+    ALREADY_LOCKED(ALREADY_LOCKED_MSG, CATEGORY_CONFLICT, 415),
     /** You cannot unlock this document. */
-    LOCKED_BY_ANOTHER(LOCKED_BY_ANOTHER_MSG, Category.CONCURRENT_MODIFICATION, 416),
+    LOCKED_BY_ANOTHER(LOCKED_BY_ANOTHER_MSG, CATEGORY_CONFLICT, 416),
     /** You need write permissions to unlock a document. */
     WRITE_PERMS_FOR_UNLOCK_MISSING(WRITE_PERMS_FOR_UNLOCK_MISSING_MSG, CATEGORY_PERMISSION_DENIED, 417),
     /** You need write permissions to lock a document. */
@@ -142,11 +114,11 @@ public enum InfostoreExceptionCodes {
     /** In order to accomplish the search, %1$d or more characters are required. */
     PATTERN_NEEDS_MORE_CHARACTERS(PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602),
     /** Could not delete DocumentMetadata %d. Please try again. */
-    DELETE_FAILED(DELETE_FAILED_MSG, Category.CONCURRENT_MODIFICATION, 700),
+    DELETE_FAILED(DELETE_FAILED_MSG, CATEGORY_CONFLICT, 700),
     /** The document could not be updated because it was modified. Reload the view. */
-    MODIFIED_CONCURRENTLY(MODIFIED_CONCURRENTLY_MSG, Category.CONCURRENT_MODIFICATION, 1302),
+    MODIFIED_CONCURRENTLY(MODIFIED_CONCURRENTLY_MSG, CATEGORY_CONFLICT, 1302),
     /** The document was updated in between do and undo. The Database is now probably inconsistent. */
-    UPDATED_BETWEEN_DO_AND_UNDO(UPDATED_BETWEEN_DO_AND_UNDO_MSG, Category.CONCURRENT_MODIFICATION, 1303),
+    UPDATED_BETWEEN_DO_AND_UNDO(UPDATED_BETWEEN_DO_AND_UNDO_MSG, CATEGORY_CONFLICT, 1303),
     /** This folder is a virtual folder. It cannot contain documents. */
     NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, CATEGORY_USER_INPUT, 1700),
     /** Validation failed: %s */
@@ -158,16 +130,17 @@ public enum InfostoreExceptionCodes {
 
     private final int number;
 
-    private final boolean display;
-
-    private InfostoreExceptionCodes(final String message, final Category category, final int number, final boolean display) {
+    private InfostoreExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
-        this.display = display;
     }
 
-    public int getDetailNumber() {
+    public String getPrefix() {
+        return EnumComponent.INFOSTORE.getAbbreviation();
+    }
+
+    public int getNumber() {
         return number;
     }
 
@@ -183,41 +156,37 @@ public enum InfostoreExceptionCodes {
         return category;
     }
 
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
+    }
+
     /**
-     * Creates an {@link OXException} instance using this error code.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @return The newly created {@link OXException} instance.
+     * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return create(new Object[0]);
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates an {@link OXException} instance using this error code.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param logArguments The arguments for log message.
-     * @return The newly created {@link OXException} instance.
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... logArguments) {
-        return create(null, logArguments);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
-    private static final String PREFIX = "IDO";
-
     /**
-     * Creates an {@link OXException} instance using this error code.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 
-     * @param cause The initial cause for {@link OXException}
-     * @param logArguments The arguments for message.
-     * @return The newly created {@link OXException} instance.
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... logArguments) {
-        final OXException ret;
-        if (display) {
-            new OXException(number, message, cause, logArguments);
-        } else {
-            ret = new OXException(number, OXExceptionStrings.MESSAGE, cause);
-        }
-        return ret.setPrefix(PREFIX).addCategory(category).setLogMessage(message, logArguments);
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

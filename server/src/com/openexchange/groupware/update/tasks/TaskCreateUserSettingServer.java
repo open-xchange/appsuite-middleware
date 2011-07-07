@@ -52,7 +52,7 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException;
@@ -89,7 +89,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
         Connection con = null;
         try {
             con = Database.getNoTimeout(contextId, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw TaskExceptionCode.NO_CONNECTION.create(e);
         }
 

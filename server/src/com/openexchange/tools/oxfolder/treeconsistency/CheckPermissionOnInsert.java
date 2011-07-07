@@ -57,7 +57,7 @@ import java.util.Map;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
@@ -170,12 +170,12 @@ public final class CheckPermissionOnInsert extends CheckPermission {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
-    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final Map<Integer, ToDoPermission> map) throws DBPoolingException, OXException, SQLException {
+    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final Map<Integer, ToDoPermission> map) throws OXException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * We reached a context-created folder
@@ -214,10 +214,10 @@ public final class CheckPermissionOnInsert extends CheckPermission {
      * @param folderId The folder ID
      * @param entity The entity
      * @param isGroup whether entity denotes a group
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private void addSystemFolderReadPermission(final int folderId, final int entity, final boolean isGroup) throws DBPoolingException, SQLException {
+    private void addSystemFolderReadPermission(final int folderId, final int entity, final boolean isGroup) throws OXException, SQLException {
         /*
          * Add folder-read permission
          */

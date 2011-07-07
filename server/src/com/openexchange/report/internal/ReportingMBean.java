@@ -80,7 +80,7 @@ import javax.management.openmbean.TabularType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
@@ -257,7 +257,7 @@ public class ReportingMBean implements DynamicMBean {
         final Connection con;
         try {
             con = Database.get(ctx, false);
-        } catch (DBPoolingException e) {
+        } catch (OXException e) {
             LOG.error("Unable to get database connection.", e);
             return new Date(0);
         }

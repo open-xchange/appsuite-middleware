@@ -53,7 +53,7 @@ import static com.openexchange.tools.sql.DBUtils.tablesExist;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -109,7 +109,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         try {
             con = ds.getForUpdateTask(contextId);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         

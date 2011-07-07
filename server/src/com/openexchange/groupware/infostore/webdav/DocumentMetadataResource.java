@@ -59,8 +59,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -91,7 +89,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
-public class DocumentMetadataResource extends AbstractResource implements OXWebdavResource {
+public class DocumentMetadataResource extends AbstractResource implements OXWebdavResource, OXExceptionConstants {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DocumentMetadataResource.class));
 
@@ -217,11 +215,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 exists = false;
                 factory.removed(this);
             } catch (final InfostoreException x) {
-                if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
+                if (com.openexchange.exception.Category.CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                     throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (final AbstractOXException x) {
+            } catch (final OXException x) {
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch (final Exception x) {
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -241,7 +239,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 session.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
                 session.getUserId(),
                 session.getContext()));
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (final Exception e) {
             throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -314,12 +312,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return injectOwner(lockHelper.getAllLocks());
     }
 
-    private WebdavLock injectOwner(WebdavLock lock) throws WebdavProtocolException {
+    private WebdavLock injectOwner(final WebdavLock lock) throws WebdavProtocolException {
         if(lock.getOwner() == null || "".equals(lock.getOwner())) {
             loadMetadata();
-            int userId = metadata.getModifiedBy();
+            final int userId = metadata.getModifiedBy();
             try {
-                User user = UserStorage.getInstance().getUser(userId, getSession().getContext());
+                final User user = UserStorage.getInstance().getUser(userId, getSession().getContext());
                 String displayName = user.getDisplayName();
                 if(displayName == null) {
                     displayName = user.getMail();
@@ -329,15 +327,15 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 }
                 lock.setOwner(displayName);
                 
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 // Ignore, if lookup fails set no owner.
             }
         }
         return lock;
     }
 
-    private List<WebdavLock> injectOwner(List<WebdavLock> allLocks) throws WebdavProtocolException {
-        for (WebdavLock webdavLock : allLocks) {
+    private List<WebdavLock> injectOwner(final List<WebdavLock> allLocks) throws WebdavProtocolException {
+        for (final WebdavLock webdavLock : allLocks) {
             injectOwner(webdavLock);
         }
         return allLocks;
@@ -360,7 +358,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         lockHelper.addLock(lock);
         try {
             touch();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new WebdavProtocolException(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -401,7 +399,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
             throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (final AbstractOXException x) {
+        } catch (final OXException x) {
             throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (final Exception x) {
             throw new WebdavProtocolException(x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -603,7 +601,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             } else {
                 throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
-        } catch (final AbstractOXException x) {
+        } catch (final OXException x) {
             throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (final Exception x) {
             throw new WebdavProtocolException(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -653,7 +651,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 }
                 if (x instanceof InfostoreException) {
                     final InfostoreException iStoreException = (InfostoreException) x;
-                    if (415 == iStoreException.getDetailNumber()) {
+                    if (415 == iStoreException.getCode()) {
                         throw new WebdavProtocolException(getUrl(), Protocol.SC_LOCKED);
                     }
                     if (CATEGORY_PERMISSION_DENIED == iStoreException.getCategory()) {

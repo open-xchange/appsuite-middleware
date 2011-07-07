@@ -66,7 +66,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -189,7 +189,7 @@ public final class UpdateTaskToolkit {
         final Connection con;
         try {
             con = Database.get(false);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;
@@ -265,7 +265,7 @@ public final class UpdateTaskToolkit {
                 // Invalidate schema's contexts
                 try {
                     removeContexts(contextId);
-                } catch (final DBPoolingException e) {
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
@@ -296,7 +296,7 @@ public final class UpdateTaskToolkit {
         final Connection con;
         try {
             con = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw new OXException(e);
         }
@@ -378,7 +378,7 @@ public final class UpdateTaskToolkit {
         }
     }
 
-    private static void removeContexts(final int contextId) throws DBPoolingException, OXException {
+    private static void removeContexts(final int contextId) throws OXException, OXException {
         final int[] contextIds = Database.getContextsInSameSchema(contextId);
         final ContextStorage contextStorage = ContextStorage.getInstance();
         for (final int cid : contextIds) {

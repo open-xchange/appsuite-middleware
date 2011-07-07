@@ -52,7 +52,7 @@ package com.openexchange.database;
 import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * Exception messages to translate for {@link DBPoolingException}.
+ * Exception messages to translate for {@link OXException}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

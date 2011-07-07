@@ -61,7 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException;
@@ -114,7 +114,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
         Connection con = null;
         try {
             con = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw TaskExceptionCode.NO_CONNECTION.create(e);
         }
         try {

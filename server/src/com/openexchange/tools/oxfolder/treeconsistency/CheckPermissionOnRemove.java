@@ -58,7 +58,7 @@ import java.util.Map;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
@@ -123,7 +123,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             if (!toRemove.isEmpty()) {
                 removeSystemPermissions(lastModified, toRemove);
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -149,14 +149,14 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             if (!toRemove.isEmpty()) {
                 removeSystemPermissions(lastModified, toRemove);
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final Map<Integer, ToDoPermission> toRemove) throws DBPoolingException, OXException, SQLException {
+    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final Map<Integer, ToDoPermission> toRemove) throws OXException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * Stop recursive check
@@ -202,10 +202,10 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * 
      * @param folderId The folder ID
      * @param entity The entity
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private void deleteSystemFolderReadPermission(final int folderId, final int entity) throws DBPoolingException, SQLException {
+    private void deleteSystemFolderReadPermission(final int folderId, final int entity) throws OXException, SQLException {
         /*
          * Delete folder-read permission
          */
@@ -217,10 +217,10 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * 
      * @param lastModified The last-modified time stamp
      * @param toRemove The map containing the permissions to delete
-     * @throws DBPoolingException If a pooling error occurs
+     * @throws OXException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private void removeSystemPermissions(final long lastModified, final Map<Integer, ToDoPermission> toRemove) throws DBPoolingException, SQLException {
+    private void removeSystemPermissions(final long lastModified, final Map<Integer, ToDoPermission> toRemove) throws OXException, SQLException {
         final int size2 = toRemove.size();
         final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = toRemove.entrySet().iterator();
         for (int i = 0; i < size2; i++) {

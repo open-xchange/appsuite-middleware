@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.impl.SessionHolder;
@@ -131,11 +130,11 @@ public class EntityLockHelper extends LockHelper {
 		return Integer.parseInt(lock.getToken().substring(TOKEN_PREFIX_LENGTH));
 	}
 
-    private ServerSession getSession() throws InfostoreException {
+    private ServerSession getSession() throws OXException {
         try {
             return new ServerSessionAdapter(sessionHolder.getSessionObject());
         } catch (final OXException e) {
-            throw new InfostoreException(e);
+            throw e;
         }
     }
 

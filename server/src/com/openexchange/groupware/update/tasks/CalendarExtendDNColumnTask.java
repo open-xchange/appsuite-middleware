@@ -55,7 +55,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.exception.OXException;
@@ -112,7 +112,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             final Connection writeCon;
             try {
                 writeCon = Database.getNoTimeout(contextId, true);
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             }
             PreparedStatement stmt = null;
@@ -139,7 +139,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
         final Connection writeCon;
         try {
             writeCon = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         ResultSet rs = null;

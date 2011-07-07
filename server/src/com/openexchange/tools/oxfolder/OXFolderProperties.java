@@ -71,7 +71,7 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -306,7 +306,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                 Connection con = null;
                 try {
                     con = Database.get(contextId, true);
-                } catch (final DBPoolingException e) {
+                } catch (final OXException e) {
                     logger.error(e.getMessage(), e);
                 }
                 if (null != con) {
@@ -356,7 +356,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                             Database.back(false, writeCon);
                         }
                     }
-                } catch (final DBPoolingException e) {
+                } catch (final OXException e) {
                     logger.error(e.getMessage(), e);
                 } catch (final SQLException e) {
                     logger.error(e.getMessage(), e);

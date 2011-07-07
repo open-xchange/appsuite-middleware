@@ -78,7 +78,7 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -660,7 +660,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         if (null == con) {
             try {
                 con = Database.get(ctx, false);
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw new SearchIteratorException(e);
             }
             try {

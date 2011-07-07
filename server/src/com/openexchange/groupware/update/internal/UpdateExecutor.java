@@ -205,7 +205,7 @@ public final class UpdateExecutor {
             for (final int cid : contextIds) {
                 contextStorage.invalidateContext(cid);
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final OXException e) {
             throw new OXException(e);

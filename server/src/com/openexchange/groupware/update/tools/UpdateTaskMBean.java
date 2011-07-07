@@ -73,7 +73,7 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
@@ -350,7 +350,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified() });
                 retval.put(data);
             }
-        } catch (DBPoolingException e) {
+        } catch (OXException e) {
             throw new OXException(e);
         } catch (SchemaException e) {
             throw new OXException(e);

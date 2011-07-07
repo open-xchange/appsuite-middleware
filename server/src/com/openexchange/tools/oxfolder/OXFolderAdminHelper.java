@@ -63,7 +63,7 @@ import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -270,7 +270,7 @@ public final class OXFolderAdminHelper {
                 }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 throw new OXException(e);
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
@@ -289,7 +289,7 @@ public final class OXFolderAdminHelper {
         final Connection writeCon;
         try {
             writeCon = Database.get(cid, true);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
@@ -537,7 +537,7 @@ public final class OXFolderAdminHelper {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -573,7 +573,7 @@ public final class OXFolderAdminHelper {
                 throw OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT.create(Integer.valueOf(cid));
             }
             return retval;
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -692,7 +692,7 @@ public final class OXFolderAdminHelper {
             ctx.setMailadmin(mailAdmin);
             try {
                 OXFolderSQL.updateLastModified(globalAddressBookId, creatingTime, mailAdmin, writeCon, ctx);
-            } catch (final DBPoolingException e) {
+            } catch (final OXException e) {
                 // Cannot occur
                 LOG.error(e.getMessage(), e);
             }
@@ -1392,7 +1392,7 @@ public final class OXFolderAdminHelper {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
         }
         /*
@@ -1420,7 +1420,7 @@ public final class OXFolderAdminHelper {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
         } catch (final OXException e) {
             throw OXFolderExceptionCode.LDAP_ERROR.create(e, Integer.valueOf(cid));
@@ -1601,7 +1601,7 @@ public final class OXFolderAdminHelper {
                  */
                 LOG.info(new StringBuilder("User ").append(userId).append(" successfully created").append(" in context ").append(cid).toString());
             }
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

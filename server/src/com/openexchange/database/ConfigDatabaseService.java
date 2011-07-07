@@ -62,14 +62,14 @@ public interface ConfigDatabaseService {
     /**
      * Returns a connection for reading from the config database.
      * @return a connection for reading from the config database.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
     Connection getReadOnly() throws OXException;
 
     /**
      * Returns a connection to the config database.
      * @return a connection to the config database.
-     * @throws DBPoolingException if no connection can be obtained.
+     * @throws OXException if no connection can be obtained.
      */
     Connection getWritable() throws OXException;
 

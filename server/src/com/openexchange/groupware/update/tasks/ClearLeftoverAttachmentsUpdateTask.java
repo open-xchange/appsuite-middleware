@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -103,11 +103,11 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private void removeDatabaseEntry(final int id, final int contextId) throws DBPoolingException, SQLException {
+    private void removeDatabaseEntry(final int id, final int contextId) throws OXException, SQLException {
         update(contextId, "DELETE FROM prg_attachment WHERE id = ? and cid = ?", I(id), I(contextId));
     }
 
-    private void update(final int contextId, final String sql, final Object...args) throws DBPoolingException, SQLException {
+    private void update(final int contextId, final String sql, final Object...args) throws OXException, SQLException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
 
@@ -151,7 +151,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private void removeFile(final String fileId,final int ctx_id) throws SQLException, DBPoolingException, OXException, OXException {
+    private void removeFile(final String fileId,final int ctx_id) throws SQLException, OXException, OXException, OXException {
         // We have to use the local file storage to bypass quota handling, which must remain
         // unaffected by these operations
 
@@ -173,7 +173,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private URI createURI(final int ctx_id) throws DBPoolingException, SQLException {
+    private URI createURI(final int ctx_id) throws OXException, SQLException {
         // We need to select the filestore URI and the context subpath from the DB
         // We can't use the API, because the ContextStorage will throw exceptions
         // when we try to load a Context during the update process;
@@ -245,7 +245,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private List<LeftoverAttachment> getLeftoverAttachmentsInSchema(final int contextId) throws SQLException, DBPoolingException {
+    private List<LeftoverAttachment> getLeftoverAttachmentsInSchema(final int contextId) throws SQLException, OXException {
 
         final String query = "SELECT prg_attachment.cid, prg_attachment.id, prg_attachment.file_id FROM prg_attachment " +
                 "JOIN sequence_attachment ON prg_attachment.cid = sequence_attachment.cid  WHERE prg_attachment.id > sequence_attachment.id";

@@ -131,7 +131,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         // try {
         //     con.close();
         // } catch (SQLException e) {
-        //     DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        //     OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         //     LOG.error(e1.getMessage(), e1);
         // }
     }

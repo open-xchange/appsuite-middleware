@@ -138,7 +138,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         final Connection readCon;
         try {
             readCon = Database.getNoTimeout(contextId, false);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement stmt = null;
@@ -179,7 +179,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         try {
             writeCon = Database.get(contextId, true);
             writeCon.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         } catch (final SQLException e) {
             // Auto-Commit mode could not be changed

@@ -74,7 +74,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.OXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -753,7 +753,7 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement ps = null;
@@ -782,7 +782,7 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement ps = null;
@@ -811,7 +811,7 @@ public final class ical extends PermissionServlet {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         PreparedStatement ps = null;
@@ -844,7 +844,7 @@ public final class ical extends PermissionServlet {
     /*
      * private void addEntries(final Context ctx, final Principal principal, final Map<String, Integer> entriesApp, final Map<String,
      * Integer> entriesTask) throws OXException { final Connection con; try { con = DBPool.pickupWriteable(ctx); } catch (final
-     * DBPoolingException e) { throw new OXException(e); } PreparedStatement ps = null; try { con.setAutoCommit(false); ps =
+     * OXException e) { throw new OXException(e); } PreparedStatement ps = null; try { con.setAutoCommit(false); ps =
      * con.prepareStatement(SQL_ENTRY_INSERT); for (final Map.Entry<String, Integer> entry : entriesApp.entrySet()) { final int objectId =
      * IDGenerator.getId(ctx, Types.ICAL, con); ps.setInt(1, objectId); ps.setLong(2, ctx.getContextId()); ps.setInt(3, principal.getId());
      * ps.setString(4, entry.getKey()); ps.setInt(5, entry.getValue().intValue()); ps.setInt(6, Types.APPOINTMENT); ps.addBatch(); } for
@@ -858,7 +858,7 @@ public final class ical extends PermissionServlet {
     /*
      * private void deleteEntries(final Context ctx, final Principal principal, final Mapping mapping, final Map<String, Integer>
      * entriesApp, final Map<String, Integer> entriesTask) throws OXException { final Connection con; try { con =
-     * DBPool.pickupWriteable(ctx); } catch (final DBPoolingException e) { throw new OXException(e); } PreparedStatement ps = null; try {
+     * DBPool.pickupWriteable(ctx); } catch (final OXException e) { throw new OXException(e); } PreparedStatement ps = null; try {
      * con.setAutoCommit(false); ps = con.prepareStatement(SQL_ENTRY_DELETE); for (final String clientId : mapping.client2App.keySet()) { if
      * (!entriesApp.containsKey(clientId)) { ps.setInt(1, ctx.getContextId()); ps.setInt(2, principal.getId()); ps.setInt(3,
      * mapping.client2App.get(clientId).intValue()); ps.setInt(4, Types.APPOINTMENT); ps.addBatch(); } } for (final String clientId :
@@ -903,7 +903,7 @@ public final class ical extends PermissionServlet {
 
     /*
      * private Mapping loadDBEntriesNew(final Context context, final Principal principal) throws OXException { final Connection readCon; try
-     * { readCon = DBPool.pickup(context); } catch (final DBPoolingException e) { throw new OXException(e); } PreparedStatement ps = null;
+     * { readCon = DBPool.pickup(context); } catch (final OXException e) { throw new OXException(e); } PreparedStatement ps = null;
      * ResultSet rs = null; final Mapping mapping = new Mapping(); try { ps = readCon.prepareStatement(SQL_ENTRIES_LOAD); ps.setInt(1,
      * principal.getId()); ps.setLong(2, context.getContextId()); rs = ps.executeQuery(); while (rs.next()) { final String client_id =
      * rs.getString(2); final int target_id = rs.getInt(3); final int module = rs.getInt(4); switch (module) { case Types.APPOINTMENT:

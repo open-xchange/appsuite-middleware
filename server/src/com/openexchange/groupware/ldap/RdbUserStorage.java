@@ -121,7 +121,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         PreparedStatement stmt = null;
@@ -151,7 +151,7 @@ public class RdbUserStorage extends UserStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         try {
@@ -236,7 +236,7 @@ public class RdbUserStorage extends UserStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
@@ -254,7 +254,7 @@ public class RdbUserStorage extends UserStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new OXException(e);
         }
         try {
@@ -430,7 +430,7 @@ public class RdbUserStorage extends UserStorage {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         try {
@@ -501,7 +501,7 @@ public class RdbUserStorage extends UserStorage {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         try {
@@ -762,7 +762,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw LdapExceptionCode.NO_CONNECTION.create("USR", e);
         }
         try {
