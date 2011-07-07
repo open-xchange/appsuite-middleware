@@ -74,9 +74,6 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.event.impl.EventClient;
@@ -160,15 +157,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
     }
 
-    public void insertContactObject(final Contact co) throws OXException, OXConflictException {
+    public void insertContactObject(final Contact co) throws OXException {
         insertContactObject(co, false);
     }
 
-    public void forceInsertContactObject(final Contact co) throws OXException, OXConflictException {
+    public void forceInsertContactObject(final Contact co) throws OXException {
         insertContactObject(co, true);
     }
 
-    protected void insertContactObject(final Contact co, final boolean override) throws OXException, OXConflictException {
+    protected void insertContactObject(final Contact co, final boolean override) throws OXException {
         try {
             Contacts.performContactStorageInsert(co, userId, session, override);
             final EventClient ec = new EventClient(session);
@@ -178,7 +175,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException, OXConflictException, OXObjectNotFoundException, OXPermissionException {
+    public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException {
 
         try {
             final Contact storageVersion = Contacts.getContactById(co.getObjectID(), session);
@@ -190,7 +187,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public void updateUserContact(final Contact contact, final java.util.Date lastModified) throws OXException, OXObjectNotFoundException, OXPermissionException, OXConflictException {
+    public void updateUserContact(final Contact contact, final java.util.Date lastModified) throws OXException {
         try {
             final Contact storageVersion = Contacts.getContactById(contact.getObjectID(), session);
             Contacts.performUserContactStorageUpdate(contact, lastModified, userId, memberInGroups, ctx, userConfiguration);
@@ -201,7 +198,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public int getNumberOfContacts(final int folderId) throws OXException, OXConflictException {
+    public int getNumberOfContacts(final int folderId) throws OXException {
         final Connection readCon;
         try {
             readCon = DBPool.pickup(ctx);
@@ -243,16 +240,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 closeSQLStuff(rs, stmt);
             }
             return retval;
-        } catch (final OXConflictException e) {
-            throw e;
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         } finally {
             DBPool.closeReaderSilent(ctx, readCon);
         }
     }
 
-    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final Order orderMechanism, final String collation2, final int[] cols) throws OXException, OXConflictException, OXException {
+    public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final Order orderMechanism, final String collation2, final int[] cols) throws OXException {
         int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
         cs.setFolder(folderId);
@@ -696,7 +691,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public Contact getObjectById(final int objectId, final int fid) throws OXObjectNotFoundException, OXConflictException, OXException {
+    public Contact getObjectById(final int objectId, final int fid) throws OXException {
         if (objectId <= 0) {
             throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectId), I(ctx.getContextId()));
         }
@@ -788,7 +783,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return co;
     }
 
-    public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException, OXConflictException {
+    public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         boolean error = false;
         Connection readCon = null;
         try {
@@ -845,12 +840,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         } catch (final SQLException e) {
             error = true;
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (final OXConflictException e) {
-            error = true;
-            throw e;
         } catch (final OXException e) {
             error = true;
-            throw new OXException(e);
+            throw e;
         } finally {
             if (error) {
                 closeSQLStuff(rs, stmt);
@@ -915,7 +907,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
-    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXPermissionException, OXException {
+    public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXException {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fuid) {
             throw ContactExceptionCodes.NO_USER_CONTACT_DELETE.create();
         }
@@ -969,16 +961,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId));
             }
-        } catch (final OXObjectNotFoundException xe) {
-            throw xe;
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (final OXConflictException e) {
-            throw e;
-        } catch (final OXPermissionException e) {
-            throw e;
         } catch (final OXException e) {
-            throw new OXException(e);
+            throw e;
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             try {
@@ -1140,7 +1126,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             readcon);
     }
 
-    protected Contact convertResultSet2ContactObject(final ResultSet rs, final int cols[], final boolean check, final Connection con) throws OXException, OXConflictException {
+    protected Contact convertResultSet2ContactObject(final ResultSet rs, final int cols[], final boolean check, final Connection con) throws OXException {
         final Contact co = new Contact();
         Statement stmt = null;
         try {
@@ -1488,7 +1474,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return null; // TODO: Throw exception
     }
 
-    public Contact getContactByUUID(final UUID uuid) throws OXException, OXObjectNotFoundException, OXConflictException {
+    public Contact getContactByUUID(final UUID uuid) throws OXException {
         final Contact contact = null;
         Connection con = null;
         PreparedStatement stmt = null;
