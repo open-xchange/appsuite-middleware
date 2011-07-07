@@ -58,7 +58,6 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
@@ -95,7 +94,7 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected FileStorage getFileStorage(final Context ctx) throws OXException, FilestoreException {
+    protected FileStorage getFileStorage(final Context ctx) throws OXException {
         return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 

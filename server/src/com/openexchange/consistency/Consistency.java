@@ -64,7 +64,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -298,9 +297,9 @@ public abstract class Consistency implements ConsistencyMBean {
     protected abstract Context getContext(int contextId) throws OXException;
     protected abstract DatabaseImpl getDatabase();
     protected abstract AttachmentBase getAttachments();
-    protected abstract FileStorage getFileStorage(Context ctx) throws OXException, FilestoreException;
+    protected abstract FileStorage getFileStorage(Context ctx) throws OXException;
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws OXException;
-    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException, DBPoolingException, OXException;
+    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException;
     protected abstract List<Context> getAllContexts() throws OXException;
     protected abstract User getAdmin(Context ctx) throws OXException;
 
@@ -453,7 +452,13 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
-                } catch (final OXException e) {
+                    try {
+                        database.rollback();
+                        return;
+                    } catch (final OXException e1) {
+                        LOG1.debug("", e1);
+                    }
+                } catch (final RuntimeException e) {
                     LOG1.error("", e);
                     try {
                         database.rollback();
@@ -510,15 +515,13 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
-                } catch (final OXException e) {
-                    LOG1.error("", e);
                     try {
                         attachments.rollback();
                         return;
                     } catch (final OXException e1) {
                         LOG1.error("", e1);
                     }
-                } catch (final OXException e) {
+                } catch (final RuntimeException e) {
                     LOG1.error("", e);
                     try {
                         attachments.rollback();
@@ -657,7 +660,7 @@ public abstract class Consistency implements ConsistencyMBean {
                         LOG1.debug("", e1);
                     }
                     return;
-                } catch (final OXException e) {
+                } catch (final RuntimeException e) {
                     LOG1.error("", e);
                     try {
                         attachments.rollback();
@@ -731,7 +734,7 @@ public abstract class Consistency implements ConsistencyMBean {
                         } catch (final OXException e1) {
                             LOG1.debug("", e1);
                         }
-                    } catch (final OXException e) {
+                    } catch (final RuntimeException e) {
                         LOG1.error("", e);
                         try {
                             database.rollback();
