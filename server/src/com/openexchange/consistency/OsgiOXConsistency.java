@@ -51,7 +51,6 @@ package com.openexchange.consistency;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -62,10 +61,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -118,10 +115,10 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected List<Context> getContextsForDatabase(int databaseId) throws OXException, DBPoolingException, OXException {
-        DatabaseService configDB = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        int[] contextIds = configDB.listContexts(databaseId);
-        List<Integer> ctxIds = new ArrayList<Integer>(contextIds.length);
+    protected List<Context> getContextsForDatabase(final int databaseId) throws OXException {
+        final DatabaseService configDB = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        final int[] contextIds = configDB.listContexts(databaseId);
+        final List<Integer> ctxIds = new ArrayList<Integer>(contextIds.length);
         for (int i = 0; i < contextIds.length; i++) {
             ctxIds.add(com.openexchange.java.Autoboxing.I(contextIds[i]));
         }

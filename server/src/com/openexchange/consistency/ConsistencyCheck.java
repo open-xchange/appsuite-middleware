@@ -60,7 +60,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 
 /**
  * CommandLineClient to run the consistency tool.
@@ -312,7 +312,7 @@ public class ConsistencyCheck {
             }
         }
 
-        private void listMissing() throws AbstractOXException, IOException, MalformedObjectNameException, NullPointerException {
+        private void listMissing() throws OXException, IOException, MalformedObjectNameException, NullPointerException {
 
             Map<Integer, List<String>> result = null;
             try {
@@ -334,7 +334,7 @@ public class ConsistencyCheck {
             print(result);
         }
 
-        private void repair() throws AbstractOXException, IOException, MalformedObjectNameException, NullPointerException {
+        private void repair() throws OXException, IOException, MalformedObjectNameException, NullPointerException {
             if(policies.isEmpty()) {
                 System.out.println("Nothing to be done. Please specify one or more resolver policies");
                 return;
@@ -387,7 +387,7 @@ public class ConsistencyCheck {
             consistency = new MBeanConsistency(mbsc, name);
         }
 
-        private void listUnassigned() throws AbstractOXException, IOException, MalformedObjectNameException, NullPointerException {
+        private void listUnassigned() throws OXException, IOException, MalformedObjectNameException, NullPointerException {
 
             Map<Integer, List<String>> result = null;
             try {

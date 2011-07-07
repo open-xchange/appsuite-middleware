@@ -56,7 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.consistency.ConsistencyException;
+import com.openexchange.exception.OXException;
 import com.openexchange.consistency.ConsistencyExceptionCodes;
 import com.openexchange.consistency.MBeanNamer;
 import com.openexchange.consistency.OsgiOXConsistency;
@@ -88,13 +88,13 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer {
             LOG.info("Registering consistency MBean under name: " + name);
             managementService.registerMBean(name, new OsgiOXConsistency());
         } catch (OXException e) {
-            ConsistencyException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
+            OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
         } catch (MalformedObjectNameException e) {
-            ConsistencyException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
+            OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
         } catch (NullPointerException e) {
-            ConsistencyException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
+            OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
         }
         return managementService;
@@ -110,7 +110,7 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer {
         try {
             managementService.unregisterMBean(name);
         } catch (OXException e) {
-            ConsistencyException e1 = ConsistencyExceptionCodes.UNREGISTRATION_FAILED.create(e);
+            OXException e1 = ConsistencyExceptionCodes.UNREGISTRATION_FAILED.create(e);
             LOG.error(e1.getMessage(), e1);
         }
         name = null;

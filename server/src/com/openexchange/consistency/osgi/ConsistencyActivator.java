@@ -52,9 +52,6 @@ package com.openexchange.consistency.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.consistency.ConsistencyExceptionFactory;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -64,21 +61,18 @@ import com.openexchange.management.ManagementService;
  */
 public final class ConsistencyActivator implements BundleActivator {
 
-    private ComponentRegistration registration;
     private ServiceTracker tracker;
 
     public ConsistencyActivator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        registration = new ComponentRegistration(context, EnumComponent.CONSISTENCY, "com.openexchange.consistency", ConsistencyExceptionFactory.getInstance());
+    public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker(context, ManagementService.class.getName(), new MBeanRegisterer(context));
         tracker.open();
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         tracker.close();
-        registration.unregister();
     }
 }
