@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.internal.UpdaterImpl;
 
@@ -74,7 +75,7 @@ public abstract class Updater {
         return new UpdaterImpl();
     }
 
-    public final UpdateStatus getStatus(Context ctx) throws OXException {
+    public final UpdateStatus getStatus(final Context ctx) throws OXException {
         return getStatus(ctx.getContextId());
     }
 
@@ -87,7 +88,7 @@ public abstract class Updater {
      * @param contextId Context inside the schema.
      * @throws OXException if an exception occurs.
      */
-    public final void startUpdate(Context ctx) throws OXException {
+    public final void startUpdate(final Context ctx) throws OXException {
         startUpdate(ctx.getContextId());
     }
 

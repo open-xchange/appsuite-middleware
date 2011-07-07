@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
@@ -848,15 +847,15 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 return subfolderFlag;
             }
             return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null)).hasNext();
-        } catch (final AbstractOXException e) {
-            throw new OXFolderException(e);
+        } catch (final OXException e) {
+            throw e;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (iter != null) {
                 try {
                     iter.close();
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     LOG.error("SearchIterator cannot be closed", e);
                 }
             }
@@ -902,14 +901,14 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @throws SQLException If a SQL error occurs
      * @throws SearchIteratorException If an iterator error occurs
      */
-    public final List<FolderObject> getVisibleSubfolders(final User userObj, final UserConfiguration userConfig, final Context ctx) throws SQLException, AbstractOXException {
+    public final List<FolderObject> getVisibleSubfolders(final User userObj, final UserConfiguration userConfig, final Context ctx) throws SQLException, OXException {
         return getVisibleSubfolders(userObj.getId(), userObj.getGroups(), userConfig, ctx);
     }
 
     /**
      * Returns a <code>java.util.List</code> containing all user-visible subfolders
      */
-    public final List<FolderObject> getVisibleSubfolders(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws AbstractOXException, SQLException {
+    public final List<FolderObject> getVisibleSubfolders(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws OXException, SQLException {
         if (b_subfolderFlag && !subfolderFlag) {
             return new ArrayList<FolderObject>(0);
         }

@@ -60,8 +60,6 @@ import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
@@ -129,7 +127,7 @@ public class CachingContextStorage extends ContextStorage {
                         updater.startUpdate(retval);
                     }
                 } catch (final OXException e) {
-                    if (SchemaExceptionCodes.DATABASE_DOWN.getDetailNumber() == e.getDetailNumber()) {
+                    if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
                         LOG.warn("Switching to read only mode for context " + contextId + " because master database is down.", e);
                         retval.setReadOnly(true);
                     }
