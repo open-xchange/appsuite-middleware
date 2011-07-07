@@ -49,141 +49,16 @@
 
 package com.openexchange.spellcheck.servlet;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SpellCheckServletException}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SpellCheckServletException extends AbstractOXException {
+public final class SpellCheckServletException extends OXException {
 
     private static final long serialVersionUID = -4936647856374250642L;
 
-    public static enum Code {
-
-        /**
-         * Spell check property '%1$s' not specified in configuration.
-         */
-        MISSING_PROPERTY("Spell check property '%1$s' not specified in configuration.", CATEGORY_CONFIGURATION, 1),
-        /**
-         * Spell check directory '%1$s' not found or is not a directory
-         */
-        MISSING_DIR("Spell check directory '%1$s' not found or is not a directory", CATEGORY_CONFIGURATION, 2),
-        /**
-         * Only one phonetic file is allowed per locale
-         */
-        ONLY_ONE_PHON_FILE("Only one phonetic file is allowed per locale", CATEGORY_CONFIGURATION, 3),
-        /**
-         * At least one word list file per locale
-         */
-        AT_LEAST_ONE_WL_FILE("At least one word list file per locale", CATEGORY_CONFIGURATION, 4),
-        /**
-         * An I/O error occurred: %1$s
-         */
-        IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 5),
-        /**
-         * No locale directory found
-         */
-        NO_LOCALE_FOUND("No locale directory found", CATEGORY_CONFIGURATION, 6),
-        /**
-         * No dictionary available for locale %1$s
-         */
-        MISSING_LOCALE_DIC("No dictionary available for locale %1$s", CATEGORY_CONFIGURATION, 7),
-        /**
-         * A SQL error occurred: %1$s
-         */
-        SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 8),
-        /**
-         * Invalid format of user dictionary: %1$s
-         */
-        INVALID_FORMAT("Invalid format of user dictionary: %1$s", CATEGORY_ERROR, 9),
-        /**
-         * Spell check servlet cannot be registered: %1$s
-         */
-        SERVLET_REGISTRATION_FAILED("Spell check servlet cannot be registered: %1$s", CATEGORY_ERROR, 10),
-        /**
-         * Missing parameter %1$s
-         */
-        MISSING_PARAM("Missing parameter %1$s", CATEGORY_ERROR, 11),
-        /**
-         * Unsupported value parameter %1$s: %2$s
-         */
-        UNSUPPORTED_PARAM("Unsupported value parameter %1$s: %2$s", CATEGORY_ERROR, 12),
-        /**
-         * A JSON error occurred: %1$s
-         */
-        JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 13),
-        /**
-         * Invalid locale string: %1$s
-         */
-        INVALID_LOCALE_STR("Invalid locale string: %1$s", CATEGORY_ERROR, 14);
-
-        private final String message;
-
-        private final int detailNumber;
-
-        private final Category category;
-
-        private Code(final String message, final Category category, final int detailNumber) {
-            this.message = message;
-            this.detailNumber = detailNumber;
-            this.category = category;
-        }
-
-        public Category getCategory() {
-            return category;
-        }
-
-        public int getNumber() {
-            return detailNumber;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-    }
-
-    private static final Object[] EMPTY_ARGS = new Object[0];
-
-    /**
-     * Initializes a new {@link SpellCheckServletException}
-     * 
-     * @param cause The cause
-     */
-    public SpellCheckServletException(final AbstractOXException cause) {
-        super(cause);
-    }
-
-    /**
-     * Initializes a new {@link SpellCheckServletException}
-     * 
-     * @param code The service error code
-     */
-    public SpellCheckServletException(final Code code) {
-        this(code, null, EMPTY_ARGS);
-    }
-
-    /**
-     * Initializes a new {@link SpellCheckServletException}
-     * 
-     * @param code The service error code
-     * @param messageArgs The message arguments
-     */
-    public SpellCheckServletException(final Code code, final Object... messageArgs) {
-        this(code, null, messageArgs);
-    }
-
-    /**
-     * Initializes a new {@link SpellCheckServletException}
-     * 
-     * @param code The service error code
-     * @param cause The init cause
-     * @param messageArgs The message arguments
-     */
-    public SpellCheckServletException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
-        super.setMessageArgs(messageArgs);
-    }
+    
 }

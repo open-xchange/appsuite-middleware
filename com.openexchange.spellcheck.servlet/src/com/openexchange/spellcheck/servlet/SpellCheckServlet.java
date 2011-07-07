@@ -70,12 +70,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.session.Session;
 import com.openexchange.spellcheck.SpellCheckError;
-import com.openexchange.spellcheck.OXException;
 import com.openexchange.spellcheck.SpellCheckExceptionCode;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.SpellChecker;
@@ -121,7 +120,7 @@ public final class SpellCheckServlet extends SessionServlet {
         Tools.disableCaching(resp);
         try {
             actionGet(req, resp);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("doGet", e);
             final Response response = new Response();
             response.setException(e);
@@ -135,7 +134,7 @@ public final class SpellCheckServlet extends SessionServlet {
         } catch (final JSONException e) {
             LOG.error("doGet", e);
             final Response response = new Response();
-            response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e.getMessage()));
+            response.setException(SpellCheckServletExceptionCode.JSON_ERROR.create(e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 Response.write(response, writer);
@@ -155,7 +154,7 @@ public final class SpellCheckServlet extends SessionServlet {
         Tools.disableCaching(resp);
         try {
             actionPut(req, resp);
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
             response.setException(e);
@@ -169,7 +168,7 @@ public final class SpellCheckServlet extends SessionServlet {
         } catch (final JSONException e) {
             LOG.error("doPut", e);
             final Response response = new Response();
-            response.setException(new SpellCheckServletException(SpellCheckServletException.Code.JSON_ERROR, e, e.getMessage()));
+            response.setException(SpellCheckServletExceptionCode.JSON_ERROR.create(e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 Response.write(response, writer);
@@ -180,7 +179,7 @@ public final class SpellCheckServlet extends SessionServlet {
         }
     }
 
-    private void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws SpellCheckServletException, JSONException, IOException {
+    private void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
         final String actionStr = checkStringParam(req, PARAMETER_ACTION);
         if (actionStr.equalsIgnoreCase(ACTION_CHECK)) {
             actionPutCheck(req, resp);
@@ -191,16 +190,16 @@ public final class SpellCheckServlet extends SessionServlet {
         } else if (actionStr.equalsIgnoreCase(ACTION_REMOVE)) {
             actionPutRemove(req, resp);
         } else {
-            throw new SpellCheckServletException(SpellCheckServletException.Code.UNSUPPORTED_PARAM, PARAMETER_ACTION, actionStr);
+            throw SpellCheckServletExceptionCode.UNSUPPORTED_PARAM.create(PARAMETER_ACTION, actionStr);
         }
     }
 
-    private void actionGet(final HttpServletRequest req, final HttpServletResponse resp) throws SpellCheckServletException, JSONException, IOException {
+    private void actionGet(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
         final String actionStr = checkStringParam(req, PARAMETER_ACTION);
         if (actionStr.equalsIgnoreCase(ACTION_LIST)) {
             actionGetList(req, resp);
         } else {
-            throw new SpellCheckServletException(SpellCheckServletException.Code.UNSUPPORTED_PARAM, PARAMETER_ACTION, actionStr);
+            throw SpellCheckServletExceptionCode.UNSUPPORTED_PARAM.create(PARAMETER_ACTION, actionStr);
         }
     }
 
@@ -222,7 +221,7 @@ public final class SpellCheckServlet extends SessionServlet {
             for (final String userWord : userWords) {
                 jsonWriter.value(userWord);
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } finally {
@@ -270,7 +269,7 @@ public final class SpellCheckServlet extends SessionServlet {
             for (final String misspeltWord : misspeltWords) {
                 jsonWriter.value(misspeltWord);
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } finally {
@@ -314,7 +313,7 @@ public final class SpellCheckServlet extends SessionServlet {
             for (final String suggestion : suggestions) {
                 jsonWriter.value(suggestion);
             }
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } finally {
@@ -339,7 +338,7 @@ public final class SpellCheckServlet extends SessionServlet {
                 session.getUserId(),
                 ContextStorage.getStorageContext(session.getContextId()));
             spellCheck.addWord(getBody(req));
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
@@ -362,7 +361,7 @@ public final class SpellCheckServlet extends SessionServlet {
                 session.getUserId(),
                 ContextStorage.getStorageContext(session.getContextId()));
             spellCheck.removeWord(getBody(req));
-        } catch (final AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
@@ -374,10 +373,10 @@ public final class SpellCheckServlet extends SessionServlet {
         Response.write(response, resp.getWriter());
     }
 
-    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws SpellCheckServletException {
+    private static String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {
         final String paramVal = req.getParameter(paramName);
         if ((paramVal == null) || (paramVal.length() == 0) || "null".equals(paramVal)) {
-            throw new SpellCheckServletException(SpellCheckServletException.Code.MISSING_PARAM, paramName);
+            throw SpellCheckServletExceptionCode.MISSING_PARAM.create(paramName);
         }
         return paramVal;
     }
