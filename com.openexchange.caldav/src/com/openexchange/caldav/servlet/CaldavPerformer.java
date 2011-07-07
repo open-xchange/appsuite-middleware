@@ -99,6 +99,7 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
@@ -114,7 +115,7 @@ public class CaldavPerformer implements SessionHolder {
 
     private static ServiceLookup services;
 
-    public static void setServices(ServiceLookup lookup) {
+    public static void setServices(final ServiceLookup lookup) {
         services = lookup;
     }
 
@@ -293,7 +294,12 @@ public class CaldavPerformer implements SessionHolder {
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final OXException x) {
-            resp.setStatus(x.getStatus());
+            if (x instanceof WebdavProtocolException) {
+                final WebdavProtocolException we = (WebdavProtocolException) x;
+                resp.setStatus(we.getStatus());
+            } else {
+                LOG.error("Error detected.", x);
+            }
         } catch (final NullPointerException x) {
             LOG.error("Null reference detected.", x);
         } finally {
@@ -305,7 +311,7 @@ public class CaldavPerformer implements SessionHolder {
         return factory;
     }
 
-    public void setGlobalMixins(PropertyMixin... mixins) {
+    public void setGlobalMixins(final PropertyMixin... mixins) {
         factory.setGlobalMixins(mixins);
     }
 }

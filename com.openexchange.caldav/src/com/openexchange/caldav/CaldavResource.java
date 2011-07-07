@@ -87,6 +87,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
@@ -101,23 +102,23 @@ public class CaldavResource extends AbstractResource {
     
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-    private GroupwareCaldavFactory factory;
+    private final GroupwareCaldavFactory factory;
 
     private Appointment appointment;
 
     private CaldavCollection parent;
 
-    private WebdavPath url;
+    private final WebdavPath url;
 
     private boolean exists = false;
 
     private byte[] fileData;
 
-    private List<CalendarDataObject> exceptionsToSave = new ArrayList<CalendarDataObject>();
+    private final List<CalendarDataObject> exceptionsToSave = new ArrayList<CalendarDataObject>();
 
-    private List<CalendarDataObject> deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
+    private final List<CalendarDataObject> deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
 
-    public CaldavResource(CaldavCollection parent, Appointment appointment, GroupwareCaldavFactory factory) throws OXException {
+    public CaldavResource(final CaldavCollection parent, final Appointment appointment, final GroupwareCaldavFactory factory) throws OXException {
         super();
         if (appointment == null) {
             throw new NullPointerException();
@@ -133,7 +134,7 @@ public class CaldavResource extends AbstractResource {
         patchSeriesStartAndEnd();
     }
 
-    public CaldavResource(CaldavCollection parent, WebdavPath url, GroupwareCaldavFactory factory) {
+    public CaldavResource(final CaldavCollection parent, final WebdavPath url, final GroupwareCaldavFactory factory) {
         super();
         this.exists = false;
         this.parent = parent;
@@ -157,13 +158,13 @@ public class CaldavResource extends AbstractResource {
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws OXException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
         if (namespace.equals(CaldavProtocol.CAL_NS.getURI()) && name.equals("calendar-data")) {
-            WebdavProperty property = new WebdavProperty(namespace, name);
+            final WebdavProperty property = new WebdavProperty(namespace, name);
             try {
                 property.setValue(new String(icalFile(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                throw new OXException(getUrl(), 500);
+            } catch (final UnsupportedEncodingException e) {
+                throw WebdavProtocolException.generalError(getUrl(), 500);
             }
             return property;
         }
@@ -171,35 +172,35 @@ public class CaldavResource extends AbstractResource {
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws OXException {
+    protected void internalPutProperty(final WebdavProperty prop) throws OXException {
 
     }
 
     @Override
-    protected void internalRemoveProperty(String namespace, String name) throws OXException {
+    protected void internalRemoveProperty(final String namespace, final String name) throws OXException {
 
     }
 
     @Override
-    protected boolean isset(Property p) {
+    protected boolean isset(final Property p) {
         return true;
     }
 
     @Override
-    public void putBody(InputStream body, boolean guessSize) throws OXException {
+    public void putBody(final InputStream body, final boolean guessSize) throws OXException {
         fileData = null;
-        ICalParser parser = factory.getIcalParser();
+        final ICalParser parser = factory.getIcalParser();
         try {
-            List<CalendarDataObject> appointments = parser.parseAppointments(
+            final List<CalendarDataObject> appointments = parser.parseAppointments(
                 body,
                 UTC,
                 factory.getContext(),
                 new ArrayList<ConversionError>(),
                 new ArrayList<ConversionWarning>());
-            Appointment oldAppointment = appointment;
+            final Appointment oldAppointment = appointment;
             if (!appointments.isEmpty()) {
                 if (appointments.size() == 1) {
-                    CalendarDataObject cdo = appointments.get(0);
+                    final CalendarDataObject cdo = appointments.get(0);
                     cdo.setContext(factory.getContext());
                     if (oldAppointment != null) {
                         checkForExplicitRemoves(oldAppointment, cdo);
@@ -212,7 +213,7 @@ public class CaldavResource extends AbstractResource {
                     }
                     appointment = cdo;
                 } else {
-                    for (CalendarDataObject cdo : appointments) {
+                    for (final CalendarDataObject cdo : appointments) {
                         cdo.setContext(factory.getContext());
 
                         if (oldAppointment != null) {
@@ -235,13 +236,13 @@ public class CaldavResource extends AbstractResource {
                 }
 
             }
-        } catch (ConversionError e) {
+        } catch (final ConversionError e) {
             LOG.error(e.getMessage(),e );
-            throw new OXException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
-    private void checkForExplicitRemoves(Appointment oldAppointment, CalendarDataObject cdo) {
+    private void checkForExplicitRemoves(final Appointment oldAppointment, final CalendarDataObject cdo) {
         if (oldAppointment.getFullTime() && !cdo.getFullTime() && !cdo.containsFullTime()) {
             cdo.setFullTime(false); // Set this explicitly, so the update actually changes it
         }
@@ -251,25 +252,25 @@ public class CaldavResource extends AbstractResource {
         }
     }
 
-    private void createNewDeleteExceptions(Appointment oldAppointment, CalendarDataObject cdo) {
-        Date[] wantedDeleteExceptions = cdo.getDeleteException();
+    private void createNewDeleteExceptions(final Appointment oldAppointment, final CalendarDataObject cdo) {
+        final Date[] wantedDeleteExceptions = cdo.getDeleteException();
         if (wantedDeleteExceptions == null || wantedDeleteExceptions.length == 0) {
             return;
         }
         // Normalize the wanted DelEx to midnight, and add them to our set.
-        Set<Date> wantedSet = new HashSet<Date>(Arrays.asList(wantedDeleteExceptions));
+        final Set<Date> wantedSet = new HashSet<Date>(Arrays.asList(wantedDeleteExceptions));
 
 
         Date[] knownDeleteExceptions = oldAppointment.getDeleteException();
         if (knownDeleteExceptions == null) {
             knownDeleteExceptions = new Date[0];
         }
-        for (Date date : knownDeleteExceptions) {
+        for (final Date date : knownDeleteExceptions) {
             wantedSet.remove(date);
         }
 
-        for (Date date : wantedSet) {
-            CalendarDataObject deleteException = new CalendarDataObject();
+        for (final Date date : wantedSet) {
+            final CalendarDataObject deleteException = new CalendarDataObject();
             deleteException.setRecurrenceDatePosition(date);
             deleteException.setContext(factory.getContext());
             deleteException.setParentFolderID(parent.getId());
@@ -280,12 +281,12 @@ public class CaldavResource extends AbstractResource {
 
     }
 
-    private boolean looksLikeMaster(CalendarDataObject cdo) {
+    private boolean looksLikeMaster(final CalendarDataObject cdo) {
         return cdo.containsRecurrenceType() && cdo.getRecurrenceType() != CalendarObject.NO_RECURRENCE;
     }
 
     @Override
-    public void setCreationDate(Date date) throws OXException {
+    public void setCreationDate(final Date date) throws OXException {
 
     }
 
@@ -295,15 +296,15 @@ public class CaldavResource extends AbstractResource {
     }
     
     @Override
-    public WebdavResource move(WebdavPath dest, boolean noroot, boolean overwrite) throws OXException {
-        WebdavResource destinationResource = factory.resolveResource(dest);
+    public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
+        final WebdavResource destinationResource = factory.resolveResource(dest);
         CaldavCollection destinationCollection;
         if (destinationResource.isCollection()) {
             destinationCollection = (CaldavCollection) destinationResource;
         } else {
             destinationCollection = (CaldavCollection) factory.resolveCollection(dest.parent());
         }
-        CalendarDataObject moveOp = new CalendarDataObject();
+        final CalendarDataObject moveOp = new CalendarDataObject();
         moveOp.setObjectID(appointment.getObjectID());
         moveOp.setParentFolderID(destinationCollection.getId());
         moveOp.setContext(factory.getContext());
@@ -314,20 +315,20 @@ public class CaldavResource extends AbstractResource {
         return this;
     }
 
-    private void write(boolean create) throws OXException {
+    private void write(final boolean create) throws OXException {
         try {
-            CalendarDataObject toSave = (CalendarDataObject) appointment;
-            AppointmentSQLInterface appointmentSQLInterface = factory.getAppointmentInterface();
+            final CalendarDataObject toSave = (CalendarDataObject) appointment;
+            final AppointmentSQLInterface appointmentSQLInterface = factory.getAppointmentInterface();
             if (create) {
                 appointmentSQLInterface.insertAppointmentObject(toSave);
             } else {
                 appointmentSQLInterface.updateAppointmentObject(toSave, parent.getId(), toSave.getLastModified());
             }
 
-            for (Appointment exception : exceptionsToSave) {
+            for (final Appointment exception : exceptionsToSave) {
                 setAppropriateIDForException(exception);
                 exception.removeUid(); // TODO: Needed?
-                CalendarDataObject cdo = (CalendarDataObject) exception;
+                final CalendarDataObject cdo = (CalendarDataObject) exception;
                 factory.getCalendarUtilities().removeRecurringType(cdo);
                 appointmentSQLInterface.updateAppointmentObject(
                     cdo,
@@ -335,39 +336,39 @@ public class CaldavResource extends AbstractResource {
                     appointment.getLastModified());
             }
 
-            for (CalendarDataObject deleteException : deleteExceptionsToSave) {
+            for (final CalendarDataObject deleteException : deleteExceptionsToSave) {
                 setAppropriateIDForException(deleteException);
                 appointmentSQLInterface.deleteAppointmentObject(deleteException, parent.getId(), appointment.getLastModified());
             }
 
-        } catch (ClassCastException e) {
+        } catch (final ClassCastException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(getUrl(), 500);
-        } catch (OXPermissionException e) {
+            throw WebdavProtocolException.generalError(getUrl(), 500);
+        } catch (final OXPermissionException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(getUrl(), 403);
-        } catch (OXException e) {
+            throw WebdavProtocolException.generalError(getUrl(), 403);
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(getUrl(), 500);
-        } catch (SQLException e) {
+            throw WebdavProtocolException.generalError(getUrl(), 500);
+        } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(getUrl(), 500);
+            throw WebdavProtocolException.generalError(getUrl(), 500);
         }
     }
 
     private void checkRange() throws OXException {
         if (!factory.isInRange(appointment)) {
-            throw new OXException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
-    private void setAppropriateIDForException(Appointment exception) {
-        List<Appointment> changeExceptions = factory.getState().getChangeExceptions(appointment.getUid(), parent.getId());
+    private void setAppropriateIDForException(final Appointment exception) {
+        final List<Appointment> changeExceptions = factory.getState().getChangeExceptions(appointment.getUid(), parent.getId());
         if (changeExceptions == null) {
             exception.setObjectID(appointment.getObjectID());
             return;
         }
-        for (Appointment existingException : changeExceptions) {
+        for (final Appointment existingException : changeExceptions) {
             if (existingException.getRecurrenceDatePosition().equals(exception.getRecurrenceDatePosition())) {
                 exception.setObjectID(existingException.getObjectID());
                 exception.setLastModified(existingException.getLastModified());
@@ -378,15 +379,15 @@ public class CaldavResource extends AbstractResource {
     }
 
     public void delete() throws OXException {
-        AppointmentSQLInterface appointments = factory.getAppointmentInterface();
+        final AppointmentSQLInterface appointments = factory.getAppointmentInterface();
         try {
             appointments.deleteAppointmentObject((CalendarDataObject) appointment, parent.getId(), getLastModified());
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(getUrl(), 500);
-        } catch (SQLException e) {
+            throw WebdavProtocolException.generalError(getUrl(), 500);
+        } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(getUrl(), 500);
+            throw WebdavProtocolException.generalError(getUrl(), 500);
         }
     }
 
@@ -405,8 +406,8 @@ public class CaldavResource extends AbstractResource {
         if (appointment == null) {
             return new byte[0];
         }
-        ICalEmitter icalEmitter = factory.getIcalEmitter();
-        ICalSession session = icalEmitter.createSession();
+        final ICalEmitter icalEmitter = factory.getIcalEmitter();
+        final ICalSession session = icalEmitter.createSession();
         try {
             icalEmitter.writeAppointment(
                 session,
@@ -414,8 +415,8 @@ public class CaldavResource extends AbstractResource {
                 factory.getContext(),
                 new ArrayList<ConversionError>(),
                 new ArrayList<ConversionWarning>());
-            List<Appointment> changeExceptions = factory.getState().getChangeExceptions(appointment.getUid(), parent.getId());
-            for (Appointment exception : changeExceptions) {
+            final List<Appointment> changeExceptions = factory.getState().getChangeExceptions(appointment.getUid(), parent.getId());
+            for (final Appointment exception : changeExceptions) {
                 // exception.removeRecurrenceDatePosition(); // Let the client figure this one out.6
                 icalEmitter.writeAppointment(
                     session,
@@ -424,12 +425,12 @@ public class CaldavResource extends AbstractResource {
                     new ArrayList<ConversionError>(),
                     new ArrayList<ConversionWarning>());
             }
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             icalEmitter.writeSession(session, bytes);
             return fileData = bytes.toByteArray();
-        } catch (ConversionError e) {
+        } catch (final ConversionError e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(getUrl(), 500);
+            throw WebdavProtocolException.generalError(getUrl(), 500);
         }
 
     }
@@ -465,7 +466,7 @@ public class CaldavResource extends AbstractResource {
         return (long) icalFile().length;
     }
 
-    public WebdavLock getLock(String token) throws OXException {
+    public WebdavLock getLock(final String token) throws OXException {
         return null;
     }
 
@@ -473,7 +474,7 @@ public class CaldavResource extends AbstractResource {
         return Collections.emptyList();
     }
 
-    public WebdavLock getOwnLock(String token) throws OXException {
+    public WebdavLock getOwnLock(final String token) throws OXException {
         return null;
     }
 
@@ -489,7 +490,7 @@ public class CaldavResource extends AbstractResource {
         return url;
     }
 
-    public void lock(WebdavLock lock) throws OXException {
+    public void lock(final WebdavLock lock) throws OXException {
 
     }
 
@@ -497,27 +498,27 @@ public class CaldavResource extends AbstractResource {
         write(false);
     }
 
-    public void setContentType(String type) throws OXException {
+    public void setContentType(final String type) throws OXException {
 
     }
 
-    public void setDisplayName(String displayName) throws OXException {
+    public void setDisplayName(final String displayName) throws OXException {
         appointment.setTitle(displayName);
     }
 
-    public void setLanguage(String language) throws OXException {
+    public void setLanguage(final String language) throws OXException {
 
     }
 
-    public void setLength(Long length) throws OXException {
+    public void setLength(final Long length) throws OXException {
 
     }
 
-    public void setSource(String source) throws OXException {
+    public void setSource(final String source) throws OXException {
 
     }
 
-    public void unlock(String token) throws OXException {
+    public void unlock(final String token) throws OXException {
 
     }
 
@@ -525,36 +526,36 @@ public class CaldavResource extends AbstractResource {
 
     // TODO: Warum ist das nicht gesetzt?
     private void patchOrganizer() throws OXException {
-        String organizer = appointment.getOrganizer();
+        final String organizer = appointment.getOrganizer();
         if (organizer == null) {
-            int createdBy = appointment.getCreatedBy();
-            User user = factory.resolveUser(createdBy);
+            final int createdBy = appointment.getCreatedBy();
+            final User user = factory.resolveUser(createdBy);
             appointment.setOrganizer(user.getMail());
         }
     }
 
     // TODO: Warum ist das nicht gesetzt?
     private void patchOrganizersParticipantState() {
-        UserParticipant[] users = appointment.getUsers();
-        int createdBy = appointment.getCreatedBy();
-        Map<Integer, UserParticipant> userMap = new HashMap<Integer, UserParticipant>();
-        for (UserParticipant userParticipant : users) {
-            int identifier = userParticipant.getIdentifier();
+        final UserParticipant[] users = appointment.getUsers();
+        final int createdBy = appointment.getCreatedBy();
+        final Map<Integer, UserParticipant> userMap = new HashMap<Integer, UserParticipant>();
+        for (final UserParticipant userParticipant : users) {
+            final int identifier = userParticipant.getIdentifier();
             if (createdBy == identifier && userParticipant.getConfirm() == 0) {
                 userParticipant.setConfirm(CalendarObject.ACCEPT);
             }
             userMap.put(identifier, userParticipant);
         }
 
-        Participant[] participants = appointment.getParticipants();
-        for (Participant participant : participants) {
+        final Participant[] participants = appointment.getParticipants();
+        for (final Participant participant : participants) {
             if (UserParticipant.class.isInstance(participant)) {
-                UserParticipant userParticipant = (UserParticipant) participant;
-                int identifier = userParticipant.getIdentifier();
+                final UserParticipant userParticipant = (UserParticipant) participant;
+                final int identifier = userParticipant.getIdentifier();
                 if (createdBy == identifier && userParticipant.getConfirm() == 0) {
                     userParticipant.setConfirm(CalendarObject.ACCEPT);
                 } else {
-                    UserParticipant up = userMap.get(identifier);
+                    final UserParticipant up = userMap.get(identifier);
                     userParticipant.setConfirm(up.getConfirm());
                     userParticipant.setConfirmMessage(up.getConfirmMessage());
                 }
@@ -564,7 +565,7 @@ public class CaldavResource extends AbstractResource {
 
     private void patchSeriesStartAndEnd() {
         if (this.appointment.isMaster()) {
-            CalendarCollectionService calUtils = factory.getCalendarUtilities();
+            final CalendarCollectionService calUtils = factory.getCalendarUtilities();
             calUtils.safelySetStartAndEndDateForRecurringAppointment((CalendarDataObject) appointment);
         }
     }

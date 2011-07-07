@@ -68,6 +68,7 @@ import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
@@ -184,7 +185,7 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
     }
     
     public OXException internalError(final OXException x) {
-        return new OXException(getUrl(), 500);
+        return WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
     }
     
     protected List<WebdavResource> getVisibleCalendarFoldersOfType(final Type type) throws OXException {

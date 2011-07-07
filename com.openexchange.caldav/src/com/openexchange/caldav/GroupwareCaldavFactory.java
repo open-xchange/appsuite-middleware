@@ -83,6 +83,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
@@ -147,7 +148,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
 
     public WebdavCollection resolveCollection(final WebdavPath url) throws OXException {
         if (url.size() > 1) {
-            throw new OXException(url, 404);
+            throw WebdavProtocolException.generalError(url, 404);
         }
         if (isRoot(url)) {
             return mixin(new RootCollection(this));
@@ -161,7 +162,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 return mixin((AbstractCollection) resource);
             }
         }
-        throw new OXException(url, 404);
+        throw WebdavProtocolException.generalError(url, 404);
     }
 
     // TODO: i18n
@@ -223,7 +224,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             return property.get();
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(new WebdavPath(), 500);
+            throw WebdavProtocolException.generalError(new WebdavPath(), 500);
         }
     }
 
@@ -296,7 +297,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             return users.getUser(uid, getContext());
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXException(new WebdavPath(), 500);
+            throw WebdavProtocolException.generalError(new WebdavPath(), 500);
         }
     }
 

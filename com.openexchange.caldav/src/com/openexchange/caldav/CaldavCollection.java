@@ -73,6 +73,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
@@ -196,7 +197,7 @@ public class CaldavCollection extends AbstractCollection {
     public CaldavResource getChild(final String name) throws OXException {
         final Matcher matcher = NAME_PATTERN.matcher(name);
         if (!matcher.find()) {
-            throw new OXException(getUrl().dup().append(name), 404);
+            throw WebdavProtocolException.generalError(getUrl().dup().append(name), 404);
         }
         
         final String uid = matcher.group(1);
