@@ -55,8 +55,8 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * TODO Remove this class from inheritance tree because all its methods are
@@ -74,10 +74,11 @@ public abstract class DataServlet extends PermissionServlet {
 
     public static int parseIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException {
         if (containsParameter(httpServletRequest, name)) {
+            final String parameter = httpServletRequest.getParameter(name);
             try {
-                return Integer.parseInt(httpServletRequest.getParameter(name));
+                return Integer.parseInt(parameter);
             } catch (final NumberFormatException exc) {
-                throw _invalidParameter + name, exc;
+                throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
             }
         }
         return 0;
@@ -85,10 +86,11 @@ public abstract class DataServlet extends PermissionServlet {
 
     public static Date parseDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException {
         if (containsParameter(httpServletRequest, name)) {
+            final String parameter = httpServletRequest.getParameter(name);
             try {
                 return new Date(Long.parseLong(httpServletRequest.getParameter(name)));
             } catch (final NumberFormatException exc) {
-                throw _invalidParameter + name, exc;
+                throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
             }
         }
         return null;
@@ -98,21 +100,21 @@ public abstract class DataServlet extends PermissionServlet {
         return httpServletRequest.getParameter(name);
     }
 
-    public static String parseMandatoryStringParameter(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+    public static String parseMandatoryStringParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException {
         if (!containsParameter(httpServletRequest, name)) {
-            throw new OXMandatoryFieldException(_missingField + name);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
         return parseStringParameter(httpServletRequest, name);
     }
 
-    public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException, OXMandatoryFieldException {
+    public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException {
         if (!containsParameter(httpServletRequest, name)) {
-            throw new OXMandatoryFieldException(_missingField + name);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
         return parseIntParameter(httpServletRequest, name);
     }
 
-    public static int[] parsIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+    public static int[] parsIntParameterArray(final HttpServletRequest httpServletRequest, final String name) {
         if (containsParameter(httpServletRequest, name)) {
             final String[] s = httpServletRequest.getParameterValues(name);
 
@@ -127,7 +129,7 @@ public abstract class DataServlet extends PermissionServlet {
         return null;
     }
 
-    public static String[] parseStringParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+    public static String[] parseStringParameterArray(final HttpServletRequest httpServletRequest, final String name) {
         if (containsParameter(httpServletRequest, name)) {
             final String[] s = httpServletRequest.getParameterValues(name);
             return s;
@@ -135,9 +137,9 @@ public abstract class DataServlet extends PermissionServlet {
         return null;
     }
 
-    public static int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+    public static int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXException {
         if (!containsParameter(httpServletRequest, name)) {
-            throw new OXMandatoryFieldException(_missingField + name);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
         final String[] s = httpServletRequest.getParameterValues(name);
 
@@ -150,9 +152,9 @@ public abstract class DataServlet extends PermissionServlet {
         return i;
     }
 
-    public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException, OXMandatoryFieldException {
+    public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXException {
         if (!containsParameter(httpServletRequest, name)) {
-            throw new OXMandatoryFieldException(_missingField + name);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
         return parseDateParameter(httpServletRequest, name);
     }
