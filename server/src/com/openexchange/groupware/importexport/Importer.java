@@ -52,7 +52,7 @@ package com.openexchange.groupware.importexport;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -73,7 +73,7 @@ public interface Importer {
 	 * @return true, if this importer can import this format for this module; false otherwise
 	 * @see com.openexchange.groupware.Types
 	 */
-	public abstract boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws ImportExportException;
+	public abstract boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
 
 	/**
 	 * 
@@ -83,7 +83,7 @@ public interface Importer {
 	 * @param folders: Identifiers for folders (plus their type as int) - usually only one, but iCal may need two and future extensions might need even more (remember: Folders can have only one type, so type is not a necessary argument)
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return
-	 * @throws ImportExportException
+	 * @throws OXException
 	 * @see com.openexchange.groupware.Types
 	 */
 	public abstract List<ImportResult> importData(
@@ -91,6 +91,6 @@ public interface Importer {
 			Format format,
 			InputStream is,
 			List<String> folders, 
-			Map<String, String[]> optionalParams ) throws ImportExportException;
+			Map<String, String[]> optionalParams ) throws OXException;
 
 }

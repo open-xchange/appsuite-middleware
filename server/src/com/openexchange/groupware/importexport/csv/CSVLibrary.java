@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -90,9 +89,9 @@ public final class CSVLibrary {
      * @param sessObj The user's session
      * @param folder The folder, usually a number, but for mails it really might be a string
      * @return
-     * @throws ImportExportException - if could not be loaded
+     * @throws OXException - if could not be loaded
      */
-    public static FolderObject getFolderObject(final ServerSession sessObj, final String folder) throws ImportExportException {
+    public static FolderObject getFolderObject(final ServerSession sessObj, final String folder) throws OXException {
         final int folderId = getFolderId(folder);
         FolderObject fo = null;
         try {
@@ -108,9 +107,9 @@ public final class CSVLibrary {
      *
      * @param folderString
      * @return
-     * @throws ImportExportException
+     * @throws OXException
      */
-    public static int getFolderId(final String folderString) throws ImportExportException {
+    public static int getFolderId(final String folderString) throws OXException {
         try{
             return Integer.parseInt(folderString);
         } catch (final NumberFormatException e) {
@@ -154,7 +153,7 @@ public final class CSVLibrary {
         return ret;
     }
 
-    public static String transformInputStreamToString(final InputStream is, final String encoding) throws ImportExportException{
+    public static String transformInputStreamToString(final InputStream is, final String encoding) throws OXException{
     	boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
     	
         final InputStreamReader isr;

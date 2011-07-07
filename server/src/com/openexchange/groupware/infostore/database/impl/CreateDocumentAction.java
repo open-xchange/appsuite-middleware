@@ -51,14 +51,13 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 
 public class CreateDocumentAction extends AbstractDocumentListAction {
 
     @Override
-    protected void undoAction() throws AbstractOXException {
+    protected void undoAction() throws OXException {
         final UpdateBlock update = new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
 
             @Override
@@ -69,15 +68,15 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
         try {
             doUpdates(update);
         } catch (final OXException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+            throw e;
         }
     }
 
-    public void perform() throws AbstractOXException {
+    public void perform() throws OXException {
         try {
             doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getWritableDocumentFields(), getDocuments());
         } catch (final OXException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+            throw e;
         }
     }
 

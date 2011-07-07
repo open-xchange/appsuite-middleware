@@ -59,7 +59,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.SizedInputStream;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -120,7 +120,7 @@ public class ExportServlet extends ImportExport {
             LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ImportExportException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }

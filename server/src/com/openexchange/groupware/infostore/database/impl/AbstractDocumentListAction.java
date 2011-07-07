@@ -55,8 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -66,7 +65,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 
     private List<DocumentMetadata> documents;
 
-    public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws OXException, DBPoolingException {
+    public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws OXException {
         final UpdateBlock[] updates = new UpdateBlock[docs.size()];
         int i = 0;
 
@@ -94,7 +93,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
         return this.documents;
     }
 
-    public List<DocumentMetadata>[] getSlices(int batchSize, List<DocumentMetadata> documents) {
+    public List<DocumentMetadata>[] getSlices(final int batchSize, final List<DocumentMetadata> documents) {
         final boolean addOne = (0 != (documents.size() % batchSize));
         int numberOfSlices = documents.size() / batchSize;
         if (addOne) {
@@ -119,21 +118,21 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
         return slices;
     }
 
-    protected void assureExistence() throws AbstractOXException {
+    protected void assureExistence() throws OXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             writeCon = getProvider().getWriteConnection(getContext());
             stmt = writeCon.prepareStatement("SELECT id FROM infostore WHERE cid = " + getContext().getContextId() + " AND id = ? FOR UPDATE");
-            for (DocumentMetadata document : getDocuments()) {
+            for (final DocumentMetadata document : getDocuments()) {
                 stmt.setInt(1, document.getId());
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
                     throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);

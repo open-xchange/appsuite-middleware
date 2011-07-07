@@ -57,10 +57,9 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -113,7 +112,7 @@ public class CheckSizeSwitch {
                 valueLength = 0;
             }
             if(maxSize < valueLength) {
-                final AbstractOXException.ProblematicAttribute attr = new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength);
+                final ProblematicAttribute attr = new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength);
                 x.addProblematic(attr);
                 error = true;
             }
@@ -141,7 +140,7 @@ public class CheckSizeSwitch {
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             return 0;
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(),  e);
             return 0;
         } finally {

@@ -52,8 +52,8 @@ package com.openexchange.groupware.importexport.csv;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 
 /**
  * This class represents a combined parser and lexer for CSV files. It is designed rather simple with speed in mind. Note: Proper CSV files
@@ -112,14 +112,14 @@ public class CSVParser {
      * 
      * @param str - CSV to be parsed
      * @return
-     * @throws ImportExportException
+     * @throws OXException
      */
-    public List<List<String>> parse(final String str) throws ImportExportException {
+    public List<List<String>> parse(final String str) throws OXException {
         this.file = str;
         return parse();
     }
 
-    public List<List<String>> parse() throws ImportExportException {
+    public List<List<String>> parse() throws OXException {
         if (file == null) {
             return null;
         }
@@ -160,7 +160,7 @@ public class CSVParser {
         currentCell.append(fileAsArray[pointer]);
     }
 
-    protected void handleCellDelimiter() throws ImportExportException {
+    protected void handleCellDelimiter() throws OXException {
         if (isEscaping) {
             currentCell.append(CELL_DELIMITER);
         } else {
@@ -188,7 +188,7 @@ public class CSVParser {
         }
     }
 
-    protected void handleLineDelimiter() throws ImportExportException {
+    protected void handleLineDelimiter() throws OXException {
         if (isEscaping) {
             currentCell.append(LINE_DELIMITER);
         } else {

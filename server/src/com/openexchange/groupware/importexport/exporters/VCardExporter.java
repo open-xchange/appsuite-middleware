@@ -56,9 +56,7 @@ import java.util.Date;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
@@ -70,7 +68,6 @@ import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.SizedInputStream;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -199,7 +196,7 @@ public class VCardExporter implements Exporter {
         Contact.DEFAULT_ADDRESS
     };
 
-    public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
             return false;
         }
@@ -223,7 +220,7 @@ public class VCardExporter implements Exporter {
         final EffectivePermission perm;
         try {
             perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
         } catch (final SQLException e) {
             throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -231,7 +228,7 @@ public class VCardExporter implements Exporter {
         return perm.canReadAllObjects();
     }
 
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
         try {
             if (fieldsToBeExported == null) {
@@ -264,13 +261,13 @@ public class VCardExporter implements Exporter {
                     LOG.error(e.getMessage(), e);
                 }
             }
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        } catch (ConverterException e) {
+        } catch (final ConverterException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-        } catch (AbstractOXException e) {
-            throw new ImportExportException(e);
-        } catch (IOException e) {
+        } catch (final OXException e) {
+            throw new OXException(e);
+        } catch (final IOException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }
 
@@ -280,7 +277,7 @@ public class VCardExporter implements Exporter {
                 Format.VCARD);
     }
 
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
         try {
             final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
@@ -297,13 +294,13 @@ public class VCardExporter implements Exporter {
             } finally {
                 closeVersitResources(oxContainerConverter, versitWriter);
             }
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        } catch (OXException e) {
-            throw new ImportExportException(e);
-        } catch (IOException e) {
+        } catch (final OXException e) {
+            throw new OXException(e);
+        } catch (final IOException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-        } catch (ConverterException e) {
+        } catch (final ConverterException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }
 

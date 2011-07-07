@@ -60,10 +60,8 @@ import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -72,7 +70,6 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
@@ -158,8 +155,8 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     private boolean initNext;
     private ResultSet rs;
     private boolean next;
-    private AbstractOXException exception;
-    private final List<AbstractOXException> warnings;
+    private OXException exception;
+    private final List<OXException> warnings;
 
     private final Context ctx;
 
@@ -169,7 +166,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
 
     protected InfostoreIterator(final String query,final DBProvider provider, final Context ctx, final Metadata[] fields, final FieldChooser chooser, final Object...args){
-        this.warnings =  new ArrayList<AbstractOXException>(2);
+        this.warnings =  new ArrayList<OXException>(2);
         this.query = query;
         this.provider = provider;
         this.args = args;
@@ -178,7 +175,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         this.chooser = chooser;
     }
 
-    public void close() throws SearchIteratorException, OXException {
+    public void close() throws OXException {
         if(rs == null) {
             return;
         }
@@ -191,7 +188,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             provider.releaseReadConnection(ctx, con);
             rs = null;
         } catch (final SQLException e) {
-            throw new SearchIteratorException(InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         }
     }
 
@@ -212,8 +209,6 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                 }
             } catch (final SQLException e) {
                 this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-            } catch (final SearchIteratorException e) {
-                this.exception=e;
             }
         }
         initNext = false;
@@ -225,7 +220,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
     public OXException[] getWarnings() {
-        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+        return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
     public boolean hasWarnings() {
@@ -258,7 +253,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                 provider.releaseReadConnection(ctx, con);
             }
             this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt, query));
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             this.exception =e;
         }
     }
@@ -267,17 +262,17 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return false;
     }
 
-    public DocumentMetadata next() throws SearchIteratorException, OXException {
+    public DocumentMetadata next() throws OXException {
         hasNext();
         if(exception != null) {
-            throw new SearchIteratorException(exception);
+            throw exception;
         }
         initNext = true;
 
         return getDocument();
     }
 
-    private DocumentMetadata getDocument() throws SearchIteratorException {
+    private DocumentMetadata getDocument() throws OXException {
         final DocumentMetadata dm = new DocumentMetadataImpl();
         final SetSwitch set = new SetSwitch(dm);
         final StringBuilder sb = new StringBuilder(100);
@@ -289,7 +284,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                     dm.setIsCurrentVersion(rs.getBoolean("current_version"));
                     continue SetValues;
                 } catch (final SQLException e) {
-                    throw new SearchIteratorException(InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
+                    throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
                 }
             }
             final Table t = chooser.choose(m);
@@ -304,7 +299,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                         .toString())));
                 sb.setLength(0);
             } catch (final SQLException e) {
-                throw new SearchIteratorException(InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt)));
+                throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
             }
             m.doSwitch(set);
         }
@@ -325,7 +320,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
 
-    public List<DocumentMetadata> asList() throws SearchIteratorException {
+    public List<DocumentMetadata> asList() throws OXException {
         try {
             final List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
             while(hasNext()) {

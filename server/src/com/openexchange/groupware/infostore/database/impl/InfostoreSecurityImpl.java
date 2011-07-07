@@ -55,14 +55,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
@@ -90,8 +88,6 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             final EffectivePermission isperm = new OXFolderAccess(con, ctx).getFolderPermission((int)document.getFolderId(), user.getId(), userConfig);
             //final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
             return new EffectiveInfostorePermission(isperm, document,user);
-        } catch (DBPoolingException e) {
-            throw new OXException(e);
         } finally {
             releaseReadConnection(ctx, con);
         }
@@ -112,8 +108,6 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             readCon = getReadConnection(ctx);
             return new OXFolderAccess(readCon, ctx).getFolderPermission((int) folderId, user.getId(), userConfig);
             //return OXFolderTools.getEffectiveFolderOCL((int)folderId, user.getId(), user.getGroups(),ctx, userConfig, readCon);
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e); 
         } finally {
             releaseReadConnection(ctx, readCon);
         }
@@ -138,8 +132,6 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
                 permissions.add(new EffectiveInfostorePermission(isperm, m,user));
             }
 
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
         } finally {
             releaseReadConnection(ctx, con);
         }
@@ -155,8 +147,6 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             readCon = getReadConnection(ctx);
             final OXFolderAccess access = new OXFolderAccess(readCon, ctx);
             fo = access.getFolderObject((int)folderId);
-        } catch (DBPoolingException e) {
-            throw new OXException(e);
         } finally {
             releaseReadConnection(ctx, readCon);
         }

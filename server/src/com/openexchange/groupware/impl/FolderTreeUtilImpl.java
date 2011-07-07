@@ -116,7 +116,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);
                 }
-            } catch (final FolderCacheNotEnabledException e) {
+            } catch (final OXException e) {
                 MODE = new NORMAL_MODE();
                 return MODE.getFolder(folderid, ctx);
             }

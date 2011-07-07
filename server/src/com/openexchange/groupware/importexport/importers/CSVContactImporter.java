@@ -66,11 +66,8 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
@@ -87,7 +84,6 @@ import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -105,7 +101,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CSVContactImporter.class));
 
-    public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(getResponsibleFor())) {
             return false;
         }
@@ -125,7 +121,7 @@ public class CSVContactImporter extends AbstractImporter {
         FolderObject fo = null;
         try {
             fo = getFolderObject(session, folder);
-        } catch (final ImportExportException e) {
+        } catch (final OXException e) {
             return false;
         }
         if (fo == null) {
@@ -144,7 +140,7 @@ public class CSVContactImporter extends AbstractImporter {
             perm = fo.getEffectiveUserPermission(
                 session.getUserId(),
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             return false;
         } catch (final SQLException e) {
             return false;
@@ -160,7 +156,7 @@ public class CSVContactImporter extends AbstractImporter {
         return "UTF-8";
     }
 
-    public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         final String folder = folders.get(0);
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
@@ -208,8 +204,8 @@ public class CSVContactImporter extends AbstractImporter {
                 throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
             }
             folderUpdater.save(contacts, target);
-        } catch (final AbstractOXException e) {
-            throw new ImportExportException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
         
         
@@ -309,7 +305,7 @@ public class CSVContactImporter extends AbstractImporter {
                 result.setDate(new Date());
             }
         } catch (final OXException e) {
-            if (e.getCategory() != Category.TRUNCATED || (e.getCategory() == Category.TRUNCATED && !canOverrideInCaseOfTruncation)) {
+            if (e.getCategory() != Category.CATEGORY_TRUNCATED || (e.getCategory() == Category.CATEGORY_TRUNCATED && !canOverrideInCaseOfTruncation)) {
                 result.setException(e);
                 addErrorInformation(result, lineNumber, fields);
             }
@@ -317,9 +313,9 @@ public class CSVContactImporter extends AbstractImporter {
         return new ImportIntention(result);
     }
 
-    public Contact convertCsvToContact(final List<String> fields, final List<String> entry, final ContactSwitcher conSet, final int lineNumber, final ImportResult result, final boolean[] atLeastOneFieldInserted) throws ContactException {
+    public Contact convertCsvToContact(final List<String> fields, final List<String> entry, final ContactSwitcher conSet, final int lineNumber, final ImportResult result, final boolean[] atLeastOneFieldInserted) throws OXException {
         final Contact contactObj = new Contact();
-        final Collection<AbstractOXException> warnings = new LinkedList<AbstractOXException>();
+        final Collection<OXException> warnings = new LinkedList<OXException>();
         final List<String> wrongFields = new LinkedList<String>();
         boolean atLeastOneFieldWithWrongName = false;
         for (int i = 0; i < fields.size(); i++) {
@@ -336,7 +332,7 @@ public class CSVContactImporter extends AbstractImporter {
             } else {
                 if (!currEntry.equals("")) {
                     currField.doSwitch(conSet, contactObj, currEntry);
-                    final Collection<AbstractOXException> warns = contactObj.getWarnings();
+                    final Collection<OXException> warns = contactObj.getWarnings();
                     if (!warns.isEmpty()) {
                         warnings.add(ImportExportExceptionCodes.IGNORE_FIELD.create(warns.iterator().next(), fieldName, currEntry));
                     }
@@ -345,7 +341,7 @@ public class CSVContactImporter extends AbstractImporter {
             }
         }
         if (!warnings.isEmpty()) {
-            final AbstractOXException warning = warnings.iterator().next();
+            final OXException warning = warnings.iterator().next();
             result.setException(warning);
             addErrorInformation(result, lineNumber, fields);
         } else if (atLeastOneFieldWithWrongName) {

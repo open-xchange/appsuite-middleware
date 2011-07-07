@@ -64,9 +64,7 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
@@ -81,14 +79,11 @@ import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.SizedInputStream;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.OXException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.encoding.Charsets;
@@ -172,7 +167,7 @@ public class ICalExporter implements Exporter {
         Task.COLOR_LABEL
     };
 
-    public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws OXException {
         if(! format.equals(Format.ICAL)){
             return false;
         }
@@ -201,7 +196,7 @@ public class ICalExporter implements Exporter {
         EffectivePermission perm;
         try {
             perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
         } catch (final SQLException e) {
             throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -209,23 +204,21 @@ public class ICalExporter implements Exporter {
         return perm.canReadAllObjects();
     }
 
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         final Context ctx;
         final User user;
         try {
             ctx = ContextStorage.getInstance().getContext(sessObj.getContextId());
             user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
         } catch (final OXException e) {
-            throw new ImportExportException(e);
-        } catch (final OXException e) {
-            throw new ImportExportException(e);
+            throw new OXException(e);
         }
         String icalText;
         try {
             final ICalEmitter emitter;
             try {
                 emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class, true);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 throw ImportExportExceptionCodes.ICAL_EMITTER_SERVICE_MISSING.create(e);
             }
             final FolderObject fo;
@@ -240,7 +233,7 @@ public class ICalExporter implements Exporter {
                 }
 
                 final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessObj);
-                CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+                final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                 final SearchIterator<Appointment> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
                 final List<Appointment> appointments = new LinkedList<Appointment>();
                 try {
@@ -296,14 +289,14 @@ public class ICalExporter implements Exporter {
             } else {
                 throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
             }
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        } catch (ConversionError e) {
+        } catch (final ConversionError e) {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
-        } catch (AbstractOXException e) {
-            throw new ImportExportException(e);
+        } catch (final OXException e) {
+            throw new OXException(e);
         }
-        byte[] bytes = Charsets.getBytes(icalText, Charsets.UTF_8);
+        final byte[] bytes = Charsets.getBytes(icalText, Charsets.UTF_8);
         return new SizedInputStream(
                 new UnsynchronizedByteArrayInputStream(bytes),
                 bytes.length,
@@ -320,7 +313,7 @@ public class ICalExporter implements Exporter {
         }
     }
 
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
         try {
             final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
@@ -343,7 +336,7 @@ public class ICalExporter implements Exporter {
                 try {
                     exportAppointment(oxContainerConverter, eventDef, versitWriter, appointmentObj);
                     versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 } finally {
@@ -363,15 +356,15 @@ public class ICalExporter implements Exporter {
             }
 
             versitWriter.flush();
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        } catch (OXException e) {
-            throw new ImportExportException(e);
-        } catch (IOException e) {
+        } catch (final OXException e) {
+            throw new OXException(e);
+        } catch (final IOException e) {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
-        } catch (ConverterException e) {
+        } catch (final ConverterException e) {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
 

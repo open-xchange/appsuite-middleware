@@ -50,14 +50,13 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 
 public class DeleteAllVersionsAction extends AbstractDocumentListAction {
 
     @Override
-    protected void undoAction() throws AbstractOXException {
+    protected void undoAction() throws OXException {
         if(getDocuments().size()==0) {
             return;
         }
@@ -77,11 +76,11 @@ public class DeleteAllVersionsAction extends AbstractDocumentListAction {
         try {
             doUpdates(updates);
         } catch (final OXException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+            throw e;
         }
     }
 
-    public void perform() throws AbstractOXException {
+    public void perform() throws OXException {
         if(getDocuments().size()==0) {
             return;
         }
@@ -97,7 +96,7 @@ public class DeleteAllVersionsAction extends AbstractDocumentListAction {
         try {
             doUpdates(updates);
         } catch (final OXException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+            throw e;
         }
 
     }

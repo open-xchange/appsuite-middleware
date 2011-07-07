@@ -60,14 +60,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfoDatabase;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
@@ -339,8 +337,6 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
             }
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
         } finally {
             close(stmt,rs);
             releaseReadConnection(ctx, con);
@@ -388,8 +384,6 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (DBPoolingException e) {
-            throw new InfostoreException(e);
         } finally {
             close(stmt,null);
             releaseWriteConnection(ctx, con);

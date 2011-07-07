@@ -65,22 +65,16 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
-import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
@@ -96,11 +90,9 @@ import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.iterator.SearchIteratorException.Code;
+import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tx.TransactionException;
 
 public class DatabaseImpl extends DBService {
 
@@ -219,8 +211,8 @@ public class DatabaseImpl extends DBService {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
 
         final StringBuilder sql = new StringBuilder();
@@ -282,8 +274,8 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, result);
             if (con != null) {
@@ -317,8 +309,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             LOG.error("SQLException", e);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, rs);
             releaseReadConnection(ctx, con);
@@ -346,8 +338,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             LOG.error("SQLException", e);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, rs);
             releaseReadConnection(ctx, con);
@@ -389,11 +381,7 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (final OXException e) {
-            throw new InfostoreException(e);
-        } catch (final FilestoreException e) {
-            throw new InfostoreException(e);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+            throw e;
         } finally {
             close(stmt, result);
             releaseReadConnection(ctx, con);
@@ -427,8 +415,8 @@ public class DatabaseImpl extends DBService {
         final Connection writecon;
         try {
             writecon = getWriteConnection(ctx);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
 
         final int[] retval = new int[2];
@@ -491,18 +479,18 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             try {
                 rollbackDBTransaction();
-            } catch (final DBPoolingException e1) {
-                throw new InfostoreException(e1);
+            } catch (final OXException e1) {
+                throw e1;
             }
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, result);
             try {
                 finishDBTransaction();
-            } catch (final DBPoolingException e) {
-                throw new InfostoreException(e);
+            } catch (final OXException e) {
+                throw e;
             }
             releaseWriteConnection(ctx, writecon);
         }
@@ -523,8 +511,8 @@ public class DatabaseImpl extends DBService {
         final Connection writecon;
         try {
             writecon = getWriteConnection(ctx);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
 
         final StringBuilder select_description = new StringBuilder(
@@ -564,18 +552,18 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             try {
                 rollbackDBTransaction();
-            } catch (final DBPoolingException e1) {
-                throw new InfostoreException(e1);
+            } catch (final OXException e1) {
+                throw e1;
             }
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, result);
             try {
                 finishDBTransaction();
-            } catch (final DBPoolingException e) {
-                throw new InfostoreException(e);
+            } catch (final OXException e) {
+                throw e;
             }
             releaseWriteConnection(ctx, writecon);
         }
@@ -650,27 +638,25 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException e) {
             try {
                 rollbackDBTransaction();
-            } catch (final DBPoolingException e1) {
-                throw new InfostoreException(e1);
+            } catch (final OXException e1) {
+                throw e1;
             }
             LOG.error(e.getMessage(), e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (final OXException e) {
             try {
                 rollbackDBTransaction();
-            } catch (final DBPoolingException e1) {
-                throw new InfostoreException(e1);
+            } catch (final OXException e1) {
+                throw e1;
             }
             LOG.error(e.getMessage(), e);
             throw e;
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
         } finally {
             close(stmt, null);
             try {
                 finishDBTransaction();
-            } catch (final DBPoolingException e) {
-                throw new InfostoreException(e);
+            } catch (final OXException e) {
+                throw e;
             }
             releaseWriteConnection(ctx, writeCon);
         }
@@ -717,12 +703,10 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
         }
     }
 
@@ -731,8 +715,8 @@ public class DatabaseImpl extends DBService {
         Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         final StringBuilder SQL = new StringBuilder(
             "SELECT file_store_location from infostore_document where infostore_document.cid=? AND file_store_location is not null");
@@ -760,8 +744,8 @@ public class DatabaseImpl extends DBService {
         Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         final StringBuilder SQL = new StringBuilder(
             "SELECT file_store_location from del_infostore_document where del_infostore_document.cid=? AND file_store_location is not null");
@@ -819,12 +803,10 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
         }
     }
 
@@ -858,12 +840,10 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             close(stmt, result);
             releaseReadConnection(ctx, con);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
         }
     }
 
@@ -941,10 +921,8 @@ public class DatabaseImpl extends DBService {
             retval = new DeltaImpl<DocumentMetadata>(isiNew, isiModified, isiDeleted, System.currentTimeMillis());
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmtNew));
-        } catch (final SearchIteratorException e) {
-            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } catch (final OXException e) {
-            throw new InfostoreException(e);
+            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } finally {
             if (FETCH.equals(Fetch.PREFETCH)) {
                 close(stmtNew, resultNew);
@@ -991,8 +969,8 @@ public class DatabaseImpl extends DBService {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         try {
             final StringBuilder SQL = new StringBuilder("SELECT count(id) from infostore where infostore.cid=?");
@@ -1020,8 +998,8 @@ public class DatabaseImpl extends DBService {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -1056,8 +1034,8 @@ public class DatabaseImpl extends DBService {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -1110,8 +1088,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, query.toString());
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             if (stmt != null) {
                 try {
@@ -1173,11 +1151,11 @@ public class DatabaseImpl extends DBService {
             deleteVersionAction.perform();
             try {
                 deleteDocumentAction.perform();
-            } catch (final AbstractOXException e) {
+            } catch (final OXException e) {
                 try {
                     deleteVersionAction.undo();
-                    throw new InfostoreException(e);
-                } catch (final AbstractOXException e1) {
+                    throw e;
+                } catch (final OXException e1) {
                     LOG.fatal("Can't roll back deleting versions. Run the consistency tool.", e1);
                 }
             }
@@ -1204,8 +1182,8 @@ public class DatabaseImpl extends DBService {
                 }
             }
 
-        } catch (final AbstractOXException x) {
-            throw new InfostoreException(x);
+        } catch (final OXException x) {
+            throw x;
         }
 
     }
@@ -1233,8 +1211,8 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException x) {
             LOG.error(x.getMessage(), x);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, x.toString());
-        } catch (final AbstractOXException x) {
-            throw new InfostoreException(x);
+        } catch (final OXException x) {
+            throw x;
         } finally {
             if(holder != null) {
                 holder.close();
@@ -1243,7 +1221,7 @@ public class DatabaseImpl extends DBService {
         }
     }
 
-    private void clearFolder(final FolderObject folder, final ServerSession session, final List<String> files, final PreparedStatementHolder holder) throws AbstractOXException, SQLException {
+    private void clearFolder(final FolderObject folder, final ServerSession session, final List<String> files, final PreparedStatementHolder holder) throws OXException, SQLException {
         final com.openexchange.groupware.infostore.database.impl.InfostoreIterator allDocumentsInFolder = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.documents(
             folder.getObjectID(),
             Metadata.VALUES_ARRAY,
@@ -1275,13 +1253,13 @@ public class DatabaseImpl extends DBService {
         for (final DocumentMetadata documentMetadata : parents) {
             try {
                 ec.delete(documentMetadata);
-            } catch (final EventException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
     }
 
-    private void discoverAllFiles(final DocumentMetadata documentMetadata, final ServerSession session, final List<String> files) throws AbstractOXException {
+    private void discoverAllFiles(final DocumentMetadata documentMetadata, final ServerSession session, final List<String> files) throws OXException {
         final com.openexchange.groupware.infostore.database.impl.InfostoreIterator allVersions = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.versions(
             documentMetadata.getId(),
             Metadata.VALUES_ARRAY,
@@ -1315,8 +1293,8 @@ public class DatabaseImpl extends DBService {
             }
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, (query != null) ? query.toString() : "");
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             if (stmt != null) {
                 try {
@@ -1550,12 +1528,12 @@ public class DatabaseImpl extends DBService {
         return dmi;
     }
 
-    protected FileStorage getFileStorage(final Context ctx) throws OXException, FilestoreException {
+    protected FileStorage getFileStorage(final Context ctx) throws OXException {
         return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     @Override
-    public void startTransaction() throws TransactionException {
+    public void startTransaction() throws OXException {
         fileIdRemoveList.set(new ArrayList<String>());
         fileIdAddList.set(new ArrayList<String>());
         ctxHolder.set(null);
@@ -1563,22 +1541,20 @@ public class DatabaseImpl extends DBService {
     }
 
     @Override
-    public void commit() throws TransactionException {
+    public void commit() throws OXException {
         final Context ctx = ctxHolder.get();
         for (final String id : fileIdRemoveList.get()) {
             try {
                 getFileStorage(ctx).deleteFile(id);
-            } catch (final FilestoreException e) {
-                throw new TransactionException(e);
             } catch (final OXException e) {
-                throw new TransactionException(e);
+                throw e;
             }
         }
         super.commit();
     }
 
     @Override
-    public void finish() throws TransactionException {
+    public void finish() throws OXException {
         fileIdRemoveList.set(null);
         fileIdAddList.set(null);
         ctxHolder.set(null);
@@ -1586,21 +1562,15 @@ public class DatabaseImpl extends DBService {
     }
 
     @Override
-    public void rollback() throws TransactionException {
+    public void rollback() throws OXException {
         final Context ctx = ctxHolder.get();
         for (final String id : fileIdAddList.get()) {
-            try {
-                getFileStorage(ctx).deleteFile(id);
-            } catch (final FilestoreException e) {
-                throw new TransactionException(e);
-            } catch (final OXException e) {
-                throw new TransactionException(e);
-            }
+            getFileStorage(ctx).deleteFile(id);
         }
         super.rollback();
     }
 
-    private SearchIterator<DocumentMetadata> buildIterator(final ResultSet result, final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl service, final Context ctx, final Connection con, final boolean closeIfPossible) throws SearchIteratorException, SQLException {
+    private SearchIterator<DocumentMetadata> buildIterator(final ResultSet result, final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl service, final Context ctx, final Connection con, final boolean closeIfPossible) throws OXException, SQLException {
 
         return fetchMode.buildIterator(result, stmt, dbColumns, service, ctx, con, closeIfPossible);
 
@@ -1608,7 +1578,7 @@ public class DatabaseImpl extends DBService {
 
     protected static interface FetchMode {
 
-        public SearchIterator<DocumentMetadata> buildIterator(ResultSet result, PreparedStatement stmt, int[] dbColumns, DatabaseImpl DatabaseImpl2, Context ctx, Connection con, boolean closeIfPossible) throws SearchIteratorException, SQLException;
+        public SearchIterator<DocumentMetadata> buildIterator(ResultSet result, PreparedStatement stmt, int[] dbColumns, DatabaseImpl DatabaseImpl2, Context ctx, Connection con, boolean closeIfPossible) throws OXException, SQLException;
     }
 
     class PrefetchMode implements FetchMode {
@@ -1631,7 +1601,7 @@ public class DatabaseImpl extends DBService {
 
     static class CloseLaterMode implements FetchMode {
 
-        public SearchIterator<DocumentMetadata> buildIterator(final ResultSet result, final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl, final Context ctx, final Connection con, final boolean closeIfPossible) throws SearchIteratorException {
+        public SearchIterator<DocumentMetadata> buildIterator(final ResultSet result, final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl, final Context ctx, final Connection con, final boolean closeIfPossible) throws OXException {
             return new InfostoreIterator(result, stmt, dbColumns, impl, ctx, con);
         }
 
@@ -1667,10 +1637,10 @@ public class DatabaseImpl extends DBService {
 
         private Connection readCon;
 
-        private final List<AbstractOXException> warnings;
+        private final List<OXException> warnings;
 
-        public InfostoreIterator(final ResultSet rs, final Statement stmt, final int[] columns, final DatabaseImpl d, final Context ctx, final Connection readCon) throws SearchIteratorException {
-            this.warnings = new ArrayList<AbstractOXException>(2);
+        public InfostoreIterator(final ResultSet rs, final Statement stmt, final int[] columns, final DatabaseImpl d, final Context ctx, final Connection readCon) throws OXException {
+            this.warnings = new ArrayList<OXException>(2);
             this.rs = rs;
             this.stmt = stmt;
             this.columns = columns;
@@ -1685,12 +1655,12 @@ public class DatabaseImpl extends DBService {
                     close();
                 }
             } catch (final SQLException e) {
-                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.INFOSTORE);
+                throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             }
         }
 
         public InfostoreIterator(final ResultSet rs, final int[] columns, final DatabaseImpl d) {
-            this.warnings = new ArrayList<AbstractOXException>(2);
+            this.warnings = new ArrayList<OXException>(2);
             this.rs = rs;
             this.columns = columns;
             this.d = d;
@@ -1708,7 +1678,7 @@ public class DatabaseImpl extends DBService {
             return false;
         }
 
-        public DocumentMetadata next() throws SearchIteratorException, OXException {
+        public DocumentMetadata next() throws OXException, OXException {
             try {
                 DocumentMetadata retval = null;
                 retval = next;
@@ -1729,11 +1699,11 @@ public class DatabaseImpl extends DBService {
                 }
                 return retval;
             } catch (final SQLException exc) {
-                throw new SearchIteratorException(Code.SQL_ERROR, exc, EnumComponent.INFOSTORE);
+                throw SearchIteratorExceptionCodes.SQL_ERROR.create(exc, exc.getMessage());
             }
         }
 
-        public void close() throws SearchIteratorException, OXException {
+        public void close() throws OXException {
             next = null;
             try {
                 if (rs != null) {
@@ -1745,7 +1715,7 @@ public class DatabaseImpl extends DBService {
                 rs = null;
                 stmt = null;
             } catch (final SQLException e) {
-                throw new SearchIteratorException(Code.SQL_ERROR, e, EnumComponent.INFOSTORE);
+                throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 if (readCon != null) {
                     d.releaseReadConnection(ctx, readCon);
@@ -1758,7 +1728,7 @@ public class DatabaseImpl extends DBService {
         }
 
         public OXException[] getWarnings() {
-            return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+            return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
         public boolean hasWarnings() {
@@ -1790,8 +1760,8 @@ public class DatabaseImpl extends DBService {
             return -1;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } catch (final DBPoolingException e) {
-            throw new InfostoreException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, rs);
             if (con != null) {

@@ -51,7 +51,7 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -59,26 +59,26 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 
     @Override
-    protected void undoAction() throws AbstractOXException {
+    protected void undoAction() throws OXException {
         int counter = 0;
         try {
             counter = doUpdates(getQueryCatalog().getDocumentUpdate(getModified()), getQueryCatalog().filterForDocument(getModified()), getOldDocuments());
         } catch (final OXException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+            throw e;
         }
         if (counter < 0) {
             throw InfostoreExceptionCodes.UPDATED_BETWEEN_DO_AND_UNDO.create();
         }
     }
 
-    public void perform() throws AbstractOXException {
+    public void perform() throws OXException {
         int counter = 0;
         try {
             Metadata[] fields = getQueryCatalog().filterForDocument(getModified());
             fields = getQueryCatalog().filterWritable(fields);
             counter = doUpdates(getQueryCatalog().getDocumentUpdate(fields), fields, getDocuments());
         } catch (final OXException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getSQLException(), e.getStatement());
+            throw e;
         }
         setTimestamp(System.currentTimeMillis());
         if (counter <= 0) {

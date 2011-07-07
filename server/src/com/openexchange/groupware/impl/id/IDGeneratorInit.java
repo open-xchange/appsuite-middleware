@@ -50,7 +50,7 @@
 package com.openexchange.groupware.impl.id;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -75,7 +75,7 @@ public final class IDGeneratorInit implements Initialization {
         started = new AtomicBoolean();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
         }
@@ -84,7 +84,7 @@ public final class IDGeneratorInit implements Initialization {
         LOG.info("IDGeneratorService successfully injected to server service registry");
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;
         }

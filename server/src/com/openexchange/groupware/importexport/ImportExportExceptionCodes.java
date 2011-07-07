@@ -49,48 +49,13 @@
 
 package com.openexchange.groupware.importexport;
 
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.BROKEN_CSV_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.CALENDAR_DISABLED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.CANNOT_EXPORT_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.CANNOT_IMPORT_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.CONTACTS_DISABLED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.DATA_AFTER_LAST_LINE_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.EMPTY_FILE_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.FILE_NOT_EXISTS_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ICAL_CONVERSION_FAILED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ICAL_EMITTER_SERVICE_MISSING_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ICAL_PARSER_SERVICE_MISSING_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.IOEXCEPTION_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.LOADING_CONTACTS_FAILED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.LOADING_FOLDER_FAILED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NOT_FOUND_FIELD_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_DATABASE_CONNECTION_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_EXPORTER_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_FIELD_FOR_NAMING_IN_LINE_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_FIELD_FOR_NAMING_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_FIELD_IMPORTED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_FOLDEROBJECT_CONSTANT_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_IMPORTER_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_TYPES_CONSTANT_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_VALID_CSV_COLUMNS_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NO_VCARD_FOUND_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.NUMBER_FAILED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ONLY_ONE_FILE_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.ONLY_ONE_FOLDER_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.RESOURCE_HARD_CONFLICT_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.TASKS_DISABLED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.UNKNOWN_FORMAT_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.UNKNOWN_VCARD_FORMAT_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.UTF8_ENCODE_FAILED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.VCARD_CONVERSION_FAILED_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.VCARD_CONVERSION_PROBLEM_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.VCARD_PARSING_PROBLEM_MSG;
-import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.WARNINGS_MSG;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.importexport.internal.ImportExportExceptionFactory;
+import static com.openexchange.groupware.importexport.ImportExportExceptionMessages.*;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.groupware.EnumComponent;
+
 
 /**
  * {@link ImportExportExceptionCodes}
@@ -130,7 +95,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     /** Failed importing appointment due to hard conflicting resource. */
     RESOURCE_HARD_CONFLICT(RESOURCE_HARD_CONFLICT_MSG, CATEGORY_USER_INPUT, 513),
     /** Warnings when importing file: %i warnings */
-    WARNINGS(WARNINGS_MSG, Category.WARNING, 514),
+    WARNINGS(WARNINGS_MSG, CATEGORY_WARNING, 514),
     /** Could not recognize format of the following data: %s */
     UNKNOWN_VCARD_FORMAT(UNKNOWN_VCARD_FORMAT_MSG, CATEGORY_USER_INPUT, 605),
     /** Module contacts not enabled for user, cannot import contacts. */
@@ -144,7 +109,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     /** Can only import into one folder at a time. */
     ONLY_ONE_FOLDER(ONLY_ONE_FOLDER_MSG, CATEGORY_USER_INPUT, 800),
     /** Could not find the following fields %s */
-    NOT_FOUND_FIELD(NOT_FOUND_FIELD_MSG, Category.WARNING, 803),
+    NOT_FOUND_FIELD(NOT_FOUND_FIELD_MSG, CATEGORY_WARNING, 803),
     /** Could not translate a single column title. Is this a valid CSV file? */
     NO_VALID_CSV_COLUMNS(NO_VALID_CSV_COLUMNS_MSG, CATEGORY_USER_INPUT, 804),
     /** Could not translate a single field of information, did not insert entry %s. */
@@ -192,7 +157,11 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
         this.number = number;
     }
 
-    public int getDetailNumber() {
+    public String getPrefix() {
+        return EnumComponent.IMPORT_EXPORT.getAbbreviation();
+    }
+
+    public int getNumber() {
         return number;
     }
 
@@ -208,11 +177,37 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
         return category;
     }
 
-    public ImportExportException create(final Object... args) {
-        return ImportExportExceptionFactory.getInstance().create(this, args);
+    public boolean equals(final OXException e) {
+        return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
-    public ImportExportException create(final Throwable cause, final Object... args) {
-        return ImportExportExceptionFactory.getInstance().create(this, cause, args);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     * 
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

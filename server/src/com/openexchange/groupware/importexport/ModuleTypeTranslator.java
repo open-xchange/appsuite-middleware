@@ -50,9 +50,9 @@
 package com.openexchange.groupware.importexport;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 
 /**
  * This sad little class translates has the sad little task to translate between different constants that are used to identify types of
@@ -69,7 +69,7 @@ public final class ModuleTypeTranslator {
     /**
      * Translates a FolderObject value to a Types value.
      */
-    public static int getTypesConstant(final int folderObjectConstant) throws ImportExportException {
+    public static int getTypesConstant(final int folderObjectConstant) throws OXException {
         switch (folderObjectConstant) {
         case FolderObject.CONTACT:
             return Types.CONTACT;
@@ -89,7 +89,7 @@ public final class ModuleTypeTranslator {
     /**
      * Translates a Types value to a FolderObject value
      */
-    public static int getFolderObjectConstant(final int typeConstant) throws ImportExportException {
+    public static int getFolderObjectConstant(final int typeConstant) throws OXException {
         switch (typeConstant) {
         case Types.CONTACT:
             return FolderObject.CONTACT;

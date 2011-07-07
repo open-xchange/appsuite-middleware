@@ -408,6 +408,15 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Gets the first category.
+     * 
+     * @return The first category.
+     */
+    public Category getCategory() {
+        return getCategories().get(0);
+    }
+
+    /**
      * Gets the (sorted) categories.
      * 
      * @return The (sorted) categories

@@ -58,7 +58,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -118,7 +118,7 @@ public final class IDGenerator {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             final SQLException sexp = new SQLException("Cannot get connection from dbpool.");
             sexp.initCause(e);
             throw sexp;

@@ -61,10 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -77,7 +74,6 @@ import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.SizedInputStream;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -167,7 +163,7 @@ public class CSVContactExporter implements Exporter {
         FolderObject fo;
         try {
             fo = getFolderObject(sessObj, folder);
-        } catch (final ImportExportException e) {
+        } catch (final OXException e) {
             return false;
         }
         // check format of folder
@@ -180,7 +176,7 @@ public class CSVContactExporter implements Exporter {
             perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
                 sessObj.getUserId(),
                 sessObj.getContext()));
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             return false;
         } catch (final SQLException e) {
             return false;
@@ -188,7 +184,7 @@ public class CSVContactExporter implements Exporter {
         return perm.canReadAllObjects();
     }
 
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
@@ -228,14 +224,14 @@ public class CSVContactExporter implements Exporter {
                 }
 
             }
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
         }
         final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
         return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);
     }
 
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
@@ -274,7 +270,7 @@ public class CSVContactExporter implements Exporter {
             tempField = ContactField.getByValue(col);
             try {
                 l.add((String) tempField.doSwitch(getter, conObj));
-            } catch (final ContactException e) {
+            } catch (final OXException e) {
                 l.add("");
             }
         }

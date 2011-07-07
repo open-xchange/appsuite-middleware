@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -116,8 +115,8 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
             return locks;
         } catch (final SQLException x) {
             throw new OXException();
-        } catch (DBPoolingException e) {
-            throw new OXException(e);
+        } catch (final OXException e) {
+            throw e;
         } finally {
             close(stmt, rs);
             releaseReadConnection(ctx, readCon);

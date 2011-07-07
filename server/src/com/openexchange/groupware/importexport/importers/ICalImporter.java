@@ -73,7 +73,6 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -88,13 +87,11 @@ import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskField;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.OXException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.TimeZoneUtils;
@@ -125,7 +122,7 @@ public class ICalImporter extends AbstractImporter {
 	public boolean canImport(final ServerSession session, final Format format,
 			final List<String> folders,
 			final Map<String, String[]> optionalParams)
-			throws ImportExportException {
+			throws OXException {
 		if (!format.equals(Format.ICAL)) {
 			return false;
 		}
@@ -178,7 +175,7 @@ public class ICalImporter extends AbstractImporter {
 						UserConfigurationStorage.getInstance()
 								.getUserConfigurationSafe(session.getUserId(),
 										session.getContext()));
-			} catch (final DBPoolingException e) {
+			} catch (final OXException e) {
 				throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION
 						.create(e);
 			} catch (final SQLException e) {
@@ -193,9 +190,9 @@ public class ICalImporter extends AbstractImporter {
 		return true;
 	}
 
-	private int[] determineFolders(ServerSession session, List<String> folders,
-			Format format) throws ImportExportException {
-		int[] result = new int[] { -1, -1 };
+	private int[] determineFolders(final ServerSession session, final List<String> folders,
+			final Format format) throws OXException {
+		final int[] result = new int[] { -1, -1 };
 		final OXFolderAccess folderAccess = new OXFolderAccess(
 				session.getContext());
 		final Iterator<String> iterator = folders.iterator();
@@ -224,10 +221,10 @@ public class ICalImporter extends AbstractImporter {
 			final Format format, final InputStream is,
 			final List<String> folders,
 			final Map<String, String[]> optionalParams)
-			throws ImportExportException {
-		int[] res = determineFolders(session, folders, format);
-		int appointmentFolderId = res[APP];
-		int taskFolderId = res[TASK];
+			throws OXException {
+		final int[] res = determineFolders(session, folders, format);
+		final int appointmentFolderId = res[APP];
+		final int taskFolderId = res[TASK];
 
 		final AppointmentSQLInterface appointmentInterface = retrieveAppointmentInterface(
 				appointmentFolderId, session);
@@ -254,17 +251,17 @@ public class ICalImporter extends AbstractImporter {
 		return list;
 	}
 
-	private void importTask(final InputStream is, int taskFolderId,
+	private void importTask(final InputStream is, final int taskFolderId,
 			final TasksSQLInterface taskInterface, final ICalParser parser,
 			final Context ctx, final TimeZone defaultTz,
 			final List<ImportResult> list, final List<ConversionError> errors,
 			final List<ConversionWarning> warnings)
-			throws ImportExportException {
+			throws OXException {
 		List<Task> tasks;
 		try {
 			tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
 		} catch (final ConversionError conversionError) {
-			throw new ImportExportException(conversionError);
+			throw new OXException(conversionError);
 		}
 		final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
@@ -291,7 +288,7 @@ public class ICalImporter extends AbstractImporter {
 			final ConversionError error = errorMap.get(index);
 			if (error != null) {
 				errorMap.remove(index);
-				importResult.setException(new ImportExportException(error));
+				importResult.setException(new OXException(error));
 			} else {
 				// IGNORE WARNINGS. Protocol doesn't allow for warnings.
 				// TODO: Verify This
@@ -327,7 +324,7 @@ public class ICalImporter extends AbstractImporter {
 				public boolean execute(final ConversionError error) {
 					final ImportResult importResult = new ImportResult();
 					importResult.setEntryNumber(error.getIndex());
-					importResult.setException(new ImportExportException(
+					importResult.setException(new OXException(
 							error));
 					list.add(importResult);
 					return true;
@@ -338,19 +335,19 @@ public class ICalImporter extends AbstractImporter {
 
 	private void importAppointment(final ServerSession session,
 			final InputStream is, final Map<String, String[]> optionalParams,
-			int appointmentFolderId,
+			final int appointmentFolderId,
 			final AppointmentSQLInterface appointmentInterface,
 			final ICalParser parser, final Context ctx,
 			final TimeZone defaultTz, final List<ImportResult> list,
 			final List<ConversionError> errors,
 			final List<ConversionWarning> warnings)
-			throws ImportExportException {
+			throws OXException {
 		List<CalendarDataObject> appointments;
 		try {
 			appointments = parser.parseAppointments(is, defaultTz, ctx,
 					errors, warnings);
 		} catch (final ConversionError conversionError) {
-			throw new ImportExportException(conversionError);
+			throw new OXException(conversionError);
 		}
 		final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
@@ -359,8 +356,8 @@ public class ICalImporter extends AbstractImporter {
 		}
 
 		sortSeriesMastersFirst(appointments);
-		Map<Integer, Integer> pos2Master = handleChangeExceptions(appointments);
-		Map<Integer, Integer> master2id = new HashMap<Integer,Integer>();
+		final Map<Integer, Integer> pos2Master = handleChangeExceptions(appointments);
+		final Map<Integer, Integer> master2id = new HashMap<Integer,Integer>();
 		
 		final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
 
@@ -377,14 +374,14 @@ public class ICalImporter extends AbstractImporter {
 		int index = 0;
 		final Iterator<CalendarDataObject> iter = appointments.iterator();
 		
-		boolean suppressNotification = (optionalParams != null && optionalParams
+		final boolean suppressNotification = (optionalParams != null && optionalParams
 				.containsKey("suppressNotification"));
 		while (iter.hasNext()) {
 			final ImportResult importResult = new ImportResult();
 			final ConversionError error = errorMap.get(index);
 			if (error != null) {
 				errorMap.remove(index);
-				importResult.setException(new ImportExportException(error));
+				importResult.setException(new OXException(error));
 			} else {
 				final CalendarDataObject appointmentObj = iter.next();
 				appointmentObj.setContext(session.getContext());
@@ -396,10 +393,10 @@ public class ICalImporter extends AbstractImporter {
 				// Check for possible full-time appointment
 				check4FullTime(appointmentObj);
 				try {
-					boolean isMaster = appointmentObj.containsUid() && !pos2Master.containsKey(index);
-					boolean isChange = appointmentObj.containsUid() && pos2Master.containsKey(index);
-					Date changeDate = new Date(Long.MAX_VALUE);
-					Integer masterID = master2id.get(pos2Master.get(index));
+					final boolean isMaster = appointmentObj.containsUid() && !pos2Master.containsKey(index);
+					final boolean isChange = appointmentObj.containsUid() && pos2Master.containsKey(index);
+					final Date changeDate = new Date(Long.MAX_VALUE);
+					final Integer masterID = master2id.get(pos2Master.get(index));
 					if(isChange){
 						appointmentObj.setRecurrenceID(masterID);
 						appointmentObj.removeUid();
@@ -412,8 +409,9 @@ public class ICalImporter extends AbstractImporter {
 					}  else {
 						conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
 					}
-					if(isMaster)
-						master2id.put(index, appointmentObj.getObjectID());
+					if(isMaster) {
+                        master2id.put(index, appointmentObj.getObjectID());
+                    }
 					if (conflicts == null || conflicts.length == 0) {
 						importResult.setObjectId(String
 								.valueOf(appointmentObj.getObjectID()));
@@ -449,7 +447,7 @@ public class ICalImporter extends AbstractImporter {
 				public boolean execute(final ConversionError error) {
 					final ImportResult importResult = new ImportResult();
 					importResult.setEntryNumber(error.getIndex());
-					importResult.setException(new ImportExportException(
+					importResult.setException(new OXException(
 							error));
 					list.add(importResult);
 					return true;
@@ -458,8 +456,8 @@ public class ICalImporter extends AbstractImporter {
 		}
 	}
 
-	private Date calculateRecurrenceDatePosition(Date startDate) {
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+	private Date calculateRecurrenceDatePosition(final Date startDate) {
+		final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		cal.setTime(startDate);
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
@@ -468,93 +466,103 @@ public class ICalImporter extends AbstractImporter {
 		return cal.getTime();
 	}
 
-	private void sortSeriesMastersFirst(List<CalendarDataObject> appointments) {
+	private void sortSeriesMastersFirst(final List<CalendarDataObject> appointments) {
 		Collections.sort(appointments, new Comparator<CalendarDataObject>(){
-			public int compare(CalendarDataObject o1, CalendarDataObject o2) {
-				if( o1.containsRecurrenceType() && !o2.containsRecurrenceType())
-					return -1;
-				if( !o1.containsRecurrenceType() && o2.containsRecurrenceType())
-					return 1;
+			public int compare(final CalendarDataObject o1, final CalendarDataObject o2) {
+				if( o1.containsRecurrenceType() && !o2.containsRecurrenceType()) {
+                    return -1;
+                }
+				if( !o1.containsRecurrenceType() && o2.containsRecurrenceType()) {
+                    return 1;
+                }
 				return 0;
 			}});
 	}
 	/**
 	 * @return mapping for position of a recurrence in the list to the position of the recurrence master
 	 */
-	private Map<Integer, Integer> handleChangeExceptions(List<CalendarDataObject> appointments) {
-		Map<String, Integer> uid2master = new HashMap<String,Integer>();
-		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+	private Map<Integer, Integer> handleChangeExceptions(final List<CalendarDataObject> appointments) {
+		final Map<String, Integer> uid2master = new HashMap<String,Integer>();
+		final Map<Integer, Integer> map = new HashMap<Integer, Integer>();
 		CalendarDataObject app;
 			
 		//find master
 		for(int pos = 0, len = appointments.size(); pos < len; pos++){
 			app = appointments.get(pos);
-			if(! app.containsUid())
-				continue;
+			if(! app.containsUid()) {
+                continue;
+            }
 			
-			String uid = app.getUid();
-			if(! uid2master.containsKey(uid))
-				uid2master.put(uid, pos);
+			final String uid = app.getUid();
+			if(! uid2master.containsKey(uid)) {
+                uid2master.put(uid, pos);
+            }
 		}
 		
 		//references to master
 		for(int pos = 0, len = appointments.size(); pos < len; pos++){
 			app = appointments.get(pos);
-			if(! app.containsUid())
-				continue;
+			if(! app.containsUid()) {
+                continue;
+            }
 			
-			String uid = app.getUid();
-			Integer masterPos = uid2master.get(uid);
+			final String uid = app.getUid();
+			final Integer masterPos = uid2master.get(uid);
 				
-			if(pos > masterPos) //only work on change exceptions, not on the series master 
-				map.put(pos, uid2master.get(uid));
+			if(pos > masterPos) {
+                map.put(pos, uid2master.get(uid));
+            }
 		}
 		
 		return map;
 	}
 
-	private ICalParser retrieveIcalParser() throws ImportExportException {
+	private ICalParser retrieveIcalParser() throws OXException {
 		try {
 			return ServerServiceRegistry.getInstance().getService(
 					ICalParser.class, true);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw ImportExportExceptionCodes.ICAL_PARSER_SERVICE_MISSING
 					.create(e);
 		}
 	}
 
 	private AppointmentSQLInterface retrieveAppointmentInterface(
-			int appointmentFolderId, ServerSession session)
-			throws ImportExportException {
-		if (appointmentFolderId == -1)
-			return null;
+			final int appointmentFolderId, final ServerSession session)
+			throws OXException {
+		if (appointmentFolderId == -1) {
+            return null;
+        }
 
 		if (!UserConfigurationStorage
 				.getInstance()
 				.getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasCalendar())
-			throw ImportExportExceptionCodes.CALENDAR_DISABLED
+						session.getContext()).hasCalendar()) {
+            throw ImportExportExceptionCodes.CALENDAR_DISABLED
 					.create(new OXPermissionException(
 							OXPermissionException.Code.NoPermissionForModul,
 							"Calendar"));
+        }
 
 		return ServerServiceRegistry.getInstance()
 				.getService(AppointmentSqlFactoryService.class)
 				.createAppointmentSql(session);
 	}
 
-	private TasksSQLInterface retrieveTaskInterface(int taskFolderId,
-			ServerSession session) throws ImportExportException {
-		if (taskFolderId == -1)
-			return null;
+	private TasksSQLInterface retrieveTaskInterface(final int taskFolderId,
+			final ServerSession session) throws OXException {
+		if (taskFolderId == -1) {
+            return null;
+        }
 		if (!UserConfigurationStorage
 				.getInstance()
 				.getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasTask())
-			throw ImportExportExceptionCodes.TASKS_DISABLED
+						session.getContext()).hasTask()) {
+            throw ImportExportExceptionCodes.TASKS_DISABLED
 					.create(new OXPermissionException(
 							OXPermissionException.Code.NoPermissionForModul,
 							"Task"));
+        }
 
 		return new TasksSQLImpl(session);
 	}
@@ -591,13 +599,13 @@ public class ICalImporter extends AbstractImporter {
 	@Override
 	protected String getNameForFieldInTruncationError(final int id,
 			final OXException oxex) {
-		if (oxex.getComponent() == EnumComponent.APPOINTMENT) {
+		if (oxex.getPrefix().equals(EnumComponent.APPOINTMENT.getAbbreviation())) {
 			final CalendarField field = CalendarField
 					.getByAppointmentObjectId(id);
 			if (field != null) {
 				return field.getName();
 			}
-		} else if (oxex.getComponent() == EnumComponent.TASK) {
+		} else if (oxex.getPrefix().equals(EnumComponent.TASK.getAbbreviation())) {
 			final TaskField field = TaskField.getByTaskID(id);
 			if (field != null) {
 				return field.getName();
