@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -222,8 +221,6 @@ final class Reminder {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 throw new OXException(e);
             }
-        } catch (final OXException e) {
-            throw e;
         }
     }
 }

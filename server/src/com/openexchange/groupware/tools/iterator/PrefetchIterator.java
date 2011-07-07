@@ -57,10 +57,10 @@ import java.util.Queue;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 
 /**
  * This iterator prefetches the delegating iterator results if the server configuration contains <code>true</code> for the prefetch
@@ -79,9 +79,9 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
      * Default constructor.
      * 
      * @param delegate Delegating iterator.
-     * @throws AbstractOXException 
+     * @throws OXException 
      */
-    public PrefetchIterator(final SearchIterator<T> delegate) throws AbstractOXException {
+    public PrefetchIterator(final SearchIterator<T> delegate) throws OXException {
         final boolean prefetch = ServerConfig.getBoolean(Property.PrefetchEnabled);
         if (prefetch) {
             impl = new Prefetch<T>(delegate);
@@ -154,9 +154,9 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
         private Queue<T> data;
 
-        private final List<AbstractOXException> warnings;
+        private final List<OXException> warnings;
 
-        private AbstractOXException oxExc;
+        private OXException oxExc;
 
         private SearchIteratorException closeexc;
 
@@ -164,11 +164,11 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
          * Default constructor.
          * 
          * @param delegate Iterator for the object.
-         * @throws AbstractOXException 
+         * @throws OXException 
          */
-        Prefetch(final SearchIterator<T> delegate) throws AbstractOXException {
+        Prefetch(final SearchIterator<T> delegate) throws OXException {
             super();
-            warnings = new ArrayList<AbstractOXException>(2);
+            warnings = new ArrayList<OXException>(2);
             this.delegate = delegate;
             fetch();
             if (delegate.hasWarnings()) {
@@ -178,14 +178,14 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
         /**
          * Reads all data from the delegate.
-         * @throws AbstractOXException 
+         * @throws OXException 
          */
-        private void fetch() throws AbstractOXException {
+        private void fetch() throws OXException {
             data = new LinkedList<T>();
             while (delegate.hasNext()) {
                 try {
                     data.add(delegate.next());
-                } catch (final AbstractOXException e) {
+                } catch (final OXException e) {
                     oxExc = e;
                     break;
                 }
@@ -229,7 +229,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
                 if (null != oxExc) {
                     throw oxExc;
                 }
-                throw new SearchIteratorException(SearchIteratorException.Code.NO_SUCH_ELEMENT, EnumComponent.APPOINTMENT);
+                throw SearchIteratorExceptionCodes.NO_SUCH_ELEMENT.create().setPrefix(EnumComponent.APPOINTMENT.getAbbreviation());
             }
             return data.poll();
         }
@@ -252,7 +252,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
          * {@inheritDoc}
          */
         public OXException[] getWarnings() {
-            return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+            return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
         /**

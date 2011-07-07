@@ -315,9 +315,6 @@ public abstract class UserStorage {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return null;
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
         }
     }
 }
