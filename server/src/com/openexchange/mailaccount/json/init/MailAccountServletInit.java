@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Constants;
 import com.openexchange.mailaccount.json.servlet.MailAccountServlet;
 import com.openexchange.server.Initialization;
@@ -81,7 +81,7 @@ public final class MailAccountServletInit implements Initialization {
         super();
     }
 
-    public void start() throws AbstractOXException {
+    public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
         }
@@ -96,7 +96,7 @@ public final class MailAccountServletInit implements Initialization {
         }
     }
 
-    public void stop() throws AbstractOXException {
+    public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;
         }
