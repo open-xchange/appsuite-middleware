@@ -61,14 +61,19 @@ public final class ResponseFields {
     public static final String DATA = "data";
 
     /**
+     * Name of the JSON attribute containing the response's warnings.
+     */
+    public static final String WARNINGS = "warnings";
+
+    /**
      * Name of the JSON attribute containing the error message.
      */
     public static final String ERROR = "error";
 
     /**
-     * Name of the JSON attribute containing the error category.
+     * Name of the JSON attribute containing the error categories.
      */
-    public static final String ERROR_CATEGORY = "category";
+    public static final String ERROR_CATEGORIES = "categories";
 
     /**
      * Name of the JSON attribute containing the error code.

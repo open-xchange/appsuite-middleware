@@ -52,7 +52,10 @@ package com.openexchange.ajax.container;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +68,7 @@ import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
  * Response data object.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -86,7 +90,7 @@ public final class Response {
     private Object data;
 
     /**
-     * Timestamp for the last modification.
+     * Time stamp for the last modification.
      */
     private Date timestamp;
 
@@ -96,18 +100,18 @@ public final class Response {
     private OXException exception;
 
     /**
-     * Whether to communicate exception as a warning to front-end or as an error
+     * The list of warnings.
      */
-    private boolean isWarning;
+    private final List<OXException> warnings;
 
     /**
      * This constructor parses a server response into an object.
-     *
-     * @param response
-     *            the response JSON object.
+     * 
+     * @param response the response JSON object.
      */
     public Response(final JSONObject response) {
         super();
+        warnings = new LinkedList<OXException>();
         this.json = response;
         this.locale = Locale.US;
     }
@@ -117,6 +121,7 @@ public final class Response {
      */
     public Response(final Locale locale) {
         super();
+        warnings = new LinkedList<OXException>();
         this.json = null;
         this.locale = locale;
     }
@@ -133,9 +138,19 @@ public final class Response {
     }
 
     /**
-     * @return the json object
-     * @throws JSONException
-     *             if putting the attributes into the json object fails.
+     * Gets the locale used for internationalization of display message.
+     * 
+     * @return locale The locale
+     */
+    public Locale getLocale() {
+        return locale;
+    }
+
+    /**
+     * Gets the JSON object resulting from this response.
+     * 
+     * @return The JSON object
+     * @throws JSONException If composing the JSON object fails.
      * @deprecated use {@link ResponseWriter#getJSON(Response)}.
      */
     @Deprecated
@@ -147,29 +162,33 @@ public final class Response {
     }
 
     /**
-     * Resets the response object for re-use
+     * Resets the response object for re-use.
+     * <p>
+     * <b>Note</b>: Locale is maintained.
      */
     public void reset() {
         json = null;
         data = null;
         timestamp = null;
         exception = null;
-        isWarning = false;
+        warnings.clear();
     }
 
     /**
-     * @return Returns the data.
+     * Gets the data object.
+     * 
+     * @return The data.
      */
     public Object getData() {
         return data;
     }
 
     /**
-     * Returns the error message.
+     * Gets the error message.
      * <p>
      * For testing only
-     *
-     * @return Returns the errorMessage.
+     * 
+     * @return The errorMessage.
      */
     public String getErrorMessage() {
         if (null == exception) {
@@ -193,23 +212,21 @@ public final class Response {
     }
 
     /**
-     * @return Returns the timestamp.
+     * @return Returns the time stamp.
      */
     public Date getTimestamp() {
         return timestamp;
     }
 
     /**
-     * @param data
-     *            The data to set.
+     * @param data The data to set.
      */
     public void setData(final Object data) {
         this.data = data;
     }
 
     /**
-     * @param timestamp
-     *            The timestamp to set.
+     * @param timestamp The time stamp to set.
      */
     public void setTimestamp(final Date timestamp) {
         this.timestamp = timestamp;
@@ -219,29 +236,28 @@ public final class Response {
      * Checks if if the response contains an error message or a warning.
      * <p>
      * For testing only.
-     *
-     * @return <code>true</code> if the response contains an error message or a
-     *         warning.
+     * 
+     * @return <code>true</code> if the response contains an error message or a warning.
      */
     public boolean hasError() {
         return exception != null;
     }
 
     /**
-     * @return <code>true</code> if the response contains a warning.
+     * Checks if this response contains warnings.
+     * 
+     * @return <code>true</code> if the response contains warnings; otherwise <code>false</code>
      */
-    public boolean hasWarning() {
-        return exception != null && isWarning;
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
     }
 
     /**
      * Deserializes a response into the Response object.
-     *
-     * @param body
-     *            JSON response string.
+     * 
+     * @param body JSON response string.
      * @return the parsed object.
-     * @throws JSONException
-     *             if parsing fails.
+     * @throws JSONException if parsing fails.
      * @deprecated use {@link ResponseParser#parse(String)}.
      */
     @Deprecated
@@ -251,13 +267,10 @@ public final class Response {
 
     /**
      * Serializes a Response object to the writer.
-     *
-     * @param response
-     *            Response object to serialize.
-     * @param writer
-     *            the serialized object will be written to this writer.
-     * @throws JSONException
-     *             if writing fails.
+     * 
+     * @param response Response object to serialize.
+     * @param writer the serialized object will be written to this writer.
+     * @throws JSONException if writing fails.
      * @throws IOException If an I/O error occurs
      * @deprecated use {@link ResponseWriter#write(Response, Writer)}.
      */
@@ -269,13 +282,10 @@ public final class Response {
     /**
      * Serializes a Response object to given instance of <code>
      * {@link JSONWriter}</code>.
-     *
-     * @param response
-     *            - the <code>{@link Response}</code> object to serialize.
-     * @param writer
-     *            - the <code>{@link JSONWriter}</code> to write to
-     * @throws JSONException
-     *             - if writing fails
+     * 
+     * @param response - the <code>{@link Response}</code> object to serialize.
+     * @param writer - the <code>{@link JSONWriter}</code> to write to
+     * @throws JSONException - if writing fails
      * @deprecated use {@link ResponseWriter#write(Response, JSONWriter)}.
      */
     @Deprecated
@@ -300,39 +310,41 @@ public final class Response {
     }
 
     /**
-     * Sets this response object's exception and implicitly overwrites any
-     * existing warning/error.
+     * Sets this response object's exception and implicitly overwrites any existing exception.
      * <p>
-     * <b>Note</b>: If exception's category is set to {@link Category#WARNING}
-     * it is treated as a warning only.
-     *
-     * @param exception
-     *            The exception to set
-     * @see #setWarning(AbstractOXException)
+     * <b>Note</b>: If exception's category is set to {@link Category#CATEGORY_WARNING} it is treated as a warning only.
+     * 
+     * @param exception The exception to set
+     * @return This response with exception applied
      */
-    public void setException(final OXException exception) {
-        this.exception = exception;
-        isWarning = exception.getCategories().get(0).getType().equals(Category.EnumType.WARNING);
+    public Response setException(final OXException exception) {
+        if (Category.CATEGORY_WARNING.equals(exception.getCategory())) {
+            addWarning(exception);
+        } else {
+            this.exception = exception;
+        }
+        return this;
     }
 
     /**
-     * Sets this response object's warning and implicitly overwrites any
-     * existing warning/error.
+     * Sets this response object's warning and implicitly overwrites any existing warning/error.
      * <p>
-     * <b>Note</b>: Resulting response object's category is implicitly set to
-     * {@link Category#WARNING}.
-     *
-     * @param warning
-     *            The warning to set
+     * <b>Note</b>: {@link OXException}'s category is implicitly set to {@link Category#CATEGORY_WARNING}.
+     * 
+     * @param warning The warning to add
+     * @return This response with warning added
      */
-    public void setWarning(final OXException warning) {
-        this.exception = warning;
-        isWarning = true;
+    public Response addWarning(final OXException warning) {
+        if (!Category.CATEGORY_WARNING.equals(exception.getCategory())) {
+            warning.setCategory(Category.CATEGORY_WARNING);
+        }
+        warnings.add(warning);
+        return this;
     }
 
     /**
      * Gets this response object's exception/warning.
-     *
+     * 
      * @return the exception or <code>null</code>
      */
     public OXException getException() {
@@ -340,11 +352,12 @@ public final class Response {
     }
 
     /**
-     * Gets this response object's warning
-     *
-     * @return the warning or <code>null</code>
+     * Gets this response object's warnings
+     * 
+     * @return The warnings as an unmodifiable list
      */
-    public OXException getWarning() {
-        return isWarning ? exception : null;
+    public List<OXException> getWarnings() {
+        return Collections.unmodifiableList(warnings);
     }
+
 }

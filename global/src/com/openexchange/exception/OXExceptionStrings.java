@@ -59,6 +59,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class OXExceptionStrings implements LocalizableStrings {
 
+    // Text displayed to user if there is no message.
+    public static final String DEFAULT_MESSAGE = "[Not available]";
+
     // The default message displayed to user.
     public static final String MESSAGE = "An error occurred. There is nothing you can do about at the moment.";
 

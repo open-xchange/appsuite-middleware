@@ -51,16 +51,18 @@ package com.openexchange.ajax.writer;
 
 import static com.openexchange.ajax.fields.ResponseFields.DATA;
 import static com.openexchange.ajax.fields.ResponseFields.ERROR;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORY;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
 import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
 import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
 import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
 import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
 import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
+import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
@@ -73,6 +75,7 @@ import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 
@@ -83,19 +86,59 @@ import com.openexchange.exception.OXException.Truncated;
  */
 public final class ResponseWriter {
 
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+
     private ResponseWriter() {
         super();
     }
 
+    /**
+     * Gets the JSON object resulting from specified response using default locale.
+     * 
+     * @param response The response
+     * @return The JSON object
+     * @throws JSONException If writing JSON fails
+     */
     public static JSONObject getJSON(final Response response) throws JSONException {
         final JSONObject json = new JSONObject();
-        write(response, json);
+        write(response, json, DEFAULT_LOCALE);
         return json;
     }
 
-    private static final String ERR = "[Not available]";
+    /**
+     * Gets the JSON object resulting from specified response using given locale.
+     * 
+     * @param response The response
+     * @param locale The locale
+     * @return The JSON object
+     * @throws JSONException If writing JSON fails
+     */
+    public static JSONObject getJSON(final Response response, final Locale locale) throws JSONException {
+        final JSONObject json = new JSONObject();
+        write(response, json, locale);
+        return json;
+    }
 
+    /**
+     * Writes specified response to given JSON object using default locale.
+     * 
+     * @param response The response to write
+     * @param json The JOSN object to write to
+     * @throws JSONException If writing JSON fails
+     */
     public static void write(final Response response, final JSONObject json) throws JSONException {
+        write(response, json, DEFAULT_LOCALE);
+    }
+
+    /**
+     * Writes specified response to given JSON object using passed locale.
+     * 
+     * @param response The response to write
+     * @param json The JOSN object to write to
+     * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     */
+    public static void write(final Response response, final JSONObject json, final Locale locale) throws JSONException {
         /*-
          * TODO: Also check for
          *       "JSONObject.NULL.equals(response.getData())"
@@ -108,26 +151,89 @@ public final class ResponseWriter {
             json.put(TIMESTAMP, response.getTimestamp().getTime());
         }
         if (null != response.getException()) {
-            final OXException exception = response.getException();
-            addException(json, exception,response.hasWarning());
+            addException(json, response.getException(), locale);
+        }
+        addWarnings(json, response.getWarnings(), locale);
+    }
+
+    /**
+     * Writes specified warnings to given JSON object using default locale.
+     * 
+     * @param json The JSON object
+     * @param warnings The warnings
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addWarnings(final JSONObject json, final List<OXException> warnings) throws JSONException {
+        addWarnings(json, warnings, DEFAULT_LOCALE);
+    }
+
+    /**
+     * Writes specified warnings to given JSON object using passed locale.
+     * 
+     * @param json The JSON object
+     * @param warnings The warnings
+     * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addWarnings(final JSONObject json, final List<OXException> warnings, final Locale locale) throws JSONException {
+        if (null == warnings || warnings.isEmpty()) {
+            return;
+        }
+        if (1 == warnings.size()) {
+            final JSONObject jsonWarning = new JSONObject();
+            addException(jsonWarning, warnings.get(0), locale);
+            json.put(WARNINGS, jsonWarning);
+        } else {
+            final JSONArray jsonArray = new JSONArray();
+            for (final OXException warning : warnings) {
+                final JSONObject jsonWarning = new JSONObject();
+                addException(jsonWarning, warning, locale);
+                jsonArray.put(jsonWarning);
+            }
+            json.put(WARNINGS, jsonArray);
         }
     }
 
-    public static void addException(final JSONObject json, final OXException exception, final boolean isWarning) throws JSONException {
-        json.put(ERROR, null == exception.getOrigMessage() ? ERR : exception.getOrigMessage());
-        if (exception.getMessageArgs() != null) {
-            final JSONArray array = new JSONArray();
-            for (final Object tmp : exception.getMessageArgs()) {
-                array.put(tmp);
+    /**
+     * Writes specified exception to given JSON object using default locale.
+     * 
+     * @param json The JSON object
+     * @param exception The exception to write
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addException(final JSONObject json, final OXException exception) throws JSONException {
+        addException(json, exception, DEFAULT_LOCALE);
+    }
+
+    /**
+     * Writes specified exception to given JSON object using passed locale.
+     * 
+     * @param json The JSON object
+     * @param exception The exception to write
+     * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
+        json.put(ERROR, exception.getDisplayMessage(locale));
+        /*
+         * Categories
+         */
+        {
+            final List<Category> categories = exception.getCategories();
+            if (1 == categories.size()) {
+                json.put(ERROR_CATEGORIES, categories.get(0).toString());
+            } else {
+                final JSONArray jsonArray = new JSONArray();
+                for (final Category category : categories) {
+                    jsonArray.put(category.toString());
+                }
+                json.put(ERROR_CATEGORIES, jsonArray);
             }
-            json.put(ERROR_PARAMS, array);
         }
-        json.put(ERROR_CATEGORY, isWarning ? Category.CATEGORY_WARNING.getCode() : exception.getCategory()
-                .getCode());
         json.put(ERROR_CODE, exception.getErrorCode());
-        json.put(ERROR_ID, exception.getExceptionID());
+        json.put(ERROR_ID, exception.getExceptionId());
         toJSON(json, exception.getProblematics());
-        if (Category.TRUNCATED == exception.getCategory()) {
+        if (Category.CATEGORY_TRUNCATED.equals(exception.getCategory())) {
             addTruncated(json, exception.getProblematics());
         }
     }
@@ -168,8 +274,7 @@ public final class ResponseWriter {
     /**
      * This method adds the old truncated ids.
      */
-    private static void addTruncated(final JSONObject json, final ProblematicAttribute[] problematics)
-            throws JSONException {
+    private static void addTruncated(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {
         final JSONArray array = new JSONArray();
         for (final ProblematicAttribute problematic : problematics) {
             if (Truncated.class.isAssignableFrom(problematic.getClass())) {
@@ -216,10 +321,8 @@ public final class ResponseWriter {
         } catch (final JSONException e) {
             if (e.getCause() instanceof IOException) {
                 /*
-                 * Throw proper I/O error since a serious socket error could
-                 * been occurred which prevents further communication. Just
-                 * throwing a JSON error possibly hides this fact by trying to
-                 * write to/read from a broken socket connection.
+                 * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
+                 * throwing a JSON error possibly hides this fact by trying to write to/read from a broken socket connection.
                  */
                 throw (IOException) e.getCause();
             }
@@ -231,25 +334,95 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes given instance of <code>OXException</code> into given instance of <code>JSONWriter</code> assuming that writer's mode
-     * is already set to writing a JSON object
+     * Writes specified warnings to {@link JSONWriter} instance using default locale.
+     * 
+     * @param warnings The warnings
+     * @param writer The JSON writer
+     * @throws JSONException If writing JSON fails
+     */
+    public static void writeWarnings(final List<OXException> warnings, final JSONWriter writer) throws JSONException {
+        writeWarnings(warnings, writer, DEFAULT_LOCALE);
+    }
+
+    /**
+     * Writes specified warnings to {@link JSONWriter} instance.
+     * 
+     * @param warnings The warnings
+     * @param writer The JSON writer
+     * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     */
+    public static void writeWarnings(final List<OXException> warnings, final JSONWriter writer, final Locale locale) throws JSONException {
+        if (null == warnings || warnings.isEmpty()) {
+            return;
+        }
+        writer.key(WARNINGS);
+        if (1 == warnings.size()) {
+            writer.object();
+            try {
+                writeException(warnings.get(0), writer, locale);
+            } finally {
+                writer.endObject();
+            }
+        } else {
+            writer.array();
+            try {
+                for (final OXException warning : warnings) {
+                    writer.object();
+                    try {
+                        writeException(warning, writer, locale);
+                    } finally {
+                        writer.endObject();
+                    }
+                }
+            } finally {
+                writer.endArray();
+            }
+        }
+    }
+
+    /**
+     * Writes given instance of <code>OXException</code> into given instance of <code>JSONWriter</code> assuming that writer's mode is
+     * already set to writing a JSON object
      * 
      * @param exc - the exception to write
      * @param writer - the writer to write to
      * @throws JSONException - if writing fails
      */
     public static void writeException(final OXException exc, final JSONWriter writer) throws JSONException {
-        writer.key(ResponseFields.ERROR).value(exc.getOrigMessage());
-        if (exc.getMessageArgs() != null) {
-            final JSONArray array = new JSONArray();
-            for (final Object tmp : exc.getMessageArgs()) {
-                array.put(tmp);
+        writeException(exc, writer, DEFAULT_LOCALE);
+    }
+
+    /**
+     * Writes given instance of <code>OXException</code> into given instance of <code>JSONWriter</code> assuming that writer's mode is
+     * already set to writing a JSON object
+     * 
+     * @param exc - the exception to write
+     * @param writer - the writer to write to
+     * @param locale The locale to use for internationalization of the error message
+     * @throws JSONException - if writing fails
+     */
+    public static void writeException(final OXException exc, final JSONWriter writer, final Locale locale) throws JSONException {
+        writer.key(ERROR).value(exc.getDisplayMessage(locale));
+        {
+            final List<Category> categories = exc.getCategories();
+            if (1 == categories.size()) {
+                writer.key(ERROR_CATEGORIES).value(categories.get(0).toString());
+            } else {
+                writer.key(ERROR_CATEGORIES);
+                writer.array();
+                try {
+                    for (final Category category : categories) {
+                        writer.value(category.toString());
+                    }
+                } finally {
+                    writer.endArray();
+                }
             }
-            writer.key(ResponseFields.ERROR_PARAMS).value(array);
+
         }
-        writer.key(ResponseFields.ERROR_CATEGORY).value(exc.getCategory().getCode());
         writer.key(ResponseFields.ERROR_CODE).value(exc.getErrorCode());
-        writer.key(ResponseFields.ERROR_ID).value(exc.getExceptionID());
+        writer.key(ResponseFields.ERROR_ID).value(exc.getExceptionId());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
     }
@@ -279,27 +452,4 @@ public final class ResponseWriter {
         }
     }
 
-    /**
-     * Writes given instance of <code>OXException</code> as a warning into given instance of <code>JSONWriter</code> assuming that
-     * writer's mode is already set to writing a JSON object
-     * 
-     * @param warning - the warning to write
-     * @param writer - the writer to write to
-     * @throws JSONException - if writing fails
-     */
-    public static void writeWarning(final OXException warning, final JSONWriter writer) throws JSONException {
-        writer.key(ResponseFields.ERROR).value(warning.getOrigMessage());
-        if (warning.getMessageArgs() != null) {
-            final JSONArray array = new JSONArray();
-            for (final Object tmp : warning.getMessageArgs()) {
-                array.put(tmp);
-            }
-            writer.key(ResponseFields.ERROR_PARAMS).value(array);
-        }
-        writer.key(ResponseFields.ERROR_CATEGORY).value(Category.CATEGORY_WARNING.getCode());
-        writer.key(ResponseFields.ERROR_CODE).value(warning.getErrorCode());
-        writer.key(ResponseFields.ERROR_ID).value(warning.getExceptionID());
-        writeProblematic(warning, writer);
-        writeTruncated(warning, writer);
-    }
 }
