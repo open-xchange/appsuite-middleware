@@ -54,8 +54,10 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.polling.Poll;
 import com.openexchange.polling.Question;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -64,24 +66,24 @@ import com.openexchange.polling.Question;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PollParser {
-    public Poll parse(JSONObject obj) throws AjaxException {
+    public Poll parse(final JSONObject obj) throws OXException {
         try {
-            Poll poll = new Poll();
+            final Poll poll = new Poll();
             
             poll.setTitle(obj.getString("title"));
             
             
-            JSONArray array = obj.getJSONArray("questions");
-            List<Question> questions = new ArrayList<Question>(array.length());
+            final JSONArray array = obj.getJSONArray("questions");
+            final List<Question> questions = new ArrayList<Question>(array.length());
             for(int i = 0, size = array.length(); i < size; i++) {
-                JSONObject q = array.getJSONObject(i);
-                Question question = new Question();
+                final JSONObject q = array.getJSONObject(i);
+                final Question question = new Question();
                 question.setQuestion(q.getString("question"));
                 
-                JSONArray array2 = q.getJSONArray("options");
-                List<String> answerOptions = new ArrayList<String>(array2.length());
+                final JSONArray array2 = q.getJSONArray("options");
+                final List<String> answerOptions = new ArrayList<String>(array2.length());
                 for(int j = 0, size2 = array2.length(); j < size2; j++) {
-                    String option = array2.getString(j);
+                    final String option = array2.getString(j);
                     answerOptions.add(option);
                 }
                 
@@ -92,8 +94,8 @@ public class PollParser {
             poll.setQuestions(questions);
             
             return poll;
-        } catch (JSONException x) {
-            throw new AjaxException(AjaxException.Code.JSONError, x.getMessage());
+        } catch (final JSONException x) {
+            throw AjaxExceptionCodes.JSONError.create(x.getMessage());
         }
         
     }

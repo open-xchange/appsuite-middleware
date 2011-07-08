@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.polling.PollService;
 import com.openexchange.server.ServiceLookup;
 
@@ -66,12 +67,12 @@ import com.openexchange.server.ServiceLookup;
 public class PollingActionFactory implements AJAXActionServiceFactory {
 
 	// The ServiceLookup provides access to the services we want to use from the OSGi framework.
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     //  This map holds our action implementations
-    private Map<String, AbstractPollingAction> ACTIONS = new HashMap<String, AbstractPollingAction>();
+    private final Map<String, AbstractPollingAction> ACTIONS = new HashMap<String, AbstractPollingAction>();
     
-    public PollingActionFactory(ServiceLookup services) {
+    public PollingActionFactory(final ServiceLookup services) {
         super();
         this.services = services;
         // Here we assemble the actions our module understands. Note that we pass a reference to this instance to the constructor
@@ -84,7 +85,7 @@ public class PollingActionFactory implements AJAXActionServiceFactory {
         // Try to add a delete action!
     }
 
-    public AJAXActionService createActionService(String action) throws AjaxException {
+    public AJAXActionService createActionService(final String action) throws OXException {
         return ACTIONS.get(action);
     }
     
