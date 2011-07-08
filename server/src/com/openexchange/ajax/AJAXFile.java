@@ -124,13 +124,14 @@ public final class AJAXFile extends PermissionServlet {
          * The magic spell to disable caching
          */
         Tools.disableCaching(resp);
+        final ServerSession session = getSessionObject(req);
         final String action = req.getParameter(PARAMETER_ACTION);
         if (ACTION_KEEPALIVE.equalsIgnoreCase(action)) {
             actionKeepAlive(req, resp);
         } else if (ACTION_GET.equalsIgnoreCase(action)) {
             actionGet(req, resp);
         } else {
-            final Response response = new Response();
+            final Response response = new Response(session);
             response.setException(UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(
                 action == null ? STR_NULL : action).setAction(null));
             try {
@@ -146,9 +147,9 @@ public final class AJAXFile extends PermissionServlet {
 
     private void actionKeepAlive(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         try {
-            ResponseWriter.write(actionKeepAlive(ParamContainer.getInstance(req, EnumComponent.UPLOAD, resp)), resp.getWriter());
+            ResponseWriter.write(actionKeepAlive(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.UPLOAD, resp)), resp.getWriter());
         } catch (final JSONException e) {
-            final Response response = new Response();
+            final Response response = new Response(getSessionObject(req));
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
             try {
                 ResponseWriter.write(response, resp.getWriter());
@@ -161,11 +162,11 @@ public final class AJAXFile extends PermissionServlet {
         }
     }
 
-    private Response actionKeepAlive(final ParamContainer paramContainer) {
+    private Response actionKeepAlive(final ServerSession session, final ParamContainer paramContainer) {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         /*
          * Start response
          */
@@ -185,6 +186,7 @@ public final class AJAXFile extends PermissionServlet {
     }
 
     private void actionGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        final ServerSession session = getSessionObject(req);
         try {
             final String id = req.getParameter(PARAMETER_ID);
             if (id == null || id.length() == 0) {
@@ -245,7 +247,7 @@ public final class AJAXFile extends PermissionServlet {
             Tools.disableCaching(resp);
             JSONObject responseObj = null;
             try {
-                final Response response = new Response();
+                final Response response = new Response(session);
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
@@ -261,7 +263,7 @@ public final class AJAXFile extends PermissionServlet {
             Tools.disableCaching(resp);
             JSONObject responseObj = null;
             try {
-                final Response response = new Response();
+                final Response response = new Response(session);
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
@@ -282,6 +284,7 @@ public final class AJAXFile extends PermissionServlet {
         /*
          * The magic spell to disable caching
          */
+        final ServerSession session = getSessionObject(req);
         Tools.disableCaching(resp);
         resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
         String action = null;
@@ -362,7 +365,7 @@ public final class AJAXFile extends PermissionServlet {
                 /*
                  * Return IDs of upload files in response
                  */
-                final Response response = new Response();
+                final Response response = new Response(session);
                 response.setData(jArray);
 				final String jsResponse = substituteJS(
 						ResponseWriter.getJSON(response).toString(), action);
@@ -375,7 +378,7 @@ public final class AJAXFile extends PermissionServlet {
             LOG.error(e.getMessage(), e);
             JSONObject responseObj = null;
             try {
-                final Response response = new Response();
+                final Response response = new Response(session);
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
@@ -389,7 +392,7 @@ public final class AJAXFile extends PermissionServlet {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             JSONObject responseObj = null;
             try {
-                final Response response = new Response();
+                final Response response = new Response(session);
                 response.setException(oje);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
