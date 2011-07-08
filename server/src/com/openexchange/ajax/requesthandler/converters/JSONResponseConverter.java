@@ -85,7 +85,9 @@ public class JSONResponseConverter implements ResultConverter {
         response.setTimestamp(result.getTimestamp());
         final Collection<OXException> warnings = result.getWarnings();
         if (null != warnings && !warnings.isEmpty()) {
-            response.setWarning(warnings.iterator().next());
+            for (final OXException warning : warnings) {
+                response.addWarning(warning);
+            }
         }
         result.setResultObject(response);
     }
