@@ -73,10 +73,10 @@ public class Appointment extends DataServlet {
 
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-        final Response response = new Response();
+        final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-            final ServerSession session = getSessionObject(httpServletRequest);
             JSONObject jsonObj;
             try {
                 jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -104,10 +104,10 @@ public class Appointment extends DataServlet {
 
     @Override
     protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-        final Response response = new Response();
+        final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-            final ServerSession session = getSessionObject(httpServletRequest);
 
             final String data = getBody(httpServletRequest).trim();
             if (data.length() > 0) {
