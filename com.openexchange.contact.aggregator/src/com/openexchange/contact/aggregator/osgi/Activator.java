@@ -1,28 +1,35 @@
 package com.openexchange.contact.aggregator.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.subscribe.SubscribeService;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = {MessagingServiceRegistry.class};
+    private static final Class[] NEEDED = {FolderService.class, ConfigurationService.class};
     
-    /* (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {        
         return NEEDED;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
-        // TODO Auto-generated method stub
+        FolderService folders = getService(FolderService.class);
+        ConfigurationService config = getService(ConfigurationService.class);
+        
+        MailFolderDiscoverer mailFolderDiscoverer = new MailFolderDiscoverer(folders);
+        
+        ContactAggregator aggregator = new ContactAggregator();
+        aggregator.add(new ContactFolderContactSourceFactory());
+        aggregator.add(new EMailFolderContactSource(mailFolderDiscoverer, config.getIntProperty("com.openexchange.contact.aggregator.mailLimit", 3000)));
+        
+        AggregatingSubscribeService subscribeService = new AggregatingSubscribeService(aggregator);
+        
+        registerService(SubscribeService.class, subscribeService);
+        
         
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.contact.aggregator.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.contact.aggregator.osgi.ContactSource.Type;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -67,10 +68,12 @@ public class ContactFolderContactSource implements ContactSource {
 
     private FolderObject folder;
     private ContactSQLInterface contacts;
+    private Type type;
 
-    public ContactFolderContactSource(FolderObject folder, ContactSQLInterface contacts) {
+    public ContactFolderContactSource(FolderObject folder, ContactSQLInterface contacts, Type type) {
         this.folder = folder;
         this.contacts = contacts;
+        this.type = type;
     }
 
     public List<Contact> getContacts(ServerSession session) throws Exception {
@@ -83,7 +86,7 @@ public class ContactFolderContactSource implements ContactSource {
     }
 
     public Type getType() {
-        return Type.CONFIRMED;
+        return type;
     }
 
 }

@@ -52,12 +52,14 @@ package com.openexchange.contact.aggregator.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.contact.aggregator.osgi.ContactSource.Type;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,11 +71,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactFolderContactSourceFactory implements ContactSourceFactory {
 
-    private ContactSQLInterface contacts;
 
-    public ContactFolderContactSourceFactory(ContactSQLInterface contacts) {
+    public ContactFolderContactSourceFactory() {
         super();
-        this.contacts = contacts;
     }
 
     public List<ContactSource> getSources(ServerSession session) throws Exception {
@@ -85,22 +85,29 @@ public class ContactFolderContactSourceFactory implements ContactSourceFactory {
             session.getUserId(),
             user.getGroups(),
             userConfig.getAccessibleModules(),
-            FolderObject.INFOSTORE,
+            FolderObject.CONTACT,
             session.getContext())).asQueue();
         
         List<ContactSource> sources = new ArrayList<ContactSource>(queue.size());
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance();
 
-        final Integer folderId = serverUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
+        final Integer ccollectorFolderId = serverUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
         
         for (FolderObject folder : queue) {
-            if (folderId == null || folder.getObjectID() != folderId) {
-                sources.add(new ContactFolderContactSource(folder, contacts));
+            EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userConfig);
+            
+            if ((permission.canReadAllObjects() || permission.canReadOwnObjects())) {
+                if (ccollectorFolderId == null || folder.getObjectID() != ccollectorFolderId) {
+                    sources.add(new ContactFolderContactSource(folder, new RdbContactSQLImpl(session), Type.CONFIRMED));
+                } else {
+                    sources.add(new ContactFolderContactSource(folder, new RdbContactSQLImpl(session), Type.CONTRIBUTOR));
+                }
             }
         }
         
         return sources;
     }
+
 
 
 }

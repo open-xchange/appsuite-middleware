@@ -51,9 +51,12 @@ package com.openexchange.contact.aggregator.osgi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -65,13 +68,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link MailFolderDiscoverer}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailFolderDiscoverer {
+
+    private static final Log LOG = LogFactory.getLog(MailFolderDiscoverer.class);
     
     private FolderService folderService;
 
@@ -85,32 +89,53 @@ public class MailFolderDiscoverer {
         if (mailType == null) {
             throw new IllegalStateException("Could not determine contentType for Mail module");
         }
-        FolderServiceDecorator decorator = new FolderServiceDecorator().setTimeZone(TimeZone.getTimeZone("UTC")).setAllowedContentTypes(Arrays.asList(mailType)).put("mailRootFolders", "true");
-        final FolderResponse<UserizedFolder[]> privateResp =
-            folderService.getVisibleFolders(
-                FolderStorage.REAL_TREE_ID,
-                mailType,
-                PrivateType.getInstance(),
-                true,
-                session,
-                decorator);
-        
+        FolderServiceDecorator decorator = new FolderServiceDecorator().setTimeZone(TimeZone.getTimeZone("UTC")).setAllowedContentTypes(
+            Arrays.asList(mailType)).put("mailRootFolders", "true");
+        final FolderResponse<UserizedFolder[]> privateResp = folderService.getVisibleFolders(
+            FolderStorage.REAL_TREE_ID,
+            mailType,
+            PrivateType.getInstance(),
+            true,
+            session,
+            decorator);
+
         UserizedFolder[] response = privateResp.getResponse();
         List<String> folders = new ArrayList<String>();
         for (UserizedFolder userizedFolder : response) {
-            folders.add(userizedFolder.getID());
-            recurse(userizedFolder, folders, session, decorator);
+            if (!isVirtualMailFolder(userizedFolder.getID())) {
+                folders.add(userizedFolder.getID());
+            }
+            if (userizedFolder.isSubscribed()) {
+                recurse(userizedFolder, folders, session, decorator);
+            }
         }
-        return folders;
+        return new ArrayList<String>(new HashSet<String>(folders));
     }
-    
+
     private void recurse(UserizedFolder userizedFolder, List<String> folders, Session session, FolderServiceDecorator decorator) throws Exception {
-        FolderResponse<UserizedFolder[]> subfolders = folderService.getSubfolders(FolderStorage.REAL_TREE_ID, userizedFolder.getID(), true, session, decorator);
-        UserizedFolder[] userizedFolders = subfolders.getResponse();
-        for (UserizedFolder folder : userizedFolders) {
-            folders.add(folder.getID());
-            recurse(userizedFolder, folders, session, decorator);
+        try {
+            FolderResponse<UserizedFolder[]> subfolders = folderService.getSubfolders(
+                FolderStorage.REAL_TREE_ID,
+                userizedFolder.getID(),
+                true,
+                session,
+                decorator);
+            UserizedFolder[] userizedFolders = subfolders.getResponse();
+            for (UserizedFolder folder : userizedFolders) {
+                if (!isVirtualMailFolder(folder.getID())) {
+                    folders.add(folder.getID());
+                }
+                if (folder.isSubscribed()) {
+                    recurse(folder, folders, session, decorator);
+                }
+            }
+        } catch (Exception x) {
+            LOG.error(x.getMessage(), x);
         }
+    }
+
+    private boolean isVirtualMailFolder(String id) {
+        return !id.contains("/");
     }
 
     private ContentType getMailType() {
@@ -118,4 +143,3 @@ public class MailFolderDiscoverer {
         return availableContentTypes.get(FolderObject.MAIL);
     }
 }
- 
