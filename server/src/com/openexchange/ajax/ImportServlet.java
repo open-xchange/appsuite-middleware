@@ -73,7 +73,6 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Servlet for doing imports of data like contacts stored in CSV format,
@@ -106,7 +105,7 @@ public class ImportServlet extends ImportExport {
         final List<ImportResult> importResult;
         try {
             init();
-            final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
+            final ServerSession session = getSessionObject(req);
             resObj.setLocale(session.getUser().getLocale());
             //checking format
             final String formatStr = DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION);
