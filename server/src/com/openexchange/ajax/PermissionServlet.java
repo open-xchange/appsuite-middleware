@@ -80,7 +80,7 @@ public abstract class PermissionServlet extends SessionServlet {
             super.service(req, resp);
         } catch (final OXException e) {
             e.log(LOG);
-            final Response response = new Response();
+            final Response response = new Response(getSessionObject(req));
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             final PrintWriter writer = resp.getWriter();
