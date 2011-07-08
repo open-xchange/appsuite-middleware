@@ -236,7 +236,7 @@ public class AttachmentRequest extends CommonRequest {
                     ATTACHMENT_BASE.finish();
                 }
                 
-                final Response resp = new Response();
+                final Response resp = new Response(session);
                 resp.setData(attachment.getId());
                 resp.setTimestamp(new Date(ts));
                 
