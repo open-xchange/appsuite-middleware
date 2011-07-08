@@ -5,11 +5,9 @@ import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
-
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 
 public class SMS {

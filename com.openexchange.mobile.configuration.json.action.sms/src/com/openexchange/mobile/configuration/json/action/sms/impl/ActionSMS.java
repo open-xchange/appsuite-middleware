@@ -51,17 +51,14 @@ package com.openexchange.mobile.configuration.json.action.sms.impl;
 
 import java.net.MalformedURLException;
 import java.util.Map;
-
 import org.apache.xmlrpc.XmlRpcException;
-
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mobile.configuration.json.action.ActionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.sms.osgi.ActionServiceRegistry;
 import com.openexchange.mobile.configuration.json.container.ProvisioningInformation;
 import com.openexchange.mobile.configuration.json.container.ProvisioningResponse;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
-import com.openexchange.server.ServiceException;
 
 /**
  * 
@@ -73,22 +70,22 @@ public class ActionSMS implements ActionService {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 
 	public ProvisioningResponse handleAction(
-			ProvisioningInformation provisioningInformation){
-		ProvisioningResponse provisioningResponse = new ProvisioningResponse();
-		int cid = provisioningInformation.getCtx().getContextId();
-		int userid = provisioningInformation.getUser().getId();
+			final ProvisioningInformation provisioningInformation){
+		final ProvisioningResponse provisioningResponse = new ProvisioningResponse();
+		final int cid = provisioningInformation.getCtx().getContextId();
+		final int userid = provisioningInformation.getUser().getId();
 		// init sms
-		SMS smssend = new SMS();
+		final SMS smssend = new SMS();
 
 		// fix up number/remove leading 00, if number is incorrect
-		String to = provisioningInformation.getTarget(); // initial number
+		final String to = provisioningInformation.getTarget(); // initial number
 		String to_formatted = null;
 		try {
 			// check number and set it to SMS object
 			to_formatted = smssend.checkAndFormatRecipient(to);
 			smssend.setSMSNumber(to_formatted);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error("Invalid recipient detected. SMS to recipient "+ to_formatted + " (unformatted nr:" + to+ ") could not be send for user " + userid + " in context "+ cid, e);
 			provisioningResponse.setMessage("Invalid recipient number detected.");
 			provisioningResponse.setSuccess(false);
@@ -108,7 +105,7 @@ public class ActionSMS implements ActionService {
 
 		// send sms and check response code
 		try {
-			Map map = smssend.send();
+			final Map map = smssend.send();
 			if(smssend.wasSuccessfull()){
 				provisioningResponse.setMessage("SMS sent successfully...");
 				provisioningResponse.setSuccess(true);
@@ -119,11 +116,11 @@ public class ActionSMS implements ActionService {
 				provisioningResponse.setSuccess(false);
 				LOG.error("API error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid);
 			}
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			LOG.error("internal error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid,e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
-		} catch (XmlRpcException e) {
+		} catch (final XmlRpcException e) {
 			LOG.error("internal error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid,e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
@@ -133,13 +130,13 @@ public class ActionSMS implements ActionService {
 		return provisioningResponse;
 	}
 
-	private String getFromConfig(String key) {
+	private String getFromConfig(final String key) {
 		ConfigurationService configservice;
 		String retval = null;
 		try {
 			configservice = ActionServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true);
 			retval = configservice.getProperty(key);
-		} catch (ServiceException e) {
+		} catch (final OXException e) {
 			LOG.error("value for key " + key + " was not found for ACTIONSMS configuration");
 		}
 		return retval;
