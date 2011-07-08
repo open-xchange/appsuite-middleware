@@ -825,7 +825,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         response.setData(data);
         response.setTimestamp(null);
         if (!warnings.isEmpty()) {
-            response.setWarning(warnings.get(0));
+            response.addWarning(warnings.get(0));
         }
         return response;
     }
@@ -916,7 +916,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         response.setData(data);
         response.setTimestamp(null);
         if (!warnings.isEmpty()) {
-            response.setWarning(warnings.get(0));
+            response.addWarning(warnings.get(0));
         }
         return response;
     }
@@ -1432,7 +1432,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         response.setData(data);
         response.setTimestamp(null);
         if (!warnings.isEmpty()) {
-            response.setWarning(warnings.get(0));
+            response.addWarning(warnings.get(0));
         }
         return response;
     }
@@ -2206,7 +2206,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         response.setData(data);
         response.setTimestamp(null);
         if (!warnings.isEmpty()) {
-            response.setWarning(warnings.get(0));
+            response.addWarning(warnings.get(0));
         }
         return response;
     }
