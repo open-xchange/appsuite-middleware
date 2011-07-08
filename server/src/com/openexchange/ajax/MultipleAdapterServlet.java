@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -111,9 +113,10 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             if (action == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
             }
-            final Object response = handler.performRequest(action, request, getSessionObject(req), Tools.considerSecure(req));
+            final ServerSession session = getSessionObject(req);
+            final Object response = handler.performRequest(action, request, session, Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
-            writeResponseSafely(response, timestamp, handler.getWarnings(), resp);
+            writeResponseSafely(response, session.getUser().getLocale(), timestamp, handler.getWarnings(), resp);
         } catch (final OXException x) {
             writeException(x, resp);
         } catch (final Throwable t) {
@@ -129,8 +132,8 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         return false;
     }
 
-    private void writeResponseSafely(final Object data, final Date timestamp, final Collection<OXException> warnings, final HttpServletResponse resp) {
-        final Response response = new Response();
+    private void writeResponseSafely(final Object data, final Locale locale, final Date timestamp, final Collection<OXException> warnings, final HttpServletResponse resp) {
+        final Response response = new Response(locale);
         response.setData(data);
         if(null != timestamp) {
             response.setTimestamp(timestamp);
