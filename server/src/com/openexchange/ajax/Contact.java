@@ -91,10 +91,10 @@ public class Contact extends DataServlet {
     
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-        final Response response = new Response();
+        final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-            final ServerSession session = getSessionObject(httpServletRequest);
             
             JSONObject jsonObj = null;
             try {
@@ -167,10 +167,10 @@ public class Contact extends DataServlet {
     
     @Override
     protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-        final Response response = new Response();
+        final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-            final ServerSession session = getSessionObject(httpServletRequest);
             
             final String data = getBody(httpServletRequest);
             if (data.length() > 0) {
@@ -226,10 +226,10 @@ public class Contact extends DataServlet {
     protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
         httpServletResponse.setContentType("text/html");
         String callbackSite = null;
-        final Response response = new Response();
+        final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
         String action = ACTION_ERROR;
         try {
-            final ServerSession session = getSessionObject(httpServletRequest);
             action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
             if (action.equals(ACTION_NEW)) {
                 UploadEvent upload = null;
