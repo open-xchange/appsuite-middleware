@@ -177,7 +177,13 @@ public class SyncServlet extends PermissionServlet {
 		/*
 		 * Some variables
 		 */
-		final Response response = new Response();
+        final Response response;
+        try {
+            response = new Response(sessionObj);
+        } catch (final OXException e1) {
+            ResponseWriter.write(new Response().setException(e1), writer);
+            return;
+        }
 		final UnsynchronizedStringWriter strWriter = new UnsynchronizedStringWriter();
 		final JSONWriter jsonWriter = new JSONWriter(strWriter);
 		Date lastModifiedDate = null;
