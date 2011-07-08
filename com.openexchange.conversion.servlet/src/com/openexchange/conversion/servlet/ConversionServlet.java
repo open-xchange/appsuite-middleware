@@ -143,7 +143,18 @@ public final class ConversionServlet extends SessionServlet {
             ResponseWriter.write(response, resp.getWriter());
         } catch (final OXException e) {
             LOG.error("doPut", e);
-            final Response response = new Response();
+            final Session session = getSessionObject(req);
+            Response response;
+            try {
+                response = new Response(session);
+            } catch (final OXException e2) {
+                try {
+                    ResponseWriter.write(new Response().setException(e2), resp.getWriter());
+                } catch (final JSONException e1) {
+                    throw new IOException("JSON error.", e1);
+                }
+                return;
+            }
             response.setException(e);
             final PrintWriter writer = resp.getWriter();
             try {
