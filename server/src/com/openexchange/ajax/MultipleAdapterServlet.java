@@ -105,6 +105,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         if (handleOverride(req, resp)) {
             return;
         }
+        final ServerSession session = getSessionObject(req);
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             final JSONObject request = toJSON(req, action);
@@ -113,14 +114,13 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             if (action == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
             }
-            final ServerSession session = getSessionObject(req);
             final Object response = handler.performRequest(action, request, session, Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
             writeResponseSafely(response, session.getUser().getLocale(), timestamp, handler.getWarnings(), resp);
         } catch (final OXException x) {
-            writeException(x, resp);
+            writeException(x, session.getUser().getLocale(), resp);
         } catch (final Throwable t) {
-            writeException(wrap(t), resp);
+            writeException(wrap(t), session.getUser().getLocale(), resp);
         }
     }
 
@@ -148,9 +148,9 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         }
     }
     
-    private void writeException(final OXException x, final HttpServletResponse resp) {
+    private void writeException(final OXException x, final Locale locale, final HttpServletResponse resp) {
         x.log(LOG);
-        final Response response = new Response();
+        final Response response = new Response(locale);
         response.setException(x);
         try {
             writeResponse(response, resp);
