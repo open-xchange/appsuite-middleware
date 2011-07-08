@@ -236,7 +236,7 @@ public final class ConversionServlet extends SessionServlet {
         /*
          * Compose response
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         response.setTimestamp(null);
         response.setData(result);
         return response;
