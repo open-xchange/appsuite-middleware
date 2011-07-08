@@ -167,7 +167,7 @@ public final class ConversionServlet extends SessionServlet {
             writer.flush();
         } catch (final JSONException e) {
             LOG.error("doPut", e);
-            final Response response = new Response();
+            final Response response = new Response(getSessionObject(req));
             response.setException(ConversionServletExceptionCode.JSON_ERROR.create(e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
@@ -193,7 +193,7 @@ public final class ConversionServlet extends SessionServlet {
             ResponseWriter.write(response, resp.getWriter());
         } catch (final OXException e) {
             LOG.error("doPut", e);
-            final Response response = new Response();
+            final Response response = new Response(getSessionObject(req));
             response.setException(e);
             final PrintWriter writer = resp.getWriter();
             try {
