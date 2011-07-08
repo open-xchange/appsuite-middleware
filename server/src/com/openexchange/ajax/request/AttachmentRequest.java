@@ -546,7 +546,12 @@ public class AttachmentRequest extends CommonRequest {
             }
         }
 
-        final Response resp = new Response();
+        Response resp;
+        try {
+            resp = new Response(session);
+        } catch (final OXException e) {
+            resp = new Response();
+        }
         resp.setData("");
         resp.setTimestamp(new Date(timestamp));
         try {
