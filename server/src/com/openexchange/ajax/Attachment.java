@@ -330,7 +330,7 @@ public class Attachment extends PermissionServlet {
                 }
             }
         } catch (final OXException x) {
-            final Response resp = new Response();
+            final Response resp = new Response(getSessionObject(req));
             resp.setException(x);
             try {
                 res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
