@@ -125,6 +125,7 @@ public abstract class AJAXServlet extends HttpServlet {
             if (null == session) {
                 throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
             }
+            response.setLocale(session);
             final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {

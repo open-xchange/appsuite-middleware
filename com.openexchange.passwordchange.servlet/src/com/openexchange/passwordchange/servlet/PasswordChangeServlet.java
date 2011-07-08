@@ -102,7 +102,7 @@ public final class PasswordChangeServlet extends SessionServlet {
             actionGet(req, resp);
         } catch (final OXException e) {
             LOG.error("PasswordChangeServlet.doGet()", e);
-            final Response response = new Response();
+            final Response response = new Response(getSessionObject(req));
             response.setException(e);
             final PrintWriter writer = resp.getWriter();
             try {

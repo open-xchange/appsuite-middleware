@@ -129,7 +129,7 @@ public final class Response {
      * @throws OXException If user's locale cannot be detected
      */
     public Response(final Session session) throws OXException {
-        this(getServerSessionFrom(session).getUser().getLocale());
+        this(null == session ? DEFAULT_LOCALE : getServerSessionFrom(session).getUser().getLocale());
     }
 
     /**
@@ -138,7 +138,7 @@ public final class Response {
      * @param session The server session providing user data
      */
     public Response(final ServerSession session) {
-        this(session.getUser().getLocale());
+        this(null == session ? DEFAULT_LOCALE : session.getUser().getLocale());
     }
 
     /**
