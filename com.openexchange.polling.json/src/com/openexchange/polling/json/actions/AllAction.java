@@ -1,7 +1,6 @@
 package com.openexchange.polling.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.polling.PollService;
 
 public class AllAction extends AbstractPollingAction {

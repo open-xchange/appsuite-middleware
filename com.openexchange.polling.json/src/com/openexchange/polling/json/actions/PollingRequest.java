@@ -51,10 +51,8 @@ package com.openexchange.polling.json.actions;
 
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.polling.Poll;
 import com.openexchange.polling.json.PollParser;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
 

@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.polling.Poll;
 import com.openexchange.polling.Question;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**

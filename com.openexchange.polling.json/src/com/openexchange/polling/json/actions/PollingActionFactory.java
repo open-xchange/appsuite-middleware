@@ -54,9 +54,7 @@ import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.polling.PollService;
-import com.openexchange.polling.json.osgi.PollingJSONActivator;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**

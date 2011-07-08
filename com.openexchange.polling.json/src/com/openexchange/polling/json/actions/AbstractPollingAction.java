@@ -52,7 +52,6 @@ package com.openexchange.polling.json.actions;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
 
