@@ -64,8 +64,8 @@ import com.openexchange.configjump.Replacements;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * This class implements the servlet for authenticating the user at the
@@ -98,8 +98,8 @@ public class ConfigJump extends SessionServlet {
     @Override
     protected void doGet(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
-        final Session sessionObj = getSessionObject(req);
-        final Response response = new Response();
+        final ServerSession sessionObj = getSessionObject(req);
+        final Response response = new Response(sessionObj);
         try {
             final Context ctx = ContextStorage.getInstance().getContext(
                 sessionObj.getContextId());
