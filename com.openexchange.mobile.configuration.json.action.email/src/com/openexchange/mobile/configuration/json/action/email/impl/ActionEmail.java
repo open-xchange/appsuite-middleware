@@ -52,12 +52,10 @@ package com.openexchange.mobile.configuration.json.action.email.impl;
 import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
-import com.openexchange.mail.MailException;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mobile.configuration.json.action.ActionException;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.container.ProvisioningInformation;
 import com.openexchange.mobile.configuration.json.container.ProvisioningResponse;
@@ -72,8 +70,8 @@ public class ActionEmail implements ActionService {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 	
-    public ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation){
-    	ProvisioningResponse provisioningResponse = new ProvisioningResponse();
+    public ProvisioningResponse handleAction(final ProvisioningInformation provisioningInformation){
+    	final ProvisioningResponse provisioningResponse = new ProvisioningResponse();
     	
     	try {		
 			InternetAddress fromAddress = new InternetAddress(provisioningInformation.getUser().getMail(), true);
@@ -84,7 +82,7 @@ public class ActionEmail implements ActionService {
 			final com.openexchange.mail.transport.TransportProvider provider =
 				com.openexchange.mail.transport.TransportProviderRegistry.getTransportProviderBySession(provisioningInformation.getSession(), 0);
 
-			ComposedMailMessage msg = provider.getNewComposedMailMessage(provisioningInformation.getSession(), provisioningInformation.getCtx());
+			final ComposedMailMessage msg = provider.getNewComposedMailMessage(provisioningInformation.getSession(), provisioningInformation.getCtx());
 			msg.addFrom(fromAddress);
 			msg.addTo(new InternetAddress(provisioningInformation.getTarget()));
 			
@@ -109,11 +107,11 @@ public class ActionEmail implements ActionService {
 			
 			provisioningResponse.setMessage("Provisioning mail has been send to " + provisioningInformation.getTarget());
 			provisioningResponse.setSuccess(true);
-		} catch (MailException e) {
+		} catch (final OXException e) {
 			logError("Couldn't send provisioning mail", e, provisioningResponse);
 			provisioningResponse.setMessage("Couldn't send provisioning mail");
 			provisioningResponse.setSuccess(false);
-		} catch (AddressException e) {
+		} catch (final AddressException e) {
 			logError("Target Spam email address cannot be parsed", e, provisioningResponse);
 			provisioningResponse.setMessage("Target Spam email address cannot be parsed");
 			provisioningResponse.setSuccess(false);
@@ -122,7 +120,7 @@ public class ActionEmail implements ActionService {
     	return provisioningResponse;
     }
     
-    private void logError(String message, Exception e, ProvisioningResponse provisioningResponse) {
+    private void logError(final String message, final Exception e, final ProvisioningResponse provisioningResponse) {
     	LOG.error(message, e);
     	provisioningResponse.setMessage(message);
     	provisioningResponse.setSuccess(false);
