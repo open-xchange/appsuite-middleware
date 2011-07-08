@@ -132,13 +132,6 @@ public final class Response {
         this(getServerSessionFrom(session).getUser().getLocale());
     }
 
-    private static ServerSession getServerSessionFrom(final Session session) throws OXException {
-        if (session instanceof ServerSession) {
-            return (ServerSession) session;
-        }
-        return new ServerSessionAdapter(session);
-    }
-
     /**
      * Constructor for generating responses.
      * 
@@ -420,6 +413,13 @@ public final class Response {
      */
     public List<OXException> getWarnings() {
         return Collections.unmodifiableList(warnings);
+    }
+
+    private static ServerSession getServerSessionFrom(final Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return (ServerSession) session;
+        }
+        return new ServerSessionAdapter(session);
     }
 
 }
