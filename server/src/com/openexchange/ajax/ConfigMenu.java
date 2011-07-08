@@ -70,6 +70,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -89,7 +90,7 @@ public class ConfigMenu extends SessionServlet {
     private static final long serialVersionUID = -7113587607566553771L;
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         String path = getServletSpecificURI(req);
         if (path.length() > 0 && path.charAt(0) == '/') {
             path = path.substring(1);
@@ -97,17 +98,17 @@ public class ConfigMenu extends SessionServlet {
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
-        final Session sessionObj = getSessionObject(req);
+        final ServerSession sessionObj = getSessionObject(req);
         final SettingStorage stor = SettingStorage.getInstance(sessionObj);
         Setting setting;
-        final Response response = new Response();
+        final Response response = new Response(sessionObj);
         try {
             setting = ConfigTree.getSettingByPath(path);
             stor.readValues(setting);
             response.setData(convert2JS(setting));
         } catch (final OXException e) {
             response.setException(e);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
@@ -116,7 +117,7 @@ public class ConfigMenu extends SessionServlet {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             ResponseWriter.write(response, resp.getWriter());
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         }
@@ -128,7 +129,7 @@ public class ConfigMenu extends SessionServlet {
      * @return java script object representing the setting tree.
      * @throws JSONException if the conversion to java script objects fails.
      */
-    public static Object convert2JS(Setting setting) throws JSONException {
+    public static Object convert2JS(final Setting setting) throws JSONException {
         Object retval = null;
         if (setting.isLeaf()) {
             final Object[] multiValue = setting.getMultiValue();
@@ -141,7 +142,7 @@ public class ConfigMenu extends SessionServlet {
                 } else {
                     try {
                         retval = new JSONObject(singleValue.toString());
-                    } catch (JSONException e) {
+                    } catch (final JSONException e) {
                         retval = singleValue;
                     }
                 }
@@ -163,7 +164,7 @@ public class ConfigMenu extends SessionServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Session session = getSessionObject(req);
         final InputStream input = req.getInputStream();
         final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(input.available());
@@ -201,7 +202,7 @@ public class ConfigMenu extends SessionServlet {
         } catch (final OXException e) {
             log(e.getMessage(), e);
             response.setException(e);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
@@ -212,7 +213,7 @@ public class ConfigMenu extends SessionServlet {
             if (response.hasError()) {
                 ResponseWriter.write(response, resp.getWriter());
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         }
@@ -225,7 +226,7 @@ public class ConfigMenu extends SessionServlet {
      * @throws OXException if an error occurs.
      * @throws JSONException if the json object can't be parsed.
      */
-    private void saveSettingWithSubs(SettingStorage storage, Setting setting) throws OXException, JSONException {
+    private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException, JSONException {
         if (setting.isLeaf()) {
             final String value = (String) setting.getSingleValue();
             if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
@@ -251,7 +252,7 @@ public class ConfigMenu extends SessionServlet {
                 try {
                     // Catch single exceptions if GUI writes not writable fields.
                     saveSettingWithSubs(storage, sub);
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     exc = e;
                 }
             }
