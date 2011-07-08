@@ -166,6 +166,29 @@ public final class Response {
     /**
      * Sets the specified locale needed for internationalization of display message.
      * 
+     * @param session The session
+     * @return This {@link Response} with locale applied.
+     */
+    public Response setLocale(final ServerSession session) {
+        this.locale = null == session ? DEFAULT_LOCALE : session.getUser().getLocale();
+        return this;
+    }
+
+    /**
+     * Sets the specified locale needed for internationalization of display message.
+     * 
+     * @param session The session
+     * @return This {@link Response} with locale applied.
+     * @throws OXException If locale cannot be detected
+     */
+    public Response setLocale(final Session session) throws OXException {
+        this.locale = null == session ? DEFAULT_LOCALE : getServerSessionFrom(session).getUser().getLocale();
+        return this;
+    }
+
+    /**
+     * Sets the specified locale needed for internationalization of display message.
+     * 
      * @param locale The locale
      * @return This {@link Response} with locale applied.
      */
