@@ -330,7 +330,7 @@ public class Infostore extends PermissionServlet {
                 }
             }
         } catch (final UploadException x) {
-            final Response resp = new Response();
+            final Response resp = new Response(session);
             resp.setException(x);
             try {
                 res.setContentType("text/html; charset=UTF-8");
@@ -343,7 +343,7 @@ public class Infostore extends PermissionServlet {
         } catch (final OXException x) {
             handleOXException(res, x, action, true);
         } catch (final Throwable t) {
-            final Response resp = new Response();
+            final Response resp = new Response(session);
             resp.setException(AjaxExceptionCodes.UnexpectedError.create(t, t.getMessage()));
             try {
                 res.setContentType("text/html; charset=UTF-8");
