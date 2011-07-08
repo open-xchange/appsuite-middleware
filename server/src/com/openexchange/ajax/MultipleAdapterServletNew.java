@@ -156,7 +156,9 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         final String action = req.getParameter(PARAMETER_ACTION);
         final boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
 
-        final Response response = new Response();
+        final ServerSession session = getSessionObject(req);
+
+        final Response response = new Response(session);
         try {
             if (action == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
@@ -164,8 +166,6 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             if (handleIndividually(action, req, resp)) {
                 return;
             }
-
-            final ServerSession session = getSessionObject(req);
 
             final AJAXRequestData data = parseRequest(req, preferStream, isFileUpload, session);
             if (handleIndividually(action, data, req, resp)) {
