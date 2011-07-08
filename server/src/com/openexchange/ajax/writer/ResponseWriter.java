@@ -49,15 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.DATA;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
-import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
-import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
-import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
-import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
+import static com.openexchange.ajax.fields.ResponseFields.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
@@ -70,7 +62,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.exception.Category;
@@ -235,6 +226,36 @@ public final class ResponseWriter {
         toJSON(json, exception.getProblematics());
         if (Category.CATEGORY_TRUNCATED.equals(exception.getCategory())) {
             addTruncated(json, exception.getProblematics());
+        }
+        final StackTraceElement[] traceElements = exception.getStackTrace();
+        if (null != traceElements && traceElements.length > 0) {
+            final JSONArray jsonStack = new JSONArray();
+            final StringBuilder tmp = new StringBuilder(64);
+            for (final StackTraceElement stackTraceElement : traceElements) {
+                tmp.setLength(0);
+                writeElementTo(stackTraceElement, tmp);
+                jsonStack.put(tmp.toString());
+            }
+            json.put(ERROR_STACK, jsonStack);
+        }
+    }
+
+    private static void writeElementTo(final StackTraceElement element, final StringBuilder sb) {
+        sb.append(element.getClassName()).append(".").append(element.getMethodName());
+        if (element.isNativeMethod()) {
+            sb.append("(Native Method)");
+        } else {
+            final String fileName = element.getFileName();
+            if (null != fileName) {
+                sb.append('(').append(fileName);
+                final int lineNumber = element.getLineNumber();
+                if (lineNumber >= 0) {
+                    sb.append(':').append(lineNumber);
+                }
+                sb.append(')');
+            } else {
+                sb.append("(Unknown Source)");
+            }
         }
     }
 
@@ -421,10 +442,25 @@ public final class ResponseWriter {
             }
 
         }
-        writer.key(ResponseFields.ERROR_CODE).value(exc.getErrorCode());
-        writer.key(ResponseFields.ERROR_ID).value(exc.getExceptionId());
+        writer.key(ERROR_CODE).value(exc.getErrorCode());
+        writer.key(ERROR_ID).value(exc.getExceptionId());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
+        final StackTraceElement[] traceElements = exc.getStackTrace();
+        if (null != traceElements && traceElements.length > 0) {
+            writer.key(ERROR_STACK);
+            writer.array();
+            try {
+                final StringBuilder tmp = new StringBuilder(64);
+                for (final StackTraceElement stackTraceElement : traceElements) {
+                    tmp.setLength(0);
+                    writeElementTo(stackTraceElement, tmp);
+                    writer.value(tmp.toString());
+                }
+            } finally {
+                writer.endArray();
+            }
+        }
     }
 
     private static void writeProblematic(final OXException exc, final JSONWriter writer) throws JSONException {
@@ -448,7 +484,7 @@ public final class ResponseWriter {
                     array.put(((Truncated) problematic).getId());
                 }
             }
-            writer.key(ResponseFields.TRUNCATED).value(array);
+            writer.key(TRUNCATED).value(array);
         }
     }
 

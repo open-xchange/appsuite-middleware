@@ -91,6 +91,11 @@ public final class ResponseFields {
     public static final String ERROR_PARAMS = "error_params";
 
     /**
+     * Name of the JSON attribute containing the stacks of the error.
+     */
+    public static final String ERROR_STACK = "error_stack";
+
+    /**
      * Name of the JSON attribute containing the array of actual length of the truncated attributes.
      */
     public static final String LENGTHS = "lengths";
