@@ -166,7 +166,7 @@ public class Infostore extends PermissionServlet {
 
         if (action.equals(ACTION_DOCUMENT)) {
             if (req.getParameter(PARAMETER_ID) == null) {
-                final Response resp = new Response();
+                final Response resp = new Response(session);
                 resp.setException(AjaxExceptionCodes.UnexpectedError.create("You must provide a value for " + PARAMETER_ID));
                 final UnsynchronizedStringWriter w = new UnsynchronizedStringWriter();
                 try {

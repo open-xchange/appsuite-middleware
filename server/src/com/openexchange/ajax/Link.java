@@ -62,7 +62,6 @@ import com.openexchange.ajax.request.LinkRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -89,11 +88,11 @@ public class Link extends DataServlet {
 	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws ServletException, IOException {
-		final Response response = new Response();
+	    final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
 		final UnsynchronizedStringWriter sw = new UnsynchronizedStringWriter();
 
 		try {
-			final Session sessionObj = getSessionObject(httpServletRequest);
 			final String action = getAction(httpServletRequest);
 			JSONObject jsonObj;
 
@@ -106,9 +105,9 @@ public class Link extends DataServlet {
 				return;
 			}
 
-			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 
-			final LinkRequest linkRequest = new LinkRequest(sessionObj, sw, ctx);
+			final LinkRequest linkRequest = new LinkRequest(session, sw, ctx);
 			linkRequest.action(action, jsonObj);
 
 			response.setData(new JSONArray(sw.toString()));
@@ -128,7 +127,8 @@ public class Link extends DataServlet {
 	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws ServletException, IOException {
-		final Response response = new Response();
+	    final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
 
 		httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
 		/*
@@ -140,14 +140,12 @@ public class Link extends DataServlet {
 
 			final String action = getAction(httpServletRequest);
 
-			final Session sessionObj = getSessionObject(httpServletRequest);
-
 			final String data = getBody(httpServletRequest);
 
 			if (data.length() > 0) {
-				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+				final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 
-				final LinkRequest linkRequest = new LinkRequest(sessionObj, sw, ctx);
+				final LinkRequest linkRequest = new LinkRequest(session, sw, ctx);
 
 				final JSONObject jsonDataObj = new JSONObject(data);
 				JSONObject jsonObj;
