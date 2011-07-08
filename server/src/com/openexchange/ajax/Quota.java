@@ -72,14 +72,13 @@ public class Quota extends SessionServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
 			IOException {
-        final Response response = new Response();
+	    final ServerSession session = getSessionObject(req);
+        final Response response = new Response(session);
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             if (null == action) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
             }
-            final ServerSession session = getSessionObject(req);
-
             final QuotaRequest fsReq = new QuotaRequest(session);
             final JSONValue responseObj = fsReq.action(action);
 

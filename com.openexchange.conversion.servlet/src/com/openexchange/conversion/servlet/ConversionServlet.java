@@ -106,7 +106,18 @@ public final class ConversionServlet extends SessionServlet {
             throw ConversionServletExceptionCode.UNSUPPORTED_METHOD.create("GET");
         } catch (final OXException e) {
             LOG.error("doGet", e);
-            final Response response = new Response();
+            final Session session = getSessionObject(req);
+            Response response;
+            try {
+                response = new Response(session);
+            } catch (final OXException e2) {
+                try {
+                    ResponseWriter.write(new Response().setException(e2), resp.getWriter());
+                } catch (final JSONException e1) {
+                    throw new IOException("JSON error.", e1);
+                }
+                return;
+            }
             response.setException(e);
             final PrintWriter writer = resp.getWriter();
             try {

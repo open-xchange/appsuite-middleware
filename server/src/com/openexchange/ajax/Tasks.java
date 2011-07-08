@@ -78,10 +78,10 @@ public class Tasks extends DataServlet {
 
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws IOException {
-        final Response response = new Response();
+        final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-            final ServerSession session = getSessionObject(httpServletRequest);
             final JSONObject jsonObj;
             try {
                  jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -112,10 +112,10 @@ public class Tasks extends DataServlet {
 
     @Override
     protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws IOException {
-        final Response response = new Response();
+        final ServerSession session = getSessionObject(httpServletRequest);
+        final Response response = new Response(session);
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-            final ServerSession session = getSessionObject(httpServletRequest);
 
             final String data = getBody(httpServletRequest);
             if (data.length() > 0) {
