@@ -107,7 +107,22 @@ public class OXException extends Exception implements OXExceptionConstants {
      * The generic types.
      */
     public static enum Generic {
-        NONE, NOT_FOUND, NO_PERMISSION, MANDATORY_FIELD, CONFLICT,
+        /**
+         * No generic type set.
+         */
+        NONE, NOT_FOUND,
+        /**
+         * The exception was caused due to missing permissions needed to access a certain module and/or module.
+         */
+        NO_PERMISSION,
+        /**
+         * A mandatory (request) field is missing.
+         */
+        MANDATORY_FIELD,
+        /**
+         * A conflicting operation (tries to update data but offers an out-dated time stamp).
+         */
+        CONFLICT,
     }
 
     /**
