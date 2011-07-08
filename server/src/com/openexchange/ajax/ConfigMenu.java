@@ -68,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -165,7 +164,7 @@ public class ConfigMenu extends SessionServlet {
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final Session session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         final InputStream input = req.getInputStream();
         final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(input.available());
         final byte[] buf = new byte[BUFFER_SIZE];
@@ -194,7 +193,7 @@ public class ConfigMenu extends SessionServlet {
             path = path.substring(0, path.length() - 1);
         }
         final SettingStorage stor = SettingStorage.getInstance(session);
-        final Response response = new Response();
+        final Response response = new Response(session);
         try {
             final Setting setting = ConfigTree.getSettingByPath(path);
             setting.setSingleValue(value);
