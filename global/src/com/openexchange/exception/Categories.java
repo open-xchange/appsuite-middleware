@@ -68,9 +68,20 @@ public final class Categories implements OXExceptionConstants {
      * Resolves specified name to a known category.
      * 
      * @param name The category's name
-     * @return The resolved category or <code>null</code>
+     * @return The resolved category or {@link Category#CATEGORY_ERROR} if unresolveable
      */
     public static Category getKnownCategoryByName(final String name) {
+        return getKnownCategoryByName(name, CATEGORY_ERROR);
+    }
+
+    /**
+     * Resolves specified name to a known category.
+     * 
+     * @param name The category's name
+     * @param fallback The fall-back value to return
+     * @return The resolved category or <code>fallback</code> if unresolveable
+     */
+    public static Category getKnownCategoryByName(final String name, final Category fallback) {
         if (CATEGORY_ERROR.toString().equalsIgnoreCase(name)) {
             return CATEGORY_ERROR;
         }
@@ -105,7 +116,7 @@ public final class Categories implements OXExceptionConstants {
             return CATEGORY_WARNING;
         }
         // Unknown...
-        return null;
+        return fallback;
     }
 
 }

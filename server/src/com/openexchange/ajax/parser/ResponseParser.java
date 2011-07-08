@@ -50,6 +50,7 @@
 package com.openexchange.ajax.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
@@ -59,6 +60,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
+import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -116,66 +118,33 @@ public final class ResponseParser {
         if (message != null || code != null) {
             final String prefix = parseComponent(code);
             final int number = parseErrorNumber(code);
-            final int categoryCode = json.optInt(ResponseFields.ERROR_CATEGORY, -1);
-            final Category category;
-            if (-1 == categoryCode) {
-                category = Category.CATEGORY_ERROR;
-            } else {
-                switch (categoryCode) {
-                case 1:
-                    category = Category.CATEGORY_USER_INPUT;
-                    break;
-                case 2:
-                    category = Category.CATEGORY_CONFIGURATION;
-                    break;
-                case 3:
-                    category = Category.CATEGORY_PERMISSION_DENIED;
-                    break;
-                case 4:
-                    category = Category.CATEGORY_TRY_AGAIN;
-                    break;
-                case 5:
-                    category = Category.CATEGORY_SERVICE_DOWN;
-                    break;
-                case 6:
-                    category = Category.CATEGORY_CONNECTIVITY;
-                    break;
-                case 7:
-                    // fall-through
-                case 8:
-                    category = Category.CATEGORY_ERROR;
-                    break;
-                case 9:
-                    category = Category.CATEGORY_CONFLICT;
-                    break;
-                case 10:
-                    category = Category.CATEGORY_CONFIGURATION;
-                    break;
-                case 11:
-                    category = Category.CATEGORY_CAPACITY;
-                    break;
-                case 12:
-                    category = Category.CATEGORY_TRUNCATED;
-                    break;
-                case 13:
-                    category = Category.CATEGORY_WARNING;
-                    break;
-                default:
-                    category = Category.CATEGORY_ERROR;
-                    break;
+            final Object jsonCategories = json.opt(ResponseFields.ERROR_CATEGORIES);
+            final List<Category> categories;
+            if (jsonCategories instanceof JSONArray) {
+                final JSONArray jsonArray = (JSONArray) jsonCategories;
+                final int length = jsonArray.length();
+                categories = new ArrayList<Category>(length);
+                for (int i = 0; i < length; i++) {
+                    categories.add(Categories.getKnownCategoryByName(jsonArray.getString(i)));
                 }
+                Collections.sort(categories);
+            } else {
+                categories = Collections.singletonList(Categories.getKnownCategoryByName(jsonCategories.toString()));
             }
             final Object[] args = parseErrorMessageArgs(json.optJSONArray(ResponseFields.ERROR_PARAMS));
             final OXException exception;
+            final Category category = categories.get(0);
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
                 exception = new OXException(number, message, args);
             } else {
                 exception = new OXException(number, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, args);
                 exception.setLogMessage(message);
             }
-            exception.setCategory(category).setPrefix(prefix);
+            for (final Category cat : categories) {
+                exception.addCategory(cat);
+            }
             if (Category.CATEGORY_WARNING.equals(category)) {
-                response.setWarning(exception);
+                response.addWarning(exception);
             } else {
                 response.setException(exception);
             }
