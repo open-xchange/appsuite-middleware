@@ -1,6 +1,7 @@
 package com.openexchange.polling.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.polling.PollService;
 
 public class AllAction extends AbstractPollingAction {
@@ -11,7 +12,7 @@ public class AllAction extends AbstractPollingAction {
 
 	@Override
 	protected AJAXRequestResult perform(PollingRequest req)
-			throws AbstractOXException {
+			throws OXException {
 		
 		PollService pollService = factory.getPollService();
 		

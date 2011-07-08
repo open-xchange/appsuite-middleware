@@ -52,6 +52,7 @@ package com.openexchange.polling.json.actions;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -73,7 +74,7 @@ public abstract class AbstractPollingAction implements AJAXActionService {
     }
 
     // This is the method we have to implement as an AJAXActionService
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
     	// We construct a PollingRequest. I've found it useful to wrap request data, along with the session and our factory into a single request object. Everything that has to do with parsing request parameters or bodies
     	// can be put neatly into this class.
     	PollingRequest req = new PollingRequest(request, session, factory);
@@ -82,6 +83,6 @@ public abstract class AbstractPollingAction implements AJAXActionService {
     }
 
     // This is the method our subclasses must implement, where we put the concrete logic for an action.
-    protected abstract AJAXRequestResult perform(PollingRequest req) throws AbstractOXException;
+    protected abstract AJAXRequestResult perform(PollingRequest req) throws OXException;
 
 }

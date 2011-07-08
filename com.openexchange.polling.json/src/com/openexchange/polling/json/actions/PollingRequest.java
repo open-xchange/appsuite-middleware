@@ -51,6 +51,7 @@ package com.openexchange.polling.json.actions;
 
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.polling.Poll;
 import com.openexchange.polling.json.PollParser;
 import com.openexchange.tools.session.ServerSession;
@@ -79,7 +80,7 @@ public class PollingRequest {
     }
 
     // Handle the body. This will typically be used by new and update actions.
-    public Poll getPoll() throws AbstractOXException {
+    public Poll getPoll() throws OXException {
         JSONObject object = (JSONObject) request.getData();
         return PARSER.parse(object);
     }
@@ -91,7 +92,7 @@ public class PollingRequest {
 
     // A helpful delegate method. Add delegate methods as needed by the action implementations.
     // ServerSession#getContext oder ServerSession#getUser are also popular for this.
-    public void require(String... mandatoryParameters) throws AbstractOXException {
+    public void require(String... mandatoryParameters) throws OXException {
         request.require(mandatoryParameters);
     }
 

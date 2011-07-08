@@ -50,6 +50,7 @@
 package com.openexchange.polling.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.polling.Poll;
 import com.openexchange.polling.PollService;
 
@@ -71,7 +72,7 @@ public class GetAction extends AbstractPollingAction {
     // We're aiming for a very slim controller (that's what actions are in an Model-View-Controller architecture) much like this one. Most complicated
     // stuff should happen at the model level (meaning, mostly in the PollService or the Poll class). 
     @Override
-    protected AJAXRequestResult perform(PollingRequest req) throws AbstractOXException {
+    protected AJAXRequestResult perform(PollingRequest req) throws OXException {
         req.require("id");
         int cid = req.getContextId();
         int id = req.getId();
