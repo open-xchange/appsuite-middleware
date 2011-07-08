@@ -80,7 +80,7 @@ public class JSONResponseConverter implements ResultConverter {
     }
        
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final Response response = new Response();
+        final Response response = new Response(session);
         response.setData(result.getResultObject());
         response.setTimestamp(result.getTimestamp());
         final Collection<OXException> warnings = result.getWarnings();
