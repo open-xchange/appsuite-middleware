@@ -61,6 +61,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * This writer's main objective is to wrap ImportResults into JSON, which then
@@ -73,11 +74,13 @@ import com.openexchange.json.OXJSONWriter;
  */
 public class ImportExportWriter extends DataWriter {
 
+    private final ServerSession session;
+
 	/**
 	 * Initializes a new {@link ImportExportWriter}
 	 */
-	public ImportExportWriter() {
-		this(new OXJSONWriter());
+	public ImportExportWriter(final ServerSession session) {
+		this(new OXJSONWriter(), session);
 	}
 
 	/**
@@ -86,15 +89,16 @@ public class ImportExportWriter extends DataWriter {
 	 * @param jsonwriter
 	 *            The JSON writer to write to
 	 */
-	public ImportExportWriter(final OXJSONWriter jsonwriter) {
+	public ImportExportWriter(final OXJSONWriter jsonwriter, final ServerSession session) {
 		super(null, jsonwriter);
+		this.session = session;
 	}
 
 	public void writeObject(final ImportResult importResult) throws JSONException {
         if (importResult.hasError()) {
             final OXException exception = importResult.getException();
             final JSONObject jsonObject = new JSONObject();
-            ResponseWriter.addException(jsonObject, exception, false);
+            ResponseWriter.addException(jsonObject, exception, session.getUser().getLocale());
 
             jsonwriter.object();
             writeDepth1(jsonObject);        
@@ -106,7 +110,7 @@ public class ImportExportWriter extends DataWriter {
                 for (final ConversionWarning warning : warnings) {
                     jsonwriter.object();
                     final JSONObject jsonWarning = new JSONObject();
-                    ResponseWriter.addException(jsonWarning, warning,  true);
+                    ResponseWriter.addWarning(jsonWarning, warning,  session.getUser().getLocale());
                     writeDepth1(jsonWarning);
                     jsonwriter.endObject();                    
                 }

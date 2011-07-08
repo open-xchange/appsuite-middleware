@@ -106,6 +106,8 @@ public class ImportServlet extends ImportExport {
         final List<ImportResult> importResult;
         try {
             init();
+            final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
+            resObj.setLocale(session.getUser().getLocale());
             //checking format
             final String formatStr = DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION);
             final Format format = Format.getFormatByConstantName(formatStr);
@@ -131,7 +133,6 @@ public class ImportServlet extends ImportExport {
                     throw ImportExportExceptionCodes.EMPTY_FILE.create();
                 }
                 //actual import
-                final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
                 importResult = importerExporter.importData(session, format, new FileInputStream(upload), folders, req.getParameterMap());
             } finally {
                 if (event != null) {
@@ -139,7 +140,7 @@ public class ImportServlet extends ImportExport {
                 }
             }
             //writing response
-            final ImportExportWriter writer = new ImportExportWriter();
+            final ImportExportWriter writer = new ImportExportWriter(session);
             try {
                 writer.writeObjects(importResult);
                 resObj.setData(writer.getObject());

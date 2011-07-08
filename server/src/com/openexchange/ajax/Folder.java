@@ -306,7 +306,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         long lastModified = 0;
         /*
@@ -403,7 +403,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         OXException warning = null;
         Date lastModifiedDate = null;
@@ -1044,7 +1044,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
          */
         jsonWriter.endArray();
         if (null != warning) {
-            response.setWarning(warning);
+            response.addWarning(warning);
         }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
@@ -1079,7 +1079,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         long lastModified = 0;
         /*
@@ -1342,7 +1342,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         Date lastModifiedDate = null;
         OXException warning = null;
@@ -1675,7 +1675,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
          */
         jsonWriter.endArray();
         if (null != warning) {
-            response.setWarning(warning);
+            response.addWarning(warning);
         }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
@@ -1705,7 +1705,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session.getUser().getLocale());
         OXJSONWriter jsonWriter = null;
         Date lastModifiedDate = null;
         /*
@@ -1832,7 +1832,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         Date lastModifiedDate = null;
         Object retval = JSONObject.NULL;
         /*
@@ -1967,7 +1967,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         Date lastModifiedDate = null;
         Object retval = JSONObject.NULL;
         /*
@@ -2075,7 +2075,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         Date lastModifiedDate = null;
         /*
@@ -2196,7 +2196,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response();
+        final Response response = new Response(session);
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         Date lastModifiedDate = null;
         /*

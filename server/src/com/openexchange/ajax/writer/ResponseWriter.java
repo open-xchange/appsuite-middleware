@@ -148,6 +148,23 @@ public final class ResponseWriter {
     }
 
     /**
+     * Writes specified warning to given JSON object using passed locale.
+     * 
+     * @param json The JSON object
+     * @param warning The warning
+     * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     */
+    public static void addWarning(final JSONObject json, final OXException warning, final Locale locale) throws JSONException {
+        if (null == warning) {
+            return;
+        }
+        final JSONObject jsonWarning = new JSONObject();
+        addException(jsonWarning, warning.setCategory(Category.CATEGORY_WARNING), locale);
+        json.put(WARNINGS, jsonWarning);
+    }
+
+    /**
      * Writes specified warnings to given JSON object using default locale.
      * 
      * @param json The JSON object
@@ -172,13 +189,13 @@ public final class ResponseWriter {
         }
         if (1 == warnings.size()) {
             final JSONObject jsonWarning = new JSONObject();
-            addException(jsonWarning, warnings.get(0), locale);
+            addException(jsonWarning, warnings.get(0).setCategory(Category.CATEGORY_WARNING), locale);
             json.put(WARNINGS, jsonWarning);
         } else {
             final JSONArray jsonArray = new JSONArray();
             for (final OXException warning : warnings) {
                 final JSONObject jsonWarning = new JSONObject();
-                addException(jsonWarning, warning, locale);
+                addException(jsonWarning, warning.setCategory(Category.CATEGORY_WARNING), locale);
                 jsonArray.put(jsonWarning);
             }
             json.put(WARNINGS, jsonArray);
@@ -381,7 +398,7 @@ public final class ResponseWriter {
         if (1 == warnings.size()) {
             writer.object();
             try {
-                writeException(warnings.get(0), writer, locale);
+                writeException(warnings.get(0).setCategory(Category.CATEGORY_WARNING), writer, locale);
             } finally {
                 writer.endObject();
             }
@@ -391,7 +408,7 @@ public final class ResponseWriter {
                 for (final OXException warning : warnings) {
                     writer.object();
                     try {
-                        writeException(warning, writer, locale);
+                        writeException(warning.setCategory(Category.CATEGORY_WARNING), writer, locale);
                     } finally {
                         writer.endObject();
                     }

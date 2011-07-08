@@ -64,7 +64,10 @@ import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Response data object.
@@ -73,6 +76,8 @@ import com.openexchange.tools.UnsynchronizedStringWriter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Response {
+
+    private static final Locale DEFAULT_LOCALE = Locale.US;
 
     /**
      * The locale needed for i18n of display message.
@@ -113,11 +118,49 @@ public final class Response {
         super();
         warnings = new LinkedList<OXException>();
         this.json = response;
-        this.locale = Locale.US;
+        this.locale = DEFAULT_LOCALE;
     }
 
     /**
      * Constructor for generating responses.
+     * 
+     * @param session The server session providing user data
+     * @throws OXException If user's locale cannot be detected
+     */
+    public Response(final Session session) throws OXException {
+        this(getServerSessionFrom(session).getUser().getLocale());
+    }
+
+    private static ServerSession getServerSessionFrom(final Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return (ServerSession) session;
+        }
+        return new ServerSessionAdapter(session);
+    }
+
+    /**
+     * Constructor for generating responses.
+     * 
+     * @param session The server session providing user data
+     */
+    public Response(final ServerSession session) {
+        this(session.getUser().getLocale());
+    }
+
+    /**
+     * Constructor for generating responses.
+     */
+    public Response() {
+        super();
+        warnings = new LinkedList<OXException>();
+        this.json = null;
+        this.locale = DEFAULT_LOCALE;
+    }
+
+    /**
+     * Constructor for generating responses.
+     * 
+     * @param locale The locale for possibly internationalizing the error message
      */
     public Response(final Locale locale) {
         super();
@@ -133,7 +176,7 @@ public final class Response {
      * @return This {@link Response} with locale applied.
      */
     public Response setLocale(final Locale locale) {
-        this.locale = null == locale ? Locale.US : locale;
+        this.locale = null == locale ? DEFAULT_LOCALE : locale;
         return this;
     }
 
@@ -208,7 +251,7 @@ public final class Response {
         if (null == exception) {
             return null;
         }
-        return exception.getDisplayMessage(Locale.US);
+        return exception.getDisplayMessage(DEFAULT_LOCALE);
     }
 
     /**
