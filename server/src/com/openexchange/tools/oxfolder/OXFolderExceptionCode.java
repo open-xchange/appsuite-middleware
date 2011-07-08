@@ -1,8 +1,8 @@
 package com.openexchange.tools.oxfolder;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
@@ -16,35 +16,35 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * Requested operation was canceled because underlying user configuration denies folder access due to module restrictions
      * </p>
      */
-    NO_MODULE_ACCESS("User %1$s has no access to module %2$s in context %3$s due to user configuration", Category.CATEGORY_CONFIGURATION, 2),
+    NO_MODULE_ACCESS("User %1$s has no access to module %2$s in context %3$s due to user configuration", Category.CATEGORY_PERMISSION_DENIED, 2, Generic.NO_PERMISSION),
     /**
      * Folder \"%1$s\" not visible to user %2$s in context %3$s
      * <p>
      * Either underlying user configuration or folder CATEGORY_PERMISSION_DENIED setting denies visibility of folder in question
      * </p>
      */
-    NOT_VISIBLE("Folder \"%1$s\" not visible to user %2$s in context %3$s", Category.CATEGORY_PERMISSION_DENIED, 3),
+    NOT_VISIBLE("Folder \"%1$s\" not visible to user %2$s in context %3$s", Category.CATEGORY_PERMISSION_DENIED, 3, Generic.NO_PERMISSION),
     /**
      * User %1$s has no access on shared folder %2$s in context %3$s due to user configuration
      * <p>
      * Underlying user configuration denies access to shared folder(s)
      * </p>
      */
-    NO_SHARED_FOLDER_ACCESS("User %1$s has no access on shared folder %2$s in context %3$s due to user configuration", Category.CATEGORY_CONFIGURATION, 4),
+    NO_SHARED_FOLDER_ACCESS("User %1$s has no access on shared folder %2$s in context %3$s due to user configuration", Category.CATEGORY_PERMISSION_DENIED, 4, Generic.NO_PERMISSION),
     /**
      * User %1$s has no write access on public folder %2$s in context %3$s due to user configuration
      * <p>
      * Underlying user configuration denies write access to public folder(s)
      * </p>
      */
-    NO_PUBLIC_FOLDER_WRITE_ACCESS("User %1$s has no write access on public folder %2$s in context %3$s due to user configuration", Category.CATEGORY_CONFIGURATION, 5),
+    NO_PUBLIC_FOLDER_WRITE_ACCESS("User %1$s has no write access on public folder %2$s in context %3$s due to user configuration", Category.CATEGORY_PERMISSION_DENIED, 5, Generic.NO_PERMISSION),
     /**
-     * User %1$s has no create-subfolder CATEGORY_PERMISSION_DENIED on folder %2$s in context %3$s
+     * User %1$s has no create-subfolder permission on folder %2$s in context %3$s
      * <p>
      * Folder CATEGORY_PERMISSION_DENIED setting denies subfolder creation beneath folder in question
      * </p>
      */
-    NO_CREATE_SUBFOLDER_PERMISSION("User %1$s has no create-subfolder CATEGORY_PERMISSION_DENIED on folder %2$s in context %3$s", Category.CATEGORY_PERMISSION_DENIED, 6),
+    NO_CREATE_SUBFOLDER_PERMISSION("User %1$s has no create-subfolder permission on folder %2$s in context %3$s", Category.CATEGORY_PERMISSION_DENIED, 6, Generic.NO_PERMISSION),
     /**
      * Missing field %1$s in folder %2$s in context %3$s
      * <p>
@@ -58,28 +58,28 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * Folder does not exist
      * </p>
      */
-    NOT_EXISTS("Folder %1$s does not exist in context %2$s", Category.CATEGORY_ERROR, 8),
+    NOT_EXISTS("Folder %1$s does not exist in context %2$s", Category.CATEGORY_ERROR, 8, Generic.NOT_FOUND),
     /**
      * Folder %1$s has been modified after last sync timestamp in context %2$s
      * <p>
      * Client timestamp is before folder's last-changed timestamp
      * </p>
      */
-    CONCURRENT_MODIFICATION("Folder %1$s has been modified after last sync timestamp in context %2$s", Category.CATEGORY_CONFLICT, 9),
+    CONCURRENT_MODIFICATION("Folder %1$s has been modified after last sync timestamp in context %2$s", Category.CATEGORY_CONFLICT, 9, Generic.CONFLICT),
     /**
      * User %1$s has no admin access to folder %2$s in context %3$s
      * <p>
      * No necessary admin access granted for update operation
      * </p>
      */
-    NO_ADMIN_ACCESS("User %1$s has no admin access to folder %2$s in context %3$s", Category.CATEGORY_PERMISSION_DENIED, 10),
+    NO_ADMIN_ACCESS("User %1$s has no admin access to folder %2$s in context %3$s", Category.CATEGORY_PERMISSION_DENIED, 10, Generic.NO_PERMISSION),
     /**
      * Default folder %1$s cannot be renamed in context %2$s
      * <p>
      * Default folder must not be renamed
      * </p>
      */
-    NO_DEFAULT_FOLDER_RENAME("Default folder %1$s cannot be renamed in context %2$s", Category.CATEGORY_PERMISSION_DENIED, 11),
+    NO_DEFAULT_FOLDER_RENAME("Default folder %1$s cannot be renamed in context %2$s", Category.CATEGORY_PERMISSION_DENIED, 11, Generic.NO_PERMISSION),
     /**
      * A duplicate folder exists in parent folder %1$s in context %2$s
      * <p>
@@ -326,9 +326,9 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     CACHE_ERROR_ON_REMOVE("Folder %1$s could not be removed from folder cache", Category.CATEGORY_ERROR, 53),
     /**
-     * User %1$s has no write CATEGORY_PERMISSION_DENIED on folder %2$s in context %3$s
+     * User %1$s has no write permission on folder %2$s in context %3$s
      */
-    NO_WRITE_PERMISSION("User %1$s has no write CATEGORY_PERMISSION_DENIED on folder %2$s in context %3$s", Category.CATEGORY_PERMISSION_DENIED, 54),
+    NO_WRITE_PERMISSION("User %1$s has no write permission on folder %2$s in context %3$s", Category.CATEGORY_PERMISSION_DENIED, 54, Generic.NO_PERMISSION),
     /**
      * A JSON error occurred: %1$s
      */
@@ -370,9 +370,9 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     TRUNCATED("The attribute %1$s contains too much characters. Current " + "length %3$d is more than allowed length of %2$d characters.", Category.CATEGORY_TRUNCATED, 64),
     /**
-     * Unable to map OCL CATEGORY_PERMISSION_DENIED value %1$s to a JSON CATEGORY_PERMISSION_DENIED value
+     * Unable to map OCL permission value %1$s to a JSON permission value
      */
-    MAP_PERMISSION_FAILED("Unable to map OCL CATEGORY_PERMISSION_DENIED value %1$s to a JSON CATEGORY_PERMISSION_DENIED value", Category.CATEGORY_ERROR, 65),
+    MAP_PERMISSION_FAILED("Unable to map OCL permission value %1$s to a JSON permission value", Category.CATEGORY_ERROR, 65),
     /**
      * Folder existence cannot be checked due to insufficient folder information
      */
@@ -382,9 +382,9 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     RUNTIME_ERROR("A runtime error occurred in context %1$s", Category.CATEGORY_ERROR, 67),
     /**
-     * This method is not applicable to an IMAP CATEGORY_PERMISSION_DENIED
+     * This method is not applicable to an IMAP permission.
      */
-    ACL_PERMISSION_ERROR("This method is not applicable to an IMAP CATEGORY_PERMISSION_DENIED", Category.CATEGORY_ERROR, 68),
+    ACL_PERMISSION_ERROR("This method is not applicable to an IMAP permission.", Category.CATEGORY_ERROR, 68),
     /**
      * No subfolder creation underneath shared folder %1$s in context %2$s
      */
@@ -395,9 +395,9 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION("User %1$s grants invalid permissions on shared folder %2$s in context %3$s." + " Only owner of parental shared folder %4$s may be folder admin", Category.CATEGORY_PERMISSION_DENIED, 70),
     /**
-     * Owner %1$s of default folder %2$s must keep the folder admin CATEGORY_PERMISSION_DENIED
+     * Owner %1$s of default folder %2$s must keep the folder admin permission
      */
-    CREATOR_IS_NOT_ADMIN("Owner %1$s of default folder %2$s must keep the folder admin CATEGORY_PERMISSION_DENIED", Category.CATEGORY_USER_INPUT, 71),
+    CREATOR_IS_NOT_ADMIN("Owner %1$s of default folder %2$s must keep the folder admin permission", Category.CATEGORY_USER_INPUT, 71),
     /**
      * User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration
      */
@@ -430,17 +430,17 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     NO_FOLDER_MODULE_UPDATE("Folder module cannot be updated since folder is not empty", Category.CATEGORY_USER_INPUT, 78),
     /**
-     * Duplicate CATEGORY_PERMISSION_DENIED defined for user %1$s. Only one CATEGORY_PERMISSION_DENIED per user is allowed.
+     * Duplicate permission defined for user %1$s. Only one permission per user is allowed.
      */
-    DUPLICATE_USER_PERMISSION("Duplicate CATEGORY_PERMISSION_DENIED defined for user %1$s. Only one CATEGORY_PERMISSION_DENIED per user is allowed.", Category.CATEGORY_USER_INPUT, 79),
+    DUPLICATE_USER_PERMISSION("Duplicate permission defined for user %1$s. Only one permission per user is allowed.", Category.CATEGORY_USER_INPUT, 79),
     /**
-     * Duplicate CATEGORY_PERMISSION_DENIED defined for group %1$s. Only one CATEGORY_PERMISSION_DENIED per group is allowed.
+     * Duplicate permission defined for group %1$s. Only one permission per group is allowed.
      */
-    DUPLICATE_GROUP_PERMISSION("Duplicate CATEGORY_PERMISSION_DENIED defined for group %1$s. Only one CATEGORY_PERMISSION_DENIED per group is allowed.", Category.CATEGORY_USER_INPUT, 80),
+    DUPLICATE_GROUP_PERMISSION("Duplicate permission defined for group %1$s. Only one permission per group is allowed.", Category.CATEGORY_USER_INPUT, 80),
     /**
-     * Only the folder visibility CATEGORY_PERMISSION_DENIED is allowed to be changed for folder %1$s in context %2$s.
+     * Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.
      */
-    FOLDER_VISIBILITY_PERMISSION_ONLY("Only the folder visibility CATEGORY_PERMISSION_DENIED is allowed to be changed for folder %1$s in context %2$s.", Category.CATEGORY_PERMISSION_DENIED, 81),
+    FOLDER_VISIBILITY_PERMISSION_ONLY("Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.", Category.CATEGORY_PERMISSION_DENIED, 81),
     /**
      * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
      */
@@ -498,15 +498,22 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
     /**
      * Detail number of the exception.
      */
-    private final int detailNumber;
+    private final int number;
 
-    private final boolean display;
+    /**
+     * The generic type.
+     */
+    private final Generic generic;
 
-    private OXFolderExceptionCode(final String message, final Category category, final int detailNumber) {
+    private OXFolderExceptionCode(final String message, final Category category, final int number) {
+        this(message, category, number, Generic.NONE);
+    }
+
+    private OXFolderExceptionCode(final String message, final Category category, final int number, final Generic generic) {
         this.message = message;
         this.category = category;
-        this.detailNumber = detailNumber;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
+        this.number = number;
+        this.generic = generic;
     }
 
     public String getPrefix() {
@@ -519,7 +526,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * @return The (detail) number.
      */
     public int getNumber() {
-        return detailNumber;
+        return number;
     }
 
     /**
