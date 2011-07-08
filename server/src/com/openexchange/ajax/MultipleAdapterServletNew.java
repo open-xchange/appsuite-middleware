@@ -177,7 +177,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             response.setTimestamp(result.getTimestamp());
             final Collection<OXException> warnings = result.getWarnings();
             if (null != warnings && !warnings.isEmpty()) {
-                response.setWarning(warnings.iterator().next());
+                response.addWarnings(warnings);
             }
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);

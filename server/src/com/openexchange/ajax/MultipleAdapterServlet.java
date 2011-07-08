@@ -136,7 +136,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             response.setTimestamp(timestamp);
         }
         if (null != warnings && !warnings.isEmpty()) {
-            response.setWarning(warnings.iterator().next());
+            response.addWarnings(warnings);
         }
         try {
             writeResponse(response, resp);

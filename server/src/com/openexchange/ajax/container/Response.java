@@ -52,6 +52,7 @@ package com.openexchange.ajax.container;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -370,7 +371,7 @@ public final class Response {
     }
 
     /**
-     * Sets this response object's warning and implicitly overwrites any existing warning/error.
+     * Sets this response object's warning.
      * <p>
      * <b>Note</b>: {@link OXException}'s category is implicitly set to {@link Category#CATEGORY_WARNING}.
      * 
@@ -382,6 +383,24 @@ public final class Response {
             warning.setCategory(Category.CATEGORY_WARNING);
         }
         warnings.add(warning);
+        return this;
+    }
+
+    /**
+     * Sets this response object's warnings and implicitly overwrites any existing warning/error.
+     * <p>
+     * <b>Note</b>: {@link OXException}'s category is implicitly set to {@link Category#CATEGORY_WARNING}.
+     * 
+     * @param warnings The warnings to add
+     * @return This response with warnings added
+     */
+    public Response addWarnings(final Collection<OXException> warnings) {
+        for (final OXException warning : warnings) {
+            if (!Category.CATEGORY_WARNING.equals(exception.getCategory())) {
+                warning.setCategory(Category.CATEGORY_WARNING);
+            }
+        }
+        warnings.addAll(warnings);
         return this;
     }
 
