@@ -51,6 +51,7 @@ package com.openexchange.publish.json;
 
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.THROWABLE;
 import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.PermissionServlet;
@@ -72,9 +73,9 @@ public abstract class AbstractPublicationServlet extends PermissionServlet{
         return session.getUserConfiguration().isPublication();
     }
     
-    protected void writeOXException(final OXException x, final HttpServletResponse resp) {
+    protected void writeOXException(final OXException x, final HttpServletRequest req, final HttpServletResponse resp) {
         x.log(com.openexchange.exception.Log.valueOf(getLog()));
-        final Response response = new Response();
+        final Response response = new Response(getSessionObject(req));
         response.setException(x);
         writeResponseSafely(response, resp);
     }
