@@ -71,6 +71,11 @@ import com.openexchange.tools.UnsynchronizedStringWriter;
 public final class Response {
 
     /**
+     * The locale needed for i18n of display message.
+     */
+    private Locale locale;
+
+    /**
      * The original JSON response.
      */
     private transient JSONObject json;
@@ -104,13 +109,27 @@ public final class Response {
     public Response(final JSONObject response) {
         super();
         this.json = response;
+        this.locale = Locale.US;
     }
 
     /**
      * Constructor for generating responses.
      */
-    public Response() {
-        this(null);
+    public Response(final Locale locale) {
+        super();
+        this.json = null;
+        this.locale = locale;
+    }
+
+    /**
+     * Sets the specified locale needed for internationalization of display message.
+     * 
+     * @param locale The locale
+     * @return This {@link Response} with locale applied.
+     */
+    public Response setLocale(final Locale locale) {
+        this.locale = null == locale ? Locale.US : locale;
+        return this;
     }
 
     /**
