@@ -245,9 +245,15 @@ public final class SpellCheckServlet extends SessionServlet {
         /*
          * Some variables
          */
-        final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         final Session session = getSessionObject(req);
+        Response response;
+        try {
+            response = new Response(session);
+        } catch (final OXException e1) {
+            Response.write(new Response().setException(e1), resp.getWriter());
+            return;
+        }
         /*
          * Start response
          */
