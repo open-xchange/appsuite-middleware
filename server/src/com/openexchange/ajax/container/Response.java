@@ -125,7 +125,7 @@ public final class Response {
     /**
      * Constructor for generating responses.
      * 
-     * @param session The server session providing user data
+     * @param session The server session providing user data; if <code>null</code> default locale {@link Locale#US} is used
      * @throws OXException If user's locale cannot be detected
      */
     public Response(final Session session) throws OXException {
@@ -135,7 +135,7 @@ public final class Response {
     /**
      * Constructor for generating responses.
      * 
-     * @param session The server session providing user data
+     * @param session The server session providing user data; if <code>null</code> default locale {@link Locale#US} is used
      */
     public Response(final ServerSession session) {
         this(null == session ? DEFAULT_LOCALE : session.getUser().getLocale());
@@ -166,7 +166,7 @@ public final class Response {
     /**
      * Sets the specified locale needed for internationalization of display message.
      * 
-     * @param session The session
+     * @param session The server session; if <code>null</code> default locale {@link Locale#US} is used
      * @return This {@link Response} with locale applied.
      */
     public Response setLocale(final ServerSession session) {
@@ -177,7 +177,7 @@ public final class Response {
     /**
      * Sets the specified locale needed for internationalization of display message.
      * 
-     * @param session The session
+     * @param session The session; if <code>null</code> default locale {@link Locale#US} is used
      * @return This {@link Response} with locale applied.
      * @throws OXException If locale cannot be detected
      */
