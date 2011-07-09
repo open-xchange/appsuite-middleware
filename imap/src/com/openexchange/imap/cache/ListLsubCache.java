@@ -332,6 +332,28 @@ public final class ListLsubCache {
     }
 
     /**
+     * Gets up-to-date LIST entry for specified full name.
+     * 
+     * @param fullName The full name
+     * @param accountId The account ID
+     * @param imapStore The IMAP store
+     * @param session The session
+     * @return The cached LIST entry
+     * @throws MailException If loading the entry fails
+     */
+    public static ListLsubEntry getActualLISTEntry(final String fullName, final int accountId, final AccessedIMAPStore imapStore, final Session session) throws MailException {
+        try {
+            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+            final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+            synchronized (collection) {
+                return collection.getActualEntry(fullName, imapFolder);
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
      * Gets cached LIST entry for specified full name.
      * 
      * @param fullName The full name

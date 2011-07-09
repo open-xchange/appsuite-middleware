@@ -549,7 +549,7 @@ public final class IMAPDefaultFolderChecker {
         final StringBuilder tmp = new StringBuilder(32);
         final boolean checkSubscribed = true;
         final long st = System.currentTimeMillis();
-        final String fullName = tmp.append(prefix).append(name).toString();
+        final String fullName = prefix.length() == 0 ? name : tmp.append(prefix).append(name).toString();
         {
             final ListLsubEntry entry = modified.get() ? ListLsubCache.getActualLISTEntry(fullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
             if (null != entry && entry.exists()) {

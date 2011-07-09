@@ -158,7 +158,7 @@ final class ListLsubCollection {
         }
     }
 
-    boolean isNamespace(final String fullName) {
+    protected boolean isNamespace(final String fullName) {
         for (final String sharedNamespace : shared) {
             if (fullName.startsWith(sharedNamespace)) {
                 return true;
@@ -172,7 +172,7 @@ final class ListLsubCollection {
         return false;
     }
 
-    boolean equalsNamespace(final String fullName) {
+    protected boolean equalsNamespace(final String fullName) {
         for (final String sharedNamespace : shared) {
             if (fullName.equals(sharedNamespace)) {
                 return true;
@@ -406,6 +406,30 @@ final class ListLsubCollection {
     }
 
     /**
+     * Gets current entry for specified full name.
+     * 
+     * @param fullName The full name of the starting folder node
+     * @param imapFolder The connected IMAP folder
+     * @throws MailException If update fails
+     */
+    public ListLsubEntry getActualEntry(final String fullName, final IMAPFolder imapFolder) throws MailException {
+        try {
+            /*
+             * Perform LIST "" <full-name>
+             */
+            return (ListLsubEntry) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    return doSingleListCommandWithLsub(protocol, fullName);
+                }
+
+            });
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
      * Updates a sub-tree starting at specified full name.
      * 
      * @param fullName The full name of the starting folder node
@@ -549,7 +573,7 @@ final class ListLsubCollection {
      * @param lsub <code>true</code> to perform a LSUB command; otherwise <code>false</code> for LIST
      * @throws ProtocolException If a protocol error occurs
      */
-    void doListLsubCommand(final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
+    protected void doListLsubCommand(final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
         /*
          * Perform command
          */
@@ -574,56 +598,67 @@ final class ListLsubCollection {
             char separator = '\0';
             for (final ListLsubEntryImpl next : listResponses) {
                 ListLsubEntryImpl listLsubEntry = next;
-                if (listLsubEntry.hasInferiors() && listLsubEntry.canOpen()) {
-                    mbox = Boolean.FALSE;
-                }
                 final String fullName = listLsubEntry.getFullName();
-                {
-                    final ListLsubEntryImpl oldEntry = map.get(fullName);
-                    if (oldEntry == null) {
-                        /*
-                         * Wasn't in map before
-                         */
-                        map.put(fullName, listLsubEntry);
-                    } else {
-                        /*
-                         * Already contained in map
-                         */
-                        oldEntry.clearChildren();
-                        oldEntry.copyFrom(listLsubEntry);
-                        listLsubEntry = oldEntry;
-                    }
-                }
                 /*
-                 * Determine parent
+                 * Ensure LSUB entry has a LIST equivalent
                  */
-                final int pos = fullName.lastIndexOf((separator = listLsubEntry.getSeparator()));
-                if (pos >= 0) {
+                if (!lsub || listMap.containsKey(fullName)) {
                     /*
-                     * Non-root level
+                     * Check for MBox format while iterating LIST/LSUB responses.
                      */
-                    final String parentFullName = fullName.substring(0, pos);
-                    final ListLsubEntryImpl parent = map.get(parentFullName);
-                    if (null == parent) {
-                        /*
-                         * Parent not (yet) in map
-                         */
-                        List<ListLsubEntryImpl> children = parentMap.get(parentFullName);
-                        if (null == children) {
-                            children = new ArrayList<ListLsubCollection.ListLsubEntryImpl>(8);
-                            parentMap.put(parentFullName, children);
-                        }
-                        children.add(listLsubEntry);
-                    } else {
-                        listLsubEntry.setParent(parent);
-                        parent.addChild(listLsubEntry);
+                    if (listLsubEntry.hasInferiors() && listLsubEntry.canOpen()) {
+                        mbox = Boolean.FALSE;
                     }
-                } else {
                     /*
-                     * Root level
+                     * (Re-)Set children
                      */
-                    listLsubEntry.setParent(rootEntry);
-                    rootEntry.addChild(listLsubEntry);
+                    {
+                        final ListLsubEntryImpl oldEntry = map.get(fullName);
+                        if (oldEntry == null) {
+                            /*
+                             * Wasn't in map before
+                             */
+                            map.put(fullName, listLsubEntry);
+                        } else {
+                            /*
+                             * Already contained in map
+                             */
+                            oldEntry.clearChildren();
+                            oldEntry.copyFrom(listLsubEntry);
+                            listLsubEntry = oldEntry;
+                        }
+                    }
+                    /*
+                     * Determine parent
+                     */
+                    final int pos = fullName.lastIndexOf((separator = listLsubEntry.getSeparator()));
+                    if (pos >= 0) {
+                        /*
+                         * Non-root level
+                         */
+                        final String parentFullName = fullName.substring(0, pos);
+                        final ListLsubEntryImpl parent = map.get(parentFullName);
+                        if (null == parent) {
+                            /*
+                             * Parent not (yet) in map
+                             */
+                            List<ListLsubEntryImpl> children = parentMap.get(parentFullName);
+                            if (null == children) {
+                                children = new ArrayList<ListLsubCollection.ListLsubEntryImpl>(8);
+                                parentMap.put(parentFullName, children);
+                            }
+                            children.add(listLsubEntry);
+                        } else {
+                            listLsubEntry.setParent(parent);
+                            parent.addChild(listLsubEntry);
+                        }
+                    } else {
+                        /*
+                         * Root level
+                         */
+                        listLsubEntry.setParent(rootEntry);
+                        rootEntry.addChild(listLsubEntry);
+                    }
                 }
             }
             if (!parentMap.isEmpty()) {
@@ -638,15 +673,16 @@ final class ListLsubCollection {
             if (!lsub) {
                 for (final String sharedNamespace : shared) {
                     if (!map.containsKey(sharedNamespace)) {
-                        final ListLsubEntryImpl namespaceFolder = new ListLsubEntryImpl(
-                            sharedNamespace,
-                            ATTRIBUTES_NON_EXISTING_NAMESPACE,
-                            separator,
-                            ChangeState.UNDEFINED,
-                            true,
-                            false,
-                            Boolean.FALSE,
-                            lsub ? null : lsubMap).setNamespace(true);
+                        final ListLsubEntryImpl namespaceFolder =
+                            new ListLsubEntryImpl(
+                                sharedNamespace,
+                                ATTRIBUTES_NON_EXISTING_NAMESPACE,
+                                separator,
+                                ChangeState.UNDEFINED,
+                                true,
+                                false,
+                                Boolean.FALSE,
+                                lsub ? null : lsubMap).setNamespace(true);
                         namespaceFolder.setParent(rootEntry);
                         rootEntry.addChildIfAbsent(namespaceFolder);
                         map.put(sharedNamespace, namespaceFolder);
@@ -654,15 +690,16 @@ final class ListLsubCollection {
                 }
                 for (final String userNamespace : user) {
                     if (!map.containsKey(userNamespace)) {
-                        final ListLsubEntryImpl namespaceFolder = new ListLsubEntryImpl(
-                            userNamespace,
-                            ATTRIBUTES_NON_EXISTING_NAMESPACE,
-                            separator,
-                            ChangeState.UNDEFINED,
-                            true,
-                            false,
-                            Boolean.FALSE,
-                            lsub ? null : lsubMap).setNamespace(true);
+                        final ListLsubEntryImpl namespaceFolder =
+                            new ListLsubEntryImpl(
+                                userNamespace,
+                                ATTRIBUTES_NON_EXISTING_NAMESPACE,
+                                separator,
+                                ChangeState.UNDEFINED,
+                                true,
+                                false,
+                                Boolean.FALSE,
+                                lsub ? null : lsubMap).setNamespace(true);
                         namespaceFolder.setParent(rootEntry);
                         rootEntry.addChildIfAbsent(namespaceFolder);
                         map.put(userNamespace, namespaceFolder);
@@ -702,7 +739,7 @@ final class ListLsubCollection {
      * @param fullNames
      * @throws ProtocolException
      */
-    void doFolderListLsubCommand(final String fullName, final IMAPProtocol protocol, final boolean lsub, final Set<String> fullNames) throws ProtocolException {
+    protected void doFolderListLsubCommand(final String fullName, final IMAPProtocol protocol, final boolean lsub, final Set<String> fullNames) throws ProtocolException {
         /*
          * Get sub-tree starting at specified full name
          */
@@ -849,15 +886,16 @@ final class ListLsubCollection {
                     /*
                      * Add dummy parent
                      */
-                    parent = new ListLsubEntryImpl(
-                        parentFullName,
-                        ATTRIBUTES_NON_EXISTING_PARENT,
-                        separator,
-                        ChangeState.UNDEFINED,
-                        true,
-                        false,
-                        Boolean.TRUE,
-                        lsub ? null : lsubMap).setNamespace(isNamespace(parentFullName));
+                    parent =
+                        new ListLsubEntryImpl(
+                            parentFullName,
+                            ATTRIBUTES_NON_EXISTING_PARENT,
+                            separator,
+                            ChangeState.UNDEFINED,
+                            true,
+                            false,
+                            Boolean.TRUE,
+                            lsub ? null : lsubMap).setNamespace(isNamespace(parentFullName));
                     map.put(parentFullName, parent);
                     if (null != set) {
                         if (add) {
@@ -906,7 +944,7 @@ final class ListLsubCollection {
      * @param protocol The IMAP protocol
      * @throws ProtocolException If a protocol error occurs
      */
-    void doRootListCommand(final IMAPProtocol protocol) throws ProtocolException {
+    protected void doRootListCommand(final IMAPProtocol protocol) throws ProtocolException {
         /*
          * Perform command: LIST "" ""
          */
@@ -945,6 +983,92 @@ final class ListLsubCollection {
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         }
+    }
+
+    /**
+     * Performs a LIST command for a single folder with specified IMAP protocol.
+     * 
+     * @param protocol The IMAP protocol
+     * @param fullName The full name
+     * @throws ProtocolException If a protocol error occurs
+     */
+    protected ListLsubEntryImpl doSingleListCommandWithLsub(final IMAPProtocol protocol, final String fullName) throws ProtocolException {
+        /*
+         * Perform command: LIST "" <full-name>
+         */
+        final String mbox = BASE64MailboxEncoder.encode(fullName);
+        final Response[] r = protocol.command("LIST \"\" \"" + mbox + "\"", null);
+        final Response response = r[r.length - 1];
+        if (response.isOK()) {
+            ListLsubEntryImpl listLsubEntry = null;
+            for (int i = 0, len = r.length; i < len; i++) {
+                if (!(r[i] instanceof IMAPResponse)) {
+                    continue;
+                }
+                final IMAPResponse ir = (IMAPResponse) r[i];
+                if (null == listLsubEntry && ir.keyEquals("LIST")) {
+                    listLsubEntry = parseListResponse(ir, null);
+                    r[i] = null;
+                }
+            }
+            /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            if (null != listLsubEntry) {
+                /*
+                 * Check subscription status
+                 */
+                listLsubEntry.setSubscribed(doSubscriptionCheck(protocol, mbox));
+            }
+            return listLsubEntry;
+        }
+        /*
+         * Dispatch remaining untagged responses
+         */
+        protocol.notifyResponseHandlers(r);
+        protocol.handleResult(response);
+        return null; // Never reached if response is not OK
+    }
+
+    /**
+     * Performs a check if denoted folder is subscribed.
+     * 
+     * @param protocol The IMAP protocol
+     * @param mbox The encoded full name
+     * @return <code>true</code> if subscribed; otherwise <code>false</code>
+     * @throws ProtocolException If a protocol error occurs
+     */
+    private boolean doSubscriptionCheck(final IMAPProtocol protocol, final String mbox) throws ProtocolException {
+        /*
+         * Perform command: LIST "" <full-name>
+         */
+        final Response[] r = protocol.command("LSUB \"\" \"" + mbox + "\"", null);
+        final Response response = r[r.length - 1];
+        if (response.isOK()) {
+            boolean ret = false;
+            for (int i = 0, len = r.length; i < len; i++) {
+                if (!(r[i] instanceof IMAPResponse)) {
+                    continue;
+                }
+                final IMAPResponse ir = (IMAPResponse) r[i];
+                if (ir.keyEquals("LSUB")) {
+                    ret |= mbox.equals(parseEncodedFullName(ir));
+                    r[i] = null;
+                }
+            }
+            /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            return ret;
+        }
+        /*
+         * Dispatch remaining untagged responses
+         */
+        protocol.notifyResponseHandlers(r);
+        protocol.handleResult(response);
+        return false; // Never reached if response is not OK
     }
 
     /**
@@ -1006,14 +1130,15 @@ final class ListLsubCollection {
      * @param protocol The IMAP protocol
      * @throws ProtocolException If a protocol error occurs
      */
-    ListLsubEntryImpl doSingleListCommand(final String fullName, final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
+    protected ListLsubEntryImpl doSingleListCommand(final String fullName, final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
         /*
          * Perform command: LIST "" "INBOX"
          */
         final String command = lsub ? "LSUB" : "LIST";
-        final Response[] r = protocol.command(
-            new StringBuilder(command).append(" \"\" \"").append(BASE64MailboxEncoder.encode(fullName)).append("\"").toString(),
-            null);
+        final Response[] r =
+            protocol.command(
+                new StringBuilder(command).append(" \"\" \"").append(BASE64MailboxEncoder.encode(fullName)).append("\"").toString(),
+                null);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             ListLsubEntryImpl retval = null;
@@ -1277,13 +1402,42 @@ final class ListLsubCollection {
         return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));
     }
 
+    private String parseEncodedFullName(final IMAPResponse listResponse) {
+        /*-
+         * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
+         * 
+         * Consume attributes
+         */
+        listResponse.readSimpleList();
+        /*
+         * Read separator character
+         */
+        listResponse.skipSpaces();
+        if (listResponse.readByte() == '"') {
+            if (((char) listResponse.readByte()) == '\\') {
+                /*
+                 * Escaped separator character
+                 */
+                listResponse.readByte();
+            }
+            listResponse.skip(1);
+        } else {
+            listResponse.skip(2);
+        }
+        /*
+         * Read full name; decode the name (using RFC2060's modified UTF7)
+         */
+        listResponse.skipSpaces();
+        return listResponse.readAtomString();
+    }
+
     /**
      * Creates an empty {@link ListLsubEntry} for specified full name.
      * 
      * @param fullName The full name
      * @return An empty {@link ListLsubEntry}
      */
-    static ListLsubEntry emptyEntryFor(final String fullName) {
+    protected static ListLsubEntry emptyEntryFor(final String fullName) {
         return new EmptyListLsubEntry(fullName);
     }
 
@@ -1417,9 +1571,12 @@ final class ListLsubCollection {
 
         private Rights myRights;
 
-        ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
+        private Boolean subscribed;
+
+        protected ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
-            this.fullName = String.valueOf(separator).equals(fullName) ? ROOT_FULL_NAME : (INBOX.equalsIgnoreCase(fullName) ? INBOX : fullName);
+            this.fullName =
+                String.valueOf(separator).equals(fullName) ? ROOT_FULL_NAME : (INBOX.equalsIgnoreCase(fullName) ? INBOX : fullName);
             this.attributes = attributes;
             this.separator = separator;
             this.changeState = changeState;
@@ -1437,7 +1594,7 @@ final class ListLsubCollection {
             this.lsubMap = lsubMap;
         }
 
-        void copyFrom(final ListLsubEntryImpl newEntry) {
+        protected void copyFrom(final ListLsubEntryImpl newEntry) {
             if (newEntry == null) {
                 return;
             }
@@ -1451,7 +1608,7 @@ final class ListLsubCollection {
             hasChildren = newEntry.hasChildren;
         }
 
-        void clearChildren() {
+        protected void clearChildren() {
             if (children != null) {
                 children.clear();
             }
@@ -1466,7 +1623,7 @@ final class ListLsubCollection {
          * 
          * @param parent The parent
          */
-        void setParent(final ListLsubEntry parent) {
+        protected void setParent(final ListLsubEntry parent) {
             this.parent = parent;
         }
 
@@ -1479,7 +1636,7 @@ final class ListLsubCollection {
          * 
          * @param child The child LIST/LSUB entry
          */
-        void addChild(final ListLsubEntryImpl child) {
+        protected void addChild(final ListLsubEntryImpl child) {
             if (null == child) {
                 return;
             }
@@ -1502,7 +1659,7 @@ final class ListLsubCollection {
          * 
          * @param child The child LIST/LSUB entry
          */
-        void addChildIfAbsent(final ListLsubEntryImpl child) {
+        protected void addChildIfAbsent(final ListLsubEntryImpl child) {
             if (null == child) {
                 return;
             }
@@ -1516,7 +1673,7 @@ final class ListLsubCollection {
             return null == children ? Collections.<ListLsubEntry> emptyList() : new ArrayList<ListLsubEntry>(children);
         }
 
-        Set<ListLsubEntryImpl> getChildrenSet() {
+        protected Set<ListLsubEntryImpl> getChildrenSet() {
             return null == children ? Collections.<ListLsubEntryImpl> emptySet() : children;
         }
 
@@ -1552,8 +1709,12 @@ final class ListLsubCollection {
             return true;
         }
 
+        protected void setSubscribed(final boolean subscribed) {
+            this.subscribed = Boolean.valueOf(subscribed);
+        }
+
         public boolean isSubscribed() {
-            return null == lsubMap ? true : lsubMap.containsKey(fullName);
+            return null == subscribed ? (null == lsubMap ? true : lsubMap.containsKey(fullName)) : subscribed.booleanValue();
         }
 
         /**
@@ -1561,7 +1722,7 @@ final class ListLsubCollection {
          * 
          * @param status The status
          */
-        void setStatus(final int[] status) {
+        protected void setStatus(final int[] status) {
             if (null == status) {
                 this.status = null;
                 return;
@@ -1582,7 +1743,7 @@ final class ListLsubCollection {
             return null == status ? -1 : status[2];
         }
 
-        void setMyRights(final Rights myRights) {
+        protected void setMyRights(final Rights myRights) {
             this.myRights = myRights;
         }
 
@@ -1600,7 +1761,7 @@ final class ListLsubCollection {
          * 
          * @param acls The ACL list
          */
-        void setAcls(final List<ACL> acls) {
+        protected void setAcls(final List<ACL> acls) {
             this.acls = acls;
         }
 
@@ -1686,7 +1847,7 @@ final class ListLsubCollection {
          * 
          * @param namespace The namespace flag
          */
-        ListLsubEntryImpl setNamespace(final boolean namespace) {
+        protected ListLsubEntryImpl setNamespace(final boolean namespace) {
             this.namespace = namespace;
             return this;
         }
