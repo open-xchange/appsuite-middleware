@@ -257,16 +257,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         setMailProperties((Properties) System.getProperties().clone());
     }
 
-    private void reset() {
-        super.resetFields();
-        // pop3Storage = null;
-        // pop3StorageProperties = null;
-        folderStorage = null;
-        messageStorage = null;
-        logicTools = null;
-        connected = false;
-    }
-
     /**
      * Gets this POP3 access' session.
      * 
@@ -347,7 +337,13 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Reset
              */
-            reset();
+            super.resetFields();
+            // pop3Storage = null;
+            // pop3StorageProperties = null;
+            folderStorage = null;
+            messageStorage = null;
+            logicTools = null;
+            connected = false;
         }
     }
 
@@ -376,6 +372,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     public MailFolder getRootFolder() throws MailException {
         pop3Storage.connect();
         addWarnings(pop3Storage.getWarnings());
+        connected = true;
         return pop3Storage.getFolderStorage().getRootFolder();
     }
 

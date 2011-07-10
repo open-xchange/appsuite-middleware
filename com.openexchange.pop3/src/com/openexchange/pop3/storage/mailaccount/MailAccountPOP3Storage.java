@@ -129,7 +129,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private final Collection<MailException> warnings;
 
-    MailAccountPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
+    protected MailAccountPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws MailException {
         super();
         warnings = new ArrayList<MailException>(2);
         this.pop3Access = pop3Access;

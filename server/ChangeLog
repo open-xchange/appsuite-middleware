@@ -2,6 +2,7 @@
 
  - Bugfix #19480: Reliable sorting of message by arrival date.
  - Bugfix #19595: Added permission check prior to creating attachment-publishing infostore folder
+ - Bugfix #19608: Ensured proper removal from MailAccess watcher on close
 
 * 2011-07-08 - thorben.betten@open-xchange.com
 

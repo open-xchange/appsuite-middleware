@@ -778,12 +778,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param put2Cache <code>true</code> to try to put this mail connection into cache; otherwise <code>false</code>
      */
     public final void close(final boolean put2Cache) {
-        if (!isConnectedUnsafe()) {
-            signalClosed(this);
-            return;
-        }
-        boolean put = put2Cache;
         try {
+            if (!isConnectedUnsafe()) {
+                signalClosed(this);
+                return;
+            }
+            boolean put = put2Cache;
             try {
                 /*
                  * Release all used, non-cachable resources
