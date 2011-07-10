@@ -93,7 +93,7 @@ public class SimICalParser implements ICalParser{
         this.tasks = tasks;
     }
 
-    public String parseUID(final InputStream ical) {
+    public String parseProperty(final String propertyName, final InputStream ical) {
         return null;
     }
 
