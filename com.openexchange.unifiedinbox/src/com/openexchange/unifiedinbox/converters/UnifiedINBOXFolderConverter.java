@@ -154,13 +154,13 @@ public final class UnifiedINBOXFolderConverter {
      * 
      * @param unifiedInboxAccountId The account ID of the Unified INBOX account
      * @param session The session
-     * @param fullname The folder's fullname
+     * @param fullName The folder's full name
      * @param localizedName The localized name of the folder
      * @return The appropriately filled instance of {@link MailFolder}
      * @throws MailException If converting mail folder fails
      */
-    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName) throws MailException {
-        return getUnifiedINBOXFolder(unifiedInboxAccountId, session, fullname, localizedName, null);
+    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullName, final String localizedName) throws MailException {
+        return getUnifiedINBOXFolder(unifiedInboxAccountId, session, fullName, localizedName, null);
     }
 
     /**
@@ -168,13 +168,13 @@ public final class UnifiedINBOXFolderConverter {
      * 
      * @param unifiedInboxAccountId The account ID of the Unified INBOX account
      * @param session The session
-     * @param fullname The folder's fullname
+     * @param fullName The folder's full name
      * @param localizedName The localized name of the folder
      * @param executor The executor to use to concurrently load accounts' message counts
      * @return The appropriately filled instance of {@link MailFolder}
      * @throws MailException If converting mail folder fails
      */
-    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName, final Executor executor) throws MailException {
+    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullName, final String localizedName, final Executor executor) throws MailException {
         final MailFolder tmp = new MailFolder();
         // Subscription not supported by Unified INBOX, so every folder is "subscribed"
         tmp.setSubscribed(true);
@@ -182,7 +182,7 @@ public final class UnifiedINBOXFolderConverter {
         tmp.setRootFolder(false);
         tmp.setExists(true);
         tmp.setSeparator('/');
-        tmp.setFullname(fullname);
+        tmp.setFullname(fullName);
         tmp.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
         tmp.setName(localizedName);
         tmp.setHoldsFolders(true);
@@ -205,21 +205,21 @@ public final class UnifiedINBOXFolderConverter {
         }
         // What else?!
         tmp.setDefaultFolder(true);
-        if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+        if (UnifiedINBOXAccess.INBOX.equals(fullName)) {
             tmp.setDefaultFolderType(DefaultFolderType.INBOX);
-        } else if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+        } else if (UnifiedINBOXAccess.TRASH.equals(fullName)) {
             tmp.setDefaultFolderType(DefaultFolderType.TRASH);
-        } else if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+        } else if (UnifiedINBOXAccess.SENT.equals(fullName)) {
             tmp.setDefaultFolderType(DefaultFolderType.SENT);
-        } else if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+        } else if (UnifiedINBOXAccess.SPAM.equals(fullName)) {
             tmp.setDefaultFolderType(DefaultFolderType.SPAM);
-        } else if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+        } else if (UnifiedINBOXAccess.DRAFTS.equals(fullName)) {
             tmp.setDefaultFolderType(DefaultFolderType.DRAFTS);
         } else {
             tmp.setDefaultFolderType(DefaultFolderType.NONE);
         }
         // Set message counts
-        final boolean hasAtLeastOneSuchFolder = setMessageCounts(fullname, unifiedInboxAccountId, session, tmp, executor);
+        final boolean hasAtLeastOneSuchFolder = setMessageCounts(fullName, unifiedInboxAccountId, session, tmp, executor);
         if (hasAtLeastOneSuchFolder) {
             tmp.setSubfolders(true);
             tmp.setSubscribedSubfolders(true);
@@ -233,6 +233,7 @@ public final class UnifiedINBOXFolderConverter {
         ownPermission.setGroupPermission(false);
         ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
         ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        ownPermission.setFolderAdmin(false);
         mailFolder.setOwnPermission(ownPermission);
     }
 
@@ -247,7 +248,7 @@ public final class UnifiedINBOXFolderConverter {
         mailFolder.addPermission(permission);
     }
 
-    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, MailException {
+    private static boolean setMessageCounts(final String fullName, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, MailException {
         final MailAccount[] accounts;
         try {
             final MailAccountStorageService storageService =
@@ -292,7 +293,7 @@ public final class UnifiedINBOXFolderConverter {
                             return EMPTY_COUNTS;
                         }
                         try {
-                            final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
+                            final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullName);
                             // Check if account fullname is not null
                             if (null == accountFullname) {
                                 return EMPTY_COUNTS;
@@ -329,7 +330,7 @@ public final class UnifiedINBOXFolderConverter {
                 newCount += counts[3];
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Retrieving message counts of folder \"").append(fullname).append("\" took ").append(
+                LOG.debug(new StringBuilder("Retrieving message counts of folder \"").append(fullName).append("\" took ").append(
                     completionService.getDuration()).append("msec."));
             }
             // Apply counts
