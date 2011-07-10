@@ -443,16 +443,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return;
         }
         final IMAPConfig config = getIMAPConfig();
-        
-        if (accountId == 0 && session.getUserId() == 17) {
-            config.setLogin("mbraun");
-            config.setPassword("secret");
-            config.setServer("10.20.30.205");
-            config.setPort(143);
-            config.setSecure(false);
-        }
-        
-        
         try {
             final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
             final boolean tmpDownEnabled = (imapConfProps.getImapTemporaryDown() > 0);
