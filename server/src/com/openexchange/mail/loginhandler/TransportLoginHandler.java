@@ -66,6 +66,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -74,6 +75,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -103,75 +105,79 @@ public final class TransportLoginHandler implements LoginHandlerService {
         Field.CREATED_BY)));
 
     public void handleLogin(final LoginResult login) throws LoginException {
-        /*
-         * Ensure publishing infostore folder exists
-         */
-        final Context ctx = login.getContext();
-        final Session session = login.getSession();
-        if (TransportProperties.getInstance().isPublishOnExceededQuota()) {
-            final String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
-            final int folderId;
-            try {
-                final int lookUpFolder =
-                    OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
-                if (-1 == lookUpFolder) {
-                    synchronized (TransportLoginHandler.class) {
-                        folderId = createIfAbsent(session, ctx, name);
-                    }
-                } else {
-                    folderId = lookUpFolder;
-                }
-                session.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderId));
-            } catch (final DBPoolingException e) {
-                throw new LoginException(e);
-            } catch (final SQLException e) {
-                throw new LoginException(new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage()));
-            } catch (final OXFolderException e) {
-                throw new LoginException(e);
-            } catch (final OXException e) {
-                throw new LoginException(e);
-            }
+        try {
             /*
-             * Check for elapsed documents inside infostore folder
+             * Ensure publishing infostore folder exists
              */
-            if (!TransportProperties.getInstance().publishedDocumentsExpire()) {
-                return;
-            }
-            final IDBasedFileAccess fileAccess =
-                ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(session);
-            final ServerSession serverSession;
-            if (session instanceof ServerSession) {
-                serverSession = (ServerSession) session;
-            } else {
-                serverSession = new ServerSessionAdapter(session, ctx);
-            }
-            final long now = System.currentTimeMillis();
-            final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now);
-            if (!toRemove.isEmpty()) {
-                /*
-                 * Remove elapsed documents
-                 */
+            final Context ctx = login.getContext();
+            final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
+            final UserConfiguration userConfiguration = serverSession.getUserConfiguration();
+            if (TransportProperties.getInstance().isPublishOnExceededQuota() && userConfiguration.hasInfostore() && new OXFolderAccess(ctx).getFolderObject(
+                FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID).getEffectiveUserPermission(serverSession.getUserId(), userConfiguration).canCreateSubfolders()) {
+                final String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
+                final int folderId;
                 try {
-                    fileAccess.startTransaction();
-                    try {
-                        fileAccess.removeDocument(toRemove, now);
-                        fileAccess.commit();
-                    } catch (final FileStorageException e) {
-                        fileAccess.rollback();
-                        throw new LoginException(e);
-                    } catch (final TransactionException e) {
-                        fileAccess.rollback();
-                        throw e;
-                    } catch (final Exception e) {
-                        fileAccess.rollback();
-                        throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-                    } finally {
-                        fileAccess.finish();
+                    final int lookUpFolder =
+                        OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
+                    if (-1 == lookUpFolder) {
+                        synchronized (TransportLoginHandler.class) {
+                            folderId = createIfAbsent(serverSession, ctx, name);
+                        }
+                    } else {
+                        folderId = lookUpFolder;
                     }
-                } catch (final TransactionException e) {
+                    serverSession.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderId));
+                } catch (final DBPoolingException e) {
+                    throw new LoginException(e);
+                } catch (final SQLException e) {
+                    throw new LoginException(new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage()));
+                } catch (final OXFolderException e) {
+                    throw new LoginException(e);
+                } catch (final OXException e) {
                     throw new LoginException(e);
                 }
+                /*
+                 * Check for elapsed documents inside infostore folder
+                 */
+                if (!TransportProperties.getInstance().publishedDocumentsExpire()) {
+                    return;
+                }
+                final IDBasedFileAccess fileAccess =
+                    ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
+                final long now = System.currentTimeMillis();
+                final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now);
+                if (!toRemove.isEmpty()) {
+                    /*
+                     * Remove elapsed documents
+                     */
+                    try {
+                        fileAccess.startTransaction();
+                        try {
+                            fileAccess.removeDocument(toRemove, now);
+                            fileAccess.commit();
+                        } catch (final FileStorageException e) {
+                            fileAccess.rollback();
+                            throw new LoginException(e);
+                        } catch (final TransactionException e) {
+                            fileAccess.rollback();
+                            throw e;
+                        } catch (final Exception e) {
+                            fileAccess.rollback();
+                            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+                        } finally {
+                            fileAccess.finish();
+                        }
+                    } catch (final TransactionException e) {
+                        throw new LoginException(e);
+                    }
+                }
             }
+        } catch (final DBPoolingException e) {
+            throw new LoginException(e);
+        } catch (final OXException e) {
+            throw new LoginException(e);
+        } catch (final SQLException e) {
+            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         }
     }
 
@@ -272,5 +278,12 @@ public final class TransportLoginHandler implements LoginHandlerService {
 
     public void handleLogout(final LoginResult logout) throws LoginException {
         // Nothing to do
+    }
+
+    private static ServerSession getServerSessionFrom(final Session session, final Context context) {
+        if (session instanceof ServerSession) {
+            return (ServerSession) session;
+        }
+        return new ServerSessionAdapter(session, context);
     }
 }
