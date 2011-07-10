@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import net.fortuna.ical4j.data.CalendarBuilder;
@@ -169,7 +170,10 @@ public class ICal4JParser implements ICalParser {
         return appointments;
     }
 
-    public String parseUID(final InputStream ical) {
+    public String parseProperty(final String propertyName, final InputStream ical) {
+        if (null == propertyName || null == ical) {
+            return null;
+        }
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
@@ -177,12 +181,8 @@ public class ICal4JParser implements ICalParser {
             if (calendar == null) {
                 return null;
             }
-            for (final Object componentObj : calendar.getComponents("VEVENT")) {
-                final Component vevent = (Component) componentObj;
-                final Property property = vevent.getProperty(Property.UID);
-                return null == property ? null : property.getValue();
-            }
-            return null;
+            final Property property = calendar.getProperty(propertyName.toUpperCase(Locale.US));
+            return null == property ? null : property.getValue();
         } catch (final UnsupportedEncodingException e) {
             // IGNORE
             return null;

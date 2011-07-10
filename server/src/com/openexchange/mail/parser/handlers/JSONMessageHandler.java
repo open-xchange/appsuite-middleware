@@ -885,18 +885,19 @@ public final class JSONMessageHandler implements MailMessageHandler {
          */
         if (isVCalendar(baseContentType)) {
             /*
-             * Check ICal part for a valid UID and presence of method=RESPONSE parameter
+             * Check ICal part for a valid METHOD and its presence in Content-Type header
              */
             final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
             if (iCalParser != null) {
                 try {
-                    if (null != iCalParser.parseUID(part.getInputStream())) {
+                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    if (null != method) {
                         /*
-                         * Assume an invitation response
+                         * Assume an iTIP response or request
                          */
                         final ContentType contentType = part.getContentType();
                         if (!contentType.containsParameter("method")) {
-                            contentType.setParameter("method", "RESPONSE");
+                            contentType.setParameter("method", method.toUpperCase(Locale.US));
                         }
                     }
                 } catch (final RuntimeException e) {

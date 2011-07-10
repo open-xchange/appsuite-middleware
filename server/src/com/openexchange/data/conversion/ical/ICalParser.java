@@ -70,10 +70,12 @@ public interface ICalParser {
     List<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     /**
-     * Parses the first UID possibly contained in specified ICal stream.
+     * Parses the first property possibly contained in specified ICal stream.
      * 
+     * @param propertyName The property name; e.g. "UID" or "METHOD"
      * @param ical The ICal stream
-     * @return The detected UID or <code>null</code>
+     * @return The detected property or <code>null</code>
      */
-    String parseUID(final InputStream ical);
+    String parseProperty(String propertyName, final InputStream ical);
+
 }
