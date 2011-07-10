@@ -404,7 +404,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (!entry.canOpen()) {
                     return 0;
                 }
-                return IMAPCommandsCollection.getRecent(f);
+                try {
+                    return IMAPCommandsCollection.getRecent(f);
+                } catch (final MessagingException e) {
+                    return 0;
+                }
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -431,7 +435,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (!entry.canOpen()) {
                     return 0;
                 }
-                return IMAPCommandsCollection.getTotal(f);
+                try {
+                    return IMAPCommandsCollection.getTotal(f);
+                } catch (final MessagingException e) {
+                    return 0;
+                }
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
