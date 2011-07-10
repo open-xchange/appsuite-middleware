@@ -1,3 +1,7 @@
+* 2011-07-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #19480: Reliable sorting of message by arrival date.
+
 * 2011-07-08 - thorben.betten@open-xchange.com
 
  - Bugfix #19751: Proper generation of FETCH command items if IMAPrev1 is supported

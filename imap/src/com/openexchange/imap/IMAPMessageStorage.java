@@ -1854,6 +1854,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final MailFields MAILFIELDS_DEFAULT = new MailFields(MailField.ID, MailField.FOLDER_ID);
 
+    private static boolean assumeIMAPSortIsReliable() {
+        return false; // Introduce config parameter?
+    }
+
     /**
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
      * 
@@ -1870,7 +1874,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         MailMessage[] retval = null;
         {
             boolean allFetch = true;
-            if (MAILFIELDS_DEFAULT.equals(lowCostFields)) {
+            if (assumeIMAPSortIsReliable() && MAILFIELDS_DEFAULT.equals(lowCostFields)) { // Enable if sure that IMAP sort works reliably
                 try {
                     final long start = System.currentTimeMillis();
                     final long[] uids = IMAPSort.allUIDs(imapFolder, OrderDirection.DESC.equals(order), imapConfig);
