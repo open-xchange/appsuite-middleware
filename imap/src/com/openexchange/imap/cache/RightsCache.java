@@ -88,7 +88,12 @@ public final class RightsCache {
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
-            entry.setValue(f.myRights());
+            try {
+                entry.setValue(f.myRights());
+            } catch (final MessagingException e) {
+                // Hmm...
+                throw e;
+            }
             mailCache.put(entry);
         }
         return entry.getValue();

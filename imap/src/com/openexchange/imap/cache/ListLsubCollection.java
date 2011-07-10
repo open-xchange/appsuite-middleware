@@ -672,7 +672,8 @@ final class ListLsubCollection {
              */
             if (!lsub) {
                 for (final String sharedNamespace : shared) {
-                    if (!map.containsKey(sharedNamespace)) {
+                    final ListLsubEntryImpl entry = map.get(sharedNamespace);
+                    if (null == entry) {
                         final ListLsubEntryImpl namespaceFolder =
                             new ListLsubEntryImpl(
                                 sharedNamespace,
@@ -686,10 +687,13 @@ final class ListLsubCollection {
                         namespaceFolder.setParent(rootEntry);
                         rootEntry.addChildIfAbsent(namespaceFolder);
                         map.put(sharedNamespace, namespaceFolder);
+                    } else {
+                        entry.setCanOpen(false);
                     }
                 }
                 for (final String userNamespace : user) {
-                    if (!map.containsKey(userNamespace)) {
+                    final ListLsubEntryImpl entry = map.get(userNamespace);
+                    if (null == entry) {
                         final ListLsubEntryImpl namespaceFolder =
                             new ListLsubEntryImpl(
                                 userNamespace,
@@ -703,6 +707,8 @@ final class ListLsubCollection {
                         namespaceFolder.setParent(rootEntry);
                         rootEntry.addChildIfAbsent(namespaceFolder);
                         map.put(userNamespace, namespaceFolder);
+                    } else {
+                        entry.setCanOpen(false);
                     }
                 }
             }
@@ -895,7 +901,13 @@ final class ListLsubCollection {
                             true,
                             false,
                             Boolean.TRUE,
-                            lsub ? null : lsubMap).setNamespace(isNamespace(parentFullName));
+                            lsub ? null : lsubMap);
+                    if (isNamespace(parentFullName)) {
+                        parent.setNamespace(true);
+                        if (equalsNamespace(parentFullName)) {
+                            parent.setCanOpen(false);
+                        }
+                    }
                     map.put(parentFullName, parent);
                     if (null != set) {
                         if (add) {
@@ -1697,6 +1709,11 @@ final class ListLsubCollection {
             return hasInferiors;
         }
 
+        protected ListLsubEntryImpl setCanOpen(final boolean canOpen) {
+            this.canOpen = canOpen;
+            return this;
+        }
+
         public boolean canOpen() {
             return canOpen;
         }
@@ -1816,6 +1833,7 @@ final class ListLsubCollection {
             } else {
                 sb.append('"').append(parent.getFullName()).append('"');
             }
+            sb.append(", canOpen=").append(canOpen);
             sb.append(", attributes=(");
             if (null != attributes && !attributes.isEmpty()) {
                 final Iterator<String> iterator = new TreeSet<String>(attributes).iterator();
