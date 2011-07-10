@@ -377,7 +377,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (!entry.canOpen()) {
                     return 0;
                 }
-                return IMAPCommandsCollection.getUnread(f);
+                try {
+                    return IMAPCommandsCollection.getUnread(f);
+                } catch (final MessagingException e) {
+                    return 0;
+                }
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
