@@ -123,7 +123,6 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.MailImportResult;
-import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException;
@@ -3525,13 +3524,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
                     }
                 }
-            } catch (MailException e) {
+            } catch (final MailException e) {
                 exception = e;
                 throw e;
-            } catch (MessagingException e) {
+            } catch (final MessagingException e) {
                 exception = getWrappingOXException(e);
                 throw exception;
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 exception = getWrappingOXException(e);
                 throw exception;
             } finally {
@@ -3571,36 +3570,35 @@ public class Mail extends PermissionServlet implements UploadListener {
             Future<MailImportResult[]> future = null;
             {
                 final ServletFileUpload servletFileUpload = new ServletFileUpload();
-                if (ServletFileUpload.isMultipartContent(req)) {
-                    final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-                    final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
-                    task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);
-                    try {
-                        final FileItemIterator iter = servletFileUpload.getItemIterator(req);
-                        if (iter.hasNext()) {
-                            future = service.submit(task);
-                        }
-                        boolean keepgoing = true;
-                        while (keepgoing && iter.hasNext()) {
-                            final FileItemStream item = iter.next();
-                            final String filename = item.getName();
-                            final InputStream is = item.openStream();
-                            final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
-                            final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
-                            if (isEmpty(fromAddr)) {
-                                // Add from address
-                                message.setFrom(defaultSendAddr);
-                            }
-                            message.setFileName(filename);
-                            while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
-                                keepgoing = !future.isDone();
-                            }
-                        }
-                    } finally {
-                        task.finished();
-                    }
-                } else {
+                if (!ServletFileUpload.isMultipartContent(req)) {
                     throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, req.getContentType());
+                }
+                final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+                final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
+                task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);
+                try {
+                    final FileItemIterator iter = servletFileUpload.getItemIterator(req);
+                    if (iter.hasNext()) {
+                        future = service.submit(task);
+                    }
+                    boolean keepgoing = true;
+                    while (keepgoing && iter.hasNext()) {
+                        final FileItemStream item = iter.next();
+                        final String filename = item.getName();
+                        final InputStream is = item.openStream();
+                        final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
+                        final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
+                        if (isEmpty(fromAddr)) {
+                            // Add from address
+                            message.setFrom(defaultSendAddr);
+                        }
+                        message.setFileName(filename);
+                        while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
+                            keepgoing = !future.isDone();
+                        }
+                    }
+                } finally {
+                    task.finished();
                 }
             }
 
