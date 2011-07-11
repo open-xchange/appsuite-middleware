@@ -140,7 +140,7 @@ jcs.region.UserSettingMail.elementattributes.IsLateral=false
 # Pre-defined region for context data
 jcs.region.Context=LTCP
 jcs.region.Context.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.Context.cacheattributes.MaxObjects=1000
+jcs.region.Context.cacheattributes.MaxObjects=10000
 jcs.region.Context.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.Context.cacheattributes.UseMemoryShrinker=true
 jcs.region.Context.cacheattributes.MaxMemoryIdleTimeSeconds=180
