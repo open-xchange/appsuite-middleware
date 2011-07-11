@@ -76,6 +76,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
@@ -220,7 +222,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private static final long serialVersionUID = 1980226522220313667L;
 
-    private static final AbstractOXException getWrappingOXException(final Exception cause) {
+    /**
+     * Generates a wrapping {@link AbstractOXException} for specified exception.
+     * 
+     * @param cause The exception to wrap
+     * @return The wrapping {@link AbstractOXException}
+     */
+    protected static final AbstractOXException getWrappingOXException(final Exception cause) {
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
             warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
@@ -3471,9 +3479,14 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private static final class AppenderTask extends AbstractTask<MailImportResult[]> {
+    /**
+     * The poison element to quit message import immediately.
+     */
+    protected static final MimeMessage POISON = new MimeMessage(MIMEDefaultSession.getDefaultSession());
 
-        private boolean finished = false;
+    private static final class AppenderTask extends AbstractTask<Object> {
+
+        private final AtomicBoolean keepgoing;
 
         private final MailServletInterface mailInterface;
 
@@ -3487,8 +3500,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 
         private AbstractOXException exception;
 
-        AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
+        protected AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
             super();
+            keepgoing = new AtomicBoolean(true);
             this.mailInterface = mailInterface;
             this.folder = folder;
             this.force = force;
@@ -3496,21 +3510,38 @@ public class Mail extends PermissionServlet implements UploadListener {
             this.queue = queue;
         }
 
-        void finished() {
-            finished = true;
+        protected void stop() throws MailException {
+            keepgoing.set(false);
+            /*
+             * Feed poison element to enforce quit
+             */
+            try {
+                queue.put(POISON);
+            } catch (final InterruptedException e) {
+                /*
+                 * Cannot occur, but keep interrupted state
+                 */
+                Thread.currentThread().interrupt();
+                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+            }
         }
 
-        public MailImportResult[] call() throws Exception {
+        public Object call() throws Exception {
             final List<String> idList = new ArrayList<String>();
             try {
-                final List<MimeMessage> messages = new ArrayList<MimeMessage>();
-                final List<MailMessage> mails = new ArrayList<MailMessage>();
-                while (!finished || !queue.isEmpty()) {
+                final List<MimeMessage> messages = new ArrayList<MimeMessage>(16);
+                final List<MailMessage> mails = new ArrayList<MailMessage>(16);
+                while (keepgoing.get() || !queue.isEmpty()) {
                     if (queue.isEmpty()) {
-                        // Wait for at least 1 message to arrive.
-                        messages.add(queue.take());
+                        // Blocking wait for at least 1 message to arrive.
+                        final MimeMessage msg = queue.take();
+                        if (POISON == msg) {
+                            return null;
+                        }
+                        messages.add(msg);
                     }
                     queue.drainTo(messages);
+                    final boolean quit = messages.remove(POISON);
                     for (final MimeMessage message : messages) {
                         message.getHeader("Date", null);
                         final MailMessage mm = MIMEMessageConverter.convertMessage(message);
@@ -3523,12 +3554,15 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (flags > 0) {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
                     }
+                    if (quit) {
+                        return null;
+                    }
                 }
             } catch (final MailException e) {
                 exception = e;
                 throw e;
             } catch (final MessagingException e) {
-                exception = getWrappingOXException(e);
+                exception = MIMEMailException.handleMessagingException(e);
                 throw exception;
             } catch (final InterruptedException e) {
                 exception = getWrappingOXException(e);
@@ -3536,7 +3570,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             } finally {
                 mailInterface.close(true);
             }
-            return mailInterface.getMailImportResults();
+            return null;
         }
 
         @Override
@@ -3567,15 +3601,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-            Future<MailImportResult[]> future = null;
+            MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
+            Future<Object> future = null;
             {
                 final ServletFileUpload servletFileUpload = new ServletFileUpload();
                 if (!ServletFileUpload.isMultipartContent(req)) {
                     throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, req.getContentType());
                 }
                 final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-                final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
-                task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);
+                task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
                     final FileItemIterator iter = servletFileUpload.getItemIterator(req);
                     if (iter.hasNext()) {
@@ -3586,7 +3621,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final FileItemStream item = iter.next();
                         final String filename = item.getName();
                         final InputStream is = item.openStream();
-                        final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
+                        final MimeMessage message;
+                        try {
+                            message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
+                        } finally {
+                            try {
+                                is.close();
+                            } catch (final Exception e) {
+                                LOG.error("Closing file item stream failed.", e);
+                            }
+                        }
                         final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                         if (isEmpty(fromAddr)) {
                             // Add from address
@@ -3598,7 +3642,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                 } finally {
-                    task.finished();
+                    task.stop();
                 }
             }
 
@@ -3606,7 +3650,47 @@ public class Mail extends PermissionServlet implements UploadListener {
             if (null == future) {
                 mirs = new MailImportResult[0];
             } else {
-                mirs = future.get();
+                /*
+                 * Ensure release from BlockingQueue.take();
+                 */
+                try {
+                    future.get(10, TimeUnit.SECONDS);
+                } catch (final TimeoutException e) {
+                    // Wait time elapsed; enforce cancelation
+                    future.cancel(true);
+                }
+                final MailImportResult[] alreadyImportedOnes = mailInterface.getMailImportResults();
+                /*
+                 * Still some in queue?
+                 */
+                if (queue.isEmpty()) {
+                    mirs = alreadyImportedOnes;
+                } else {
+                    final List<MimeMessage> messages = new ArrayList<MimeMessage>(16);
+                    queue.drainTo(messages);
+                    messages.remove(POISON);
+                    final List<MailMessage> mails = new ArrayList<MailMessage>(messages.size());
+                    for (final MimeMessage message : messages) {
+                        message.getHeader("Date", null);
+                        final MailMessage mm = MIMEMessageConverter.convertMessage(message);
+                        mails.add(mm);
+                    }
+                    messages.clear();
+                    mailInterface = MailServletInterface.getInstance(session);
+                    try {
+                        final String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
+                        mails.clear();
+                        if (flags > 0) {
+                            mailInterface.updateMessageFlags(folder, ids, flags, true);
+                        }
+                    } finally {
+                        mailInterface.close(true);
+                    }
+                    final MailImportResult[] byCaller = mailInterface.getMailImportResults();
+                    mirs = new MailImportResult[alreadyImportedOnes.length + byCaller.length];
+                    System.arraycopy(alreadyImportedOnes, 0, mirs, 0, alreadyImportedOnes.length);
+                    System.arraycopy(byCaller, 0, mirs, alreadyImportedOnes.length, byCaller.length);
+                }
             }
             final JSONArray respArray = new JSONArray();
             for (final MailImportResult m : mirs) {
