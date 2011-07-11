@@ -180,6 +180,8 @@ public enum ImportExportExceptionCodes implements OXErrorMessage {
     /** Ignoring invalid value for field "%1$s": %2$s  */
     IGNORE_FIELD(ImportExportExceptionMessages.IGNORE_FIELD_MSG, Category.USER_INPUT, 1306),
     
+    CONTACT_INTERFACE_MISSING(ImportExportExceptionMessages.CONTACT_INTERFACE_MISSING, Category.INTERNAL_ERROR, 1307),
+    COULD_NOT_WRITE(ImportExportExceptionMessages.COULD_NOT_WRITE, Category.INTERNAL_ERROR, 1308),    
     ;
 
     private String message;

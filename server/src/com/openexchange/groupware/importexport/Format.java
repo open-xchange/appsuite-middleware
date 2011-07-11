@@ -60,6 +60,8 @@ public enum Format {
     OUTLOOK_CSV("OUTLOOK_CSV" , "Comma separated values","text/csv","csv"),
     ICAL("ICAL" , "iCal","text/calendar","ics"),
     VCARD("VCARD", "vCard","text/x-vcard","vcf"),
+    FacebookFriends("FacebookFriends", "FacebookFriends","text/html","html"),
+    FacebookArchive("FacebookArchive", "FacebookArchive","application/zip","zip"),
     TNEF("TNEF" , "Transport Neutral Encapsulation Format" , "application/ms-tnef", "tnef");
     
     private String constantName, mimetype, longName, extension;
