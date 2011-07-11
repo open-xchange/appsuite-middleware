@@ -149,6 +149,14 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-774
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/cache.ccf
+   val=0$(ox_read_property jcs.region.Context.cacheattributes.MaxObjects $pfile)
+   if [ $val -lt 10000 ]; then
+       ox_set_property jcs.region.Context.cacheattributes.MaxObjects 10000 $pfile
+   fi
+
    # SoftwareChange_Request-755
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/imap.properties
