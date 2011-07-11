@@ -1,6 +1,7 @@
 * 2011-07-11 - thorben.betten@open-xchange.com
 
  - Bugfix #19635: Ensure termination of consumer task upon mail mass import
+ - Bugfix #19128: Accepting context admin as a user's contact creator, too
 
 * 2011-07-10 - thorben.betten@open-xchange.com
 

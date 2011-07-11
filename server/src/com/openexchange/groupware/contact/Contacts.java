@@ -898,8 +898,27 @@ public final class Contacts {
                 throw new OXPermissionException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId)));
             }
             // ALL RIGHTS CHECK SO FAR, CHECK FOR MODIFY ONLY OWN
-            if (original.getCreatedBy() != userId) {
-                throw new OXConflictException(ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId)));
+            {
+                final int createdBy = original.getCreatedBy();
+                if (createdBy != userId) {
+                    if (createdBy != ctx.getMailadmin()) {
+                        throw new OXConflictException(ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId)));
+                    }
+                    /*
+                     * Unfortunately still set to context admin. Honor this condition, too.
+                     */
+                    final StringBuilder stmtBuilder = cs.iFperformContactStorageUpdate(new StringBuilder(1), System.currentTimeMillis(), original.getObjectID(), ctx.getContextId());
+                    final Connection wc = DBPool.pickupWriteable(ctx);
+                    PreparedStatement stmt = null;
+                    try {
+                        stmt = wc.prepareStatement(stmtBuilder.toString());
+                    } catch (final SQLException e) {
+                        throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                    } finally {
+                        DBPool.closeWriterSilent(ctx, wc);
+                        DBUtils.closeSQLStuff(stmt);
+                    }
+                }
             }
 
             final java.util.Date server_date = original.getLastModified();
