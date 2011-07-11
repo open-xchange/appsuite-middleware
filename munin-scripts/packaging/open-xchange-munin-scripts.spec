@@ -4,7 +4,7 @@
 Name:           open-xchange-munin-scripts
 BuildArch:	noarch
 Version:	0.1
-Release:	5
+Release:	6
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -59,6 +59,9 @@ exit 0
 
 
 %changelog
+* Tue May 24 2011 - steffen.templin@open-xchange.com
+ - Repaired autoconf function of most scripts.
+ - Corrected wrong parameter for showruntimestats call in java heap scripts 
 * Fri Apr 29 2011 - wolfgang.rosenauer@open-xchange.com
  - RPM %post script calls munin-node-configure with explicit libdir path
  - Improved RPM requirements
