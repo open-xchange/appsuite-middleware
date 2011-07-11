@@ -1,3 +1,8 @@
+* 2011-07-11 - steffen.templin@open-xchange.com
+
+ - Bugfix #19487: The name of the updater installer that can be downloaded from weg gui is configurable now
+ - Bugfix #19488: The template values product-name, base-name and icon are config-file properties now
+
 * 2011-07-11 - thorben.betten@open-xchange.com
 
  - Bugfix #19635: Ensure termination of consumer task upon mail mass import
@@ -15,7 +20,7 @@
 
 * 2011-07-04 - thorben.betten@open-xchange.com
 
- - Bugfix #19585: Allowing empty cookie values; e.g. ``mycookie=««
+ - Bugfix #19585: Allowing empty cookie values; e.g. ``mycookie=ï¿½ï¿½
  - Bugfix #19691: Dropping AJP connection (in AJP way) if a corrupt AJP cycle is detected
 
 * 2011-07-02 - thorben.betten@open-xchange.com
