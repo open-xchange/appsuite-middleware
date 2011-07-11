@@ -56,6 +56,42 @@ package com.openexchange.ajax.mail;
  */
 public final class TestMails {
 
+    public static final String BUG_19696_MAIL =
+        "Date: Mon, 4 Jul 2011 14:22 +0200\n" + 
+        "From: \"ecoWorkTrack\" <mnuissl@econtec.de>\n" + 
+        "To: hsehic@econtec.de\n" + 
+        "Subject: [!!! no reply !!!] => new project ...\n" + 
+        "X-Mailer: Mail::SendEasy/1.2 Perl/5.008008-linux\n" + 
+        "Mime-version: 1.0\n" + 
+        "Content-Type: text/plain; charset=ISO-8859-1\n" + 
+        "Content-Transfer-Encoding: quoted-printable\n" + 
+        "Message-Id: <20110704122246.66998FA800C@mail02.econtec.de>\n" + 
+        "\n" + 
+        "\n" + 
+        "\n" + 
+        "=45=73 =77=75=72=64=65 =65=69=6E =6E=65=75=65=73 =50=72=6F=6A=65=6B=74 =61=\n" + 
+        "=6E=67=65=6C=65=67=74=3A\n" + 
+        "\n" + 
+        "=46=69=72=6D=61      =3A =46=65=72=64=69=6E=61=6E=64 =4D=65=6E=72=61=64 =47=\n" + 
+        "=6D=62=48 =2B =43=6F=2E =4B=47\n" + 
+        "\n" + 
+        "=4E=75=6D=6D=65=72     =3A =41=35=39=38=31\n" + 
+        "=20=20=20=20\n" + 
+        "=4E=61=6D=65       =3A =57=69=6C=64=63=61=72=64-=5A=65=72=74=69=66=69=6B=61=\n" + 
+        "=74=20\n" + 
+        "\n" + 
+        "=5A=65=69=74       =3A =32=30=31=31-=30=37-=30=34 - =32=30=31=31-=30=38-=33=\n" + 
+        "=31\n" + 
+        "\n" + 
+        "=50=6C=61=6E=73=74=75=6E=64=65=6E=3A =38\n" + 
+        "\n" + 
+        "=54=65=78=74  =3A\n" + 
+        "=49=6E=73=74=61=6C=6C=61=74=69=6F=6E\n" + 
+        "=20=20=20=20\n" + 
+        "=20=20=20=20\n" + 
+        "\n" + 
+        "\n";
+
     public static final String UMLAUT_MAIL =
         "From: #ADDR#\n" +
         "To: #ADDR#\n" +
@@ -85,7 +121,7 @@ public final class TestMails {
         "<dd>Appletalk Address Resolution Protocol</dd>" + 
         "</dl>";
 
-    public static final String replaceAddresses(String mail, String address) {
+    public static final String replaceAddresses(final String mail, final String address) {
         return mail.replaceAll("#ADDR#", address);
     }
 
