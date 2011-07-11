@@ -49,45 +49,63 @@
 
 package com.openexchange.ajax.mail;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.mail.actions.DeleteRequest;
+import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.mail.actions.ImportMailRequest;
+import com.openexchange.ajax.mail.actions.ImportMailResponse;
+import com.openexchange.tools.encoding.Charsets;
 
 /**
- * {@link MailTestSuite}
- *
+ * {@link Bug19696Test}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailTestSuite extends TestSuite {
+public final class Bug19696Test extends AbstractMailTest {
 
-    private MailTestSuite() {
-        super();
+    private String folder;
+    private String address;
+    private String[] ids;
+
+    /**
+     * Default constructor.
+     * 
+     * @param name Name of this test.
+     */
+    public Bug19696Test(final String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite();
-        mailSuite.addTestSuite(AllTest.class);
-        mailSuite.addTestSuite(ListTest.class);
-        mailSuite.addTestSuite(GetTest.class);
-        mailSuite.addTestSuite(SendTest.class);
-        mailSuite.addTestSuite(CountMailTest.class);
-        mailSuite.addTestSuite(MailSearchTest.class);
-        mailSuite.addTestSuite(ForwardMailTest.class);
-        mailSuite.addTestSuite(ReplyAllTest.class);
-        mailSuite.addTestSuite(ReplyTest.class);
-        mailSuite.addTestSuite(UpdateMailTest.class);
-        mailSuite.addTestSuite(MoveMailTest.class);
-        mailSuite.addTestSuite(ClearTest.class);
-        mailSuite.addTestSuite(CopyMailTest.class);
-        mailSuite.addTestSuite(ViewTest.class);
-        mailSuite.addTestSuite(MultipleAttachmentTest.class);
-        mailSuite.addTestSuite(SearchTest.class);
-        /*mailSuite.addTestSuite(AlwaysTest.class);*/
-        mailSuite.addTestSuite(Bug15608Test.class);
-        mailSuite.addTestSuite(Bug16087Test.class);
-        mailSuite.addTestSuite(Bug15901Test.class);
-        mailSuite.addTestSuite(Bug15777Test.class);
-        mailSuite.addTestSuite(Bug16141Test.class);
-        mailSuite.addTestSuite(Bug19696Test.class);
-        return mailSuite;
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        folder = client.getValues().getInboxFolder();
+        address = client.getValues().getSendAddress();
+        final String mail = TestMails.BUG_19696_MAIL;
+        final ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
+        final ImportMailResponse response = client.execute(request);
+        ids = response.getIds()[0];
     }
+
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(ids, true));
+        super.tearDown();
+    }
+
+    /**
+     * Tests the <code>action=get</code> request on INBOX folder
+     * 
+     * @throws Throwable
+     */
+    public void testGet() throws Throwable {
+        {
+            final GetRequest request = new GetRequest(folder, ids[1]);
+            request.setUnseen(true);
+            request.setSource(true);
+            request.setSave(true);
+            client.execute(request);
+        }
+    }
+
 }
