@@ -59,6 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationException;
@@ -154,7 +155,12 @@ public final class LoginPerformer {
             // Create session
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
             final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
-            retval.setSession(sessiondService.getSession(sessionId));
+            Session session = sessiondService.getSession(sessionId);
+            if (SessionEnhancement.class.isInstance(authed)) {
+                SessionEnhancement enhancement = (SessionEnhancement) authed;
+                enhancement.enhanceSession(session);
+            }
+            retval.setSession(session);
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
         } catch (final ServiceException e) {
