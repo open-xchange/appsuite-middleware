@@ -109,8 +109,8 @@ public class LinkedInServiceImpl implements LinkedInService{
         try {
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             account = oAuthService.getAccount(accountId, password, user, contextId);
-        } catch (OAuthException e) {
-            LOG.error(e);
+        } catch (Throwable t) {
+            LOG.error(t);
         }
 
         // get the connections (contacts) with the given access token
