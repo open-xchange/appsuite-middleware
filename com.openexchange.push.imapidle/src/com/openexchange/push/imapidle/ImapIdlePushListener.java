@@ -78,12 +78,52 @@ import com.sun.mail.imap.IMAPStore;
 public final class ImapIdlePushListener implements PushListener {
 
     /**
+     * @author choeger
+     *
+     */
+    public enum PushMode {
+        NEWMAIL("newmail"),
+        ALWAYS("always");
+        
+        private final String text;
+        
+        private PushMode(String text) {
+            this.text = text;
+        }
+        
+        public final String getText() {
+            return text;
+        }
+        
+        public static final PushMode fromString(String text) {
+            if( text != null ) {
+                for(PushMode m : PushMode.values()) {
+                    if(text.equals(m.text)) {
+                        return m;
+                    }
+                }
+            }
+            return null;
+        }
+    }
+    
+    /**
      * @param debugEnabled the debugEnabled to set
      */
     public static final void setDebugEnabled(final boolean debugEnabled) {
         DEBUG_ENABLED = debugEnabled;
     }
 
+    private static PushMode pushMode; 
+
+    /**
+     * @param pushmode the pushmode to set
+     */
+    public static final void setPushmode(PushMode pushmode) {
+        pushMode = pushmode;
+    }
+    
+    
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListener.class);
 
     private static boolean DEBUG_ENABLED = LOG.isDebugEnabled();
@@ -310,12 +350,20 @@ public final class ImapIdlePushListener implements PushListener {
                 } finally {
                     mailAccess.setWaiting(false);
                 }
-                if (inbox.getNewMessageCount() > 0) {
-                    if (DEBUG_ENABLED) {
-                        final int nmails = inbox.getNewMessageCount();
-                        LOG.info("IDLE: " + nmails + " new mail(s) for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                switch (pushMode) {
+                case NEWMAIL:
+                    if (inbox.getNewMessageCount() > 0) {
+                        if (DEBUG_ENABLED) {
+                            final int nmails = inbox.getNewMessageCount();
+                            LOG.info("IDLE: " + nmails + " new mail(s) for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+                        }
+                        notifyNewMail();
                     }
+                    break;
+                case ALWAYS:
+                default:
                     notifyNewMail();
+                    break;
                 }
                 /*
                  * NOTE: we cannot throw Exceptions because that would stop the IDLE'ing when e.g. IMAP server is down/busy for a moment or
