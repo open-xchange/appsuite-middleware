@@ -287,6 +287,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     imapStore.close();
                 } catch (final MessagingException e) {
                     LOG.error("Error while closing IMAP store.", e);
+                } catch (final RuntimeException e) {
+                    LOG.error("Error while closing IMAP store.", e);
+                }
+                final IMAPConfig ic = getIMAPConfig();
+                if (null != ic) {
+                    ic.dropImapStore();
                 }
                 imapStore = null;
             }
