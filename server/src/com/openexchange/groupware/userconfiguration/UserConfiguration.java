@@ -848,20 +848,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates to enable multiple mail accounts.
-     * <p>
-     * Since this is currently a beta feature, it is globally configurable via user's attribute <code>"beta"</code>.
      * 
      * @return <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise <code>false</code>
      */
     public boolean isMultipleMailAccounts() {
-        try {
-            return hasBetaEnabled() && hasPermission(MULTIPLE_MAIL_ACCOUNTS);
-        } catch (final LdapException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        /*
-         * Return flag
-         */
         return hasPermission(MULTIPLE_MAIL_ACCOUNTS);
     }
 
@@ -881,14 +871,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
      */
     public boolean isSubscription() {
-        try {
-            return hasBetaEnabled() && hasPermission(SUBSCRIPTION);
-        } catch (final LdapException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        /*
-         * Return flag
-         */
         return hasPermission(SUBSCRIPTION);
     }
 
@@ -908,14 +890,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
      */
     public boolean isPublication() {
-        try {
-            return hasBetaEnabled() && hasPermission(PUBLICATION);
-        } catch (final LdapException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        /*
-         * Return flag
-         */
         return hasPermission(PUBLICATION);
     }
 
@@ -1081,20 +1055,4 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public String toString() {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
-
-    private static final String BETA = "beta";
-
-    private static final String PROP_BETA = "com.openexchange.user.beta";
-
-    /**
-     * Checks whether configuration's user has beta features enabled.
-     * 
-     * @return <code>true</code> if configuration's user has beta features enabled; otherwise <code>false</code>
-     * @throws LdapException If user cannot be fetched from storage
-     */
-    private boolean hasBetaEnabled() throws LdapException {
-        final UserAttributeAccess uaa = UserAttributeAccess.getDefaultInstance();
-        return uaa.getBooleanAttribute(BETA, UserStorage.getInstance().getUser(userId, ctx), uaa.getBooleanProperty(PROP_BETA, true));
-    }
-
 }
