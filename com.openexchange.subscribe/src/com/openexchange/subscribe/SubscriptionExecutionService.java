@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  */
 public interface SubscriptionExecutionService {
-    public void executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws AbstractOXException;
-    public void executeSubscription(ServerSession session, int subscriptionId) throws AbstractOXException;
-    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws AbstractOXException;
+    public int executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws AbstractOXException;
+    public int executeSubscription(ServerSession session, int subscriptionId) throws AbstractOXException;
+    public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws AbstractOXException;
 }

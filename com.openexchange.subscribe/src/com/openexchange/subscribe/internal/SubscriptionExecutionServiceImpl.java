@@ -93,7 +93,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         this.contextService = contexts;
     }
 
-    public void executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws AbstractOXException {
+    public int executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws AbstractOXException {
         SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
         Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
         subscription.setSession(session);
@@ -104,6 +104,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         Collection data = subscribeService.getContent(subscription);
 
         storeData(data, subscription);
+        return data.size();
     }
 
     /**
@@ -142,7 +143,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         return ofa.getFolderObject(folderId);
     }
 
-    public void executeSubscription(ServerSession session, int subscriptionId) throws AbstractOXException {
+    public int executeSubscription(ServerSession session, int subscriptionId) throws AbstractOXException {
         Context context = session.getContext();
         SubscriptionSource source = discoverer.getSource(context, subscriptionId);
         if(source == null) {
@@ -156,10 +157,11 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             throw INACTIVE_SOURCE.create();
         }        Collection data = subscribeService.getContent(subscription);
         storeData(data, subscription);
-
+        return data.size();
     }
 
-    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws AbstractOXException {
+    public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws AbstractOXException {
+        int sum = 0;
         for (Subscription subscription : subscriptionsToRefresh) {
             subscription.setSession(session);
             if(!subscription.isEnabled()) {
@@ -173,8 +175,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             	SubscribeService subscribeService = source.getSubscribeService();
             	Collection data = subscribeService.getContent(subscription);
             	storeData(data, subscription);
+            	sum += data.size();
             }
         }
+        return sum;
     }
     private boolean isThereMoreThanOneSubscriptionOnThisFolder(final Context context, final String folder, final String secret) throws AbstractOXException {
         final List<SubscriptionSource> sources = discoverer.getSources();
