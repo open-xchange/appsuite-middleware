@@ -63,6 +63,11 @@ public class I18nTranslator implements Translator {
 
     private final I18nService service;
 
+    /**
+     * Initializes a new {@link I18nTranslator}.
+     * 
+     * @param service The i18n service
+     */
     public I18nTranslator(final I18nService service) {
         super();
         this.service = service;
