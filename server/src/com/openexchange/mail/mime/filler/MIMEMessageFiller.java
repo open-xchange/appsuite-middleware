@@ -127,7 +127,8 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility.SourcedImage;
+import com.openexchange.mail.mime.utils.sourcedimage.SourcedImage;
+import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountException;
@@ -660,7 +661,7 @@ public class MIMEMessageFiller {
         final Map<String, SourcedImage> images;
         {
             final StringBuilder sb = new StringBuilder((String) textBodyPart.getContent());
-            images = MIMEMessageUtility.hasSourcedImages(sb);
+            images = SourcedImageUtility.hasSourcedImages(sb);
             content = sb.toString();
         }
         /*
