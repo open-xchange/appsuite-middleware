@@ -50,7 +50,6 @@ public class FacebookFriendsImporter extends AbstractImporter {
 		while(scanner.hasNextLine()){
 			html.append(scanner.nextLine());
 		}
-		
 		Pattern p= Pattern.compile("<div\\s+class\\s?=\\s?[\"']friend[\"']\\s?>\\s?<span\\s+class\\s?=\\s?[\"']profile[\"']\\s?>(.+?)</span\\s?>\\s?</div\\s?>");
 		Matcher m = p.matcher(html);
 		

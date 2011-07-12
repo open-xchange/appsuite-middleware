@@ -64,7 +64,7 @@ import com.openexchange.groupware.importexport.exporters.ICalExporter;
 import com.openexchange.groupware.importexport.exporters.VCardExporter;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 import com.openexchange.groupware.importexport.importers.FacebookFriendsImporter;
-//import com.openexchange.groupware.importexport.importers.FacebookArchiveImporter;
+import com.openexchange.groupware.importexport.importers.FacebookArchiveImporter;
 import com.openexchange.groupware.importexport.importers.ICalImporter;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 import com.openexchange.groupware.importexport.importers.VCardImporter;
@@ -114,7 +114,7 @@ public abstract class ImportExport extends SessionServlet {
         importerExporter.addImporter(new VCardImporter());
         importerExporter.addImporter(new CSVContactImporter());
         importerExporter.addImporter(new FacebookFriendsImporter());
-        //importerExporter.addImporter(new FacebookArchiveImporter());
+        importerExporter.addImporter(new FacebookArchiveImporter());
         importerExporter.addImporter(getOutlookImporter());
     }
 
