@@ -69,6 +69,7 @@ import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURCE;
 
 /**
@@ -92,10 +93,11 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         this.contextService = contexts;
     }
 
-    public void executeSubscription(String sourceId, Context context, int subscriptionId) throws AbstractOXException {
+    public void executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws AbstractOXException {
         SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
-        Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
-        boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
+        Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
+        subscription.setSession(session);
+        boolean knowsSource = discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
         if(!knowsSource) {
             throw INACTIVE_SOURCE.create();
         }
@@ -140,13 +142,15 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         return ofa.getFolderObject(folderId);
     }
 
-    public void executeSubscription(Context context, int subscriptionId) throws AbstractOXException {
+    public void executeSubscription(ServerSession session, int subscriptionId) throws AbstractOXException {
+        Context context = session.getContext();
         SubscriptionSource source = discoverer.getSource(context, subscriptionId);
         if(source == null) {
             throw INACTIVE_SOURCE.create();
         }
         SubscribeService subscribeService = source.getSubscribeService();
         Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
+        subscription.setSession(session);
         boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
         if(!knowsSource) {
             throw INACTIVE_SOURCE.create();
@@ -155,9 +159,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     }
 
-    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh) throws AbstractOXException {
+    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws AbstractOXException {
         for (Subscription subscription : subscriptionsToRefresh) {
-        	if(!subscription.isEnabled()) {
+            subscription.setSession(session);
+            if(!subscription.isEnabled()) {
                 LOG.debug("Skipping subscription "+subscription.getDisplayName()+" because it is disabled");
                 
             } else {

@@ -53,7 +53,10 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -73,6 +76,8 @@ public class Subscription extends TargetFolderDefinition {
     private Boolean enabled;
     
     private String secret;
+
+    private ServerSession session;
     
     public long getLastUpdate() {
         return lastUpdate;
@@ -144,6 +149,21 @@ public class Subscription extends TargetFolderDefinition {
     
     public void setSecret(String secret) {
         this.secret = secret;
+    }
+
+    public void setSession(ServerSession session) {
+        this.session = session;
+    }
+    
+    public ServerSession getSession() {
+        if (session != null) {
+            return session;
+        }
+        try {
+            return new ServerSessionAdapter(new TargetFolderSession(this));
+        } catch (ContextException e) {
+            return null;
+        }
     }
     
 

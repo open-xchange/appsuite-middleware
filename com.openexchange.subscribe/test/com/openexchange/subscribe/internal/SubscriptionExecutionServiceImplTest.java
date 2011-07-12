@@ -65,6 +65,8 @@ import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.SimServerSession;
 import junit.framework.TestCase;
 
 /**
@@ -117,7 +119,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
     }
 
     public void testShouldTransferDataCorrectly() throws AbstractOXException {
-        executionService.executeSubscription(SOURCE_NAME, new SimContext(2), 12);
+        executionService.executeSubscription(SOURCE_NAME, sessionForContext(new SimContext(2)), 12);
         assertEquals("Wrong source used", SOURCE_NAME, discovery.getLoadedSources().get(0));
         
         // correct subscription loaded?
@@ -128,13 +130,21 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         assertEquals("Wrong data saved", Arrays.asList("entry1", "entry2", "entry3"), simFolderUpdaterService.getData());
     }
     
+    /**
+     * @param simContext
+     * @return
+     */
+    private ServerSession sessionForContext(SimContext simContext) {
+        return new SimServerSession(simContext, null, null);
+    }
+
     public void testShouldNotThrowNPEWhenNoFolderUpdaterIsFound() {
         //fail("Not yet implemented");
         assertTrue(true);
     }
 
     public void testShouldGuessCorrectSubscriptionSource() throws AbstractOXException {
-        executionService.executeSubscription(new SimContext(2), 12);
+        executionService.executeSubscription(sessionForContext(new SimContext(2)), 12);
         assertEquals("Wrong source used", SOURCE_NAME, discovery.getLoadedSources().get(0));
         
         // correct subscription loaded?

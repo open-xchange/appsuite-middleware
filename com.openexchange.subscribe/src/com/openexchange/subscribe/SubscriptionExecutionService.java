@@ -52,6 +52,7 @@ package com.openexchange.subscribe;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -61,7 +62,7 @@ import com.openexchange.groupware.contexts.Context;
  *
  */
 public interface SubscriptionExecutionService {
-    public void executeSubscription(String sourceId, Context context, int subscriptionId) throws AbstractOXException;
-    public void executeSubscription(Context context, int subscriptionId) throws AbstractOXException;
-    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh) throws AbstractOXException;
+    public void executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws AbstractOXException;
+    public void executeSubscription(ServerSession session, int subscriptionId) throws AbstractOXException;
+    public void executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws AbstractOXException;
 }

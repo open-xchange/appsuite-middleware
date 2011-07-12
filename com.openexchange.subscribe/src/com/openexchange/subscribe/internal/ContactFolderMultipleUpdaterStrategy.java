@@ -97,7 +97,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         boolean contactsAreAbleToBeAssociated = false;
         FinalContactInterface contactStore = (FinalContactInterface) getFromSession(SQL_INTERFACE, session);
         
-        if (candidate.getUserField20() != null && !candidate.getUserField20().equals("")){
+        if (false && candidate.getUserField20() != null && !candidate.getUserField20().equals("")){
             
             UUID uuid = UUID.fromString(candidate.getUserField20());
                                     

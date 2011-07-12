@@ -49,100 +49,16 @@
 
 package com.openexchange.subscribe;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.groupware.generic.TargetFolderDefinition;
-import com.openexchange.session.Session;
+import java.util.Set;
+import com.openexchange.groupware.container.FolderObject;
 
 
-public class TargetFolderSession implements Session {
-    private final TargetFolderDefinition target;
-    private Map<String, Object> params = new HashMap<String, Object>();
-    
-    public TargetFolderSession(final TargetFolderDefinition target){
-        this.target = target;
-    }
-    
-    //IMPLEMENTED:
-    public int getContextId() {
-        return target.getContext().getContextId();
-    }
-    
-    public int getUserId() {
-        return target.getUserId();
-    }
-    
-    //NOT IMPLEMENTED AT ALL:
-    public String getLocalIp() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getLogin() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getLoginName() {
-        throw new UnsupportedOperationException();
-    }
-
-    public Object getParameter(final String name) {
-        return params.get(name);
-    }
-
-    public boolean containsParameter(final String name) {
-        return params.containsKey(name);
-    }
-
-    public String getPassword() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getSecret() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getSessionID() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getUserlogin() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void removeRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setParameter(final String name, final Object value) {
-        params.put(name, value);
-    }
-
-    public String getAuthId() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getHash() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void setLocalIp(String ip) {
-        // Nothing to do here.
-    }
-
-    public void setHash(String hash) {
-        // TODO Auto-generated method stub
-    }
-
-    public String getClient() {
-        return null;
-    }
-
-    public void setClient(String client) {
-        // Nothing to do.
-    }
+/**
+ * {@link SubscriptionChecker}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public interface SubscriptionChecker {
+    public Set<FolderObject> allWithSubscriptions(FolderObject...folders);
+    public boolean hasSubscription(FolderObject folder);
 }

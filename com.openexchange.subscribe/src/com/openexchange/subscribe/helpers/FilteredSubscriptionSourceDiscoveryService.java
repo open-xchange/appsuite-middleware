@@ -126,6 +126,9 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
     }
     
     protected SubscriptionSource filter(SubscriptionSource source) {
+        if (source == null) {
+            return null;
+        }
         return accepts(source.getId()) ? source : null;
     }
     

@@ -150,7 +150,6 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
 
     private Object refreshSubscriptions(final JSONObject request, final ServerSession session) throws AbstractOXException, JSONException {
         final List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
-        final Context context = session.getContext();
         final Set<Integer> ids = new HashSet<Integer>();
         if (request.has("folder")) {
             final String folderId = request.getString("folder");
@@ -180,7 +179,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             }
         }
 
-        executor.executeSubscriptions(subscriptionsToRefresh);
+        executor.executeSubscriptions(subscriptionsToRefresh, session);
         
         
         return 1;
@@ -324,6 +323,9 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
     }
 
     private Object createResponse(final Subscription subscription, final String urlPrefix) throws JSONException, SubscriptionJSONException {
+        if (subscription == null) {
+            return new JSONObject();
+        }
         final JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
         return object;
     }
