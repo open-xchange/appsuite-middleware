@@ -659,11 +659,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             final int[] fromToIndices;
             {
                 final int leftHandLimit = paramContainer.getIntParam(LEFT_HAND_LIMIT);
-                final int rigthHandLimit = paramContainer.getIntParam(RIGHT_HAND_LIMIT);
-                if (leftHandLimit == ParamContainer.NOT_FOUND || rigthHandLimit == ParamContainer.NOT_FOUND) {
+                final int rightHandLimit = paramContainer.getIntParam(RIGHT_HAND_LIMIT);
+                if (leftHandLimit == ParamContainer.NOT_FOUND || rightHandLimit == ParamContainer.NOT_FOUND) {
                     fromToIndices = null;
                 } else {
-                    fromToIndices = new int[] { leftHandLimit, rigthHandLimit };
+                    fromToIndices = new int[] { leftHandLimit, rightHandLimit };
                 }
             }
 
