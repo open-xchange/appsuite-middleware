@@ -81,6 +81,9 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.api2.OXException;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataException;
@@ -121,8 +124,10 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility.SourcedImage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountException;
@@ -257,15 +262,15 @@ public class MIMEMessageFiller {
          * Set organization to context-admin's company field setting
          */
         try {
-            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-                FolderObject.SYSTEM_LDAP_FOLDER_ID,
-                session);
+            final ContactInterface contactInterface =
+                ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                    FolderObject.SYSTEM_LDAP_FOLDER_ID,
+                    session);
 
             final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
             if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-                final String encoded = MimeUtility.fold(
-                    14,
-                    MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
+                final String encoded =
+                    MimeUtility.fold(14, MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
                 mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
             }
         } catch (final Exception e) {
@@ -648,9 +653,23 @@ public class MIMEMessageFiller {
          * HTML content with embedded images
          */
         final TextBodyMailPart textBodyPart = mail.getBodyPart();
-        final String content = (String) textBodyPart.getContent();
+        /*
+         * Check for with-source images
+         */
+        final String content;
+        final Map<String, SourcedImage> images;
+        {
+            final StringBuilder sb = new StringBuilder((String) textBodyPart.getContent());
+            images = MIMEMessageUtility.hasSourcedImages(sb);
+            content = sb.toString();
+        }
+        /*
+         * Check for referenced images (by cid oder locally available)
+         */
         final boolean embeddedImages;
-        if (sendMultipartAlternative || mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+        if (!images.isEmpty()) {
+            embeddedImages = true;
+        } else if (sendMultipartAlternative || mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
             embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content, session);
         } else {
             embeddedImages = false;
@@ -663,7 +682,7 @@ public class MIMEMessageFiller {
              * If any condition is true, we ought to create a multipart/ message
              */
             if (sendMultipartAlternative) {
-                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages, textBodyPart);
+                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages, images, textBodyPart);
                 if (primaryMultipart == null) {
                     primaryMultipart = alternativeMultipart;
                 } else {
@@ -672,7 +691,7 @@ public class MIMEMessageFiller {
                     primaryMultipart.addBodyPart(bodyPart);
                 }
             } else if (embeddedImages) {
-                final Multipart relatedMultipart = createMultipartRelated(mail, content, new String[1]);
+                final Multipart relatedMultipart = createMultipartRelated(mail, content, images, new String[1]);
                 if (primaryMultipart == null) {
                     primaryMultipart = relatedMultipart;
                 } else {
@@ -830,7 +849,10 @@ public class MIMEMessageFiller {
                     /*
                      * Convert html content to regular text
                      */
-                    mailText = performLineFolding(htmlService.html2text(htmlService.getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()), false), usm.getAutoLinebreak());
+                    mailText =
+                        performLineFolding(htmlService.html2text(
+                            htmlService.getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()),
+                            false), usm.getAutoLinebreak());
                     // mailText =
                     // performLineFolding(getConverter().convertWithQuotes
                     // ((String) mail.getContent()), false,
@@ -945,12 +967,13 @@ public class MIMEMessageFiller {
      * @param mailBody The composed mail's HTML content
      * @param embeddedImages <code>true</code> if specified HTML content contains inline images (an appropriate "multipart/related" object
      *            is going to be created ); otherwise <code>false</code>.
+     * @param images
      * @param textBodyPart The text body part
      * @return An appropriate "multipart/alternative" object.
      * @throws MailException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
      */
-    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final TextBodyMailPart textBodyPart) throws MailException, MessagingException {
+    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final Map<String, SourcedImage> images, final TextBodyMailPart textBodyPart) throws MailException, MessagingException {
         /*
          * Create an "alternative" multipart
          */
@@ -966,7 +989,7 @@ public class MIMEMessageFiller {
             final Multipart relatedMultipart;
             {
                 final String[] arr = new String[1];
-                relatedMultipart = createMultipartRelated(mail, mailBody, arr);
+                relatedMultipart = createMultipartRelated(mail, mailBody, images, arr);
                 htmlContent = arr[0];
             }
             /*
@@ -1001,12 +1024,13 @@ public class MIMEMessageFiller {
      * 
      * @param mail The source composed mail
      * @param mailBody The composed mail's HTML content
+     * @param images The list of with-source images
      * @param htmlContent An array of {@link String} with length <code>1</code> serving as a container for altered HTML content
      * @return The created "multipart/related" object
      * @throws MessagingException If a messaging error occurs
      * @throws MailException If a mail error occurs
      */
-    protected Multipart createMultipartRelated(final ComposedMailMessage mail, final String mailBody, final String[] htmlContent) throws MessagingException, MailException {
+    protected Multipart createMultipartRelated(final ComposedMailMessage mail, final String mailBody, final Map<String, SourcedImage> images, final String[] htmlContent) throws MessagingException, MailException {
         /*
          * Create "related" multipart
          */
@@ -1023,22 +1047,58 @@ public class MIMEMessageFiller {
          * Traverse Content-IDs occurring in original HTML content
          */
         final List<String> cidList = MIMEMessageUtility.getContentIDs(mailBody);
+        final StringBuilder tmp = new StringBuilder(32);
         NextImg: for (final String cid : cidList) {
-            /*
-             * Get & remove inline image (to prevent being sent twice)
-             */
-            final MailPart imgPart = getAndRemoveImageAttachment(cid, mail);
-            if (imgPart == null) {
-                continue NextImg;
-            }
-            /*
-             * Create new body part from part's data handler
-             */
-            final BodyPart relatedImageBodyPart = new MimeBodyPart();
-            relatedImageBodyPart.setDataHandler(imgPart.getDataHandler());
-            for (final Iterator<Map.Entry<String, String>> iter = imgPart.getHeadersIterator(); iter.hasNext();) {
-                final Map.Entry<String, String> e = iter.next();
-                relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
+            final BodyPart relatedImageBodyPart;
+            final SourcedImage image = images.get(cid);
+            if (null == image) {
+                /*
+                 * Get & remove inline image (to prevent being sent twice)
+                 */
+                final MailPart imgPart = getAndRemoveImageAttachment(cid, mail);
+                if (imgPart == null) {
+                    continue NextImg;
+                }
+                /*
+                 * Create new body part from part's data handler
+                 */
+                relatedImageBodyPart = new MimeBodyPart();
+                relatedImageBodyPart.setDataHandler(imgPart.getDataHandler());
+                for (final Iterator<Map.Entry<String, String>> iter = imgPart.getHeadersIterator(); iter.hasNext();) {
+                    final Map.Entry<String, String> e = iter.next();
+                    relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
+                }
+
+            } else {
+                final DataSource dataSource;
+                if ("base64".equalsIgnoreCase(image.getTransferEncoding())) {
+                    dataSource = new MessageDataSource(Base64.decodeBase64(image.getData()), image.getContentType());
+                } else {
+                    /*
+                     * Expect quoted-printable instead
+                     */
+                    try {
+                        /*
+                         * No need to specify a charset in String.getBytes(), quoted-printable is always ASCII
+                         */
+                        final byte[] bs = QuotedPrintableCodec.decodeQuotedPrintable(image.getData().getBytes());
+                        dataSource = new MessageDataSource(bs, image.getContentType());
+                    } catch (final DecoderException e) {
+                        LOG.warn("Couldn't decode " + image.getTransferEncoding() + " image data.", e);
+                        continue NextImg;
+                    }
+                }
+                final MimeBodyPart imgBodyPart = new MimeBodyPart();
+                imgBodyPart.setDataHandler(new DataHandler(dataSource));
+                tmp.setLength(0);
+                imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
+                final ContentDisposition contentDisposition = new ContentDisposition(Part.INLINE);
+                imgBodyPart.setHeader(
+                    MessageHeaders.HDR_CONTENT_DISPOSITION,
+                    MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
+                final ContentType ct = new ContentType(image.getContentType());
+                imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
+                relatedImageBodyPart = imgBodyPart;
             }
             /*
              * Add image to "related" multipart
@@ -1212,7 +1272,10 @@ public class MIMEMessageFiller {
         if (content == null || content.length() == 0) {
             textContent = "";
         } else if (isHtml) {
-            textContent = performLineFolding(htmlService.html2text(htmlService.getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()), appendHref), usm.getAutoLinebreak());
+            textContent =
+                performLineFolding(htmlService.html2text(
+                    htmlService.getConformHTML(content, MailProperties.getInstance().getDefaultMimeCharset()),
+                    appendHref), usm.getAutoLinebreak());
         } else {
             textContent = performLineFolding(content, usm.getAutoLinebreak());
         }
@@ -1243,7 +1306,9 @@ public class MIMEMessageFiller {
             new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
         final MimeBodyPart html = new MimeBodyPart();
         if (htmlContent == null || htmlContent.length() == 0) {
-            html.setContent(htmlService.getConformHTML(HTML_SPACE, htmlCT.getCharsetParameter()).replaceFirst(HTML_SPACE, ""), htmlCT.toString());
+            html.setContent(
+                htmlService.getConformHTML(HTML_SPACE, htmlCT.getCharsetParameter()).replaceFirst(HTML_SPACE, ""),
+                htmlCT.toString());
         } else {
             html.setContent(htmlService.getConformHTML(htmlContent, htmlCT.getCharsetParameter()), htmlCT.toString());
         }

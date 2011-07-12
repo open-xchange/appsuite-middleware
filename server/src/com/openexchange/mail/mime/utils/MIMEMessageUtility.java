@@ -55,10 +55,15 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -95,9 +100,11 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -264,13 +271,13 @@ public final class MIMEMessageUtility {
         return isWhitespace;
     }
 
-    private static final Pattern PATTERN_EMBD_IMG =
-        Pattern.compile("(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG = Pattern.compile(
+        "(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern PATTERN_EMBD_IMG_ALT =
-        Pattern.compile(
-            "(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG_ALT = Pattern.compile(
+        "(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains inlined images
@@ -286,6 +293,123 @@ public final class MIMEMessageUtility {
      */
     public static boolean hasEmbeddedImages(final CharSequence htmlContent) {
         return PATTERN_EMBD_IMG.matcher(htmlContent).find() || PATTERN_EMBD_IMG_ALT.matcher(htmlContent).find();
+    }
+
+    /**
+     * Represents a with-source image in HTML content.
+     */
+    public static final class SourcedImage {
+
+        private final String contentType;
+
+        private final String transferEncoding;
+
+        private final String data;
+
+        private final String contentId;
+
+        /**
+         * Initializes a new {@link SourcedImage}.
+         * 
+         * @param contentType The Content-Type
+         * @param transferEncoding The transfer encoding; e.g. <code>"base64"</code>
+         * @param contentId The content identifier
+         * @param data The (encoded) image data
+         */
+        protected SourcedImage(final String contentType, final String transferEncoding, final String contentId, final String data) {
+            super();
+            this.contentType = contentType;
+            this.transferEncoding = transferEncoding;
+            this.contentId = contentId;
+            this.data = data;
+        }
+
+        /**
+         * Gets the content identifier.
+         * 
+         * @return The content identifier
+         */
+        public String getContentId() {
+            return contentId;
+        }
+
+        /**
+         * Gets the content type.
+         * 
+         * @return The content type
+         */
+        public String getContentType() {
+            return contentType;
+        }
+
+        /**
+         * Gets the transfer encoding.
+         * 
+         * @return The transfer encoding
+         */
+        public String getTransferEncoding() {
+            return transferEncoding;
+        }
+
+        /**
+         * Gets the data.
+         * 
+         * @return The data
+         */
+        public String getData() {
+            return data;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder builder = new StringBuilder(64);
+            builder.append("SourcedImage [contentType=").append(contentType).append(", transferEncoding=").append(transferEncoding).append(
+                ", contentId=").append(contentId).append(", data=");
+            if (data.length() <= 10) {
+                builder.append(data);
+            } else {
+                builder.append(data.substring(0, 10)).append("...");
+            }
+
+            builder.append(']');
+            return builder.toString();
+        }
+
+    }
+
+    private static final Pattern PATTERN_SOURCED_IMG = Pattern.compile(
+        "(<img[^>]+src=\")data:([a-zA-Z]+/[a-zA-Z-.]+);([a-zA-Z0-9-_]+),([^\"]+)(\"[^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    /**
+     * Parses possible existing with-source images from specified HTML content and replaces such occurrences with referenced images.
+     * <p>
+     * <b>Note</b>: Specified {@link StringBuilder}'s content is changed to hold referenced images instead.
+     * 
+     * @param htmlContent The HTML content
+     * @return The parsed with-source images
+     */
+    public static Map<String, SourcedImage> hasSourcedImages(final StringBuilder htmlContent) {
+        final String toParse = htmlContent.toString();
+        final Matcher m = PATTERN_SOURCED_IMG.matcher(toParse);
+        if (!m.find()) {
+            return Collections.emptyMap();
+        }
+        htmlContent.setLength(0);
+        final MatcherReplacer mr = new MatcherReplacer(m, toParse);
+        final Map<String, SourcedImage> map = new HashMap<String, SourcedImage>(4);
+        final StringBuilder tmp = new StringBuilder(48);
+        do {
+            final String cid = tmp.append(UUID.randomUUID().toString()).append('@').append(Version.NAME).toString();
+            tmp.setLength(0);
+            final String prefix = m.group(1);
+            final String appendix = m.group(5);
+            map.put(cid, new SourcedImage(m.group(2), m.group(3), cid, m.group(4)));
+            mr.appendLiteralReplacement(htmlContent, tmp.append(prefix).append("cid:").append(cid).append(appendix).toString());
+            tmp.setLength(0);
+        } while (m.find());
+        mr.appendTail(htmlContent);
+        return map;
     }
 
     /**
@@ -326,10 +450,9 @@ public final class MIMEMessageUtility {
         return false;
     }
 
-    public static final Pattern PATTERN_REF_IMG =
-        Pattern.compile(
-            "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    public static final Pattern PATTERN_REF_IMG = Pattern.compile(
+        "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains references to local image files
@@ -948,8 +1071,10 @@ public final class MIMEMessageUtility {
                 throw e;
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
-                    "using plain addresses' string representation instead.").toString(), e);
+                LOG.debug(
+                    new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
+                        "using plain addresses' string representation instead.").toString(),
+                    e);
             }
             addrs = PlainTextAddress.getAddresses(al.split(" *, *"));
         }
@@ -1002,11 +1127,11 @@ public final class MIMEMessageUtility {
      * 
      * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
      * System.out.println(buildAddr);
-     * //Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
+     * // Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
      * 
      * final InternetAddress ia = new InternetAddress(buildAddr);
      * System.out.println(ia.toUnicodeString());
-     * //Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
+     * // Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
      * </pre>
      * 
      * @param personal The personal's string representation
