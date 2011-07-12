@@ -299,6 +299,10 @@ public final class NewAction extends AbstractMailAccountAction {
     }
 
     private static String getPrefix(final MailAccountDescription description, final ServerSession session) throws MailAccountException {
+        final String mailServerURL = description.generateMailServerURL();
+        if (mailServerURL.startsWith("pop3")) {
+            return "";
+        }
         try {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = getMailAccess(description, session);
             access.connect(false);
