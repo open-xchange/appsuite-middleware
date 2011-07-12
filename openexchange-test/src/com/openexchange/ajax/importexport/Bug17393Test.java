@@ -73,11 +73,7 @@ public class Bug17393Test extends ManagedAppointmentTest {
 	public void testChangeException() throws Exception{
 		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), CULPRIT);
 		ICalImportResponse response = getClient().execute(request);
-		Object data = response.getData();
-		System.out.println(data);
-	}
-
-	public void testDeleteException() throws Exception{
-		
+		assertFalse(response.hasConflicts());
+		assertFalse(response.hasError());
 	}
 }
