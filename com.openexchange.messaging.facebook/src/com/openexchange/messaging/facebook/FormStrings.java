@@ -53,13 +53,12 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link FormStrings}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class FormStrings implements LocalizableStrings {
 
     public static final String ACCOUNT_LABEL = "The OAuth Account to use";
-  
 
     public FormStrings() {
         super();
