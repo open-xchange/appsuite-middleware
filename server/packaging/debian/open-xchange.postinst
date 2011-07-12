@@ -27,6 +27,13 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
   
+  # SoftwareChange_Request-766
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/imap.properties
+  if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+      ox_set_property com.openexchange.imap.maxNumExternalConnections '""' $pfile
+  fi
+
   # SoftwareChange_Request-774
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/cache.ccf
@@ -66,11 +73,12 @@ postFix() {
   fi
 
   # SoftwareChange_Request-711
+  # obsoleted by SoftwareChange_Request-766
   # -----------------------------------------------------------------------
-  local pfile=/opt/open-xchange/etc/groupware/imap.properties
-  if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
-      ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.googlemail.com:4," $pfile
-  fi
+  #local pfile=/opt/open-xchange/etc/groupware/imap.properties
+  #if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+  #    ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.googlemail.com:4," $pfile
+  #fi
 
   # SoftwareChange_Request-705
   # -----------------------------------------------------------------------

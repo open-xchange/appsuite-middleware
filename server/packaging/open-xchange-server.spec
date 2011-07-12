@@ -149,6 +149,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-766
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/imap.properties
+   if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+       ox_set_property com.openexchange.imap.maxNumExternalConnections '""' $pfile
+   fi
+ 
    # SoftwareChange_Request-774
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/cache.ccf
@@ -188,11 +195,12 @@ if [ ${1:-0} -eq 2 ]; then
    fi
 
    # SoftwareChange_Request-711
+   # obsoleted by SoftwareChange_Request-766
    # -----------------------------------------------------------------------
-   pfile=/opt/open-xchange/etc/groupware/imap.properties
-   if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
-      ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.googlemail.com:4," $pfile
-   fi
+   #pfile=/opt/open-xchange/etc/groupware/imap.properties
+   #if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+   #   ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.googlemail.com:4," $pfile
+   #fi
 
    # SoftwareChange_Request-705
    # -----------------------------------------------------------------------
