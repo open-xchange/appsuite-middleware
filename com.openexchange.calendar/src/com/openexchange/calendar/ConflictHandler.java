@@ -461,7 +461,7 @@ public class ConflictHandler {
                 if (recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
                     continue;
                 }
-                if (!create && cdao.getObjectID() == conflict_dao.getObjectID()) { // Same id should never conflict if we are running an update
+                if (!create && !shouldConflict(cdao, conflict_dao)) { // Same id should never conflict if we are running an update
                     continue;
                 }
                 for (int i = 0; i < results.size() && current_results < MAX_CONFLICT_RESULTS; i++) {

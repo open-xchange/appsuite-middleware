@@ -1,3 +1,7 @@
+* 2011-07-12 - martin.herfurth@open-xchange.com
+
+ - Bugfix #19667: Resources in a series are conflicting with itself in excetions.
+
 * 2011-07-11 - steffen.templin@open-xchange.com
 
  - Bugfix #19487: The name of the updater installer that can be downloaded from weg gui is configurable now
