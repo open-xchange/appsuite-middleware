@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -170,7 +171,7 @@ public class ContactAggregator {
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
 
-    public int calculateSimilarityScore(Contact original, Contact candidate, Object session) {
+    public static int calculateSimilarityScore(Contact original, Contact candidate, Object session) {
         int score = 0;
         int threshold = 9; // Of course
         
@@ -206,16 +207,60 @@ public class ContactAggregator {
         
         // an email-address is unique so if this is identical the contact should be the same
         Set<String> mails = new HashSet<String>();
-        for (String mail : java.util.Arrays.asList(original.getEmail1(), original.getEmail2(), original.getEmail3())) {
+        List<String> mails1 = java.util.Arrays.asList(original.getEmail1(), original.getEmail2(), original.getEmail3());
+        for (String mail : mails1) {
             if (mail != null) {
                 mails.add(mail);
             }
         }
-        for (String mail : java.util.Arrays.asList(candidate.getEmail1(), candidate.getEmail2(), candidate.getEmail3())) {
+        List<String> mails2 = java.util.Arrays.asList(candidate.getEmail1(), candidate.getEmail2(), candidate.getEmail3());
+        for (String mail : mails2) {
             if (mail != null && mails.contains(mail)) {
                 LOG.debug("mail "+mail+" in "+mails);
                 
                 score += 10;
+            }
+        }
+        
+        List<String> purged = getPurgedDisplayNameComponents(original.getDisplayName());
+        for(String mail : mails2) {
+            if (mail == null) {
+                continue;
+            }
+            if (isset(original.getGivenName()) && isset(original.getSurName()) && mail.contains(original.getGivenName().toLowerCase()) && mail.contains(original.getSurName().toLowerCase())) {
+                score += 10;
+            }
+            if (purged.size() >= 2) {
+                int count = 0;
+                for(String comp : purged) {
+                    if (mail.contains(comp.toLowerCase())) {
+                        count++;
+                    }
+                }
+                if (count == purged.size()) {
+                    score += 10;
+                }
+            }
+        }
+        
+        List<String> purged2 = getPurgedDisplayNameComponents(candidate.getDisplayName());
+        for(String mail : mails) {
+            if (mail == null) {
+                continue;
+            }
+            if (isset(candidate.getGivenName()) && isset(candidate.getSurName()) && mail.contains(candidate.getGivenName().toLowerCase()) && mail.contains(candidate.getSurName().toLowerCase())) {
+                score += 10;
+            }
+            if (purged2.size() >= 2) {
+                int count = 0;
+                for(String comp : purged2) {
+                    if (mail.contains(comp.toLowerCase())) {
+                        count++;
+                    }
+                }
+                if (count == purged2.size()) {
+                    score += 10;
+                }
             }
         }
         
@@ -231,17 +276,11 @@ public class ContactAggregator {
         return score;
     }
     
-    public static boolean compareDisplayNames(String displayName, String displayName2) {
-        if (eq(displayName, displayName2)) {
-            return true;
+    public static List<String> getPurgedDisplayNameComponents(String displayName) {
+        if (displayName == null) {
+            return Collections.emptyList();
         }
-        if (displayName == null || displayName2 == null) {
-            return false;
-        }
-        // make it into components
         List<String> d1 = java.util.Arrays.asList(displayName.split("\\s+"));
-        List<String> d2 = java.util.Arrays.asList(displayName2.split("\\s+"));
-
         List<String> p1 = new ArrayList<String>();
         for (String string : d1) {
             String purged = purge(string);
@@ -249,15 +288,18 @@ public class ContactAggregator {
                 p1.add(purged);
             }
         }
-        
-        List<String> p2 = new ArrayList<String>();
-        for (String string : d2) {
-            String purged = purge(string);
-            if (purged != null) {
-                p2.add(purged);
-            }
+        return p1;
+    }
+    
+    public static boolean compareDisplayNames(String displayName, String displayName2) {
+        if (eq(displayName, displayName2)) {
+            return true;
         }
-        
+        if (displayName == null || displayName2 == null) {
+            return false;
+        }
+        List<String> p1 = getPurgedDisplayNameComponents(displayName);
+        List<String> p2 = getPurgedDisplayNameComponents(displayName2);
         
         // any two must match
         int count = 0;
