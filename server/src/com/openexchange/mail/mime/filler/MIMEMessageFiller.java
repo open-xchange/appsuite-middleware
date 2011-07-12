@@ -665,12 +665,15 @@ public class MIMEMessageFiller {
             content = sb.toString();
         }
         /*
-         * Check for referenced images (by cid oder locally available)
+         * Check embedded images
          */
         final boolean embeddedImages;
         if (!images.isEmpty()) {
             embeddedImages = true;
         } else if (sendMultipartAlternative || mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+            /*
+             * Check for referenced images (by cid oder locally available)
+             */
             embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content, session);
         } else {
             embeddedImages = false;
