@@ -77,7 +77,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
 
     private static final char FILTER_SHORT = 'f';
 
-    private static final String FILTER_DESCRIPTION = "Filter";
+    private static final String FILTER_DESCRIPTION = "The call will only affect users with this access combination. Can be an Integer or a String, representing a module access definition. If left out, all users will be changed.";
 
     private CLIOption filterOption;
 
