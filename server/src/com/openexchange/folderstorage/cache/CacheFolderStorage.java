@@ -349,10 +349,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (folder.isGlobalID()) {
                 globalCache.putInGroup(newCacheKey(folder.getID(), treeId), String.valueOf(storageParameters.getContextId()), folder);
             } else {
-                final FolderMap folderMap = getFolderMapFor(storageParameters.getSession());
-                if (null != folderMap) {
-                    folderMap.put(treeId, folder);
-                }
+                getFolderMapFor(storageParameters.getSession()).put(treeId, folder);
             }
         } catch (final CacheException e) {
             throw new FolderException(e);
