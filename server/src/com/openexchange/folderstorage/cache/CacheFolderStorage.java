@@ -327,7 +327,7 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final Folder createdFolder = loadFolder(treeId, folderId, StorageType.WORKING, storageParameters);
+        final Folder createdFolder = loadFolder(treeId, folderId, StorageType.WORKING, true, storageParameters);
         if (createdFolder.isCacheable()) {
             putFolder(createdFolder, treeId, storageParameters);
         }
@@ -335,7 +335,7 @@ public final class CacheFolderStorage implements FolderStorage {
          * Refresh parent
          */
         removeSingleFromCache(folder.getParentID(), treeId, storageParameters.getUserId(), storageParameters.getSession());
-        final Folder parentFolder = loadFolder(treeId, folder.getParentID(), StorageType.WORKING, storageParameters);
+        final Folder parentFolder = loadFolder(treeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
         if (parentFolder.isCacheable()) {
             putFolder(parentFolder, treeId, storageParameters);
         }
@@ -578,7 +578,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         if (!FolderStorage.ROOT_ID.equals(parentId)) {
             removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
-            final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, storageParameters);
+            final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, true, storageParameters);
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, treeId, storageParameters);
             }
@@ -1019,7 +1019,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Put updated folder
          */
-        final Folder updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, storageParameters);
+        final Folder updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, true, storageParameters);
         if (isMove) {
             /*
              * Invalidate new parent folder
@@ -1155,11 +1155,15 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        return loadFolder(treeId, folderId, storageType, false, storageParameters);
+    }
+
+    private Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final boolean readWrite, final StorageParameters storageParameters) throws FolderException {
         final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final boolean started = storage.startTransaction(storageParameters, false);
+        final boolean started = storage.startTransaction(storageParameters, readWrite);
         try {
             final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);
             if (started) {
