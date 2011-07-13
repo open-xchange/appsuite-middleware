@@ -54,28 +54,17 @@ package twitter4j;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OXTwitter extends twitter4j.Twitter {
+public interface OXTwitter extends twitter4j.Twitter {
 
-    private static final long serialVersionUID = -5828299325374714007L;
-
-    public OXTwitter() {
-        super();
-    }
-
-    public OXTwitter(final String id, final String password, final String baseURL) {
-        super(id, password, baseURL);
-    }
-
-    public OXTwitter(final String id, final String password) {
-        super(id, password);
-    }
-
-    public OXTwitter(final String baseURL) {
-        super(baseURL);
-    }
-
-    public Status showStatusAuthenticated(final long id) throws TwitterException {
-        return new Status(get(getBaseURL() + "statuses/show/" + id + ".xml", null, true), this);
-    }
+    /**
+     * Returns a single status, specified by the id parameter below. The status's author will be returned inline. <br>
+     * This method calls http://api.twitter.com/1/statuses/show
+     * 
+     * @param id the numerical ID of the status you're trying to retrieve
+     * @return a single status
+     * @throws twitter4j.TwitterException when Twitter service or network is unavailable
+     * @see <a href="http://dev.twitter.com/doc/get/statuses/show/:id">GET statuses/show/:id | dev.twitter.com</a>
+     */
+    public Status showStatusAuthenticated(final long id) throws TwitterException;
 
 }

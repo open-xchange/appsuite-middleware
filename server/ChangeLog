@@ -1,3 +1,7 @@
+* 2011-07-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #19752: Using newest stable twitter4j API to display home timeline (incl. retweets)
+
 * 2011-07-13 - tobias.prinz@open-xchange.com
 
  - Bugfix #19647: Tolerating whitespaces in subscription URIs 

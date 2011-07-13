@@ -64,7 +64,7 @@ public interface User {
      * 
      * @return The id of the user
      */
-    int getId();
+    long getId();
 
     /**
      * Returns the name of the user
@@ -198,13 +198,6 @@ public interface User {
      * @return The URL of user profile's background image
      */
     String getProfileBackgroundImageUrl();
-
-    /**
-     * Gets the tile of user profile's background.
-     * 
-     * @return The tile of user profile's background
-     */
-    String getProfileBackgroundTile();
 
     /**
      * Gets the status count.

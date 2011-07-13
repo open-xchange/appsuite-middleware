@@ -50,6 +50,7 @@
 package com.openexchange.twitter.internal;
 
 import java.util.Date;
+import twitter4j.Status;
 import com.openexchange.twitter.RetweetDetails;
 import com.openexchange.twitter.User;
 
@@ -60,57 +61,61 @@ import com.openexchange.twitter.User;
  */
 public final class RetweetDetailsImpl implements RetweetDetails {
 
-    private final twitter4j.RetweetDetails twitter4jRetweetDetails;
+    private final twitter4j.Status retweetStatus;
+
+    private final long retweetCount;
 
     private User user;
 
     /**
      * Initializes a new {@link RetweetDetailsImpl}.
      * 
-     * @param twitter4jRetweetDetails The twitter4j retweet details
+     * @param retweetStatus
+     * @param retweetCount
      */
-    public RetweetDetailsImpl(final twitter4j.RetweetDetails twitter4jRetweetDetails) {
+    public RetweetDetailsImpl(final Status retweetStatus, final long retweetCount) {
         super();
-        this.twitter4jRetweetDetails = twitter4jRetweetDetails;
+        this.retweetStatus = retweetStatus;
+        this.retweetCount = retweetCount;
     }
 
     public int getRateLimitLimit() {
-        return twitter4jRetweetDetails.getRateLimitLimit();
+        return retweetStatus.getRateLimitStatus().getHourlyLimit();
     }
 
     public int getRateLimitRemaining() {
-        return twitter4jRetweetDetails.getRateLimitRemaining();
+        return retweetStatus.getRateLimitStatus().getRemainingHits();
     }
 
     public long getRateLimitReset() {
-        return twitter4jRetweetDetails.getRateLimitReset();
+        return retweetStatus.getRateLimitStatus().getResetTimeInSeconds();
     }
 
     public Date getRetweetedAt() {
-        return twitter4jRetweetDetails.getRetweetedAt();
+        return retweetStatus.getCreatedAt();
     }
 
     public long getRetweetId() {
-        return twitter4jRetweetDetails.getRetweetId();
+        return retweetStatus.getId();
     }
 
     public User getRetweetingUser() {
         if (null == user) {
-            user = new UserImpl(twitter4jRetweetDetails.getRetweetingUser());
+            user = new UserImpl(retweetStatus.getUser());
         }
         return user;
     }
 
     @Override
     public String toString() {
-        return twitter4jRetweetDetails.toString();
+        return retweetStatus.toString();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((twitter4jRetweetDetails == null) ? 0 : twitter4jRetweetDetails.hashCode());
+        result = prime * result + ((retweetStatus == null) ? 0 : retweetStatus.hashCode());
         return result;
     }
 
@@ -123,11 +128,11 @@ public final class RetweetDetailsImpl implements RetweetDetails {
             return false;
         }
         final RetweetDetailsImpl other = (RetweetDetailsImpl) obj;
-        if (twitter4jRetweetDetails == null) {
-            if (other.twitter4jRetweetDetails != null) {
+        if (retweetStatus == null) {
+            if (other.retweetStatus != null) {
                 return false;
             }
-        } else if (!twitter4jRetweetDetails.equals(other.twitter4jRetweetDetails)) {
+        } else if (!retweetStatus.equals(other.retweetStatus)) {
             return false;
         }
         return true;

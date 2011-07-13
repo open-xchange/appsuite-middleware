@@ -47,41 +47,55 @@
  *
  */
 
-package com.openexchange.twitter.internal;
+package twitter4j;
 
-import twitter4j.auth.AccessToken;
-import com.openexchange.twitter.TwitterAccessToken;
+import twitter4j.auth.Authorization;
+import twitter4j.conf.Configuration;
+import twitter4j.internal.http.HttpResponse;
 
 /**
- * {@link TwitterAccessTokenImpl}
+ * {@link OXTwitterImpl}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class TwitterAccessTokenImpl implements TwitterAccessToken {
+public class OXTwitterImpl extends twitter4j.TwitterImpl implements OXTwitter {
 
-    private final AccessToken accessToken;
+    private static final long serialVersionUID = -5828299325374714007L;
 
     /**
-     * Initializes a new {@link TwitterAccessTokenImpl}.
+     * Initializes a new {@link OXTwitterImpl}.
      * 
-     * @param accessToken The twitter4j access token instance
+     * @param conf
+     * @param auth
      */
-    public TwitterAccessTokenImpl(final AccessToken accessToken) {
-        super();
-        this.accessToken = accessToken;
+    public OXTwitterImpl(final Configuration conf, final Authorization auth) {
+        super(conf, auth);
     }
 
-    public String getTokenSecret() {
-        return accessToken.getTokenSecret();
+    public Status showStatusAuthenticated(final long id) throws TwitterException {
+        return new StatusJSONImpl(get(conf.getRestBaseURL() + "statuses/show/" + id + ".json?include_entities="
+            + conf.isIncludeEntitiesEnabled()), conf);
+        //return new Status(get(conf.getRestBaseURL() + "statuses/show/" + id + ".xml", null, true), this);
     }
 
-    public String getToken() {
-        return accessToken.getToken();
+    private HttpResponse get(final String url) throws TwitterException {
+        if (!conf.isMBeanEnabled()) {
+            return http.get(url, auth);
+        }
+        // intercept HTTP call for monitoring purposes
+        HttpResponse response = null;
+        final long start = System.currentTimeMillis();
+        try {
+            response = http.get(url, auth);
+        } finally {
+            final long elapsedTime = System.currentTimeMillis() - start;
+            TwitterAPIMonitor.getInstance().methodCalled(url, elapsedTime, isOk(response));
+        }
+        return response;
     }
 
-    @Override
-    public String toString() {
-        return accessToken.toString();
+    private boolean isOk(final HttpResponse response) {
+        return response != null && response.getStatusCode() < 300;
     }
 
 }
