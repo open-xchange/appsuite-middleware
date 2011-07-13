@@ -1,3 +1,7 @@
+* 2011-07-13 - tobias.prinz@open-xchange.com
+
+ - Bugfix #19647: Tolerating whitespaces in subscription URIs 
+
 * 2011-07-13 - francisco.laguna@open-xchange.com
 
  - Bugfix #18688: Correct attachment count in calendar

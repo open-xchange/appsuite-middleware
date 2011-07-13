@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -64,6 +65,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.util.URIUtil;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.microformats.OXMFServiceRegistry;
 
@@ -93,7 +96,9 @@ public class HTTPToolkit {
         /*
          * Generate URL
          */
-        final java.net.URL javaURL = new java.net.URL(site);
+        String encodedSite = URIUtil.encodeQuery(site);
+        
+        final java.net.URL javaURL = new java.net.URL(encodedSite);
 
         checkContentAndLength(javaURL, timeout);
 
@@ -116,7 +121,7 @@ public class HTTPToolkit {
         /*
          * No https, but http
          */
-        final GetMethod getMethod = new GetMethod(site);
+        final GetMethod getMethod = new GetMethod(encodedSite);
         client.executeMethod(getMethod);
         return new InputStreamReader(getMethod.getResponseBodyAsStream(), "UTF-8");
     }
