@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.Version;
 import com.openexchange.tools.regex.MatcherReplacer;
 
@@ -96,7 +97,7 @@ public final class SourcedImageUtility {
         final Map<String, SourcedImage> map = new HashMap<String, SourcedImage>(4);
         final StringBuilder tmp = new StringBuilder(48);
         do {
-            final String cid = tmp.append(UUID.randomUUID().toString()).append('@').append(Version.NAME).toString();
+            final String cid = tmp.append(UUIDs.getUnformattedString(UUID.randomUUID())).append('@').append(Version.NAME).toString();
             tmp.setLength(0);
             final String prefix = m.group(1);
             final String appendix = m.group(5);
