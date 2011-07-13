@@ -47,66 +47,22 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.MessageFormat;
-import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.groupware.update.SimpleStatementsUpdateTask;
+
 
 /**
- * {@link SimpleColumnCreationTask}
+ * {@link CorrectAttachmentCountInAppointments}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
+public class CorrectAttachmentCountInAppointments extends SimpleStatementsUpdateTask {
 
-    private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
-
-    public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
-        try {
-            con.setAutoCommit(false);
-            if (columnExists(con)) {
-                return;
-            }
-            Statement stmt = null;
-            try {
-                stmt = con.createStatement();
-                stmt.execute(getStatement());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
-            con.commit();
-        } catch (SQLException e) {
-            rollback(con);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
-        }
+    @Override
+    protected void statements() {
+        add("UPDATE prg_dates AS d SET d.intfield08 = (SELECT count(*) FROM prg_attachment AS a WHERE a.cid=d.cid AND a.module = 1 AND a.attached = d.intfield01)");
     }
 
-    private String getStatement() {
-        return MessageFormat.format(ADD_COLUMN, getTableName(), getColumnDefinition());
-    }
-
-    private boolean columnExists(Connection con) throws SQLException {
-        return Tools.columnExists(con, getTableName(), getColumnName());
-    }
-
-    protected abstract String getTableName();
-
-    protected abstract String getColumnName();
-
-    protected abstract String getColumnDefinition();
-    
-    
+ 
 }

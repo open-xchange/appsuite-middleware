@@ -53,37 +53,31 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.MessageFormat;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
+
 
 /**
- * {@link SimpleColumnCreationTask}
+ * A {@link SimpleUpdateTask} handles connection management for update tasks. Implement the {@link #perform(Connection)} method
+ * with your update logic. You may want to implement {@link #shouldRun(Connection)} if you can determine whether the UT has any work to do. 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
-
-    private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
+public abstract class SimpleUpdateTask implements UpdateTaskV2 {
 
     public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
+        perform(params.getSchema(), params.getContextId());
+    }
+
+    public void perform(Schema schema, int contextId) throws AbstractOXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
-            if (columnExists(con)) {
+            if (!shouldRun(con)) {
                 return;
             }
-            Statement stmt = null;
-            try {
-                stmt = con.createStatement();
-                stmt.execute(getStatement());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
+            perform(con);
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -94,19 +88,28 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
         }
     }
 
-    private String getStatement() {
-        return MessageFormat.format(ADD_COLUMN, getTableName(), getColumnDefinition());
+    protected abstract void perform(Connection con) throws SQLException;
+
+    protected boolean shouldRun(Connection con) {
+        return true;
+    }
+    
+//  The following methods can be overridden, if different values make sense here
+    
+    public TaskAttributes getAttributes() {
+        return new Attributes();
     }
 
-    private boolean columnExists(Connection con) throws SQLException {
-        return Tools.columnExists(con, getTableName(), getColumnName());
+    public String[] getDependencies() {
+        return new String[0];
     }
 
-    protected abstract String getTableName();
+    public int addedWithVersion() {
+        return NO_VERSION;
+    }
 
-    protected abstract String getColumnName();
+    public int getPriority() {
+        return UpdateTaskPriority.NORMAL.priority;
+    }
 
-    protected abstract String getColumnDefinition();
-    
-    
 }

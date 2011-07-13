@@ -49,64 +49,69 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.MessageFormat;
-import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
+
 
 /**
- * {@link SimpleColumnCreationTask}
+ * Build a subclass of {@link SimpleStatementsUpdateTask} if all you want to do is execute a bunch of statements.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
+public abstract class SimpleStatementsUpdateTask extends SimpleUpdateTask {
 
-    private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
+    private List<StatementHolder> statements = new ArrayList<StatementHolder>();
+    
+    public SimpleStatementsUpdateTask() {
+        statements();
+    }
+    
+    /**
+     * Define Statements with {@link #add(String, Object...)} here.
+     */
+    protected abstract void statements();
 
-    public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
-        try {
-            con.setAutoCommit(false);
-            if (columnExists(con)) {
-                return;
-            }
-            Statement stmt = null;
+    /**
+     * Add a statement to be executed. The ? in the statement will be filled with objects from the values array
+     */
+    public void add(String statement, Object...values) {
+        statements.add(new StatementHolder(statement, values));
+    }
+
+    @Override
+    protected void perform(Connection con) throws SQLException {
+        for (StatementHolder sqlStatement : statements) {
+            sqlStatement.execute(con);
+        }
+    }
+    
+    protected static class StatementHolder {
+        private String statement;
+        private Object[] values;
+        
+        public StatementHolder(String statement, Object...values) {
+            this.statement = statement;
+            this.values = values;
+        }
+        
+        public void execute(Connection con) throws SQLException {
+            PreparedStatement stmt = null;
             try {
-                stmt = con.createStatement();
-                stmt.execute(getStatement());
+                stmt = con.prepareStatement(statement);
+                for(int i = 0; i < values.length; i++) {
+                    stmt.setObject(i+1, values[i]);
+                }
+                stmt.execute();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                if (stmt != null) {
+                    DBUtils.closeSQLStuff(stmt);
+                }
             }
-            con.commit();
-        } catch (SQLException e) {
-            rollback(con);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
         }
     }
 
-    private String getStatement() {
-        return MessageFormat.format(ADD_COLUMN, getTableName(), getColumnDefinition());
-    }
-
-    private boolean columnExists(Connection con) throws SQLException {
-        return Tools.columnExists(con, getTableName(), getColumnName());
-    }
-
-    protected abstract String getTableName();
-
-    protected abstract String getColumnName();
-
-    protected abstract String getColumnDefinition();
-    
-    
 }

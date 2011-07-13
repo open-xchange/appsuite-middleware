@@ -3676,7 +3676,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     public final long attachmentAction(int folderId, final int oid, final int uid, Session session, final Context c, final int numberOfAttachments) throws OXException {
-        Connection readcon = null, writecon = null;
+        Connection writecon = null;
         int changes[];
         PreparedStatement pst = null;
         int oldAmount = 0;
@@ -3684,13 +3684,15 @@ public class CalendarMySQL implements CalendarSqlImp {
         PreparedStatement prep = null;
         long last_modified = 0L;
         try {
-            readcon = DBPool.pickup(c);
+            writecon = DBPool.pickupWriteable(c);
+            writecon.setAutoCommit(false);
             final StringBuilder sb = new StringBuilder(96);
             sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01 = ");
             sb.append(oid);
             sb.append(" AND cid = ");
             sb.append(c.getContextId());
-            prep = getPreparedStatement(readcon, sb.toString());
+            sb.append(" FOR UPDATE");
+            prep = getPreparedStatement(writecon, sb.toString());
             rs = getResultSet(prep);
             if (rs.next()) {
                 oldAmount = rs.getInt(1);
@@ -3698,27 +3700,14 @@ public class CalendarMySQL implements CalendarSqlImp {
                 LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
                 throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
             }
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
-        } catch (final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-        } finally {
-            collection.closeResultSet(rs);
-            collection.closePreparedStatement(prep);
-            if (readcon != null) {
-                DBPool.closeReaderSilent(c, readcon);
+       
+
+            oldAmount += numberOfAttachments;
+            if (oldAmount < 0) {
+                LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: new number of attachments:", Integer.valueOf(oldAmount), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
             }
-        }
 
-        oldAmount += numberOfAttachments;
-        if (oldAmount < 0) {
-            LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: new number of attachments:", Integer.valueOf(oldAmount), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
-            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
-        }
-
-        try {
-            writecon = DBPool.pickupWriteable(c);
-            writecon.setAutoCommit(false);
             pst = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ?, intfield08 = ? WHERE intfield01 = ? AND cid = ?");
             last_modified = System.currentTimeMillis();
             pst.setLong(1, last_modified);
@@ -3733,6 +3722,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
             }
             LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ", Integer.valueOf(changes[0]), ". Check prg_dates oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
+            writecon.commit();
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch (final SQLException sqle) {
