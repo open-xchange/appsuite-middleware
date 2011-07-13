@@ -265,11 +265,11 @@ public final class MIMEMessageUtility {
     }
 
     private static final Pattern PATTERN_EMBD_IMG = Pattern.compile(
-        "(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)",
+        "(<img[^>]+src=\"cid:)([^\"]+)(\"[^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern PATTERN_EMBD_IMG_ALT = Pattern.compile(
-        "(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)",
+        "(<img[^>]+src=\")([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"[^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
