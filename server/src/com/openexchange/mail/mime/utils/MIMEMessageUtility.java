@@ -54,16 +54,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -100,11 +95,9 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -302,7 +295,7 @@ public final class MIMEMessageUtility {
      * @return an instance of <code>{@link List}</code> containing all occurring content IDs
      */
     public static List<String> getContentIDs(final CharSequence htmlContent) {
-        final List<String> retval = new ArrayList<String>();
+        final List<String> retval = new LinkedList<String>();
         Matcher m = PATTERN_EMBD_IMG.matcher(htmlContent);
         while (m.find()) {
             retval.add(m.group(2));
