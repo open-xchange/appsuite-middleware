@@ -349,7 +349,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (folder.isGlobalID()) {
                 globalCache.putInGroup(newCacheKey(folder.getID(), treeId), String.valueOf(storageParameters.getContextId()), folder);
             } else {
-                final FolderMap folderMap = getFolderMapFrom(storageParameters.getSession());
+                final FolderMap folderMap = getFolderMapFor(storageParameters.getSession());
                 if (null != folderMap) {
                     folderMap.put(treeId, folder);
                 }
@@ -412,7 +412,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 }
             }
             final int contextId = session.getContextId();
-            final FolderMap folderMap = optFolderMapFrom(session);
+            final FolderMap folderMap = optFolderMapFor(session);
             final Cache cache = globalCache;
             if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 for (final String folderId : ids) {
@@ -460,7 +460,7 @@ public final class CacheFolderStorage implements FolderStorage {
         final Cache cache = globalCache;
         cache.removeFromGroup(newCacheKey(id, treeId), String.valueOf(contextId));
         if (userId > 0) {
-            final FolderMap folderMap = optFolderMapFrom(session);
+            final FolderMap folderMap = optFolderMapFor(session);
             if (null != folderMap) {
                 folderMap.remove(id, treeId);
             }
@@ -469,7 +469,7 @@ public final class CacheFolderStorage implements FolderStorage {
             // Now for real tree, too
             cache.removeFromGroup(newCacheKey(id, FolderStorage.REAL_TREE_ID), String.valueOf(contextId));
             if (userId > 0) {
-                final FolderMap folderMap = optFolderMapFrom(session);
+                final FolderMap folderMap = optFolderMapFor(session);
                 if (null != folderMap) {
                     folderMap.remove(id, FolderStorage.REAL_TREE_ID);
                 }
@@ -508,7 +508,7 @@ public final class CacheFolderStorage implements FolderStorage {
                  */
                 final Session session = storageParameters.getSession();
                 globalCache.removeFromGroup(newCacheKey(folderId, treeId), String.valueOf(storageParameters.getContextId()));
-                final FolderMap folderMap = optFolderMapFrom(session);
+                final FolderMap folderMap = optFolderMapFor(session);
                 if (null != folderMap) {
                     folderMap.remove(folderId, treeId);
                 }
@@ -567,7 +567,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (global) {
                 globalCache.removeFromGroup(newCacheKey(folderId, treeId), String.valueOf(storageParameters.getContextId()));
             } else {
-                final FolderMap folderMap = optFolderMapFrom(session);
+                final FolderMap folderMap = optFolderMapFor(session);
                 if (null != folderMap) {
                     folderMap.remove(folderId, treeId);
                 }
@@ -775,7 +775,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Try user cache key
          */
-        final FolderMap folderMap = optFolderMapFrom(storageParameters.getSession());
+        final FolderMap folderMap = optFolderMapFor(storageParameters.getSession());
         folder = null == folderMap ? null : folderMap.get(folderId, treeId);
         if (null != folder) {
             /*
@@ -1299,11 +1299,11 @@ public final class CacheFolderStorage implements FolderStorage {
         return new StorageParametersImpl((ServerSession) session);
     }
 
-    private static FolderMap getFolderMapFrom(final Session session) {
+    private static FolderMap getFolderMapFor(final Session session) {
         return FolderMapManagement.getInstance().getFor(session);
     }
 
-    private static FolderMap optFolderMapFrom(final Session session) {
+    private static FolderMap optFolderMapFor(final Session session) {
         return FolderMapManagement.getInstance().optFor(session);
     }
 
