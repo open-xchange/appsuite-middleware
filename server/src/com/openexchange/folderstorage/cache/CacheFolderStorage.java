@@ -62,8 +62,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -82,6 +80,7 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
+import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
 import com.openexchange.folderstorage.internal.performers.CreatePerformer;
@@ -95,9 +94,7 @@ import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -204,7 +201,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 userCache = null;
             }
         }
-        */
+         */
         if (service != null) {
             cacheService = null;
         }
@@ -367,7 +364,8 @@ public final class CacheFolderStorage implements FolderStorage {
      * 
      * @param id The folder identifier
      * @param treeId The tree identifier
-     * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's path to root folder
+     * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
+     *            path to root folder
      * @param session The session providing user information
      * @throws FolderException If removal fails
      */
@@ -376,10 +374,7 @@ public final class CacheFolderStorage implements FolderStorage {
             removeSingleFromCache(id, treeId, session.getUserId(), session);
         } else {
             try {
-                removeFromCache(id, treeId, session, new PathPerformer(
-                    new ServerSessionAdapter(session),
-                    null,
-                    registry));
+                removeFromCache(id, treeId, session, new PathPerformer(new ServerSessionAdapter(session), null, registry));
             } catch (final ContextException e) {
                 throw new FolderException(e);
             }
@@ -867,7 +862,7 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws FolderException {
-        
+
         final FolderStorage folderStorage = registry.getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
@@ -1216,12 +1211,17 @@ public final class CacheFolderStorage implements FolderStorage {
             paramsProvider = new InstanceStorageParametersProvider(storageParameters);
         } else {
             try {
-                completionService = new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true));
+                completionService =
+                    new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(
+                        ThreadPoolService.class,
+                        true));
             } catch (final ServiceException e) {
                 throw new FolderException(e);
             }
             final Session session = storageParameters.getSession();
-            paramsProvider = null == session ? new SessionStorageParametersProvider(storageParameters.getUser(), storageParameters.getContext()) : new SessionStorageParametersProvider((ServerSession) storageParameters.getSession());
+            paramsProvider =
+                null == session ? new SessionStorageParametersProvider(storageParameters.getUser(), storageParameters.getContext()) : new SessionStorageParametersProvider(
+                    (ServerSession) storageParameters.getSession());
         }
         /*
          * Create destination map
@@ -1236,7 +1236,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 public Object call() throws Exception {
                     final StorageParameters newParameters = paramsProvider.getStorageParameters();
                     final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
-                    if (tmp.startTransaction(newParameters, false)) {            
+                    if (tmp.startTransaction(newParameters, false)) {
                         openedStorages.add(tmp);
                     }
                     try {
@@ -1300,47 +1300,11 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private static FolderMap getFolderMapFrom(final Session session) {
-        return getFolderMapFrom(session, true);
+        return FolderMapManagement.getInstance().getFor(session);
     }
 
     private static FolderMap optFolderMapFrom(final Session session) {
-        return getFolderMapFrom(session, false);
-    }
-
-    private static final String PARAM_FOLDER_MAP = "com.openexchange.folderstorage.cache.folderMap";
-
-    private static FolderMap getFolderMapFrom(final Session session, final boolean createIfAbsent) {
-        if (null == session) {
-            return null;
-        }
-        if (!createIfAbsent) {
-            return (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
-        }
-        FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
-        if (null == map) {
-            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-            if (null == lock) {
-                synchronized (session) {
-                    map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
-                    if (null == map) {
-                        map = new FolderMap(1024, 300, TimeUnit.SECONDS);
-                        session.setParameter(PARAM_FOLDER_MAP, map);
-                    }
-                }
-            } else {
-                lock.lock();
-                try {
-                    map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
-                    if (null == map) {
-                        map = new FolderMap(1024, 300, TimeUnit.SECONDS);
-                        session.setParameter(PARAM_FOLDER_MAP, map);
-                    }
-                } finally {
-                    lock.unlock();
-                }
-            }
-        }
-        return map;
+        return FolderMapManagement.getInstance().optFor(session);
     }
 
     /**
@@ -1350,30 +1314,9 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param contextId The context identifier
      */
     public static void dropUserEntries(final int userId, final int contextId) {
-        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != service) {
-            for (final Session session : service.getSessions(userId, contextId)) {
-                final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-                if (null == lock) {
-                    synchronized (session) {
-                        final FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
-                        if (null != map) {
-                            map.clear();
-                        }
-                    }
-                } else {
-                    lock.lock();
-                    try {
-                        final FolderMap map = (FolderMap) session.getParameter(PARAM_FOLDER_MAP);
-                        if (null != map) {
-                            map.clear();
-                        }
-                    } finally {
-                        lock.unlock();
-                    }
-                }
-            }
-            
+        final FolderMap folderMap = FolderMapManagement.getInstance().optFor(userId, contextId);
+        if (null != folderMap) {
+            folderMap.clear();
         }
     }
 

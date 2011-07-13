@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -66,10 +67,12 @@ import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -82,9 +85,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageActivator.class);
 
-    private ServiceRegistration folderStorageRegistration;
-
-    private ServiceRegistration eventHandlerRegistration;
+    private List<ServiceRegistration> registrations;
 
     private CacheFolderStorage cacheFolderStorage;
 
@@ -203,7 +204,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         // Register folder storage
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
         dictionary.put("tree", FolderStorage.ALL_TREE_ID);
-        folderStorageRegistration = context.registerService(FolderStorage.class.getName(), cacheFolderStorage, dictionary);
+        registrations = new ArrayList<ServiceRegistration>(4);
+        registrations.add(context.registerService(FolderStorage.class.getName(), cacheFolderStorage, dictionary));
         // Register event handler for content-related changes on a mail folder
         final CacheFolderStorage tmp = cacheFolderStorage;
         {
@@ -222,7 +224,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
-            eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
+            registrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
         }
         {
             final EventHandler eventHandler = new EventHandler() {
@@ -246,20 +248,41 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, FolderEventConstants.getAllTopics());
-            eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
+            registrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
+        }
+        {
+            final EventHandler eventHandler = new EventHandler() {
+                
+                public void handleEvent(final Event event) {
+                    final String topic = event.getTopic();
+                    if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                        handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                    } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                        @SuppressWarnings("unchecked")
+                        final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                        for (final Session session : map.values()) {
+                            handleDroppedSession(session);
+                        }
+                    }
+                }
+
+                private void handleDroppedSession(final Session session) {
+                    FolderMapManagement.getInstance().dropFor(session);
+                }
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+            dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registrations.add(context.registerService(EventHandler.class.getName(), eventHandler, dict));
         }
     }
 
     private void unregisterCacheFolderStorage() {
-        // Unregister event handler
-        if (null != eventHandlerRegistration) {
-            eventHandlerRegistration.unregister();
-            eventHandlerRegistration = null;
-        }
-        // Unregister folder storage
-        if (null != folderStorageRegistration) {
-            folderStorageRegistration.unregister();
-            folderStorageRegistration = null;
+        // Unregister
+        if (null != registrations) {
+            while (!registrations.isEmpty()) {
+                registrations.remove(0).unregister();
+            }
+            registrations = null;
         }
     }
 
