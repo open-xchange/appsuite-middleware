@@ -168,7 +168,7 @@ public final class ImapIdleActivator extends DeferredActivator {
             }
 
             final String modestr =configurationService.getProperty("com.openexchange.push.imapidle.pushmode", PushMode.ALWAYS.toString());
-            PushMode pushmode = ImapIdlePushListener.PushMode.fromString(modestr);
+            PushMode pushmode = PushMode.fromString(modestr);
             if( pushmode == null ) {
                 LOG.info("WARNING: " + modestr + " is an invalid setting for com.openexchange.push.imapidle.pushmode, using default");
                 pushmode = PushMode.ALWAYS;
