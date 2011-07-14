@@ -112,7 +112,7 @@ public final class OXConfigurationBase {
                     clientVersion = property;
                 } else {
                     // Not a valid version
-                    log.warn(MessageFormat.format("Not a valid version string: {0}. Using fallback \"2.0.10\"", property));
+                    log.warn(MessageFormat.format("Not a valid version string: {0}. Using fallback \"2.2.3\"", property));
                     clientVersion = "2.2.3";
                 }
             }
