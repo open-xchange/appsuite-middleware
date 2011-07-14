@@ -20,17 +20,17 @@
 
 * 2011-07-12 - martin.herfurth@open-xchange.com
 
- - Bugfix #19667: Resources in a series are conflicting with itself in excetions.
+ - Bugfix #19667: Resources in a series are conflicting with itself in exceptions.
 
 * 2011-07-11 - steffen.templin@open-xchange.com
 
- - Bugfix #19487: The name of the updater installer that can be downloaded from weg gui is configurable now
- - Bugfix #19488: The template values product-name, base-name and icon are config-file properties now
+ - Bugfix #19487: The name of the updater installer that can be downloaded from web gui is configurable now
+ - Bugfix #19488: The template values product-name, base-name and icon are configuration-file properties now
 
 * 2011-07-11 - thorben.betten@open-xchange.com
 
  - Bugfix #19635: Ensure termination of consumer task upon mail mass import
- - Bugfix #19128: Accepting context admin as a user's contact creator, too
+ - Bugfix #19128: Accepting context administrator as a user's contact creator, too
 
 * 2011-07-10 - thorben.betten@open-xchange.com
 
@@ -44,7 +44,7 @@
 
 * 2011-07-04 - thorben.betten@open-xchange.com
 
- - Bugfix #19585: Allowing empty cookie values; e.g. ``mycookie=��
+ - Bugfix #19585: Allowing empty cookie values; e.g. 'mycookie='
  - Bugfix #19691: Dropping AJP connection (in AJP way) if a corrupt AJP cycle is detected
 
 * 2011-07-02 - thorben.betten@open-xchange.com
