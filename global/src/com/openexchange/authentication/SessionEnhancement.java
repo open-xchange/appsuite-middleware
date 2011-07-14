@@ -51,12 +51,20 @@ package com.openexchange.authentication;
 
 import com.openexchange.session.Session;
 
-
 /**
- * {@link SessionEnhancement}
- *
+ * {@link SessionEnhancement} - An optional interface which may be implemented by {@link AuthenticationService} to apply custom properties
+ * to specified {@link Session}.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> - JavaDoc
  */
 public interface SessionEnhancement {
+
+    /**
+     * Sets custom properties in specified {@link Session}.
+     * 
+     * @param session The session to enhance
+     */
     public void enhanceSession(Session session);
+
 }
