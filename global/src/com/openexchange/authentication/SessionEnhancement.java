@@ -52,7 +52,7 @@ package com.openexchange.authentication;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionEnhancement} - An optional interface which may be implemented by {@link AuthenticationService} to apply custom properties
+ * {@link SessionEnhancement} - An optional interface which may be implemented by {@link Authenticated} to apply custom properties
  * to specified {@link Session}.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
