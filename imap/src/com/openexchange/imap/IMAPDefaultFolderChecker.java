@@ -49,19 +49,18 @@
 
 package com.openexchange.imap;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
-import com.openexchange.concurrent.CallerRunsCompletionService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
@@ -90,7 +89,6 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
@@ -109,8 +107,6 @@ public final class IMAPDefaultFolderChecker {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final int FOLDER_TYPE = (IMAPFolder.HOLDS_MESSAGES | IMAPFolder.HOLDS_FOLDERS);
-
-    private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
 
     private final Session session;
 
@@ -254,7 +250,7 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Get prefix for default folder names, NOT fullnames!
                      */
-                    final String prefix;
+                    String prefix;
                     final char sep;
                     {
                         final String[] sa = getDefaultFolderPrefix(inboxFolder, inboxListEntry, mailSessionCache);
@@ -272,126 +268,191 @@ public final class IMAPDefaultFolderChecker {
                         type = FOLDER_TYPE;
                     }
                     /*
-                     * Load mail account
+                     * Get connection
                      */
-                    final boolean isSpamOptionEnabled;
-                    final MailAccount mailAccount;
+                    final Connection con;
                     try {
-                        mailAccount =
-                            IMAPServiceRegistry.getService(MailAccountStorageService.class, true).getMailAccount(
-                                accountId,
-                                session.getUserId(),
-                                session.getContextId());
-                        final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-                        isSpamOptionEnabled = usm.isSpamOptionEnabled();
-                    } catch (final ServiceException e) {
-                        throw new MailException(e);
-                    } catch (final MailAccountException e) {
+                        con = IMAPServiceRegistry.getService(DatabaseService.class, true).getWritable(session.getContextId());
+                    } catch (final AbstractOXException e) {
                         throw new MailException(e);
                     }
-                    /*
-                     * Check default folders
-                     */
-                    final DefaultFolderNamesProvider defaultFolderNamesProvider =
-                        new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
-                    final String[] defaultFolderFullnames =
-                        defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, isSpamOptionEnabled);
-                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, isSpamOptionEnabled);
-                    final SpamHandler spamHandler;
-                    {
-                        spamHandler =
-                            isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
-                    }
-                    final CompletionService<Object> completionService = new CallerRunsCompletionService<Object>();
-                    final AtomicBoolean modified = new AtomicBoolean(false);
-                    int count = 0;
-                    {
-                        for (int i = 0; i < defaultFolderNames.length; i++) {
-                            final String fullname = defaultFolderFullnames[i];
-                            final int index = i;
-                            if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
-                                if (spamHandler.isCreateConfirmedHam()) {
-                                    completionService.submit(submittableTaskFor(
-                                        index,
-                                        prefix,
-                                        fullname,
-                                        defaultFolderNames[index],
-                                        sep,
-                                        type,
-                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                        modified,
-                                        mailSessionCache));
-                                    count++;
-                                } else if (DEBUG) {
-                                    LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
-                                }
-                            } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
-                                if (spamHandler.isCreateConfirmedSpam()) {
-                                    completionService.submit(submittableTaskFor(
-                                        index,
-                                        prefix,
-                                        fullname,
-                                        defaultFolderNames[index],
-                                        sep,
-                                        type,
-                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                        modified,
-                                        mailSessionCache));
-                                    count++;
-                                } else if (DEBUG) {
-                                    LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
-                                }
-                            } else {
-                                completionService.submit(submittableTaskFor(
-                                    index,
-                                    prefix,
-                                    fullname,
-                                    defaultFolderNames[index],
-                                    sep,
-                                    type,
-                                    1,
-                                    modified,
-                                    mailSessionCache));
-                                count++;
-                            }
+                    try {
+                        /*
+                         * Get storage service
+                         */
+                        final MailAccountStorageService storageService;
+                        try {
+                            storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
+                        } catch (final ServiceException e) {
+                            throw new MailException(e);
                         }
-                    }
-                    final long start = System.currentTimeMillis();
-                    try {
-                        for (int i = 0; i < count; i++) {
-                            final Future<Object> f = completionService.take();
+                        boolean keepgoing = true;
+                        while (keepgoing) {
+                            keepgoing = false;
                             try {
-                                f.get();
-                            } catch (final ExecutionException e) {
-                                if (MailAccount.DEFAULT_ID == accountId) {
-                                    /*
-                                     * Mandatory for primary mail account
-                                     */
-                                    throw ThreadPools.launderThrowable(e, MailException.class);
+                                sequentiallyCheckFolders(prefix, sep, type, storageService, mailSessionCache, con);
+                            } catch (final RetryWithINBOXPrefixException e) {
+                                MailAccount mailAccount = null;
+                                try {
+                                    final MailAccount[] accounts =
+                                        storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
+                                    for (final MailAccount acc : accounts) {
+                                        if (acc.getId() == accountId) {
+                                            mailAccount = acc;
+                                            break;
+                                        }
+                                    }
+                                } catch (final MailAccountException mae) {
+                                    throw new MailException(mae);
                                 }
-                                final MailException me = ThreadPools.launderThrowable(e, MailException.class);
-                                LOG.warn(
-                                    new StringBuilder(128).append("A default folder could not be created on IMAP server ").append(
-                                        imapConfig.getServer()).append(" for login ").append(imapConfig.getLogin()).append(" (user=").append(
-                                        session.getUserId()).append(", context=").append(session.getContextId()).append("): ").append(
-                                        me.getMessage()).toString(),
-                                    me);
+                                final MailAccountDescription mad = new MailAccountDescription();
+                                final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
+                                mad.setId(accountId);
+                                mad.setConfirmedHamFullname("INBOX" + sep + mailAccount.getConfirmedHamFullname());
+                                attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
+                                mad.setConfirmedSpamFullname("INBOX" + sep + mailAccount.getConfirmedSpamFullname());
+                                attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
+                                mad.setDraftsFullname("INBOX" + sep + mailAccount.getDraftsFullname());
+                                attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
+                                mad.setSentFullname("INBOX" + sep + mailAccount.getSentFullname());
+                                attributes.add(Attribute.SENT_FULLNAME_LITERAL);
+                                mad.setSpamFullname("INBOX" + sep + mailAccount.getSpamFullname());
+                                attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
+                                mad.setTrashFullname("INBOX" + sep + mailAccount.getTrashFullname());
+                                attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
+                                try {
+                                    storageService.updateMailAccount(
+                                        mad,
+                                        attributes,
+                                        session.getUserId(),
+                                        session.getContextId(),
+                                        IMAPServiceRegistry.getService(SecretService.class).getSecret(session),
+                                        con,
+                                        true);
+                                } catch (final MailAccountException mae) {
+                                    throw new IMAPException(mae);
+                                }
+                                keepgoing = true;
+                            } catch (final RetryOtherPrefixException e) {
+                                prefix = e.getPrefix();
+                                MailAccount mailAccount = null;
+                                try {
+                                    final MailAccount[] accounts =
+                                        storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
+                                    for (final MailAccount acc : accounts) {
+                                        if (acc.getId() == accountId) {
+                                            mailAccount = acc;
+                                            break;
+                                        }
+                                    }
+                                } catch (final MailAccountException mae) {
+                                    throw new MailException(mae);
+                                }
+                                final MailAccountDescription mad = new MailAccountDescription();
+                                final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
+                                mad.setId(accountId);
+                                {
+                                    final String fn = mailAccount.getConfirmedHamFullname();
+                                    final String name;
+                                    if (null == fn) {
+                                        name = mailAccount.getConfirmedHam();
+                                    } else {
+                                        final int pos = fn.lastIndexOf(sep);
+                                        name = pos < 0 ? fn : fn.substring(pos + 1);
+                                    }
+                                    mad.setConfirmedHamFullname(prefix + name);
+                                    attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
+                                }
+                                {
+                                    final String fn = mailAccount.getConfirmedSpamFullname();
+                                    final String name;
+                                    if (null == fn) {
+                                        name = mailAccount.getConfirmedSpam();
+                                    } else {
+                                        final int pos = fn.lastIndexOf(sep);
+                                        name = pos < 0 ? fn : fn.substring(pos + 1);
+                                    }
+                                    mad.setConfirmedSpamFullname(prefix + name);
+                                    attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
+                                }
+                                {
+                                    final String fn = mailAccount.getDraftsFullname();
+                                    final String name;
+                                    if (null == fn) {
+                                        name = mailAccount.getDrafts();
+                                    } else {
+                                        final int pos = fn.lastIndexOf(sep);
+                                        name = pos < 0 ? fn : fn.substring(pos + 1);
+                                    }
+                                    mad.setDraftsFullname(prefix + name);
+                                    attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
+                                }
+                                {
+                                    final String fn = mailAccount.getSpamFullname();
+                                    final String name;
+                                    if (null == fn) {
+                                        name = mailAccount.getSpam();
+                                    } else {
+                                        final int pos = fn.lastIndexOf(sep);
+                                        name = pos < 0 ? fn : fn.substring(pos + 1);
+                                    }
+                                    mad.setSpamFullname(prefix + name);
+                                    attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
+                                }
+                                {
+                                    final String fn = mailAccount.getSentFullname();
+                                    final String name;
+                                    if (null == fn) {
+                                        name = mailAccount.getSent();
+                                    } else {
+                                        final int pos = fn.lastIndexOf(sep);
+                                        name = pos < 0 ? fn : fn.substring(pos + 1);
+                                    }
+                                    mad.setSentFullname(prefix + name);
+                                    attributes.add(Attribute.SENT_FULLNAME_LITERAL);
+                                }
+                                {
+                                    final String fn = mailAccount.getTrashFullname();
+                                    final String name;
+                                    if (null == fn) {
+                                        name = mailAccount.getTrash();
+                                    } else {
+                                        final int pos = fn.lastIndexOf(sep);
+                                        name = pos < 0 ? fn : fn.substring(pos + 1);
+                                    }
+                                    mad.setTrashFullname(prefix + name);
+                                    attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
+                                }
+                                try {
+                                    storageService.updateMailAccount(
+                                        mad,
+                                        attributes,
+                                        session.getUserId(),
+                                        session.getContextId(),
+                                        IMAPServiceRegistry.getService(SecretService.class).getSecret(session),
+                                        con,
+                                        true);
+                                } catch (final MailAccountException mae) {
+                                    throw new IMAPException(mae);
+                                }
+                                keepgoing = true;
                             }
                         }
-                    } catch (final InterruptedException e) {
-                        // Keep interrupted status
-                        throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+                    } finally {
+                        try {
+                            IMAPServiceRegistry.getService(DatabaseService.class, true).backWritable(session.getContextId(), con);
+                        } catch (final ServiceException e) {
+                            try {
+                                con.close();
+                            } catch (final Exception ignore) {
+                                // Ignore
+                            }
+                            throw new MailException(e);
+                        }
                     }
                     /*
-                     * Check for modifications
+                     * Remember default folders
                      */
-                    if (modified.get()) {
-                        ListLsubCache.clearCache(accountId, session);
-                    }
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
-                            System.currentTimeMillis() - start).append("msec").toString());
-                    }
                     setDefaultFoldersChecked(key, true, mailSessionCache);
                 } catch (final MessagingException e) {
                     throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -400,22 +461,102 @@ public final class IMAPDefaultFolderChecker {
         }
     }
 
-    private Callable<Object> submittableTaskFor(final int index, final String prefix, final String fullName, final String name, final char sep, final int type, final int subscribe, final AtomicBoolean modified, final MailSessionCache cache) {
-        return new AbstractCallable(imapConfig, session) {
-
-            public Object call() throws MailException {
-                try {
-                    if (null == fullName || 0 == fullName.length()) {
-                        setDefaultMailFolder(index, checkDefaultFolder(index, prefix, name, sep, type, subscribe, false, modified), cache);
-                    } else {
-                        setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, modified), cache);
-                    }
-                    return null;
-                } catch (final MessagingException e) {
-                    throw MIMEMailException.handleMessagingException(e, config, sess);
+    private void sequentiallyCheckFolders(final String prefix, final char sep, final int type, final MailAccountStorageService storageService, final MailSessionCache mailSessionCache, final Connection con) throws MailException {
+        /*
+         * Load mail account
+         */
+        final boolean isSpamOptionEnabled;
+        MailAccount mailAccount = null;
+        try {
+            final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
+            for (final MailAccount acc : accounts) {
+                if (acc.getId() == accountId) {
+                    mailAccount = acc;
+                    break;
                 }
             }
-        };
+            final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+            isSpamOptionEnabled = usm.isSpamOptionEnabled();
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
+        /*
+         * Get default folders names and full names
+         */
+        final DefaultFolderNamesProvider defaultFolderNamesProvider =
+            new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
+        final String[] defaultFolderFullnames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, isSpamOptionEnabled);
+        final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, isSpamOptionEnabled);
+        final SpamHandler spamHandler;
+        {
+            spamHandler =
+                isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
+        }
+        /*
+         * Sequentially check folders
+         */
+        final AtomicBoolean modified = new AtomicBoolean(false);
+        final long start = DEBUG ? System.currentTimeMillis() : 0L;
+        for (int i = 0; i < defaultFolderNames.length; i++) {
+            final String fullname = defaultFolderFullnames[i];
+            final int index = i;
+            if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
+                if (spamHandler.isCreateConfirmedHam()) {
+                    performTaskFor(
+                        index,
+                        prefix,
+                        fullname,
+                        defaultFolderNames[index],
+                        sep,
+                        type,
+                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                        modified,
+                        mailSessionCache);
+                } else if (DEBUG) {
+                    LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
+                }
+            } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
+                if (spamHandler.isCreateConfirmedSpam()) {
+                    performTaskFor(
+                        index,
+                        prefix,
+                        fullname,
+                        defaultFolderNames[index],
+                        sep,
+                        type,
+                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
+                        modified,
+                        mailSessionCache);
+                } else if (DEBUG) {
+                    LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
+                }
+            } else {
+                performTaskFor(index, prefix, fullname, defaultFolderNames[index], sep, type, 1, modified, mailSessionCache);
+            }
+        } // End of for loop
+        if (DEBUG) {
+            LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
+                System.currentTimeMillis() - start).append("msec").toString());
+        }
+        /*
+         * Check for modifications
+         */
+        if (modified.get()) {
+            ListLsubCache.clearCache(accountId, session);
+        }
+    }
+
+    private Callable<Object> performTaskFor(final int index, final String prefix, final String fullName, final String name, final char sep, final int type, final int subscribe, final AtomicBoolean modified, final MailSessionCache cache) throws MailException {
+        try {
+            if (null == fullName || 0 == fullName.length()) {
+                setDefaultMailFolder(index, checkDefaultFolder(index, prefix, name, sep, type, subscribe, false, modified), cache);
+            } else {
+                setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, modified), cache);
+            }
+            return null;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
     }
 
     private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final ListLsubEntry inboxListEntry, final MailSessionCache mailSessionCache) throws MessagingException, IMAPException {
@@ -436,7 +577,7 @@ public final class IMAPDefaultFolderChecker {
              * NAMESPACE command failed for any reason
              */
             namespaces = null;
-        }        
+        }
         /*
          * Check namespaces
          */
@@ -551,7 +692,12 @@ public final class IMAPDefaultFolderChecker {
         final long st = System.currentTimeMillis();
         final String fullName = prefix.length() == 0 ? name : tmp.append(prefix).append(name).toString();
         {
-            final ListLsubEntry entry = modified.get() ? ListLsubCache.getActualLISTEntry(fullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
+            final ListLsubEntry entry =
+                modified.get() ? ListLsubCache.getActualLISTEntry(fullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(
+                    fullName,
+                    accountId,
+                    imapStore,
+                    session);
             if (null != entry && entry.exists()) {
                 if (checkSubscribed) {
                     final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
@@ -603,12 +749,14 @@ public final class IMAPDefaultFolderChecker {
                     modified.set(true);
                     return fullName;
                 } catch (final MessagingException e) {
-                    LOG.warn(
-                        new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullName).append(
-                            "\" failed.").toString(),
-                        e);
                     ListLsubCache.clearCache(accountId, session);
                     modified.set(true);
+                    if (fullName.indexOf(sep) < 0) {
+                        /*
+                         * Creation at root level failed...
+                         */
+                        throw new RetryWithINBOXPrefixException(e.getMessage(), e);
+                    }
                 }
             } else {
                 /*
@@ -646,12 +794,9 @@ public final class IMAPDefaultFolderChecker {
                         IMAPCommandsCollection.createFolder(f, sep, type);
                         modified.set(true);
                     } catch (final MessagingException e) {
-                        LOG.warn(
-                            new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullName).append(
-                                "\" failed.").toString(),
-                            e);
                         ListLsubCache.clearCache(accountId, session);
                         modified.set(true);
+                        throw new RetryOtherPrefixException(prefix.length() == 0 ? "INBOX" + sep : "", e.getMessage(), e);
                     }
                 } else {
                     if (MailAccount.DEFAULT_ID == accountId) {
@@ -790,17 +935,36 @@ public final class IMAPDefaultFolderChecker {
         mailSessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), Character.valueOf(separator));
     }
 
-    private static abstract class AbstractCallable implements Callable<Object> {
+    private static final class RetryWithINBOXPrefixException extends RuntimeException {
 
-        protected final IMAPConfig config;
+        private static final long serialVersionUID = -8838371974082572543L;
 
-        protected final Session sess;
-
-        protected AbstractCallable(final IMAPConfig config, final Session sess) {
-            super();
-            this.config = config;
-            this.sess = sess;
+        /**
+         * Initializes a new {@link RetryWithINBOXPrefixException}.
+         * 
+         * @param message
+         * @param cause
+         */
+        public RetryWithINBOXPrefixException(final String message, final Throwable cause) {
+            super(message, cause);
         }
-    } // End of AbstractCallable
+
+    }
+
+    private static final class RetryOtherPrefixException extends RuntimeException {
+
+        private static final long serialVersionUID = 544473465523324664L;
+
+        private final String prefix;
+
+        public RetryOtherPrefixException(final String prefix, final String message, final Throwable cause) {
+            super(message, cause);
+            this.prefix = prefix;
+        }
+
+        public String getPrefix() {
+            return prefix;
+        }
+    }
 
 }
