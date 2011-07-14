@@ -209,7 +209,7 @@ final class MovePerformer extends AbstractPerformer {
          * Special handling for mail folders on root level
          */
         boolean flag = true;
-        if (FolderStorage.PRIVATE_ID.equals(folder.getParentID()) && MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
+        if (FolderStorage.PRIVATE_ID.equals(folder.getParentID()) && isMailFolder(folder, realStorage)) {
             /*
              * Perform the move in real storage
              */
@@ -241,7 +241,11 @@ final class MovePerformer extends AbstractPerformer {
                  */
                 final boolean started = realStorage.startTransaction(storageParameters, true);
                 try {
-                    realStorage.updateLastModified(System.currentTimeMillis(), FolderStorage.REAL_TREE_ID, folder.getParentID(), storageParameters);
+                    realStorage.updateLastModified(
+                        System.currentTimeMillis(),
+                        FolderStorage.REAL_TREE_ID,
+                        folder.getParentID(),
+                        storageParameters);
                     if (started) {
                         realStorage.commitTransaction(storageParameters);
                     }
@@ -394,11 +398,16 @@ final class MovePerformer extends AbstractPerformer {
                     /*
                      * Is real folder already located below default folder localtion?
                      */
-                    final String realParentID = realStorage.getFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters).getParentID();
+                    final String realParentID =
+                        realStorage.getFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters).getParentID();
                     if (!defaultParentId.equals(realParentID)) {
                         final Folder clone4Real = (Folder) folder.clone();
                         clone4Real.setParentID(defaultParentId);
-                        clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId, openedStorages));
+                        clone4Real.setName(nonExistingName(
+                            clone4Real.getName(),
+                            FolderStorage.REAL_TREE_ID,
+                            defaultParentId,
+                            openedStorages));
                         realStorage.updateFolder(clone4Real, storageParameters);
                         final String newId = clone4Real.getID();
                         if (null != newId) {
@@ -545,6 +554,14 @@ final class MovePerformer extends AbstractPerformer {
             }
         }
         return nonExistingName;
+    }
+
+    private static boolean isMailFolder(final Folder folder, final FolderStorage realFolderStorage) {
+        if (MailContentType.getInstance().equals(realFolderStorage.getDefaultContentType())) {
+            return true;
+        }
+        final ContentType contentType = folder.getContentType();
+        return (null != contentType && MailContentType.getInstance().toString().equals(contentType.toString()));
     }
 
 }
