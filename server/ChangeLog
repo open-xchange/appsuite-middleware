@@ -65,7 +65,7 @@
 
 * 2011-06-30 - steffen.templin@open-xchange.com
 
- - Bugfix #19670: To see the updater-download-link in the OX GUI the user also needs permissions for USM istead of only for OLOX20.
+ - Bugfix #19670: To see the updater-download-link in the OX GUI the user also needs permissions for USM instead of only for OLOX20.
 
 * 2011-06-30 - thorben.betten@open-xchange.com
 
