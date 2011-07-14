@@ -51,9 +51,12 @@ package com.openexchange.authentication;
 
 /**
  * This data must be available to the application after a user has been authenticated. It is used to assign the according context and user
- * information. If you want to influence the session, the Authenticated instance may also implement @link {@link SessionEnhancement}.
+ * information.
+ * <p>
+ * If you want to influence the session, the {@link Authenticated} instance may also implement {@link SessionEnhancement}.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @see SessionEnhancement
  */
 public interface Authenticated {
 
