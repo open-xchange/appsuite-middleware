@@ -498,6 +498,13 @@ final class ListLsubCollection {
             dropEntryFrom(child, map);
         }
         map.remove(lle.getFullName());
+        /*
+         * Drop from parent's children
+         */
+        final ListLsubEntryImpl p = (ListLsubEntryImpl) lle.getParent();
+        if (null != p) {
+            p.removeChild(lle);
+        }
     }
 
     /**
@@ -1581,6 +1588,21 @@ final class ListLsubCollection {
                     children.add(child);
                 }
             }
+        }
+
+        /**
+         * Removes specified LIST/LSUB entry from this LIST/LSUB entry's children
+         * 
+         * @param child The child LIST/LSUB entry
+         */
+        protected void removeChild(final ListLsubEntryImpl child) {
+            if (null == child) {
+                return;
+            }
+            if (null == children) {
+                return;
+            }
+            children.remove(child);
         }
 
         /**
