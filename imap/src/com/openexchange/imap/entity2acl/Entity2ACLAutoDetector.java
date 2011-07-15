@@ -235,34 +235,36 @@ public final class Entity2ACLAutoDetector {
         }
         synchronized (CACHE) {
             imapServer = CACHE.get(socketAddress);
-            if (null == imapServer) {
-                /*
-                 * Try to determine ACL entities by simple checking for alias "owner"
-                 */
-                final IMAPStore imapStore = imapConfig.optImapStore();
-                if (null == imapStore) {
-                    throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
-                }
-                try {
-                    final IMAPFolder folder = (IMAPFolder) imapStore.getFolder("INBOX");
-                    if (imapConfig.getACLExtension().canGetACL(
-                        RightsCache.getCachedRights(folder, true, imapConfig.getSession(), imapConfig.getAccountId()))) {
-                        final ACL[] acls = folder.getACL();
-                        boolean owner = false;
-                        for (int i = 0; !owner && i < acls.length; i++) {
-                            owner = "owner".equalsIgnoreCase(acls[i].getName());
-                        }
-                        imapServer = owner ? IMAPServer.COURIER : IMAPServer.CYRUS;
-                        CACHE.put(socketAddress, imapServer);
-                        return imapServer;
+            if (null != imapServer) {
+                return imapServer;
+            }
+            /*
+             * Try to determine ACL entities by simple checking for alias "owner"
+             */
+            final IMAPStore imapStore = imapConfig.optImapStore();
+            if (null == imapStore) {
+                throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
+            }
+            try {
+                final IMAPFolder folder = (IMAPFolder) imapStore.getFolder("INBOX");
+                if (imapConfig.getACLExtension().canGetACL(
+                    RightsCache.getCachedRights(folder, true, imapConfig.getSession(), imapConfig.getAccountId()))) {
+                    final ACL[] acls = folder.getACL();
+                    boolean owner = false;
+                    for (int i = 0; !owner && i < acls.length; i++) {
+                        owner = "owner".equalsIgnoreCase(acls[i].getName());
                     }
-                } catch (final MessagingException e) {
-                    CACHE.put(socketAddress, IMAPServer.UNKNOWN);
-                    throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, e, info);
-                } catch (final RuntimeException e) {
-                    CACHE.put(socketAddress, IMAPServer.UNKNOWN);
-                    throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, e, info);
+                    imapServer = owner ? IMAPServer.COURIER : IMAPServer.CYRUS;
+                    CACHE.put(socketAddress, imapServer);
+                    return imapServer;
                 }
+                CACHE.put(socketAddress, IMAPServer.UNKNOWN);
+            } catch (final MessagingException e) {
+                CACHE.put(socketAddress, IMAPServer.UNKNOWN);
+                throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, e, info);
+            } catch (final RuntimeException e) {
+                CACHE.put(socketAddress, IMAPServer.UNKNOWN);
+                throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, e, info);
             }
         }
         /*
