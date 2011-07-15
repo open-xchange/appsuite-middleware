@@ -373,7 +373,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, MailException {
         final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
         //final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false, false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
-        final NewFetchIMAPCommand command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+        final NewFetchIMAPCommand command;
+        if (array instanceof long[]) {
+            command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (long[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+        } else {
+            command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (int[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+        }
         final long start = System.currentTimeMillis();
         final MailMessage[] tmp = command.doCommand();
         final long time = System.currentTimeMillis() - start;

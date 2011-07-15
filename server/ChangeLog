@@ -1,3 +1,7 @@
+* 2011-07-15 - thorben.betten@open-xchange.com
+
+ - Bugfix #19792: Fixed possible IndexOutOfBoundsException when fetching an IMAP folder's messages
+
 * 2011-07-14 - thorben.betten@open-xchange.com
 
  - Bugfix #19766: Reliable check for a folder's content type

@@ -49,7 +49,8 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIntHashMap;
+import gnu.trove.TLongIntHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -71,7 +72,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
-import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -112,61 +112,9 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private static final boolean WARN = LOG.isWarnEnabled();
 
-    private static interface SeqNumFetcher {
+    private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
 
-        public int getNextSeqNum(int messageIndex);
-
-        public int getIndexOf(int value);
-    }
-
-    private static class MsgSeqNumFetcher implements SeqNumFetcher {
-
-        private final SeqNumFetcher delegate;
-
-        public MsgSeqNumFetcher(final Message[] msgs) {
-            /*
-             * Create array from messages' sequence numbers
-             */
-            final int[] arr = new int[msgs.length];
-            for (int i = 0; i < arr.length; i++) {
-                arr[i] = msgs[i].getMessageNumber();
-            }
-            /*
-             * Create delegate
-             */
-            delegate = new IntSeqNumFetcher(arr);
-        }
-
-        public int getNextSeqNum(final int index) {
-            return delegate.getNextSeqNum(index);
-        }
-
-        public int getIndexOf(final int value) {
-            return delegate.getIndexOf(value);
-        }
-    }
-
-    private static class IntSeqNumFetcher implements SeqNumFetcher {
-
-        private final int[] arr;
-
-        public IntSeqNumFetcher(final int[] arr) {
-            this.arr = arr;
-        }
-
-        public int getNextSeqNum(final int index) {
-            return arr[index];
-        }
-
-        public int getIndexOf(final int value) {
-            for (int i = 0; i < arr.length; i++) {
-                if (arr[i] == value) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-    }
+    private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
     private final char separator;
 
@@ -174,71 +122,23 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private final String command;
 
-    private SeqNumFetcher seqNumFetcher;
-
     private boolean uid;
 
-    private int length;
+    private final int length;
 
     private int index;
 
-    private MailMessage[] retval;
+    private final MailMessage[] retval;
 
     private boolean determineAttachmentByHeader;
 
     private final String fullname;
 
-    private TIntHashSet knownSeqNums;
-
     private final Set<FetchItemHandler> lastHandlers;
 
-    // private final int recentCount;
+    private final TLongIntHashMap uid2index;
 
-    /**
-     * Initializes a new {@link NewFetchIMAPCommand}.
-     * 
-     * @param imapFolder - the IMAP folder
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
-     * @param fp - the fetch profile
-     * @param isSequential - whether the source array values are sequential
-     * @param keepOrder - whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
-     *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
-     * @throws MessagingException
-     */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder) throws MessagingException {
-        this(imapFolder, separator, isRev1, arr, fp, isSequential, keepOrder, false);
-    }
-
-    /**
-     * Initializes a new {@link NewFetchIMAPCommand}.
-     * 
-     * @param imapFolder - the IMAP folder
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
-     * @param fp - the fetch profile
-     * @param isSequential - whether the source array values are sequential
-     * @param keepOrder - whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
-     *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
-     * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
-     * @throws MessagingException
-     */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
-        super(imapFolder);
-        final int messageCount = imapFolder.getMessageCount();
-        if (messageCount == 0) {
-            returnDefaultValue = true;
-        }
-        if (loadBody) {
-            throw new MessagingException("Loading body not supported.");
-        }
-        lastHandlers = new HashSet<FetchItemHandler>();
-        this.separator = separator;
-        command = getFetchCommand(isRev1, fp, loadBody);
-        set(arr, isSequential, keepOrder, messageCount);
-        fullname = imapFolder.getFullName();
-        // recentCount = imapFolder.getNewMessageCount();
-    }
+    private final TIntIntHashMap seqNum2index;
 
     /**
      * Initializes a new {@link NewFetchIMAPCommand}.
@@ -246,11 +146,11 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param imapFolder The IMAP folder providing connected protocol
      * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param array The array (either <code>long</code> for UIDs or <code>int</code> for sequence numbers)
+     * @param seqNums The sequence numbers to fetch
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final Object array, final FetchProfile fp) throws MessagingException {
+    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount == 0) {
@@ -259,55 +159,60 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
         command = getFetchCommand(isRev1, fp, false);
-        if (array instanceof int[]) {
-            final int[] seqNums = (int[]) array;
-            knownSeqNums = new TIntHashSet(seqNums);
+        uid = false;
+        length = seqNums.length;
+        seqNum2index = new TIntIntHashMap(length);
+        uid2index = null;
+        for (int i = 0; i < length; i++) {
+            seqNum2index.put(seqNums[i], i);
+        }
+        args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
+        if (0 == length) {
+            returnDefaultValue = true;
+        }
+        fullname = imapFolder.getFullName();
+        retval = new MailMessage[length];
+    }
+
+    /**
+     * Initializes a new {@link NewFetchIMAPCommand}.
+     * 
+     * @param imapFolder The IMAP folder providing connected protocol
+     * @param separator The separator character
+     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
+     * @param uids The UIDs to fetch
+     * @param fp The fetch profile to use
+     * @throws MessagingException If initialization fails
+     */
+    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
+        super(imapFolder);
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
+            returnDefaultValue = true;
+        }
+        this.separator = separator;
+        lastHandlers = new HashSet<FetchItemHandler>();
+        length = uids.length;
+        uid2index = new TLongIntHashMap(length);
+        seqNum2index = null;
+        for (int i = 0; i < length; i++) {
+            uid2index.put(uids[i], i);
+        }
+        if (length == messageCount) {
+            fp.add(UIDFolder.FetchProfileItem.UID);
+            command = getFetchCommand(isRev1, fp, false);
+            args = ARGS_ALL;
             uid = false;
-            length = seqNums.length;
-            seqNumFetcher = new IntSeqNumFetcher(seqNums);
-            args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
-        } else if (array instanceof long[]) {
-            final long[] uids = (long[]) array;
-            final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, uids);
-            seqNumFetcher = new IntSeqNumFetcher(seqNums);
-            knownSeqNums = new TIntHashSet(seqNums);
-            length = uids.length;
-            if (length == messageCount) {
-                args = ARGS_ALL;
-                uid = false;
-            } else {
-                args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
-                uid = true;
-            }
         } else {
-            throw new MessagingException("Illegal array argument: " + array.getClass().getSimpleName());
+            command = getFetchCommand(isRev1, fp, false);
+            args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
+            uid = true;
         }
         if (0 == length) {
             returnDefaultValue = true;
         }
         fullname = imapFolder.getFullName();
         retval = new MailMessage[length];
-        // recentCount = imapFolder.getNewMessageCount();
-    }
-
-    /**
-     * Apply a new numeric argument to this IMAP <i>FETCH</i> command
-     * 
-     * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
-     * @param isSequential whether the source array values are sequential
-     * @param keepOrder whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
-     *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
-     * @param messageCount The total message
-     * @throws MessagingException
-     */
-    public void set(final Object arr, final boolean isSequential, final boolean keepOrder, final int messageCount) throws MessagingException {
-        if (null == arr) {
-            returnDefaultValue = true;
-        } else {
-            createArgs(arr, isSequential, keepOrder, messageCount);
-        }
-        retval = new MailMessage[length];
-        index = 0;
     }
 
     /**
@@ -322,157 +227,6 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     public NewFetchIMAPCommand setDetermineAttachmentByHeader(final boolean determineAttachmentByHeader) {
         this.determineAttachmentByHeader = determineAttachmentByHeader;
         return this;
-    }
-
-    private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
-
-    private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
-
-    private void createArgs(final Object arr, final boolean isSequential, final boolean keepOrder, final int messageCount) throws MessagingException {
-        if (arr instanceof int[]) {
-            final int[] seqNums = (int[]) arr;
-            uid = false;
-            length = seqNums.length;
-            if (0 == length) {
-                returnDefaultValue = true;
-            } else {
-                if (keepOrder) {
-                    seqNumFetcher = new IntSeqNumFetcher(seqNums);
-                    knownSeqNums = new TIntHashSet(seqNums);
-                    args =
-                        (isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
-                            seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
-                            seqNums,
-                            keepOrder,
-                            LENGTH + command.length()));
-                } else {
-                    args =
-                        length == messageCount ? ARGS_ALL : (isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(
-                            ':').append(seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
-                            seqNums,
-                            keepOrder,
-                            LENGTH + command.length()));
-                    seqNumFetcher = null;
-                }
-            }
-        } else if (arr instanceof long[]) {
-            if (keepOrder) {
-                /*
-                 * Turn UIDs to corresponding sequence number to initialize seqNumFetcher which keeps track or proper order
-                 */
-                final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, (long[]) arr);
-                uid = false;
-                length = seqNums.length;
-                if (0 == length) {
-                    returnDefaultValue = true;
-                } else {
-                    args =
-                        isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
-                            seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
-                            seqNums,
-                            true,
-                            LENGTH + command.length());
-                    seqNumFetcher = new IntSeqNumFetcher(seqNums);
-                    knownSeqNums = new TIntHashSet(seqNums);
-                }
-            } else {
-                final long[] uids = (long[]) arr;
-                uid = true;
-                length = uids.length;
-                if (0 == length) {
-                    returnDefaultValue = true;
-                } else {
-                    if (length == messageCount) {
-                        args = ARGS_ALL;
-                        uid = false;
-                    } else {
-                        args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(
-                            uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
-                            uids,
-                            false,
-                            LENGTH_WITH_UID + command.length());
-                    }
-                    seqNumFetcher = null;
-                }
-            }
-        } else if (arr instanceof Message[]) {
-            final Message[] msgs = (Message[]) arr;
-            uid = false;
-            length = msgs.length;
-            if (0 == length) {
-                returnDefaultValue = true;
-            } else {
-                if (keepOrder) {
-                    seqNumFetcher = new MsgSeqNumFetcher(msgs);
-                    args =
-                        isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
-                            msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
-                            msgs,
-                            keepOrder,
-                            LENGTH + command.length());
-                } else {
-                    args =
-                        length == messageCount ? ARGS_ALL : (isSequential ? new String[] { new StringBuilder(64).append(
-                            msgs[0].getMessageNumber()).append(':').append(msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
-                            msgs,
-                            keepOrder,
-                            LENGTH + command.length()));
-                    seqNumFetcher = null;
-                }
-            }
-        } else {
-            throw new MessagingException(new StringBuilder("Invalid array type! ").append(arr.getClass().getName()).toString());
-        }
-    }
-
-    /**
-     * Constructor to fetch all messages of given folder
-     * <p>
-     * <b>Note</b>: Ensure that denoted folder is not empty through {@link IMAPFolder#getMessageCount()}.
-     * 
-     * @param imapFolder - the IMAP folder
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param fp - the fetch profile
-     * @param fetchLen - the total message count
-     * @throws MessagingException If a messaging error occurs
-     */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final FetchProfile fp, final int fetchLen) throws MessagingException {
-        this(imapFolder, separator, isRev1, fp, fetchLen, false);
-    }
-
-    /**
-     * Constructor to fetch all messages of given folder
-     * <p>
-     * <b>Note</b>: Ensure that denoted folder is not empty through {@link IMAPFolder#getMessageCount()}.
-     * 
-     * @param imapFolder - the IMAP folder
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param fp - the fetch profile
-     * @param fetchLen - the total message count
-     * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
-     * @throws MessagingException If a messaging error occurs
-     */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final FetchProfile fp, final int fetchLen, final boolean loadBody) throws MessagingException {
-        super(imapFolder);
-        if (imapFolder.getMessageCount() == 0) {
-            returnDefaultValue = true;
-        }
-        if (loadBody) {
-            throw new MessagingException("Loading body not supported.");
-        }
-        this.separator = separator;
-        if (0 == fetchLen) {
-            returnDefaultValue = true;
-        }
-        lastHandlers = new HashSet<FetchItemHandler>();
-        args = AbstractIMAPCommand.ARGS_ALL;
-        uid = false;
-        length = fetchLen;
-        command = getFetchCommand(isRev1, fp, loadBody);
-        retval = new MailMessage[length];
-        index = 0;
-        fullname = imapFolder.getFullName();
-        // recentCount = imapFolder.getNewMessageCount();
     }
 
     @Override
@@ -528,39 +282,20 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     @Override
     protected MailMessage[] getReturnVal() throws MessagingException {
-        if (seqNumFetcher != null && knownSeqNums != null && !knownSeqNums.isEmpty()) {
-            for (final int seqNum : knownSeqNums.toArray()) {
-                /*
-                 * Look-up position
-                 */
-                final int pos = seqNumFetcher.getIndexOf(seqNum);
+        if (null != seqNum2index) {
+            for (final int seqNum : seqNum2index.keys()) {
+                final int pos = seqNum2index.get(seqNum);
                 if (pos > 0) {
-                    try {
-                        final Message message = imapFolder.getMessage(seqNum);
-                        final IDMailMessage mail = new IDMailMessage(null, fullname);
-                        for (final FetchItemHandler fetchItemHandler : lastHandlers.isEmpty() ? MAP.values() : lastHandlers) {
-                            fetchItemHandler.handleMessage(message, mail, LOG);
-                        }
-                        retval[pos] = mail;
-                    } catch (final MessagingException e) {
-                        if (WARN) {
-                            final MailException imapExc = MIMEMailException.handleMessagingException(e);
-                            LOG.warn(
-                                new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(
-                                    imapExc.getMessage()).toString(),
-                                imapExc);
-                        }
-                    } catch (final MailException e) {
-                        if (WARN) {
-                            LOG.warn(
-                                new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
-                                e);
-                        }
-                    }
+                    retval[pos] = handleMessage(seqNum);
                 }
-
             }
-
+        } else if (null != uid2index) {
+            for (final long uid : uid2index.keys()) {
+                final int pos = uid2index.get(uid);
+                if (pos > 0) {
+                    retval[pos] = handleMessage(uid);
+                }
+            }
         } else if (index < length) {
             String server = imapFolder.getStore().toString();
             int pos = server.indexOf('@');
@@ -576,6 +311,42 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         return retval;
     }
 
+    private IDMailMessage handleMessage(final int seqNum) {
+        try {
+            return handleMessage(imapFolder.getMessage(seqNum));
+        } catch (final Exception e) {
+            LOG.warn(new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(), e);
+            return null;
+        }
+    }
+
+    private IDMailMessage handleMessage(final long uid) {
+        try {
+            return handleMessage(imapFolder.getMessageByUID(uid));
+        } catch (final Exception e) {
+            LOG.warn(new StringBuilder(128).append("Message uid=").append(uid).append(" discarded: ").append(e.getMessage()).toString(), e);
+            return null;
+        }
+    }
+
+    private IDMailMessage handleMessage(final Message message) {
+        try {
+            final IDMailMessage mail = new IDMailMessage(null, fullname);
+            for (final FetchItemHandler fetchItemHandler : lastHandlers.isEmpty() ? MAP.values() : lastHandlers) {
+                fetchItemHandler.handleMessage(message, mail, LOG);
+            }
+            return mail;
+        } catch (final Exception e) {
+            if (WARN) {
+                LOG.warn(
+                    new StringBuilder(128).append("Message #").append(message.getMessageNumber()).append(" discarded: ").append(
+                        e.getMessage()).toString(),
+                    e);
+            }
+            return null;
+        }
+    }
+
     @Override
     protected boolean handleResponse(final Response currentReponse) throws MessagingException {
         /*
@@ -585,38 +356,27 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             return false;
         }
         final FetchResponse fetchResponse = (FetchResponse) currentReponse;
-        int seqnum;
+        final int seqNum = fetchResponse.getNumber();
         final int pos;
-        final int currentSeqNum = fetchResponse.getNumber();
-        if (null != knownSeqNums) {
-            knownSeqNums.remove(currentSeqNum);
-        }
-        if (null == seqNumFetcher) {
-            seqnum = currentSeqNum;
-            pos = index;
-        } else {
-            seqnum = seqNumFetcher.getNextSeqNum(index);
-            if (seqnum == currentSeqNum) {
-                pos = index;
+        if (null == seqNum2index) {
+            final UID uidItem = getItemOf(UID.class, fetchResponse);
+            if (null != uidItem && uid2index.containsKey(uidItem.uid)) {
+                pos = uid2index.remove(uidItem.uid);
             } else {
-                /*
-                 * Assign to current response's sequence number
-                 */
-                seqnum = currentSeqNum;
-                /*
-                 * Look-up position
-                 */
-                pos = seqNumFetcher.getIndexOf(seqnum);
-                if (pos == -1) {
-                    throw new MessagingException("Unexpected sequence number in untagged FETCH response: " + seqnum);
-                }
+                pos = index;
+            }
+        } else {
+            if (seqNum2index.containsKey(seqNum)) {
+                pos = seqNum2index.remove(seqNum);
+            } else {
+                pos = index;
             }
         }
         index++;
         final IDMailMessage mail = new IDMailMessage(null, fullname);
         // mail.setRecentCount(recentCount);
         mail.setSeparator(separator);
-        mail.setSeqnum(seqnum);
+        mail.setSeqnum(seqNum);
         boolean error = false;
         try {
             final int itemCount = fetchResponse.getItemCount();
@@ -1364,6 +1124,26 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             return newFetchProfile;
         }
         return fetchProfile;
+    }
+
+    /**
+     * Gets the item associated with given class in specified <i>FETCH</i> response.
+     * 
+     * @param <I> The returned item's class
+     * @param clazz The item class to look for
+     * @param fetchResponse The <i>FETCH</i> response
+     * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
+     * @see #getItemOf(Class, FetchResponse, String)
+     */
+    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+        final int len = fetchResponse.getItemCount();
+        for (int i = 0; i < len; i++) {
+            final Item item = fetchResponse.getItem(i);
+            if (clazz.isInstance(item)) {
+                return clazz.cast(item);
+            }
+        }
+        return null;
     }
 
 }
