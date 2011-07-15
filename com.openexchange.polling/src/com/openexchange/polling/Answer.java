@@ -68,11 +68,4 @@ public class Answer {
     public void setAnswers(List<Integer> answers) {
         this.answers = Collections.unmodifiableList(answers);
     }
-    
-    public void newMethod() {
-    	
-    }
-    
-
-    
 }
