@@ -259,6 +259,7 @@ public final class Entity2ACLAutoDetector {
                     return imapServer;
                 }
                 CACHE.put(socketAddress, IMAPServer.UNKNOWN);
+                throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
             } catch (final MessagingException e) {
                 CACHE.put(socketAddress, IMAPServer.UNKNOWN);
                 throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, e, info);
@@ -267,10 +268,6 @@ public final class Entity2ACLAutoDetector {
                 throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, e, info);
             }
         }
-        /*
-         * What else?!
-         */
-        throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
     }
 
 }
