@@ -255,9 +255,9 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 
                 public void handleEvent(final Event event) {
                     final String topic = event.getTopic();
-                    if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                    if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                         handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
-                    } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                    } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
                         @SuppressWarnings("unchecked")
                         final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                         for (final Session session : map.values()) {
