@@ -18,7 +18,7 @@ public class Snippets {
 	}
 	
 	public void a1() {
-		
+		int a = 13;
 	}
 	
 	
