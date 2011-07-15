@@ -18,7 +18,11 @@ public class Snippets {
 	}
 	
 	public void a1() {
+<<<<<<< HEAD
+		int a = 13;
+=======
 		int a = 12;
+>>>>>>> refs/heads/us1
 	}
 	
 	
