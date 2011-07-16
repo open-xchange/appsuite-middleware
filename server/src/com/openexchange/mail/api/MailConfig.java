@@ -554,7 +554,6 @@ public abstract class MailConfig {
             mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
         }
         // Assign password
-        final String sessionPassword = session.getPassword();
         if (mailAccount.isDefaultAccount()) {
             final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
             if (PasswordSource.GLOBAL.equals(cur)) {
@@ -564,7 +563,7 @@ public abstract class MailConfig {
                 }
                 mailConfig.password = masterPw;
             } else {
-                mailConfig.password = sessionPassword;
+                mailConfig.password = session.getPassword();
             }
         } else {
             final String mailAccountPassword = mailAccount.getPassword();
