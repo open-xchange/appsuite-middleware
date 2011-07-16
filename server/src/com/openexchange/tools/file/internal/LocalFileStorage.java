@@ -649,7 +649,7 @@ public class LocalFileStorage implements FileStorage {
         final long lastModified = lock.lastModified();
         if (lastModified > 0 && lastModified + maxLifeTime < System.currentTimeMillis()) {
             unlock();
-            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed by a crashed/restartet application.");
+            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed by a crashed/restarted application.");
         }
         final long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
