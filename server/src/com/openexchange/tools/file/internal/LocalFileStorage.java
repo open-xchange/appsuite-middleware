@@ -135,7 +135,7 @@ public class LocalFileStorage implements FileStorage {
     protected static final Set<String> SPECIAL_FILENAMES;
 
     static {
-        Set<String> tmp = new HashSet<String>();
+        final Set<String> tmp = new HashSet<String>();
         tmp.add(LOCK_FILENAME);
         tmp.add(STATEFILENAME);
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
@@ -288,7 +288,7 @@ public class LocalFileStorage implements FileStorage {
         }
 
         // Forms the Output String
-        StringBuilder retval = new StringBuilder();
+        final StringBuilder retval = new StringBuilder();
         for (int j = 0; j < vals.length; j++) {
             retval.append("/");
             retval.append(vals[j]);
@@ -420,7 +420,7 @@ public class LocalFileStorage implements FileStorage {
     }
 
     public long getFileSize(final String name) throws FileStorageException {
-        File dataFile = new File(storage, name);
+        final File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
             throw new FileStorageException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
         }
@@ -486,6 +486,10 @@ public class LocalFileStorage implements FileStorage {
      * @throws FileStorageException if removing fails.
      */
     public void remove() throws FileStorageException {
+        // Already initialized?
+        if (!alreadyInitialized || !storage.exists()) {
+            return;
+        }
         lock(LOCK_TIMEOUT);
         eliminate();
         // no unlock here because everything is removed.
@@ -727,7 +731,7 @@ public class LocalFileStorage implements FileStorage {
      * @throws FileStorageException
      */
     protected InputStream load(final String name) throws FileStorageException {
-        File dataFile = new File(storage, name);
+        final File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
             throw new FileStorageException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
         }
@@ -824,11 +828,11 @@ public class LocalFileStorage implements FileStorage {
         return state;
     }
 
-    private boolean mkdirs(File directory) {
+    private boolean mkdirs(final File directory) {
         if (directory.exists()) {
             return true;
         }
-        File parent = directory.getParentFile();
+        final File parent = directory.getParentFile();
         if (!mkdirs(parent)) {
             return false;
         }
@@ -836,8 +840,9 @@ public class LocalFileStorage implements FileStorage {
     }
     
     private void initialize() throws FileStorageException{
-    	if(alreadyInitialized)
-    		return;
+    	if(alreadyInitialized) {
+            return;
+        }
     	
         try {
             LOCK.lock();
