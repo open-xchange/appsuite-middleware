@@ -58,7 +58,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
@@ -71,10 +70,8 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -246,7 +243,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 }
             } else {
                 final URI uri = attendee.getCalAddress();
-                if("mailto".equalsIgnoreCase(uri.getScheme())) {
+                if(null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
                     final String mail = uri.getSchemeSpecificPart();
                     final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
                     mails.put(mail, icalP);
@@ -268,7 +265,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             ICalParticipant icalP = null;
             for (final String alias: user.getAliases()) {
             	String toRemove = null;
-            	for(String mail: mails.keySet()){
+            	for(final String mail: mails.keySet()){
             		if(mail.equalsIgnoreCase(alias)){
             			icalP = mails.get(mail);
             			toRemove = mail;
@@ -280,12 +277,15 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     break;
                 }
             }
-            if (icalP == null)
+            if (icalP == null) {
                 LOG.warn("Should not be possible to find a user ("+user.getMail()+") by their alias and then be unable to remove that alias  from list");
-            if (icalP.message != null)
+            }
+            if (icalP.message != null) {
                 up.setConfirmMessage(icalP.message);
-            if (icalP.status != -1)
+            }
+            if (icalP.status != -1) {
                 up.setConfirm(icalP.status);
+            }
             
             cObj.addParticipant(up);
         }
@@ -297,13 +297,16 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
             final ICalParticipant icalP = mails.get(mail);
             
-            if (icalP.message != null)
+            if (icalP.message != null) {
                 external.setMessage(icalP.message);
-            if (icalP.status != -1)
+            }
+            if (icalP.status != -1) {
                 external.setConfirm(icalP.status);
+            }
             
-            if (comment != null)
+            if (comment != null) {
                 external.setMessage(comment);
+            }
             
             cObj.addParticipant(external);
             confirmableParticipants.add(external);
