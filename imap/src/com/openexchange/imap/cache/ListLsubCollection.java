@@ -240,9 +240,9 @@ final class ListLsubCollection {
     private static void removeFrom(final String fullName, final ConcurrentMap<String, ListLsubEntryImpl> map) {
         final ListLsubEntryImpl entry = map.remove(fullName);
         if (null != entry) {
-            final ListLsubEntry parent = entry.getParent();
+            final ListLsubEntryImpl parent = entry.getParentImpl();
             if (null != parent) {
-                ((ListLsubEntryImpl) parent).removeChild(entry);
+                parent.removeChild(entry);
             }
             for (final ListLsubEntry child : entry.getChildrenSet()) {
                 removeFrom(child.getFullName(), map);
@@ -509,7 +509,7 @@ final class ListLsubCollection {
         /*
          * Drop from parent's children
          */
-        final ListLsubEntryImpl p = (ListLsubEntryImpl) lle.getParent();
+        final ListLsubEntryImpl p = lle.getParentImpl();
         if (null != p) {
             p.removeChild(lle);
         }
@@ -1088,7 +1088,7 @@ final class ListLsubCollection {
                                 child.setParent(listLsubEntry);
                                 listLsubEntry.addChild(child);
                             }
-                            parent = (ListLsubEntryImpl) oldEntry.getParent();
+                            parent = oldEntry.getParentImpl();
                         } else {
                             final int pos = fullName.lastIndexOf(listLsubEntry.getSeparator());
                             if (pos > 0) {
@@ -1470,7 +1470,7 @@ final class ListLsubCollection {
      */
     private static final class ListLsubEntryImpl implements ListLsubEntry, Comparable<ListLsubEntryImpl> {
 
-        private ListLsubEntry parent;
+        private ListLsubEntryImpl parent;
 
         private Set<ListLsubEntryImpl> children;
 
@@ -1567,11 +1567,20 @@ final class ListLsubCollection {
          * 
          * @param parent The parent
          */
-        protected void setParent(final ListLsubEntry parent) {
+        protected void setParent(final ListLsubEntryImpl parent) {
             this.parent = parent;
         }
 
         public ListLsubEntry getParent() {
+            return parent;
+        }
+
+        /**
+         * Gets the parent.
+         * 
+         * @return The parent
+         */
+        protected ListLsubEntryImpl getParentImpl() {
             return parent;
         }
 
