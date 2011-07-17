@@ -553,7 +553,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 final List<MailFolder> list =
                     new ArrayList<MailFolder>(subfolders.size() + (additionalFullNames.isEmpty() ? 0 : additionalFullNames.size()));
                 for (final ListLsubEntry subfolder : subfolders) {
-                    list.add(FolderCache.getCachedFolder(subfolder.getFullName(), this));
+                    final String subfolderFullName = subfolder.getFullName();
+                    try {
+                        list.add(FolderCache.getCachedFolder(subfolderFullName, this));
+                    } catch (final MailException e) {
+                        if (MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() != e.getDetailNumber()) {
+                            throw e;
+                        }
+                        /*
+                         * Obviously folder does (no more) exist
+                         */
+                        FolderCache.removeCachedFolder(subfolderFullName, session, accountId);
+                        ListLsubCache.removeCachedEntry(subfolderFullName, accountId, session);
+                        RightsCache.removeCachedRights(subfolderFullName, session, accountId);
+                        UserFlagsCache.removeUserFlags(subfolderFullName, session, accountId);
+                    }
                 }
                 if (!additionalFullNames.isEmpty()) {
                     for (final String fn : additionalFullNames) {

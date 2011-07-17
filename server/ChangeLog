@@ -1,3 +1,7 @@
+* 2011-07-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #19821: Properly handling a disappeared mail folder on root level
+
 * 2011-07-16 - thorben.betten@open-xchange.com
 
  - Bugfix #19726: Checking for existence of storage directory prior attempting to delete it

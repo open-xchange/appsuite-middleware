@@ -120,6 +120,17 @@ public final class UserFlagsCache {
         SessionMailCache.getInstance(session, accountId).remove(new UserFlagCacheEntry(f.getFullName()));
     }
 
+    /**
+     * Removes cached information if given IMAP folder supports user flags
+     * 
+     * @param fullName The IMAP folder full name
+     * @param session The session providing the session-bound cache
+     * @param accountId The account ID
+     */
+    public static void removeUserFlags(final String fullName, final Session session, final int accountId) {
+        SessionMailCache.getInstance(session, accountId).remove(new UserFlagCacheEntry(fullName));
+    }
+
     private static final class UserFlagCacheEntry implements SessionMailCacheEntry<Boolean> {
 
         private final String fullname;

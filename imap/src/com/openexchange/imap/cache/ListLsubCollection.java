@@ -227,17 +227,25 @@ final class ListLsubCollection {
      * @param fullName The full name
      */
     public void remove(final String fullName) {
-        ListLsubEntryImpl entry = listMap.remove(fullName);
-        if (null == entry) {
-            return;
-        }
-        for (final ListLsubEntry child : entry.getChildrenSet()) {
-            remove(child.getFullName());
-        }
-        entry = lsubMap.remove(fullName);
+        /*
+         * Cleanse from LIST map
+         */
+        removeFrom(fullName, listMap);
+        /*
+         * Cleanse from LSUB map, too
+         */
+        removeFrom(fullName, lsubMap);
+    }
+
+    private static void removeFrom(final String fullName, final ConcurrentMap<String, ListLsubEntryImpl> map) {
+        final ListLsubEntryImpl entry = map.remove(fullName);
         if (null != entry) {
+            final ListLsubEntry parent = entry.getParent();
+            if (null != parent) {
+                ((ListLsubEntryImpl) parent).removeChild(entry);
+            }
             for (final ListLsubEntry child : entry.getChildrenSet()) {
-                remove(child.getFullName());
+                removeFrom(child.getFullName(), map);
             }
         }
     }
