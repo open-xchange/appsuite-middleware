@@ -47,28 +47,42 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.carddav.mixins;
 
-import com.openexchange.caldav.CaldavProtocol;
+import java.util.List;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
+ * {@link CTag}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CalendarHomeSet extends SingleXMLPropertyMixin {
+public class CTag extends SingleXMLPropertyMixin {
 
-    private static final String PROPERTY_NAME = "calendar-home-set";
-    
-    public CalendarHomeSet() {
-        super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
+    private String value;
+
+    public CTag(List<Contact> contacts, int folderId) {
+        super("http://calendarserver.org/ns/", "getctag");
+        
+        Contact youngest = null;
+        for (Contact contact : contacts) {
+            if (youngest == null || youngest.getLastModified().before(contact.getLastModified())) {
+                youngest = contact;
+            }
+        }
+        if (youngest != null) {
+            value = "http://www.open-xchange.com/carddav/ctag/"+folderId+"_"+youngest.getLastModified().getTime();
+        } else {
+            value = "http://www.open-xchange.com/carddav/ctag/"+folderId;
+            
+        }
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/caldav/</D:href>";
+        return value;
     }
 
 }

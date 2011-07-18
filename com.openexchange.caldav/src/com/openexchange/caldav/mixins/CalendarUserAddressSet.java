@@ -78,7 +78,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
             addresses.append("<D:href>mailto:").append(alias).append("</D:href>");
         }
         
-        addresses.append("<D:href>/servlet/home/"+sessionHolder.getUser().getLoginInfo()+"</D:href>");
+        addresses.append("<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"</D:href>");
         
         return addresses.toString();
     }

@@ -49,6 +49,11 @@
 
 package com.openexchange.carddav;
 
+import java.util.Arrays;
+import java.util.List;
+import org.jdom.Namespace;
+import com.openexchange.carddav.reports.AddressbookMultigetReport;
+import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.Protocol;
 
 
@@ -58,5 +63,26 @@ import com.openexchange.webdav.protocol.Protocol;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CarddavProtocol extends Protocol {
+    public static final Namespace CARD_NS = Namespace.getNamespace("CARD", "urn:ietf:params:xml:ns:carddav");
+
+    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CARD_NS);
+
+    public static final String CARD_NAMESPACE = "CARD:";
+
+    public static final String ADDRESSBOOK = "<CARD:addressbook />";
+    
+    @Override
+    public List<Namespace> getAdditionalNamespaces() {
+        return ADDITIONAL_NAMESPACES;
+    }
+    
+    @Override
+    public WebdavAction getReportAction(String ns, String name) {
+        if (ns.equals(AddressbookMultigetReport.NAMESPACE) && name.equals(AddressbookMultigetReport.NAME)) {
+            return new AddressbookMultigetReport(this);
+        }
+        return null;
+    }
+
 
 }

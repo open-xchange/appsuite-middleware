@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.webdav.acl.servlets;
+package com.openexchange.webdav.directory.servlets;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,11 +62,11 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
-import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer.Action;
+import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.webdav.directory.servlets.WebdavDirectoryPerformer.Action;
 
 
 /**
@@ -74,8 +74,8 @@ import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer.Action;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class WebdavPrincipalServlet extends OXServlet {
-    private static final transient Log LOG = LogFactory.getLog(WebdavPrincipalServlet.class);
+public class WebdavDirectoryServlet extends OXServlet {
+    private static final transient Log LOG = LogFactory.getLog(WebdavDirectoryServlet.class);
 
     @Override
     protected Interface getInterface() {
@@ -156,7 +156,7 @@ public class WebdavPrincipalServlet extends OXServlet {
             return;
         }
         try {
-                WebdavPrincipalPerformer.getInstance().doIt(req, resp, action, session);
+                WebdavDirectoryPerformer.getInstance().doIt(req, resp, action, session);
         } finally {
             if (mustLogOut(req)) {
                 logout(session, req, resp);

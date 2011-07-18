@@ -66,7 +66,7 @@ public class ScheduleOutboxURL extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>/servlet/dev/null</D:href>";
+        return "<D:href>/dev/null</D:href>";
     }
 
 }

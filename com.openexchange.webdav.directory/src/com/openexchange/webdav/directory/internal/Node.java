@@ -47,28 +47,42 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.webdav.directory.internal;
 
-import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import java.util.ArrayList;
+import java.util.List;
 
-
-/**
- * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class CalendarHomeSet extends SingleXMLPropertyMixin {
-
-    private static final String PROPERTY_NAME = "calendar-home-set";
+public final class Node {
+    private String name = null;
+    private List<Node> children = new ArrayList<Node>();
     
-    public CalendarHomeSet() {
-        super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
+    public Node(String name) {
+        this.name = name;
     }
 
-    @Override
-    protected String getValue() {
-        return "<D:href>/caldav/</D:href>";
+    public Node getChild(String name, boolean create) {
+        if (this.name.equals(name)) {
+            return this;
+        }
+        for (Node child : children) {
+            if (child.name.equals(name)) {
+                return child;
+            }
+        }
+        if (create) {
+            Node node = new Node(name);
+            children.add(node);
+            return node;
+        }
+         
+        return null;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public List<Node> getChildren() {
+        return children;
+    }
 }

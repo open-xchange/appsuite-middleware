@@ -52,9 +52,12 @@ package com.openexchange.carddav;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.carddav.GroupwareCarddavFactory.State;
+import com.openexchange.carddav.mixins.CTag;
+import com.openexchange.carddav.mixins.SupportedReportSet;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -76,11 +79,23 @@ public class CarddavCollection extends AbstractCarddavCollection {
      * @param rootCollection
      * @param folder
      * @param factory
+     * @throws WebdavProtocolException 
      */
-    public CarddavCollection(RootCollection parent, UserizedFolder folder, WebdavPath url, GroupwareCarddavFactory factory) {
+    public CarddavCollection(RootCollection parent, UserizedFolder folder, WebdavPath url, GroupwareCarddavFactory factory) throws WebdavProtocolException {
         super(factory, url);
         this.parent = parent;
         this.folder = folder;
+        
+        try {
+            includeProperties(
+                new CurrentUserPrivilegeSet(folder.getOwnPermission()),
+                new SupportedReportSet(),
+                new CTag(factory.getState().getFolder(getId()), getId())
+            );
+        } catch (ContextException e) {
+            throw internalError(e);
+        }
+
     }
 
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
@@ -92,6 +107,9 @@ public class CarddavCollection extends AbstractCarddavCollection {
             List<WebdavResource> children = new ArrayList<WebdavResource>(contacts.size());
 
             for (Contact contact : contacts) {
+                if (contact.getMarkAsDistribtuionlist()) {
+                    continue;
+                }
                 CarddavResource resource = new CarddavResource(this, contact, factory);
                 children.add(resource);
             }
@@ -102,7 +120,7 @@ public class CarddavCollection extends AbstractCarddavCollection {
         }
     }
 
-    private int getId() {
+    public int getId() {
         return Integer.parseInt(folder.getID());
     }
 
@@ -116,10 +134,23 @@ public class CarddavCollection extends AbstractCarddavCollection {
             // TODO: Robustness
             int id = Integer.parseInt(name.substring(0, name.indexOf('.')));
             Contact contact = state.get(id, getId());
-            return new CarddavResource(this, contact, factory);
+            if (contact != null) {
+                return new CarddavResource(this, contact, factory);
+            }
         } catch (ContextException x) {
             throw internalError(x);
+        } catch (NumberFormatException x) {
+            // Ignore, return a new CarddavResource instead
         }
+        return new CarddavResource(this, factory);
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.webdav.protocol.helpers.AbstractCollection#getResourceType()
+     */
+    @Override
+    public String getResourceType() throws WebdavProtocolException {
+        return super.getResourceType()+CarddavProtocol.ADDRESSBOOK;
     }
 
 }

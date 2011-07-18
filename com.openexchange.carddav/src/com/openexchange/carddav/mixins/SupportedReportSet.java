@@ -47,28 +47,28 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.carddav.mixins;
 
-import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
+ * {@link SupportedReportSet}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CalendarHomeSet extends SingleXMLPropertyMixin {
+public class SupportedReportSet extends SingleXMLPropertyMixin {
 
-    private static final String PROPERTY_NAME = "calendar-home-set";
-    
-    public CalendarHomeSet() {
-        super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
+    private static final String NAME = "supported-report-set";
+
+    public SupportedReportSet() {
+        super(Protocol.DAV_NS.getURI(), NAME);
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/caldav/</D:href>";
+        return "<supported-report><report><addressbook-multiget/></report></supported-report>";
     }
 
 }

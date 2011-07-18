@@ -1,50 +1,34 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: CardDAV
-Bundle-SymbolicName: com.openexchange.carddav
-Bundle-Version: 6.20.0.0
-Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Name: Directory Plug-in
+Bundle-SymbolicName: com.openexchange.webdav.directory
+Bundle-Version: 1.0.0
+Bundle-Activator: com.openexchange.webdav.directory.osgi.DAVDirectoryActivator
+Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.api,
- com.openexchange.api2,
- com.openexchange.authentication,
- com.openexchange.folderstorage,
- com.openexchange.folderstorage.database.contentType,
- com.openexchange.folderstorage.type,
+Import-Package: com.openexchange.authentication,
  com.openexchange.groupware,
- com.openexchange.groupware.contact,
- com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
- com.openexchange.groupware.settings,
  com.openexchange.login,
  com.openexchange.login.internal,
- com.openexchange.preferences,
- com.openexchange.server,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.sessiond.impl,
- com.openexchange.tools.iterator,
  com.openexchange.tools.service,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
- com.openexchange.tools.versit,
- com.openexchange.tools.versit.converter,
  com.openexchange.tools.webdav,
  com.openexchange.webdav,
  com.openexchange.webdav.acl.mixins,
  com.openexchange.webdav.action,
- com.openexchange.webdav.directory,
  com.openexchange.webdav.protocol,
  com.openexchange.webdav.protocol.helpers,
  com.openexchange.webdav.protocol.osgi,
- com.openexchange.webdav.xml.resources,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
- org.jdom,
- org.jdom.output,
  org.osgi.framework;version="1.3.0",
  org.osgi.service.http
+Export-Package: com.openexchange.webdav.directory

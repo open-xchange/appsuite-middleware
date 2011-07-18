@@ -177,10 +177,6 @@ public class CaldavCollection extends AbstractCollection {
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
         State state = factory.getState();
         List<Appointment> appointments = state.getFolder(getId());
-        if (appointments == null) {
-            int a = 12;
-            System.out.println(a);
-        }
         List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
 
         for (Appointment appointment : appointments) {

@@ -50,6 +50,8 @@
 package com.openexchange.carddav.servlet;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,6 +61,7 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.carddav.servlet.CarddavPerformer.Action;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.login.Interface;
+import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -198,5 +201,53 @@ public class CardDAV extends OXServlet {
     @Override
     protected void incrementRequests() {
         // TODO Auto-generated method stub
+    }
+    
+    
+    @Override
+    protected LoginRequest modifyLogin(final LoginRequest loginReq) {
+        return new LoginRequest() {
+
+            public String getAuthId() {
+                return loginReq.getAuthId();
+            }
+
+            public String getClient() {
+                return loginReq.getClient();
+            }
+
+            public String getClientIP() {
+                return loginReq.getClientIP();
+            }
+
+            public String getHash() {
+                return loginReq.getHash();
+            }
+
+            public Map<String, List<String>> getHeaders() {
+                return loginReq.getHeaders();
+            }
+
+            public Interface getInterface() {
+                return loginReq.getInterface();
+            }
+
+            public String getLogin() {
+                return loginReq.getLogin().replaceAll("\\*", "@");
+            }
+
+            public String getPassword() {
+                return loginReq.getPassword();
+            }
+
+            public String getUserAgent() {
+                return loginReq.getUserAgent();
+            }
+
+            public String getVersion() {
+                return loginReq.getVersion();
+            }
+            
+        };
     }
 }

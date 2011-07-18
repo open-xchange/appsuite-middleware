@@ -47,28 +47,65 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.webdav.directory.internal;
 
-import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 
 /**
- * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
+ * {@link DirectoryWebdavFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CalendarHomeSet extends SingleXMLPropertyMixin {
+public class DirectoryWebdavFactory extends AbstractWebdavFactory{
 
-    private static final String PROPERTY_NAME = "calendar-home-set";
+    public static final Protocol PROTOCOL = new Protocol();
     
-    public CalendarHomeSet() {
-        super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
+    private Node ROOT = new Node("");
+
+    private SessionHolder sessionHolder;
+
+    
+
+    public DirectoryWebdavFactory(SessionHolder sessionHolder) {
+        super();
+        this.sessionHolder = sessionHolder;
     }
 
-    @Override
-    protected String getValue() {
-        return "<D:href>/caldav/</D:href>";
+    public Protocol getProtocol() {
+        return PROTOCOL;
+    }
+
+    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
+        Node n = ROOT;
+        for(String component : url) {
+            n = n.getChild(component, false);
+            if (n == null) {
+                throw new WebdavProtocolException(url, 404);
+            }
+        }
+        return mixin(new NodeCollection(n, this, url));
+    }
+
+    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
+        return resolveCollection(url);
+    }
+    
+    public void mkdirs(String...components) {
+        Node n = ROOT;
+        for (String name : components) {
+            n = n.getChild(name, true);
+        }
+    }
+
+    public SessionHolder getSessionHolder() {
+        return this.sessionHolder;
     }
 
 }

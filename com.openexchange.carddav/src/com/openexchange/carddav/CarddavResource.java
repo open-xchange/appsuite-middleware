@@ -60,15 +60,18 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -102,7 +105,9 @@ public class CarddavResource extends AbstractResource {
     private Contact contact;
 
     private OXContainerConverter converter = new OXContainerConverter((TimeZone) null, (String) null);
-    
+
+    private boolean exists;
+
     public static final Log LOG = LogFactory.getLog(CarddavResource.class);
 
     public CarddavResource(CarddavCollection parent, Contact contact, GroupwareCarddavFactory factory) {
@@ -111,7 +116,14 @@ public class CarddavResource extends AbstractResource {
         this.parent = parent;
         this.url = parent.getUrl().dup().append(contact.getObjectID() + ".vcf");
         this.contact = contact;
+        this.exists = true;
+    }
 
+    public CarddavResource(CarddavCollection parent, GroupwareCarddavFactory factory) {
+        super();
+        this.factory = factory;
+        this.parent = parent;
+        this.exists = false;
     }
 
     @Override
@@ -131,6 +143,11 @@ public class CarddavResource extends AbstractResource {
 
     @Override
     protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+        if (namespace.equals(CarddavProtocol.CARD_NS.getURI()) && name.equals("address-data")) {
+            WebdavProperty property = new WebdavProperty(namespace, name);
+            property.setValue(generateVCard());
+            return property;
+        }
         return null;
     }
 
@@ -154,7 +171,7 @@ public class CarddavResource extends AbstractResource {
         // parse vcard
         Writer writer = new StringWriter();
         char[] buffer = new char[1024];
-        
+
         try {
             Reader reader = new BufferedReader(new InputStreamReader(body));
             int n;
@@ -167,20 +184,33 @@ public class CarddavResource extends AbstractResource {
             VersitDefinition.Reader versitReader;
             versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");
             final VersitObject versitObject = def.parse(versitReader);
-            contact = converter.convertContact(versitObject);
+            Contact newContact = converter.convertContact(versitObject);
+            if (exists) {
+                newContact.setParentFolderID(contact.getParentFolderID());
+                newContact.setContextId(contact.getContextId());
+                newContact.setLastModified(contact.getLastModified());
+                newContact.setObjectID(contact.getObjectID());
+            } else {
+                newContact.setParentFolderID(parent.getId());
+                newContact.setContextId(factory.getSession().getContextId());
+            }
+            contact = newContact;
         } catch (final VersitException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
+            throw new WebdavProtocolException(getUrl(), 500);
         } catch (final ConverterException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
+            throw new WebdavProtocolException(getUrl(), 500);
         } catch (final IOException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
+            throw new WebdavProtocolException(getUrl(), 500);
         } finally {
             try {
                 body.close();
             } catch (IOException e) {
                 LOG.error(e);
             }
-        }        
+        }
     }
 
     @Override
@@ -192,6 +222,7 @@ public class CarddavResource extends AbstractResource {
         // save Contact
         try {
             factory.getContactInterface().insertContactObject(contact);
+            this.url = parent.getUrl().dup().append(contact.getObjectID()+".vcf");
         } catch (OXException e) {
             LOG.error(e);
         } catch (ContextException e) {
@@ -215,12 +246,13 @@ public class CarddavResource extends AbstractResource {
     }
 
     public boolean exists() throws WebdavProtocolException {
-        return true;
+        return exists;
     }
 
     public InputStream getBody() throws WebdavProtocolException {
-        // generate VCard File        
-        String outputString = generateVCard(); 
+        // generate VCard File
+        String outputString = generateVCard();
+        
         return new ByteArrayInputStream(outputString.getBytes());
     }
 
@@ -239,7 +271,8 @@ public class CarddavResource extends AbstractResource {
             contactDef.write(versitWriter, versitObject);
             versitWriter.flush();
 
-            String outputString = new String (byteArrayOutputStream.toByteArray(), "UTF-8");
+            String outputString = new String(byteArrayOutputStream.toByteArray(), "UTF-8");
+            outputString = removeXOPENXCHANGEAttributes(outputString);
             return outputString;
         } catch (IOException e) {
             LOG.error(e);
@@ -247,6 +280,11 @@ public class CarddavResource extends AbstractResource {
             LOG.error(e);
         }
         return "";
+    }
+    
+    Pattern customAttributes = Pattern.compile("^X-OPEN-XCHANGE.*?\\r?\\n", Pattern.MULTILINE);
+    private String removeXOPENXCHANGEAttributes(String outputString) {
+        return customAttributes.matcher(outputString).replaceAll("");
     }
 
     public String getContentType() throws WebdavProtocolException {
@@ -262,6 +300,9 @@ public class CarddavResource extends AbstractResource {
     }
 
     public String getETag() throws WebdavProtocolException {
+        if (!exists) {
+            return "";
+        }
         return "http://www.open-xchange.com/carddav/" + contact.getObjectID() + "_" + contact.getLastModified().getTime();
     }
 
@@ -275,8 +316,8 @@ public class CarddavResource extends AbstractResource {
 
     public Long getLength() throws WebdavProtocolException {
         // generate vcard file and count bytes
-        String outputString = generateVCard(); 
-        return new Long (outputString.getBytes().length);
+        String outputString = generateVCard();
+        return new Long(outputString.getBytes().length);
     }
 
     public WebdavLock getLock(String token) throws WebdavProtocolException {
@@ -300,6 +341,9 @@ public class CarddavResource extends AbstractResource {
     }
 
     public WebdavPath getUrl() {
+        if (url == null) {
+            return new WebdavPath("UNSET");
+        }
         return url;
     }
 
@@ -308,7 +352,18 @@ public class CarddavResource extends AbstractResource {
     }
 
     public void save() throws WebdavProtocolException {
-
+        try {
+            factory.getContactInterface().updateContactObject(contact, parent.getId(), contact.getLastModified());
+        } catch (OXConcurrentModificationException e) {
+            LOG.error(e.getMessage(), e);
+            throw new WebdavProtocolException(getUrl(), 500);
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+            throw new WebdavProtocolException(getUrl(), 500);
+        } catch (ContextException e) {
+            LOG.error(e.getMessage(), e);
+            throw new WebdavProtocolException(getUrl(), 500);
+        }
     }
 
     public void setContentType(String type) throws WebdavProtocolException {
@@ -333,6 +388,6 @@ public class CarddavResource extends AbstractResource {
 
     public void unlock(String token) throws WebdavProtocolException {
 
-    }    
+    }
 
 }

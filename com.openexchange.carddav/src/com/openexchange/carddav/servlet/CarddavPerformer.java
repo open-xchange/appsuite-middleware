@@ -271,8 +271,9 @@ public class CarddavPerformer implements SessionHolder {
 
     public void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action, final ServerSession sess) {
         try {
-            final WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
-            final WebdavResponse webdavResponse = new ServletWebdavResponse(resp);
+            final ServletWebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
+            webdavRequest.setUrlPrefix("/carddav/");
+            final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
             session.set(sess);
             if (LOG.isDebugEnabled()) {

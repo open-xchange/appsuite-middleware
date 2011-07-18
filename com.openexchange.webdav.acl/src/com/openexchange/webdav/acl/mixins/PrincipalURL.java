@@ -71,7 +71,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
     
     @Override
     protected String getValue() {
-        return "<D:href>/servlet/home/"+sessionHolder.getUser().getLoginInfo()+"/</D:href>";
+        return "<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"/</D:href>";
     }
 
 }

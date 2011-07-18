@@ -47,9 +47,9 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.carddav.mixins;
 
-import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -58,17 +58,17 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CalendarHomeSet extends SingleXMLPropertyMixin {
+public class AddressbookHomeSet extends SingleXMLPropertyMixin {
 
-    private static final String PROPERTY_NAME = "calendar-home-set";
+    private static final String PROPERTY_NAME = "addressbook-home-set";
     
-    public CalendarHomeSet() {
-        super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
+    public AddressbookHomeSet() {
+        super(CarddavProtocol.CARD_NS.getURI(), PROPERTY_NAME);
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/caldav/</D:href>";
+        return "<D:href>/carddav/</D:href>";
     }
 
 }

@@ -47,28 +47,31 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.webdav.acl.mixins;
 
-import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
+ * {@link CurrentUserPrincipal}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CalendarHomeSet extends SingleXMLPropertyMixin {
+public class CurrentUserPrincipal extends SingleXMLPropertyMixin {
 
-    private static final String PROPERTY_NAME = "calendar-home-set";
+    private static final String PROPERTY_NAME = "current-user-principal";
+    private SessionHolder sessionHolder = null;
     
-    public CalendarHomeSet() {
-        super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
+    public CurrentUserPrincipal(SessionHolder sessionHolder) {
+        super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
+        this.sessionHolder = sessionHolder;
     }
-
+    
     @Override
     protected String getValue() {
-        return "<D:href>/caldav/</D:href>";
+        return "<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"/</D:href>";
     }
 
 }
