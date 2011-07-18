@@ -309,13 +309,17 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             for (final String desc : sa) {
                                 final int pos = desc.indexOf(':');
                                 if (pos > 0) {
-                                    imapProtocol.putIfAbsent(desc.substring(0, pos), Integer.parseInt(desc.substring(pos + 1)));
-                                    if (first) {
-                                        first = false;
-                                    } else {
-                                        sb.append(", ");
+                                    try {
+                                        imapProtocol.putIfAbsent(desc.substring(0, pos), Integer.parseInt(desc.substring(pos + 1).trim()));
+                                        if (first) {
+                                            first = false;
+                                        } else {
+                                            sb.append(", ");
+                                        }
+                                        sb.append(desc);
+                                    } catch (final RuntimeException e) {
+                                        LOG.warn("Max. Number of External Connections: Invalid entry: " + desc, e);
                                     }
-                                    sb.append(desc);
                                 }
                             }
                             logBuilder.append(sb).append('\n');
