@@ -69,8 +69,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
@@ -705,6 +707,8 @@ public final class Contacts {
 
         try {
             boolean modifiedDisplayName = false;
+            String newDisplayName = null;
+            String newEmail01 = null;
             final int[] modtrim;
             {
                 final int[] mod = new int[650];
@@ -713,8 +717,13 @@ public final class Contacts {
                     final Mapper mapper = mapping[i];
                     if ((mapper != null) && !mapper.compare(co, original)) {
                         // Check if modified field is DISPLAY-NAME and contact denotes a system user
-                        if (i == Contact.DISPLAY_NAME && original.getInternalUserId() > 0) {
-                            modifiedDisplayName = true;
+                        if (i == Contact.DISPLAY_NAME) {
+                            if (original.getInternalUserId() > 0) {
+                                modifiedDisplayName = true;
+                            }
+                            newDisplayName = co.getDisplayName();
+                        } else if (i == Contact.EMAIL1) {
+                            newEmail01 = co.getEmail1();
                         }
                         mod[cnt++] = i;
                     }
@@ -728,8 +737,9 @@ public final class Contacts {
             }
 
             for (int i = 0; i < modtrim.length; i++) {
-                final Mapper mapper = mapping[modtrim[i]];
-                if ((mapper != null) && mapper.containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                final int field = modtrim[i];
+                final Mapper mapper = mapping[field];
+                if ((mapper != null) && mapper.containsElement(co) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     update.append(mapper.getDBFieldName()).append(" = ?,");
                 }
             }
@@ -829,6 +839,35 @@ public final class Contacts {
                     writecon,
                     writecon,
                     ctx.getContextId());
+            }
+            // Check for modifications
+            if (null != newDisplayName || null != newEmail01) {
+                PreparedStatement stmt = null;
+                try {
+                    final StringBuilder sb = new StringBuilder("UPDATE prg_dlist SET");
+                    final List<String> vals = new ArrayList<String>(2);
+                    if (null != newDisplayName) {
+                        sb.append(" field01 = ?,");
+                        vals.add(newDisplayName);
+                    }
+                    if (null != newEmail01) {
+                        sb.append(" field04 = ?,");
+                        vals.add(newEmail01);
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    sb.append(" WHERE cid = ? AND intfield03 IS NOT NULL AND intfield03 <> ").append(DistributionListEntryObject.INDEPENDENT);
+                    sb.append(" AND intfield02 IS NOT NULL AND intfield02 = ?");
+                    stmt = writecon.prepareStatement(sb.toString());
+                    int pos = 1;
+                    for (final String val : vals) {
+                        stmt.setString(pos++, val);
+                    }
+                    stmt.setInt(pos++, ctx.getContextId());
+                    stmt.setInt(pos, co.getObjectID());
+                    stmt.executeUpdate();
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
+                }
             }
             writecon.commit();
         } catch (final OXConflictException ox) {
