@@ -96,11 +96,15 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 	    super.tearDown();
 	}
 
-	protected Contact generateContact() {
+	protected Contact generateContact(String lastname) {
 	    Contact contact = new Contact();
-	    contact.setSurName("Surname");
+	    contact.setSurName(lastname);
 	    contact.setGivenName("Given name");
 	    contact.setParentFolderID(folderID);
 	    return contact;
+	}
+
+	protected Contact generateContact() {
+	    return generateContact("Surname");
 	}
 }
