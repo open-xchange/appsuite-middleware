@@ -68,9 +68,11 @@ import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
+import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
@@ -619,7 +621,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         } else if (mailConfig.getLogin() == null) {
             throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "login");
         } else if (mailConfig.getPassword() == null) {
-            throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "password");
+            final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
+            if (!PasswordSource.GLOBAL.equals(cur)) {
+                throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "password");
+            }
+            final String masterPw = MailProperties.getInstance().getMasterPassword();
+            if (masterPw == null) {
+                throw new MailConfigException(new StringBuilder().append("Property \"masterPassword\" not set").toString());
+            }
+            mailConfig.setPassword(masterPw);
         }
     }
 
