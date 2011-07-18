@@ -1,3 +1,7 @@
+* 2011-07-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #19728: Configured max. connection restriction for GMail by default
+
 * 2011-07-17 - thorben.betten@open-xchange.com
 
  - Bugfix #19821: Properly handling a disappeared mail folder on root level
