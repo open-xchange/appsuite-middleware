@@ -86,6 +86,20 @@ public final class RenderMap implements Cloneable {
     }
 
     /**
+     * Checks if any of the contained {@link TemplateReplacement}s is marked as changed.
+     * 
+     * @return <code>true</code> if any of the contained {@link TemplateReplacement}s is marked as changed; otherwise <code>false</code>
+     */
+    public boolean containsChanges() {
+        for (final TemplateReplacement templateReplacement : map.values()) {
+            if (templateReplacement.changed()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Removes all mappings from this map.
      */
     public void clear() {
