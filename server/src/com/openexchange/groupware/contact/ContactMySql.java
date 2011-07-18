@@ -75,12 +75,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -305,7 +305,7 @@ public class ContactMySql implements ContactSql {
         }
         if (userIds != null) {
             sb.append(" (co.userid IN (");
-            for (int userId : userIds) {
+            for (final int userId : userIds) {
                 sb.append(userId).append(',');
             }
             sb.setCharAt(sb.length() - 1, ')');
@@ -534,7 +534,7 @@ public class ContactMySql implements ContactSql {
         this.userid = userid;
     }
 
-    public void setInternalUsers(int[] userIds) {
+    public void setInternalUsers(final int[] userIds) {
         this.where = null;
         this.userIds = userIds;
     }
@@ -721,7 +721,7 @@ public class ContactMySql implements ContactSql {
             cid).toString();
     }
 
-    public String iFgetContactImageContentType(int id, int cid) {
+    public String iFgetContactImageContentType(final int id, final int cid) {
         return new StringBuilder("SELECT mime_type from prg_contacts_image WHERE intfield01 = ").append(id).append(" AND cid = ").append(
             cid).toString();
     }
@@ -826,6 +826,13 @@ public class ContactMySql implements ContactSql {
         del.execute(tmp.toString());
 
         tmp.setLength(0);
+        tmp.append("DELETE FROM prg_dlist WHERE cid = ").append(cid).append("  AND intfield03 IS NOT NULL AND intfield03 <> 0 AND intfield02 IS NOT NULL AND intfield02 = ").append(id);
+        if (DEBUG) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
+
+        tmp.setLength(0);
         tmp.append("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(" WHERE cid = ").append(cid).append(
             " AND intfield01 = ").append(id);
         if (DEBUG) {
@@ -864,6 +871,12 @@ public class ContactMySql implements ContactSql {
             }
             del.execute(tmp.toString());
         }
+        tmp.setLength(0);
+        tmp.append("DELETE FROM prg_dlist WHERE cid = ").append(cid).append("  AND intfield03 IS NOT NULL AND intfield03 <> 0 AND intfield02 IS NOT NULL AND intfield02 = ").append(oid);
+        if (DEBUG) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
     }
 
     public void iFbackupContact(final Statement stmt, final int cid, final int oid, final int uid) throws SQLException {

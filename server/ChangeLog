@@ -1,4 +1,4 @@
-* 2011-07-12 - martin.herfurth@open-xchange.com
+* 2011-07-18 - martin.herfurth@open-xchange.com
 
  - Bugfix #19490: Error during exception change.
  - Bugfix #19489: Removing recurrence information from a recurring appointment.
@@ -7,6 +7,7 @@
 
  - Bugfix #19728: Configured max. connection restriction for GMail by default
  - Bugfix #19722: Additional check for possibly configured global password if password is missing on mail connect attempt
+ - Bugfix #19777: Changed/deleted contacts is honored in existing distribution lists
 
 * 2011-07-17 - thorben.betten@open-xchange.com
 
