@@ -157,8 +157,7 @@ public final class LoginPerformer {
             final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
             Session session = sessiondService.getSession(sessionId);
             if (SessionEnhancement.class.isInstance(authed)) {
-                SessionEnhancement enhancement = (SessionEnhancement) authed;
-                enhancement.enhanceSession(session);
+                ((SessionEnhancement) authed).enhanceSession(session);
             }
             retval.setSession(session);
             // Trigger registered login handlers
