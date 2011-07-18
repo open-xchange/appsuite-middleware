@@ -209,7 +209,7 @@ final class MovePerformer extends AbstractPerformer {
          * Special handling for mail folders on root level
          */
         boolean flag = true;
-        if (FolderStorage.PRIVATE_ID.equals(folder.getParentID()) && MailContentType.getInstance().equals(realStorage.getDefaultContentType())) {
+        if (FolderStorage.PRIVATE_ID.equals(folder.getParentID()) && MailContentType.getInstance().toString().equals(storageFolder.getContentType().toString())) {
             /*
              * Perform the move in real storage
              */
