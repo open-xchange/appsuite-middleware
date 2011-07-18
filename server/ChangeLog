@@ -1,6 +1,7 @@
 * 2011-07-12 - martin.herfurth@open-xchange.com
 
  - Bugfix #19490: Error during exception change.
+ - Bugfix #19489: Removing recurrence information from a recurring appointment.
 
 * 2011-07-18 - thorben.betten@open-xchange.com
 

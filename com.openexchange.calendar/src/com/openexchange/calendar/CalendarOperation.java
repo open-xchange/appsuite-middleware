@@ -1375,7 +1375,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setRecurrenceID(edao.getObjectID());
             if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
                 cdao.setStartDate(edao.getStartDate());
-                cdao.setEndDate(edao.getEndDate());
+                if (cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) {
+                    calculateEndDateForNoType(cdao, edao);
+                } else {
+                    cdao.setEndDate(edao.getEndDate());
+                }
             } else if(CalendarDataObject.NO_RECURRENCE != cdao.getRecurrenceType()) {
                 cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/Constants.MILLI_DAY)));
                 calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
