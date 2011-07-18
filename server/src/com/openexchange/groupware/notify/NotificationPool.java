@@ -325,7 +325,9 @@ public final class NotificationPool {
                 /*
                  * Send notification
                  */
-                ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
+                if (null != mmsg) {
+                    ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
+                }
             }
         }
 

@@ -8,6 +8,7 @@
  - Bugfix #19728: Configured max. connection restriction for GMail by default
  - Bugfix #19722: Additional check for possibly configured global password if password is missing on mail connect attempt
  - Bugfix #19777: Changed/deleted contacts is honored in existing distribution lists
+ - Bugfix #14653: Suppress notification message if no relevant changes can be detected
 
 * 2011-07-17 - thorben.betten@open-xchange.com
 

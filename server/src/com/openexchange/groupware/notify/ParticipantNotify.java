@@ -708,12 +708,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         } else {
                             message = createParticipantMessage(session, newObj, p, title, actionRepl, state, locale, renderMap, isUpdate, b);
                         }
-                        messages.add(message);
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
-                                " (id = ").append(newObj.getObjectID()).append(") \"").append(
-                                EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString())).append(
-                                "\" notification message generated for receiver ").append(p.email).toString());
+                        if (null != message) {
+                            messages.add(message);
+                            if (DEBUG) {
+                                LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
+                                    " (id = ").append(newObj.getObjectID()).append(") \"").append(
+                                    EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString())).append(
+                                    "\" notification message generated for receiver ").append(p.email).toString());
+                            }
                         }
                     }
                 }
@@ -886,6 +888,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     msg.message = new StringTemplate(message).render(p.getLocale(), clone);
                 }
             } else {
+                if (!renderMap.containsChanges()) {
+                    /*
+                     * No element contains relevant changes to notify about...
+                     */
+                    return null;
+                }
+                
                 String textMessage = "";
                 if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
                     final String template = Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_UPDATE_MAIL_EXT : Notifications.TASK_UPDATE_MAIL_EXT;
