@@ -689,7 +689,7 @@ public final class IMAPDefaultFolderChecker {
          */
         final StringBuilder tmp = new StringBuilder(32);
         final boolean checkSubscribed = true;
-        final long st = System.currentTimeMillis();
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final String fullName = prefix.length() == 0 ? name : tmp.append(prefix).append(name).toString();
         {
             final ListLsubEntry entry =
