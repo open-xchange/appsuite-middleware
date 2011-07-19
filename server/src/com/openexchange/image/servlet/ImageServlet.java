@@ -121,6 +121,18 @@ public final class ImageServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        writeImage(req, resp, hashSource);
+    }
+
+    /**
+     * Writes image denoted by request to given response.
+     * 
+     * @param req The request
+     * @param resp The response
+     * @param hashSource The hash source
+     * @throws IOException If an I/O error occurs
+     */
+    public static void writeImage(final HttpServletRequest req, final HttpServletResponse resp, final CookieHashSource hashSource) throws IOException {
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {

@@ -59,7 +59,7 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -75,15 +75,19 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
+import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
+import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -112,8 +116,16 @@ public final class AJAXFile extends PermissionServlet {
 
     private static final String STR_NULL = "null";
 
+    private CookieHashSource hashSource;
+
     public AJAXFile() {
         super();
+    }
+
+    @Override
+    public void init(final ServletConfig config) throws ServletException {
+        super.init(config);
+        hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
     /*
@@ -201,7 +213,20 @@ public final class AJAXFile extends PermissionServlet {
             final String userAgent = req.getHeader("user-agent") == null ? null : req.getHeader("user-agent").toLowerCase(Locale.ENGLISH);
             final boolean internetExplorer = (userAgent != null && userAgent.indexOf("msie") > -1 && userAgent.indexOf("windows") > -1);
             final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            final ManagedFile file = management.getByID(id);
+            if (null == management) {
+                actionGetImage(req, resp);
+                return;
+            }
+            final ManagedFile file;
+            try {
+                file = management.getByID(id);
+            } catch (final ManagedFileException e) {
+                if (ManagedFileExceptionErrorMessage.NOT_FOUND.getDetailNumber() != e.getDetailNumber()) {
+                    throw e;
+                }
+                actionGetImage(req, resp);
+                return;
+            }
             /*
              * Set proper headers
              */
@@ -276,6 +301,10 @@ public final class AJAXFile extends PermissionServlet {
 					responseObj == null ? STR_NULL : responseObj.toString(),
 					ACTION_GET), e.getMessage(), e);
         }
+    }
+
+    private void actionGetImage(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        ImageServlet.writeImage(req, resp, hashSource);
     }
 
     /*
