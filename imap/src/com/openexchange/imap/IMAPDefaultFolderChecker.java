@@ -483,22 +483,29 @@ public final class IMAPDefaultFolderChecker {
         /*
          * Get default folders names and full names
          */
-        final DefaultFolderNamesProvider defaultFolderNamesProvider =
-            new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
-        final String[] defaultFolderFullnames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, isSpamOptionEnabled);
-        final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, isSpamOptionEnabled);
+        final String[] fullNames;
+        final String[] names;
         final SpamHandler spamHandler;
         {
-            spamHandler =
-                isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
+            final DefaultFolderNamesProvider defaultFolderNamesProvider =
+                new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
+            if (isSpamOptionEnabled) {
+                fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, true);
+                names = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
+                spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId);
+            } else {
+                fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, false);
+                names = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, false);
+                spamHandler = NoSpamHandler.getInstance();
+            }
         }
         /*
          * Sequentially check folders
          */
         final AtomicBoolean modified = new AtomicBoolean(false);
         final long start = DEBUG ? System.currentTimeMillis() : 0L;
-        for (int i = 0; i < defaultFolderNames.length; i++) {
-            final String fullname = defaultFolderFullnames[i];
+        for (int i = 0; i < names.length; i++) {
+            final String fullname = fullNames[i];
             final int index = i;
             if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
                 if (spamHandler.isCreateConfirmedHam()) {
@@ -506,14 +513,14 @@ public final class IMAPDefaultFolderChecker {
                         index,
                         prefix,
                         fullname,
-                        defaultFolderNames[index],
+                        names[index],
                         sep,
                         type,
                         spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
                         modified,
                         mailSessionCache);
                 } else if (DEBUG) {
-                    LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
+                    LOG.debug("Skipping check for " + names[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
                 }
             } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
                 if (spamHandler.isCreateConfirmedSpam()) {
@@ -521,17 +528,17 @@ public final class IMAPDefaultFolderChecker {
                         index,
                         prefix,
                         fullname,
-                        defaultFolderNames[index],
+                        names[index],
                         sep,
                         type,
                         spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
                         modified,
                         mailSessionCache);
                 } else if (DEBUG) {
-                    LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
+                    LOG.debug("Skipping check for " + names[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                 }
             } else {
-                performTaskFor(index, prefix, fullname, defaultFolderNames[index], sep, type, 1, modified, mailSessionCache);
+                performTaskFor(index, prefix, fullname, names[index], sep, type, 1, modified, mailSessionCache);
             }
         } // End of for loop
         if (DEBUG) {
