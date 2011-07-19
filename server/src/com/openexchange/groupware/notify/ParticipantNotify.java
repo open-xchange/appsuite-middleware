@@ -2080,7 +2080,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (s2 == null && s1.length() == 0) {
             return true;
         }
-        return s1.equals(s2);
+        return s1.trim().equals(s2 == null ? null : s2.trim());
     }
 
     /**
