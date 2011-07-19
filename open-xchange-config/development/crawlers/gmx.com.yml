@@ -31,7 +31,7 @@ workflowString: |
           name: format
           value: csv_Outlook2003_eng
       specialParameterName: accountId
-      url: "https://www.gmx.com/callgate-6.37.8.0/coms8/ImportExportService/exportContacts"
+      url: "https://www.gmx.com/callgate-6.42.4.0/coms8/ImportExportService/exportContacts"
     - !com.openexchange.subscribe.crawler.ContactsByCsvFileStep
       description: Map csv fields to Contact-Fields
       fields: 
