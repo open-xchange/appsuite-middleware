@@ -1,3 +1,7 @@
+* 2011-07-19 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19484: Only patch appointments once for use in CalDAV interface
+
 * 2011-07-19 - marcus.klein@open-xchange.com
 
  - Bugfix #19818: Setting secure flag on cookies even if autologin is not enabled.

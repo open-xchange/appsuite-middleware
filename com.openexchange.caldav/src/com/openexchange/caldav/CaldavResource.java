@@ -131,10 +131,13 @@ public class CaldavResource extends AbstractResource {
         this.factory = factory;
         this.url = parent.getUrl().dup().append(appointment.getUid() + ".ics");
 
-        patchOrganizer();
-        patchOrganizersParticipantState();
-        patchSeriesStartAndEnd();
-        patchGroups();
+        if (! factory.getState().hasBeenPatched(appointment)) {
+            factory.getState().markAsPatched(appointment);
+            patchOrganizer();
+            patchOrganizersParticipantState();
+            patchSeriesStartAndEnd();
+            patchGroups();
+        }
     }
 
     public CaldavResource(CaldavCollection parent, WebdavPath url, GroupwareCaldavFactory factory) {
@@ -594,6 +597,11 @@ public class CaldavResource extends AbstractResource {
         calendar.setTime(until);
         calendar.setTimeZone(UTC);
         calendar.add(Calendar.DAY_OF_YEAR, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        
         Date oneDayLater = calendar.getTime();
         return oneDayLater;
     }

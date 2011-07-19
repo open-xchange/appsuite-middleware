@@ -55,9 +55,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -328,6 +330,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
 
         private Map<Integer, List<Appointment>> folderCache = new HashMap<Integer, List<Appointment>>();
         
+        private Set<Integer> patchGuard = new HashSet<Integer>();
         
         public void cacheFolder(int folderId) {
             cacheFolderFast(folderId); // Switch this to the other method, once it loads participants
@@ -439,6 +442,14 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 return Collections.emptyList();
             }
             return appointments;
+        }
+
+        public boolean hasBeenPatched(Appointment appointment) {
+            return patchGuard.contains(appointment.getObjectID());
+        }
+
+        public void markAsPatched(Appointment appointment) {
+            patchGuard.add(appointment.getObjectID());
         }
 
     }
