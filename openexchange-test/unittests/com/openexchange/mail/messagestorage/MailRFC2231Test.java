@@ -305,7 +305,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
                 rfc2231Mail,
                 DisplayMode.DISPLAY,
                 session,
-                UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()));
+                UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()), false, -1);
             new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
             final JSONObject jObject = messageHandler.getJSONObject();
             if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
@@ -342,7 +342,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
                 rfc2231Mail,
                 DisplayMode.DISPLAY,
                 session,
-                UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()));
+                UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()), false, -1);
             new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
             final JSONObject jObject = messageHandler.getJSONObject();
             if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
