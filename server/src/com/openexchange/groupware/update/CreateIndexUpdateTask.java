@@ -56,18 +56,17 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.update.Index;
 import com.openexchange.tools.update.IndexNotFoundException;
 
-
 /**
  * A {@link CreateIndexUpdateTask} is an abstract superclass for UpdateTasks wanting to create an index. It checks for the presence of a named (using only the name as criterion)
  * index, and, if it is not found, creates the index.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class CreateIndexUpdateTask implements UpdateTaskV2 {
+public abstract class CreateIndexUpdateTask extends UpdateTaskAdapter {
 
     private DatabaseService dbService;
     private Index index;
-    
+
     public CreateIndexUpdateTask(DatabaseService dbService, String table, String indexName, String...columns) {
         this.dbService = dbService;
         index = new Index();
@@ -75,39 +74,33 @@ public abstract class CreateIndexUpdateTask implements UpdateTaskV2 {
         index.setName(indexName);
         index.setColumns(columns);
     }
-    
+
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes(UpdateConcurrency.BACKGROUND);
     }
 
-
     public void perform(PerformParameters params) throws AbstractOXException {
-        perform(params.getSchema(), params.getContextId());
-    }
-
-
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
-        Connection con = null;
+        int contextId = params.getContextId();
+        final DatabaseService service = getDatabaseService();
+        final Connection con = service.getForUpdateTask(contextId);
         try {
-            con = getDatabaseService().getForUpdateTask(contextId);
-            if ( ! hasIndex(con) ) {
+            if (!hasIndex(con)) {
                 createIndex(con);
             }
         } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
         } finally {
-            if(con != null) {
-                getDatabaseService().backForUpdateTask(contextId, con);
-            }
+            service.backForUpdateTask(contextId, con);
         }
     }
 
-    public DatabaseService getDatabaseService() {
+    protected DatabaseService getDatabaseService() {
         return dbService;
     }
 
     protected void createIndex(Connection con) throws SQLException {
-        index.create(con);        
+        index.create(con);
     }
 
     private boolean hasIndex(Connection con) throws SQLException {
@@ -118,5 +111,4 @@ public abstract class CreateIndexUpdateTask implements UpdateTaskV2 {
         }
         return true;
     }
-
 }

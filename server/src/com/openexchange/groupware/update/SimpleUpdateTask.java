@@ -51,29 +51,25 @@ package com.openexchange.groupware.update;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
-
 
 /**
  * A {@link SimpleUpdateTask} handles connection management for update tasks. Implement the {@link #perform(Connection)} method
- * with your update logic. You may want to implement {@link #shouldRun(Connection)} if you can determine whether the UT has any work to do. 
+ * with your update logic. You may want to implement {@link #shouldRun(Connection)} if you can determine whether the UT has any work to do.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class SimpleUpdateTask implements UpdateTaskV2 {
+public abstract class SimpleUpdateTask extends UpdateTaskAdapter {
 
-    public void perform(PerformParameters params) throws AbstractOXException {
-        perform(params.getSchema(), params.getContextId());
-    }
-
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public final void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
-            con.setAutoCommit(false);
+            startTransaction(con);
             if (!shouldRun(con)) {
                 return;
             }
@@ -90,26 +86,13 @@ public abstract class SimpleUpdateTask implements UpdateTaskV2 {
 
     protected abstract void perform(Connection con) throws SQLException;
 
-    protected boolean shouldRun(Connection con) {
-        return true;
-    }
-    
 //  The following methods can be overridden, if different values make sense here
-    
-    public TaskAttributes getAttributes() {
-        return new Attributes();
+
+    protected boolean shouldRun(@SuppressWarnings("unused") Connection con) {
+        return true;
     }
 
     public String[] getDependencies() {
         return new String[0];
     }
-
-    public int addedWithVersion() {
-        return NO_VERSION;
-    }
-
-    public int getPriority() {
-        return UpdateTaskPriority.NORMAL.priority;
-    }
-
 }

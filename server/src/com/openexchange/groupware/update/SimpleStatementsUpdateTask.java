@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.tools.sql.DBUtils;
 
-
 /**
  * Build a subclass of {@link SimpleStatementsUpdateTask} if all you want to do is execute a bunch of statements.
  *
@@ -65,11 +64,11 @@ import com.openexchange.tools.sql.DBUtils;
 public abstract class SimpleStatementsUpdateTask extends SimpleUpdateTask {
 
     private List<StatementHolder> statements = new ArrayList<StatementHolder>();
-    
+
     public SimpleStatementsUpdateTask() {
         statements();
     }
-    
+
     /**
      * Define Statements with {@link #add(String, Object...)} here.
      */
@@ -88,16 +87,16 @@ public abstract class SimpleStatementsUpdateTask extends SimpleUpdateTask {
             sqlStatement.execute(con);
         }
     }
-    
+
     protected static class StatementHolder {
         private String statement;
         private Object[] values;
-        
+
         public StatementHolder(String statement, Object...values) {
             this.statement = statement;
             this.values = values;
         }
-        
+
         public void execute(Connection con) throws SQLException {
             PreparedStatement stmt = null;
             try {
@@ -113,5 +112,4 @@ public abstract class SimpleStatementsUpdateTask extends SimpleUpdateTask {
             }
         }
     }
-
 }
