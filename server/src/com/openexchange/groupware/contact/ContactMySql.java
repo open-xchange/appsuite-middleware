@@ -833,6 +833,13 @@ public class ContactMySql implements ContactSql {
         del.execute(tmp.toString());
 
         tmp.setLength(0);
+        tmp.append("DELETE FROM del_dlist WHERE cid = ").append(cid).append("  AND intfield03 IS NOT NULL AND intfield03 <> 0 AND intfield02 IS NOT NULL AND intfield02 = ").append(id);
+        if (DEBUG) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
+
+        tmp.setLength(0);
         tmp.append("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(" WHERE cid = ").append(cid).append(
             " AND intfield01 = ").append(id);
         if (DEBUG) {
@@ -873,6 +880,13 @@ public class ContactMySql implements ContactSql {
         }
         tmp.setLength(0);
         tmp.append("DELETE FROM prg_dlist WHERE cid = ").append(cid).append("  AND intfield03 IS NOT NULL AND intfield03 <> 0 AND intfield02 IS NOT NULL AND intfield02 = ").append(oid);
+        if (DEBUG) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
+
+        tmp.setLength(0);
+        tmp.append("DELETE FROM del_dlist WHERE cid = ").append(cid).append("  AND intfield03 IS NOT NULL AND intfield03 <> 0 AND intfield02 IS NOT NULL AND intfield02 = ").append(oid);
         if (DEBUG) {
             LOG.debug(tmp.toString());
         }
