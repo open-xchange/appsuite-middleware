@@ -505,14 +505,14 @@ public final class IMAPDefaultFolderChecker {
         final AtomicBoolean modified = new AtomicBoolean(false);
         final long start = DEBUG ? System.currentTimeMillis() : 0L;
         for (int i = 0; i < names.length; i++) {
-            final String fullname = fullNames[i];
+            final String fullName = fullNames[i];
             final int index = i;
             if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
                 if (spamHandler.isCreateConfirmedHam()) {
                     performTaskFor(
                         index,
                         prefix,
-                        fullname,
+                        fullName,
                         names[index],
                         sep,
                         type,
@@ -527,7 +527,7 @@ public final class IMAPDefaultFolderChecker {
                     performTaskFor(
                         index,
                         prefix,
-                        fullname,
+                        fullName,
                         names[index],
                         sep,
                         type,
@@ -538,7 +538,7 @@ public final class IMAPDefaultFolderChecker {
                     LOG.debug("Skipping check for " + names[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                 }
             } else {
-                performTaskFor(index, prefix, fullname, names[index], sep, type, 1, modified, mailSessionCache);
+                performTaskFor(index, prefix, fullName, names[index], sep, type, 1, modified, mailSessionCache);
             }
         } // End of for loop
         if (DEBUG) {
@@ -690,14 +690,14 @@ public final class IMAPDefaultFolderChecker {
     /**
      * Internally used by {@link IMAPDefaultFolderChecker}.
      */
-    protected String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname, final AtomicBoolean modified) throws MessagingException, MailException {
+    protected String checkDefaultFolder(final int index, final String prefix, final String qualifiedName, final char sep, final int type, final int subscribe, final boolean isFullname, final AtomicBoolean modified) throws MessagingException, MailException {
         /*
          * Check default folder
          */
         final StringBuilder tmp = new StringBuilder(32);
         final boolean checkSubscribed = true;
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
-        final String fullName = prefix.length() == 0 ? name : tmp.append(prefix).append(name).toString();
+        final String fullName = prefix.length() == 0 ? qualifiedName : tmp.append(prefix).append(qualifiedName).toString();
         {
             final ListLsubEntry entry =
                 modified.get() ? ListLsubCache.getActualLISTEntry(fullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(
@@ -785,7 +785,7 @@ public final class IMAPDefaultFolderChecker {
                 final List<String> candidates = new ArrayList<String>(2);
                 for (int i = 0; i < folders.length; i++) {
                     final String folderName = folders[i].getName();
-                    if (name.equalsIgnoreCase(folderName)) {
+                    if (qualifiedName.equalsIgnoreCase(folderName)) {
                         /*
                          * Detected a similarly named folder
                          */
