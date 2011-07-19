@@ -67,7 +67,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 public class ServletWebdavRequest extends AbstractWebdavRequest implements WebdavRequest {
 	private final HttpServletRequest req;
-	private final String urlPrefix;
+	private String urlPrefix;
 	private final WebdavPath url;
 	private WebdavPath destUrl;
 
@@ -106,6 +106,10 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	public String getURLPrefix() {
 		return urlPrefix;
 	}
+	
+    public void setUrlPrefix(String urlPrefix) {
+        this.urlPrefix = urlPrefix;
+    }
 
 	public WebdavPath getUrl() {
 		return url;

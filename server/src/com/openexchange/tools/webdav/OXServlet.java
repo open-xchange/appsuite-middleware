@@ -219,7 +219,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
      * @throws IOException If an I/O error occurs
      */
-    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
+    public boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
         Session session;
         try {
             session = findSessionByCookie(req, resp);
@@ -234,7 +234,7 @@ public abstract class OXServlet extends WebDavServlet {
              */
             final LoginRequest loginRequest;
             try {
-                loginRequest = parseLogin(req, face);
+                loginRequest = modifyLogin(parseLogin(req, face));
             } catch (final WebdavException e) {
                 LOG.debug(e.getMessage(), e);
                 addUnauthorizedHeader(req, resp);
@@ -272,6 +272,10 @@ public abstract class OXServlet extends WebDavServlet {
         }
         req.setAttribute(SESSION, session);
         return true;
+    }
+
+    protected LoginRequest modifyLogin(LoginRequest loginReq) {
+        return loginReq;
     }
 
     private static void removeCookie(HttpServletRequest req, HttpServletResponse resp, String...cookiesToRemove) {
