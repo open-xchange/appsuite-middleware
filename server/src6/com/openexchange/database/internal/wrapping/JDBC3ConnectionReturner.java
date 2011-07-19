@@ -158,8 +158,7 @@ public abstract class JDBC3ConnectionReturner implements Connection {
     }
 
     public boolean isClosed() throws SQLException {
-        checkForAlreadyClosed();
-        return delegate.isClosed();
+        return delegate == null || delegate.isClosed();
     }
 
     public boolean isReadOnly() throws SQLException {
