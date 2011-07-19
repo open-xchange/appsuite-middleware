@@ -51,6 +51,7 @@ package com.openexchange.carddav;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.api2.OXException;
 import com.openexchange.carddav.GroupwareCarddavFactory.State;
 import com.openexchange.carddav.mixins.CTag;
 import com.openexchange.carddav.mixins.SupportedReportSet;
@@ -67,11 +68,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CarddavCollection extends AbstractCarddavCollection {
-
-    private RootCollection parent;
-
-    private UserizedFolder folder;
+public class AggregatedCollection extends AbstractCarddavCollection {
 
     /**
      * Initializes a new {@link CarddavCollection}.
@@ -79,20 +76,16 @@ public class CarddavCollection extends AbstractCarddavCollection {
      * @param rootCollection
      * @param folder
      * @param factory
-     * @throws WebdavProtocolException 
+     * @throws WebdavProtocolException
      */
-    public CarddavCollection(RootCollection parent, UserizedFolder folder, WebdavPath url, GroupwareCarddavFactory factory) throws WebdavProtocolException {
+    public AggregatedCollection(WebdavPath url, GroupwareCarddavFactory factory) throws WebdavProtocolException {
         super(factory, url);
-        this.parent = parent;
-        this.folder = folder;
-        
+
         try {
-            includeProperties(
-                new CurrentUserPrivilegeSet(folder.getOwnPermission()),
-                new SupportedReportSet(),
-                new CTag(factory.getState().getFolder(getId()), getId())
-            );
+            includeProperties(new SupportedReportSet(), new CTag(factory.getState().getAggregatedContacts(), factory.getSession().getUserId()));
         } catch (ContextException e) {
+            throw internalError(e);
+        } catch (OXException e) {
             throw internalError(e);
         }
 
@@ -102,7 +95,7 @@ public class CarddavCollection extends AbstractCarddavCollection {
         State state = factory.getState();
         List<Contact> contacts;
         try {
-            contacts = state.getFolder(getId());
+            contacts = state.getAggregatedContacts();
 
             List<WebdavResource> children = new ArrayList<WebdavResource>(contacts.size());
 
@@ -117,40 +110,37 @@ public class CarddavCollection extends AbstractCarddavCollection {
             return children;
         } catch (ContextException e) {
             throw internalError(e);
+        } catch (OXException e) {
+            throw internalError(e);
         }
     }
 
-    public int getId() {
-        return Integer.parseInt(folder.getID());
-    }
-
+ 
     public String getDisplayName() throws WebdavProtocolException {
-        return folder.getName();
+        return "Contacts";
     }
 
     public CarddavResource getChild(String name) throws WebdavProtocolException {
-        try {
-            State state = factory.getState();
-            // TODO: Robustness
-            int id = Integer.parseInt(name.substring(0, name.indexOf('.')));
-            Contact contact = state.get(id, getId());
-            if (contact != null) {
-                return new CarddavResource(this, contact, factory);
+        List<WebdavResource> children = getChildren();
+        for (WebdavResource resource : children) {
+            if (resource.getUrl().name().equals(name)) {
+                return (CarddavResource) resource;
             }
-        } catch (ContextException x) {
-            throw internalError(x);
-        } catch (NumberFormatException x) {
-            // Ignore, return a new CarddavResource instead
         }
         return new CarddavResource(this, factory);
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.webdav.protocol.helpers.AbstractCollection#getResourceType()
-     */
+
     @Override
     public String getResourceType() throws WebdavProtocolException {
-        return super.getResourceType()+CarddavProtocol.ADDRESSBOOK;
+        return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
+    }
+
+    public int getStandardFolder() {
+        try {
+            return factory.getState().getStandardContactFolderId();
+        } catch (OXException e) {
+            return -1;
+        }
     }
 
 }

@@ -86,46 +86,10 @@ public class RootCollection extends AbstractCarddavCollection {
     }
 
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
-        List<WebdavResource> children = new ArrayList<WebdavResource>(3);
-        for (Type type : Arrays.asList(PrivateType.getInstance(), PublicType.getInstance(), SharedType.getInstance())) {
-            children.addAll(getVisibleContactFoldersOfType(type));
-        }
-        return children;
+        return Arrays.asList((WebdavResource)new AggregatedCollection(getUrl().dup().append("Contacts"), factory));
     }
 
     protected final static ContentType CONTACT_CTYPE = ContactContentType.getInstance();
 
-    protected List<WebdavResource> getVisibleContactFoldersOfType(Type type) throws WebdavProtocolException {
-        final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance();
-        Session session = factory.getSession();
-
-        Integer ccollectorFolderId = null;
-        try {
-           ccollectorFolderId = serverUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
-        } catch (SettingException e) {
-            ccollectorFolderId = null;
-        }
-
-
-        try {
-            FolderResponse<UserizedFolder[]> visibleFolders = factory.getFolderService().getVisibleFolders(
-                FolderStorage.REAL_TREE_ID,
-                CONTACT_CTYPE,
-                type,
-                true,
-                factory.getSession(),
-                null);
-            UserizedFolder[] response = visibleFolders.getResponse();
-            List<WebdavResource> children = new ArrayList<WebdavResource>(response.length);
-            for (UserizedFolder folder : response) {
-                if (folder.getOwnPermission().getReadPermission() > Permission.READ_OWN_OBJECTS && (ccollectorFolderId == null || ccollectorFolderId != Integer.parseInt(folder.getID()))) {
-                    children.add(new CarddavCollection(this, folder, getUrl().dup().append(folder.getName()), factory));
-                }
-            }
-            return children;
-        } catch (FolderException e) {
-            throw internalError(e);
-        }
-    }
 
 }

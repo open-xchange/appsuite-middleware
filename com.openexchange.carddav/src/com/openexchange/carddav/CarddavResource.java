@@ -98,7 +98,7 @@ public class CarddavResource extends AbstractResource {
 
     private GroupwareCarddavFactory factory;
 
-    private CarddavCollection parent;
+    private AggregatedCollection parent;
 
     private WebdavPath url;
 
@@ -110,7 +110,7 @@ public class CarddavResource extends AbstractResource {
 
     public static final Log LOG = LogFactory.getLog(CarddavResource.class);
 
-    public CarddavResource(CarddavCollection parent, Contact contact, GroupwareCarddavFactory factory) {
+    public CarddavResource(AggregatedCollection parent, Contact contact, GroupwareCarddavFactory factory) {
         super();
         this.factory = factory;
         this.parent = parent;
@@ -119,7 +119,7 @@ public class CarddavResource extends AbstractResource {
         this.exists = true;
     }
 
-    public CarddavResource(CarddavCollection parent, GroupwareCarddavFactory factory) {
+    public CarddavResource(AggregatedCollection parent, GroupwareCarddavFactory factory) {
         super();
         this.factory = factory;
         this.parent = parent;
@@ -192,7 +192,7 @@ public class CarddavResource extends AbstractResource {
                 newContact.setLastModified(contact.getLastModified());
                 newContact.setObjectID(contact.getObjectID());
             } else {
-                newContact.setParentFolderID(parent.getId());
+                newContact.setParentFolderID(parent.getStandardFolder());
                 newContact.setContextId(factory.getSession().getContextId());
             }
             contact = newContact;
@@ -359,7 +359,7 @@ public class CarddavResource extends AbstractResource {
 
     public void save() throws WebdavProtocolException {
         try {
-            factory.getContactInterface().updateContactObject(contact, parent.getId(), contact.getLastModified());
+            factory.getContactInterface().updateContactObject(contact, parent.getStandardFolder(), contact.getLastModified());
         } catch (OXConcurrentModificationException e) {
             LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 500);
