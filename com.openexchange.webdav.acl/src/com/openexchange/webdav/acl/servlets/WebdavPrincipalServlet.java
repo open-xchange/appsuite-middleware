@@ -65,6 +65,8 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
+import com.openexchange.tools.webdav.LoginCustomizer;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer.Action;
 
@@ -198,50 +200,11 @@ public class WebdavPrincipalServlet extends OXServlet {
         // TODO Auto-generated method stub
     }
     
+    private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
+    
     @Override
-    protected LoginRequest modifyLogin(final LoginRequest loginReq) {
-        return new LoginRequest() {
-
-            public String getAuthId() {
-                return loginReq.getAuthId();
-            }
-
-            public String getClient() {
-                return loginReq.getClient();
-            }
-
-            public String getClientIP() {
-                return loginReq.getClientIP();
-            }
-
-            public String getHash() {
-                return loginReq.getHash();
-            }
-
-            public Map<String, List<String>> getHeaders() {
-                return loginReq.getHeaders();
-            }
-
-            public Interface getInterface() {
-                return loginReq.getInterface();
-            }
-
-            public String getLogin() {
-                return loginReq.getLogin().replaceAll("\\*", "@");
-            }
-
-            public String getPassword() {
-                return loginReq.getPassword();
-            }
-
-            public String getUserAgent() {
-                return loginReq.getUserAgent();
-            }
-
-            public String getVersion() {
-                return loginReq.getVersion();
-            }
-            
-        };
+    protected LoginCustomizer getLoginCustomizer() {
+        return ALLOW_ASTERISK;
     }
+
 }

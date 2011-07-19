@@ -65,6 +65,8 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
+import com.openexchange.tools.webdav.LoginCustomizer;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.caldav.servlet.CaldavPerformer.Action;
 
@@ -202,5 +204,13 @@ public class CalDAV extends OXServlet {
     protected void incrementRequests() {
         // TODO Auto-generated method stub
     }
+    
+    private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
+    
+    @Override
+    protected LoginCustomizer getLoginCustomizer() {
+        return ALLOW_ASTERISK;
+    }
+
    
 }

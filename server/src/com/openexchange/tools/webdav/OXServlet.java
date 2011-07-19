@@ -191,7 +191,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface())) {
+        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface(), getLoginCustomizer())) {
             return;
         }
         try {
@@ -209,7 +209,15 @@ public abstract class OXServlet extends WebDavServlet {
             throw se;
         }
     }
+    
+    protected LoginCustomizer getLoginCustomizer() {
+        return null;
+    }
 
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
+        return doAuth(req, resp, face, null);
+    }
+    
     /**
      * Performs authentication.
      * 
@@ -219,7 +227,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
      * @throws IOException If an I/O error occurs
      */
-    public boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face, LoginCustomizer customizer) throws IOException {
         Session session;
         try {
             session = findSessionByCookie(req, resp);
@@ -232,9 +240,12 @@ public abstract class OXServlet extends WebDavServlet {
             /*
              * No session found by cookie
              */
-            final LoginRequest loginRequest;
+            LoginRequest loginRequest;
             try {
-                loginRequest = modifyLogin(parseLogin(req, face));
+                loginRequest = parseLogin(req, face);
+                if (customizer != null) {
+                    loginRequest = customizer.modifyLogin(loginRequest);
+                }
             } catch (final WebdavException e) {
                 LOG.debug(e.getMessage(), e);
                 addUnauthorizedHeader(req, resp);
@@ -272,10 +283,6 @@ public abstract class OXServlet extends WebDavServlet {
         }
         req.setAttribute(SESSION, session);
         return true;
-    }
-
-    protected LoginRequest modifyLogin(LoginRequest loginReq) {
-        return loginReq;
     }
 
     private static void removeCookie(HttpServletRequest req, HttpServletResponse resp, String...cookiesToRemove) {
