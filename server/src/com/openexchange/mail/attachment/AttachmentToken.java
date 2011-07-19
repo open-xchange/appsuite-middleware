@@ -91,7 +91,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      */
     public AttachmentToken() {
         super();
-        this.id = UUIDs.getUnformattedString(UUID.randomUUID());
+        this.id = new StringBuilder(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = DEFAULT_TIMEOUT;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
     }
@@ -104,7 +104,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
         if (ttlMillis <= 0) {
             throw new IllegalArgumentException("ttlMillis must be positive.");
         }
-        this.id = UUIDs.getUnformattedString(UUID.randomUUID());
+        this.id = new StringBuilder(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
     }
