@@ -6,6 +6,7 @@
 
  - Bugfix #19776: Applying proper subscription status to newly created mail default folders
  - Bugfix #19824: Token access to mail attachments
+ - Bugfix #19875: Updated GMX export URL in corresponding .yml files
 
 * 2011-07-18 - martin.herfurth@open-xchange.com
 
