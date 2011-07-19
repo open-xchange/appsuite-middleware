@@ -295,7 +295,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 					final SessionObject session = getSession();
 					final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, mailPath, mail,
 							DisplayMode.DISPLAY, session, UserSettingMailStorage.getInstance().getUserSettingMail(
-									session.getUserId(), session.getContextId()));
+									session.getUserId(), session.getContextId()), false, -1);
 					new MailMessageParser().parseMailMessage(mail, messageHandler);
 					final JSONObject jObject = messageHandler.getJSONObject();
 					if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
@@ -353,7 +353,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231.getBytes("US-ASCII"));
 			final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, null, rfc2231Mail, DisplayMode.DISPLAY,
 					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-							session.getContextId()));
+							session.getContextId()), false, -1);
 			new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
 			final JSONObject jObject = messageHandler.getJSONObject();
 			if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {

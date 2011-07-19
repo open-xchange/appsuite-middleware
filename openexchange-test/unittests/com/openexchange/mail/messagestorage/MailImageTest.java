@@ -189,7 +189,7 @@ public final class MailImageTest extends AbstractMailTest {
 
 				final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, null, mail, DisplayMode.DISPLAY,
 						session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-								session.getContextId()));
+								session.getContextId()), false, -1);
 				new MailMessageParser().parseMailMessage(mail, messageHandler);
 				final JSONObject jObject = messageHandler.getJSONObject();
 
