@@ -695,7 +695,6 @@ public final class IMAPDefaultFolderChecker {
          * Check default folder
          */
         final StringBuilder tmp = new StringBuilder(32);
-        final boolean checkSubscribed = true;
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final String fullName = prefix.length() == 0 ? qualifiedName : tmp.append(prefix).append(qualifiedName).toString();
         {
@@ -706,29 +705,27 @@ public final class IMAPDefaultFolderChecker {
                     imapStore,
                     session);
             if (null != entry && entry.exists()) {
-                if (checkSubscribed) {
-                    final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
-                    if (1 == subscribe) {
-                        if (!entry.isSubscribed()) {
-                            try {
-                                f.setSubscribed(true);
-                                modified.set(true);
-                            } catch (final MethodNotSupportedException e) {
-                                LOG.error(e.getMessage(), e);
-                            } catch (final MessagingException e) {
-                                LOG.error(e.getMessage(), e);
-                            }
+                final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
+                if (1 == subscribe) {
+                    if (!entry.isSubscribed()) {
+                        try {
+                            f.setSubscribed(true);
+                            modified.set(true);
+                        } catch (final MethodNotSupportedException e) {
+                            LOG.error(e.getMessage(), e);
+                        } catch (final MessagingException e) {
+                            LOG.error(e.getMessage(), e);
                         }
-                    } else if (0 == subscribe) {
-                        if (entry.isSubscribed()) {
-                            try {
-                                f.setSubscribed(false);
-                                modified.set(true);
-                            } catch (final MethodNotSupportedException e) {
-                                LOG.error(e.getMessage(), e);
-                            } catch (final MessagingException e) {
-                                LOG.error(e.getMessage(), e);
-                            }
+                    }
+                } else if (0 == subscribe) {
+                    if (entry.isSubscribed()) {
+                        try {
+                            f.setSubscribed(false);
+                            modified.set(true);
+                        } catch (final MethodNotSupportedException e) {
+                            LOG.error(e.getMessage(), e);
+                        } catch (final MessagingException e) {
+                            LOG.error(e.getMessage(), e);
                         }
                     }
                 }
@@ -752,6 +749,8 @@ public final class IMAPDefaultFolderChecker {
                     IMAPCommandsCollection.createFolder(f, sep, type);
                     if (1 == subscribe) {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, true);
+                    } else if (0 == subscribe) {
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
                     }
                     modified.set(true);
                     return fullName;
@@ -888,30 +887,28 @@ public final class IMAPDefaultFolderChecker {
             checkSubscribed = false;
              */
         }
-        if (checkSubscribed) {
-            if (1 == subscribe) {
-                if (!f.isSubscribed()) {
-                    try {
-                        f.setSubscribed(true);
-                    } catch (final MethodNotSupportedException e) {
-                        LOG.error(e.getMessage(), e);
-                    } catch (final MessagingException e) {
-                        LOG.error(e.getMessage(), e);
-                    } finally {
-                        modified.set(true);
-                    }
+        if (1 == subscribe) {
+            if (!f.isSubscribed()) {
+                try {
+                    f.setSubscribed(true);
+                } catch (final MethodNotSupportedException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final MessagingException e) {
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    modified.set(true);
                 }
-            } else if (0 == subscribe) {
-                if (f.isSubscribed()) {
-                    try {
-                        f.setSubscribed(false);
-                    } catch (final MethodNotSupportedException e) {
-                        LOG.error(e.getMessage(), e);
-                    } catch (final MessagingException e) {
-                        LOG.error(e.getMessage(), e);
-                    } finally {
-                        modified.set(true);
-                    }
+            }
+        } else if (0 == subscribe) {
+            if (f.isSubscribed()) {
+                try {
+                    f.setSubscribed(false);
+                } catch (final MethodNotSupportedException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final MessagingException e) {
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    modified.set(true);
                 }
             }
         }
