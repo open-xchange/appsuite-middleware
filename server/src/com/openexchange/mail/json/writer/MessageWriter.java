@@ -139,7 +139,7 @@ public final class MessageWriter {
      * @throws MailException If writing message fails
      */
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings) throws MailException {
-        return writeMailMessage(accountId, mail, displayMode, session, settings, null);
+        return writeMailMessage(accountId, mail, displayMode, session, settings, null, false, -1);
     }
 
     /**
@@ -152,10 +152,12 @@ public final class MessageWriter {
      * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
      *            storage, thus no request-specific preparations will take place.
      * @param warnings A container for possible warnings
+     * @param tokenTimeout 
+     * @token <code>true</code> to add attachment tokens
      * @return The written JSON object
      * @throws MailException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<AbstractOXException> warnings) throws MailException {
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<AbstractOXException> warnings, final boolean token, final int tokenTimeout) throws MailException {
         final MailPath mailPath;
         if (mail.getFolder() != null && mail.getMailId() != null) {
             mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
@@ -171,7 +173,7 @@ public final class MessageWriter {
         } catch (final UserConfigurationException e) {
             throw new MailException(e);
         }
-        final JSONMessageHandler handler = new JSONMessageHandler(accountId, mailPath, mail, displayMode, session, usm);
+        final JSONMessageHandler handler = new JSONMessageHandler(accountId, mailPath, mail, displayMode, session, usm, token, tokenTimeout);
         final MailMessageParser parser = new MailMessageParser();
         parser.parseMailMessage(mail, handler);
         if (null != warnings) {

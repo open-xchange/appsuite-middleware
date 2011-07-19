@@ -833,7 +833,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                         displayMode,
                         session,
                         usmNoSave,
-                        warnings);
+                        warnings,
+                        false, 
+                        -1);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -927,7 +929,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                         displayMode,
                         session,
                         usmNoSave,
-                        warnings);
+                        warnings,
+                        false,
+                        -1);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -1161,6 +1165,15 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
             tmp = paramContainer.getStringParam(PARAMETER_UNSEEN);
             final boolean unseen = (tmp != null && (STR_1.equals(tmp) || Boolean.parseBoolean(tmp)));
+            tmp = paramContainer.getStringParam("token");
+            final boolean token = (tmp != null && (STR_1.equals(tmp) || Boolean.parseBoolean(tmp)));
+            tmp = paramContainer.getStringParam("ttlMillis");
+            int ttlMillis;
+            try {
+                ttlMillis = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
+            } catch (final NumberFormatException e) {
+                ttlMillis = -1;
+            }
             tmp = null;
             /*
              * Get message
@@ -1415,7 +1428,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                         }
                         data =
-                            MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings);
+                            MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis);
                         if (doUnseen) {
                             /*
                              * Leave mail as unseen
@@ -2232,7 +2245,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                         DisplayMode.MODIFYABLE,
                         session,
                         usmNoSave,
-                        warnings);
+                        warnings,
+                        false,
+                        -1);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);

@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.JSONMessageCache;
 import com.openexchange.mail.cache.JSONMessageCacheConfiguration;
@@ -196,6 +197,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         /*
          * Stop global mail system
          */
+        AttachmentTokenRegistry.releaseInstance();
         EventPool.releaseInstance();
         JSONMessageCache.releaseInstance();
         JSONMessageCacheConfiguration.releaseInstance();
