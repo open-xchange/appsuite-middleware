@@ -707,13 +707,13 @@ public class Login extends AJAXServlet {
 
     private void configureCookie(final Cookie cookie, final boolean secure) {
         cookie.setPath("/");
+        if (cookieForceHTTPS || secure) {
+            cookie.setSecure(true);
+        }
         if (!sessiondAutoLogin) {
             return;
         }
         cookie.setMaxAge(cookieExpiry);
-        if (cookieForceHTTPS || secure) {
-            cookie.setSecure(true);
-        }
     }
 
     private void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws AjaxException, IOException {
