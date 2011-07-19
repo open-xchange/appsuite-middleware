@@ -55,11 +55,9 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * {@link RenderMap} - A map containing replacements for tokens to render a
- * {@link Template template}
+ * {@link RenderMap} - A map containing replacements for tokens to render a {@link Template template}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class RenderMap implements Cloneable {
 
@@ -107,13 +105,9 @@ public final class RenderMap implements Cloneable {
     }
 
     /**
-     * Returns <code>true</code> if this map contains no token-replacement
-     * mappings.
-     * <p>
-     * This implementation returns size() == 0.
+     * Returns <code>true</code> if this map contains no token-replacement mappings.
      * 
-     * @return <code>true</code> if this map contains no token-replacement
-     *         mappings; otherwise <code>false</code>
+     * @return <code>true</code> if this map contains no token-replacement mappings; otherwise <code>false</code>
      */
     public boolean isEmpty() {
         return map.isEmpty();
@@ -129,29 +123,23 @@ public final class RenderMap implements Cloneable {
     }
 
     /**
-     * Associates the specified replacement with the specified token in this
-     * map. If the map previously contained a mapping for this token, the old
-     * replacement is replaced.
+     * Associates the specified replacement with the specified token in this map. If the map previously contained a mapping for this token,
+     * the old replacement is replaced.
      * 
      * @param replacement The replacement to put into this map
-     * @return The previous replacement associated with specified token, or
-     *         <code>null</code> if there was no mapping for token. (A
-     *         <code>null</code> return can also indicate that the map
-     *         previously associated <code>null</code> with the specified
-     *         token.)
+     * @return The previous replacement associated with specified token, or <code>null</code> if there was no mapping for token. (A
+     *         <code>null</code> return can also indicate that the map previously associated <code>null</code> with the specified token.)
      */
     public TemplateReplacement put(final TemplateReplacement replacement) {
         return map.put(replacement.getToken(), replacement);
     }
 
     /**
-     * Returns the replacement to which this map maps the specified token, or
-     * <code>null</code> if this map contains no mapping for the specified
-     * token.
+     * Returns the replacement to which this map maps the specified token, or <code>null</code> if this map contains no mapping for the
+     * specified token.
      * 
      * @param token The token whose associated value is to be returned
-     * @return The replacement to which this map maps the specified token, or
-     *         <code>null</code> if this map contains no mapping for the
+     * @return The replacement to which this map maps the specified token, or <code>null</code> if this map contains no mapping for the
      *         specified token.
      */
     public TemplateReplacement get(final TemplateToken token) {
@@ -159,13 +147,11 @@ public final class RenderMap implements Cloneable {
     }
 
     /**
-     * Returns the replacement to which this map maps the specified token, or
-     * <code>null</code> if this map contains no mapping for the specified
-     * token.
+     * Returns the replacement to which this map maps the specified token, or <code>null</code> if this map contains no mapping for the
+     * specified token.
      * 
      * @param tokenStr The token whose associated value is to be returned
-     * @return The replacement to which this map maps the specified token, or
-     *         <code>null</code> if this map contains no mapping for the
+     * @return The replacement to which this map maps the specified token, or <code>null</code> if this map contains no mapping for the
      *         specified token.
      */
     public TemplateReplacement get(final String tokenStr) {
@@ -177,20 +163,17 @@ public final class RenderMap implements Cloneable {
     }
 
     /**
-     * Returns <code>true</code> if this map contains a mapping for the
-     * specified token.
+     * Returns <code>true</code> if this map contains a mapping for the specified token.
      * 
      * @param token The token whose presence in this map is to be tested
-     * @return <code>true</code> if this map contains a mapping for the
-     *         specified token
+     * @return <code>true</code> if this map contains a mapping for the specified token
      */
     public boolean contains(final TemplateToken token) {
         return map.containsKey(token);
     }
 
     /**
-     * Returns an iterator over the tokens in this map. The template tokens are
-     * returned in no particular order.
+     * Returns an iterator over the tokens in this map. The template tokens are returned in no particular order.
      * 
      * @return An iterator over the tokens in this map.
      */
@@ -199,8 +182,7 @@ public final class RenderMap implements Cloneable {
     }
 
     /**
-     * Returns an iterator over the replacements in this map. The replacements
-     * are returned in no particular order.
+     * Returns an iterator over the replacements in this map. The replacements are returned in no particular order.
      * 
      * @return An iterator over the replacements in this map.
      */
@@ -212,23 +194,18 @@ public final class RenderMap implements Cloneable {
      * Removes the mapping for specified token from this map if present.
      * 
      * @param token The token whose mapping is to be removed from the map
-     * @return The previous replacement associated with specified token, or
-     *         <code>null</code> if there was no entry for token. (A
-     *         <code>null</code> return can also indicate that the map
-     *         previously associated <code>null</code> with the specified
-     *         token.)
+     * @return The previous replacement associated with specified token, or <code>null</code> if there was no entry for token. (A
+     *         <code>null</code> return can also indicate that the map previously associated <code>null</code> with the specified token.)
      */
     public TemplateReplacement remove(final TemplateToken token) {
         return map.remove(token);
     }
 
     /**
-     * Applies specified changed status to all contained token-replacement
-     * mappings.
+     * Applies specified changed status to all contained token-replacement mappings.
      * 
      * @param changed The changed status to apply
-     * @return This render map with specified changed status applied to all
-     *         contained token-replacement mappings.
+     * @return This render map with specified changed status applied to all contained token-replacement mappings.
      */
     public RenderMap applyChangedStatus(final boolean changed) {
         final Iterator<TemplateReplacement> iter = map.values().iterator();
@@ -243,8 +220,7 @@ public final class RenderMap implements Cloneable {
      * Applies specified locale to all contained token-replacement mappings.
      * 
      * @param locale The locale to apply
-     * @return This render map with specified locale applied to all contained
-     *         token-replacement mappings.
+     * @return This render map with specified locale applied to all contained token-replacement mappings.
      */
     public RenderMap applyLocale(final Locale locale) {
         final Iterator<TemplateReplacement> iter = map.values().iterator();
@@ -259,8 +235,7 @@ public final class RenderMap implements Cloneable {
      * Applies specified time zone to all contained token-replacement mappings.
      * 
      * @param timeZone The time zone to apply
-     * @return This render map with specified time zone applied to all contained
-     *         token-replacement mappings.
+     * @return This render map with specified time zone applied to all contained token-replacement mappings.
      */
     public RenderMap applyTimeZone(final TimeZone timeZone) {
         final Iterator<TemplateReplacement> iter = map.values().iterator();
@@ -288,8 +263,7 @@ public final class RenderMap implements Cloneable {
     }
 
     /**
-     * Merges this render map's token-replacement mappings with specified render
-     * map's token-replacement mappings.
+     * Merges this render map's token-replacement mappings with specified render map's token-replacement mappings.
      * 
      * @param other The other render map to merge with
      * @return This render map merged with specified render map
