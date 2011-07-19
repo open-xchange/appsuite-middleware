@@ -168,8 +168,18 @@ public class LocalFileStorage implements FileStorage {
      */
     protected LocalFileStorage() {
         super();
-        storage = null;
+        storage = assignStorage();
     }
+
+    //Ugly workaround because someone insisted to make storage final:
+	private File assignStorage() {
+		try {
+        	return File.createTempFile("test-storage", "tmp");
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
     /**
      * Checks, if Statefile is correct. Especially if nextEntry is right and all Files really exist.
