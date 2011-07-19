@@ -107,14 +107,16 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @throws MailException If instance initialization fails
      */
     public static EnqueueingMailAccessCache getInstance(final int queueCapacity) throws MailException {
-        if (null == singleton) {
+        EnqueueingMailAccessCache tmp = singleton;
+        if (null == tmp) {
             synchronized (EnqueueingMailAccessCache.class) {
-                if (null == singleton) {
-                    singleton = new EnqueueingMailAccessCache(queueCapacity);
+                tmp = singleton;
+                if (null == tmp) {
+                    singleton = tmp = new EnqueueingMailAccessCache(queueCapacity);
                 }
             }
         }
-        return singleton;
+        return tmp;
     }
 
     /**
