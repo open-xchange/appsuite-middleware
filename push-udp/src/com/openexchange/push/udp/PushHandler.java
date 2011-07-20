@@ -92,7 +92,12 @@ public class PushHandler implements EventHandler {
             if (obj == null) {
                 return;
             }
-            event = (CommonEvent) obj;
+            try {
+                event = (CommonEvent) obj;
+            } catch (final ClassCastException cce) {
+                LOG.warn("Unexpected type: " + cce.getMessage(), cce);
+                return;
+            }
         }
 
         final int contextId = event.getContextId();
@@ -118,7 +123,7 @@ public class PushHandler implements EventHandler {
         case Types.TASK:
         case Types.CONTACT:
         case Types.FOLDER:
-            for (Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
+            for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
                 event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()));
             }
             break;
@@ -126,7 +131,7 @@ public class PushHandler implements EventHandler {
             event(1, new int[] { event.getUserId() }, module, ctx, 0);
             break;
         case Types.INFOSTORE:
-            for (Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
+            for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
                 event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(((DocumentMetadata) event.getActionObj()).getLastModified()));
             }
             break;
@@ -143,7 +148,7 @@ public class PushHandler implements EventHandler {
             PushOutputQueue.add(new PushObject(folderId, module, ctx.getContextId(), users, false, timestamp));
         } catch (final EventException e) {
             LOG.error(e.getMessage(), e);
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }
     }
@@ -152,14 +157,14 @@ public class PushHandler implements EventHandler {
         return lastModified == null ? 0 : lastModified.getTime();
     }
 
-    private static long getTimestamp(DataObject object) {
+    private static long getTimestamp(final DataObject object) {
         return null == object ? 0 : getTimestamp(object.getLastModified()); 
     }
 
-    private static final Map<Integer, Set<Integer>> transform(Map<Integer, Set<Integer>> map) {
-        Map<Integer, Set<Integer>> retval = new HashMap<Integer, Set<Integer>>();
-        for (Entry<Integer, Set<Integer>> entry : map.entrySet()) {
-            for (Integer folderId : entry.getValue()) {
+    private static final Map<Integer, Set<Integer>> transform(final Map<Integer, Set<Integer>> map) {
+        final Map<Integer, Set<Integer>> retval = new HashMap<Integer, Set<Integer>>();
+        for (final Entry<Integer, Set<Integer>> entry : map.entrySet()) {
+            for (final Integer folderId : entry.getValue()) {
                 Set<Integer> users = retval.get(folderId);
                 if (null == users) {
                     users = new HashSet<Integer>();
