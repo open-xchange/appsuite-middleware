@@ -74,3 +74,6 @@ Whitelist=@oxgroupwaresysconfdir@/whitelist.properties
 # Server name registered by registerserver in the configuration database
 # can be read with listservers
 SERVER_NAME=dev-prototyp
+
+# The scopes to use in the config cascade, and their precedence
+com.openexchange.config.cascade.scopes=user, context, contextSets, server
