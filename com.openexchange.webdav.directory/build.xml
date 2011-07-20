@@ -30,6 +30,7 @@
     
 	<property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar" />
+	<property name="webdavacljar" value="com.openexchange.webdav.acl.jar" />
 	
     <property name="jdomjar" value="jdom-1.1.jar"/>
 
@@ -44,6 +45,7 @@
     	<pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${serverjar}"/>
     	<pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
+    	<pathelement location="${bundlesdir}/${webdavacljar}"/>
     			
     	
     </path>
