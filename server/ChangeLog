@@ -1,3 +1,7 @@
+* 2011-07-20 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19547: Resolve groups in update cycle, retain all resources of an appointment, declare only primary mail address as private address.
+
 * 2011-07-19 - francisco.laguna@open-xchange.com
 
  - Bugfix #19484: Only patch appointments once for use in CalDAV interface

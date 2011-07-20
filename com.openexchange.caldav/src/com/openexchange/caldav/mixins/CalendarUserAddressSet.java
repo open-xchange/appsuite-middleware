@@ -71,12 +71,10 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        String[] aliases = sessionHolder.getUser().getAliases();
+        String mail = sessionHolder.getUser().getMail();
 
         StringBuilder addresses = new StringBuilder();
-        for (String alias : aliases) {
-            addresses.append("<D:href>mailto:").append(alias).append("</D:href>");
-        }
+        addresses.append("<D:href>mailto:").append(mail).append("</D:href>");
         
         addresses.append("<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"</D:href>");
         
