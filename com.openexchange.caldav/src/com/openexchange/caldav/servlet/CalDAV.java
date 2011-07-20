@@ -62,6 +62,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -69,6 +70,9 @@ import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
 import com.openexchange.tools.webdav.LoginCustomizer;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.caldav.servlet.CaldavPerformer.Action;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
@@ -78,6 +82,13 @@ import com.openexchange.caldav.servlet.CaldavPerformer.Action;
 public class CalDAV extends OXServlet {
 
     private static final transient Log LOG = LogFactory.getLog(CalDAV.class);
+    
+    private static ServiceLookup services;
+    
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        services = serviceLookup;
+    }
+
 
     @Override
     protected Interface getInterface() {
@@ -158,6 +169,10 @@ public class CalDAV extends OXServlet {
         ServerSession session;
         try {
             session = new ServerSessionAdapter(getSession(req));
+            if (!checkPermission(session)) {
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
         } catch (final ContextException exc) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
@@ -168,6 +183,16 @@ public class CalDAV extends OXServlet {
             if (mustLogOut(req)) {
                 logout(session, req, resp);
             }
+        }
+    }
+
+    private boolean checkPermission(ServerSession session) {
+        try {
+            ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
+            return property.isDefined() && property.get();
+
+        } catch (ConfigCascadeException e) {
+            return false;
         }
     }
 

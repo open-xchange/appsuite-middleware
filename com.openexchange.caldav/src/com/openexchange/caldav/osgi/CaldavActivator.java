@@ -94,6 +94,7 @@ public class CaldavActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
+            CalDAV.setServiceLookup(this);
             CaldavPerformer.setServices(this);
             
             rememberTracker(new ServletRegistration(context, new CalDAV(), "/servlet/dav/caldav"));

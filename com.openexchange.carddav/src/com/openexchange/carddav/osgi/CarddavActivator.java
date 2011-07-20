@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.carddav.mixins.AddressbookHomeSet;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
@@ -16,7 +17,7 @@ public class CarddavActivator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(CarddavActivator.class);
     
-    private static final Class<?>[] NEEDED = new Class[]{FolderService.class};
+    private static final Class<?>[] NEEDED = new Class[]{FolderService.class, ConfigViewFactory.class};
     private OSGiPropertyMixin mixin;
 
     @Override
@@ -27,6 +28,7 @@ public class CarddavActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
+            CardDAV.setServiceLookup(this);
             CarddavPerformer.setServices(this);
             
             rememberTracker(new ServletRegistration(context, new CardDAV(), "/servlet/dav/carddav"));
