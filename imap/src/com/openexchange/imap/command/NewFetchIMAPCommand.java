@@ -1133,7 +1133,6 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param clazz The item class to look for
      * @param fetchResponse The <i>FETCH</i> response
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
-     * @see #getItemOf(Class, FetchResponse, String)
      */
     protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
