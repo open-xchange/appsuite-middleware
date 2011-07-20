@@ -79,6 +79,10 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigCascadeException;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
@@ -97,7 +101,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ReportingMBean}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ReportingMBean implements DynamicMBean {
@@ -157,7 +161,8 @@ public class ReportingMBean implements DynamicMBean {
                 for (Integer contextId : allContextIds) {
                     userCount += userService.listAllUser(contextService.getContext(contextId.intValue())).length;
                 }
-                CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] { I(allContextIds.size()), I(userCount) });
+                CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] {
+                    I(allContextIds.size()), I(userCount) });
                 total.put(value);
             } catch (OpenDataException e) {
                 LOG.error(e.getMessage(), e);
@@ -167,8 +172,7 @@ public class ReportingMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
             }
             return total;
-        } else
-        if ("Detail".equals(attribute)) {
+        } else if ("Detail".equals(attribute)) {
             return generateDetailTabular(contextService, userService, configurationService);
         }
         throw new AttributeNotFoundException("Cannot find " + attribute + " attribute ");
@@ -194,7 +198,8 @@ public class ReportingMBean implements DynamicMBean {
                 TabularDataSupport moduleAccessCombinations = new TabularDataSupport(moduleAccessCombinationsType);
                 consolidateAccessCombinations(configs, userService, moduleAccessCombinations);
                 CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] {
-                    contextId, getAdminPermission(contextAdmin, configs), I(configs.length), calcAge(created), created, sb.toString(), moduleAccessCombinations });
+                    contextId, getAdminPermission(contextAdmin, configs), I(configs.length), calcAge(created), created, sb.toString(),
+                    moduleAccessCombinations });
                 detail.put(value);
             }
         } catch (ContextException e) {
@@ -213,12 +218,18 @@ public class ReportingMBean implements DynamicMBean {
 
     private void consolidateAccessCombinations(UserConfiguration[] configs, UserService userService, TabularDataSupport moduleAccessCombinations) throws OpenDataException, UserException {
         Map<Integer, Integer[]> combinations = new HashMap<Integer, Integer[]>();
+        ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         for (UserConfiguration config : configs) {
             User user = userService.getUser(config.getUserId(), config.getContext());
             Integer accessCombination = I(config.getPermissionBits());
+            try {
+                accessCombination = modifyForConfigCascade(accessCombination, configViews.getView(user.getId(), config.getContext().getContextId()));
+            } catch (ConfigCascadeException e) {
+                // Skip
+            }
             Integer[] users = combinations.get(accessCombination);
             if (null == users) {
-                users = new Integer[]{I(1), user.isMailEnabled() ? I(0) : I(1)};
+                users = new Integer[] { I(1), user.isMailEnabled() ? I(0) : I(1) };
             } else {
                 users[0] = I(users[0].intValue() + 1);
                 if (!user.isMailEnabled()) {
@@ -232,7 +243,22 @@ public class ReportingMBean implements DynamicMBean {
                 entry.getKey(), entry.getValue()[0], entry.getValue()[1] }));
         }
     }
-    
+
+    private Integer modifyForConfigCascade(Integer accessCombination, ConfigView configView) throws ConfigCascadeException {
+        ComposedConfigProperty<Boolean> caldav = configView.property("com.openexchange.caldav.enabled", boolean.class);
+        ComposedConfigProperty<Boolean> carddav = configView.property("com.openexchange.carddav.enabled", boolean.class);
+        
+        if (caldav.isDefined() && caldav.get()) {
+            accessCombination =  (accessCombination | UserConfiguration.CALDAV);
+        } 
+        
+        if (carddav.isDefined() && carddav.get()) {
+            accessCombination =  (accessCombination | UserConfiguration.CARDDAV);
+        }
+        
+        return accessCombination;
+    }
+
     private Integer getAdminPermission(int contextAdmin, UserConfiguration[] configs) {
         for (UserConfiguration config : configs) {
             if (config.getUserId() == contextAdmin) {
@@ -324,19 +350,47 @@ public class ReportingMBean implements DynamicMBean {
             totalRow = new CompositeType("Total row", "A total row", totalNames, totalDescriptions, totalTypes);
             totalType = new TabularType("Total", "Total view", totalRow, totalNames);
 
-            String[] moduleAccessCombinationDescriptions = { "Integer value of the module access combination", "number of users configured with this module access combination", "inactive subset of useres configured with this module access combination" };
+            String[] moduleAccessCombinationDescriptions = {
+                "Integer value of the module access combination", "number of users configured with this module access combination",
+                "inactive subset of useres configured with this module access combination" };
             OpenType[] moduleAccessCombinationTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
-            moduleAccessPermission = new CompositeType("Module access permission", "A module access combination and the number of users having it", moduleAccessCombinationNames, moduleAccessCombinationDescriptions, moduleAccessCombinationTypes);
-            moduleAccessCombinationsType = new TabularType("Module access permission combinations", "The different access combinations used in this context", moduleAccessPermission, new String[] { "module access combination" });
+            moduleAccessPermission = new CompositeType(
+                "Module access permission",
+                "A module access combination and the number of users having it",
+                moduleAccessCombinationNames,
+                moduleAccessCombinationDescriptions,
+                moduleAccessCombinationTypes);
+            moduleAccessCombinationsType = new TabularType(
+                "Module access permission combinations",
+                "The different access combinations used in this context",
+                moduleAccessPermission,
+                new String[] { "module access combination" });
 
-            String[] detailDescriptions = { "Context identifier", "Context admin permission", "Number of users", "Context age in days", "Date and time of context creation", "Login mappings", "Module access permission combinations" };
-            OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, SimpleType.STRING, moduleAccessCombinationsType };
+            String[] detailDescriptions = {
+                "Context identifier", "Context admin permission", "Number of users", "Context age in days",
+                "Date and time of context creation", "Login mappings", "Module access permission combinations" };
+            OpenType[] detailTypes = {
+                SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, SimpleType.STRING,
+                moduleAccessCombinationsType };
             detailRow = new CompositeType("Detail row", "A detail row", detailNames, detailDescriptions, detailTypes);
             detailType = new TabularType("Detail", "Detail view", detailRow, new String[] { "identifier" });
 
-            OpenMBeanAttributeInfo totalAttribute = new OpenMBeanAttributeInfoSupport("Total", "Total contexts and users.", totalType, true, false, false);
-            OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport("Detail", "Detailed report about contexts and users", detailType, true, false, false);
-            return new OpenMBeanInfoSupport(this.getClass().getName(), "Context and user reporting.", new OpenMBeanAttributeInfo[] { totalAttribute, detailAttribute }, null, null, null);
+            OpenMBeanAttributeInfo totalAttribute = new OpenMBeanAttributeInfoSupport(
+                "Total",
+                "Total contexts and users.",
+                totalType,
+                true,
+                false,
+                false);
+            OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport(
+                "Detail",
+                "Detailed report about contexts and users",
+                detailType,
+                true,
+                false,
+                false);
+            return new OpenMBeanInfoSupport(this.getClass().getName(), "Context and user reporting.", new OpenMBeanAttributeInfo[] {
+                totalAttribute, detailAttribute }, null, null, null);
         } catch (OpenDataException e) {
             LOG.error(e.getMessage(), e);
         }

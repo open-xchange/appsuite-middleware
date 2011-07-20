@@ -215,6 +215,18 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * The permission bit for denied portal access.
      */
     public static final int DENIED_PORTAL = 1 << 28;
+    
+    /**
+     * The permission bit for caldav access. ATTENTION: This is actually handled by the config cascade!
+     */
+    public static final int CALDAV = 1 << 29;
+    
+    
+    /**
+     * The permission bit for carddav access. ATTENTION: This is actually handled by the config cascade!
+     */
+    public static final int CARDDAV = 1 << 30;
+    
 
     /*-
      * Field members
