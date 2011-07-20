@@ -20,6 +20,11 @@
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
+    <!-- Replacements -->
+    <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+    <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
+
+	
     <!-- Bundle dependencies -->
     <property name="xmlBundle" value="com.openexchange.xml"/>
 
