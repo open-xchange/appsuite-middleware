@@ -1,3 +1,9 @@
+open-xchange-subscribe (6.20.0.0-17) unstable; urgency=low
+
+  * build for public ptf 2011-07-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 20 Jul 2011 15:09:04 +0000
+
 open-xchange-subscribe (6.20.0.0-16) unstable; urgency=low
 
   * build for public ptf 2011-07-06
