@@ -292,36 +292,6 @@ public final class IMAPDefaultFolderChecker {
                             keepgoing = false;
                             try {
                                 sequentiallyCheckFolders(prefix, sep, type, storageService, mailSessionCache, con);
-                            } catch (final RetryWithINBOXPrefixException e) {
-                                final MailAccount mailAccount = getMailAccount(storageService, con);
-                                final MailAccountDescription mad = new MailAccountDescription();
-                                final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
-                                mad.setId(accountId);
-                                mad.setConfirmedHamFullname("INBOX" + sep + mailAccount.getConfirmedHamFullname());
-                                attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
-                                mad.setConfirmedSpamFullname("INBOX" + sep + mailAccount.getConfirmedSpamFullname());
-                                attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
-                                mad.setDraftsFullname("INBOX" + sep + mailAccount.getDraftsFullname());
-                                attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
-                                mad.setSentFullname("INBOX" + sep + mailAccount.getSentFullname());
-                                attributes.add(Attribute.SENT_FULLNAME_LITERAL);
-                                mad.setSpamFullname("INBOX" + sep + mailAccount.getSpamFullname());
-                                attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
-                                mad.setTrashFullname("INBOX" + sep + mailAccount.getTrashFullname());
-                                attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
-                                try {
-                                    storageService.updateMailAccount(
-                                        mad,
-                                        attributes,
-                                        session.getUserId(),
-                                        session.getContextId(),
-                                        IMAPServiceRegistry.getService(SecretService.class).getSecret(session),
-                                        con,
-                                        true);
-                                } catch (final MailAccountException mae) {
-                                    throw new IMAPException(mae);
-                                }
-                                keepgoing = true;
                             } catch (final RetryOtherPrefixException e) {
                                 prefix = e.getPrefix();
                                 final MailAccount mailAccount = getMailAccount(storageService, con);
@@ -740,13 +710,15 @@ public final class IMAPDefaultFolderChecker {
                     modified.set(true);
                     return fullName;
                 } catch (final MessagingException e) {
+                    final String prfx = "INBOX" + sep;
+                    LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
                     ListLsubCache.clearCache(accountId, session);
                     modified.set(true);
                     if (fullName.indexOf(sep) < 0) {
                         /*
                          * Creation at root level failed...
                          */
-                        throw new RetryWithINBOXPrefixException(e.getMessage(), e);
+                        throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
                     }
                 }
             } else {
@@ -785,9 +757,11 @@ public final class IMAPDefaultFolderChecker {
                         IMAPCommandsCollection.createFolder(f, sep, type);
                         modified.set(true);
                     } catch (final MessagingException e) {
+                        final String prfx = prefix.length() == 0 ? "INBOX" + sep : "";
+                        LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
                         ListLsubCache.clearCache(accountId, session);
                         modified.set(true);
-                        throw new RetryOtherPrefixException(prefix.length() == 0 ? "INBOX" + sep : "", e.getMessage(), e);
+                        throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
                     }
                 } else {
                     if (MailAccount.DEFAULT_ID == accountId) {
@@ -922,22 +896,6 @@ public final class IMAPDefaultFolderChecker {
      */
     private void setSeparator(final char separator, final MailSessionCache mailSessionCache) {
         mailSessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), Character.valueOf(separator));
-    }
-
-    private static final class RetryWithINBOXPrefixException extends RuntimeException {
-
-        private static final long serialVersionUID = -8838371974082572543L;
-
-        /**
-         * Initializes a new {@link RetryWithINBOXPrefixException}.
-         * 
-         * @param message
-         * @param cause
-         */
-        public RetryWithINBOXPrefixException(final String message, final Throwable cause) {
-            super(message, cause);
-        }
-
     }
 
     private static final class RetryOtherPrefixException extends RuntimeException {
