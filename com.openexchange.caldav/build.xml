@@ -39,6 +39,7 @@
 	<property name="calendarjar" value="com.openexchange.calendar.jar" />
 	<property name="cascadejar" value="com.openexchange.config.cascade.jar" />
 	<property name="webdavacljar" value="com.openexchange.webdav.acl.jar" />
+	<property name="webdavdirectoryjar" value="com.openexchange.webdav.directory.jar" />
 
 	<property name="jdomjar" value="jdom-1.1.jar" />
 
@@ -54,6 +55,7 @@
 		<pathelement location="${bundlesdir}/${calendarjar}" />
 		<pathelement location="${bundlesdir}/${cascadejar}" />
 		<pathelement location="${bundlesdir}/${webdavacljar}" />
+		<pathelement location="${bundlesdir}/${webdavdirectoryjar}" />
 		<pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}" />
 
 
