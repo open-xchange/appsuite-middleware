@@ -49,10 +49,15 @@
 
 package com.openexchange.push;
 
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.event.CommonEvent;
+import com.openexchange.event.EventFactoryService;
+import com.openexchange.groupware.Types;
 import com.openexchange.push.internal.ServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -85,16 +90,35 @@ public final class PushUtility {
     public static void triggerOSGiEvent(final String folder, final Session session) throws PushException {
         try {
             final EventAdmin eventAdmin = ServiceRegistry.getInstance().getService(EventAdmin.class, true);
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
             /*
              * Create event's properties
              */
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(4);
             properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
             properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
             properties.put(PushEventConstants.PROPERTY_SESSION, session);
             properties.put(PushEventConstants.PROPERTY_FOLDER, folder);
+            /*
+             * Add common event to properties for remote distribution via UDP-push
+             */
+            {
+                final EventFactoryService eventFactoryService = ServiceRegistry.getInstance().getService(EventFactoryService.class, true);
+                final CommonEvent commonEvent =
+                    eventFactoryService.newCommonEvent(
+                        contextId,
+                        userId,
+                        Collections.<Integer, Set<Integer>> emptyMap(),
+                        CommonEvent.INSERT,
+                        Types.EMAIL,
+                        null,
+                        null,
+                        folder,
+                        folder,
+                        session);
+                properties.put(CommonEvent.EVENT_KEY, commonEvent);
+            }
             /*
              * Create event with push topic
              */
