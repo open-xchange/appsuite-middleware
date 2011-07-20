@@ -233,7 +233,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         try {
             final List<MessagingMessage> msgs;
             if (null != searchTerm) {
-                final List<Status> friendsTimeline = twitterAccess.getFriendsTimeline();
+                final List<Status> friendsTimeline = twitterAccess.getHomeTimeline();
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
                     final TwitterMessagingMessage message = new TwitterMessagingMessage(status, session);
@@ -242,7 +242,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                     }
                 }
             } else {
-                final List<Status> friendsTimeline = twitterAccess.getFriendsTimeline();
+                final List<Status> friendsTimeline = twitterAccess.getHomeTimeline();
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
                     final TwitterMessagingMessage message = new TwitterMessagingMessage(status, session);
