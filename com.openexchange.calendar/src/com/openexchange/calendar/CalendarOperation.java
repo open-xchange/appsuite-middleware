@@ -1818,7 +1818,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs)
                         throws SQLException {
                     final String organizer = rs.getString(columnCount);
-                    cdao.setOrganizer(organizer);
+                    if (!rs.wasNull()) {
+                        cdao.setOrganizer(organizer);
+                    }
                 }
             });
             put(I(Appointment.UID), new FieldFiller() {

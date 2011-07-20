@@ -57,6 +57,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
+import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 
@@ -387,5 +388,9 @@ public final class InternalList {
         
         // Correct the attachment count in the dates table
         new CorrectAttachmentCountInAppointments(),
+
+        // Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL
+        // NULL. This task corrects this.
+        new CorrectOrganizerInAppointments()
     };
 }
