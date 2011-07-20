@@ -149,6 +149,15 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-791
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/common/excludedupdatetasks.properties
+   if ! grep "com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments" >/dev/null $pfile; then
+       echo "# Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL NULL" >> $pfile
+       echo "# This task corrects this." >> $pfile
+       echo "!com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments" >> $pfile
+   fi
+ 
    # SoftwareChange_Request-788
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/system.properties
