@@ -4,7 +4,7 @@
 Name:           open-xchange-caldav
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@ open-xchange-webdav-acl >= @OXVERSION@ open-xchange-xml >= @OXVERSION@   
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@ open-xchange-webdav-directory >= @OXVERSION@ open-xchange-webdav-acl >= @OXVERSION@ open-xchange-xml >= @OXVERSION@   
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Conversion Servlet
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@ open-xchange-webdav-acl >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ 
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@ open-xchange-webdav-directory >= @OXVERSION@ open-xchange-webdav-acl >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ 
 #
 
 %description
