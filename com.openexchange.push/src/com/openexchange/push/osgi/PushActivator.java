@@ -60,6 +60,7 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushManagerService;
@@ -111,6 +112,10 @@ public final class PushActivator implements BundleActivator {
             /*
              * Thread pool service tracker
              */
+            trackers.add(new ServiceTracker(context, ConfigurationService.class.getName(), new RegistryServiceTrackerCustomizer<ConfigurationService>(
+                context,
+                ServiceRegistry.getInstance(),
+                ConfigurationService.class)));
             trackers.add(new ServiceTracker(context, ThreadPoolService.class.getName(), new RegistryServiceTrackerCustomizer<ThreadPoolService>(
                     context,
                     ServiceRegistry.getInstance(),

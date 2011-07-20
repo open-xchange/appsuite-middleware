@@ -1,3 +1,7 @@
+* 2011-07-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 19688: Introduced white-list property to specify clients which are allowed to receive a notification about a new mail (mail-push)
+
 * 2011-07-20 - francisco.laguna@open-xchange.com
 
  - Bugfix #19547: Resolve groups in update cycle, retain all resources of an appointment, declare only primary mail address as private address.

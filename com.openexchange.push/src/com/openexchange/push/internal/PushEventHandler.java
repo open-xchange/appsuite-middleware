@@ -158,10 +158,10 @@ public final class PushEventHandler implements EventHandler {
                     /*
                      * Check session's client identifier
                      */
-                    final String client = session.getClient();
-                    if (CLIENT_OX_GUI.equals(client) || null == client) {
+                    final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
+                    if (!clientWhitelist.isEmpty() && !clientWhitelist.isAllowed(session.getClient())) {
                         /*
-                         * No push listener for OX web front-end
+                         * No push listener for the client associated with current session.
                          */
                         return;
                     }
