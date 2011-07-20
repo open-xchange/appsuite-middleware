@@ -131,7 +131,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) {
+    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
     	if (move) {
     		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
     		mailAccess.connect();
