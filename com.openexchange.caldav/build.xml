@@ -84,9 +84,14 @@
 
 	<target name="patchConfigFiles">
 		<fail message="Define conf.subst.patch." unless="conf.subst.patch" />
-		<move tofile="${patch.conf.dir}/crawler.properties" file="${patch.conf.dir}/crawler.properties.in" overwrite="true" />
-		<replace file="${patch.conf.dir}/crawler.properties">
+		<move tofile="${patch.conf.dir}/caldav.properties" file="${patch.conf.dir}/caldav.properties.in" overwrite="true" />
+		<replace file="${patch.conf.dir}/caldav.properties">
 			<replacefilter token="@oxgroupwaresysconfdir@" value="${conf.install.dir}" />
+		</replace>
+		<fail message="Define conf.subst.patch." unless="conf.subst.patch" />
+		<move tofile="${patch.conf.dir}/contextSets/caldav.yml" file="${patch.conf.dir}/contextSets/caldav.yml.in" overwrite="true" />
+		<replace file="${patch.conf.dir}/contextSets/caldav.yml">
+			<replacefilter token="@oxgroupwaresysconfdir@" value="${conf.install.dir}/contextSets" />
 		</replace>
 	</target>
 
