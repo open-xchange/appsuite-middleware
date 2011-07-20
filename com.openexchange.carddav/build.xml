@@ -25,7 +25,6 @@
     <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
     <!-- Bundle dependencies -->
-    <property name="commonBundle" value="com.openexchange.common"/>
     <property name="xmlBundle" value="com.openexchange.xml"/>
 
     <!-- JAR names for classpath -->
