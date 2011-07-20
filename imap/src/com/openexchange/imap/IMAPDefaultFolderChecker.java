@@ -82,6 +82,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceException;
@@ -292,19 +293,7 @@ public final class IMAPDefaultFolderChecker {
                             try {
                                 sequentiallyCheckFolders(prefix, sep, type, storageService, mailSessionCache, con);
                             } catch (final RetryWithINBOXPrefixException e) {
-                                MailAccount mailAccount = null;
-                                try {
-                                    final MailAccount[] accounts =
-                                        storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
-                                    for (final MailAccount acc : accounts) {
-                                        if (acc.getId() == accountId) {
-                                            mailAccount = acc;
-                                            break;
-                                        }
-                                    }
-                                } catch (final MailAccountException mae) {
-                                    throw new MailException(mae);
-                                }
+                                final MailAccount mailAccount = getMailAccount(storageService, con);
                                 final MailAccountDescription mad = new MailAccountDescription();
                                 final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
                                 mad.setId(accountId);
@@ -335,19 +324,7 @@ public final class IMAPDefaultFolderChecker {
                                 keepgoing = true;
                             } catch (final RetryOtherPrefixException e) {
                                 prefix = e.getPrefix();
-                                MailAccount mailAccount = null;
-                                try {
-                                    final MailAccount[] accounts =
-                                        storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
-                                    for (final MailAccount acc : accounts) {
-                                        if (acc.getId() == accountId) {
-                                            mailAccount = acc;
-                                            break;
-                                        }
-                                    }
-                                } catch (final MailAccountException mae) {
-                                    throw new MailException(mae);
-                                }
+                                final MailAccount mailAccount = getMailAccount(storageService, con);
                                 final MailAccountDescription mad = new MailAccountDescription();
                                 final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
                                 mad.setId(accountId);
@@ -461,24 +438,32 @@ public final class IMAPDefaultFolderChecker {
         }
     }
 
+    private MailAccount getMailAccount(final MailAccountStorageService storageService, final Connection con) throws MailException {
+        try {
+            final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
+            for (final MailAccount acc : accounts) {
+                if (acc.getId() == accountId) {
+                    return acc;
+                }
+            }
+            throw MailAccountExceptionMessages.NOT_FOUND.create(
+                Integer.valueOf(accountId),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
+        } catch (final MailAccountException mae) {
+            throw new MailException(mae);
+        }
+    }
+
     private void sequentiallyCheckFolders(final String prefix, final char sep, final int type, final MailAccountStorageService storageService, final MailSessionCache mailSessionCache, final Connection con) throws MailException {
         /*
          * Load mail account
          */
         final boolean isSpamOptionEnabled;
-        MailAccount mailAccount = null;
-        try {
-            final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
-            for (final MailAccount acc : accounts) {
-                if (acc.getId() == accountId) {
-                    mailAccount = acc;
-                    break;
-                }
-            }
+        final MailAccount mailAccount = getMailAccount(storageService, con);
+        {
             final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
             isSpamOptionEnabled = usm.isSpamOptionEnabled();
-        } catch (final MailAccountException e) {
-            throw new MailException(e);
         }
         /*
          * Get default folders names and full names
