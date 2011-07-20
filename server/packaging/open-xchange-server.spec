@@ -149,6 +149,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-788
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/system.properties
+   if ! ox_exists_property com.openexchange.config.cascade.scopes $pfile; then
+       ox_set_property com.openexchange.config.cascade.scopes "user, context, contextSets, server" $pfile
+   fi
+
    # SoftwareChange_Request-784
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/imap.properties
