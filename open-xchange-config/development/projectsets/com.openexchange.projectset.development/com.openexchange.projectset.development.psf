@@ -21,5 +21,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.webdav.acl,com.openexchange.webdav.acl"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.mdns,com.openexchange.mdns"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.service.messaging,com.openexchange.service.messaging"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.webdav.directory,com.openexchange.webdav.directory"/>
 </provider>
 </psf>
