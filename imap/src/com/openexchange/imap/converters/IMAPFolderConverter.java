@@ -83,6 +83,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.ProtocolException;
@@ -423,7 +424,10 @@ public final class IMAPFolderConverter {
                     mailFolder.setDeletedMessageCount(-1);
                 }
                 mailFolder.setSubscribed(MailProperties.getInstance().isSupportSubscription() ? ("INBOX".equals(mailFolder.getFullname()) ? true : listEntry.isSubscribed()) : true);
-                if (imapConfig.isSupportsACLs()) {
+                /*
+                 * Parse ACLs to user/group permissions for primary account only.
+                 */
+                if (MailAccount.DEFAULT_ID == accountId && imapConfig.isSupportsACLs()) {
                     // Check if ACLs can be read; meaning GETACL is allowed
                     if (selectable && exists && imapConfig.getACLExtension().canGetACL(ownRights)) {
                         try {
