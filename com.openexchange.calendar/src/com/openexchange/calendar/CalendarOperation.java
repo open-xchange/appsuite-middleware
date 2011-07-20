@@ -698,8 +698,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         final int startDateZoneOffset = tz.getOffset(startDate);
         final long endDate = cdao.containsUntil() && cdao.getUntil() != null ? cdao.getUntil().getTime() : edao.getUntil().getTime();
-        long startTime = cdao.getStartDate().getTime();
-        long endTime = (cdao.getEndDate().getTime());
+        long startTime = cdao.getStartDate() == null ? edao.getStartDate().getTime() : cdao.getStartDate().getTime();
+        long endTime = cdao.getEndDate() == null ? edao.getEndDate().getTime() : cdao.getEndDate().getTime();
         final int startTimeZoneOffset = tz.getOffset(startTime);
         startTime = startTime % Constants.MILLI_DAY;
         endTime = endTime % Constants.MILLI_DAY  + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
@@ -1366,6 +1366,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     }
                 }
             }
+            if (ret == CalendarCollection.CHANGE_RECURRING_TYPE) {
+                //calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
+            }
             return ret;
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && cdao.getRecurrenceType() != edao.getRecurrenceType()) {
             // Recurring Pattern changed! TODO: Remove all exceptions
@@ -1514,6 +1517,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             // Set proper end time
             cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
             pattern_change = true;
+        }
+        if (cdao.containsEndDate() && !cdao.getEndDate().equals(edao.getEndDate())) {
+            cdao.setEndDate(calculateRealRecurringEndDate(cdao));
         }
         if (changeUntil(cdao, edao)) {
             if (!completenessChecked) {

@@ -1,3 +1,7 @@
+* 2011-07-20 - martin.herfurth@open-xchange.com
+
+ - Bugfix #19109: Moving a sequence destroys the appointment.
+
 * 2011-07-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 19688: Introduced white-list property to specify clients which are allowed to receive a notification about a new mail (mail-push)
