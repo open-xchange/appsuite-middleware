@@ -82,7 +82,7 @@ public abstract class SimpleStatementsUpdateTask extends SimpleUpdateTask {
     }
 
     @Override
-    protected void perform(Connection con) throws SQLException {
+    protected final void perform(Connection con) throws SQLException {
         for (StatementHolder sqlStatement : statements) {
             sqlStatement.execute(con);
         }
