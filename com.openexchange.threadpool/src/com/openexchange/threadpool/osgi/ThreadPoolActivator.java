@@ -55,6 +55,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.Log;
 import com.openexchange.log.LogService;
 import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
@@ -121,6 +122,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
                 threadPool.prestartAllCoreThreads();
             }
             logService = new LogServiceImpl(threadPool);
+            Log.set(logService);
             /*
              * Service trackers
              */
@@ -178,6 +180,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
             if (null != logService) {
                 logService.stop();
                 logService = null;
+                Log.set(null);
             }
             if (null != threadPool) {
                 try {
