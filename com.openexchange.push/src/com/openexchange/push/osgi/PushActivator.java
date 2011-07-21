@@ -110,6 +110,7 @@ public final class PushActivator implements BundleActivator {
             trackers = new ArrayList<ServiceTracker>(4);
             PushManagerRegistry.init();
             trackers.add(new ServiceTracker(context, PushManagerService.class.getName(), new PushManagerServiceTracker(context)));
+            trackers.add(new ServiceTracker(context, ConfigurationService.class.getName(), new WhitelistServiceTracker(context)));
             /*
              * Thread pool service tracker
              */
