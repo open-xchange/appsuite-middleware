@@ -62,6 +62,7 @@ import com.openexchange.ajax.appointment.helper.PositiveAssertionOnDeleteExcepti
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnCreateAndUpdate;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnUpdateOnly;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
@@ -176,5 +177,12 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
         app.set(Appointment.MONTH, Calendar.JANUARY);
         return app;
     }
-
+    
+    protected Date D(String dateString){
+    	return TimeTools.D(dateString);
+    }
+    
+    protected Date D(String dateString, TimeZone tz){
+    	return TimeTools.D(dateString,tz);
+    }
 }
