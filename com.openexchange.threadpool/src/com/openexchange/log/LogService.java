@@ -67,6 +67,15 @@ public interface LogService {
     public void log(Loggable loggable);
 
     /**
+     * Logs specified {@link Throwable} instance.
+     * 
+     * @param level The log level
+     * @param log The logger
+     * @param throwable The throwable to log
+     */
+    public void log(Level level, Log log, Throwable throwable);
+
+    /**
      * Creates a new {@link Loggable} with specified arguments.
      * 
      * @param level The log level

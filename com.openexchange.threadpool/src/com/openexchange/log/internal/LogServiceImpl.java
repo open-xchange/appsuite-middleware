@@ -107,6 +107,10 @@ public final class LogServiceImpl implements LogService {
         }
     }
 
+    public void log(final Level level, final Log log, final Throwable throwable) {
+        log(loggableFor(level, log, throwable.getMessage(), throwable));
+    }
+
     public void log(final Loggable loggable) {
         final Log log = loggable.getLog();
         if (null == log) {
