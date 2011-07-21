@@ -59,7 +59,7 @@ import com.openexchange.log.Loggable.Level;
  */
 public final class Log implements org.apache.commons.logging.Log {
 
-    private static final AtomicReference<LogService> LOGSERVICERE_REFERENCE = new AtomicReference<LogService>();
+    private static final AtomicReference<LogService> LOGSERVICE_REFERENCE = new AtomicReference<LogService>();
 
     /**
      * Sets the log service.
@@ -67,7 +67,7 @@ public final class Log implements org.apache.commons.logging.Log {
      * @param logService The log service
      */
     public static void set(final LogService logService) {
-        LOGSERVICERE_REFERENCE.set(logService);
+        LOGSERVICE_REFERENCE.set(logService);
     }
 
     /**
@@ -115,7 +115,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void trace(final Object message) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.trace(message);
         } else {
@@ -124,7 +124,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void trace(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.trace(message, t);
         } else {
@@ -133,7 +133,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void debug(final Object message) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.debug(message);
         } else {
@@ -142,7 +142,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void debug(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.debug(message, t);
         } else {
@@ -151,7 +151,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void info(final Object message) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.info(message);
         } else {
@@ -160,7 +160,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void info(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.info(message, t);
         } else {
@@ -169,7 +169,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void warn(final Object message) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.warn(message);
         } else {
@@ -178,7 +178,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void warn(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.warn(message, t);
         } else {
@@ -187,7 +187,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void error(final Object message) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.error(message);
         } else {
@@ -196,7 +196,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void error(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.error(message, t);
         } else {
@@ -205,7 +205,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void fatal(final Object message) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.fatal(message);
         } else {
@@ -214,7 +214,7 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     public void fatal(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICERE_REFERENCE.get();
+        final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
             delegatee.fatal(message, t);
         } else {
