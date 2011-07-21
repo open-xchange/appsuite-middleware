@@ -2,6 +2,7 @@
 
  - Fix for bug #19920: Using proper tree identifier
  - Bugfix #19910: Multiple IMAP-IDLE listeners for certain clients
+ - Bugfix #19880: Logging problem is fixed, too
 
 * 2011-07-21 - marcus.klein@open-xchange.com
 
