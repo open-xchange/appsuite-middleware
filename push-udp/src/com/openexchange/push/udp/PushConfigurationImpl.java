@@ -226,6 +226,7 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         } catch (UnknownHostException e) {
             LOG.error("Unable to determine internet address for hostname: " + hostnameString, e);
         }
+        LOG.info("Using " + hostname.getHostAddress() + " for inter OX UDP communication.");
 
         isInit = true;
     }
