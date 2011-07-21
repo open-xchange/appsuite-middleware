@@ -124,7 +124,7 @@ public final class ImapIdlePushListener implements PushListener {
     }
     
     
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListener.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListener.class));
 
     private static boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
@@ -374,7 +374,7 @@ public final class ImapIdlePushListener implements PushListener {
             }
         } catch (final MailException e) {
             // throw new PushException(e);
-            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
+            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
             if (DEBUG_ENABLED) {
                 LOG.error(e);
             }
@@ -384,7 +384,7 @@ public final class ImapIdlePushListener implements PushListener {
                 LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
             }
         } catch (final MessagingException e) {
-            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms");
+            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
             if (DEBUG_ENABLED) {
                 LOG.error(e);
             }

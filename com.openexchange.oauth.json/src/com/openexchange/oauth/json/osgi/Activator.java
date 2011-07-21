@@ -193,7 +193,7 @@ public class Activator extends DeferredActivator {
             AbstractOAuthAJAXActionService.setOAuthService(null);
             ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

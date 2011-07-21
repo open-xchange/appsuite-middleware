@@ -81,7 +81,7 @@ import com.openexchange.user.UserService;
  */
 public final class POP3Activator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Activator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3Activator.class));
 
     private final Dictionary<String, String> dictionary;
 

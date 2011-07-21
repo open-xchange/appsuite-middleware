@@ -86,7 +86,7 @@ public final class FileStorageActivator implements BundleActivator {
     }
 
     public void start(final BundleContext context) throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(FileStorageActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.file.storage");
@@ -125,7 +125,7 @@ public final class FileStorageActivator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(FileStorageActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.file.storage");

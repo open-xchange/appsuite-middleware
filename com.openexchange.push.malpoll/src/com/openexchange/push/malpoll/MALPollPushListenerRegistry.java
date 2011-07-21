@@ -149,7 +149,7 @@ public final class MALPollPushListenerRegistry {
             try {
                 l.open();
             } catch (final PushException e) {
-                org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRegistry.class).error(
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRegistry.class)).error(
                     MessageFormat.format("Opening MAL Poll listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();

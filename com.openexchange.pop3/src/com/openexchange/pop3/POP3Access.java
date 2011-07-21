@@ -98,7 +98,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      */
     private static final long serialVersionUID = -7510487764376433468L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3Access.class));
 
     private static final ConcurrentMap<LoginKey, Future<Object>> SYNCHRONIZER_MAP = new ConcurrentHashMap<LoginKey, Future<Object>>();
 

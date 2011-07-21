@@ -85,7 +85,7 @@ public final class ConfigFileStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -97,7 +97,7 @@ public final class ConfigFileStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -109,7 +109,7 @@ public final class ConfigFileStorageActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.file.storage.config");
@@ -146,7 +146,7 @@ public final class ConfigFileStorageActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.file.storage.config");

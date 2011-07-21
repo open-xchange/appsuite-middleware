@@ -364,7 +364,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 data.close();
             } catch (final IOException e) {
-                org.apache.commons.logging.LogFactory.getLog(CIFSFileAccess.class).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CIFSFileAccess.class)).error(e.getMessage(), e);
             }
         }
     }

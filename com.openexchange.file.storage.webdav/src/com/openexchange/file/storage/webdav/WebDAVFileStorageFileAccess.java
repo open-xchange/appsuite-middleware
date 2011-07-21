@@ -200,7 +200,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             try {
                 unlock0(entry.getKey(), entry.getValue());
             } catch (final FileStorageException e) {
-                org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageFileAccess.class).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageFileAccess.class)).error(e.getMessage(), e);
             }
         }
     }
@@ -700,7 +700,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     try {
                         data.close();
                     } catch (final IOException e) {
-                        org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageFileAccess.class).error(e.getMessage(), e);
+                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageFileAccess.class)).error(e.getMessage(), e);
                     }
                 }
             }
