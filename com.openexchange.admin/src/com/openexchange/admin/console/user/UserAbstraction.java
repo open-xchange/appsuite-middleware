@@ -790,6 +790,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected static UserModuleAccess getUserModuleAccess(final String[] nextLine, final int[] idarray) {
         final UserModuleAccess moduleaccess = new UserModuleAccess();
+        moduleaccess.disableAll();
         final int i = idarray[AccessCombinations.accessActiveSync.getIndex()];
         if (-1 != i) {
             if (nextLine[i].length() > 0) {
