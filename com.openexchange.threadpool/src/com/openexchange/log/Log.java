@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.log.Loggable.Level;
 
 /**
- * {@link Log}
+ * {@link Log} - The <code>org.apache.commons.logging.Log</code> using {@link LogService}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
