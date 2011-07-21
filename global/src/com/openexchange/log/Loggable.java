@@ -91,4 +91,10 @@ public interface Loggable {
      */
     public Throwable getThrowable();
 
+    /**
+     * Gets the caller's stack trace.
+     * 
+     * @return The caller's stack trace
+     */
+    public StackTraceElement[] getCallerTrace();
 }

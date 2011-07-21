@@ -85,6 +85,10 @@ final class LoggerTask extends AbstractTask<Object> {
         public Level getLevel() {
             return null;
         }
+
+        public StackTraceElement[] getCallerTrace() {
+            return null;
+        }
     };
 
     private final BlockingQueue<Loggable> queue;
@@ -139,49 +143,49 @@ final class LoggerTask extends AbstractTask<Object> {
             queue.drainTo(loggables);
             final boolean quit = loggables.remove(POISON);
             for (final Loggable loggable : loggables) {
-                final Log log = loggable.getLog();
                 final Throwable t = loggable.getThrowable();
+                final String message = prependLocation(loggable.getMessage(), loggable.getCallerTrace());
                 switch (loggable.getLevel()) {
                 case FATAL:
                     if (null == t) {
-                        log.fatal(loggable.getMessage());
+                        loggable.getLog().fatal(message);
                     } else {
-                        log.fatal(loggable.getMessage(), t);
+                        loggable.getLog().fatal(message, t);
                     }
                     break;
                 case ERROR:
                     if (null == t) {
-                        log.error(loggable.getMessage());
+                        loggable.getLog().error(message);
                     } else {
-                        log.error(loggable.getMessage(), t);
+                        loggable.getLog().error(message, t);
                     }
                     break;
                 case WARNING:
                     if (null == t) {
-                        log.warn(loggable.getMessage());
+                        loggable.getLog().warn(message);
                     } else {
-                        log.warn(loggable.getMessage(), t);
+                        loggable.getLog().warn(message, t);
                     }
                     break;
                 case INFO:
                     if (null == t) {
-                        log.info(loggable.getMessage());
+                        loggable.getLog().info(message);
                     } else {
-                        log.info(loggable.getMessage(), t);
+                        loggable.getLog().info(message, t);
                     }
                     break;
                 case DEBUG:
                     if (null == t) {
-                        log.debug(loggable.getMessage());
+                        loggable.getLog().debug(message);
                     } else {
-                        log.debug(loggable.getMessage(), t);
+                        loggable.getLog().debug(message, t);
                     }
                     break;
                 case TRACE:
                     if (null == t) {
-                        log.trace(loggable.getMessage());
+                        loggable.getLog().trace(message);
                     } else {
-                        log.trace(loggable.getMessage(), t);
+                        loggable.getLog().trace(message, t);
                     }
                     break;
                 default:
@@ -194,6 +198,35 @@ final class LoggerTask extends AbstractTask<Object> {
             }
         }
         return null;
+    }
+
+    private static String prependLocation(final String message, final StackTraceElement[] trace) {
+        if (null == trace) {
+            return message;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (!className.startsWith("com.openexchange.log")) {
+                final StringBuilder sb = new StringBuilder(64).append(className).append(".").append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber).append(")");
+                        }
+                        sb.append(')');
+                    }
+                }
+                return sb.append("\n").append(message).toString();
+            }
+        }
+        return message;
     }
 
 }
