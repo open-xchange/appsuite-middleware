@@ -1,3 +1,7 @@
+* 2011-07-21 - dennis.sieben@open-xchange.com
+
+ - Bugfix #19913 - [L3] defaults for csv und direct user creation differ
+
 * 2011-06-30 - marcus.klein@open-xchange.com
 
  - Bugfix #19653: Not starting administration daemon with GMT timezone anymore.
