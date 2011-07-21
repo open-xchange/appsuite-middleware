@@ -6,6 +6,7 @@
 * 2011-07-21 - marcus.klein@open-xchange.com
 
  - Bugfix #19890: No more NullPointerExceptions in UDP push bundle if socket initialization fails.
+ - Bugfix #19880: Partial fix. Decoupling the clean up task of the database pooling from other subsystems to avoid blocking situations.
 
 * 2011-07-21 - tobias.prinz@open-xchange.com
 
