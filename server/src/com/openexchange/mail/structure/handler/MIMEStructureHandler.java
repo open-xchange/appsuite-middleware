@@ -81,6 +81,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -106,6 +107,7 @@ import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -242,6 +244,28 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static final int BUFLEN = 8192;
 
     public boolean handleAttachment(final MailPart part, final String id) throws MailException {
+        if (isVCalendar(part.getContentType().getBaseType())) {
+            /*
+             * Check ICal part for a valid METHOD and its presence in Content-Type header
+             */
+            final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
+            if (iCalParser != null) {
+                try {
+                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    if (null != method) {
+                        /*
+                         * Assume an iTIP response or request
+                         */
+                        final ContentType contentType = part.getContentType();
+                        if (!contentType.containsParameter("method")) {
+                            contentType.setParameter("method", method.toUpperCase(Locale.US));
+                        }
+                    }
+                } catch (final RuntimeException e) {
+                    LOG.warn("A runtime error occurred.", e);
+                }
+            }
+        }
         addBodyPart(part, id);
         return true;
     }
@@ -916,6 +940,10 @@ public final class MIMEStructureHandler implements StructureHandler {
             isWhitespace = Character.isWhitespace(chars[i]);
         }
         return isWhitespace;
+    }
+
+    private static boolean isVCalendar(final String baseContentType) {
+        return "text/calendar".equalsIgnoreCase(baseContentType) || "text/x-vcalendar".equalsIgnoreCase(baseContentType);
     }
 
 }
