@@ -68,7 +68,7 @@ public final class CSVImportRequest extends AbstractImportRequest<CSVImportRespo
 
     public CSVImportRequest(final int folderId, final InputStream csv,
         final boolean failOnError) {
-        super(Action.CSV, folderId, csv);
+        super(Action.FacebookFriends, folderId, csv);
         this.failOnError = failOnError;
     }
 

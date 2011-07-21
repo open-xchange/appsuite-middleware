@@ -106,7 +106,10 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
         CSV("CSV", "contacts.csv", Format.CSV),
         ICal("ICAL", "ical.ics", Format.ICAL),
         VCard("VCARD", "vcard.vcf", Format.VCARD),
-        OUTLOOK_CSV("OUTLOOK_CSV", "contacts.csv", Format.OUTLOOK_CSV);
+        OUTLOOK_CSV("OUTLOOK_CSV", "contacts.csv", Format.OUTLOOK_CSV),
+        FacebookFriends("FacebookFriends", "friends.html", Format.FacebookFriends),
+        FacebookArchive("FacebookArchive", "facebook.zip", Format.FacebookArchive);
+        
         private final String name, fileName;
         private final Format format;
         private Action(final String name, final String fileName,

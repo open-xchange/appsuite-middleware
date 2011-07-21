@@ -49,38 +49,47 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Date;
 
-/**
- * Test suite for iCal tests.
- */
-public final class ICalTestSuite {
+import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
+import com.openexchange.ajax.importexport.actions.ICalExportRequest;
+import com.openexchange.ajax.importexport.actions.ICalExportResponse;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.TaskTest;
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalTaskExportTest.class);
-		tests.addTestSuite(ICalAppointmentExportTest.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		tests.addTestSuite(Bug12414Test.class);
-		tests.addTestSuite(Bug12470Test.class);
-		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
-		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
-		tests.addTestSuite(Bug19089Test.class);
-		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
-		tests.addTestSuite(Bug17393Test.class);
-		tests.addTestSuite(Bug19915Test.class);
-		return tests;
+public class ICalAppointmentExportTest extends ManagedAppointmentTest {
+
+	public ICalAppointmentExportTest(final String name) {
+		super(name);
 	}
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
+
+	public void testExportICalAppointment() throws Exception {
+		final String title = "testExportICalAppointment" + System.currentTimeMillis();
+		int folderID = folder.getObjectID();
+		final Appointment appointmentObj = new Appointment();
+		appointmentObj.setTitle(title);
+		appointmentObj.setStartDate(new Date());
+		appointmentObj.setEndDate(new Date());
+		appointmentObj.setShownAs(Appointment.RESERVED);
+		appointmentObj.setParentFolderID(folderID);
+		appointmentObj.setIgnoreConflicts(true);
+
+		calendarManager.insert(appointmentObj);
+		ICalExportRequest exportRequest = new ICalExportRequest(folderID);
+		ICalExportResponse response = getClient().execute(exportRequest);
+		
+		
+		String iCal = response.getICal();
+		
+		assertTrue(iCal.contains(title));
+	}
+
 }
