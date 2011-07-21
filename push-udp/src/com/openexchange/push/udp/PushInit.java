@@ -55,14 +55,13 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
-import com.openexchange.server.Initialization;
 
 /**
  * Initializes the event system.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class PushInit implements Initialization {
+public class PushInit {
 
     /**
      * Singleton.
@@ -82,7 +81,7 @@ public class PushInit implements Initialization {
 
     private PushConfiguration config;
 
-    
+
     public PushConfiguration getConfig() {
         return config;
     }
@@ -132,12 +131,18 @@ public class PushInit implements Initialization {
             LOG.error("Duplicate push component shutdown.");
             return;
         }
-        multicast.close();
-        multicast = null;
-        output.close();
-        output = null;
-        channels.shutdown();
-        channels = null;
+        if (null != multicast) {
+            multicast.close();
+            multicast = null;
+        }
+        if (null != output) {
+            output.close();
+            output = null;
+        }
+        if (null != channels) {
+            channels.shutdown();
+            channels = null;
+        }
         config = null;
     }
 }

@@ -64,7 +64,7 @@ public class PushUDPException extends AbstractOXException {
 
     /**
      * Initializes a new exception using the information provided by the cause.
-     * 
+     *
      * @param cause the cause of the exception.
      */
     public PushUDPException(final AbstractOXException cause) {
@@ -73,7 +73,7 @@ public class PushUDPException extends AbstractOXException {
 
     /**
      * Constructor with all parameters.
-     * 
+     *
      * @param code code
      */
     public PushUDPException(final Code code) {
@@ -82,7 +82,7 @@ public class PushUDPException extends AbstractOXException {
 
     /**
      * Constructor with all parameters.
-     * 
+     *
      * @param code code
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
@@ -93,7 +93,7 @@ public class PushUDPException extends AbstractOXException {
 
     /**
      * Constructor with all parameters.
-     * 
+     *
      * @param code code
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
@@ -164,7 +164,9 @@ public class PushUDPException extends AbstractOXException {
         /**
          * Missing payload in datagram package.
          */
-        MISSING_PAYLOAD("Missing payload in datagram package.", 14, AbstractOXException.Category.CODE_ERROR);
+        MISSING_PAYLOAD("Missing payload in datagram package.", 14, AbstractOXException.Category.CODE_ERROR),
+        /** No UDP channel is configured. Check for failed channel opens on server startup. */
+        NO_CHANNEL("No UDP channel is configured. Check for failed channel opens on server startup.", 15, Category.SETUP_ERROR);
 
         /**
          * Message of the exception.
@@ -183,7 +185,7 @@ public class PushUDPException extends AbstractOXException {
 
         /**
          * Default constructor.
-         * 
+         *
          * @param message message.
          * @param category category.
          * @param detailNumber detail number.

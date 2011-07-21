@@ -1,4 +1,8 @@
-* 2011-07-20 - tobias.prinz@open-xchange.com
+* 2011-07-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #19890: No more NullPointerExceptions in UDP push bundle if socket initialization fails.
+
+* 2011-07-21 - tobias.prinz@open-xchange.com
 
  - Bugfix #19915: A mis-matching byte order mark (BOM) does not throw the parser off anymore.
  
