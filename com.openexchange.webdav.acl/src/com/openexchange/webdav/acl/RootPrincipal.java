@@ -131,7 +131,7 @@ public class RootPrincipal extends AbstractCollection {
             User[] user = users.getUser(factory.getContext());
             List<WebdavResource> children = new ArrayList<WebdavResource>(user.length);
             for (User u : user) {
-                children.add(new UserPrincipalResource(factory, u));
+                children.add(new UserPrincipalResource(factory, u, getUrl().dup().append(u.getLoginInfo())));
             }
             return children;
         } catch (UserException e) {
@@ -141,11 +141,16 @@ public class RootPrincipal extends AbstractCollection {
     
     public UserPrincipalResource resolveUser(WebdavPath url) throws WebdavProtocolException {
         String name = url.name();
+        if (name.contains("@")) {
+            name = name.split("@")[0];
+        } else if (name.contains("*")) {
+            name = name.split("\\*")[0];
+        }
         UserService users = factory.getUserService();
         try {
             int userId = users.getUserId(name, factory.getContext());
             User user = users.getUser(userId, factory.getContext());
-            return new UserPrincipalResource(factory, user);
+            return new UserPrincipalResource(factory, user, url);
         } catch (UserException e) {
             throw new WebdavProtocolException(url, 500);
         }

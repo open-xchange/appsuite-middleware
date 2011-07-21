@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class PrincipalURL extends SingleXMLPropertyMixin {
 
-    private static final String PROPERTY_NAME = "principal-url";
+    private static final String PROPERTY_NAME = "principal-URL";
     private SessionHolder sessionHolder = null;
     
     public PrincipalURL(SessionHolder sessionHolder) {

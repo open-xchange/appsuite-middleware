@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.webdav.acl.mixins.CurrentUserPrincipal;
 import com.openexchange.webdav.acl.mixins.PrincipalURL;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -73,11 +74,13 @@ public class UserPrincipalResource extends AbstractResource {
 
     private PrincipalWebdavFactory factory;
     private User user;
+    private WebdavPath url;
 
-    public UserPrincipalResource(PrincipalWebdavFactory factory, User u) {
+    public UserPrincipalResource(PrincipalWebdavFactory factory, User u, WebdavPath url) {
         this.factory = factory;
         this.user = u;
-        includeProperties(new PrincipalURL(factory.getSessionHolder()));
+        this.url = url;
+        includeProperties(new PrincipalURL(factory.getSessionHolder()), new CurrentUserPrincipal(factory.getSessionHolder()));
     }
 
     @Override
@@ -195,7 +198,7 @@ public class UserPrincipalResource extends AbstractResource {
     }
 
     public WebdavPath getUrl() {
-        return new WebdavPath(user.getLoginInfo());
+        return url;
     }
 
     public void lock(WebdavLock lock) throws WebdavProtocolException {
