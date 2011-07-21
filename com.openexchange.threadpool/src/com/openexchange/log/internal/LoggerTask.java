@@ -215,13 +215,13 @@ final class LoggerTask extends AbstractTask<Object> {
     }
 
     private static String prependLocation(final String message, final StackTraceElement[] trace) {
-        if (null == trace) {
+        if (null == trace || message.startsWith("Logged at: ")) {
             return message;
         }
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className && !className.startsWith("com.openexchange.log")) {
-                final StringBuilder sb = new StringBuilder(64).append(className).append(".").append(ste.getMethodName());
+                final StringBuilder sb = new StringBuilder(64).append("Logged at: ").append(className).append(".").append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
                 } else {
@@ -232,7 +232,7 @@ final class LoggerTask extends AbstractTask<Object> {
                         final int lineNumber = ste.getLineNumber();
                         sb.append('(').append(fileName);
                         if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber).append(")");
+                            sb.append(':').append(lineNumber);
                         }
                         sb.append(')');
                     }
