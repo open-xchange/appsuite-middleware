@@ -146,48 +146,60 @@ final class LoggerTask extends AbstractTask<Object> {
             final boolean quit = loggables.remove(POISON);
             for (final Loggable loggable : loggables) {
                 final Throwable t = loggable.getThrowable();
-                final String message = prependLocation(loggable.getMessage(), loggable.getCallerTrace());
+                final Log log = loggable.getLog();
                 switch (loggable.getLevel()) {
                 case FATAL:
-                    if (null == t) {
-                        loggable.getLog().fatal(message);
-                    } else {
-                        loggable.getLog().fatal(message, t);
+                    if (log.isFatalEnabled()) {
+                        if (null == t) {
+                            log.fatal(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                        } else {
+                            log.fatal(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                        }
                     }
                     break;
                 case ERROR:
-                    if (null == t) {
-                        loggable.getLog().error(message);
-                    } else {
-                        loggable.getLog().error(message, t);
+                    if (log.isErrorEnabled()) {
+                        if (null == t) {
+                            log.error(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                        } else {
+                            log.error(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                        }
                     }
                     break;
                 case WARNING:
-                    if (null == t) {
-                        loggable.getLog().warn(message);
-                    } else {
-                        loggable.getLog().warn(message, t);
+                    if (log.isWarnEnabled()) {
+                        if (null == t) {
+                            log.warn(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                        } else {
+                            log.warn(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                        }
                     }
                     break;
                 case INFO:
-                    if (null == t) {
-                        loggable.getLog().info(message);
-                    } else {
-                        loggable.getLog().info(message, t);
+                    if (log.isInfoEnabled()) {
+                        if (null == t) {
+                            log.info(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                        } else {
+                            log.info(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                        }
                     }
                     break;
                 case DEBUG:
-                    if (null == t) {
-                        loggable.getLog().debug(message);
-                    } else {
-                        loggable.getLog().debug(message, t);
+                    if (log.isDebugEnabled()) {
+                        if (null == t) {
+                            log.debug(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                        } else {
+                            log.debug(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                        }
                     }
                     break;
                 case TRACE:
-                    if (null == t) {
-                        loggable.getLog().trace(message);
-                    } else {
-                        loggable.getLog().trace(message, t);
+                    if (log.isTraceEnabled()) {
+                        if (null == t) {
+                            log.trace(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                        } else {
+                            log.trace(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                        }
                     }
                     break;
                 default:
@@ -208,7 +220,7 @@ final class LoggerTask extends AbstractTask<Object> {
         }
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
-            if (!className.startsWith("com.openexchange.log")) {
+            if (null != className && !className.startsWith("com.openexchange.log")) {
                 final StringBuilder sb = new StringBuilder(64).append(className).append(".").append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
