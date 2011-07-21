@@ -107,4 +107,27 @@ public final class LoggableImpl implements Loggable {
         return callerTrace.getStackTrace();
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("LoggableImpl [");
+        if (level != null) {
+            builder.append("level=").append(level).append(", ");
+        }
+        if (log != null) {
+            builder.append("log=").append(log).append(", ");
+        }
+        if (message != null) {
+            builder.append("message=\"").append(message).append("\", ");
+        }
+        if (throwable != null) {
+            builder.append("throwable=").append("<available>").append(", ");
+        }
+        if (callerTrace != null) {
+            builder.append("callerTrace=").append("<available>");
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }
