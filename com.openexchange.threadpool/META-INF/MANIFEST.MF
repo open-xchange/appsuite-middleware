@@ -6,15 +6,15 @@ Bundle-Version: 6.20.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
+ com.openexchange.log,
  com.openexchange.management,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  javax.management,
- org.apache.commons.logging;version="1.0.4",
- org.osgi.framework;version="1.4.0",
- org.osgi.util.tracker;version="1.3.3"
-Export-Package: com.openexchange.log,
- com.openexchange.threadpool,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer
 Bundle-Activator: com.openexchange.threadpool.osgi.ThreadPoolActivator
