@@ -68,6 +68,8 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.log.LogService;
+import com.openexchange.log.Loggable.Level;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -347,7 +349,8 @@ public final class AJPv13Task implements Task<Object> {
             try {
                 ajpCon = new AJPv13ConnectionImpl(this);
             } catch (final AJPv13Exception e) {
-                LOG.error(e.getMessage(), e);
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.ERROR, LOG, e.getMessage(), e));
                 terminateAndClose(null);
                 return null;
             }
@@ -364,7 +367,11 @@ public final class AJPv13Task implements Task<Object> {
                         ajpCon.processRequest();
                         ajpCon.createResponse();
                         if (!ajpCon.getAjpRequestHandler().isEndResponseSent()) {
-                            LOG.warn("Detected AJP cycle without terminating END_RESPONSE package.");
+                            final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                            logService.log(logService.loggableFor(
+                                Level.WARNING,
+                                LOG,
+                                "Detected AJP cycle without terminating END_RESPONSE package."));
                             /*
                              * Just for safety reason to ensure END_RESPONSE package is going to be sent.
                              */
@@ -376,19 +383,23 @@ public final class AJPv13Task implements Task<Object> {
                          */
                         final Throwable rootCause = e.getRootCause();
                         if (null != rootCause) {
-                            LOG.error(rootCause.getMessage(), rootCause);
+                            final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                            logService.log(logService.loggableFor(Level.ERROR, LOG, rootCause.getMessage(), rootCause));
                         }
                         /*
                          * Now log actual UploadServletException
                          */
-                        LOG.error(e.getMessage(), e);
+                        final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                        logService.log(logService.loggableFor(Level.ERROR, LOG, e.getMessage(), e));
                         closeAndKeepAlive((HttpServletResponseWrapper) e.getRes(), e.getData().getBytes("UTF-8"), ajpCon);
                     } catch (final ServletException e) {
-                        LOG.error(e.getMessage(), e);
+                        final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                        logService.log(logService.loggableFor(Level.ERROR, LOG, e.getMessage(), e));
                         closeAndKeepAlive(ajpCon);
                     } catch (final AJPv13Exception e) {
                         if (e.keepAlive()) {
-                            LOG.error(e.getMessage(), e);
+                            final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                            logService.log(logService.loggableFor(Level.ERROR, LOG, e.getMessage(), e));
                             closeAndKeepAlive(ajpCon);
                         } else {
                             /*
@@ -411,7 +422,8 @@ public final class AJPv13Task implements Task<Object> {
                         } else {
                             logMe = new AJPv13Exception(e);
                         }
-                        LOG.error(logMe.getMessage(), logMe);
+                        final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                        logService.log(logService.loggableFor(Level.ERROR, LOG, logMe.getMessage(), logMe));
                         closeAndKeepAlive(ajpCon);
                     }
                     ajpCon.resetConnection(false);
@@ -426,16 +438,19 @@ public final class AJPv13Task implements Task<Object> {
                  * Just as debug info
                  */
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
+                    final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                    logService.log(logService.loggableFor(Level.DEBUG, LOG, e.getMessage(), e));
                 }
             } catch (final AJPv13Exception e) {
-                LOG.error(e.getMessage(), e);
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.ERROR, LOG, e.getMessage(), e));
             } catch (final Throwable e) {
                 /*
                  * Catch Throwable to catch every throwable object.
                  */
                 final AJPv13Exception wrapper = new AJPv13Exception(e);
-                LOG.error(wrapper.getMessage(), wrapper);
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.ERROR, LOG, wrapper.getMessage(), wrapper));
             } finally {
                 terminateAndClose(ajpCon);
                 waitingOnAJPSocket = false;
@@ -492,11 +507,7 @@ public final class AJPv13Task implements Task<Object> {
         if (null != timer) {
             final int max = AJPv13Config.getAJPWatcherMaxRunningTime();
             scheduledKeepAliveTask =
-                timer.scheduleWithFixedDelay(
-                    new KeepAliveRunnable(this, max, LOG),
-                    max,
-                    (long) max/2,
-                    TimeUnit.MILLISECONDS);
+                timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max, LOG), max, (long) max / 2, TimeUnit.MILLISECONDS);
         }
         changeNumberOfRunningAJPTasks(true);
         listenerMonitor.incrementNumActive();
@@ -588,7 +599,7 @@ public final class AJPv13Task implements Task<Object> {
                 LOG.warn(e.getMessage(), e);
             }
         }
-        */
+         */
         try {
             /*
              * Terminate AJP cycle and close socket
@@ -601,7 +612,8 @@ public final class AJPv13Task implements Task<Object> {
                     }
                 } catch (final Exception e) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Writing END_RESPONSE package failed.", e);
+                        final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                        logService.log(logService.loggableFor(Level.DEBUG, LOG, "Writing END_RESPONSE package failed.", e));
                     }
                 } finally {
                     closeQuitely(s);
@@ -614,7 +626,8 @@ public final class AJPv13Task implements Task<Object> {
             }
         } catch (final Exception e) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(e.getMessage(), e);
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.WARNING, LOG, e.getMessage(), e));
             }
         }
     }
@@ -624,7 +637,11 @@ public final class AJPv13Task implements Task<Object> {
             s.close();
         } catch (final IOException e) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(
+                    Level.DEBUG,
+                    LOG,
+                    "Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe)."));
             }
         }
     }
@@ -681,11 +698,14 @@ public final class AJPv13Task implements Task<Object> {
                     keepAlive();
                 }
             } catch (final AJPv13Exception e) {
-                log.error("AJP KEEP-ALIVE failed.", e);
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.ERROR, log, "AJP KEEP-ALIVE failed.", e));
             } catch (final IOException e) {
-                log.error("AJP KEEP-ALIVE failed.", e);
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.ERROR, log, "AJP KEEP-ALIVE failed.", e));
             } catch (final Exception e) {
-                log.error("AJP KEEP-ALIVE failed.", e);
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.ERROR, log, "AJP KEEP-ALIVE failed.", e));
             }
         }
 
@@ -738,16 +758,22 @@ public final class AJPv13Task implements Task<Object> {
         private void keepAliveSendAvailableData(final String remoteAddress, final BlockableBufferedOutputStream out, final byte[] remainingData) throws IOException, AJPv13Exception {
             AJPv13Request.writeChunked(remainingData, out);
             if (log.isDebugEnabled()) {
-                log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
-                    "\" to initiate a KEEP-ALIVE poll."));
+                final String msg =
+                    new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
+                        "\" to initiate a KEEP-ALIVE poll.").toString();
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.DEBUG, log, msg));
             }
         }
 
         private void keepAliveSendEmptyBody(final String remoteAddress, final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
             AJPv13Request.writeEmpty(out);
             if (log.isDebugEnabled()) {
-                log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(
-                    remoteAddress).append("\" to initiate a KEEP-ALIVE poll."));
+                final String msg =
+                    new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(remoteAddress).append(
+                        "\" to initiate a KEEP-ALIVE poll.").toString();
+                final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                logService.log(logService.loggableFor(Level.DEBUG, log, msg));
             }
         }
 
@@ -757,18 +783,29 @@ public final class AJPv13Task implements Task<Object> {
                 out.write(AJPv13Response.getGetBodyChunkBytes(0));
                 out.flush();
                 if (log.isDebugEnabled()) {
-                    log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
-                        "\" to initiate a KEEP-ALIVE poll."));
+                    final String msg =
+                        new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
+                            "\" to initiate a KEEP-ALIVE poll.").toString();
+                    final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                    logService.log(logService.loggableFor(Level.DEBUG, log, msg));
                 }
                 /*
                  * Swallow expected empty body chunk
                  */
                 final int bodyRequestDataLength = ajpConnection.readInitialBytes(true, false);
                 if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
-                    log.warn("AJP KEEP-ALIVE: Got a non-empty data chunk from web server although an empty one was requested");
+                    final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                    logService.log(logService.loggableFor(
+                        Level.WARNING,
+                        log,
+                        "AJP KEEP-ALIVE: Got a non-empty data chunk from web server although an empty one was requested",
+                        null));
                 } else if (log.isDebugEnabled()) {
-                    log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
-                        "\" initiated by former KEEP-ALIVE poll."));
+                    final String msg =
+                        new StringBuilder().append("AJP KEEP-ALIVE: Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
+                            "\" initiated by former KEEP-ALIVE poll.").toString();
+                    final LogService logService = AJPv13ServiceRegistry.getServiceRegistry().getService(LogService.class);
+                    logService.log(logService.loggableFor(Level.DEBUG, log, msg));
                 }
             } finally {
                 ajpConnection.blockInputStream(false);

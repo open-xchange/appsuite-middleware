@@ -63,6 +63,7 @@ import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.ajp13.xajp.XAJPv13Server;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.log.LogService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -105,7 +106,7 @@ public final class AJPv13Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TimerService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, TimerService.class, ThreadPoolService.class, LogService.class };
     }
 
     @Override
