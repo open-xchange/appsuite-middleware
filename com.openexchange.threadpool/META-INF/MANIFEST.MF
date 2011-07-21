@@ -13,7 +13,8 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging;version="1.0.4",
  org.osgi.framework;version="1.4.0",
  org.osgi.util.tracker;version="1.3.3"
-Export-Package: com.openexchange.threadpool,
+Export-Package: com.openexchange.log,
+ com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer
 Bundle-Activator: com.openexchange.threadpool.osgi.ThreadPoolActivator
