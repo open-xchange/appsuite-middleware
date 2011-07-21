@@ -72,7 +72,7 @@ import com.openexchange.ajp13.servlet.ServletConfigLoader;
  */
 public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ServerImpl.class);
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ServerImpl.class));
 
     private static final DecimalFormat DF = new DecimalFormat("0000");
 

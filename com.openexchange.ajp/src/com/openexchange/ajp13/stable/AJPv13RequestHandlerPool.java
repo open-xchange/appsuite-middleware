@@ -60,7 +60,7 @@ import com.openexchange.ajp13.AJPv13Config;
  */
 public class AJPv13RequestHandlerPool {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerPool.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerPool.class));
 
     private static BlockingQueue<AJPv13RequestHandlerImpl> REQUEST_HANDLER_POOL;
 

@@ -79,7 +79,7 @@ import com.openexchange.tools.servlet.UploadServletException;
  */
 final class AJPv13Listener implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Listener.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Listener.class));
 
     private static final AtomicInteger numRunning = new AtomicInteger();
 

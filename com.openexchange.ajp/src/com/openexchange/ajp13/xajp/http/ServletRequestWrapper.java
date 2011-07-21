@@ -76,7 +76,7 @@ import com.openexchange.mail.mime.ContentType;
  */
 public class ServletRequestWrapper implements ServletRequest {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletRequestWrapper.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServletRequestWrapper.class));
 
     private static final Set<String> singleValueHeaders = new HashSet<String>();
 

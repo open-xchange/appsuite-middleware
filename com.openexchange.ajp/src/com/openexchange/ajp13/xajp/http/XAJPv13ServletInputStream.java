@@ -67,7 +67,7 @@ import com.openexchange.ajp13.xajp.XAJPv13Session;
  */
 public final class XAJPv13ServletInputStream extends ServletInputStream {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(XAJPv13ServletInputStream.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13ServletInputStream.class));
 
     private final INonBlockingConnection ajpCon;
 

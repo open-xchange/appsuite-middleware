@@ -78,7 +78,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 final class XAJPv13RejectedExecutionHandler implements RejectedExecutionHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(XAJPv13RejectedExecutionHandler.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13RejectedExecutionHandler.class));
 
     /**
      * Initializes a new {@link XAJPv13RejectedExecutionHandler}.

@@ -123,7 +123,7 @@ public final class XAJPv13RequestBody extends XAJPv13Request {
         super(payloadData);
     }
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(XAJPv13RequestBody.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13RequestBody.class));
 
     @Override
     public boolean doResponse(final XAJPv13Session session) throws AJPv13Exception, IOException {

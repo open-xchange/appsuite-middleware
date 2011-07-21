@@ -66,7 +66,7 @@ public final class XAJPv13CPingRequest extends XAJPv13Request {
 
     private static final String STR_RECEIVED_CPING = "Received CPing";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(XAJPv13CPingRequest.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13CPingRequest.class));
 
     /**
      * Initializes a new {@link XAJPv13CPingRequest}
