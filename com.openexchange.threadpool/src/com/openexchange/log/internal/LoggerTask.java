@@ -133,7 +133,9 @@ final class LoggerTask extends AbstractTask<Object> {
         final List<Loggable> loggables = new ArrayList<Loggable>(16);
         while (keepgoing.get()) {
             if (queue.isEmpty()) {
-                // Blocking wait for at least 1 loggable to arrive.
+                /*
+                 * Blocking wait for at least 1 Loggable to arrive.
+                 */
                 final Loggable loggable = queue.take();
                 if (POISON == loggable) {
                     return null;
