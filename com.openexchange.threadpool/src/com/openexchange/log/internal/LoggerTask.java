@@ -98,7 +98,7 @@ final class LoggerTask extends AbstractTask<Object> {
      */
     protected LoggerTask(final BlockingQueue<Loggable> queue) {
         super();
-        keepgoing = new AtomicBoolean();
+        keepgoing = new AtomicBoolean(true);
         this.queue = queue;
     }
 
@@ -139,47 +139,49 @@ final class LoggerTask extends AbstractTask<Object> {
             queue.drainTo(loggables);
             final boolean quit = loggables.remove(POISON);
             for (final Loggable loggable : loggables) {
+                final Log log = loggable.getLog();
+                final Throwable t = loggable.getThrowable();
                 switch (loggable.getLevel()) {
                 case FATAL:
-                    if (null == loggable.getThrowable()) {
-                        loggable.getLog().fatal(loggable.getMessage());
+                    if (null == t) {
+                        log.fatal(loggable.getMessage());
                     } else {
-                        loggable.getLog().fatal(loggable.getMessage(), loggable.getThrowable());
+                        log.fatal(loggable.getMessage(), t);
                     }
                     break;
                 case ERROR:
-                    if (null == loggable.getThrowable()) {
-                        loggable.getLog().error(loggable.getMessage());
+                    if (null == t) {
+                        log.error(loggable.getMessage());
                     } else {
-                        loggable.getLog().error(loggable.getMessage(), loggable.getThrowable());
+                        log.error(loggable.getMessage(), t);
                     }
                     break;
                 case WARNING:
-                    if (null == loggable.getThrowable()) {
-                        loggable.getLog().warn(loggable.getMessage());
+                    if (null == t) {
+                        log.warn(loggable.getMessage());
                     } else {
-                        loggable.getLog().warn(loggable.getMessage(), loggable.getThrowable());
+                        log.warn(loggable.getMessage(), t);
                     }
                     break;
                 case INFO:
-                    if (null == loggable.getThrowable()) {
-                        loggable.getLog().info(loggable.getMessage());
+                    if (null == t) {
+                        log.info(loggable.getMessage());
                     } else {
-                        loggable.getLog().info(loggable.getMessage(), loggable.getThrowable());
+                        log.info(loggable.getMessage(), t);
                     }
                     break;
                 case DEBUG:
-                    if (null == loggable.getThrowable()) {
-                        loggable.getLog().debug(loggable.getMessage());
+                    if (null == t) {
+                        log.debug(loggable.getMessage());
                     } else {
-                        loggable.getLog().debug(loggable.getMessage(), loggable.getThrowable());
+                        log.debug(loggable.getMessage(), t);
                     }
                     break;
                 case TRACE:
-                    if (null == loggable.getThrowable()) {
-                        loggable.getLog().trace(loggable.getMessage());
+                    if (null == t) {
+                        log.trace(loggable.getMessage());
                     } else {
-                        loggable.getLog().trace(loggable.getMessage(), loggable.getThrowable());
+                        log.trace(loggable.getMessage(), t);
                     }
                     break;
                 default:
