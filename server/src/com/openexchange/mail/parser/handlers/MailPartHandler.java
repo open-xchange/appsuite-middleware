@@ -85,7 +85,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class MailPartHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailPartHandler.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailPartHandler.class));
 
     private static final class TextMailPart extends MailPart {
 

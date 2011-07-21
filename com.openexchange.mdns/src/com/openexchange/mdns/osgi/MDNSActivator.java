@@ -69,7 +69,7 @@ import com.openexchange.mdns.internal.MDNSServiceImpl;
  */
 public final class MDNSActivator implements BundleActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MDNSActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSActivator.class));
 
     private ComponentRegistration componentRegistration;
 

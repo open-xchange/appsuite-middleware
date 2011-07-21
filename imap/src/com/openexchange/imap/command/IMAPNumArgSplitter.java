@@ -62,7 +62,7 @@ import javax.mail.Message;
  */
 public final class IMAPNumArgSplitter {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPNumArgSplitter.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPNumArgSplitter.class));
 
     private static interface Tokenizer {
 

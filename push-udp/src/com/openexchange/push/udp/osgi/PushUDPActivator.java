@@ -76,7 +76,7 @@ import com.openexchange.timer.TimerService;
  */
 public class PushUDPActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PushUDPActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUDPActivator.class));
 
     private ServiceRegistration registration;
 

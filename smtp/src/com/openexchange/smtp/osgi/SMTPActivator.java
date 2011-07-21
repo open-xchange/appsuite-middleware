@@ -68,7 +68,7 @@ import com.openexchange.smtp.SMTPProvider;
  */
 public final class SMTPActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SMTPActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMTPActivator.class));
 
     private final Dictionary<String, String> dictionary;
 

@@ -77,7 +77,7 @@ public final class PushManagerServiceTracker implements ServiceTrackerCustomizer
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         if (service instanceof PushManagerService && PushManagerRegistry.getInstance().addPushManager((PushManagerService) service)) {
-            final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(PushManagerServiceTracker.class);
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushManagerServiceTracker.class));
             log.info("Registered push manager: " + service.getClass().getName());
             return service;
         }

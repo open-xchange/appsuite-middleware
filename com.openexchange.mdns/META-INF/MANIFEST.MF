@@ -11,6 +11,7 @@ Import-Package: com.openexchange.exceptions,
  com.openexchange.exceptions.osgi,
  com.openexchange.groupware,
  com.openexchange.java.util,
+ com.openexchange.log,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
  org.osgi.framework

@@ -138,7 +138,7 @@ import com.sun.mail.imap.Rights;
  */
 public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

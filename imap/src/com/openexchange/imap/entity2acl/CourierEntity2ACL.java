@@ -91,7 +91,7 @@ import com.openexchange.user.UserService;
  */
 public class CourierEntity2ACL extends Entity2ACL {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CourierEntity2ACL.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CourierEntity2ACL.class));
 
     private static final CourierEntity2ACL INSTANCE = new CourierEntity2ACL();
 

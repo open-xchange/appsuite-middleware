@@ -135,7 +135,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class DatabaseFolderStorage implements FolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
 
     /**
      * Simple interface for providing and closing a connection.

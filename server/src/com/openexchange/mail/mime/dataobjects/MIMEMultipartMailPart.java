@@ -85,7 +85,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     private static final long serialVersionUID = -3130161956976376243L;
 
     private static final transient org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(MIMEMultipartMailPart.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMultipartMailPart.class));
 
     private static final int BUFSIZE = 8192; // 8K
 

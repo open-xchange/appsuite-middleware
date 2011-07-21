@@ -89,7 +89,7 @@ import com.openexchange.user.UserService;
  */
 public final class IMAPActivator extends DeferredActivator {
 
-    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class);
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class));
 
     private List<ServiceRegistration> registrations;
 

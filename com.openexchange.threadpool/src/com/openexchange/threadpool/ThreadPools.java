@@ -68,7 +68,7 @@ import com.openexchange.threadpool.internal.CustomThreadFactory;
  */
 public final class ThreadPools {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadPools.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadPools.class));
 
     /**
      * Initializes a new {@link ThreadPools}.

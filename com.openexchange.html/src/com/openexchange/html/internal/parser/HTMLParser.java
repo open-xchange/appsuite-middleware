@@ -74,7 +74,7 @@ public final class HTMLParser {
 
     private static final String FEATURE_PRESERVE_TEXT = "open-xchange.org/preserveText";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HTMLParser.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLParser.class));
 
     private static final int INT_IS_EMPTY_TAG = 1;
 

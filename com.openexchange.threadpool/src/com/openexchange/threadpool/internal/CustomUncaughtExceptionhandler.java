@@ -66,7 +66,7 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
     }
 
     public void uncaughtException(final Thread t, final Throwable e) {
-        final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CustomUncaughtExceptionhandler.class);
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CustomUncaughtExceptionhandler.class));
         LOG.fatal("Thread terminated with exception: " + t.getName(), e);
     }
 

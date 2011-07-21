@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractAttachmentHandler.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractAttachmentHandler.class));
 
     protected final List<MailPart> attachments;
 

@@ -11,6 +11,7 @@ Bundle-ClassPath: com.openexchange.html.jar,
  lib/jTidy.jar,
  .
 Import-Package: com.openexchange.config,
+ com.openexchange.log,
  com.openexchange.proxy,
  com.openexchange.server.osgiservice,
  com.openexchange.session,

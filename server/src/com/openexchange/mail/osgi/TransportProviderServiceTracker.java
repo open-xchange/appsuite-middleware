@@ -63,7 +63,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
  */
 public final class TransportProviderServiceTracker implements ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TransportProviderServiceTracker.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TransportProviderServiceTracker.class));
 
     private final BundleContext context;
 

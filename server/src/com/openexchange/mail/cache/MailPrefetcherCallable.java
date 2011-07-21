@@ -77,7 +77,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class MailPrefetcherCallable implements Callable<Object> {
 
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailPrefetcherCallable.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailPrefetcherCallable.class));
 
     static final boolean DEBUG = LOG.isDebugEnabled();
 

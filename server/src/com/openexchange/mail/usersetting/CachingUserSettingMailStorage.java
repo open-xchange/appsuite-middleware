@@ -81,7 +81,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class CachingUserSettingMailStorage extends UserSettingMailStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CachingUserSettingMailStorage.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CachingUserSettingMailStorage.class));
 
     private static final String CACHE_REGION_NAME = "UserSettingMail";
 

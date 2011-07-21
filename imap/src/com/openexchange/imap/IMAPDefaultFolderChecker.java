@@ -101,7 +101,7 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public final class IMAPDefaultFolderChecker {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPDefaultFolderChecker.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPDefaultFolderChecker.class));
 
     private static final String INBOX = "INBOX";
 

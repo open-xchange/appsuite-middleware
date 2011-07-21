@@ -79,7 +79,7 @@ import com.openexchange.html.internal.parser.HTMLHandler;
  */
 public class HTMLImageFilterHandler implements HTMLHandler {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HTMLImageFilterHandler.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLImageFilterHandler.class));
 
     private static final String BLANK = "";
 

@@ -76,7 +76,7 @@ public final class MessageUtility {
 
     private static final String STR_EMPTY = "";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageUtility.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageUtility.class));
 
     /**
      * No instantiation.

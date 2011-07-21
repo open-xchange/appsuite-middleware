@@ -126,7 +126,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The logger instance for {@link IMAPAccess} class.
      */
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPAccess.class);
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPAccess.class));
 
     /**
      * Whether info logging is enabled for this class.
@@ -506,7 +506,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false;// ("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = false; //("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);

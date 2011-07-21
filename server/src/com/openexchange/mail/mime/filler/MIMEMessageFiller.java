@@ -164,7 +164,7 @@ public class MIMEMessageFiller {
 
     private static final String VERSION_1_0 = "1.0";
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMessageFiller.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageFiller.class));
 
     private static final String VCARD_ERROR = "Error while appending user VCard";
 
