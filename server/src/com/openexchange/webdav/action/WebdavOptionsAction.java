@@ -58,7 +58,7 @@ public class WebdavOptionsAction extends AbstractAction {
 			throws WebdavProtocolException {
 		res.setHeader("Content-Length","0");
 		res.setHeader("Allow", join(req.getResource().getOptions()));
-		res.setHeader("DAV", "1, 2");
+		res.setHeader("DAV", "1, 2, access-control, calendar-access");
 		res.setHeader("Accept-Ranges", "bytes");
 		res.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
 	}
