@@ -144,4 +144,8 @@ public final class LogServiceImpl implements LogService {
         return new LoggableImpl(level, log, message, throwable);
     }
 
+    public Loggable loggableFor(final Level level, final Log log, final String message) {
+        return new LoggableImpl(level, log, message, null);
+    }
+
 }

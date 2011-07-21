@@ -76,4 +76,15 @@ public interface LogService {
      * @return The newly created {@link Loggable}
      */
     public Loggable loggableFor(Level level, Log log, String message, Throwable throwable);
+
+    /**
+     * Creates a new {@link Loggable} with specified arguments.
+     * 
+     * @param level The log level
+     * @param log The log
+     * @param message The message
+     * @return The newly created {@link Loggable}
+     */
+    public Loggable loggableFor(Level level, Log log, String message);
+
 }
