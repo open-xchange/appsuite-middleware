@@ -1,3 +1,7 @@
+* 2011-07-20 - tobias.prinz@open-xchange.com
+
+ - Bugfix #19915: A mis-matching byte order mark (BOM) does not throw the parser off anymore.
+ 
 * 2011-07-20 - martin.herfurth@open-xchange.com
 
  - Bugfix #19109: Moving a sequence destroys the appointment.

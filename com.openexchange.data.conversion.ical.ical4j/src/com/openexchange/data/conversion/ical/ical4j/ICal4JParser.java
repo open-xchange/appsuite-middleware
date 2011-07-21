@@ -91,6 +91,8 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 /**
  * {@link ICal4JParser} - The {@link ICalParser} using <a href="http://ical4j.sourceforge.net/">ICal4j</a> library.
  * 
@@ -323,6 +325,9 @@ public class ICal4JParser implements ICalParser {
             // Copy until we find an END:VCALENDAR
             boolean beginFound = false;
             while((line = reader.readLine()) != null) {
+            	if(!beginFound && line.endsWith("BEGIN:VCALENDAR")){
+            		line = removeByteOrderMarks(line);
+            	}
                 if(line.startsWith("BEGIN:VCALENDAR")) {
                     beginFound = true;
                 } else if ( !beginFound && !"".equals(line)) {
@@ -427,6 +432,28 @@ public class ICal4JParser implements ICalParser {
          * We ignore those.
          */
         return input.replaceAll("\nATTACH(.*?);ID=(.+?)([:;])" , "\nATTACH$1$3");
+    }
+    
+    private String removeByteOrderMarks(String line){
+    	char[] buf = line.toCharArray();
+    	int length = buf.length;
+    	
+		if(length > 3)
+			if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+				if(Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28)
+					return new String(Arrays.copyOfRange(buf, 3, length));
+				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15)
+					return new String(Arrays.copyOfRange(buf, 3, length));
+			}
+		if(length > 1)
+			if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0)
+				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28)
+					return new String(Arrays.copyOfRange(buf, 2, length));
+		if(length > 0)
+			if(Character.getNumericValue(buf[0]) < 0)
+				if(Character.getType(buf[0]) == 16)
+					return new String(Arrays.copyOfRange(buf, 1, length));
+		return line;
     }
 
 }
