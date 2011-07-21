@@ -1,3 +1,7 @@
+* 2011-07-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug #19920: Using proper tree identifier
+
 * 2011-07-21 - marcus.klein@open-xchange.com
 
  - Bugfix #19890: No more NullPointerExceptions in UDP push bundle if socket initialization fails.
