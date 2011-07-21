@@ -92,8 +92,8 @@ public class Bug18490Test extends AbstractMailFilterTest {
     public void testBug18490() throws Exception {
         final AJAXSession ajaxSession = getSession();
         client = getClient();
-        folder = Create.createPrivateFolder("Bug18490 test Földer", FolderObject.MAIL, client.getValues().getUserId());
-        folder.setFullName(client.getValues().getInboxFolder() + "/Bug18490 test Földer");
+        folder = Create.createPrivateFolder("Bug18490 test F\u00f6lder", FolderObject.MAIL, client.getValues().getUserId());
+        folder.setFullName(client.getValues().getInboxFolder() + "/Bug18490 test F\u00f6lder");
         final InsertResponse folderInsertResponse = client.execute(new InsertRequest(API.OX_NEW, folder));
         folderInsertResponse.fillObject(folder);
 

@@ -39,7 +39,7 @@ public class Bug19463Test_TimezoneOffsetsWith4Digits extends
 		+"END:VALARM\n"
 		+"SUMMARY:Neuer Serien-Termin\n"
 		+"LOCATION:\n"
-		+"DESCRIPTION;CHARSET=UTF-8:täglich\n" 
+		+"DESCRIPTION;CHARSET=UTF-8:t\u00e4glich\n" 
 		+" jeden 2. tag\n" 
 		+" ab 10.5.\n"
 		+" bis 31.05.\n"
