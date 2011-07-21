@@ -127,7 +127,7 @@ public final class ToTerm extends SearchTerm<String> {
             }          
             return (getAllAddresses(addresses).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
         } catch (final MessagingException e) {
-            LogFactory.getLog(ToTerm.class).warn("Error during search.", e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(ToTerm.class)).warn("Error during search.", e);
             return false;
         }
     }

@@ -63,7 +63,7 @@ import com.openexchange.tools.conf.AbstractConfig;
  */
 public class NotificationConfig extends AbstractConfig implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(NotificationConfig.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(NotificationConfig.class));
 
     private static final Property KEY = Property.NOTIFICATION;
 

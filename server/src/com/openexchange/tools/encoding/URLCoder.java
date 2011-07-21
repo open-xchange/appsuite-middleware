@@ -64,7 +64,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class URLCoder {
 
-    private static final Log LOG = LogFactory.getLog(URLCoder.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(URLCoder.class));
 
     private URLCoder() {
         super();

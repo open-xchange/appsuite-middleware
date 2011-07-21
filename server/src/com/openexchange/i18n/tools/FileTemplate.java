@@ -63,7 +63,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class FileTemplate extends CompiledLineParserTemplate {
 
-    private static final Log LOG = LogFactory.getLog(CompiledLineParserTemplate.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompiledLineParserTemplate.class));
 
     private final File file;
 

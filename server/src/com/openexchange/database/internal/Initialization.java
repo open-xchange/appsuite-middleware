@@ -64,7 +64,7 @@ import com.openexchange.database.DatabaseService;
  */
 public final class Initialization {
 
-    private static final Log LOG = LogFactory.getLog(Initialization.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Initialization.class));
 
     private static final Initialization SINGLETON = new Initialization();
 

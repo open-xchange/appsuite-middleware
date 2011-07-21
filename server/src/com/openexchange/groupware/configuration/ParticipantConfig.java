@@ -65,7 +65,7 @@ public final class ParticipantConfig {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ParticipantConfig.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ParticipantConfig.class));
 
     /**
      * Singleton instance.

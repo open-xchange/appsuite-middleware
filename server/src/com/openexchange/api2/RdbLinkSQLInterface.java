@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
  */
 public class RdbLinkSQLInterface implements LinkSQLInterface {
 
-    private static final Log LOG = LogFactory.getLog(RdbLinkSQLInterface.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbLinkSQLInterface.class));
 
     public LinkObject[] getLinksOfObject(final int objectId, final int type, final int folder, final int user, final int[] group, final Session sessionobject) throws OXException {
         LinkObject[] lo = null;

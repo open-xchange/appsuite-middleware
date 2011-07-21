@@ -72,7 +72,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class SpellCheckUserDictTableTask implements UpdateTask {
 
-	private static final Log LOG = LogFactory.getLog(SpellCheckUserDictTableTask.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SpellCheckUserDictTableTask.class));
 
 	private static final String CREATE = "CREATE TABLE spellcheck_user_dict (" + "cid INT4 UNSIGNED NOT NULL,"
 			+ "user INT4 UNSIGNED NOT NULL,"

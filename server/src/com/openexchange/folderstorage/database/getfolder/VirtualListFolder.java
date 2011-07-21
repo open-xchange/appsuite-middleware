@@ -73,7 +73,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  */
 public final class VirtualListFolder {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualListFolder.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualListFolder.class)));
 
     /**
      * Initializes a new {@link VirtualListFolder}.

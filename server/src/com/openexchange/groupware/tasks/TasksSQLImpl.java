@@ -77,7 +77,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class TasksSQLImpl implements TasksSQLInterface {
 
-    private static final Log LOG = LogFactory.getLog(TasksSQLImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksSQLImpl.class));
 
     private final Session session;
 

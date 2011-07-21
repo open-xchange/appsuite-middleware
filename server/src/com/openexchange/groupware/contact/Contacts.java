@@ -134,7 +134,7 @@ public final class Contacts {
 
     public static final int DATA_TRUNCATION = 54;
 
-    static final Log LOG = LogFactory.getLog(Contacts.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Contacts.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

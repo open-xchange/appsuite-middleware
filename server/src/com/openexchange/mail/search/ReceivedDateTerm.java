@@ -124,7 +124,7 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
         try {
             receivedDate = msg.getReceivedDate();
         } catch (final MessagingException e) {
-            LogFactory.getLog(ReceivedDateTerm.class).warn("Error during search.", e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(ReceivedDateTerm.class)).warn("Error during search.", e);
             return false;
         }
         if (null == receivedDate) {

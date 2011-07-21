@@ -59,7 +59,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class JSONAttachmentMetadata implements AttachmentMetadata {
 
-    private static final Log LOG = LogFactory.getLog(JSONAttachmentMetadata.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JSONAttachmentMetadata.class));
 
     private final JSONObject json;
     public JSONAttachmentMetadata(final String jsonString) throws JSONException {

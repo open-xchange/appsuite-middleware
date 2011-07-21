@@ -127,7 +127,7 @@ import com.openexchange.tx.TransactionException;
  */
 public class ContactRequest {
 
-    private static final Log LOG = LogFactory.getLog(ContactRequest.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactRequest.class));
 
     public static final String ACTION_GET_USER = "getuser";
 

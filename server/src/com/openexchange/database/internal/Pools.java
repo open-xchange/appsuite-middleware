@@ -68,7 +68,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
  */
 public final class Pools implements Runnable {
 
-    static final Log LOG = LogFactory.getLog(Pools.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Pools.class));
 
     private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
 

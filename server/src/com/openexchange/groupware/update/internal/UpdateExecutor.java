@@ -76,7 +76,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public final class UpdateExecutor {
 
-    private static final Log LOG = LogFactory.getLog(UpdateExecutor.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateExecutor.class));
 
     private static final SchemaStore store = SchemaStore.getInstance();
 

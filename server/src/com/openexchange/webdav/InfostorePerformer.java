@@ -118,7 +118,7 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class InfostorePerformer implements SessionHolder {
 
-    private static final Log LOG = LogFactory.getLog(InfostorePerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostorePerformer.class));
 
     private static final InfostorePerformer INSTANCE = new InfostorePerformer();
 

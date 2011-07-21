@@ -189,7 +189,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String UNION = " UNION ";
 
-    private static final Log LOG = LogFactory.getLog(CalendarMySQL.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarMySQL.class));
 
     private static CalendarCollection collection = new CalendarCollection();
 

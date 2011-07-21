@@ -118,7 +118,7 @@ public final class DirectoryService {
    /**
     * Logger.
     */
-   private static final Log LOG = LogFactory.getLog(DirectoryService.class);
+   private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DirectoryService.class));
 
    /**
     * The customization properties for the directory service.

@@ -81,7 +81,7 @@ public class LinksMySql implements LinksSql {
 
 	private static final String SQL_AND_SECONDID = ") AND (secondid=";
 
-	private static final Log LOG = LogFactory.getLog(LinksMySql.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinksMySql.class));
 
 	public String iFperformLinkStorage(final LinkObject l, final int cid){
 		return new StringBuilder("SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid FROM prg_links WHERE ((firstid = ").append(l.getFirstId()).append(SQL_AND_FIRSTMODULE).append(l.getFirstType()).append(SQL_AND_SECONDID).append(l.getSecondId()).append(SQL_AND_SECONDMODULE).append(l.getSecondType()).append(") OR (firstid = ").append(l.getSecondId()).append(SQL_AND_FIRSTMODULE).append(l.getSecondType()).append(SQL_AND_SECONDID).append(l.getFirstId()).append(SQL_AND_SECONDMODULE).append(l.getFirstType()).append(")) AND cid = ").append(cid).toString();

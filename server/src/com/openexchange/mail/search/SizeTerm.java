@@ -103,7 +103,7 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
         try {
             size = msg.getSize();
         } catch (final MessagingException e) {
-            LogFactory.getLog(SizeTerm.class).warn("Error during search.", e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(SizeTerm.class)).warn("Error during search.", e);
             return false;
         }
         final ComparablePattern<Integer> pattern = getPattern();

@@ -73,7 +73,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = LogFactory.getLog(ExtendCalendarForIMIPHandlingTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExtendCalendarForIMIPHandlingTask.class));
 
     private String[] TABLES = { "prg_dates", "del_dates" };
     private Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };

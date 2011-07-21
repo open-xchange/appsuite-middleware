@@ -76,7 +76,7 @@ public final class MailSessionEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    static final Log LOG = LogFactory.getLog(MailSessionEventHandler.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailSessionEventHandler.class));
 
     /**
      * Whether logger allows debug.

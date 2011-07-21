@@ -59,7 +59,7 @@ import com.openexchange.server.impl.DBPool;
 
 public class DBPoolProvider implements DBProvider {
 
-    private static final Log LOG = LogFactory.getLog(DBPoolProvider.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBPoolProvider.class));
 
     public Connection getReadConnection(final Context ctx) throws DBPoolingException {
         try {

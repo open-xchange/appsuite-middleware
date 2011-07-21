@@ -65,7 +65,7 @@ import com.openexchange.configuration.ConfigurationException.Code;
  */
 public final class ServerConfig {
 
-    private static final Log LOG = LogFactory.getLog(ServerConfig.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerConfig.class));
 
     /**
      * Singleton object.

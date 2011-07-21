@@ -382,7 +382,7 @@ public final class MIMEStructure2ComposedMailParser {
                     }
                     attachmentHandler.addAttachment(mailPart);
                 } catch (final ManagedFileException e) {
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEStructure2ComposedMailParser.class)).warn(
+                    com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEStructure2ComposedMailParser.class))).warn(
                         "Creating managed file failed. Using in-memory version instead.",
                         e);
                     addInMemory(rawBytes, contentType, headers);

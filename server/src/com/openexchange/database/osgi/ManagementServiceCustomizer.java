@@ -64,7 +64,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class ManagementServiceCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(ManagementServiceCustomizer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceCustomizer.class));
 
     private final BundleContext context;
 

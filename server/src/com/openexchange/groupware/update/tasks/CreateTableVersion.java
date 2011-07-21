@@ -61,7 +61,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class CreateTableVersion implements UpdateTask {
     
-    private static final Log LOG = LogFactory.getLog(CreateTableVersion.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CreateTableVersion.class));
     
 //    private static final String CREATE = "CREATE TABLE foobar (" +
 //            "version INT4 UNSIGNED NOT NULL," +

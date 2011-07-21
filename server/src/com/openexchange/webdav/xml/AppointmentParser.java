@@ -67,7 +67,7 @@ import com.openexchange.webdav.xml.fields.AppointmentFields;
  */
 public class AppointmentParser extends CalendarParser {
 	
-	private static final Log LOG = LogFactory.getLog(AppointmentParser.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentParser.class));
 	
 	public AppointmentParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;	

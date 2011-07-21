@@ -64,7 +64,7 @@ import com.openexchange.server.services.I18nServices;
  */
 public class StringHelper {
 
-    private static final Log LOG = LogFactory.getLog(StringHelper.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringHelper.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

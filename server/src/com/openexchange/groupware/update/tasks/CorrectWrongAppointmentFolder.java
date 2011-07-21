@@ -73,7 +73,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CorrectWrongAppointmentFolder implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(CorrectWrongAppointmentFolder.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CorrectWrongAppointmentFolder.class));
 
     public CorrectWrongAppointmentFolder() {
         super();

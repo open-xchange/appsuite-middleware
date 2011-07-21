@@ -76,7 +76,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailProperties implements IMailProperties {
 
-    private static final Log LOG = LogFactory.getLog(MailProperties.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailProperties.class));
 
     private static volatile MailProperties instance;
 

@@ -78,7 +78,7 @@ import com.openexchange.session.Session;
  */
 public final class JSONMessageCache {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageCache.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageCache.class)));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

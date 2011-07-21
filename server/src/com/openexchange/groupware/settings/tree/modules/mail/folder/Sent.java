@@ -73,7 +73,7 @@ public class Sent implements PreferencesItemService {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Sent.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Sent.class));
 
     /**
      * Default constructor.

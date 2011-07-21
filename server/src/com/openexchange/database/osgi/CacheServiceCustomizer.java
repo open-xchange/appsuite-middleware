@@ -63,7 +63,7 @@ import com.openexchange.database.internal.Initialization;
  */
 public class CacheServiceCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(CacheServiceCustomizer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CacheServiceCustomizer.class));
 
     private final BundleContext context;
 

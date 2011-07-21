@@ -71,7 +71,7 @@ import com.openexchange.tools.versit.old.VCard21;
  */
 public class VCardTokenizer {
 
-    private static final Log LOG = LogFactory.getLog(VCardTokenizer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardTokenizer.class));
 
     public static final String VCARD_V3 = "3.0";
 

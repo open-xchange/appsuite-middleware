@@ -70,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentChangedFromZeroTask implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(AppointmentChangedFromZeroTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentChangedFromZeroTask.class));
 
     public AppointmentChangedFromZeroTask() {
         super();

@@ -94,7 +94,7 @@ final class ImageIDGenerator {
         try {
             return new String(Base64.encodeBase64(sb.toString().getBytes("UTF-8"), false), "US-ASCII");
         } catch (final UnsupportedEncodingException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).error("Unsupported encoding: " + e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class))).error("Unsupported encoding: " + e.getMessage(), e);
             return sb.toString();
         }
     }
@@ -116,7 +116,7 @@ final class ImageIDGenerator {
                 final byte[] plain = Base64.decodeBase64(uniqueId.getBytes("US-ASCII"));
                 toSplit = new String(plain, "UTF-8");
             } catch (final UnsupportedEncodingException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).error("Unsupported encoding: " + e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class))).error("Unsupported encoding: " + e.getMessage(), e);
                 toSplit = uniqueId;
             }
             args = SPLIT.split(toSplit, 0);
@@ -128,14 +128,14 @@ final class ImageIDGenerator {
         try {
             dataSource = (ImageDataSource) service.getDataSource(args[0]);
         } catch (final ClassCastException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class))).error(e.getMessage(), e);
             return null;
         }
         if (null == dataSource) {
             /*
              * No data source
              */
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).warn(
+            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class))).warn(
                 new StringBuilder(64).append("Image not found: No data source found for identifier: ").append(args[0]).toString());
             return null;
         }
@@ -147,7 +147,7 @@ final class ImageIDGenerator {
             /*
              * Argument mismatch
              */
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class)).warn(
+            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class))).warn(
                 new StringBuilder(64).append("Image not found: Argument mismatch. Expected ").append(requiredArguments.length).append(
                     " argument(s), but was ").append((args.length - 1)).toString());
             return null;

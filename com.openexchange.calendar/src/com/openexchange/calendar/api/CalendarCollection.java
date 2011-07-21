@@ -181,7 +181,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public static final TimeZone ZONE_UTC = TimeZone.getTimeZone("UTC");
     
     
-    private static final Log LOG = LogFactory.getLog(CalendarCollection.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCollection.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
     

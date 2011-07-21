@@ -119,7 +119,7 @@ public class ContactWriter extends CommonWriter {
 
     protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED };
 
-    private static final Log LOG = LogFactory.getLog(ContactWriter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactWriter.class));
 
     public ContactWriter() {
 

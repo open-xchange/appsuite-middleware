@@ -95,7 +95,7 @@ public final class IDGenerator {
         }
     }
 
-    static final Log LOG = LogFactory.getLog(IDGenerator.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IDGenerator.class));
 
     /**
      * Used implementation.

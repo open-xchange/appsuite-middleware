@@ -64,7 +64,7 @@ import com.openexchange.groupware.reminder.ReminderException.Code;
  */
 public class TargetRegistry {
 
-    private static final Log LOG = LogFactory.getLog(TargetRegistry.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TargetRegistry.class));
     private static final TargetRegistry SINGLETON = new TargetRegistry();
 
     private final TIntObjectHashMap<TargetService> registry = new TIntObjectHashMap<TargetService>();

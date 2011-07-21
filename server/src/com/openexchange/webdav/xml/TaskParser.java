@@ -66,7 +66,7 @@ import com.openexchange.webdav.xml.fields.TaskFields;
  */
 public class TaskParser extends CalendarParser {
 
-    private static final Log LOG = LogFactory.getLog(TaskParser.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskParser.class));
 
     public TaskParser(final Session sessionObj) {
         this.sessionObj = sessionObj;

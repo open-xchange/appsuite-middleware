@@ -99,7 +99,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
     private static final long serialVersionUID = 5779820324953825111L;
 
-    private static final Log LOG = LogFactory.getLog(calendar.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(calendar.class));
 
     /**
      * Initializes a new {@link calendar}.

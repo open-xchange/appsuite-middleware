@@ -70,7 +70,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class MBeanRegisterer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(MBeanRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MBeanRegisterer.class));
 
     private final BundleContext context;
 

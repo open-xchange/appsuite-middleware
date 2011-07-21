@@ -67,7 +67,7 @@ import com.openexchange.database.internal.Initialization;
  */
 public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(DatabaseServiceRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseServiceRegisterer.class));
 
     private BundleContext context;
 

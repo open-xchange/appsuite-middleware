@@ -67,7 +67,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(PreferencesCustomizer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreferencesCustomizer.class));
 
     private final BundleContext context;
 

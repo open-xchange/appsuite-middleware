@@ -100,7 +100,7 @@ public final class FolderAddIndex4SharedFolderSearch extends UpdateTaskAdapter {
         try {
             con.setAutoCommit(false);
 
-            final Log log = LogFactory.getLog(FolderAddIndex4SharedFolderSearch.class);
+            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderAddIndex4SharedFolderSearch.class));
 
             String[] tables = { "oxfolder_tree", "del_oxfolder_tree" };
             createIndexes(con, tables, new String[] { "cid", "parent" }, "parentIndex", log);

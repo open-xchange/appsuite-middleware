@@ -73,7 +73,7 @@ public class Inbox implements PreferencesItemService {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Inbox.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Inbox.class));
 
     /**
      * Default constructor.

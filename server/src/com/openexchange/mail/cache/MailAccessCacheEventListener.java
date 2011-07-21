@@ -73,7 +73,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class MailAccessCacheEventListener implements EventHandlerRegistration {
 
-    private static final Log LOG = LogFactory.getLog(MailAccessCacheEventListener.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccessCacheEventListener.class));
 
     private ServiceRegistration serviceRegistration;
 

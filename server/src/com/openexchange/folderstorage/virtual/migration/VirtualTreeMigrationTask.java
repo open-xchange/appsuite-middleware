@@ -96,7 +96,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = LogFactory.getLog(VirtualTreeMigrationTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VirtualTreeMigrationTask.class));
 
     private static final String[] DEPENDENCIES = { VirtualTreeCreateTableTask.class.getName() };
 

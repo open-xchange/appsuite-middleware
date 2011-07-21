@@ -71,7 +71,7 @@ public class ContactsAddUseCountColumnUpdateTask implements UpdateTask {
     
     private final String ADD_COLUMN_DEL = "ALTER TABLE del_contacts ADD COLUMN useCount INT4 UNSIGNED";
 
-    private final Log LOG = LogFactory.getLog(ContactsAddUseCountColumnUpdateTask.class);
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsAddUseCountColumnUpdateTask.class));
 
     public int addedWithVersion() {
         return 50;

@@ -78,7 +78,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(ContactsFieldSizeUpdateTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsFieldSizeUpdateTask.class));
 
     public ContactsFieldSizeUpdateTask() {
         super();

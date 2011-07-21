@@ -67,7 +67,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 	
-	public static final Log LOG = LogFactory.getLog(InfostoreWriter.class);
+	public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreWriter.class));
 	
 	public InfostoreWriter(final JSONWriter w) {
 		super(w);

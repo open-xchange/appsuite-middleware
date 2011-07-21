@@ -106,7 +106,7 @@ public class AttachmentRequest extends CommonRequest {
 
     private static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 
-    private static final Log LOG = LogFactory.getLog(AttachmentRequest.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentRequest.class));
 
     private static final String DATASOURCE = "datasource";
 

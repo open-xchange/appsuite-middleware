@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.SchemaUpdateState;
  */
 public class UpdateProcess implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(UpdateProcess.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateProcess.class));
 
     private final int contextId;
 

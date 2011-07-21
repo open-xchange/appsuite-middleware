@@ -71,7 +71,7 @@ public class ReminderPool implements Runnable {
 
 	private static final Set<ReminderObject> pool = new HashSet<ReminderObject>();
 	
-	private static final Log LOG = LogFactory.getLog(ReminderPool.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderPool.class));
 	
 	public ReminderPool(final ReminderConfig reminderConfig) {
 		if (reminderConfig.isReminderEnabled()) {

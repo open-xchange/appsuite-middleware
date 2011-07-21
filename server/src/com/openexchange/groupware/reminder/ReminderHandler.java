@@ -96,7 +96,7 @@ public class ReminderHandler implements ReminderService {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ReminderHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderHandler.class));
 
     final Context context;
 

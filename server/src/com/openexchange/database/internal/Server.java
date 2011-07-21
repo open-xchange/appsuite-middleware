@@ -67,7 +67,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
  */
 public final class Server {
 
-    private static final Log LOG = LogFactory.getLog(Server.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Server.class));
 
     private static final String PROPERTY_NAME = "SERVER_NAME";
 

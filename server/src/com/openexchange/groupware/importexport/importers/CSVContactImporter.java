@@ -103,7 +103,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CSVContactImporter extends AbstractImporter {
 
-    private static final Log LOG = LogFactory.getLog(CSVContactImporter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVContactImporter.class));
 
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
         if (!format.equals(getResponsibleFor())) {

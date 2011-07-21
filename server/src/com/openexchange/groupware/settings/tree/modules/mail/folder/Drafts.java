@@ -73,7 +73,7 @@ public class Drafts implements PreferencesItemService {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Drafts.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Drafts.class));
 
     /**
      * Default constructor.

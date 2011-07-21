@@ -115,7 +115,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class JSONMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class)));
 
     private static final class PlainTextContent {
 

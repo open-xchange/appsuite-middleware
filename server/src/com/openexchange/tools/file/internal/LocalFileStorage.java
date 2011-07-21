@@ -141,7 +141,7 @@ public class LocalFileStorage implements FileStorage {
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
     }
     
-    private static final Log LOG = LogFactory.getLog(LocalFileStorage.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LocalFileStorage.class));
     
     /**
      * This lock is used to avoid threads from creating a filestore dir simultaneously.

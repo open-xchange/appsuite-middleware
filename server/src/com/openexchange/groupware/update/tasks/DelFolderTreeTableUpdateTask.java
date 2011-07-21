@@ -68,7 +68,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class DelFolderTreeTableUpdateTask implements UpdateTask {
 	
-	private static final Log LOG = LogFactory.getLog(DelFolderTreeTableUpdateTask.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelFolderTreeTableUpdateTask.class));
 	
 	/* (non-Javadoc)
 	 * 

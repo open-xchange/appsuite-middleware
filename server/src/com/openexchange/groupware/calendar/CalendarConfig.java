@@ -70,7 +70,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     
     private static final Property KEY = Property.CALENDAR;
     
-    private static final Log LOG = LogFactory.getLog(CalendarConfig.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarConfig.class));
     
     private static boolean solo_reminder_trigger_event = true;
     private static boolean check_and_remove_past_reminders = true;

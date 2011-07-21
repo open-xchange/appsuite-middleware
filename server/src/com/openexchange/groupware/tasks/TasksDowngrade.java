@@ -79,7 +79,7 @@ public class TasksDowngrade extends DowngradeListener {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(TasksDowngrade.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksDowngrade.class));
 
     /**
      * Default constructor.

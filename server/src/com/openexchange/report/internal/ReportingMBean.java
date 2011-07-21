@@ -106,7 +106,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class ReportingMBean implements DynamicMBean {
 
-    private static final Log LOG = LogFactory.getLog(ReportingMBean.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReportingMBean.class));
 
     private String[] totalNames = { "contexts", "users" };
 

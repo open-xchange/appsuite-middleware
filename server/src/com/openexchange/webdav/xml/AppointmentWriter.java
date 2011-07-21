@@ -106,7 +106,7 @@ public class AppointmentWriter extends CalendarWriter {
     protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED,
             Appointment.RECURRENCE_ID };
 
-    private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentWriter.class));
 
     /**
      * Initializes a new {@link AppointmentWriter}.

@@ -71,7 +71,7 @@ import com.openexchange.groupware.container.CalendarObject;
  */
 public class RecurringCalculation {
 
-    private static final Log LOG = LogFactory.getLog(RecurringCalculation.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RecurringCalculation.class));
 
     private final int recurring_type; // cdao.getRecurrenceType()
     private final int recurring_interval; // cdao.getInterval()

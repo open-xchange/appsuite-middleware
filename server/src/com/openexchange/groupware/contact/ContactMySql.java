@@ -97,7 +97,7 @@ public class ContactMySql implements ContactSql {
 
     private static final String STR_PERCENT = "%";
 
-    private static final Log LOG = LogFactory.getLog(ContactMySql.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactMySql.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -85,7 +85,7 @@ public class LoginCounter implements LoginCounterMBean {
      */
     public LoginCounter() {
         super();
-        logger = LogFactory.getLog(ReportingMBean.class);
+        logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReportingMBean.class));
     }
 
     public int getNumberOfLogins(final Date startDate, final Date endDate) throws MBeanException {

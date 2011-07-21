@@ -70,7 +70,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 
     //private boolean isInit;
 
-    private static final Log LOG = LogFactory.getLog(EventConfigImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventConfigImpl.class));
 
     public EventConfigImpl() {
 

@@ -76,7 +76,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CorrectIndexes6_10 implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(CorrectIndexes6_10.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CorrectIndexes6_10.class));
 
     public CorrectIndexes6_10() {
         super();

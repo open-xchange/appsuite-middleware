@@ -120,7 +120,7 @@ public class ICalImporter extends AbstractImporter {
 	private static final int APP = 0;
 	private static final int TASK = 1;
 
-	private static final Log LOG = LogFactory.getLog(ICalImporter.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalImporter.class));
 
 	public boolean canImport(final ServerSession session, final Format format,
 			final List<String> folders,

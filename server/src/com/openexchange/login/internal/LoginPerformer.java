@@ -95,7 +95,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class LoginPerformer {
 
-    private static final Log LOG = LogFactory.getLog(LoginPerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPerformer.class));
 
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 

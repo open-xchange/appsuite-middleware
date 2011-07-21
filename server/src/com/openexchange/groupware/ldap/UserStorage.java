@@ -65,7 +65,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
  */
 public abstract class UserStorage {
 
-    private static final Log LOG = LogFactory.getLog(UserStorage.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserStorage.class));
 
     /**
      * The instance

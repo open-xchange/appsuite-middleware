@@ -69,7 +69,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class AddAppointmentParticipantsIndexTask implements UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(AddAppointmentParticipantsIndexTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AddAppointmentParticipantsIndexTask.class));
 
     public AddAppointmentParticipantsIndexTask() {
         super();

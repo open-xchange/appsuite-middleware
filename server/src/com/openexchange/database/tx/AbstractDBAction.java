@@ -66,7 +66,7 @@ import com.openexchange.tx.UndoableAction;
 public abstract class AbstractDBAction extends AbstractUndoable implements
 		UndoableAction {
 	
-	private static final Log LOG = LogFactory.getLog(AbstractDBAction.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractDBAction.class));
 	
 	private DBProvider provider = null;
 	private Context context = null;

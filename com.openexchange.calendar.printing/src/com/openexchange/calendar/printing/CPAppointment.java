@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
  */
 public class CPAppointment {
 
-    private static final Log LOG = LogFactory.getLog(CPAppointment.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CPAppointment.class));
 
     private String title, description, location;
 

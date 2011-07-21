@@ -70,7 +70,7 @@ public final class ImageSessionEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    private static final Log LOG = LogFactory.getLog(ImageSessionEventHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageSessionEventHandler.class));
 
     /**
      * Whether logger allows debug.

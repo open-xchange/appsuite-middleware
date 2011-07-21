@@ -133,10 +133,10 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
         } catch (final MailException e) {
-            LogFactory.getLog(FromTerm.class).warn("Error during search.", e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(FromTerm.class)).warn("Error during search.", e);
             return false;
         } catch (final RuntimeException e) {
-            LogFactory.getLog(FromTerm.class).warn("Error during search.", e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(FromTerm.class)).warn("Error during search.", e);
             return false;
         }
     }

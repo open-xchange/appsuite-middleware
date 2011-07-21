@@ -237,7 +237,7 @@ public final class ServerActivator extends DeferredActivator {
     }
 	
 	
-    private static final Log LOG = LogFactory.getLog(ServerActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
 
     /**
      * Bundle ID of admin.<br>

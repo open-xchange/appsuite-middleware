@@ -73,7 +73,7 @@ import com.openexchange.webdav.xml.fields.ContactFields;
 
 public class ContactParser extends CommonParser {
 
-    private static final Log LOG = LogFactory.getLog(ContactParser.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactParser.class));
 
     public ContactParser(final Session sessionObj) {
         this.sessionObj = sessionObj;

@@ -63,7 +63,7 @@ import com.openexchange.pooling.ExhaustedActions;
  */
 public final class Configuration {
 
-    private static final Log LOG = LogFactory.getLog(Configuration.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Configuration.class));
 
     private static final String CONFIG_FILENAME = "configdb.properties";
 

@@ -249,7 +249,7 @@ public class Starter implements Initialization {
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
-    private static final Log LOG = LogFactory.getLog(Starter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Starter.class));
 
     private final Stack<Initialization> started;
 

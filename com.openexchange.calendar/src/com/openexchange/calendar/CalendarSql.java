@@ -126,7 +126,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private boolean includePrivateAppointments;
 
-    private static final Log LOG = LogFactory.getLog(CalendarSql.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarSql.class));
 
     /**
      * Initializes a new {@link CalendarSql}.

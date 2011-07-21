@@ -102,7 +102,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
  */
 public class VCardImporter extends AbstractImporter {
 
-    private static final Log LOG = LogFactory.getLog(VCardImporter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
 
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
         if (!format.equals(Format.VCARD)) {

@@ -69,7 +69,7 @@ final class PreRead<T> {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(PreRead.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreRead.class));
 
     /**
      * What is the minimum count of tasks for additional sub requests.

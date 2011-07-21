@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class QuotaRequest {
 
-    private static final Log LOG = LogFactory.getLog(QuotaRequest.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuotaRequest.class));
 
     private QuotaFileStorage qfs;
 

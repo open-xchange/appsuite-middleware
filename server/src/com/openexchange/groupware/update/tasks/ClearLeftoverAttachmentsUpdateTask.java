@@ -76,7 +76,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
     private final ThreadLocal<Map<Integer, FileStorage>> filestorages = new ThreadLocal<Map<Integer,FileStorage>>();
 
-    private static final Log LOG = LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class));
 
     public int addedWithVersion() {
         return 11;

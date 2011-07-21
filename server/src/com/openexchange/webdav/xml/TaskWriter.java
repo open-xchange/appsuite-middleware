@@ -136,7 +136,7 @@ public class TaskWriter extends CalendarWriter {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(TaskWriter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskWriter.class));
 
     /**
      * Initializes a new {@link TaskWriter}

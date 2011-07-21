@@ -69,7 +69,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -8277899698366715803L;
 
-    private static final transient Log LOG = LogFactory.getLog(UserConfiguration.class);
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
 
     /**
      * The permission bit for mail access.

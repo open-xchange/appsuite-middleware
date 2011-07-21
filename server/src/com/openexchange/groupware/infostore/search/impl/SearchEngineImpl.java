@@ -97,7 +97,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class SearchEngineImpl extends DBService implements InfostoreSearchEngine {
 
-    static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SearchEngineImpl.class));
 
     private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 

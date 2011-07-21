@@ -71,7 +71,7 @@ public class OldPropertyDefinition {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(OldPropertyDefinition.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OldPropertyDefinition.class));
 
     private final Map<String, OldParamDefinition> Params = new HashMap<String, OldParamDefinition>();
 

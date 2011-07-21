@@ -213,7 +213,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
     private InfostoreSecurity security;
     private DBProvider provider;
 
-    private final Log LOG = LogFactory.getLog(InfostoreWebdavFactory.class);
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreWebdavFactory.class));
 
 
     public Protocol getProtocol() {

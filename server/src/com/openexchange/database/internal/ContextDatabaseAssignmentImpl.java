@@ -74,7 +74,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
  */
 public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssignmentService {
 
-    private static final Log LOG = LogFactory.getLog(ContextDatabaseAssignmentImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContextDatabaseAssignmentImpl.class));
 
     private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
 
