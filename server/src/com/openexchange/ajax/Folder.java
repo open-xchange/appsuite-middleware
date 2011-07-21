@@ -167,7 +167,7 @@ public class Folder extends SessionServlet {
 
     private static final long serialVersionUID = -889739420660750770L;
 
-    private static transient final Log LOG = LogFactory.getLog(Folder.class);
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Folder.class));
 
     private static final AdditionalFolderFieldList FIELDS = new AdditionalFolderFieldList();
 

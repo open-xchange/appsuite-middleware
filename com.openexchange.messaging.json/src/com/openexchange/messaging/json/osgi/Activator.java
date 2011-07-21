@@ -84,7 +84,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 public class Activator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class };
 

@@ -229,7 +229,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
                     return DATE_FORMAT.parse(h.getValue());
                 } catch (final ParseException e) {
                     // IGNORE
-                    org.apache.commons.logging.LogFactory.getLog(MessagingComparator.class).error("Comparison failed.", e);
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingComparator.class)).error("Comparison failed.", e);
                 }
             }
         }

@@ -151,7 +151,7 @@ public final class FacebookFQLStreamParser {
                     final String content = item.getTextContent();
                     final long fromId = FacebookMessagingUtility.parseUnsignedLong(null == content ? null : content.trim());
                     if (fromId < 0) {
-                        LogFactory.getLog(FacebookFQLStreamParser.class).warn(
+                        com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class)).warn(
                             new StringBuilder("Field actor_id cannot be parsed to a long: ``").append(content).append("\u00b4\u00b4").toString());
                     }
                     message.setFromId(fromId);
@@ -586,7 +586,7 @@ public final class FacebookFQLStreamParser {
                         if ("attachment".equals(localName)) {
                             attachmentNode = item;
                         } else {
-                            LogFactory.getLog(FacebookFQLStreamParser.class).warn("Un-handled item: " + localName);
+                            com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class)).warn("Un-handled item: " + localName);
                         }
                     } else {
                         itemHandler.handleItem(item, message);
@@ -602,7 +602,7 @@ public final class FacebookFQLStreamParser {
             /*
              * Empty message... ignore it!
              */
-            LogFactory.getLog(FacebookFQLStreamParser.class).warn("Empty Facebook message detected:\n" + streamElement);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class)).warn("Empty Facebook message detected:\n" + streamElement);
             return null;
         }
         /*
@@ -623,7 +623,7 @@ public final class FacebookFQLStreamParser {
                         final String type = item.getTextContent();
                         final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(type);
                         if (null == attachmentHandler) {
-                            final Log logger = LogFactory.getLog(FacebookFQLStreamParser.class);
+                            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class));
                             logger.warn("Unknown attachment type: " + type);
                             logger.debug("Stream element:\n" + Utility.prettyPrintXML(streamElement));
                         } else {
@@ -651,7 +651,7 @@ public final class FacebookFQLStreamParser {
                             final String sType = type.getTextContent();
                             final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(sType);
                             if (null == attachmentHandler) {
-                                final Log logger = LogFactory.getLog(FacebookFQLStreamParser.class);
+                                final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class));
                                 logger.warn("Unknown attachment type: " + sType);
                                 logger.debug("Stream element:\n" + Utility.prettyPrintXML(streamElement));
                             } else {
@@ -672,7 +672,7 @@ public final class FacebookFQLStreamParser {
          * Debug
          */
         if (size <= 0 && !attachmentHandlerFound) {
-            final Log logger = LogFactory.getLog(FacebookFQLStreamParser.class);
+            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class));
             logger.debug("Stream element lead to empty message:\n" + Utility.prettyPrintXML(streamElement));
         }
         message.setSize(size);

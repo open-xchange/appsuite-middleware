@@ -79,7 +79,7 @@ public class ConfigJump extends SessionServlet {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ConfigJump.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJump.class));
 
     /**
      * For serialization.

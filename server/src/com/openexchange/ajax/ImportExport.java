@@ -85,7 +85,7 @@ public abstract class ImportExport extends SessionServlet {
 
     public static final String AJAX_TYPE = "type";
 
-    private static final Log LOG = LogFactory.getLog(ImportExport.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImportExport.class));
 
     protected ImporterExporter importerExporter = null;
 

@@ -127,7 +127,7 @@ public class Login extends AJAXServlet {
 
     private static final long serialVersionUID = 7680745138705836499L;
 
-    static final Log LOG = LogFactory.getLog(Login.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Login.class));
 
     private static interface JSONRequestHandler {
         

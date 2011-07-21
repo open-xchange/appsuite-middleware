@@ -78,7 +78,7 @@ import com.openexchange.oauth.OAuthToken;
  */
 public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
-    private static final Log LOG = LogFactory.getLog(OAuthServiceMetaDataMSNImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataMSNImpl.class));
 
     private static final String accessTokenGrabber = "https://consent.live.com/AccessToken.aspx";
 

@@ -154,7 +154,7 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
                     }
                 } else {
                     // We have to load it, too.
-                    LogFactory.getLog(Refresher.class).warn(
+                    com.openexchange.log.Log.valueOf(LogFactory.getLog(Refresher.class)).warn(
                         "Found 2 threads loading object \"" + String.valueOf(key) + "\" after 1 second into Cache \"" + regionName + "\"");
                 }
             } else {
@@ -163,7 +163,7 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
                 retval = (T) tmp;
             }
         } catch (final InterruptedException e) {
-            LogFactory.getLog(Refresher.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(Refresher.class)).error(e.getMessage(), e);
         } finally {
             lock.unlock();
         }

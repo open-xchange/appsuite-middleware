@@ -63,7 +63,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
  */
 public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData{
 
-    private static final Log LOG = LogFactory.getLog(OAuthServiceMetaDataYahooImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataYahooImpl.class));
 
     private DeferringURLService deferrer;
 

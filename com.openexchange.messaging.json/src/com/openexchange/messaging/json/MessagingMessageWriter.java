@@ -251,13 +251,13 @@ public class MessagingMessageWriter {
                 try {
                     is.close();
                 } catch (final IOException e) {
-                    org.apache.commons.logging.LogFactory.getLog(MessagingMessageWriter.class).error("Closing input stream failed.", e);
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingMessageWriter.class)).error("Closing input stream failed.", e);
                 }
             }
             try {
                 return new String(baos.toByteArray(), "US-ASCII");
             } catch (final UnsupportedEncodingException e) {
-                org.apache.commons.logging.LogFactory.getLog(MessagingMessageWriter.class).error("Unsupported encoding: " + e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingMessageWriter.class)).error("Unsupported encoding: " + e.getMessage(), e);
                 return null;
             }
 

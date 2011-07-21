@@ -90,7 +90,7 @@ public class Contact extends DataServlet {
      */
     private static final long serialVersionUID = 1635881627528234660L;
     
-    private static final transient Log LOG = LogFactory.getLog(Contact.class);
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Contact.class));
     
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {

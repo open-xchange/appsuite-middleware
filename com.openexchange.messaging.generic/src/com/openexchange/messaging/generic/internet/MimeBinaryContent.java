@@ -102,7 +102,7 @@ public class MimeBinaryContent implements BinaryContent {
             try {
                 inputStream.close();
             } catch (final IOException e) {
-                org.apache.commons.logging.LogFactory.getLog(MimeBinaryContent.class).error("Couldn't close stream.", e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeBinaryContent.class)).error("Couldn't close stream.", e);
             }
         }
     }

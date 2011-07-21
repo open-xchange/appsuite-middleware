@@ -184,12 +184,12 @@ public final class Utility {
         try {
             return future.get();
         } catch (final InterruptedException e) {
-            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(cause.getMessage(), cause);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(cause.getMessage(), cause);
             return DEFAULT_MAIL_DATE_FORMAT;
         }
     }
