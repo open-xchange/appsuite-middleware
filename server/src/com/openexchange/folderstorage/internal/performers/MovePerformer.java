@@ -219,7 +219,7 @@ final class MovePerformer extends AbstractPerformer {
              */
             final Permission rootPermission;
             {
-                final Folder rootFolder = realStorage.getFolder(folder.getTreeID(), rootId, storageParameters);
+                final Folder rootFolder = realStorage.getFolder(FolderStorage.REAL_TREE_ID, rootId, storageParameters);
                 final List<ContentType> contentTypes = Collections.<ContentType> emptyList();
                 if (null == getSession()) {
                     rootPermission = CalculatePermission.calculate(rootFolder, getUser(), getContext(), contentTypes);
@@ -233,6 +233,7 @@ final class MovePerformer extends AbstractPerformer {
                  */
                 final Folder clone4Real = (Folder) folder.clone();
                 clone4Real.setParentID(rootId);
+                clone4Real.setTreeID(FolderStorage.REAL_TREE_ID);
                 realStorage.updateFolder(clone4Real, storageParameters);
                 virtualStorage.deleteFolder(folder.getTreeID(), folder.getID(), storageParameters);
                 folder.setID(clone4Real.getID());
