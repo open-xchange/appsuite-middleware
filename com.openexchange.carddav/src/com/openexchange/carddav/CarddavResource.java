@@ -178,8 +178,7 @@ public class CarddavResource extends AbstractResource {
             while ((n = reader.read(buffer)) != -1) {
                 writer.write(buffer, 0, n);
             }
-            String vcardString = writer.toString();
-            System.out.println("vcard-string : "+vcardString);
+            String vcardString = writer.toString();            
             final byte[] vcard = vcardString.getBytes("UTF-8");
             final VersitDefinition def = Versit.getDefinition("text/x-vcard");
             VersitDefinition.Reader versitReader;
@@ -195,10 +194,7 @@ public class CarddavResource extends AbstractResource {
                 newContact.setParentFolderID(parent.getStandardFolder());
                 newContact.setContextId(factory.getSession().getContextId());
             }
-            contact = newContact;
-            
-            System.out.println("This contact is generated:");
-            System.out.println("("+contact.getDisplayName() +") "+ contact.getGivenName() +" "+contact.getSurName()+" "+contact.getEmail1());
+            contact = newContact;                       
         } catch (final VersitException e) {
             LOG.error(e.getMessage(), e);
             throw new WebdavProtocolException(getUrl(), 500);
@@ -255,9 +251,7 @@ public class CarddavResource extends AbstractResource {
 
     public InputStream getBody() throws WebdavProtocolException {
         // generate VCard File
-        String outputString = generateVCard();
-        System.out.println("This is the vcard that is generated:");
-        System.out.println(outputString);
+        String outputString = generateVCard();        
         
         return new ByteArrayInputStream(outputString.getBytes());
     }
