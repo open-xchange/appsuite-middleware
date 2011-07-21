@@ -50,7 +50,7 @@
 package com.openexchange.log;
 
 /**
- * {@link Loggable}
+ * {@link Loggable} - A loggable object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

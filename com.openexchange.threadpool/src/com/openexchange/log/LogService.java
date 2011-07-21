@@ -53,7 +53,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.Loggable.Level;
 
 /**
- * {@link LogService}
+ * {@link LogService} - The logging service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
