@@ -1,3 +1,9 @@
+open-xchange-smtp (6.20.0.0-18) unstable; urgency=low
+
+  * another build for public ptf 2011-07-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 22 Jul 2011 10:01:24 +0000
+
 open-xchange-smtp (6.20.0.0-17) unstable; urgency=low
 
   * build for public ptf 2011-07-25

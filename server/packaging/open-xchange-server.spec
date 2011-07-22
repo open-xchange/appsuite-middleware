@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 18
+%define		ox_release 19
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -861,8 +861,76 @@ fi
 %doc doc/examples
 
 %changelog
+* Fri Jul 22 2011 - choeger@open-xchange.com
+ - Bugfix #19921: package open-xchange is missing a dependency on open-xchange-publish-infostore-online
+* Thu Jul 21 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #19915: A mis-matching byte order mark (BOM) does not throw the parser off anymore.
+* Thu Jul 21 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19890: No more NullPointerExceptions in UDP push bundle if socket initialization fails.
+ - Bugfix #19880: Partial fix. Decoupling the clean up task of the database pooling from other subsystems to avoid blocking situations.
+* Thu Jul 21 2011 - thorben.betten@open-xchange.com
+ - Fix for bug #19920: Using proper tree identifier
+ - Bugfix #19910: Multiple IMAP-IDLE listeners for certain clients
+ - Bugfix #19880: Logging problem is fixed, too
+* Wed Jul 20 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19547: Resolve groups in update cycle, retain all resources of an appointment, declare only primary mail address as private address.
+* Wed Jul 20 2011 - thorben.betten@open-xchange.com
+ - Fix for bug 19688: Introduced white-list property to specify clients which are allowed to receive a notification about a new mail (mail-push)
+* Wed Jul 20 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #19109: Moving a sequence destroys the appointment.
+* Tue Jul 19 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19776: Applying proper subscription status to newly created mail default folders
+ - Bugfix #19824: Token-based access to mail attachments
+ - Bugfix #19875: Updated GMX export URL in corresponding .yml files
+* Tue Jul 19 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19818: Setting secure flag on cookies even if autologin is not enabled.
+* Tue Jul 19 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19484: Only patch appointments once for use in CalDAV interface
+* Mon Jul 18 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19728: Configured max. connection restriction for GMail by default
+ - Bugfix #19722: Additional check for possibly configured global password if password is missing on mail connect attempt
+ - Bugfix #19777: Changed/deleted contacts is honored in existing distribution lists
+ - Bugfix #14653 + #12985: Suppress notification message if no relevant changes can be detected
+* Mon Jul 18 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #19490: Error during exception change.
+ - Bugfix #19489: Removing recurrence information from a recurring appointment.
+* Sun Jul 17 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19821: Properly handling a disappeared mail folder on root level
+* Sat Jul 16 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19726: Checking for existence of storage directory prior attempting to delete it
+ - Bugfix #19747: Fixed possible NPE when parsing an ICal's participants
+* Fri Jul 15 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19792: Fixed possible IndexOutOfBoundsException when fetching an IMAP folder's messages
+ - Bugfix #19816: No alias check with NULL value
+* Thu Jul 14 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19766: Reliable check for a folder's content type
+ - Bugfix #19736: Retry mechanism for mail default folder check
+* Wed Jul 13 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #18688: Correct attachment count in calendar
+* Wed Jul 13 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #19647: Tolerating whitespaces in subscription URIs 
+* Wed Jul 13 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19752: Using newest stable twitter4j API to display home timeline (incl. retweets)
+* Tue Jul 12 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #19667: Resources in a series are conflicting with itself in exceptions.
+* Tue Jul 12 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19576: Removed the usage of the beta flag. It is still only present in the API.
+* Tue Jul 12 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19739: Auto-detection of ACL entities
+* Mon Jul 11 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19635: Ensure termination of consumer task upon mail mass import
+ - Bugfix #19128: Accepting context administrator as a user's contact creator, too
+* Mon Jul 11 2011 - steffen.templin@open-xchange.com
+ - Bugfix #19487: The name of the updater installer that can be downloaded from web gui is configurable now
+ - Bugfix #19488: The template values product-name, base-name and icon are configuration-file properties now
+* Sun Jul 10 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19480: Reliable sorting of message by arrival date.
+ - Bugfix #19595: Added permission check prior to creating attachment-publishing infostore folder
+ - Bugfix #19608: Ensured proper removal from MailAccess watcher on close
+* Fri Jul 08 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19751: Proper generation of FETCH command items if IMAPrev1 is supported
 * Mon Jul 04 2011 - thorben.betten@open-xchange.com
- - Bugfix #19585: Allowing empty cookie values; e.g. ``mycookie=лл
+ - Bugfix #19585: Allowing empty cookie values; e.g. 'mycookie='
  - Bugfix #19691: Dropping AJP connection (in AJP way) if a corrupt AJP cycle is detected
 * Sat Jul 02 2011 - thorben.betten@open-xchange.com
  - Bugfix #19561: Proper re-initialization of LIST/LSUB cache
@@ -878,7 +946,7 @@ fi
  - Bugfix #19658: [L3] Moving mails with the OX WebGUI makes them disappear (dovecot)
  - Bugfix #19669: Proper expunge flag on folder closure
 * Thu Jun 30 2011 - steffen.templin@open-xchange.com
- - Bugfix #19670: To see the updater-download-link in the OX GUI the user also needs permissions for USM istead of only for OLOX20.
+ - Bugfix #19670: To see the updater-download-link in the OX GUI the user also needs permissions for USM instead of only for OLOX20.
 * Wed Jun 29 2011 - marcus.klein@open-xchange.com
  - Not creating always confirmed-spam and confirmed-ham folders anymore for Cloudmark spam handler. confirmed-spam is created if the
    configuration tells to move spam mails to that folder.
