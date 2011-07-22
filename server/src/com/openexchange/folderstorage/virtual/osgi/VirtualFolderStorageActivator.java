@@ -75,7 +75,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 public class VirtualFolderStorageActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualFolderStorageActivator.class)));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualFolderStorageActivator.class));
 
     private List<ServiceRegistration> serviceRegistrations;
 

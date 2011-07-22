@@ -70,7 +70,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class MailAccountCreateTablesTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountCreateTablesTask.class)));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountCreateTablesTask.class));
 
     public int addedWithVersion() {
         return 40;

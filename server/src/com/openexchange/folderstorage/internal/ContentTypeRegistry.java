@@ -72,7 +72,7 @@ import com.openexchange.folderstorage.FolderStorageComparator;
  */
 public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContentTypeRegistry.class)));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContentTypeRegistry.class));
 
     private static final ContentTypeRegistry instance = new ContentTypeRegistry();
 

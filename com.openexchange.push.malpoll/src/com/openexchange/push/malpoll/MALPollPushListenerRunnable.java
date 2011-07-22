@@ -57,7 +57,7 @@ import com.openexchange.push.PushException;
 public final class MALPollPushListenerRunnable implements Runnable {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRunnable.class)));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRunnable.class));
 
     private final MALPollPushListener listener;
 

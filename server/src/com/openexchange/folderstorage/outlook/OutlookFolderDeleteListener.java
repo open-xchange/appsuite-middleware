@@ -123,7 +123,7 @@ public final class OutlookFolderDeleteListener implements DeleteListener {
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OutlookFolderDeleteListener.class))).error(e.getMessage(), e);
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OutlookFolderDeleteListener.class)).error(e.getMessage(), e);
                 }
             }
         }

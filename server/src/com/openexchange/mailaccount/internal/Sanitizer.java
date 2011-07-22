@@ -92,7 +92,7 @@ final class Sanitizer {
                 storageService.invalidateMailAccount(accountId, user, contextId);
             } catch (final MailAccountException e) {
                 // Swallow
-                com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Sanitizer.class))).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Sanitizer.class)).error(e.getMessage(), e);
             }
             return true;
         }

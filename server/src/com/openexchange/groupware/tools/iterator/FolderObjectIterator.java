@@ -106,7 +106,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  */
 public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderObjectIterator.class)));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderObjectIterator.class));
 
     /**
      * The empty folder iterator

@@ -89,7 +89,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     private static final int DEFAULT_BUF_SIZE = 0x2000;
 
-    private static transient final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DataMailPart.class)));
+    private static transient final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DataMailPart.class));
 
     private static final int MB = 1048576;
 

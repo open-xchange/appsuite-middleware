@@ -166,7 +166,7 @@ public final class ImageData {
             return URLEncoder.encode(text, charset);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageData.class))).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageData.class)).error(e.getMessage(), e);
             return text;
         }
     }

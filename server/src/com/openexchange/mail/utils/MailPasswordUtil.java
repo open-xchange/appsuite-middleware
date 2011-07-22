@@ -69,7 +69,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public final class MailPasswordUtil {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailPasswordUtil.class)));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailPasswordUtil.class));
 
     /**
      * The key length.

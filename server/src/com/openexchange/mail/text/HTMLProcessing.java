@@ -89,7 +89,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
  */
 public final class HTMLProcessing {
     
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLProcessing.class)));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLProcessing.class));
 
     private static final String CHARSET_US_ASCII = "US-ASCII";
 

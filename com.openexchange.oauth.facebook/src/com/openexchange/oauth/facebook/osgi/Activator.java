@@ -69,7 +69,7 @@ import com.openexchange.oauth.OAuthService;
  */
 public final class Activator implements BundleActivator{
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class)));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private ServiceTracker tracker;
 

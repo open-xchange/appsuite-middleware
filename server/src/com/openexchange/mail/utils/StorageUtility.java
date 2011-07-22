@@ -69,7 +69,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  */
 public final class StorageUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StorageUtility.class)));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StorageUtility.class));
 
     /*
      * Public constants

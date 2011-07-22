@@ -177,9 +177,9 @@ public final class ImageServlet extends HttpServlet {
     
     private static void sendErrorAndLog(final HttpServletResponse resp, final int errorCode, final String errorMsg, final String logMsg, final Throwable... throwable) throws IOException {
         if (throwable != null && throwable.length > 0) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class))).error(logMsg, throwable[0]);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(logMsg, throwable[0]);
         } else {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class))).error(logMsg);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(logMsg);
         }
         
         if (errorMsg != null) {
@@ -282,7 +282,7 @@ public final class ImageServlet extends HttpServlet {
         try {
             in.close();
         } catch (final IOException e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class))).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(e.getMessage(), e);
         }
     }
 }
