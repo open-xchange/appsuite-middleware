@@ -83,12 +83,12 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
     private HttpService httpService;
     private Login login;
 
-    public LoginServletRegisterer(BundleContext context) {
+    public LoginServletRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
+    public Object addingService(final ServiceReference reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
         lock.lock();
@@ -107,14 +107,14 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
             lock.unlock();
         }
         if (needsRegistration) {
-            Dictionary<String, String> params = new Hashtable<String, String>();
+            final Dictionary<String, String> params = new Hashtable<String, String>(16);
             addProperty(params, Property.UI_WEB_PATH);
             addProperty(params, Property.COOKIE_HASH);
             addProperty(params, Property.COOKIE_TTL);
             addProperty(params, Property.COOKIE_FORCE_HTTPS);
             addProperty(params, Property.FORCE_HTTPS);
             addProperty(params, Property.IP_CHECK);
-            String tmp = configService.getText("noipcheck.cnf");
+            final String tmp = configService.getText("noipcheck.cnf");
             if (null != tmp) {
                 params.put(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName(), tmp);
             }
@@ -123,36 +123,37 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
             addProperty(params, ConfigurationProperty.HTTP_AUTH_CLIENT);
             addProperty(params, ConfigurationProperty.HTTP_AUTH_VERSION);
             addProperty(params, ConfigurationProperty.ERROR_PAGE_TEMPLATE);
+            addProperty(params, ConfigurationProperty.INSECURE);
             try {
                 LOG.info("Registering login servlet.");
                 httpService.registerServlet(SERVLET_PATH, new Login(), params, null);
-            } catch (ServletException e) {
+            } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
-            } catch (NamespaceException e) {
+            } catch (final NamespaceException e) {
                 LOG.error("Registering login servlet failed.", e);
             }
         }
         return obj;
     }
 
-    private void addProperty(Dictionary<String, String> params, Property property) {
-        String propertyName = property.getPropertyName();
+    private void addProperty(final Dictionary<String, String> params, final Property property) {
+        final String propertyName = property.getPropertyName();
         params.put(propertyName, configService.getProperty(propertyName, property.getDefaultValue()));
     }
 
-    private void addProperty(Dictionary<String, String> params, com.openexchange.login.ConfigurationProperty property) {
-        String propertyName = property.getPropertyName();
-        String value = configService.getProperty(propertyName, property.getDefaultValue());
+    private void addProperty(final Dictionary<String, String> params, final com.openexchange.login.ConfigurationProperty property) {
+        final String propertyName = property.getPropertyName();
+        final String value = configService.getProperty(propertyName, property.getDefaultValue());
         if (null != value) {
-            params.put(propertyName, value);
+            params.put(propertyName, value.trim());
         }
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         HttpService unregister = null;
         lock.lock();
         try {
