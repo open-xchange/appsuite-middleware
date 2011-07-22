@@ -80,7 +80,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
  */
 public class Activator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private List<ServiceRegistration> serviceRegistrations;
 
@@ -176,7 +176,7 @@ public class Activator extends DeferredActivator {
              */
             restore();
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

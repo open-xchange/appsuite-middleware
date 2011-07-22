@@ -21,6 +21,7 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.user,
  javax.mail,
  org.apache.commons.logging,
+ com.openexchange.log,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.3"
 Bundle-Activator: com.openexchange.authentication.imap.osgi.ActivatorNew

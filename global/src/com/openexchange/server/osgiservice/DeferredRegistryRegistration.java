@@ -73,7 +73,7 @@ import com.openexchange.java.Autoboxing;
 public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker {
 
 
-    private static final Log LOG = LogFactory.getLog(DeferredRegistryRegistration.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DeferredRegistryRegistration.class));
      
     private R registry;
 

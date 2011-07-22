@@ -75,7 +75,7 @@ import com.openexchange.session.Session;
  */
 public final class SynchronizerCallable implements Callable<Object> {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SynchronizerCallable.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SynchronizerCallable.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

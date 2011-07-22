@@ -66,7 +66,7 @@ public class EAVTypeCoercion {
 
     public static enum Mode { INCOMING, OUTGOING }
     
-    private static final Log LOG = LogFactory.getLog(EAVTypeCoercion.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EAVTypeCoercion.class));
 
     private Mode mode = Mode.INCOMING;
     

@@ -88,7 +88,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     private static final long serialVersionUID = -6668834083007607601L;
 
-    private static final Log LOG = LogFactory.getLog(CrawlerOfferingServlet.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerOfferingServlet.class));
 
     private static SubscriptionSourceDiscoveryService sources = null;
 

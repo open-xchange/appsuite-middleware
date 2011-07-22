@@ -16,6 +16,7 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.apache.commons.logging,
+ com.openexchange.log,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.passcrypt.osgi.PasscryptActivator

@@ -76,7 +76,7 @@ import com.openexchange.groupware.impl.IDGenerator;
  */
 public class MySQLGenericConfigurationStorage implements GenericConfigurationStorageService {
 
-    private static final Log LOG = LogFactory.getLog(MySQLGenericConfigurationStorage.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MySQLGenericConfigurationStorage.class));
     
     private DBProvider provider;
 

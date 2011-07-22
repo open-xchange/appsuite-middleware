@@ -81,7 +81,7 @@ public class SieveHandler {
     /**
      * The logger.
      */
-    private static Log log = LogFactory.getLog(SieveHandler.class);
+    private static Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(SieveHandler.class));
 
     /**
      * The constant for CRLF (carriage-return line-feed).

@@ -67,7 +67,7 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
     private static final String PROP_IDENTIFIER = "identifier";
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(ConversionEngineCustomizer.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConversionEngineCustomizer.class));
 
     private final BundleContext context;
 

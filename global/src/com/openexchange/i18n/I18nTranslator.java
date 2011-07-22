@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class I18nTranslator implements Translator {
 
-    private static final Log LOG = LogFactory.getLog(I18nTranslator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nTranslator.class));
 
     private final I18nService service;
 

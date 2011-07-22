@@ -87,7 +87,7 @@ public class Activator implements BundleActivator {
     private BundleContext context;
     private ServiceTracker serviceTracker;
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     public void start(final BundleContext bundleContext) throws Exception {
         services = new OSGiServicePublisher(bundleContext);

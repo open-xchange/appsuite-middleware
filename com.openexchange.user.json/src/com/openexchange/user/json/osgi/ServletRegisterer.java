@@ -87,9 +87,9 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
             service.registerServlet(com.openexchange.user.json.Constants.SERVLET_PATH, new UserServlet(), null, null);
             return service;
         } catch (final ServletException e) {
-            LogFactory.getLog(ServletRegisterer.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
         } catch (final NamespaceException e) {
-            LogFactory.getLog(ServletRegisterer.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
         }
         // Nothing to track on error
         return null;

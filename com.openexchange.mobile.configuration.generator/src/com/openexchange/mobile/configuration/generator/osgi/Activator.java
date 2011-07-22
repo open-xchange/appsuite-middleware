@@ -18,7 +18,7 @@ import com.openexchange.tools.service.ServletRegistration;
 
 public class Activator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, TemplateService.class, ThreadPoolService.class };
     public static final String ALIAS = "/servlet/mobileconfig";

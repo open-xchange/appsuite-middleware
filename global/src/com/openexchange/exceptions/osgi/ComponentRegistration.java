@@ -66,7 +66,7 @@ import com.openexchange.groupware.Component;
  */
 public class ComponentRegistration implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(ComponentRegistration.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ComponentRegistration.class));
 
     private final Component component;
 

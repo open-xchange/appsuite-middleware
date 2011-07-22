@@ -26,7 +26,7 @@ import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
 
 public class LDAPHostnameService implements HostnameService {
 
-    private static final Log LOG = LogFactory.getLog(LDAPHostnameService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LDAPHostnameService.class));
 
     private static final String PLACEHOLDER = "%i";
 

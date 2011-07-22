@@ -123,7 +123,7 @@ public class Activator implements BundleActivator {
                 tracker.open();
             }
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }
@@ -142,7 +142,7 @@ public class Activator implements BundleActivator {
                 userMultipleService = null;
             }
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }

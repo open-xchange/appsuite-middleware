@@ -71,7 +71,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RequestParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {
 
-    private static Log LOG = LogFactory.getLog(RequestParticipants.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestParticipants.class));
 
     @Override
     protected void addUserAttendee(final int index, final UserParticipant userParticipant, final Context ctx, final T component, final U cObj) throws ConversionError {

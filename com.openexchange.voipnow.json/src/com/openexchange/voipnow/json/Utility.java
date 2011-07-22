@@ -93,9 +93,9 @@ public final class Utility {
             checksum.update(string.getBytes("UTF-8"));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
         } catch (final UnsupportedEncodingException e) {
-            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
         }
         return null;
     }
@@ -125,9 +125,9 @@ public final class Utility {
             checksum.update(string.getBytes("UTF-8"));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
         } catch (final UnsupportedEncodingException e) {
-            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
         }
         return null;
     }
@@ -162,7 +162,7 @@ public final class Utility {
             // Keep interrupted status
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-            final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Utility.class);
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class));
             LOG.error(e.getMessage(), e);
         }
         return TimeZone.getTimeZone(ID);

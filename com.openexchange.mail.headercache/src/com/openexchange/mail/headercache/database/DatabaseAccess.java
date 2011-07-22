@@ -295,7 +295,7 @@ public final class DatabaseAccess {
                                     try {
                                         fillPipeDeflate(pipedOut, binaryStream);
                                     } catch (final IOException e) {
-                                        org.apache.commons.logging.LogFactory.getLog(DatabaseAccess.class).error(e.getMessage(), e);
+                                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseAccess.class)).error(e.getMessage(), e);
                                         throw e;
                                     }
                                     return null;
@@ -970,7 +970,7 @@ public final class DatabaseAccess {
             try {
                 closeable.close();
             } catch (final IOException e) {
-                org.apache.commons.logging.LogFactory.getLog(DatabaseAccess.class).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseAccess.class)).error(e.getMessage(), e);
             }
         }
     }

@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileDeliveryServlet extends HttpServlet {
-    private static final Log LOG = LogFactory.getLog(FileDeliveryServlet.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileDeliveryServlet.class));
     
     public static RandomTokenContainer<Map<String, Object>> PARAM_MAP = null;
     public static DataProviderRegistry DATA_PROVIDERS = null;

@@ -67,7 +67,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public class AuthLDAPActivator extends DeferredActivator {
 	
-	private static final Log LOG = LogFactory.getLog(AuthLDAPActivator.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthLDAPActivator.class));
 
 	private ServiceRegistration registration;
 

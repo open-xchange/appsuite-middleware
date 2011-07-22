@@ -65,7 +65,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
  */
 public final class ConversionServletActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConversionServletActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConversionServletActivator.class));
 
     private static final String ALIAS = "ajax/conversion";
 

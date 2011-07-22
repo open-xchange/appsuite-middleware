@@ -73,7 +73,7 @@ import com.openexchange.user.UserService;
  */
 public final class TwitterMailActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TwitterMailActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMailActivator.class));
 
     private ServiceRegistration twitterServiceRegistration;
 

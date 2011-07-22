@@ -91,7 +91,7 @@ public final class HeaderCacheStaticProperties extends AbstractProtocolPropertie
 
     @Override
     protected void loadProperties0() throws MailConfigException {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(HeaderCacheStaticProperties.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HeaderCacheStaticProperties.class));
 
         final StringBuilder logBuilder = new StringBuilder(256);
         logBuilder.append("\nLoading global header cache properties...\n");

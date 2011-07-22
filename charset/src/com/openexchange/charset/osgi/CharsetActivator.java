@@ -66,7 +66,7 @@ import com.openexchange.charset.ModifyCharsetStandardProvider;
  */
 public final class CharsetActivator implements BundleActivator, ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CharsetActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CharsetActivator.class));
 
     private CollectionCharsetProvider collectionCharsetProvider;
 

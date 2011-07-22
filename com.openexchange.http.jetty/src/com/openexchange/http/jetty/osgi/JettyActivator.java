@@ -63,7 +63,7 @@ import com.openexchange.systemname.SystemNameService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JettyActivator extends HousekeepingActivator{
-    private static final Log LOG = LogFactory.getLog(JettyActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JettyActivator.class));
     
     @Override
     protected Class<?>[] getNeededServices() {

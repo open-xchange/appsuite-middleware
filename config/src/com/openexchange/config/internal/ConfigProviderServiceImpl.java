@@ -86,7 +86,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
 
     private ConfigurationService configService;
     
-    private static final Log LOG = LogFactory.getLog(ConfigProviderService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigProviderService.class));
     
     private ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
 

@@ -86,7 +86,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
  */
 public class FileStorageJSONActivator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(FileStorageJSONActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileStorageJSONActivator.class));
 
     private static final Class<?>[] NEEDED_SERVICES =
         new Class[] { FileStorageServiceRegistry.class, HttpService.class, CacheService.class, IDBasedFileAccessFactory.class, AttachmentBase.class };

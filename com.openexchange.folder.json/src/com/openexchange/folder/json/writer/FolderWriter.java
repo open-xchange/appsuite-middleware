@@ -79,7 +79,7 @@ public final class FolderWriter {
     /**
      * The logger constant.
      */
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderWriter.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderWriter.class));
 
     /**
      * Initializes a new {@link FolderWriter}.

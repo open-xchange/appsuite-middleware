@@ -16,5 +16,6 @@ Import-Package: com.openexchange.conversion,
  javax.net,
  javax.net.ssl,
  org.apache.commons.logging,
+ com.openexchange.log,
  org.osgi.framework
 Bundle-Activator: com.openexchange.url.mail.attachment.osgi.URLMailAttachmentActivator

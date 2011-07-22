@@ -73,7 +73,7 @@ public final class EmitterTools {
 
 	private static TimeZoneRegistry timeZoneRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
 
-    private static final Log LOG = LogFactory.getLog(EmitterTools.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmitterTools.class));
 
     private static CalendarCollectionService calendarCollection;
 

@@ -101,7 +101,7 @@ public class IMAPAuthentication implements AuthenticationService {
         }
     }
 
-    private static final Log LOG = LogFactory.getLog(IMAPAuthentication.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPAuthentication.class));
 
     private static Properties props;
 

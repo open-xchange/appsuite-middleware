@@ -199,7 +199,7 @@ public final class AJPv13Activator extends DeferredActivator {
              */
 
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -234,7 +234,7 @@ public final class AJPv13Activator extends DeferredActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

@@ -68,7 +68,7 @@ import com.openexchange.user.UserService;
  */
 public final class ResourceRequestActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ResourceRequestActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ResourceRequestActivator.class));
 
     private ServiceRegistration handlerRegistration;
 

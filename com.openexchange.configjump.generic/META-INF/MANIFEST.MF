@@ -7,6 +7,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.configjump.generic.Activator
 Import-Package: com.openexchange.config,
  com.openexchange.configjump,
- org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging,
+ com.openexchange.log,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.2"

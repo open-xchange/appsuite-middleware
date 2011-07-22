@@ -73,7 +73,7 @@ public final class MonitoringInit implements Initialization {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(MonitoringInit.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MonitoringInit.class));
 
     /**
      * Prevent instantiation.

@@ -108,7 +108,7 @@ public final class ClearAction extends AbstractFolderAction {
                 try {
                     folderService.clearFolder(treeId, folderId, session);
                 } catch (final FolderException e) {
-                    final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ClearAction.class);
+                    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ClearAction.class));
                     log.error(e.getMessage(), e);
                     responseArray.put(folderId);
                     e.setCategory(Category.WARNING);

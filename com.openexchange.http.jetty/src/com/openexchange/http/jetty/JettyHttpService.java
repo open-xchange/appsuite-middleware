@@ -69,7 +69,7 @@ import org.osgi.service.http.HttpService;
  */
 public class JettyHttpService implements HttpService {
 
-    private static final Log LOG = LogFactory.getLog(JettyHttpService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JettyHttpService.class));
     
     private Server server;
 

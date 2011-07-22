@@ -83,7 +83,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public class HTMLServiceActivator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(HTMLServiceActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTMLServiceActivator.class));
 
     private List<ServiceTracker> trackers;
 

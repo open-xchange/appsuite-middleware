@@ -71,7 +71,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class CloudmarkSpamHandler extends SpamHandler {
 
-    private static final Log LOG = LogFactory.getLog(CloudmarkSpamHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CloudmarkSpamHandler.class));
 
     private static final String NAME = "CloudmarkSpamHandler";
 

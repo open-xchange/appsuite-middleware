@@ -14,7 +14,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public class MobileConfigProperties {
     
-    private static final Log LOG = LogFactory.getLog(MobileConfigProperties.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobileConfigProperties.class));
     
     /**
      * Fetches the property (convenience method)

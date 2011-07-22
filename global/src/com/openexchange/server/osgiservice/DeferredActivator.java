@@ -132,7 +132,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
     }
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class));
 
     /**
      * An atomic boolean to keep track of started/stopped status.

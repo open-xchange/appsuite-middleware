@@ -103,7 +103,7 @@ public class ICal4JParser implements ICalParser {
 
     private static final String UTF8 = "UTF-8";
 
-    private static final Log LOG = LogFactory.getLog(ICal4JParser.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JParser.class));
 
     private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {

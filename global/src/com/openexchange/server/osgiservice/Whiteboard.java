@@ -66,7 +66,7 @@ import com.openexchange.tools.global.OXCloseable;
  */
 public class Whiteboard implements OXCloseable {
     
-    private static final Log LOG = LogFactory.getLog(Whiteboard.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Whiteboard.class));
     
     private final List<OXCloseable> closeables = new LinkedList<OXCloseable>();
 

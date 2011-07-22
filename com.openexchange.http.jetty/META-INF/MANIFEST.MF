@@ -10,6 +10,7 @@ Import-Package: com.openexchange.server.osgiservice,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
+ com.openexchange.log,
  org.osgi.framework,
  org.osgi.service.http
 Bundle-ClassPath: lib/jetty-server-7.2.2.v20101205.jar,

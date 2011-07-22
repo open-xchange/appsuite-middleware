@@ -63,7 +63,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public final class JCharsetActivator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(JCharsetActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JCharsetActivator.class));
 
     private ServiceRegistration serviceRegistration;
 

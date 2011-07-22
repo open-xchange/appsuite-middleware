@@ -70,7 +70,7 @@ public class ConditionalRegistration {
     protected ServiceRegistration registration;
     private boolean running;
     
-    protected static final Log LOG = LogFactory.getLog(ConditionalRegistration.class);
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConditionalRegistration.class));
 
     public ConditionalRegistration(final BundleContext context, final String serviceName, final Object service, final Dictionary dict) {
         this.context = context;

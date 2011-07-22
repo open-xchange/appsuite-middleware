@@ -66,7 +66,7 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
  */
 public final class ConfigActivator implements BundleActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigActivator.class));
 
     private ServiceRegistration registration;
 

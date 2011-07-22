@@ -83,7 +83,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3006497622205429579L;
 
-    private static final Log LOG = LogFactory.getLog(AJAXServlet.class);   
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AJAXServlet.class));   
     
     private static final String PARAMETER_SESSION = com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 

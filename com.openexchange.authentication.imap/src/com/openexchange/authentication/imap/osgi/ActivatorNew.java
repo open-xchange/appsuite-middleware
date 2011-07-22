@@ -64,7 +64,7 @@ import com.openexchange.user.UserService;
 
 public class ActivatorNew extends DeferredActivator {
 
-    private static transient final Log LOG = LogFactory.getLog(ActivatorNew.class);
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ActivatorNew.class));
 
     private ServiceRegistration registration;
 

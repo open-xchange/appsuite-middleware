@@ -64,7 +64,7 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
  */
 public final class ConversionActivator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(ConversionActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConversionActivator.class));
 
     private ComponentRegistration convComponent;
 

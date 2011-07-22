@@ -79,7 +79,7 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
  */
 public final class ConfigurationImpl implements ConfigurationService {
 
-    private static final Log LOG = LogFactory.getLog(ConfigurationImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigurationImpl.class));
 
     private static final String EXT = ".properties";
 

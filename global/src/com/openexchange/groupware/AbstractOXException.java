@@ -81,7 +81,7 @@ public class AbstractOXException extends Exception {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(AbstractOXException.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractOXException.class));
 
     /**
      * For serialization.

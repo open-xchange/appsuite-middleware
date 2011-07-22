@@ -73,7 +73,7 @@ public class Activator extends HousekeepingActivator {
     
     private YahooService yahooService;
     
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
     
     /* (non-Javadoc)
      * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()

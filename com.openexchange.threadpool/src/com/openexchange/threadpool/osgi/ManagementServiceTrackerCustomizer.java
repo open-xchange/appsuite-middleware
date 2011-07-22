@@ -137,7 +137,7 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
             try {
                 management.unregisterMBean(objectName);
             } catch (final Exception e) {
-                org.apache.commons.logging.LogFactory.getLog(ManagementServiceTrackerCustomizer.class).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagementServiceTrackerCustomizer.class)).error(e.getMessage(), e);
             } finally {
                 objectName = null;
             }

@@ -11,6 +11,7 @@ Import-Package: com.openexchange.exceptions,
  com.openexchange.server.osgiservice,
  com.openexchange.tools.strings,
  org.apache.commons.logging,
+ com.openexchange.log,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.config.cascade

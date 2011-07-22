@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceException;
  */
 public class ActionSMS implements ActionService {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class));
 
 	public ProvisioningResponse handleAction(
 			ProvisioningInformation provisioningInformation){

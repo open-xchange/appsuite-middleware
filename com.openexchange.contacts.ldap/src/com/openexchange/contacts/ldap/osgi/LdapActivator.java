@@ -75,7 +75,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class LdapActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LdapActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapActivator.class));
 
     private final AtomicBoolean started;
 

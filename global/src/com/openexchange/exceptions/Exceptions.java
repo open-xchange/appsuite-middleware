@@ -63,7 +63,7 @@ import com.openexchange.groupware.Component;
  */
 public abstract class Exceptions<T extends AbstractOXException> {
 
-    private static final Log LOG = LogFactory.getLog(Exceptions.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Exceptions.class));
     
     private final Map<Integer, ErrorMessage> errors = new HashMap<Integer, ErrorMessage>();
 

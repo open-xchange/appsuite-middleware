@@ -101,7 +101,7 @@ import com.openexchange.server.ServiceException;
  */
 public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    private static Log LOG = LogFactory.getLog(Participants.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Participants.class));
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 

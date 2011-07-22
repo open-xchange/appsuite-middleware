@@ -75,7 +75,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class ReplyParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {
 
-    private static Log LOG = LogFactory.getLog(ReplyParticipants.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplyParticipants.class));
 
     @Override
     public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
