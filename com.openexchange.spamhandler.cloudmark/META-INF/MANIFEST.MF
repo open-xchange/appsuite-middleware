@@ -17,5 +17,5 @@ Import-Package: com.openexchange.config,
  javax.mail.internet,
  org.apache.commons.logging,
  com.openexchange.log,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework
 Bundle-Activator: com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerActivator

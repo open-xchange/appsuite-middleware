@@ -42,5 +42,5 @@ Import-Package: com.openexchange.ajax,
  javax.servlet.http,
  org.apache.commons.logging,
  com.openexchange.log,
- org.osgi.framework;version="1.3.0",
+ org.osgi.framework,
  org.osgi.service.http

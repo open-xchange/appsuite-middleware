@@ -12,6 +12,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
  com.openexchange.log,
- org.apache.commons.logging.impl;version="1.0.4",
+ org.apache.commons.logging.impl,
  org.osgi.framework
 Bundle-Activator: com.openexchange.dataretention.csv.osgi.CSVDataRetentionActivator

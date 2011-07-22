@@ -40,8 +40,8 @@ Import-Package: com.openexchange.cache,
  javax.mail,
  javax.mail.internet,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0",
- org.osgi.util.tracker;version="1.3.3"
+ org.osgi.framework,
+ org.osgi.util.tracker
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.messaging.generic,
  com.openexchange.messaging.generic.internet

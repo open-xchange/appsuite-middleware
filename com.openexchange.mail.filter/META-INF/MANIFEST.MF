@@ -37,7 +37,7 @@ Import-Package: com.openexchange.ajax,
  org.apache.commons.logging,
  com.openexchange.log,
  org.json,
- org.osgi.framework;version="1.3.0",
+ org.osgi.framework,
  org.osgi.service.http
 Export-Package: com.openexchange.jsieve.commands,
  com.openexchange.jsieve.export,
