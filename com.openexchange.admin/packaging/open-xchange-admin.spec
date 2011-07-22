@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 17
+%define		ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -406,6 +406,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Jul 21 2011 - dennis.sieben@open-xchange.com
+ - Bugfix #19913 - [L3] defaults for csv und direct user creation differ
 * Thu Jun 30 2011 - marcus.klein@open-xchange.com
  - Bugfix #19653: Not starting administration daemon with GMT timezone anymore.
 * Mon Jun 20 2011 - marcus.klein@open-xchange.com
