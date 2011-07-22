@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -160,6 +161,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.SearchStrings;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.user.UserService;
 
 /**
@@ -910,12 +912,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final ManagedFile[] files = new ManagedFile[mails.length];
         try {
+            final ByteArrayOutputStream bout = new UnsynchronizedByteArrayOutputStream(8192);
             for (int i = 0; i < files.length; i++) {
                 final MailMessage mail = mails[i];
                 if (null == mail) {
                     files[i] = null;
                 } else {
-                    files[i] = mfm.createManagedFile(mail.getInputStream());
+                    bout.reset();
+                    mail.writeTo(bout);
+                    files[i] = mfm.createManagedFile(bout.toByteArray());
                 }
             }
             /*
