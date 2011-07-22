@@ -61,6 +61,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -75,6 +76,7 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -254,11 +256,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Perform blocking enqueue (waiting if necessary for space to become available).
          */
         try {
-            queue.put(PRESENT);
+            return !queue.offer(PRESENT, StorageUtility.getMaxRunningMillis(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             throw new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
         }
-        return false;
     }
 
     /*-
