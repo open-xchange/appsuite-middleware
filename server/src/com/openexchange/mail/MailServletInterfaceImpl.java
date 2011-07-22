@@ -887,6 +887,115 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public ManagedFile getMessages(final String folder, final String[] msgIds) throws MailException {
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        /*
+         * Get parts
+         */
+        final MailMessage[] mails = new MailMessage[msgIds.length];
+        for (int i = 0; i < msgIds.length; i++) {
+            mails[i] = mailAccess.getMessageStorage().getMessage(fullname, msgIds[i], false);
+        }
+        /*
+         * Store them temporary to files
+         */
+        final ManagedFileManagement mfm;
+        try {
+            mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        }
+        final ManagedFile[] files = new ManagedFile[mails.length];
+        try {
+            for (int i = 0; i < files.length; i++) {
+                final MailMessage mail = mails[i];
+                if (null == mail) {
+                    files[i] = null;
+                } else {
+                    files[i] = mfm.createManagedFile(mail.getInputStream());
+                }
+            }
+            /*
+             * ZIP them
+             */
+            try {
+                final File tempFile = mfm.newTempFile();
+                final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(tempFile));
+                try {
+                    final byte[] buf = new byte[8192];
+                    for (int i = 0; i < files.length; i++) {
+                        final ManagedFile file = files[i];
+                        if (null != file) {
+                            final FileInputStream in = new FileInputStream(file.getFile());
+                            try {
+                                /*
+                                 * Add ZIP entry to output stream
+                                 */
+                                final String subject = mails[i].getSubject();
+                                out.putNextEntry(new ZipEntry((isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\s+", "_")) + ".eml"));
+                                /*
+                                 * Transfer bytes from the file to the ZIP file
+                                 */
+                                int len;
+                                while ((len = in.read(buf)) > 0) {
+                                    out.write(buf, 0, len);
+                                }
+                                /*
+                                 * Complete the entry
+                                 */
+                                out.closeEntry();
+                            } finally {
+                                try {
+                                    in.close();
+                                } catch (final IOException e) {
+                                    LOG.error(e.getMessage(), e);
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    // Complete the ZIP file
+                    try {
+                        out.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+                /*
+                 * Return managed file
+                 */
+                return mfm.createManagedFile(tempFile);
+            } catch (final IOException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            }
+        } catch (final ManagedFileException e) {
+            throw new MailException(e);
+        } finally {
+            for (int i = 0; i < files.length; i++) {
+                final ManagedFile file = files[i];
+                if (null != file) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
+    }
+
+    @Override
     public ManagedFile getMessageAttachments(final String folder, final String msgUID, final String[] attachmentPositions) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();

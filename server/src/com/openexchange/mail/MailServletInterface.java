@@ -236,6 +236,16 @@ public abstract class MailServletInterface {
     public abstract ManagedFile getMessageAttachments(String folder, String msgUID, String[] attachmentPositions) throws MailException;
 
     /**
+     * Returns messages as a ZIP file backed by returned managed file instance.
+     * 
+     * @param folder The folder
+     * @param msgIds The message identifiers
+     * @return A ZIP file backed by returned managed file instance
+     * @throws MailException If an error occurs
+     */
+    public abstract ManagedFile getMessages(String folder, String[] msgIds) throws MailException;
+
+    /**
      * Returns a message's inline image located identified with given <code>cid</code> wrapped by an instance of
      * <code>JSONMessageAttachmentObject</code> for a convenient access to its attributes and content.
      */

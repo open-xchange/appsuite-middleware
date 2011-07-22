@@ -371,6 +371,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             actionGetAttachment(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_ZIP_MATTACH)) {
             actionGetMultipleAttachments(req, resp);
+        } else if (actionStr.equalsIgnoreCase(ACTION_ZIP_MESSAGES)) {
+            actionGetMultipleMessages(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_NEW_MSGS)) {
             actionGetNew(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_SAVE_VERSIT)) {
@@ -1870,6 +1872,88 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final String subject = mailInterface.getMessage(folderPath, uid).getSubject();
                     fileName = new StringBuilder(subject).append(".zip").toString();
                 }
+                /*
+                 * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
+                 */
+                final ContentType contentType = new ContentType();
+                contentType.setPrimaryType("application");
+                contentType.setSubType("octet-stream");
+                resp.setContentType(contentType.toString());
+                final String userAgent = req.getHeader(STR_USER_AGENT);
+                final String preparedFileName =
+                    getSaveAsFileName(fileName, isMSIEOnWindows(userAgent == null ? "" : userAgent), "application/zip");
+                resp.setHeader(
+                    "Content-disposition",
+                    new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                /*
+                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
+                 * not allow header "Pragma"
+                 */
+                Tools.removeCachingHeader(resp);
+                final OutputStream out = resp.getOutputStream();
+                outSelected = true;
+                /*
+                 * Write from content's input stream to response output stream
+                 */
+                final InputStream zipInputStream = mf.getInputStream();
+                try {
+                    final byte[] buffer = new byte[0xFFFF];
+                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) != -1;) {
+                        out.write(buffer, 0, len);
+                    }
+                    out.flush();
+                } finally {
+                    zipInputStream.close();
+                }
+            } finally {
+                if (mailInterface != null) {
+                    mailInterface.close(true);
+                }
+                if (null != mf) {
+                    mf.delete();
+                    mf = null;
+                }
+            }
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            callbackError(resp, outSelected, true, e);
+        } catch (final Exception e) {
+            final AbstractOXException exc = getWrappingOXException(e);
+            LOG.error(exc.getMessage(), exc);
+            callbackError(resp, outSelected, true, exc);
+        }
+    }
+
+    public void actionGetGetMultipleMessages() throws MailException {
+        throw new MailException(MailException.Code.UNSUPPORTED_ACTION, ACTION_ZIP_MESSAGES, "Multiple servlet");
+    }
+
+    private final void actionGetMultipleMessages(final HttpServletRequest req, final HttpServletResponse resp) {
+        /*
+         * Some variables
+         */
+        final ServerSession session = getSessionObject(req);
+        boolean outSelected = false;
+        /*
+         * Start response
+         */
+        try {
+            /*
+             * Read in parameters
+             */
+            final String folderPath = checkStringParam(req, PARAMETER_FOLDERID);
+            final String[] ids = checkStringArrayParam(req, PARAMETER_ID);
+            /*
+             * Get attachment
+             */
+            final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            ManagedFile mf = null;
+            try {
+                mf = mailInterface.getMessages(folderPath, ids);
+                /*
+                 * Set Content-Type and Content-Disposition header
+                 */
+                final String fileName = "mails.zip";
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
                  */
