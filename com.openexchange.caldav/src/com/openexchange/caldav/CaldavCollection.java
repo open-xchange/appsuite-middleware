@@ -58,6 +58,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caldav.GroupwareCaldavFactory.State;
+import com.openexchange.caldav.mixins.CTag;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.folderstorage.Permission;
@@ -102,7 +103,8 @@ public class CaldavCollection extends AbstractCollection {
         includeProperties(
             new CurrentUserPrivilegeSet(folder.getOwnPermission()),
             new SupportedReportSet(),
-            new SupportedCalendarComponentSet()
+            new SupportedCalendarComponentSet(),
+            new CTag(factory.getState().getFolder(getId()), getId())
         );
         
 
