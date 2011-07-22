@@ -121,7 +121,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, SecretMigrator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceImpl.class)));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceImpl.class));
 
     private final OAuthServiceMetaDataRegistry registry;
 

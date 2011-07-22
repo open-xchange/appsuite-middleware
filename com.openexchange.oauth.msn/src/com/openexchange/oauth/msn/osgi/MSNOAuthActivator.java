@@ -78,7 +78,7 @@ public class MSNOAuthActivator extends HousekeepingActivator {
 
     private OAuthServiceMetaDataMSNImpl oAuthMetadata;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNOAuthActivator.class)));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNOAuthActivator.class));
 
     @Override
     protected Class<?>[] getNeededServices() {

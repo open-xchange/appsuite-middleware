@@ -77,7 +77,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class FacebookServiceImpl implements FacebookService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookServiceImpl.class))));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookServiceImpl.class)));
     
     private com.openexchange.oauth.OAuthService oAuthService;
     private OAuthServiceMetaDataFacebookImpl facebookMetaData;

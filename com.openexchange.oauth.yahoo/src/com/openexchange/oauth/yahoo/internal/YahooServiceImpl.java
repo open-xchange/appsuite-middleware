@@ -85,7 +85,7 @@ public class YahooServiceImpl implements YahooService {
 
     private static final String SINGLE_CONTACT_URL = "http://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooServiceImpl.class)));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooServiceImpl.class));
 
     public YahooServiceImpl(YahooOAuthActivator activator) {
         this.activator = activator;
