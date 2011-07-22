@@ -186,6 +186,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_ZIP_MATTACH = "zip_attachments";
 
+    public static final String ACTION_ZIP_MESSAGES = "zip_messages";
+
     public static final String ACTION_MAIL_RECEIPT_ACK = "receipt_ack";
 
     public static final String ACTION_NEW_MSGS = "newmsgs";
@@ -782,7 +784,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return uploadEvent;
     }
 
-    protected static boolean mayUpload(String action) {
+    protected static boolean mayUpload(final String action) {
         return !UPLOAD_ACTIONS.contains(action) && !com.openexchange.groupware.importexport.Format.containsConstantName(action);
     }
 
