@@ -149,58 +149,59 @@ final class LoggerTask extends AbstractTask<Object> {
                     for (final Loggable loggable : loggables) {
                         final Throwable t = loggable.getThrowable();
                         final Log log = loggable.getLog();
+                        final String message = loggable.getMessage();
                         switch (loggable.getLevel()) {
                         case FATAL:
                             if (log.isFatalEnabled()) {
                                 if (null == t) {
-                                    log.fatal(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                    log.fatal(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()));
                                 } else {
-                                    log.fatal(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                    log.fatal(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()), t);
                                 }
                             }
                             break;
                         case ERROR:
                             if (log.isErrorEnabled()) {
                                 if (null == t) {
-                                    log.error(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                    log.error(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()));
                                 } else {
-                                    log.error(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                    log.error(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()), t);
                                 }
                             }
                             break;
                         case WARNING:
                             if (log.isWarnEnabled()) {
                                 if (null == t) {
-                                    log.warn(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                    log.warn(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()));
                                 } else {
-                                    log.warn(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                    log.warn(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()), t);
                                 }
                             }
                             break;
                         case INFO:
                             if (log.isInfoEnabled()) {
                                 if (null == t) {
-                                    log.info(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                    log.info(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()));
                                 } else {
-                                    log.info(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                    log.info(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()), t);
                                 }
                             }
                             break;
                         case DEBUG:
                             if (log.isDebugEnabled()) {
                                 if (null == t) {
-                                    log.debug(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                    log.debug(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()));
                                 } else {
-                                    log.debug(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                    log.debug(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()), t);
                                 }
                             }
                             break;
                         case TRACE:
                             if (log.isTraceEnabled()) {
                                 if (null == t) {
-                                    log.trace(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                    log.trace(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()));
                                 } else {
-                                    log.trace(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                    log.trace(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable.getCallerTrace()), t);
                                 }
                             }
                             break;
