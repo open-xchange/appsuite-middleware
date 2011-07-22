@@ -62,7 +62,7 @@ import com.openexchange.i18n.I18nService;
 
 public class I18nImpl implements I18nService {
 
-    private static final Log LOG = LogFactory.getLog(I18nImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nImpl.class));
 
     private ResourceBundle serverBundle = null;
 

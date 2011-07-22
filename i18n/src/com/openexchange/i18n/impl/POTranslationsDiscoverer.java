@@ -70,7 +70,7 @@ import com.openexchange.i18n.parsing.Translations;
  */
 public class POTranslationsDiscoverer extends FileDiscoverer {
 
-    private static final Log LOG = LogFactory.getLog(POTranslationsDiscoverer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(POTranslationsDiscoverer.class));
 
     public POTranslationsDiscoverer(final File dir) throws FileNotFoundException {
         super(dir);

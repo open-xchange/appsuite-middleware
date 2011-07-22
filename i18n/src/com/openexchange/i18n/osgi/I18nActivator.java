@@ -133,7 +133,7 @@ public class I18nActivator implements BundleActivator {
         }
     }
 
-    private static final Log LOG = LogFactory.getLog(I18nActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nActivator.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
