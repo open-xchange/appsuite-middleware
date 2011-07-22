@@ -267,7 +267,7 @@ public final class SessionHandler {
             return null;
         }
         /*
-         * Check if local IP should be set
+         * Check if local IP should be replaced
          */
         if (null != newIP) {
             /*
