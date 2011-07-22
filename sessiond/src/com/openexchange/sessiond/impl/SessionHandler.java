@@ -266,13 +266,19 @@ public final class SessionHandler {
         if (null == sessionControl) {
             return null;
         }
-        // Set local IP
-        final Session session = sessionControl.getSession();
-
-        final String oldIP = session.getLocalIp();
-        if (!newIP.equals(oldIP)) {
-            LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
-            session.setLocalIp(newIP);
+        /*
+         * Check if local IP should be set
+         */
+        if (null != newIP) {
+            /*
+             * Set local IP
+             */
+            final Session session = sessionControl.getSession();
+            final String oldIP = session.getLocalIp();
+            if (!newIP.equals(oldIP)) {
+                LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+                session.setLocalIp(newIP);
+            }
         }
         return sessionControl.getSession();
     }
