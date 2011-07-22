@@ -98,7 +98,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
 
-    private static final Log LOG = LogFactory.getLog(MicroformatServlet.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MicroformatServlet.class));
 
     private static final String MODULE = "module";
 

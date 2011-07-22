@@ -76,7 +76,7 @@ public class CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abs
 
     private PagePartSequence pageParts;
     
-    private static final Log LOG = LogFactory.getLog(CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep.class));
     
     public CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep(String description, PagePartSequence pageParts){
         this.description = description;

@@ -87,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
 
-    private static final Log LOG = LogFactory.getLog(OXIntegration.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OXIntegration.class));
 
     private static final String TEMPLATE_FOLDER_NAME = "OXMF Templates";
     

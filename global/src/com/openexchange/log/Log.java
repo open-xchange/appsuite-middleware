@@ -77,6 +77,9 @@ public final class Log implements org.apache.commons.logging.Log {
      * @return The appropriate instance
      */
     public static org.apache.commons.logging.Log valueOf(final org.apache.commons.logging.Log log) {
+        if (log instanceof Log) {
+            return log;
+        }
         return new Log(log);
     }
 

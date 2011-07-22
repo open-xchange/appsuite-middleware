@@ -61,7 +61,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public class CXFActivator extends DeferredActivator {
     private static final String PATH = "/webservices";
-    private static final Log LOG = LogFactory.getLog(CXFActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CXFActivator.class));
     
     
     private static final Class<?>[] CLASSES = new Class[]{HttpService.class};

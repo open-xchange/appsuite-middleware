@@ -90,7 +90,7 @@ public class Workflow {
 
     private boolean useThreadedRefreshHandler;
 
-    private static final Log LOG = LogFactory.getLog(Workflow.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Workflow.class));
 
     private Activator activator;
 

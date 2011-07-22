@@ -102,7 +102,7 @@ import com.openexchange.user.UserService;
 public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

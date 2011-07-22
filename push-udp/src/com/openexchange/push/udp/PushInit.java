@@ -71,7 +71,7 @@ public class PushInit {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(PushInit.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushInit.class));
 
     private PushMulticastSocket multicast;
 

@@ -93,7 +93,7 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
                     registryService.addTaskFor(ImapIdlePushListener.getAccountId(), listener.getSession());
                 }
                 listenerRegistry.purgeAllPushListener();
-                LogFactory.getLog(IMAPNotifierTracker.class).warn(
+                com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPNotifierTracker.class)).warn(
                     "\n\t----- /!\\ Orderly dropped IMAP-IDLE mail push because poll-based recent-notifier is enabled. /!\\ -----\n");
             }
             return service;

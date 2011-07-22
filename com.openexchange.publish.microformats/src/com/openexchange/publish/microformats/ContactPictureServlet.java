@@ -85,7 +85,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String CONTACT_ID = "contactId";
 
-    private static final Log LOG = LogFactory.getLog(ContactPictureServlet.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactPictureServlet.class));
     
     private static OXMFPublicationService contactPublisher = null;
     

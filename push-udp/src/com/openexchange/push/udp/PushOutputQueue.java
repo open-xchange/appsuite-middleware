@@ -84,7 +84,7 @@ public class PushOutputQueue implements Runnable {
 
     private static boolean isInit;
 
-    private static final Log LOG = LogFactory.getLog(PushOutputQueue.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushOutputQueue.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

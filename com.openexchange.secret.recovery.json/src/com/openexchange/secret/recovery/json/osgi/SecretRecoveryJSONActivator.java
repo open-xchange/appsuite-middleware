@@ -67,7 +67,7 @@ import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.tools.service.SessionServletRegistration;
 
 public class SecretRecoveryJSONActivator extends DeferredActivator{
-    private static final Log LOG = LogFactory.getLog(SecretRecoveryJSONActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryJSONActivator.class));
     
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class};
     private ServiceRegistration registration;

@@ -75,7 +75,7 @@ import com.openexchange.publish.tools.PublicationTargetCollector;
  */
 public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer, PublicationTargetDiscoveryService {
 
-    private static Log LOG = LogFactory.getLog(OSGiPublicationTargetCollector.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiPublicationTargetCollector.class));
     
     private BundleContext context;
     private ServiceTracker tracker;

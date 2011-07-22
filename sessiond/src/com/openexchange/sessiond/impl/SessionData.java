@@ -80,7 +80,7 @@ import com.openexchange.timer.TimerService;
  */
 final class SessionData {
 
-    static final Log LOG = LogFactory.getLog(SessionData.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionData.class));
 
     private final int maxSessions;
     private final long randomTokenTimeout;

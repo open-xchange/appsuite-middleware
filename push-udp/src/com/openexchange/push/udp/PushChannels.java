@@ -73,7 +73,7 @@ public class PushChannels {
         INTERNAL, EXTERNAL;
     }
 
-    private static final Log LOG = LogFactory.getLog(PushChannels.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushChannels.class));
 
     private DatagramSocket internalChannel = null;
     private DatagramSocket externalChannel = null;

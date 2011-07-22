@@ -84,7 +84,7 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     private int intervalStart; 
     private int intervalStop;
     
-    private static Log LOG = LogFactory.getLog(AnchorsByLinkXPathStep.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AnchorsByLinkXPathStep.class));
 
     public AnchorsByLinkXPathStep() {
         subpagesHref = new ArrayList<String>();

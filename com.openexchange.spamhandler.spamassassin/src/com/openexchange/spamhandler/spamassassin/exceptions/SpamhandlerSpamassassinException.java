@@ -113,7 +113,7 @@ public class SpamhandlerSpamassassinException extends MailException {
     
     private static final transient Object[] EMPTY_ARGS = new Object[0];
     
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpamhandlerSpamassassinException.class);
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpamhandlerSpamassassinException.class));
     
     /**
      * For serialization

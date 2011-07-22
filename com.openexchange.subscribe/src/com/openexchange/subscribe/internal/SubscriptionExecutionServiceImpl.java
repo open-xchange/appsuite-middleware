@@ -79,7 +79,7 @@ import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURC
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
 
-	private static final Log LOG = LogFactory.getLog(SubscriptionExecutionServiceImpl.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SubscriptionExecutionServiceImpl.class));
 
     private SubscriptionSourceDiscoveryService discoverer;
 

@@ -70,7 +70,7 @@ public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
     
     private int frameNumber;
     
-    private static final Log LOG = LogFactory.getLog(PageByFrameNumberStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByFrameNumberStep.class));
 
     public PageByFrameNumberStep() {
         super();

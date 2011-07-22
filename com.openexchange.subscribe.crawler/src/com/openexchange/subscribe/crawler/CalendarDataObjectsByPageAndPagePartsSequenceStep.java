@@ -74,7 +74,7 @@ public class CalendarDataObjectsByPageAndPagePartsSequenceStep extends AbstractS
 
     private PagePartSequence pageParts;
     
-    private static final Log LOG = LogFactory.getLog(CalendarDataObjectsByPageAndPagePartsSequenceStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarDataObjectsByPageAndPagePartsSequenceStep.class));
     
     public CalendarDataObjectsByPageAndPagePartsSequenceStep(String description, PagePartSequence pageParts){
         this.description = description;

@@ -71,7 +71,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public class SessiondServiceImpl implements SessiondService {
 
-    private static final Log LOG = LogFactory.getLog(SessiondServiceImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
 
     private final Lock migrateLock;
 

@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SecretRecoveryMultipleHandler implements MultipleHandler {
 
-    private static final Log LOG = LogFactory.getLog(SecretRecoveryMultipleHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryMultipleHandler.class));
     
     private static final String CHECK = "check";
     private static final String MIGRATE = "migrate";

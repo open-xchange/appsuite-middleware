@@ -86,7 +86,7 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
  */
 public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private static final Log LOG = LogFactory.getLog(ExternalSubscriptionSourceDiscoveryService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSubscriptionSourceDiscoveryService.class));
     
     private String sourceURL;
     private SubscriptionSourceCollector sources = new SubscriptionSourceCollector();

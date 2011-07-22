@@ -79,7 +79,7 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
  */
 public class PushHandler implements EventHandler {
 
-    private static final Log LOG = LogFactory.getLog(PushHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushHandler.class));
 
     public PushHandler() {
         super();

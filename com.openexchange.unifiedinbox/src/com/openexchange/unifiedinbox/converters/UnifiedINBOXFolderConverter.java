@@ -89,7 +89,7 @@ public final class UnifiedINBOXFolderConverter {
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class));
 
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 

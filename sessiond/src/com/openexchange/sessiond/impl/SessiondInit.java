@@ -68,7 +68,7 @@ import com.openexchange.sessiond.cache.SessionCacheConfiguration;
  */
 public class SessiondInit implements Initialization {
 
-    private static final Log LOG = LogFactory.getLog(SessiondInit.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondInit.class));
 
     private SessiondConfigInterface config;
 

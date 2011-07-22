@@ -65,7 +65,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class ProxyEventHandler implements EventHandler {
 
-    private static final Log LOG = LogFactory.getLog(ProxyEventHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ProxyEventHandler.class));
 
     public ProxyEventHandler() {
         super();

@@ -77,7 +77,7 @@ public class PushRequest {
 
     private int currentLength;
 
-    private static final Log LOG = LogFactory.getLog(PushRequest.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushRequest.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -78,7 +78,7 @@ public class CrawlerUpdateTask implements Runnable {
 
     private ConfigurationService configurationService;
 
-    private static final Log LOG = LogFactory.getLog(CrawlerUpdateTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerUpdateTask.class));
 
     private static final String UPDATE_DIRECTORY_PATH_PROPERTY = "com.openexchange.subscribe.crawler.updatepath";
 

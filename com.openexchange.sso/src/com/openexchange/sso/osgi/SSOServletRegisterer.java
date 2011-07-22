@@ -83,9 +83,9 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
         try {
             service.registerServlet(SSOConstants.SERVLET_PATH, new SSOServlet(), null, null);
         } catch (final ServletException e) {
-            LogFactory.getLog(SSOServletRegisterer.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(SSOServletRegisterer.class)).error(e.getMessage(), e);
         } catch (final NamespaceException e) {
-            LogFactory.getLog(SSOServletRegisterer.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(SSOServletRegisterer.class)).error(e.getMessage(), e);
         }
         return service;
     }

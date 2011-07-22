@@ -76,7 +76,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class OnlinePublicationServlet extends HttpServlet {
 
-    private static final Log LOG = LogFactory.getLog(OnlinePublicationServlet.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OnlinePublicationServlet.class));
     
     private static final long serialVersionUID = 6966967169899449051L;
 

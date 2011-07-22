@@ -67,7 +67,7 @@ import com.openexchange.subscribe.Subscription;
  */
 public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> {
     
-    private Log LOG = LogFactory.getLog(StrategyFolderUpdaterService.class);
+    private Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StrategyFolderUpdaterService.class));
     
     private FolderUpdaterStrategy<T> strategy;
     

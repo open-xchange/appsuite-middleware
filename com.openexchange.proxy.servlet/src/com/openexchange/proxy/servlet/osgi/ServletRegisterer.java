@@ -46,9 +46,9 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
         try {
             httpService.registerServlet(Constants.PATH, new ProxyServlet(), null, null);
         } catch (final ServletException e) {
-            LogFactory.getLog(ServletRegisterer.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
         } catch (final NamespaceException e) {
-            LogFactory.getLog(ServletRegisterer.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
         }
 
     }

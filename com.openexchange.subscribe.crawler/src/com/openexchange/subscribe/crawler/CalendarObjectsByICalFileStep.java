@@ -69,7 +69,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  */
 public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObject[], Page> {
 
-    private static final Log LOG = LogFactory.getLog(CalendarObjectsByICalFileStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarObjectsByICalFileStep.class));
 
     public CalendarObjectsByICalFileStep() {
 

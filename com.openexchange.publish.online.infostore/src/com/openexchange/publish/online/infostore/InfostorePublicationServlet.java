@@ -95,7 +95,7 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private static final long serialVersionUID = 8929899129435791832L;
 
-    private static final Log LOG = LogFactory.getLog(InfostorePublicationServlet.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostorePublicationServlet.class));
 
     private static final String SELF_DESTRUCT = "selfDestruct";
 

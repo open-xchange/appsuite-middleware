@@ -58,7 +58,7 @@ import com.openexchange.push.PushException;
  */
 public final class ImapIdlePushListenerTask implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(ImapIdlePushListenerTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImapIdlePushListenerTask.class));
 
     private final ImapIdlePushListener listener;
 

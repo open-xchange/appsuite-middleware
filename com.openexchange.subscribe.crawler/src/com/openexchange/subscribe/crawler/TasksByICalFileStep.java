@@ -70,7 +70,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class TasksByICalFileStep extends AbstractStep<Task[], Page> {
-private static final Log LOG = LogFactory.getLog(TasksByICalFileStep.class);
+private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksByICalFileStep.class));
     
     public TasksByICalFileStep(){
         

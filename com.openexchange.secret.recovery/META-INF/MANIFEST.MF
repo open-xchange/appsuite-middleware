@@ -13,6 +13,6 @@ Import-Package: com.openexchange.groupware,
  com.openexchange.secret.osgi.tools,
  com.openexchange.session,
  com.openexchange.tools.session,
- org.osgi.framework;version="1.3.0",
+ org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.secret.recovery

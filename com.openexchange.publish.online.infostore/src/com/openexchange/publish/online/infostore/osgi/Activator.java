@@ -65,7 +65,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 public class Activator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final String ALIAS = InfostoreDocumentPublicationService.PREFIX+"*";
     private static final Class<?>[] NEEDED_SERVICES = {HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class };

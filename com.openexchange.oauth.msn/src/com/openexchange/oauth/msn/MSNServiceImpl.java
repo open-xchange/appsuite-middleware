@@ -83,7 +83,7 @@ public class MSNServiceImpl implements MSNService {
 
     private MSNOAuthActivator activator;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNServiceImpl.class)));
     
     public MSNServiceImpl(MSNOAuthActivator activator){
         this.activator = activator;

@@ -100,7 +100,7 @@ public final class SessionImpl implements Session {
 
     private final Map<String, Object> parameters;
     
-    private static final Log LOG = LogFactory.getLog(SessionImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
 
     /**
      * Initializes a new {@link SessionImpl}

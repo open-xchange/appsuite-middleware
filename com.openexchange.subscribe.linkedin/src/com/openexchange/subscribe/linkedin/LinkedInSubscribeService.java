@@ -74,7 +74,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
     
     private Activator activator;
 
-    private static final Log LOG = LogFactory.getLog(LinkedInSubscribeService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInSubscribeService.class));
 
     private final SubscriptionSource source = new SubscriptionSource();
     

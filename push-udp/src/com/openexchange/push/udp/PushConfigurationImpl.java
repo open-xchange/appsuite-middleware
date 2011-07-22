@@ -96,7 +96,7 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
 
     private boolean isInit = false;
 
-    private static final Log LOG = LogFactory.getLog(PushConfigurationImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushConfigurationImpl.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

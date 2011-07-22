@@ -72,7 +72,7 @@ import com.openexchange.subscribe.SubscriptionSource;
  */
 public class FacebookSubscribeService extends AbstractSubscribeService {
 
-    private static final Log LOG = LogFactory.getLog(FacebookSubscribeService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookSubscribeService.class));
 
     private final SubscriptionSource source = new SubscriptionSource();
     

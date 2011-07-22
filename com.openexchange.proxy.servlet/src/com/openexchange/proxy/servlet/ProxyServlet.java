@@ -212,7 +212,7 @@ public class ProxyServlet extends SessionServlet {
                 try {
                     responseStream.close();
                 } catch (final Exception e) {
-                    org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class).error(e.getMessage(), e);
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class)).error(e.getMessage(), e);
                 }
             }
         } finally {
@@ -283,7 +283,7 @@ public class ProxyServlet extends SessionServlet {
                     stream.close();
                 }
             } catch (final IOException e) {
-                org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServlet.class)).error(e.getMessage(), e);
             } finally {
                 /*
                  * We are done with the connection and that it can now be reused

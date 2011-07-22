@@ -86,7 +86,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     private static final int TARGET = 2;
     
-    private static final Log LOG = LogFactory.getLog(ContactFolderMultipleUpdaterStrategy.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactFolderMultipleUpdaterStrategy.class));
 
     // All columns need to be loaded here as we keep the original, not the update and no data may be lost
     private static final int[] COMPARISON_COLUMNS = Contact.CONTENT_COLUMNS;

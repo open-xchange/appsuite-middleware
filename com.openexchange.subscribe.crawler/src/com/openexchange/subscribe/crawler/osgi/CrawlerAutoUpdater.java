@@ -82,7 +82,7 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
     
     private ConfigurationService configurationService;
     
-    private static final Log LOG = LogFactory.getLog(CrawlerAutoUpdater.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerAutoUpdater.class));
 
     public CrawlerAutoUpdater(BundleContext context, Activator activator) {
         super();

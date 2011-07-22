@@ -70,7 +70,7 @@ public class Activator extends HousekeepingActivator {
     
     private MSNService msnService;
     
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     @Override
     protected Class<?>[] getNeededServices() {

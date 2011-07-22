@@ -70,7 +70,7 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  */
 public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private static final Log LOG = LogFactory.getLog(FilteredSubscriptionSourceDiscoveryService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FilteredSubscriptionSourceDiscoveryService.class));
 
     public static ConfigViewFactory CONFIG_VIEW_FACTORY;
     

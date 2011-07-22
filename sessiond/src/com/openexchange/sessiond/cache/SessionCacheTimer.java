@@ -61,7 +61,7 @@ import com.openexchange.timer.TimerService;
  */
 public class SessionCacheTimer implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(SessionCacheTimer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionCacheTimer.class));
 
     private static ScheduledTimerTask sessionCacheTimer;
 

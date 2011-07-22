@@ -80,7 +80,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
     private String url;
 
-    private static final Log LOG = LogFactory.getLog(GoogleCalendarICalStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleCalendarICalStep.class));
 
     public GoogleCalendarICalStep() {
         super();

@@ -71,7 +71,7 @@ import com.openexchange.tools.iterator.ReadOnlyIterator;
  */
 public final class MailNotifyPushListenerRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListenerRegistry.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListenerRegistry.class)));
     
     
     /**
@@ -248,7 +248,7 @@ public final class MailNotifyPushListenerRegistry {
             try {
                 l.open();
             } catch (final PushException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListenerRegistry.class)).error(
+                com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListenerRegistry.class))).error(
                     MessageFormat.format("Opening mail push UDP listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();

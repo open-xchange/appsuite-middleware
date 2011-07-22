@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractSubscriptionServlet extends PermissionServlet {
     
-    private static final Log LOG = LogFactory.getLog(AbstractSubscriptionServlet.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSubscriptionServlet.class));
     
     @Override
     protected boolean hasModulePermission(ServerSession session) {

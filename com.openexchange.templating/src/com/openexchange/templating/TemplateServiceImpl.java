@@ -98,7 +98,7 @@ public class TemplateServiceImpl implements TemplateService {
 
 	private static final Map<String, Map<String,Set<String>>> cachedTags = new ConcurrentHashMap<String, Map<String,Set<String>>>();
 
-	private static final Log LOG = LogFactory.getLog(TemplateServiceImpl.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TemplateServiceImpl.class));
 
     private ConfigurationService config;
 

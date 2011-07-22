@@ -79,7 +79,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
-    private static final Log LOG = LogFactory.getLog(ContactObjectsByVcardFileStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByVcardFileStep.class));
 
     private List<String> unwantedLines = new ArrayList<String>();
 

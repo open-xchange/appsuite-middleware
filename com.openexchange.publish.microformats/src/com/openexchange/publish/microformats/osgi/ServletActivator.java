@@ -78,7 +78,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class ServletActivator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(ServletActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletActivator.class));
 
     private ServiceTracker tracker;
     

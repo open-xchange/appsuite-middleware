@@ -72,7 +72,7 @@ import com.openexchange.subscribe.facebook.groupware.FacebookSubscriptionsOAuthA
  */
 public class FacebookRegisterer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(FacebookRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookRegisterer.class));
 
     private final BundleContext context;
 

@@ -86,7 +86,7 @@ public class EasyLogin extends HttpServlet {
 
     private static final long serialVersionUID = 7233346063627500582L;
 
-    private static final Log LOG = LogFactory.getLog(EasyLogin.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EasyLogin.class));
 
     private static final String AUTH_ID_PARAMETER = "authId";
 

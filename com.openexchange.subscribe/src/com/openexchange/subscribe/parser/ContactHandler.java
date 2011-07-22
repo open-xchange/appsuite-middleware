@@ -71,7 +71,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class ContactHandler {
  
-    private static final Log LOG = LogFactory.getLog(ContactHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactHandler.class));
 
     /**
      * Update or insert contacts from a subscription

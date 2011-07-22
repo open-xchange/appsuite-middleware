@@ -101,7 +101,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
     private final WebClient webClient_;
     private HttpClient httpClient_;
     private String virtualHost_;
-    private static Log LOG = LogFactory.getLog(CrawlerWebConnection.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerWebConnection.class));
     private boolean quirkyCookieQuotes;
     private boolean switchUserAgent;
     private final String mobileUserAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16";

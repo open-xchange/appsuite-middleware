@@ -67,7 +67,7 @@ public class PushRegistryListenerThread extends Thread {
     
     private static final AtomicInteger instances = new AtomicInteger(0);
 
-    private static final Log LOG = LogFactory.getLog(PushRegistryListenerThread.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushRegistryListenerThread.class));
     
     private DatagramSocket datagramSocket;
 

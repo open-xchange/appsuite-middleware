@@ -75,7 +75,7 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
 
     private final BundleContext context;
     
-    private static final Log LOG = LogFactory.getLog(CrawlerMBeanRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerMBeanRegisterer.class));
     
     private ManagementService managementService;
     

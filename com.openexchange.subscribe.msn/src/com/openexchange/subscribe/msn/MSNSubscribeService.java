@@ -77,7 +77,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
     
     private final SubscriptionSource source = new SubscriptionSource();
     
-    private static final Log LOG = LogFactory.getLog(MSNSubscribeService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNSubscribeService.class));
     
     public MSNSubscribeService(Activator activator){
         this.activator = activator;

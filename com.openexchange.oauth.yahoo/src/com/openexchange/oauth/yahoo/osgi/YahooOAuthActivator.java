@@ -77,7 +77,7 @@ public class YahooOAuthActivator extends HousekeepingActivator {
     
     private OAuthServiceMetaDataYahooImpl oAuthMetaData;   
     
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooOAuthActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooOAuthActivator.class)));
     
     public OAuthService getOauthService() {
         return oauthService;

@@ -80,7 +80,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
     
     private static final String OXMF_PREFIX = OXMFVisitor.OXMF_PREFIX;
     
-    private static final Log LOG = LogFactory.getLog(MapToContactObjectTransformer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MapToContactObjectTransformer.class));
     
 	public List<Contact> transform (List<Map<String, String>> inlist){
 		ArrayList<Contact> outlist = new ArrayList<Contact>();

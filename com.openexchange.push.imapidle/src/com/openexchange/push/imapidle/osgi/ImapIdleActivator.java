@@ -80,7 +80,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class ImapIdleActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdleActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdleActivator.class)));
 
     private List<ServiceRegistration> serviceRegistrations;
 

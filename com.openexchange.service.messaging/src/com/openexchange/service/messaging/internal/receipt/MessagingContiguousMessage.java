@@ -68,7 +68,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 public final class MessagingContiguousMessage {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(MessagingContiguousMessage.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingContiguousMessage.class));
 
     private final String topic;
 

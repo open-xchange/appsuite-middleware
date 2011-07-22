@@ -92,7 +92,7 @@ public final class SessionHandler {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static final Log LOG = LogFactory.getLog(SessionHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionHandler.class));
 
     private static final boolean INFO = LOG.isInfoEnabled();
 

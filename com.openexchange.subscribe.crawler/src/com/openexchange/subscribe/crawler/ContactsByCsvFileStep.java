@@ -73,7 +73,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {
 
     private Map<Integer, String> fieldMapping;
 
-    private static final Log LOG = LogFactory.getLog(ContactsByCsvFileStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsByCsvFileStep.class));
 
     public ContactsByCsvFileStep() {
         super();

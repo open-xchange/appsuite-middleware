@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class IsPublished implements AdditionalFolderField {
 
-    private static final Log LOG = LogFactory.getLog(IsPublished.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IsPublished.class));
 
     private final PublicationTargetDiscoveryService discovery;
 

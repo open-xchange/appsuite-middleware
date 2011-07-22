@@ -153,7 +153,7 @@ public final class ImapIdlePushListenerRegistry {
                 try {
                     l.open();
                 } catch (final PushException e) {
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListenerRegistry.class)).error(
+                    com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListenerRegistry.class))).error(
                         MessageFormat.format("Opening IMAP IDLE listener failed. Removing listener from registry: {0}", l.toString()),
                         e);
                     i.remove();
