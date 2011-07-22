@@ -35,7 +35,7 @@ open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>)
 {
-	if ( $_ =~ /GeneralMonitor,ManuallyCountedIMAPConnections/) {
+	if ( $_ =~ /GeneralMonitor,NumberOfIMAPConnections/) {
 		s/.*\=//; 
 		$val=$_+0;
 		print "a.value $val\n";
