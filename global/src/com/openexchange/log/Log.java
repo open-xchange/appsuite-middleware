@@ -83,145 +83,145 @@ public final class Log implements org.apache.commons.logging.Log {
         return new Log(log);
     }
 
-    private final org.apache.commons.logging.Log delegatee;
+    private final org.apache.commons.logging.Log delegate;
 
     /**
      * Initializes a new {@link Log}.
      */
-    private Log(final org.apache.commons.logging.Log delegatee) {
+    private Log(final org.apache.commons.logging.Log delegate) {
         super();
-        this.delegatee = delegatee;
+        this.delegate = delegate;
     }
 
     public boolean isDebugEnabled() {
-        return delegatee.isDebugEnabled();
+        return delegate.isDebugEnabled();
     }
 
     public boolean isErrorEnabled() {
-        return delegatee.isErrorEnabled();
+        return delegate.isErrorEnabled();
     }
 
     public boolean isFatalEnabled() {
-        return delegatee.isFatalEnabled();
+        return delegate.isFatalEnabled();
     }
 
     public boolean isInfoEnabled() {
-        return delegatee.isInfoEnabled();
+        return delegate.isInfoEnabled();
     }
 
     public boolean isTraceEnabled() {
-        return delegatee.isTraceEnabled();
+        return delegate.isTraceEnabled();
     }
 
     public boolean isWarnEnabled() {
-        return delegatee.isWarnEnabled();
+        return delegate.isWarnEnabled();
     }
 
     public void trace(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.trace(message);
+            delegate.trace(message);
         } else {
-            logService.log(logService.loggableFor(Level.TRACE, delegatee, message.toString()));
+            logService.log(logService.loggableFor(Level.TRACE, delegate, message.toString()));
         }
     }
 
     public void trace(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.trace(message, t);
+            delegate.trace(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.TRACE, delegatee, message.toString(), t));
+            logService.log(logService.loggableFor(Level.TRACE, delegate, message.toString(), t));
         }
     }
 
     public void debug(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.debug(message);
+            delegate.debug(message);
         } else {
-            logService.log(logService.loggableFor(Level.DEBUG, delegatee, message.toString()));
+            logService.log(logService.loggableFor(Level.DEBUG, delegate, message.toString()));
         }
     }
 
     public void debug(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.debug(message, t);
+            delegate.debug(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.DEBUG, delegatee, message.toString(), t));
+            logService.log(logService.loggableFor(Level.DEBUG, delegate, message.toString(), t));
         }
     }
 
     public void info(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.info(message);
+            delegate.info(message);
         } else {
-            logService.log(logService.loggableFor(Level.INFO, delegatee, message.toString()));
+            logService.log(logService.loggableFor(Level.INFO, delegate, message.toString()));
         }
     }
 
     public void info(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.info(message, t);
+            delegate.info(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.INFO, delegatee, message.toString(), t));
+            logService.log(logService.loggableFor(Level.INFO, delegate, message.toString(), t));
         }
     }
 
     public void warn(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.warn(message);
+            delegate.warn(message);
         } else {
-            logService.log(logService.loggableFor(Level.WARNING, delegatee, message.toString()));
+            logService.log(logService.loggableFor(Level.WARNING, delegate, message.toString()));
         }
     }
 
     public void warn(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.warn(message, t);
+            delegate.warn(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.WARNING, delegatee, message.toString(), t));
+            logService.log(logService.loggableFor(Level.WARNING, delegate, message.toString(), t));
         }
     }
 
     public void error(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.error(message);
+            delegate.error(message);
         } else {
-            logService.log(logService.loggableFor(Level.ERROR, delegatee, message.toString()));
+            logService.log(logService.loggableFor(Level.ERROR, delegate, message.toString()));
         }
     }
 
     public void error(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.error(message, t);
+            delegate.error(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.ERROR, delegatee, message.toString(), t));
+            logService.log(logService.loggableFor(Level.ERROR, delegate, message.toString(), t));
         }
     }
 
     public void fatal(final Object message) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.fatal(message);
+            delegate.fatal(message);
         } else {
-            logService.log(logService.loggableFor(Level.FATAL, delegatee, message.toString()));
+            logService.log(logService.loggableFor(Level.FATAL, delegate, message.toString()));
         }
     }
 
     public void fatal(final Object message, final Throwable t) {
         final LogService logService = LOGSERVICE_REFERENCE.get();
         if (null == logService) {
-            delegatee.fatal(message, t);
+            delegate.fatal(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.FATAL, delegatee, message.toString(), t));
+            logService.log(logService.loggableFor(Level.FATAL, delegate, message.toString(), t));
         }
     }
 
