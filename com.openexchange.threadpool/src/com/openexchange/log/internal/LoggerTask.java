@@ -224,7 +224,7 @@ final class LoggerTask extends AbstractTask<Object> {
     }
 
     private static String prependLocation(final String message, final StackTraceElement[] trace) {
-        if (null == trace || message.startsWith("Logged at: ")) {
+        if (null == trace) {
             return message;
         }
         for (final StackTraceElement ste : trace) {
