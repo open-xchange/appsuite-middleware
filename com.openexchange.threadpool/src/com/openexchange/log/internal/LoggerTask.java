@@ -130,86 +130,94 @@ final class LoggerTask extends AbstractTask<Object> {
     }
 
     public Object call() throws Exception {
-        final List<Loggable> loggables = new ArrayList<Loggable>(16);
-        while (keepgoing.get()) {
-            if (queue.isEmpty()) {
-                /*
-                 * Blocking wait for at least 1 Loggable to arrive.
-                 */
-                final Loggable loggable = queue.take();
-                if (POISON == loggable) {
-                    return null;
+        try {
+            final List<Loggable> loggables = new ArrayList<Loggable>(16);
+            while (keepgoing.get()) {
+                try {
+                    if (queue.isEmpty()) {
+                        /*
+                         * Blocking wait for at least 1 Loggable to arrive.
+                         */
+                        final Loggable loggable = queue.take();
+                        if (POISON == loggable) {
+                            return null;
+                        }
+                        loggables.add(loggable);
+                    }
+                    queue.drainTo(loggables);
+                    final boolean quit = loggables.remove(POISON);
+                    for (final Loggable loggable : loggables) {
+                        final Throwable t = loggable.getThrowable();
+                        final Log log = loggable.getLog();
+                        switch (loggable.getLevel()) {
+                        case FATAL:
+                            if (log.isFatalEnabled()) {
+                                if (null == t) {
+                                    log.fatal(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                } else {
+                                    log.fatal(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                }
+                            }
+                            break;
+                        case ERROR:
+                            if (log.isErrorEnabled()) {
+                                if (null == t) {
+                                    log.error(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                } else {
+                                    log.error(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                }
+                            }
+                            break;
+                        case WARNING:
+                            if (log.isWarnEnabled()) {
+                                if (null == t) {
+                                    log.warn(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                } else {
+                                    log.warn(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                }
+                            }
+                            break;
+                        case INFO:
+                            if (log.isInfoEnabled()) {
+                                if (null == t) {
+                                    log.info(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                } else {
+                                    log.info(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                }
+                            }
+                            break;
+                        case DEBUG:
+                            if (log.isDebugEnabled()) {
+                                if (null == t) {
+                                    log.debug(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                } else {
+                                    log.debug(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                }
+                            }
+                            break;
+                        case TRACE:
+                            if (log.isTraceEnabled()) {
+                                if (null == t) {
+                                    log.trace(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
+                                } else {
+                                    log.trace(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
+                                }
+                            }
+                            break;
+                        default:
+                            // No-op
+                        }
+                    }
+                    loggables.clear();
+                    if (quit) {
+                        return null;
+                    }
+                } catch (final RuntimeException e) {
+                    // Log task run failed...
                 }
-                loggables.add(loggable);
             }
-            queue.drainTo(loggables);
-            final boolean quit = loggables.remove(POISON);
-            for (final Loggable loggable : loggables) {
-                final Throwable t = loggable.getThrowable();
-                final Log log = loggable.getLog();
-                switch (loggable.getLevel()) {
-                case FATAL:
-                    if (log.isFatalEnabled()) {
-                        if (null == t) {
-                            log.fatal(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
-                        } else {
-                            log.fatal(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
-                        }
-                    }
-                    break;
-                case ERROR:
-                    if (log.isErrorEnabled()) {
-                        if (null == t) {
-                            log.error(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
-                        } else {
-                            log.error(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
-                        }
-                    }
-                    break;
-                case WARNING:
-                    if (log.isWarnEnabled()) {
-                        if (null == t) {
-                            log.warn(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
-                        } else {
-                            log.warn(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
-                        }
-                    }
-                    break;
-                case INFO:
-                    if (log.isInfoEnabled()) {
-                        if (null == t) {
-                            log.info(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
-                        } else {
-                            log.info(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
-                        }
-                    }
-                    break;
-                case DEBUG:
-                    if (log.isDebugEnabled()) {
-                        if (null == t) {
-                            log.debug(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
-                        } else {
-                            log.debug(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
-                        }
-                    }
-                    break;
-                case TRACE:
-                    if (log.isTraceEnabled()) {
-                        if (null == t) {
-                            log.trace(prependLocation(loggable.getMessage(), loggable.getCallerTrace()));
-                        } else {
-                            log.trace(prependLocation(loggable.getMessage(), loggable.getCallerTrace()), t);
-                        }
-                    }
-                    break;
-                default:
-                    // No-op
-                }
-            }
-            loggables.clear();
-            if (quit) {
-                return null;
-            }
+        } catch (final Exception e) {
+            // Log task failed...
         }
         return null;
     }
