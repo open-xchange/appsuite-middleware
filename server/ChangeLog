@@ -1,3 +1,7 @@
+* 2011-07-22 - thorben.betten@open-xchange.com
+
+ - Fix bug 19923: Using timeout
+
 * 2011-07-22 - choeger@open-xchange.com
 
  - Bugfix #19921: package open-xchange is missing a dependency on open-xchange-publish-infostore-online

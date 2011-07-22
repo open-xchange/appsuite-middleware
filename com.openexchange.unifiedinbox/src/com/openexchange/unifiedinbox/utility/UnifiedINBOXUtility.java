@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -63,6 +64,7 @@ import com.openexchange.tools.stream.UnsynchronizedStringWriter;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 import com.openexchange.unifiedinbox.UnifiedINBOXUID;
+import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 
 /**
  * {@link UnifiedINBOXUtility} - Utility methods for Unified INBOX.
@@ -76,6 +78,19 @@ public final class UnifiedINBOXUtility {
      */
     private UnifiedINBOXUtility() {
         super();
+    }
+
+    /**
+     * Gets the default max. running millis.
+     * 
+     * @return The default max. running millis
+     */
+    public static long getMaxRunningMillis() {
+        final ConfigurationService service = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        if (null == service) {
+            return 60000L;
+        }
+        return service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
     }
 
     /**
