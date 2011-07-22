@@ -38,14 +38,14 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 12
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Open-Xchange Conversion Servlet
+Summary:        The Open-Xchange Carddav interface
 Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-config-cascade >= @OXVERSION@ open-xchange-webdav-acl >= @OXVERSION@ open-xchange-webdav-directory >= @OXVERSION@ open-xchange-xml >= @OXVERSION@ 
 #
 
@@ -76,3 +76,5 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/etc/groupware/carddav.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/contextSets/carddav.yml
