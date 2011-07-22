@@ -146,6 +146,10 @@ public class SessiondServiceImpl implements SessiondService {
         return SessionHandler.getSessionByRandomToken(randomToken, localIp);
     }
 
+    public Session getSessionByRandomToken(final String randomToken) {
+        return SessionHandler.getSessionByRandomToken(randomToken, null);
+    }
+
     public int getNumberOfActiveSessions() {
         return SessionHandler.getNumberOfActiveSessions();
     }

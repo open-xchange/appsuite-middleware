@@ -64,7 +64,7 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#addSession(com.openexchange.sessiond.AddSessionParameter)
      */
-    public String addSession(AddSessionParameter parameterObject) throws SessiondException {
+    public String addSession(final AddSessionParameter parameterObject) throws SessiondException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -72,7 +72,7 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#changeSessionPassword(java.lang.String, java.lang.String)
      */
-    public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException {
+    public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {
         // TODO Auto-generated method stub
         
     }
@@ -88,7 +88,7 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#getSession(java.lang.String)
      */
-    public Session getSession(String sessionId) {
+    public Session getSession(final String sessionId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -96,7 +96,15 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#getSessionByRandomToken(java.lang.String, java.lang.String)
      */
-    public Session getSessionByRandomToken(String randomToken, String localIp) {
+    public Session getSessionByRandomToken(final String randomToken, final String localIp) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#getSessionByRandomToken(java.lang.String)
+     */
+    public Session getSessionByRandomToken(final String randomToken) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -104,7 +112,7 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#getUserSessions(int, int)
      */
-    public int getUserSessions(int userId, int contextId) {
+    public int getUserSessions(final int userId, final int contextId) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -112,7 +120,7 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#refreshSession(java.lang.String)
      */
-    public boolean refreshSession(String sessionId) {
+    public boolean refreshSession(final String sessionId) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -120,7 +128,7 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#removeSession(java.lang.String)
      */
-    public boolean removeSession(String sessionId) {
+    public boolean removeSession(final String sessionId) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -128,12 +136,12 @@ public class AbstractSimSessiondService implements SessiondService{
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.SessiondService#removeUserSessions(int, com.openexchange.groupware.contexts.Context)
      */
-    public int removeUserSessions(int userId, Context ctx) {
+    public int removeUserSessions(final int userId, final Context ctx) {
         // TODO Auto-generated method stub
         return 0;
     }
 
-    public Collection<Session> getSessions(int userId, int contextId) {
+    public Collection<Session> getSessions(final int userId, final int contextId) {
         // TODO Auto-generated method stub
         return null;
     }

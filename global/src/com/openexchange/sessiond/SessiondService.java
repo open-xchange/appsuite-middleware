@@ -137,10 +137,18 @@ public interface SessiondService {
      * Get the session object related to the given random token.
      * 
      * @param randomToken The random token of the session
-     * @param localIp The new local IP to apply to session
-     * @return The session object or null if no session exists for the given random token or if the random token is already expired
+     * @param localIp The new local IP to apply to session; pass <code>null</code> to not overwrite existing IP in session
+     * @return The session object or <code>null</code> if no session exists for the given random token or if the random token is already expired
      */
     public Session getSessionByRandomToken(final String randomToken, final String localIp);
+
+    /**
+     * Get the session object related to the given random token.
+     * 
+     * @param randomToken The random token of the session
+     * @return The session object or <code>null</code> if no session exists for the given random token or if the random token is already expired
+     */
+    public Session getSessionByRandomToken(final String randomToken);
 
     /**
      * Gets the number of active sessions.
