@@ -202,6 +202,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         }
     }
 
+    private static final long MAX_RUNNING_MILLIS = StorageUtility.getMaxRunningMillis();
+
     /**
      * Signals that specified {@link MailAccess} which shall be connected. Waiting if capacity bounds specified for a closed {@link MailAccess} instance.
      * 
@@ -256,7 +258,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Perform blocking enqueue (waiting if necessary for space to become available).
          */
         try {
-            return !queue.offer(PRESENT, StorageUtility.getMaxRunningMillis(), TimeUnit.MILLISECONDS);
+            return !queue.offer(PRESENT, MAX_RUNNING_MILLIS, TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             throw new MailException(MailException.Code.INTERRUPT_ERROR, e, e.getMessage());
         }
