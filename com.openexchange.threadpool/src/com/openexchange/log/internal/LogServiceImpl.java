@@ -140,7 +140,7 @@ public final class LogServiceImpl implements LogService {
             doLogging = false;
         }
         if (doLogging && null != loggable.getMessage()) {
-            queue.offer(loggable);
+            queue.offer(loggable); // Throw away Loggable if queue capacity is exceeded
         }
     }
 
