@@ -67,6 +67,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -816,6 +817,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return createParticipantMessage0(session, cal, p, true, title, actionRepl, state, locale, renderMap, isUpdate, b);
     }
 
+    private static final Pattern PATTERN_PREFIX_MODIFIED = Pattern.compile("(^|\r?\n)" + Pattern.quote(TemplateReplacement.PREFIX_MODIFIED));
+
     private static MailMessage createParticipantMessage0(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         final MailMessage msg = new MailMessage();
         final Template createTemplate = state.getTemplate();
@@ -905,7 +908,17 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 } else {
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
-                
+
+                /*
+                 * Check for PREFIX_MODIFIED
+                 */
+                if (!PATTERN_PREFIX_MODIFIED.matcher(textMessage).find()) {
+                    /*
+                     * No element contains relevant changes to notify about...
+                     */
+                    return null;
+                }
+
                 if (cal.getRecurrenceType() == Appointment.NO_RECURRENCE && p.type == Participant.EXTERNAL_USER) {
                     msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                 } else {
