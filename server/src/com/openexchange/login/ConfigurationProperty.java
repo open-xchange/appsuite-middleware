@@ -87,6 +87,11 @@ public enum ConfigurationProperty {
     ERROR_PAGE_TEMPLATE("com.openexchange.ajax.login.errorPageTemplate", null),
 
     /**
+     * Configures whether an insecure login is allowed. Meaning if local IP and/or user-agent strings are replaced in associated user session.
+     */
+    INSECURE("com.openexchange.ajax.login.insecure", "false"),
+
+    /**
      * Whether autologin is allowed or not.
      */
     SESSIOND_AUTOLOGIN(SessiondProperty.SESSIOND_AUTOLOGIN.getPropertyName(), SessiondProperty.SESSIOND_AUTOLOGIN.getDefaultValue()),
