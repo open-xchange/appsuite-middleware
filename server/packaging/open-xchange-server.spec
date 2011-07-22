@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 19
+%define		ox_release 20
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -863,6 +863,9 @@ fi
 %changelog
 * Fri Jul 22 2011 - choeger@open-xchange.com
  - Bugfix #19921: package open-xchange is missing a dependency on open-xchange-publish-infostore-online
+* Fri Jul 22 2011 - thorben.betten@open-xchange.com
+ - Fix bug 19923: Using timeout
+ - Fix bug 19924: Using timeout
 * Thu Jul 21 2011 - tobias.prinz@open-xchange.com
  - Bugfix #19915: A mis-matching byte order mark (BOM) does not throw the parser off anymore.
 * Thu Jul 21 2011 - marcus.klein@open-xchange.com
