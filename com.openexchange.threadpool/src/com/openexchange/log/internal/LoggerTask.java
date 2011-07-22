@@ -68,7 +68,7 @@ final class LoggerTask extends AbstractTask<Object> {
     /**
      * The poison element.
      */
-    public static final Loggable POISON = new Loggable() {
+    private static final Loggable POISON = new Loggable() {
         
         public Throwable getThrowable() {
             return null;
