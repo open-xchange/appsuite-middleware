@@ -940,7 +940,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  * Add ZIP entry to output stream
                                  */
                                 final String subject = mails[i].getSubject();
-                                out.putNextEntry(new ZipEntry((isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\s+", "_").replaceAll("[^\\p{ASCII}]+", "")) + ".eml"));
+                                out.putNextEntry(new ZipEntry((isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\s+", "_").replaceAll("[^\\p{ASCII}]+", "_")) + ".eml"));
                                 /*
                                  * Transfer bytes from the file to the ZIP file
                                  */
@@ -1048,7 +1048,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 /*
                                  * Add ZIP entry to output stream
                                  */
-                                out.putNextEntry(new ZipEntry(parts[i].getFileName().replaceAll("[^\\p{ASCII}]+", "")));
+                                out.putNextEntry(new ZipEntry(parts[i].getFileName().replaceAll("[^\\p{ASCII}]+", "_")));
                                 /*
                                  * Transfer bytes from the file to the ZIP file
                                  */

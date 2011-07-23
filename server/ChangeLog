@@ -1,3 +1,7 @@
+* 2011-07-23 - thorben.betten@open-xchange.com
+
+ - Fixed bug 19936: Replacing non-ascii characters
+
 * 2011-07-22 - thorben.betten@open-xchange.com
 
  - Fix bug 19923: Using timeout
