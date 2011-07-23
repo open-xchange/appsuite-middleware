@@ -1,6 +1,7 @@
 * 2011-07-23 - thorben.betten@open-xchange.com
 
  - Fixed bug 19936: Replacing non-ascii characters
+ - Fixed bug 19927: Save bits only on logout
 
 * 2011-07-22 - thorben.betten@open-xchange.com
 

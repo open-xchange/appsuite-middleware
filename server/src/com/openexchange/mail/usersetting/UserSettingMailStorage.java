@@ -154,6 +154,29 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     }
 
     /**
+     * Saves given user's mail settings bits to database
+     * 
+     * @param usm the user's mail settings to save
+     * @param user the user ID
+     * @param ctx the context
+     * @throws UserConfigurationException if user's mail settings could not be saved
+     */
+    public final void saveUserSettingMailBits(final UserSettingMail usm, final int user, final Context ctx) throws UserConfigurationException {
+        saveUserSettingMailBits(usm, user, ctx, null);
+    }
+
+    /**
+     * Saves given user's mail settings bits to database
+     * 
+     * @param usm the user's mail settings to save
+     * @param user the user ID
+     * @param ctx the context
+     * @param writeConArg - the writable connection; may be <code>null</code>
+     * @throws UserConfigurationException if user's mail settings could not be saved
+     */
+    public abstract void saveUserSettingMailBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws UserConfigurationException;
+
+    /**
      * Saves given user's mail settings to database
      * 
      * @param usm the user's mail settings to save
