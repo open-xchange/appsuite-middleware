@@ -2,6 +2,7 @@
 
  - Fixed bug 19936: Replacing non-ascii characters
  - Fixed bug 19927: Save bits only on logout
+ - Bug 19933: Proper charset detection for "GB2312"
 
 * 2011-07-22 - thorben.betten@open-xchange.com
 
