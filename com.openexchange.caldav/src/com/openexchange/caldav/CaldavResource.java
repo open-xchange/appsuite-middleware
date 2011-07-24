@@ -133,7 +133,7 @@ public class CaldavResource extends AbstractResource {
         this.factory = factory;
         this.url = parent.getUrl().dup().append(appointment.getUid() + ".ics");
 
-        if (! factory.getState().hasBeenPatched(appointment)) {
+        if (!factory.getState().hasBeenPatched(appointment)) {
             factory.getState().markAsPatched(appointment);
             patchGroups();
             patchOrganizer();
@@ -333,7 +333,7 @@ public class CaldavResource extends AbstractResource {
                 patchResources(oldAppointment, toSave);
                 appointmentSQLInterface.updateAppointmentObject(toSave, parent.getId(), toSave.getLastModified());
             }
-            
+
             // Exceptions may not change resource participants, so don't patch them here
             for (Appointment exception : exceptionsToSave) {
                 Appointment matchingException = getMatchingChangeException(exception);
@@ -343,14 +343,11 @@ public class CaldavResource extends AbstractResource {
                 } else {
                     exception.setObjectID(appointment.getObjectID());
                 }
-                
+
                 exception.removeUid(); // TODO: Needed?
                 CalendarDataObject cdo = (CalendarDataObject) exception;
                 factory.getCalendarUtilities().removeRecurringType(cdo);
-                appointmentSQLInterface.updateAppointmentObject(
-                    cdo,
-                    exception.getParentFolderID(),
-                    appointment.getLastModified());
+                appointmentSQLInterface.updateAppointmentObject(cdo, exception.getParentFolderID(), appointment.getLastModified());
             }
 
             for (CalendarDataObject deleteException : deleteExceptionsToSave) {
@@ -581,18 +578,16 @@ public class CaldavResource extends AbstractResource {
     }
 
     private void patchSeriesStartAndEnd() {
-        if (this.appointment.isMaster()) {
-            CalendarCollectionService calUtils = factory.getCalendarUtilities();
-            calUtils.safelySetStartAndEndDateForRecurringAppointment((CalendarDataObject) appointment);
-            
-            if (this.appointment.containsUntil()) {
-                this.appointment.setUntil(plusOneDay(appointment.getUntil()));
-            }
+        CalendarCollectionService calUtils = factory.getCalendarUtilities();
+        calUtils.safelySetStartAndEndDateForRecurringAppointment((CalendarDataObject) appointment);
+
+        if (this.appointment.containsUntil()) {
+            this.appointment.setUntil(plusOneDay(appointment.getUntil()));
         }
     }
-    
+
     private Date plusOneDay(Date until) {
-        
+
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(until);
         calendar.setTimeZone(UTC);
@@ -601,44 +596,43 @@ public class CaldavResource extends AbstractResource {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        
+
         Date oneDayLater = calendar.getTime();
         return oneDayLater;
     }
 
-    
     private void patchGroups() {
         // We want to add all user participants to the participants list and remove all group participants
-        
+
         Set<Integer> guardian = new HashSet<Integer>();
         List<Participant> newParticipants = new ArrayList<Participant>();
-        
+
         Participant[] participants = appointment.getParticipants();
         for (Participant participant : participants) {
-            if(UserParticipant.class.isInstance(participant)) {
+            if (UserParticipant.class.isInstance(participant)) {
                 UserParticipant userParticipant = (UserParticipant) participant;
                 guardian.add(userParticipant.getIdentifier());
                 newParticipants.add(userParticipant);
-            } else if (! GroupParticipant.class.isInstance(participant)) {
+            } else if (!GroupParticipant.class.isInstance(participant)) {
                 newParticipants.add(participant);
             }
         }
-        
+
         UserParticipant[] users = appointment.getUsers();
         for (UserParticipant userParticipant : users) {
             if (!guardian.contains(userParticipant.getIdentifier())) {
                 newParticipants.add(userParticipant);
             }
         }
-        
+
         appointment.setParticipants(newParticipants);
     }
-    
+
     private void patchResources(Appointment old, Appointment update) {
         // We want to add all ResourceParticipants from the oldAppointment to the update, effectively disallowing modification of resources
         Set<Integer> guardian = new HashSet<Integer>();
         List<Participant> newParticipants = new ArrayList<Participant>();
-        
+
         Participant[] participants = update.getParticipants();
         for (Participant participant : participants) {
             if (ResourceParticipant.class.isInstance(participant)) {
@@ -646,14 +640,14 @@ public class CaldavResource extends AbstractResource {
             }
             newParticipants.add(participant);
         }
-        
+
         participants = old.getParticipants();
         for (Participant participant : participants) {
-            if (ResourceParticipant.class.isInstance(participant) && ! guardian.contains(participant.getIdentifier())) {
+            if (ResourceParticipant.class.isInstance(participant) && !guardian.contains(participant.getIdentifier())) {
                 newParticipants.add(participant);
             }
-        }        
-        
+        }
+
         update.setParticipants(newParticipants);
     }
 
