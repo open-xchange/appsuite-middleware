@@ -60,6 +60,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
@@ -87,7 +88,7 @@ public final class ImapIdlePushListener implements PushListener {
         
         private final String text;
         
-        private PushMode(String text) {
+        private PushMode(final String text) {
             this.text = text;
         }
         
@@ -95,9 +96,9 @@ public final class ImapIdlePushListener implements PushListener {
             return text;
         }
         
-        public static final PushMode fromString(String text) {
+        public static final PushMode fromString(final String text) {
             if( text != null ) {
-                for(PushMode m : PushMode.values()) {
+                for(final PushMode m : PushMode.values()) {
                     if(text.equals(m.text)) {
                         return m;
                     }
@@ -119,7 +120,7 @@ public final class ImapIdlePushListener implements PushListener {
     /**
      * @param pushmode the pushmode to set
      */
-    public static final void setPushmode(PushMode pushmode) {
+    public static final void setPushmode(final PushMode pushmode) {
         pushMode = pushmode;
     }
     
@@ -374,6 +375,13 @@ public final class ImapIdlePushListener implements PushListener {
             }
         } catch (final MailException e) {
             // throw new PushException(e);
+            if ("ACC".equalsIgnoreCase(e.getComponent().getAbbreviation()) && MailAccountExceptionMessages.NOT_FOUND.getDetailNumber() == e.getDetailNumber()) {
+                /*
+                 * Missing mail account; drop listener
+                 */
+                LOG.info("Missing (default) mail account for user " + userId + ". Stopping obsolete IMAP-IDLE listener.");
+                return false;
+            }
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
             if (DEBUG_ENABLED) {
                 LOG.error(e);
