@@ -149,6 +149,26 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-798
+   # -----------------------------------------------------------------------
+   local pfile=/opt/open-xchange/etc/groupware/login.properties
+   if ! grep "com.openexchange.ajax.login.insecure" >/dev/null $pfile; then
+       echo "# Configures whether an insecure login is allowed. Meaning if local IP and/or user-agent strings are replaced in associated user session on" >> $pfile
+       echo "# login redirect or login redeem requests. To create a session from a server for some client you have to pass the clients IP address when" >> $pfile
+       echo "# creating the session." >> $pfile
+       echo "# WARNING! Setting this parameter to true may result in users seeing a different users content if the infrastructure around OX does not work" >> $pfile
+       echo "# correctly." >> $pfile
+       echo "com.openexchange.ajax.login.insecure=false" >> $pfile 
+   fi
+
+   # SoftwareChange_Request-797
+   # -----------------------------------------------------------------------
+   local pfile=/opt/open-xchange/etc/groupware/login.properties
+   if ! grep "com.openexchange.ajax.login.insecure" >/dev/null $pfile; then
+       echo "# Specify the name of the echo header whose value is echoed for each request providing that header" >> $pfile
+       echo "com.openexchange.servlet.echoHeaderName=X-Echo-Header" >> $pfile
+   fi
+
    # SoftwareChange_Request-791
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/common/excludedupdatetasks.properties
