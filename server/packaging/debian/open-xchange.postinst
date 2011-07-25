@@ -41,7 +41,7 @@ postFix() {
 
   # SoftwareChange_Request-797
   # -----------------------------------------------------------------------
-  local pfile=/opt/open-xchange/etc/groupware/login.properties
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
   if ! grep "com.openexchange.ajax.login.insecure" >/dev/null $pfile; then
       echo "# Specify the name of the echo header whose value is echoed for each request providing that header" >> $pfile
       echo "com.openexchange.servlet.echoHeaderName=X-Echo-Header" >> $pfile
