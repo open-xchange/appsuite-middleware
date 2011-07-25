@@ -61,8 +61,12 @@ import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.session.actions.RedirectRequest;
 import com.openexchange.ajax.session.actions.RedirectResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.groupware.Init;
+import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -73,6 +77,7 @@ public class RedirectTest extends AbstractAJAXSession {
 
     private String login;
     private String password;
+    private boolean insecure;
 
     public RedirectTest(final String name) {
         super(name);
@@ -83,6 +88,10 @@ public class RedirectTest extends AbstractAJAXSession {
         AJAXConfig.init();
         login = AJAXConfig.getProperty(Property.LOGIN);
         password = AJAXConfig.getProperty(Property.PASSWORD);
+        Init.injectProperty();
+        ConfigurationService configService = new ConfigurationImpl();
+        final String value = configService.getProperty(ConfigurationProperty.INSECURE.getPropertyName(), ConfigurationProperty.INSECURE.getDefaultValue());
+        insecure = Boolean.parseBoolean(value); 
     }
 
     @Override
@@ -117,12 +126,16 @@ public class RedirectTest extends AbstractAJAXSession {
             session.getHttpClient().getCookieStore().clear();
             session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
             // Test redirect
-            final RedirectResponse rResponse = myClient.execute(new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom(), RedirectTest.class.getName() + '2'));
+            final String clientIdentifier = insecure ? RedirectTest.class.getName() + '2' : RedirectTest.class.getName();
+            RedirectRequest request = new RedirectRequest(lResponse.getJvmRoute(), lResponse.getRandom(), clientIdentifier);
+            final RedirectResponse rResponse = myClient.execute(request);
             assertNotNull("Redirect location is missing.", rResponse.getLocation());
             
             for (Cookie cookie : session.getHttpClient().getCookieStore().getCookies()) {
                 String name = cookie.getName();
-                assertFalse("Cookie " + name + " was not removed after redirect.", cookieList.contains(name));
+                if (insecure) {
+                    assertFalse("Cookie " + name + " was not removed after redirect.", cookieList.contains(name));
+                }
             }
             // To get logout with tearDown() working.
             session.setId(lResponse.getSessionId());
