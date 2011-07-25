@@ -100,6 +100,7 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 	    Contact contact = new Contact();
 	    contact.setSurName(lastname);
 	    contact.setGivenName("Given name");
+	    contact.setDisplayName(contact.getSurName() +", "+contact.getGivenName());
 	    contact.setParentFolderID(folderID);
 	    return contact;
 	}
