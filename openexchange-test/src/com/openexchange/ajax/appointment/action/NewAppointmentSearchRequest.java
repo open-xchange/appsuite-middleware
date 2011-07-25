@@ -67,7 +67,7 @@ import com.openexchange.groupware.container.FolderChildObject;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class NewAppointmentSearchRequest extends AbstractAppointmentRequest {
+public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewAppointmentSearchResponse> {
 
     /**
      * The start range
