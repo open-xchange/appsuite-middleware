@@ -81,6 +81,7 @@ public final class ICalTestSuite {
 		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
 		tests.addTestSuite(Bug17393Test.class);
 		tests.addTestSuite(Bug19915Test.class);
+		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
 		return tests;
 	}
 }
