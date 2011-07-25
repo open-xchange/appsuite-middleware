@@ -65,6 +65,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.java.util.UUIDs;
@@ -291,14 +293,16 @@ public class EasyLogin extends HttpServlet {
     private void doJavaLogin(final HttpServletRequest req, HttpServletResponse resp, final String authID, final String login, final String password) throws IOException {
         final LoginResult result;
         final String client = getClient(req);
+        final String userAgent = parseUserAgent(req);
+        final String clientIP = parseClientIP(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         try {
             result = LoginPerformer.getInstance().doLogin(new LoginRequest() {
 
-                private String hash = null;
+                private final String hash = HashCalculator.getHash(req, client);
 
                 public String getUserAgent() {
-                    return req.getHeader("user-agent");
+                    return userAgent;
                 }
 
                 public String getPassword() {
@@ -314,7 +318,7 @@ public class EasyLogin extends HttpServlet {
                 }
 
                 public String getClientIP() {
-                    return req.getRemoteAddr();
+                    return clientIP;
                 }
 
                 public String getAuthId() {
@@ -330,10 +334,7 @@ public class EasyLogin extends HttpServlet {
                 }
 
                 public String getHash() {
-                    if (hash != null) {
-                        return hash;
-                    }
-                    return hash = HashCalculator.getHash(req, client);
+                    return hash;
                 }
 
                 public Map<String, List<String>> getHeaders() {
@@ -387,6 +388,26 @@ public class EasyLogin extends HttpServlet {
             retval = defaultClient;
         }
         return retval;
+    }
+
+    private static String parseUserAgent(final HttpServletRequest req) {
+        final String userAgent;
+        if (null == req.getParameter(LoginFields.USER_AGENT)) {
+            userAgent = req.getHeader(Header.USER_AGENT);
+        } else {
+            userAgent = req.getParameter(LoginFields.USER_AGENT);
+        }
+        return userAgent;
+    }
+
+    private static String parseClientIP(final HttpServletRequest req) {
+        final String clientIP;
+        if (null == req.getParameter(LoginFields.CLIENT_IP_PARAM)) {
+            clientIP = req.getRemoteAddr();
+        } else {
+            clientIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
+        }
+        return clientIP;
     }
 
     static public String getFileContents(File file) {

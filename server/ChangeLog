@@ -1,3 +1,8 @@
+* 2011-07-24 - marcus.klein@open-xchange.com
+
+ - Fixed bug 19928: Added configuration parameter insecure. Default is false. Actions redirect and redeem then require a proper initialized
+   session with correct User-Agent and client IP. Setting to true restores default behavior.
+
 * 2011-07-24 - thorben.betten@open-xchange.com
 
  - Fix for Bug #19928: Created echo-header mechanism to respond a unique identifier provided by a configurable header.
