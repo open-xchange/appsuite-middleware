@@ -23,9 +23,7 @@ public class Bug18608Test_SpecialCharsInEmailTest extends AbstractManagedContact
 		c.setEmail1(email1);
 		c = manager.newAction(c);
 		AbstractAJAXResponse lastResponse = manager.getLastResponse();
-		assertTrue(lastResponse.hasError());
-		
-		assertEquals("CON-0100", lastResponse.getException().getErrorCode());
+		assertTrue("We do bit allow special characters in e-mail addresses", lastResponse.hasError());
 	}
 
 }
