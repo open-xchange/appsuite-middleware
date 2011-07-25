@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
@@ -163,6 +164,17 @@ public final class AJPv13Activator extends DeferredActivator {
                 throw new IllegalArgumentException("Unknown AJP mode: " + mode);
             }
             inits.add(com.openexchange.ajp13.servlet.http.HttpManagersInit.getInstance());
+            inits.add(new Initialization() {
+                
+                public void stop() {
+                    AJPv13Request.setEchoHeaderName(null);
+                }
+                
+                public void start() {
+                    final ConfigurationService service = getService(ConfigurationService.class);
+                    AJPv13Request.setEchoHeaderName(null == service ? null : service.getProperty("com.openexchange.servlet.echoHeaderName"));
+                }
+            });
             /*
              * Start
              */
